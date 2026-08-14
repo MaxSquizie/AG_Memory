@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ah-agent-mvp"
+version = "0.11.0"
+description = "Associative-heterarchical memory core for a text LLM agent"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[project.optional-dependencies]
+llm = [
+  "torch>=2.5",
+  "transformers>=5.14.1,<6",
+  "accelerate>=1.0",
+  "safetensors>=0.4",
+  "bitsandbytes>=0.45",
+]
+llm-lora = ["peft>=0.14"]
+llm-vision = ["torchvision", "Pillow"]
+llm-4bit = ["bitsandbytes>=0.45"]
+gui = [
+  "PySide6>=6.8",
+  "vispy>=0.15",
+  "numpy>=2.0",
+]
+
+[project.scripts]
+ah-agent = "ah.cli:main"
+ah-gui = "ah.gui.app:main"

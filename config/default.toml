@@ -1,0 +1,174 @@
+# Центральный runtime-конфиг AH Agent MVP.
+# Пути можно задавать абсолютными или относительно этого файла.
+
+[paths]
+project_dir = ".."
+# Главное: укажи здесь локальную папку с моделью Hugging Face / Qwen.
+# На Windows удобнее использовать прямые слэши.
+llm_model_dir = "C:/AI/qwen_3.6_27B_uncesored"
+tokenizer_dir = ""
+adapter_dir = ""
+system_prompt_path = "../prompts/agent.txt" # legacy alias for generic backend calls
+agent_prompt_path = "../prompts/agent.txt"
+perception_prompt_path = "../prompts/perception.txt" # legacy protocols only
+perception_prompt_dir = "../prompts/perception"
+data_dir = "../data"
+persistence_file = "../data/ah_memory.json"
+logs_dir = "../logs"
+
+[llm]
+enabled = true
+backend = "builtin_process"       # builtin_process; внешний backend можно добавить без изменения AH Core
+loader_type = "causal_lm"        # text-only; image_text_to_text only for future vision input
+device_map = "cuda:0"            # cuda:0 = строго GPU 0; auto может offload в RAM
+dtype = "auto"                   # auto | bfloat16 | float16 | float32
+local_files_only = true
+trust_remote_code = true
+use_4bit = true                  # 27B: NF4, чтобы модель помещалась в VRAM
+ctx_total = 0                     # 0 = определить по config модели
+max_new_tokens = 256
+temperature = 0.2
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+no_repeat_ngram_size = 0
+enable_thinking = false
+strip_thinking = true
+startup_timeout_seconds = 600.0
+request_timeout_seconds = 240.0
+engine_script = ""               # опциональный внешний JSONL worker; пусто = ah.llm.worker
+history_messages = 0                # 0 = строго stateless между механическими LLM-вызовами
+
+[llm.perception]
+protocol = "adaptive_v2"           # weak-model discrete probes; Python owns choices/spans/roles
+probe_retry_attempts = 1           # retry same probe from scratch; never show the bad answer
+failure_policy = "empty"           # failed semantic parse => H experience only; no C/P write
+ground_actants = true
+max_acts = 4
+max_actants_per_act = 8
+predicate_symbol_language = "en"   # T predicate S uses short English snake_case symbols
+max_new_tokens = 24                # hard upper bound; individual probes use smaller limits
+temperature = 0.0
+top_p = 1.0
+top_k = 0
+repetition_penalty = 1.0
+no_repeat_ngram_size = 0
+
+[llm.agent]
+max_new_tokens = 384
+temperature = 0.2
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+no_repeat_ngram_size = 0
+repair_attempts = 1
+sanitize_context_echo = true      # never commit CURRENT INPUT / ACTIVE MEMORY echo into H
+
+[integration]
+initial_hypernode_weight = 0.40
+experience_hypernode_weight = 0.30
+follow_link_weight = 0.20
+initial_inferred_link_weight = 0.25
+
+[ignition]
+tick_interval_seconds = 0.05
+nu = 1.0
+x_max = 1.0
+
+[ignition.activation]
+kind = "additive_clamp"
+gain = 1.0
+epsilon = 1e-9
+
+[ignition.decay]
+kind = "sigmoid_epoch"
+alpha = 0.08
+midpoint_ticks = 12.0
+steepness = 0.35
+reactivation_reset_ratio = 1.0
+
+[ignition.plasticity]
+enabled = true
+link_hebb_increment = 0.015
+link_async_decrement = 0.002
+link_weight_floor = 0.02
+ignore_pacemaker_only_events = true # ν сам по себе не является опытом для h_L
+hypernode_confirmation_increment = 0.01
+hypernode_refutation_decrement = 0.15
+
+[ignition.seeds]
+new_fact = 0.65
+reactivated_fact = 0.55
+experience = 0.50
+sensory_symbol = 0.45
+correction = 0.65
+pacemaker = 0.08
+
+[ignition.pacemaker]
+enabled = true
+target_policy = "round_robin"   # round_robin | random | workspace | active
+include_symbols = true
+domains = ["C", "P", "H"]
+random_seed = 0
+
+[workspace]
+threshold = 0.35
+
+[lifecycle]
+initial_lifetime_ticks = 200
+reinforced_lifetime_ticks = 1000
+min_spacing_1_ticks = 20
+min_spacing_2_ticks = 50
+gc_enabled = true
+orphan_cleanup = true
+
+[inference]
+max_depth = 6
+max_expanded_states = 5000
+
+[context]
+max_tokens = 8192
+include_structural_uids = true
+include_mt = false
+max_dependency_depth = 8
+overflow_policy = "error"          # never silently drop active roots to fit budget
+
+[persistence]
+enabled = true
+load_on_start = true
+autosave_every_ticks = 200
+save_runtime_state = true
+save_pending_impulses = true
+
+[identity]
+agent_name = "АГент"
+user_name = "Пользователь"
+
+[orchestrator]
+ticks_after_input = 1
+ticks_after_response = 1
+auto_materialize_inference = true
+parse_agent_response_to_h = false      # false: ответ всё равно пишется в H как событие, но без второго LLM-parser вызова
+
+[gui]
+refresh_hz = 30
+render_mode = "2.5d"              # 2.5d | 3d
+show_labels = true
+max_labels = 120
+node_size_min = 7.0
+node_size_max = 24.0
+domain_z_spacing = 5.0
+excitation_gamma = 0.7
+propagation_duration_seconds = 0.90
+show_structural_edges = true
+show_relation_edges = true
+hover_enabled = true
+hover_pick_hz = 30
+focus_line_width = 3.0
+focus_node_scale = 1.35
+focus_neighbor_scale = 1.18
+edge_pick_radius_px = 8.0
+propagation_cycles_per_second = 1.25
+propagation_tail_points = 4
+propagation_tail_spacing = 0.055
+propagation_edge_width = 2.4

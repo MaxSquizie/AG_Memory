@@ -1,0 +1,3 @@
+[console_scripts]
+ah-agent = ah.cli:main
+ah-gui = ah.gui.app:main

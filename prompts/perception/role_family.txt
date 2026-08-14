@@ -1,0 +1,1 @@
+Choose what kind of information TARGET expresses relative to PREDICATE. Reply with one OPTIONS number only.

@@ -1,0 +1,1 @@
+Choose the first token of one not-yet-selected phrase connected to PREDICATE: a participant, object, property/state, place, time, reason, goal, means, material, amount, or manner. Reply with one OPTIONS number only. Choose 0 if none remain.

@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: ah-agent-mvp
+Version: 0.9.0
+Summary: Associative-heterarchical memory core for a text LLM agent
+Requires-Python: >=3.12
+Provides-Extra: llm
+Requires-Dist: torch>=2.5; extra == "llm"
+Requires-Dist: transformers<6,>=5.14.1; extra == "llm"
+Requires-Dist: accelerate>=1.0; extra == "llm"
+Requires-Dist: safetensors>=0.4; extra == "llm"
+Provides-Extra: llm-lora
+Requires-Dist: peft>=0.14; extra == "llm-lora"
+Provides-Extra: llm-vision
+Requires-Dist: torchvision; extra == "llm-vision"
+Requires-Dist: Pillow; extra == "llm-vision"
+Provides-Extra: llm-4bit
+Requires-Dist: bitsandbytes>=0.45; extra == "llm-4bit"
+Provides-Extra: gui
+Requires-Dist: PySide6>=6.8; extra == "gui"
+Requires-Dist: vispy>=0.15; extra == "gui"
+Requires-Dist: numpy>=2.0; extra == "gui"

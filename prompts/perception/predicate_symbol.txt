@@ -1,0 +1,1 @@
+Translate TARGET predicate meaning into one short English base-form semantic label. Reply with lowercase ASCII letters and underscores only. No explanation.

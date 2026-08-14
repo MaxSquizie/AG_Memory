@@ -1,0 +1,1 @@
+Is PREDICATE explicitly negated in TEXT? Reply 1 for yes or 0 for no.
