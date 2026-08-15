@@ -49,6 +49,7 @@ class LLMRoleSettings:
     top_k: int = 0
     repetition_penalty: float = 1.0
     no_repeat_ngram_size: int = 0
+    use_cache: bool = True
 
     def __post_init__(self) -> None:
         if self.max_new_tokens <= 0:
@@ -88,13 +89,13 @@ class LLMConfig:
     request_timeout_seconds: float = 240.0
     engine_script: Path | None = None
     history_messages: int = 0
-    perception_protocol: str = "adaptive_v2"
+    perception_protocol: str = "adaptive_v3"
     perception_probe_retry_attempts: int = 1
-    perception_failure_policy: str = "empty"
     perception_ground_actants: bool = True
     perception_max_acts: int = 4
     perception_max_actants_per_act: int = 8
     perception_predicate_symbol_language: str = "en"
+    perception_morphology_backend: str = "auto"
     perception: LLMRoleSettings = field(default_factory=lambda: LLMRoleSettings(max_new_tokens=192, temperature=0.0, top_p=1.0, top_k=0, repetition_penalty=1.0, no_repeat_ngram_size=0))
     agent_repair_attempts: int = 1
     agent_sanitize_context_echo: bool = True
@@ -118,8 +119,8 @@ class LLMConfig:
             raise ValueError("llm.top_k must be >= 0")
         if self.history_messages != 0:
             raise ValueError("llm.history_messages currently must be 0 (stateless mechanical requests)")
-        if self.perception_protocol not in {"adaptive_v1", "adaptive_v2", "span_v1", "line_v1", "compact_json_v1", "legacy_json"}:
-            raise ValueError("llm.perception.protocol must be adaptive_v2/adaptive_v1 or a legacy protocol")
+        if self.perception_protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3", "span_v1", "line_v1", "compact_json_v1", "legacy_json"}:
+            raise ValueError("llm.perception.protocol must be adaptive_v3/adaptive_v2/adaptive_v1 or a legacy protocol")
         if self.perception_probe_retry_attempts < 0 or self.perception_probe_retry_attempts > 2:
             raise ValueError("llm.perception.probe_retry_attempts must be in [0, 2]")
         if self.perception_max_acts <= 0 or self.perception_max_acts > 16:
@@ -128,8 +129,8 @@ class LLMConfig:
             raise ValueError("llm.perception.max_actants_per_act must be in [1, 32]")
         if self.perception_predicate_symbol_language != "en":
             raise ValueError("llm.perception.predicate_symbol_language currently must be 'en'")
-        if self.perception_failure_policy not in {"empty", "raise"}:
-            raise ValueError("llm.perception.failure_policy must be empty or raise")
+        if self.perception_morphology_backend not in {"auto", "pymorphy3", "none"}:
+            raise ValueError("llm.perception.morphology_backend must be auto, pymorphy3, or none")
         if self.agent_repair_attempts < 0 or self.agent_repair_attempts > 2:
             raise ValueError("llm.agent.repair_attempts must be in [0, 2]")
 
@@ -139,6 +140,7 @@ class IntegrationSettings:
     initial_hypernode_weight: float = 0.4
     experience_hypernode_weight: float = 0.3
     follow_link_weight: float = 0.2
+    cause_link_weight: float = 0.2
     initial_inferred_link_weight: float = 0.25
 
     def __post_init__(self) -> None:
@@ -146,6 +148,7 @@ class IntegrationSettings:
             ("initial_hypernode_weight", self.initial_hypernode_weight),
             ("experience_hypernode_weight", self.experience_hypernode_weight),
             ("follow_link_weight", self.follow_link_weight),
+            ("cause_link_weight", self.cause_link_weight),
             ("initial_inferred_link_weight", self.initial_inferred_link_weight),
         ):
             if not 0 <= value <= 1:
@@ -455,13 +458,13 @@ def load_config(path: str | Path) -> AppConfig:
         request_timeout_seconds=float(llm_raw.get("request_timeout_seconds", 240.0)),
         engine_script=_path(base, llm_raw.get("engine_script")),
         history_messages=int(llm_raw.get("history_messages", 0)),
-        perception_protocol=str(llm_perception_raw.get("protocol", "adaptive_v2")),
+        perception_protocol=str(llm_perception_raw.get("protocol", "adaptive_v3")),
         perception_probe_retry_attempts=int(llm_perception_raw.get("probe_retry_attempts", llm_perception_raw.get("repair_attempts", 1))),
-        perception_failure_policy=str(llm_perception_raw.get("failure_policy", "empty")),
         perception_ground_actants=bool(llm_perception_raw.get("ground_actants", True)),
         perception_max_acts=int(llm_perception_raw.get("max_acts", 4)),
         perception_max_actants_per_act=int(llm_perception_raw.get("max_actants_per_act", 8)),
         perception_predicate_symbol_language=str(llm_perception_raw.get("predicate_symbol_language", "en")),
+        perception_morphology_backend=str(llm_perception_raw.get("morphology_backend", "auto")),
         perception=LLMRoleSettings(
             max_new_tokens=int(llm_perception_raw.get("max_new_tokens", 96)),
             temperature=float(llm_perception_raw.get("temperature", 0.0)),
@@ -469,6 +472,7 @@ def load_config(path: str | Path) -> AppConfig:
             top_k=int(llm_perception_raw.get("top_k", 0)),
             repetition_penalty=float(llm_perception_raw.get("repetition_penalty", 1.0)),
             no_repeat_ngram_size=int(llm_perception_raw.get("no_repeat_ngram_size", 0)),
+            use_cache=bool(llm_perception_raw.get("use_cache", False)),
         ),
         agent_repair_attempts=int(llm_agent_raw.get("repair_attempts", 1)),
         agent_sanitize_context_echo=bool(llm_agent_raw.get("sanitize_context_echo", True)),
@@ -479,6 +483,7 @@ def load_config(path: str | Path) -> AppConfig:
             top_k=int(llm_agent_raw.get("top_k", 40)),
             repetition_penalty=float(llm_agent_raw.get("repetition_penalty", 1.05)),
             no_repeat_ngram_size=int(llm_agent_raw.get("no_repeat_ngram_size", 0)),
+            use_cache=bool(llm_agent_raw.get("use_cache", True)),
         ),
     )
 
@@ -487,6 +492,7 @@ def load_config(path: str | Path) -> AppConfig:
         initial_hypernode_weight=float(ir.get("initial_hypernode_weight", 0.4)),
         experience_hypernode_weight=float(ir.get("experience_hypernode_weight", 0.3)),
         follow_link_weight=float(ir.get("follow_link_weight", 0.2)),
+        cause_link_weight=float(ir.get("cause_link_weight", ir.get("follow_link_weight", 0.2))),
         initial_inferred_link_weight=float(ir.get("initial_inferred_link_weight", 0.25)),
     )
 

@@ -108,6 +108,37 @@ def build_edge_focus_geometry(visual: VisualGraph, key: str | None) -> EdgeFocus
     return EdgeFocusGeometry(edge, (source_index, target_index), segment)
 
 
+
+def rank_visible_label_indices(
+    snapshot: GraphSnapshot,
+    visual: VisualGraph,
+    max_labels: int,
+) -> tuple[int, ...]:
+    """Rank labels in *visual* index space, never snapshot index space.
+
+    The visual graph may suppress canonical nodes (currently orphan lexical S), so
+    ``snapshot.nodes[i]`` and ``visual.positions[i]`` are not interchangeable after
+    filtering. Returning visual indices keeps label text and positions aligned and
+    prevents out-of-bounds access when hidden nodes precede visible nodes.
+    """
+    if max_labels <= 0 or not visual.node_uids:
+        return ()
+    by_uid = {node.uid: node for node in snapshot.nodes}
+    candidates = [
+        i
+        for i, uid in enumerate(visual.node_uids)
+        if uid in by_uid
+    ]
+    candidates.sort(
+        key=lambda i: (
+            bool(by_uid[visual.node_uids[i]].activation_event),
+            bool(by_uid[visual.node_uids[i]].in_workspace),
+            float(by_uid[visual.node_uids[i]].excitation or 0.0),
+        ),
+        reverse=True,
+    )
+    return tuple(candidates[:max_labels])
+
 def point_segment_distance_2d(point: np.ndarray, a: np.ndarray, b: np.ndarray) -> float:
     """Screen-space distance from a point to a finite segment."""
     ab = b - a
@@ -160,9 +191,16 @@ class GraphLayout:
 
     _DOMAIN_Z = {None: -1.5, "C": -0.5, "P": 0.5, "H": 1.5}
 
-    def positions(self, snapshot: GraphSnapshot, settings: GUISettings) -> np.ndarray:
-        out = np.zeros((len(snapshot.nodes), 3), dtype=np.float32)
-        for i, node in enumerate(snapshot.nodes):
+    def positions(
+        self,
+        snapshot: GraphSnapshot,
+        settings: GUISettings,
+        *,
+        nodes=None,
+    ) -> np.ndarray:
+        source_nodes = snapshot.nodes if nodes is None else tuple(nodes)
+        out = np.zeros((len(source_nodes), 3), dtype=np.float32)
+        for i, node in enumerate(source_nodes):
             digest = hashlib.blake2b(node.uid.encode("utf-8"), digest_size=16).digest()
             a = int.from_bytes(digest[0:4], "little") / 2**32
             r = int.from_bytes(digest[4:8], "little") / 2**32
@@ -196,6 +234,34 @@ class GraphVisualMapper:
     def __init__(self, layout: GraphLayout | None = None) -> None:
         self.layout = layout or GraphLayout()
 
+    @staticmethod
+    def visible_nodes(snapshot: GraphSnapshot, settings: GUISettings | None = None):
+        """Return GUI nodes while suppressing orphan lexical/sensory S symbols.
+
+        S is canonical AH data and still participates in sensory excitation, but a
+        source-language token S that is not referenced by T, L, or another
+        structural edge has no graph topology to display. Rendering every such
+        token as a full 3D node produced a cloud of apparently broken isolated
+        nodes. Semantic predicate S (T->S) and explicitly linked S remain visible.
+        This is a visualization policy only; canonical memory is untouched.
+        """
+        connected: set[str] = set()
+        show_links = settings is None or settings.show_relation_edges
+        show_structural = settings is None or settings.show_structural_edges
+        if show_links:
+            for link in snapshot.links:
+                connected.add(link.source_uid)
+                connected.add(link.target_uid)
+        if show_structural:
+            for edge in snapshot.structural_edges:
+                connected.add(edge.source_uid)
+                connected.add(edge.target_uid)
+        return tuple(
+            node
+            for node in snapshot.nodes
+            if node.kind != "S" or node.uid in connected
+        )
+
     def build(
         self,
         snapshot: GraphSnapshot,
@@ -203,8 +269,9 @@ class GraphVisualMapper:
         *,
         x_max: float,
     ) -> VisualGraph:
-        positions = self.layout.positions(snapshot, settings)
-        node_uids = tuple(node.uid for node in snapshot.nodes)
+        nodes = self.visible_nodes(snapshot, settings)
+        positions = self.layout.positions(snapshot, settings, nodes=nodes)
+        node_uids = tuple(node.uid for node in nodes)
         index = {uid: i for i, uid in enumerate(node_uids)}
         n = len(node_uids)
         face = np.zeros((n, 4), dtype=np.float32)
@@ -215,7 +282,7 @@ class GraphVisualMapper:
 
         denom = max(float(x_max), 1e-9)
         excitation_by_uid: dict[str, float] = {}
-        for i, node in enumerate(snapshot.nodes):
+        for i, node in enumerate(nodes):
             x = max(0.0, float(node.excitation or 0.0))
             activation = min(1.0, x / denom) ** settings.excitation_gamma
             excitation_by_uid[node.uid] = activation

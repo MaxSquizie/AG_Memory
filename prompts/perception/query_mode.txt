@@ -1,1 +1,1 @@
-Choose the question type. Reply with one OPTIONS number only.
+Choose the question type. Reply only with the number inside brackets.

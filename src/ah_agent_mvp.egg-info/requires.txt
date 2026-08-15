@@ -1,3 +1,4 @@
+pymorphy3<3,>=2.0.6
 
 [gui]
 PySide6>=6.8
@@ -9,6 +10,7 @@ torch>=2.5
 transformers<6,>=5.14.1
 accelerate>=1.0
 safetensors>=0.4
+bitsandbytes>=0.45
 
 [llm-4bit]
 bitsandbytes>=0.45

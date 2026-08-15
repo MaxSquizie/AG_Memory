@@ -1,3 +1,5 @@
+> Historical note: `failure_policy=empty` described below was removed in slice 12.11. Current perception fails explicitly and does not return an empty successful parse.
+
 # Slice 10 — Adaptive Perception probes + English semantic predicates
 
 Срез заменяет default single-call parser (`JSON/line/span`) на `adaptive_v1`.

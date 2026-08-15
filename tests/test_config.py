@@ -31,6 +31,7 @@ logs_dir = "../logs"
 initial_hypernode_weight = 0.47
 experience_hypernode_weight = 0.31
 follow_link_weight = 0.21
+cause_link_weight = 0.19
 
 [workspace]
 threshold = 0.42
@@ -42,6 +43,7 @@ threshold = 0.42
             self.assertEqual(cfg.workspace.threshold, 0.42)
             integration = IntegrationConfig.from_settings(cfg.integration)
             self.assertEqual(integration.initial_hypernode_weight, 0.47)
+            self.assertEqual(integration.cause_link_weight, 0.19)
 
     def test_llm_command_contains_only_configured_model_path(self) -> None:
         with TemporaryDirectory() as td:

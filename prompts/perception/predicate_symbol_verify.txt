@@ -1,0 +1,1 @@
+Choose whether CANDIDATE preserves TARGET's meaning in TEXT. Reply only with the number inside brackets.

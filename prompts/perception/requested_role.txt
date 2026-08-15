@@ -1,1 +1,1 @@
-TEXT asks for missing information represented by TARGET. Choose what information is missing. Reply with one OPTIONS number only.
+Choose what information the question requests. Reply only with the number inside brackets.

@@ -1,13 +1,13 @@
-# Adaptive perception probes v2
+# Adaptive perception probes v3
 
-The local LLM is treated as a weak semantic recognizer, not as an AH-aware component.
-It never receives UIDs, AH graph state, T/N structures, domain rules, or a serialization grammar.
+Active protocol: `adaptive_v3`.
 
-Python performs tokenization, enumerates legal choices, validates every answer, assembles spans,
-maps numeric choices to canonical `ActantRole`, and constructs `PerceptionResult`.
-
-Most probes return **one integer from an explicit OPTIONS list**. No unexplained `N`, `N-M`,
-`ROLE`, or other meta-notation is used. The only open-text probe is `predicate_symbol`, because
-an unseen Russian predicate still needs a short English semantic name for the predicate `S` used by `T`.
-
-Invalid probes are retried from the same clean input. The previous bad model answer is never shown back to the model.
+Rules:
+- no AH terminology;
+- no examples, demonstrations or expected-output samples;
+- one small decision per probe;
+- finite choices whenever runtime can enumerate candidates;
+- previous invalid output is never shown on retry;
+- Python owns tokenization, morphology, clause candidates, spans, role mapping,
+  validation and `PerceptionResult` construction;
+- active `adaptive_v3` does not use open-ended predicate naming; predicate lexical identity comes from deterministic source-language morphology.

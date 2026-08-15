@@ -56,12 +56,24 @@ class EntityResolver:
         if not text:
             raise ValueError("EntityResolver requires text for non-candidate_ref actants")
 
-        entities = self.core.store.find_entities_by_name(text)
-        if len(entities) == 1:
-            return ExistingEntity(self.core.ref(entities[0].uid))
-        if len(entities) > 1:
-            return AmbiguousEntityPlan(
-                tuple(self.core.ref(entity.uid) for entity in entities),
-                text,
-            )
-        return NewEntityPlan(text, candidate.semantic_hint)
+        # `normalized_hint` is an indexing aid, not a new canonical identity field.
+        # Prefer it for deterministic lookup/creation so inflectional variants of
+        # the same nominal do not become separate m nodes merely because their
+        # surface case differs.  Evidence/mention still preserves the source text.
+        lookup_forms: list[str] = []
+        for value in (candidate.normalized_hint, candidate.mention):
+            if value and value.strip() and value.strip() not in lookup_forms:
+                lookup_forms.append(value.strip())
+
+        for lookup in lookup_forms:
+            entities = self.core.store.find_entities_by_name(lookup)
+            if len(entities) == 1:
+                return ExistingEntity(self.core.ref(entities[0].uid))
+            if len(entities) > 1:
+                return AmbiguousEntityPlan(
+                    tuple(self.core.ref(entity.uid) for entity in entities),
+                    lookup,
+                )
+
+        canonical_name = lookup_forms[0] if lookup_forms else text
+        return NewEntityPlan(canonical_name, candidate.semantic_hint)

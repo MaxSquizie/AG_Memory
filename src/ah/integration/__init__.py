@@ -1,6 +1,7 @@
 from .contracts import (
     ActivationSeedRequest,
     IntegratedAssertion,
+    IntegratedRelation,
     IntegrationCommit,
     RefutationRequest,
     SeedReason,
@@ -19,6 +20,7 @@ __all__ = [
     "CandidateValidationError",
     "EntityResolutionError",
     "IntegratedAssertion",
+    "IntegratedRelation",
     "IntegrationCommit",
     "IntegrationConfig",
     "IntegrationError",

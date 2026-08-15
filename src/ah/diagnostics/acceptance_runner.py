@@ -1,0 +1,357 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, fields, is_dataclass
+from datetime import datetime
+from enum import Enum
+import json
+from pathlib import Path
+import shutil
+import traceback
+from typing import Any, Mapping, TYPE_CHECKING
+
+from ah.model import AbstractSymbol, Domain, FunctionSymbol, Group, Hypernode, Link, SemanticEntity, Template
+from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+from ah.perception.morphology import build_morphology
+
+if TYPE_CHECKING:
+    from ah.bootstrap import RuntimeServices
+
+
+DEFAULT_CASES_FILENAME = "acceptance_cases.txt"
+RUNS_DIRNAME = "acceptance_runs"
+
+
+@dataclass(frozen=True, slots=True)
+class AcceptanceCase:
+    index: int
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class AcceptanceRunResult:
+    output_dir: Path
+    cases_file: Path
+    total: int
+    succeeded: int
+    failed: int
+
+
+def load_acceptance_cases(path: str | Path) -> tuple[AcceptanceCase, ...]:
+    """Load one user turn per non-empty, non-comment line.
+
+    The file intentionally has no hidden metadata or expected answers. Replacing its
+    contents is enough to define another black-box run. Lines starting with `#` are
+    comments only and are never sent to the agent.
+    """
+    source = Path(path)
+    if not source.is_file():
+        raise FileNotFoundError(f"Acceptance cases file not found: {source}")
+    cases: list[AcceptanceCase] = []
+    for raw in source.read_text(encoding="utf-8-sig").splitlines():
+        text = raw.strip()
+        if not text or text.startswith("#"):
+            continue
+        cases.append(AcceptanceCase(len(cases) + 1, text))
+    if not cases:
+        raise ValueError(f"Acceptance cases file contains no requests: {source}")
+    return tuple(cases)
+
+
+def _jsonable(value: Any) -> Any:
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, Path):
+        return str(value)
+    if is_dataclass(value) and not isinstance(value, type):
+        return {field.name: _jsonable(getattr(value, field.name)) for field in fields(value)}
+    if isinstance(value, Mapping):
+        return {str(key.value if isinstance(key, Enum) else key): _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (tuple, list, set, frozenset)):
+        return [_jsonable(item) for item in value]
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    return str(value)
+
+
+def _properties(properties: Mapping[str, Any]) -> dict[str, Any]:
+    return {name: _jsonable(prop) for name, prop in sorted(properties.items())}
+
+
+def canonical_ah_snapshot(services: "RuntimeServices") -> dict[str, dict[str, Any]]:
+    """Return a stable UID-keyed canonical snapshot using only public AH reads."""
+    store = services.core.store
+    records: dict[str, dict[str, Any]] = {}
+
+    for uid in sorted(store.all_uids()):
+        kind = store.kind_of(uid)
+        domain = store.domain_of(uid)
+        if isinstance(kind, Enum) and kind.value == "S":
+            symbol: AbstractSymbol = store.get_symbol(uid)
+            records[uid] = {
+                "uid": uid,
+                "kind": "S",
+                "domain": None,
+                "forms": sorted(symbol.forms),
+            }
+            continue
+        if isinstance(kind, Enum) and kind.value == "L":
+            link: Link = store.get_link(uid)
+            records[uid] = {
+                "uid": uid,
+                "kind": "L",
+                "domain": None,
+                "relation_id": link.relation_id,
+                "weight": link.weight,
+                "source": _jsonable(link.source),
+                "target": _jsonable(link.target),
+            }
+            continue
+
+        if domain is None:
+            raise RuntimeError(f"Canonical non-S/L UID has no domain: {uid}")
+        element = store.get_element(domain, uid)
+        base: dict[str, Any] = {"uid": uid, "kind": kind.value, "domain": domain.value}
+        if isinstance(element, SemanticEntity):
+            base.update(properties=_properties(element.properties), meta=_jsonable(element.meta))
+        elif isinstance(element, Template):
+            base.update(predicate=_jsonable(element.predicate), roles=[role.value for role in element.roles])
+        elif isinstance(element, Hypernode):
+            base.update(
+                weight=element.weight,
+                template=_jsonable(element.template),
+                actants={role.value: _jsonable(ref) for role, ref in element.actants.items()},
+                properties=_properties(element.properties),
+                meta=_jsonable(element.meta),
+            )
+        elif isinstance(element, FunctionSymbol):
+            base.update(function_id=element.function_id, operands=_jsonable(element.operands))
+        elif isinstance(element, Group):
+            base.update(
+                members=_jsonable(element.members),
+                properties=_properties(element.properties),
+                meta=_jsonable(element.meta),
+            )
+        else:
+            raise TypeError(f"Unsupported canonical element in acceptance snapshot: {type(element).__name__}")
+        records[uid] = base
+    return records
+
+
+def diff_canonical_ah(
+    before: Mapping[str, dict[str, Any]],
+    after: Mapping[str, dict[str, Any]],
+) -> dict[str, Any]:
+    before_uids = set(before)
+    after_uids = set(after)
+    added = {uid: after[uid] for uid in sorted(after_uids - before_uids)}
+    removed = {uid: before[uid] for uid in sorted(before_uids - after_uids)}
+    changed = {
+        uid: {"before": before[uid], "after": after[uid]}
+        for uid in sorted(before_uids & after_uids)
+        if before[uid] != after[uid]
+    }
+    return {"added": added, "removed": removed, "changed": changed}
+
+
+def _runtime_summary(services: "RuntimeServices") -> dict[str, Any]:
+    """Return only runtime state needed by acceptance diagnostics.
+
+    Do not call GraphInspector.snapshot() here. That operation semantically projects
+    every canonical node and is intended for the live graph/final graph dump. An
+    acceptance run only needs the current Workspace and pending ignition state, so
+    building a full graph once per turn is both redundant and memory-expensive.
+    """
+    ignition = services.ignition
+    workspace_refs = tuple(ignition.workspace_refs())
+    ignition_snapshot = ignition.export_snapshot(include_pending=True)
+    active: dict[str, dict[str, Any]] = {}
+    for ref in workspace_refs:
+        runtime = services.core.store.runtime_state(ref.uid)
+        active[ref.uid] = {
+            "semantic": services.graph_inspector.semantic.dependency_text(ref),
+            "excitation": runtime.excitation,
+        }
+    return {
+        "tick": ignition_snapshot.tick_index,
+        "workspace_uids": [ref.uid for ref in workspace_refs],
+        "workspace": active,
+        "pending_incoming": dict(ignition_snapshot.incoming),
+        "pending_refutations": list(ignition_snapshot.pending_refutations),
+    }
+
+
+def _parser_diagnostics_since(services: "RuntimeServices", floor: int) -> list[dict[str, Any]]:
+    parser = services.perception
+    if parser is None or not hasattr(parser, "diagnostics"):
+        return []
+    return [_jsonable(item) for item in parser.diagnostics() if item.sequence > floor]
+
+
+def _request_diagnostics_since(services: "RuntimeServices", floor: int) -> list[dict[str, Any]]:
+    backend = services.llm
+    if backend is None or not hasattr(backend, "request_diagnostics"):
+        return []
+    return [_jsonable(item) for item in backend.request_diagnostics() if item.sequence > floor]
+
+
+def _diagnostic_floors(services: "RuntimeServices") -> tuple[int, int]:
+    parser_floor = 0
+    if services.perception is not None and hasattr(services.perception, "diagnostics"):
+        history = services.perception.diagnostics()
+        parser_floor = max((item.sequence for item in history), default=0)
+    request_floor = 0
+    if services.llm is not None and hasattr(services.llm, "request_diagnostics"):
+        history = services.llm.request_diagnostics()
+        request_floor = max((item.sequence for item in history), default=0)
+    return parser_floor, request_floor
+
+
+def _dump_json(path: Path, payload: Any) -> None:
+    """Stream an already JSON-compatible payload directly to disk."""
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2, sort_keys=False)
+        handle.write("\n")
+
+
+def _write_json(path: Path, payload: Any) -> None:
+    """Normalize once and stream instead of building an additional giant string."""
+    normalized = _jsonable(payload)
+    _dump_json(path, normalized)
+
+
+def run_acceptance_suite(
+    services: "RuntimeServices",
+    *,
+    cases_file: str | Path | None = None,
+) -> AcceptanceRunResult:
+    """Run file-defined requests sequentially through the normal orchestrator.
+
+    This is diagnostics only: it does not repair, retry or reinterpret failed turns.
+    Every request uses the normal sensory/perception/integration/inference/projection
+    path in one live AH/context session.  The diagnostic suite intentionally stops
+    at AgentContext: generated agent prose is irrelevant to parser/T/N acceptance
+    and would add large, growing generation caches plus unrelated H utterances.
+    Failures are recorded and the suite proceeds to the next independent user turn.
+    """
+    data_dir = Path(services.config.paths.data_dir)
+    source = Path(cases_file) if cases_file is not None else data_dir / DEFAULT_CASES_FILENAME
+    cases = load_acceptance_cases(source)
+
+    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S_%z")
+    runs_root = data_dir / RUNS_DIRNAME
+    output_dir = runs_root / timestamp
+    suffix = 1
+    while output_dir.exists():
+        output_dir = runs_root / f"{timestamp}_{suffix:02d}"
+        suffix += 1
+    output_dir.mkdir(parents=True, exist_ok=False)
+    shutil.copyfile(source, output_dir / "cases_used.txt")
+
+    morphology = build_morphology(services.config.llm.perception_morphology_backend)
+    candidate_builder = LinguisticCandidateBuilder(morphology)
+
+    with services.operation_lock:
+        initial_ah = canonical_ah_snapshot(services)
+        initial_runtime = _runtime_summary(services)
+    _write_json(output_dir / "config.json", services.config)
+    _write_json(output_dir / "initial_context.json", services.context)
+    _dump_json(output_dir / "initial_ah.json", initial_ah)
+    _dump_json(output_dir / "initial_runtime.json", initial_runtime)
+    del initial_ah, initial_runtime
+
+    manifest_cases: list[dict[str, Any]] = []
+    succeeded = 0
+    failed = 0
+
+    for case in cases:
+        parser_floor, request_floor = _diagnostic_floors(services)
+        with services.operation_lock:
+            before = canonical_ah_snapshot(services)
+
+        record: dict[str, Any] = {
+            "index": case.index,
+            "input": case.text,
+            "status": "ERROR",
+        }
+        error_text: str | None = None
+        try:
+            linguistic_graph = candidate_builder.build(case.text)
+            record["linguistic_candidate_graph"] = _jsonable(linguistic_graph)
+            orchestrator = services.create_orchestrator()
+            turn = orchestrator.handle_user_text(case.text, generate_response=False)
+            record["perception_result"] = _jsonable(turn.perception)
+            record["integration_commit"] = _jsonable(turn.integration)
+            record["queries"] = _jsonable(turn.queries)
+            record["agent_context"] = _jsonable(turn.agent_context)
+            record["agent_response"] = None
+            record["agent_generation_skipped"] = True
+            record["response_perception"] = _jsonable(turn.response_perception)
+            record["response_integration"] = _jsonable(turn.response_integration)
+            record["status"] = "OK"
+            succeeded += 1
+        except Exception as exc:  # diagnostics boundary: preserve the real failure verbatim
+            error_text = f"{type(exc).__name__}: {exc}"
+            record["error"] = error_text
+            record["traceback"] = traceback.format_exc()
+            failed += 1
+
+        with services.operation_lock:
+            after = canonical_ah_snapshot(services)
+            runtime_after = _runtime_summary(services)
+        record["parser_diagnostics"] = _parser_diagnostics_since(services, parser_floor)
+        record["llm_requests"] = _request_diagnostics_since(services, request_floor)
+        record["ah_diff"] = diff_canonical_ah(before, after)
+        record["runtime_after"] = runtime_after
+        record["interaction_context_after"] = _jsonable(services.context)
+
+        filename = f"turn_{case.index:03d}.json"
+        # record is already normalized field-by-field above. Writing it directly
+        # avoids recursively cloning the complete diagnostic payload a second time.
+        _dump_json(output_dir / filename, record)
+        manifest_cases.append(
+            {
+                "index": case.index,
+                "input": case.text,
+                "status": record["status"],
+                "error": error_text,
+                "file": filename,
+            }
+        )
+        # Explicitly drop the two complete canonical snapshots before the next LLM
+        # turn. CPython can then release their large value graphs immediately.
+        del before, after, runtime_after, record
+
+    with services.operation_lock:
+        final_ah = canonical_ah_snapshot(services)
+        final_graph = services.graph_inspector.snapshot()
+    _write_json(output_dir / "final_context.json", services.context)
+    _dump_json(output_dir / "final_ah.json", final_ah)
+    _write_json(output_dir / "final_graph.json", final_graph)
+    del final_ah, final_graph
+
+    manifest = {
+        "cases_file": str(source.resolve()),
+        "output_dir": str(output_dir.resolve()),
+        "total": len(cases),
+        "succeeded": succeeded,
+        "failed": failed,
+        "cases": manifest_cases,
+    }
+    _write_json(output_dir / "manifest.json", manifest)
+
+    summary_lines = [
+        f"Acceptance run: {output_dir.name}",
+        f"Cases: {len(cases)} | OK: {succeeded} | ERROR: {failed}",
+        "",
+    ]
+    for item in manifest_cases:
+        line = f"{item['index']:03d} {item['status']}: {item['input']}"
+        if item["error"]:
+            line += f" | {item['error']}"
+        summary_lines.append(line)
+    (output_dir / "summary.txt").write_text("\n".join(summary_lines) + "\n", encoding="utf-8", newline="\n")
+
+    runs_root.mkdir(parents=True, exist_ok=True)
+    (runs_root / "latest.txt").write_text(str(output_dir.resolve()) + "\n", encoding="utf-8", newline="\n")
+
+    return AcceptanceRunResult(output_dir, source, len(cases), succeeded, failed)

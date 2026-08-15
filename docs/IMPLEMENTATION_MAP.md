@@ -217,4 +217,28 @@ Adaptive probe prompts live in `prompts/perception/*.txt`, are read per request,
 
 ## Weak-model discrete perception (slice 11)
 
-Default protocol is `adaptive_v2`. The LLM is explicitly treated as an AH-unaware semantic recognizer. Python enumerates legal numeric choices for speech-act class, token boundaries and role decisions; the model returns one number. Role names are not required model knowledge: plain-language option descriptions map to `ActantRole` after validation. Obvious negation/no-negation, empty candidate sets, single remaining ends/roles and high-confidence wh-word roles are deterministic fast paths. The only open-text semantic decision retained is English predicate naming for the `S` referenced by `T`.
+В slice 11 default protocol был `adaptive_v2`; slice 12 supersedes it with `adaptive_v3`. The LLM is explicitly treated as an AH-unaware semantic recognizer. Python enumerates legal numeric choices for speech-act class, token boundaries and role decisions; the model returns one number. Role names are not required model knowledge: plain-language option descriptions map to `ActantRole` after validation. Obvious negation/no-negation, empty candidate sets, single remaining ends/roles and high-confidence wh-word roles are deterministic fast paths. In current `adaptive_v3`, even predicate lexical identity is deterministic: morphology supplies the stable source-language lexeme used for the `S` referenced by `T`. Older adaptive protocols retain their compatibility path.
+
+## Morphology-assisted discrete perception (slice 11.2)
+
+Before `predicate_start`, Russian tokens are analyzed by a deterministic morphology layer (`pymorphy3` when installed). High-confidence POS/lemma results narrow or eliminate LLM probes; uncertain syntax still uses the existing adaptive numeric choices. Morphology never selects UID/domain/T/N or mutates AH. For current `adaptive_v3`, the normalized source-language predicate lexeme supplies the stable lexical `S` used by `T`; morphology still never selects UID/domain/T/N or mutates AH. The older English-symbol path is compatibility-only.
+
+## Slice 12 — adaptive_v3 perception
+
+- `perception/linguistic_candidates.py`: runtime linguistic candidate graph.
+- `perception/morphology.py`: preserves alternative Russian morphology parses.
+- `perception/adaptive_parser.py`: candidate narrowing + stateless finite LLM probes + nested candidate refs.
+- `perception/contracts.py`: structured AND/OR actant composition candidate.
+- `integration/service.py`: materializes actant composition through canonical `g.AND/g.OR`.
+- Active perception prompts contain no examples/few-shot anchors.
+
+
+## Slice 12.19 residual perception boundary
+
+- `perception/morphology.py`: carries grammatical animacy and scored morphology.
+- `perception/adaptive_parser.py`: mood/number predicate agreement, tightly licensed
+  coordinated object ellipsis, self-contained control probes, descriptive-role
+  narrowing for copular adverbials, and bounded discourse-continuation coreference.
+- `prompts/perception/pronoun_coreference.txt`: finite continuation-only antecedent
+  choice with explicit abstention.
+- Genuine unmarked pronoun ambiguity still fails before canonical integration.

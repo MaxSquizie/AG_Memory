@@ -40,19 +40,20 @@ engine_script = ""               # опциональный внешний JSONL
 history_messages = 0                # 0 = строго stateless между механическими LLM-вызовами
 
 [llm.perception]
-protocol = "adaptive_v2"           # weak-model discrete probes; Python owns choices/spans/roles
+protocol = "adaptive_v3"           # weak-model discrete probes; Python owns choices/spans/roles
 probe_retry_attempts = 1           # retry same probe from scratch; never show the bad answer
-failure_policy = "empty"           # failed semantic parse => H experience only; no C/P write
 ground_actants = true
 max_acts = 4
 max_actants_per_act = 8
-predicate_symbol_language = "en"   # T predicate S uses short English snake_case symbols
+predicate_symbol_language = "en"   # compatibility for adaptive_v1/v2; adaptive_v3 uses deterministic lexical S
+morphology_backend = "pymorphy3"    # deterministic Russian POS/lemma narrowing before LLM probes
 max_new_tokens = 24                # hard upper bound; individual probes use smaller limits
 temperature = 0.0
 top_p = 1.0
 top_k = 0
 repetition_penalty = 1.0
 no_repeat_ngram_size = 0
+use_cache = false                 # tiny stateless probes: no KV cache between generated tokens
 
 [llm.agent]
 max_new_tokens = 384
@@ -61,6 +62,7 @@ top_p = 0.9
 top_k = 40
 repetition_penalty = 1.05
 no_repeat_ngram_size = 0
+use_cache = true                  # useful for normal interactive multi-token responses
 repair_attempts = 1
 sanitize_context_echo = true      # never commit CURRENT INPUT / ACTIVE MEMORY echo into H
 
@@ -68,6 +70,7 @@ sanitize_context_echo = true      # never commit CURRENT INPUT / ACTIVE MEMORY e
 initial_hypernode_weight = 0.40
 experience_hypernode_weight = 0.30
 follow_link_weight = 0.20
+cause_link_weight = 0.20
 initial_inferred_link_weight = 0.25
 
 [ignition]

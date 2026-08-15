@@ -1,1 +1,1 @@
-Translate TARGET predicate meaning into one short English base-form semantic label. Reply with lowercase ASCII letters and underscores only. No explanation.
+Translate TARGET in its local sentence meaning into one short English base-form predicate name. Use only lowercase ASCII letters and underscores. Return nothing else.

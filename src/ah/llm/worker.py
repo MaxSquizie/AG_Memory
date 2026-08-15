@@ -166,7 +166,7 @@ def _input_device(model: Any):
 
 def _generation_config_values(
     *, max_new: int, temperature: float, top_p: float, top_k: int,
-    repetition_penalty: float, no_repeat_ngram_size: int,
+    repetition_penalty: float, no_repeat_ngram_size: int, use_cache: bool = True,
     pad_token_id: int | None, eos_token_id: Any, bos_token_id: Any = None,
 ) -> dict[str, Any]:
     """Build request-local GenerationConfig kwargs without invalid greedy flags."""
@@ -179,7 +179,7 @@ def _generation_config_values(
         "pad_token_id": pad_token_id,
         "eos_token_id": eos_token_id,
         "bos_token_id": bos_token_id,
-        "use_cache": True,
+        "use_cache": use_cache,
     }
     if do_sample:
         values.update(temperature=temperature, top_p=top_p, top_k=top_k)
@@ -416,6 +416,76 @@ def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str,
     rendered = (f"[SYSTEM]\n{system}\n\n" if system else "") + f"[USER]\n{user}\n\n[ASSISTANT]\n"
     return dict(tok(rendered, return_tensors="pt", add_special_tokens=False))
 
+def _score_fixed_choices(
+    runtime: dict[str, Any],
+    inputs: dict[str, Any],
+    choices: list[str],
+) -> str:
+    """Select one exact continuation by model likelihood.
+
+    Finite mechanical perception probes must never ask the model to generate an
+    arbitrary string and then hope it matches the protocol.  Score only the
+    explicitly allowed continuations and return the best one verbatim.
+    """
+    if not choices or any(not str(choice).strip() for choice in choices):
+        raise ValueError("choice_outputs must contain non-empty strings")
+    if len(set(choices)) != len(choices):
+        raise ValueError("choice_outputs must be unique")
+
+    torch = runtime["torch"]
+    tok = runtime["tokenizer"]
+    model = runtime["model"]
+    input_device = runtime.get("input_device", getattr(model, "device", "cpu"))
+    base_ids = inputs["input_ids"].to(input_device)
+    base_mask = inputs.get("attention_mask")
+    if base_mask is None:
+        base_mask = torch.ones_like(base_ids)
+    else:
+        base_mask = base_mask.to(input_device)
+
+    best_choice: str | None = None
+    best_score: float | None = None
+    for choice in choices:
+        encoded = tok(str(choice), return_tensors="pt", add_special_tokens=False)
+        choice_ids = encoded["input_ids"].to(input_device)
+        if choice_ids.shape[-1] <= 0:
+            raise ValueError(f"choice tokenized to an empty continuation: {choice!r}")
+        full_ids = torch.cat((base_ids, choice_ids), dim=-1)
+        full_mask = torch.cat((base_mask, torch.ones_like(choice_ids)), dim=-1)
+        output = None
+        logits = None
+        selected = None
+        token_log_probs = None
+        try:
+            with torch.inference_mode():
+                output = model(input_ids=full_ids, attention_mask=full_mask, use_cache=False)
+                logits = output.logits
+                start = base_ids.shape[-1] - 1
+                stop = start + choice_ids.shape[-1]
+                selected = logits[:, start:stop, :].float().log_softmax(dim=-1)
+                token_log_probs = selected.gather(-1, choice_ids.unsqueeze(-1)).squeeze(-1)
+                # Length-normalized conditional log-likelihood avoids preferring
+                # a one-token option solely because another allowed option happens
+                # to tokenize into two pieces.
+                score = float(token_log_probs.mean().item())
+        finally:
+            del token_log_probs
+            del selected
+            del logits
+            del output
+            del full_mask
+            del full_ids
+            del choice_ids
+            del encoded
+        if best_score is None or score > best_score:
+            best_score = score
+            best_choice = str(choice)
+
+    if best_choice is None:
+        raise RuntimeError("fixed-choice scoring produced no result")
+    return best_choice
+
+
 def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argparse.Namespace) -> str:
     tok = runtime["tokenizer"]
     model = runtime["model"]
@@ -427,6 +497,7 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
     top_k = int(override.get("top_k", defaults.top_k))
     repetition_penalty = float(override.get("repetition_penalty", defaults.repetition_penalty))
     no_repeat_ngram_size = int(override.get("no_repeat_ngram_size", defaults.no_repeat_ngram_size))
+    use_cache = bool(override.get("use_cache", True))
 
     input_ids = inputs["input_ids"]
     budget = max(1, runtime["ctx_total"] - max_new)
@@ -435,6 +506,16 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
         inputs["input_ids"] = input_ids
         if "attention_mask" in inputs:
             inputs["attention_mask"] = inputs["attention_mask"][:, -budget:]
+    choice_outputs_raw = override.get("choice_outputs")
+    if choice_outputs_raw is not None:
+        if not isinstance(choice_outputs_raw, list):
+            raise ValueError("choice_outputs must be a JSON list")
+        choices = [str(item) for item in choice_outputs_raw]
+        try:
+            return _score_fixed_choices(runtime, inputs, choices)
+        finally:
+            del inputs
+
     inputs = {k: v.to(runtime.get("input_device", getattr(model, "device", "cpu"))) for k, v in inputs.items()}
 
     # Construct a fresh request-local GenerationConfig. For greedy decoding we do
@@ -447,17 +528,34 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
         top_k=top_k,
         repetition_penalty=repetition_penalty,
         no_repeat_ngram_size=no_repeat_ngram_size,
+        use_cache=use_cache,
         pad_token_id=(tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id),
         eos_token_id=tok.eos_token_id,
         bos_token_id=getattr(tok, "bos_token_id", None),
     )
     gc = runtime["GenerationConfig"](**values)
 
-    with runtime["torch"].inference_mode():
-        out = model.generate(**inputs, generation_config=gc)
-    generated = out[0, inputs["input_ids"].shape[-1]:]
-    text = tok.decode(generated, skip_special_tokens=True).strip()
-    return _strip_thinking(text) if runtime["strip_thinking"] else text
+    out = None
+    generated = None
+    try:
+        with runtime["torch"].inference_mode():
+            out = model.generate(**inputs, generation_config=gc)
+        generated = out[0, inputs["input_ids"].shape[-1]:]
+        text = tok.decode(generated, skip_special_tokens=True).strip()
+        return _strip_thinking(text) if runtime["strip_thinking"] else text
+    finally:
+        # Generation caches and request tensors are strictly request-local.  Drop
+        # all references before the next JSONL request; on CUDA also return unused
+        # allocator blocks so WDDM cannot keep a large transient generation working
+        # set resident as shared system memory across many independent probes.
+        del generated
+        del out
+        del inputs
+        del gc
+        torch = runtime["torch"]
+        cuda = getattr(torch, "cuda", None)
+        if use_cache and cuda is not None and cuda.is_available():
+            cuda.empty_cache()
 
 
 def serve(runtime: dict[str, Any], args: argparse.Namespace) -> None:

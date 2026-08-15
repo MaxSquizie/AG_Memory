@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 
 from ah.bootstrap import RuntimeServices
 from ah.config import AppConfig
+from ah.diagnostics import load_acceptance_cases, run_acceptance_suite
 
 from .config_editor import ConfigEditor
 from .config_store import ApplyMode, ConfigDocument
@@ -63,10 +64,15 @@ class MainWindow(QMainWindow):
         self.config_path = Path(config_path)
         self.thread_pool = QThreadPool.globalInstance()
         self._last_turn = None
+        self._chat_worker: FunctionWorker | None = None
+        self._acceptance_worker: FunctionWorker | None = None
+        self._llm_operation_worker: FunctionWorker | None = None
+        self._llm_operation_clears_restart = False
         self._selected_uid: str | None = None
         self._selected_edge_key: str | None = None
         self._llm_restart_required = False
         self._runtime_restart_required = False
+        self._acceptance_visuals_suspended = False
 
         self.setWindowTitle("AH Agent — Cognitive Runtime")
         self.resize(1580, 980)
@@ -85,10 +91,20 @@ class MainWindow(QMainWindow):
         self._build_link_manager_dock()
         self._build_runtime_dock()
 
+        # Heavy runtime status includes a full GraphInspector snapshot and may be
+        # suspended during long acceptance runs. LLM diagnostics are deliberately
+        # polled by a separate lightweight timer so the LLM dock remains live while
+        # graph/AH visualization is frozen.
         self.status_timer = QTimer(self)
         self.status_timer.timeout.connect(self._refresh_status)
         self.status_timer.start(300)
+
+        self.llm_status_timer = QTimer(self)
+        self.llm_status_timer.timeout.connect(self.llm_panel.refresh_status)
+        self.llm_status_timer.start(300)
+
         self._refresh_status()
+        self.llm_panel.refresh_status()
 
     # ---------- UI construction ----------
     def _build_toolbar(self) -> None:
@@ -127,9 +143,18 @@ class MainWindow(QMainWindow):
         self.chat_input.setFixedHeight(90)
         self.send_button = QPushButton("Отправить")
         self.send_button.clicked.connect(self._send_chat)
+        self.acceptance_button = QPushButton("Прогнать acceptance-файл")
+        self.acceptance_button.setToolTip(
+            str(self.services.config.paths.data_dir / "acceptance_cases.txt")
+            + "\nОдин запрос на строку; пустые строки и # комментарии игнорируются."
+        )
+        self.acceptance_button.clicked.connect(self._run_acceptance_cases)
+        chat_buttons = QHBoxLayout()
+        chat_buttons.addWidget(self.send_button)
+        chat_buttons.addWidget(self.acceptance_button)
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
-        layout.addWidget(self.send_button)
+        layout.addLayout(chat_buttons)
         dock.setWidget(body)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
 
@@ -210,16 +235,37 @@ class MainWindow(QMainWindow):
             self._start_llm()
 
     def _run_llm_operation(self, fn, *, clears_restart: bool = False) -> None:
+        if self._llm_operation_worker is not None:
+            return
         self.action_llm.setEnabled(False)
         worker = FunctionWorker(fn)
-        worker.signals.error.connect(lambda msg: QMessageBox.critical(self, "LLM", msg))
-        if clears_restart:
-            worker.signals.result.connect(lambda _value: setattr(self, "_llm_restart_required", False))
-        worker.signals.finished.connect(lambda: self.action_llm.setEnabled(True))
-        worker.signals.finished.connect(self._refresh_status)
+        self._llm_operation_worker = worker
+        self._llm_operation_clears_restart = clears_restart
+        worker.signals.error.connect(self._llm_operation_error)
+        worker.signals.result.connect(self._llm_operation_result)
+        worker.signals.finished.connect(self._llm_operation_finished)
         self.thread_pool.start(worker)
 
+    @Slot(str)
+    def _llm_operation_error(self, message: str) -> None:
+        QMessageBox.critical(self, "LLM", message)
+
+    @Slot(object)
+    def _llm_operation_result(self, _value) -> None:
+        if self._llm_operation_clears_restart:
+            self._llm_restart_required = False
+
+    @Slot()
+    def _llm_operation_finished(self) -> None:
+        self._llm_operation_worker = None
+        self._llm_operation_clears_restart = False
+        self.action_llm.setEnabled(True)
+        self._refresh_status()
+
     def _start_llm(self) -> None:
+        if self._acceptance_worker is not None:
+            self.statusBar().showMessage("Acceptance suite использует LLM", 2500)
+            return
         llm = self.services.llm
         if llm is None:
             QMessageBox.warning(self, "LLM", "LLM отключена в конфиге.")
@@ -229,12 +275,18 @@ class MainWindow(QMainWindow):
         self._run_llm_operation(llm.start, clears_restart=True)
 
     def _stop_llm(self) -> None:
+        if self._acceptance_worker is not None:
+            self.statusBar().showMessage("Acceptance suite использует LLM", 2500)
+            return
         llm = self.services.llm
         if llm is None or not llm.is_running:
             return
         self._run_llm_operation(llm.stop)
 
     def _restart_llm(self) -> None:
+        if self._acceptance_worker is not None:
+            self.statusBar().showMessage("Acceptance suite использует LLM", 2500)
+            return
         llm = self.services.llm
         if llm is None:
             QMessageBox.warning(self, "LLM", "LLM отключена в конфиге.")
@@ -270,26 +322,144 @@ class MainWindow(QMainWindow):
 
     # ---------- chat ----------
     def _send_chat(self) -> None:
+        # Only one cognitive turn may mutate the shared runtime at a time. Keeping
+        # an explicit Python reference to the QRunnable also prevents Qt/PySide from
+        # deleting the worker wrapper before its queued completion signal is
+        # delivered. The previous implementation kept the worker only in a local
+        # variable and re-enabled the button through a lambda, which is fragile
+        # across worker-thread/UI-thread boundaries.
+        if self._chat_worker is not None or self._acceptance_worker is not None:
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2000)
+            return
+
         text = self.chat_input.toPlainText().strip()
         if not text:
             return
         if self.services.llm is None or not self.services.llm.is_running:
             QMessageBox.warning(self, "Диалог", "Сначала запустите локальную LLM.")
             return
+
         self.chat_input.clear()
         self.chat_history.append(f"<b>{self.services.config.identity.user_name}:</b> {self._html(text)}")
         self.send_button.setEnabled(False)
+        self.chat_input.setEnabled(False)
+        self.llm_panel.begin_turn(text)
 
         def run_turn():
             orchestrator = self.services.create_orchestrator()
-            result = orchestrator.handle_user_text(text)
-            return result
+            return orchestrator.handle_user_text(text)
 
         worker = FunctionWorker(run_turn)
+        self._chat_worker = worker
         worker.signals.result.connect(self._turn_finished)
         worker.signals.error.connect(self._turn_error)
-        worker.signals.finished.connect(lambda: self.send_button.setEnabled(True))
+        # Connect to a QObject slot owned by MainWindow instead of a bare lambda so
+        # UI cleanup is always queued onto the GUI thread.
+        worker.signals.finished.connect(self._chat_worker_finished)
         self.thread_pool.start(worker)
+
+    def _run_acceptance_cases(self) -> None:
+        if self._chat_worker is not None or self._acceptance_worker is not None:
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+        if self._llm_operation_worker is not None:
+            self.statusBar().showMessage("Дождитесь завершения операции LLM", 2500)
+            return
+        if self.services.llm is None or not self.services.llm.is_running:
+            QMessageBox.warning(self, "Acceptance suite", "Сначала запустите локальную LLM.")
+            return
+
+        cases_file = self.services.config.paths.data_dir / "acceptance_cases.txt"
+        try:
+            cases = load_acceptance_cases(cases_file)
+        except Exception as exc:
+            QMessageBox.critical(self, "Acceptance suite", f"{type(exc).__name__}: {exc}")
+            return
+
+        self.send_button.setEnabled(False)
+        self.chat_input.setEnabled(False)
+        self.acceptance_button.setEnabled(False)
+        self.action_llm.setEnabled(False)
+        self.action_ignition.setEnabled(False)
+        self.action_tick.setEnabled(False)
+        self.action_save.setEnabled(False)
+        self.chat_history.append(
+            f"<b>Acceptance:</b> запускаю {len(cases)} запросов из "
+            f"{self._html(str(cases_file))}."
+        )
+        self.statusBar().showMessage(f"Acceptance suite: 0/{len(cases)} — выполняется")
+        self._suspend_acceptance_visuals()
+
+        def run_suite():
+            return run_acceptance_suite(self.services, cases_file=cases_file)
+
+        worker = FunctionWorker(run_suite)
+        self._acceptance_worker = worker
+        worker.signals.result.connect(self._acceptance_finished)
+        worker.signals.error.connect(self._acceptance_error)
+        worker.signals.finished.connect(self._acceptance_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _acceptance_finished(self, result) -> None:
+        self.chat_history.append(
+            f"<b>Acceptance:</b> готово — OK {result.succeeded}/{result.total}, "
+            f"ERROR {result.failed}. Результаты: {self._html(str(result.output_dir))}"
+        )
+        self.statusBar().showMessage(
+            f"Acceptance suite завершён: OK {result.succeeded}/{result.total}; ERROR {result.failed}",
+            8000,
+        )
+        QMessageBox.information(
+            self,
+            "Acceptance suite",
+            f"Прогон завершён.\n\nOK: {result.succeeded}/{result.total}\n"
+            f"ERROR: {result.failed}\n\nРезультаты:\n{result.output_dir}",
+        )
+
+    @Slot(str)
+    def _acceptance_error(self, message: str) -> None:
+        self.chat_history.append(f"<b>ACCEPTANCE ERROR:</b> {self._html(message)}")
+        QMessageBox.critical(self, "Acceptance suite", message)
+
+    @Slot()
+    def _acceptance_worker_finished(self) -> None:
+        self._acceptance_worker = None
+        self.send_button.setEnabled(True)
+        self.chat_input.setEnabled(True)
+        self.acceptance_button.setEnabled(True)
+        self.action_llm.setEnabled(True)
+        self.action_ignition.setEnabled(True)
+        self.action_tick.setEnabled(True)
+        self.action_save.setEnabled(True)
+        self.chat_input.setFocus()
+        self._resume_acceptance_visuals()
+
+    def _suspend_acceptance_visuals(self) -> None:
+        if self._acceptance_visuals_suspended:
+            return
+        self._acceptance_visuals_suspended = True
+        self.status_timer.stop()
+        self.canvas.set_live_updates_enabled(False)
+
+    def _resume_acceptance_visuals(self) -> None:
+        if not self._acceptance_visuals_suspended:
+            return
+        self._acceptance_visuals_suspended = False
+        # One graph rebuild is enough after the whole batch. Normal status polling
+        # resumes only after that; nothing here changes ignition or AH runtime.
+        self.canvas.set_live_updates_enabled(True)
+        self.llm_panel.refresh_status()
+        self.status_timer.start(300)
+
+    @Slot()
+    def _chat_worker_finished(self) -> None:
+        self._chat_worker = None
+        self.send_button.setEnabled(True)
+        self.chat_input.setEnabled(True)
+        self.chat_input.setFocus()
+        self.llm_panel.finish_turn()
+        self._refresh_status()
 
     def _turn_finished(self, result) -> None:
         self._last_turn = result
@@ -325,9 +495,13 @@ class MainWindow(QMainWindow):
             )
         self.trace_view.setPlainText(json.dumps(trace_payload, ensure_ascii=False, indent=2))
         self.canvas.refresh()
+        # Do not wait for the 300 ms status poll to expose the just-finished parser
+        # and agent diagnostics in the LLM tabs.
+        self.llm_panel.refresh_status()
 
     def _turn_error(self, message: str) -> None:
         self.chat_history.append(f"<b>ERROR:</b> {self._html(message)}")
+        self.llm_panel.refresh_status()
         QMessageBox.critical(self, "Turn", message)
 
     @staticmethod
@@ -344,6 +518,10 @@ class MainWindow(QMainWindow):
             self.services.apply_config(new_config)
             self.canvas.set_settings(new_config.gui)
             self.llm_panel.reload_prompts()
+            self.acceptance_button.setToolTip(
+                str(new_config.paths.data_dir / "acceptance_cases.txt")
+                + "\nОдин запрос на строку; пустые строки и # комментарии игнорируются."
+            )
         except Exception as exc:
             QMessageBox.critical(self, "Config apply", str(exc))
             return
@@ -440,15 +618,17 @@ class MainWindow(QMainWindow):
             restart.append("LLM restart")
         if self._runtime_restart_required:
             restart.append("runtime restart")
+        visible_node_count = len(self.canvas.mapper.visible_nodes(snap, self.canvas.settings))
+        hidden_symbol_count = len(snap.nodes) - visible_node_count
         self.runtime_label.setText(
-            f"tick={snap.tick} | nodes={len(snap.nodes)} | links={len(snap.links)} | "
+            f"tick={snap.tick} | nodes={visible_node_count} | links={len(snap.links)} | "
             f"workspace={len(snap.workspace_uids)} | LLM={'ON' if llm_running else 'OFF'} | "
             f"Ignition={'ON' if clock.running else 'OFF'}"
+            + (f" | hidden lexical S={hidden_symbol_count}" if hidden_symbol_count else "")
             + (" | " + ", ".join(restart) if restart else "")
         )
         if clock.last_error:
             self.statusBar().showMessage(f"Ignition error: {clock.last_error}")
-        self.llm_panel.refresh_status()
         self._refresh_inspector()
 
     def closeEvent(self, event) -> None:  # noqa: N802 - Qt API

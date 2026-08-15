@@ -1,1 +1,1 @@
-Choose what TEXT does. Reply with one OPTIONS number only.
+Choose exactly one option. Reply only with the number inside brackets.

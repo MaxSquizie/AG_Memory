@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from threading import Lock
 from typing import Any, Protocol
@@ -22,6 +22,7 @@ from .contracts import (
     EvidenceSpan,
     PerceptionResult,
     PredicateCandidate,
+    TemplateCandidate,
     QueryCandidate,
     QueryMode,
 )
@@ -49,29 +50,29 @@ class LLMPerceptionSettings:
         repetition_penalty=1.0,
         no_repeat_ngram_size=0,
     )
-    protocol: str = "adaptive_v2"
+    protocol: str = "adaptive_v3"
     probe_prompt_dir: Path | None = None
     probe_retry_attempts: int = 1
     repair_attempts: int | None = None  # deprecated alias -> probe_retry_attempts
-    failure_policy: str = "empty"
     ground_actants: bool = True
     max_acts: int = 4
     max_actants_per_act: int = 8
     predicate_symbol_language: str = "en"
+    morphology_backend: str = "auto"
 
     def __post_init__(self) -> None:
         if self.repair_attempts is not None:
             object.__setattr__(self, "probe_retry_attempts", self.repair_attempts)
-        if self.protocol not in {"adaptive_v1", "adaptive_v2", "span_v1", "line_v1", "compact_json_v1", "legacy_json"}:
+        if self.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3", "span_v1", "line_v1", "compact_json_v1", "legacy_json"}:
             raise ValueError("Unsupported perception protocol")
         if self.probe_retry_attempts < 0 or self.probe_retry_attempts > 2:
             raise ValueError("probe_retry_attempts must be in [0, 2]")
-        if self.failure_policy not in {"empty", "raise"}:
-            raise ValueError("failure_policy must be empty or raise")
         if self.max_acts <= 0 or self.max_actants_per_act <= 0:
             raise ValueError("adaptive parser budgets must be > 0")
         if self.predicate_symbol_language != "en":
             raise ValueError("predicate_symbol_language currently must be 'en'")
+        if self.morphology_backend not in {"auto", "pymorphy3", "none"}:
+            raise ValueError("morphology_backend must be auto, pymorphy3, or none")
 
 
 class PerceptionParseError(ValueError):
@@ -100,9 +101,9 @@ class PerceptionDiagnostic:
 class LLMPerceptionService:
     """LLM text -> runtime-only PerceptionResult.
 
-    Default `adaptive_v2` never asks the model to serialize a compound payload.
+    Default `adaptive_v3` never asks the model to serialize a compound payload.
     The shared LLM answers a sequence of tiny stateless probes (enum / bit / source
-    span / English predicate symbol); Python owns parser state and construction of
+    span choices); Python owns parser state, lexical predicate identity and construction of
     the rich runtime contracts. Legacy single-call protocols remain readable for
     compatibility and tests.
 
@@ -142,7 +143,7 @@ class LLMPerceptionService:
             )
 
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
-        if self.settings.protocol in {"adaptive_v1", "adaptive_v2"}:
+        if self.settings.protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
             return self._parse_adaptive(text)
         return self._parse_legacy_protocol(text, interaction_context)
 
@@ -156,6 +157,8 @@ class LLMPerceptionService:
                 max_acts=self.settings.max_acts,
                 max_actants_per_act=self.settings.max_actants_per_act,
                 predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
             ),
         )
         try:
@@ -173,13 +176,6 @@ class LLMPerceptionService:
                 for trace in exc.traces
             ]
             final_error = str(exc)
-            if self.settings.failure_policy == "empty":
-                fallback = PerceptionResult(
-                    source_text=text,
-                    diagnostics=("PARSER_FAILURE: " + final_error,),
-                )
-                self._record_diagnostic(text, attempts, fallback, final_error)
-                return fallback
             self._record_diagnostic(text, attempts, None, final_error)
             raise PerceptionParseError(final_error) from exc
 
@@ -243,17 +239,6 @@ class LLMPerceptionService:
             return decoded
 
         final_error = "Perception output remained invalid after repair: " + " | ".join(errors)
-        if self.settings.failure_policy == "empty":
-            fallback = PerceptionResult(
-                source_text=text,
-                assertions=(),
-                queries=(),
-                commands=(),
-                diagnostics=("PARSER_FAILURE: " + final_error,),
-            )
-            self._record_diagnostic(text, attempts, fallback, final_error)
-            return fallback
-
         self._record_diagnostic(text, attempts, None, final_error)
         raise PerceptionParseError(final_error)
 
@@ -286,6 +271,7 @@ class LLMPerceptionService:
                     result = self._compact_result(source_text, payload)
                 else:
                     result = self._legacy_result(source_text, payload)
+            result = self._attach_template_candidates(result)
             if self.settings.ground_actants:
                 self._validate_grounding(source_text, result, strict_predicate=(using_line_protocol or using_span_protocol))
             return result
@@ -293,6 +279,40 @@ class LLMPerceptionService:
             raise
         except (KeyError, TypeError, ValueError) as exc:
             raise PerceptionParseError(f"Invalid perception payload: {exc}") from exc
+
+    @staticmethod
+    def _attach_template_candidates(result: PerceptionResult) -> PerceptionResult:
+        def with_schema(
+            predicate: PredicateCandidate,
+            actants: tuple[ActantCandidate, ...],
+            requested_role: ActantRole | None = None,
+        ) -> PredicateCandidate:
+            if predicate.template_candidate is not None:
+                return predicate
+            roles = list(dict.fromkeys(actant.role for actant in actants))
+            if requested_role is not None and requested_role not in roles:
+                roles.append(requested_role)
+            return replace(
+                predicate,
+                template_candidate=TemplateCandidate(tuple(roles)),
+            )
+
+        assertions = tuple(
+            replace(item, predicate=with_schema(item.predicate, item.actants))
+            for item in result.assertions
+        )
+        queries = tuple(
+            replace(
+                item,
+                predicate=with_schema(item.predicate, item.actants, item.requested_role),
+            )
+            for item in result.queries
+        )
+        commands = tuple(
+            replace(item, predicate=with_schema(item.predicate, item.actants))
+            for item in result.commands
+        )
+        return replace(result, assertions=assertions, queries=queries, commands=commands)
 
     @staticmethod
     def _unquote(value: str) -> str:
@@ -868,6 +888,7 @@ class LLMPerceptionService:
             normalized_hint=(None if raw.get("normalized_hint") is None else str(raw.get("normalized_hint"))),
             semantic_hint=(None if raw.get("semantic_hint") is None else str(raw.get("semantic_hint"))),
             candidate_ref=(None if raw.get("candidate_ref") is None else str(raw.get("candidate_ref"))),
+            entity_ref=(None if raw.get("entity_ref") is None else str(raw.get("entity_ref"))),
             evidence=cls._evidence(raw.get("evidence")),
             parser_confidence=(None if confidence is None else float(confidence)),
         )

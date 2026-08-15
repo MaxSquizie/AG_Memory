@@ -1,1 +1,1 @@
-ACTANT_START is the first token of the selected phrase. Choose its last token. Keep coordinated values joined by words such as "и" or "или" in one phrase when they fill the same role. Reply with one OPTIONS number only.
+Choose the last token of the selected phrase. Reply only with the number inside brackets.

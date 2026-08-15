@@ -21,6 +21,7 @@ from .graph_state import (
     VisualGraph,
     build_edge_focus_geometry,
     build_focus_geometry,
+    rank_visible_label_indices,
     pick_edge_key_2d,
 )
 
@@ -63,6 +64,7 @@ class GraphCanvasWidget(QWidget):
         self._hover_uid: str | None = None
         self._hover_edge_key: str | None = None
         self._last_hover_pick = 0.0
+        self._live_updates_enabled = True
 
         self.canvas = scene.SceneCanvas(
             keys="interactive",
@@ -200,6 +202,30 @@ class GraphCanvasWidget(QWidget):
         self._restart_timer()
         self.refresh()
 
+    def set_live_updates_enabled(self, enabled: bool) -> None:
+        """Pause/resume expensive graph snapshots and VisPy buffer rebuilds.
+
+        Cognitive runtime continues normally. This switch affects visualization only
+        and is used by long diagnostic runs where redrawing the same growing graph at
+        GUI frequency provides no value and can create substantial allocator/driver
+        pressure.
+        """
+        enabled = bool(enabled)
+        if enabled == self._live_updates_enabled:
+            return
+        self._live_updates_enabled = enabled
+        if enabled:
+            self._restart_timer()
+            self.refresh()
+            return
+
+        self.timer.stop()
+        with self._flow_lock:
+            self._flows.clear()
+        self.flow_lines.visible = False
+        self.pulse_markers.visible = False
+        self.canvas.update()
+
     def set_selected_uid(self, uid: str | None) -> None:
         self._selected_uid = uid or None
         if self._selected_uid is not None:
@@ -236,10 +262,15 @@ class GraphCanvasWidget(QWidget):
         return self.visual.edge_index.get(key)
 
     def _restart_timer(self) -> None:
+        if not self._live_updates_enabled:
+            self.timer.stop()
+            return
         interval_ms = max(1, round(1000 / max(1, self.settings.refresh_hz)))
         self.timer.start(interval_ms)
 
     def _on_tick_from_clock(self, result: TickResult) -> None:
+        if not self._live_updates_enabled:
+            return
         # Tick frequency must not determine animation readability. We aggregate real
         # propagation events into persistent directed tracks and animate those tracks
         # on GUI time. A 20 Hz or 200 Hz engine therefore shows the same direction.
@@ -277,6 +308,8 @@ class GraphCanvasWidget(QWidget):
         self.refresh()
 
     def refresh(self) -> None:
+        if not self._live_updates_enabled:
+            return
         snapshot = self.services.graph_inspector.snapshot()
         visual = self.mapper.build(
             snapshot,
@@ -320,24 +353,17 @@ class GraphCanvasWidget(QWidget):
         else:
             self.nodes.visible = False
 
-        if self.settings.show_labels and self.settings.max_labels > 0 and len(snapshot.nodes):
-            ranked = sorted(
-                range(len(snapshot.nodes)),
-                key=lambda i: (
-                    bool(snapshot.nodes[i].activation_event),
-                    bool(snapshot.nodes[i].in_workspace),
-                    float(snapshot.nodes[i].excitation or 0.0),
-                ),
-                reverse=True,
-            )[: self.settings.max_labels]
-            texts = [snapshot.nodes[i].semantic[:72] for i in ranked]
-            label_pos = visual.positions[ranked].copy()
+        if self.settings.show_labels and self.settings.max_labels > 0 and len(visual.node_uids):
+            ranked = rank_visible_label_indices(snapshot, visual, self.settings.max_labels)
+            by_uid = {node.uid: node for node in snapshot.nodes}
+            texts = [by_uid[visual.node_uids[i]].semantic[:72] for i in ranked]
+            label_pos = visual.positions[list(ranked)].copy()
             if len(label_pos):
                 label_pos[:, 0] += 0.22
                 label_pos[:, 1] += 0.22
             self.labels.text = texts
             self.labels.pos = label_pos
-            self.labels.visible = True
+            self.labels.visible = bool(len(ranked))
         else:
             self.labels.text = ""
             self.labels.visible = False

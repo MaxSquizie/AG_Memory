@@ -19,9 +19,9 @@ from ah.config import (
 from ah.core import AHCore, JsonPersistence, SequentialUidGenerator
 from ah.ignition import IgnitionEngine, LifecycleStage
 from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
-from ah.integration import IntegrationConfig, IntegrationService
+from ah.integration import CandidateValidationError, IntegrationConfig, IntegrationService
 from ah.integration.contracts import SeedReason
-from ah.model import ActantRole, Domain, Property
+from ah.model import ActantRole, Domain, Hypernode, Property
 from ah.perception import (
     ActantCandidate,
     AssertionCandidate,
@@ -29,6 +29,8 @@ from ah.perception import (
     LLMPerceptionSettings,
     PerceptionResult,
     PredicateCandidate,
+    PerceptionParseError,
+    TemplateCandidate,
     TextSensoryService,
 )
 from ah.projection import ContextProjector
@@ -56,6 +58,11 @@ class FakePerception:
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
         self.calls += 1
         return self.user if self.calls == 1 else self.response
+
+
+class FailingPerception:
+    def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
+        raise PerceptionParseError("semantic parse failed")
 
 
 class FakeAgent:
@@ -235,6 +242,10 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         result = service.parse("Маша любит чай", InteractionContext())
         self.assertEqual(result.assertions[0].predicate.lookup_form, "любить")
         self.assertEqual(result.assertions[0].actants[0].role, ActantRole.SUBJECT)
+        self.assertEqual(
+            result.assertions[0].predicate.template_candidate.roles,
+            (ActantRole.SUBJECT, ActantRole.OBJECT),
+        )
 
     def test_full_orchestrator_records_response_only_in_h(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
@@ -249,7 +260,13 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             assertions=(
                 AssertionCandidate(
                     "A1",
-                    PredicateCandidate("быть", "быть"),
+                    PredicateCandidate(
+                        "быть",
+                        "быть",
+                        template_candidate=TemplateCandidate(
+                            (ActantRole.SUBJECT, ActantRole.STATE)
+                        ),
+                    ),
                     (
                         ActantCandidate(ActantRole.SUBJECT, mention="небо"),
                         ActantCandidate(ActantRole.STATE, mention="синее"),
@@ -262,7 +279,11 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             assertions=(
                 AssertionCandidate(
                     "R1",
-                    PredicateCandidate("сказать", "сказать"),
+                    PredicateCandidate(
+                        "сказать",
+                        "сказать",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+                    ),
                     (ActantCandidate(ActantRole.SUBJECT, mention="я"),),
                 ),
             ),
@@ -287,8 +308,136 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         # User semantic assertion is C, response semantic assertion is H-only.
         self.assertTrue(any(item.domain is Domain.C for item in turn.integration.assertions))
 
+    def test_diagnostic_turn_can_stop_before_agent_generation_without_synthetic_response_h_event(self) -> None:
+        class FailIfCalledAgent:
+            def respond(self, context) -> str:
+                raise AssertionError("agent generation must be skipped")
+
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        self_e = core.add_entity(Domain.P, properties={"name": Property("name", "Agent", "str")})
+        user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
+        context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
+        integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
+        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        orchestrator = AgentOrchestrator(
+            context=context,
+            sensory=TextSensoryService(core),
+            perception=FakePerception(PerceptionResult("Привет"), PerceptionResult("unused")),
+            integration=integration,
+            ignition=ignition,
+            query_builder=QueryGoalBuilder(core),
+            inference=InferenceEngine(core, InferenceSettings()),
+            materializer=InferenceMaterializer(core, IntegrationSettings()),
+            projector=ContextProjector(core, ContextSettings(max_tokens=4096)),
+            agent=FailIfCalledAgent(),
+            settings=OrchestratorSettings(),
+            persistence=None,
+        )
+
+        turn = orchestrator.handle_user_text("Привет", generate_response=False)
+
+        self.assertIsNone(turn.response_text)
+        self.assertIsNone(turn.response_perception)
+        self.assertIsNone(turn.response_integration)
+        self.assertEqual(turn.ticks_after_response, ())
+        h_texts = [
+            item.properties["text"].value
+            for item in core.store.elements(Domain.H)
+            if isinstance(item, Hypernode) and item.properties.get("text") is not None
+        ]
+        self.assertEqual(h_texts, ["Привет"])
+
+    def test_perception_failure_is_raised_but_raw_user_turn_is_still_experienced_in_h(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        self_e = core.add_entity(Domain.P, properties={"name": Property("name", "Agent", "str")})
+        user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
+        context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
+        integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
+        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        orchestrator = AgentOrchestrator(
+            context=context,
+            sensory=TextSensoryService(core),
+            perception=FailingPerception(),
+            integration=integration,
+            ignition=ignition,
+            query_builder=QueryGoalBuilder(core),
+            inference=InferenceEngine(core, InferenceSettings()),
+            materializer=InferenceMaterializer(core, IntegrationSettings()),
+            projector=ContextProjector(core, ContextSettings(max_tokens=4096)),
+            agent=FakeAgent("unused"),
+            settings=OrchestratorSettings(),
+            persistence=None,
+        )
+
+        with self.assertRaises(PerceptionParseError):
+            orchestrator.handle_user_text("Неразобранная реплика")
+
+        h_events = [
+            item
+            for item in core.store.elements(Domain.H)
+            if isinstance(item, Hypernode)
+            and item.properties.get("text") is not None
+            and item.properties["text"].value == "Неразобранная реплика"
+        ]
+        self.assertEqual(len(h_events), 1)
+        self.assertEqual(context.last_experience_ref.uid, h_events[0].uid)
 
 
+
+
+    def test_integration_validation_failure_still_records_raw_user_turn_in_h(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        self_e = core.add_entity(Domain.P, properties={"name": Property("name", "Agent", "str")})
+        user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
+        context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
+        integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
+        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        invalid = PerceptionResult(
+            "Иван читает книгу",
+            assertions=(
+                AssertionCandidate(
+                    "A1",
+                    PredicateCandidate(
+                        "читает",
+                        "read",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="Иван"),
+                        ActantCandidate(ActantRole.OBJECT, mention="книгу"),
+                    ),
+                ),
+            ),
+        )
+        orchestrator = AgentOrchestrator(
+            context=context,
+            sensory=TextSensoryService(core),
+            perception=FakePerception(invalid, PerceptionResult("unused")),
+            integration=integration,
+            ignition=ignition,
+            query_builder=QueryGoalBuilder(core),
+            inference=InferenceEngine(core, InferenceSettings()),
+            materializer=InferenceMaterializer(core, IntegrationSettings()),
+            projector=ContextProjector(core, ContextSettings(max_tokens=4096)),
+            agent=FakeAgent("unused"),
+            settings=OrchestratorSettings(),
+            persistence=None,
+        )
+
+        with self.assertRaises(CandidateValidationError):
+            orchestrator.handle_user_text("Иван читает книгу", generate_response=False)
+
+        h_events = [
+            item for item in core.store.elements(Domain.H)
+            if isinstance(item, Hypernode)
+            and item.properties.get("text") is not None
+            and item.properties["text"].value == "Иван читает книгу"
+        ]
+        self.assertEqual(len(h_events), 1)
+        self.assertEqual(context.last_experience_ref.uid, h_events[0].uid)
+        # The rejected semantic assertion itself must not leak into C.
+        c_hypernodes = [item for item in core.store.elements(Domain.C) if isinstance(item, Hypernode)]
+        self.assertEqual(c_hypernodes, [])
 
     def test_default_orchestrator_records_agent_text_in_h_without_second_parser_call(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())

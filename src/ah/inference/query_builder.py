@@ -28,9 +28,12 @@ class QueryGoalBuilder:
         symbol = self.core.store.find_symbol_by_form(query.predicate.lookup_form)
         if symbol is None:
             return QueryBuildResult(None, ("predicate_not_found",))
+        required_roles = {a.role for a in query.actants}
+        if query.requested_role is not None:
+            required_roles.add(query.requested_role)
         templates = [
             t for t in self.core.store.find_templates_by_predicate(symbol.uid)
-            if set(a.role for a in query.actants).issubset(set(t.roles))
+            if required_roles.issubset(set(t.roles))
         ]
         if len(templates) != 1:
             return QueryBuildResult(None, ("template_not_unique",))

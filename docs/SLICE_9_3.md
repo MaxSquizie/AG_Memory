@@ -1,3 +1,5 @@
+> Historical note: `failure_policy=empty` described below was removed in slice 12.11. Current perception fails explicitly and does not return an empty successful parse.
+
 # Slice 9.3 — robust perception wire protocol and H-boundary guards
 
 This slice addresses real failures observed with the local Qwen parser role.

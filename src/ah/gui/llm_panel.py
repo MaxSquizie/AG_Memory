@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from pathlib import Path
+from enum import Enum
+import ctypes
 import json
+import os
+import sys
 
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QTextCursor
@@ -22,6 +26,71 @@ from PySide6.QtWidgets import (
 from ah.bootstrap import RuntimeServices
 
 
+def _working_set_bytes(pid: int | None) -> int | None:
+    """Return resident working-set bytes without adding a runtime dependency.
+
+    The GUI is primarily used on Windows, where Task Manager reports process
+    working set. Linux support keeps tests/development useful. Failure to sample is
+    diagnostic-only and must never affect the cognitive runtime.
+    """
+    if pid is None or pid <= 0:
+        return None
+    try:
+        if sys.platform == "win32":
+            from ctypes import wintypes
+
+            class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
+                _fields_ = [
+                    ("cb", wintypes.DWORD),
+                    ("PageFaultCount", wintypes.DWORD),
+                    ("PeakWorkingSetSize", ctypes.c_size_t),
+                    ("WorkingSetSize", ctypes.c_size_t),
+                    ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                    ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                    ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                    ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                    ("PagefileUsage", ctypes.c_size_t),
+                    ("PeakPagefileUsage", ctypes.c_size_t),
+                ]
+
+            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            psapi = ctypes.WinDLL("psapi", use_last_error=True)
+            kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+            kernel32.OpenProcess.restype = wintypes.HANDLE
+            kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+            kernel32.CloseHandle.restype = wintypes.BOOL
+            psapi.GetProcessMemoryInfo.argtypes = [
+                wintypes.HANDLE,
+                ctypes.POINTER(PROCESS_MEMORY_COUNTERS),
+                wintypes.DWORD,
+            ]
+            psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+
+            handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+            if not handle:
+                return None
+            try:
+                counters = PROCESS_MEMORY_COUNTERS()
+                counters.cb = ctypes.sizeof(counters)
+                ok = psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb)
+                return int(counters.WorkingSetSize) if ok else None
+            finally:
+                kernel32.CloseHandle(handle)
+
+        if sys.platform.startswith("linux"):
+            fields = Path(f"/proc/{pid}/statm").read_text(encoding="ascii").split()
+            if len(fields) >= 2:
+                return int(fields[1]) * int(os.sysconf("SC_PAGE_SIZE"))
+    except (OSError, ValueError, AttributeError):
+        return None
+    return None
+
+
+def _format_ram(value: int | None) -> str:
+    return "n/a" if value is None else f"{value / 2**30:.2f} GiB"
+
+
 class LLMControlWidget(QWidget):
     """Operational + diagnostic panel for the one shared local LLM process.
 
@@ -36,6 +105,7 @@ class LLMControlWidget(QWidget):
         "predicate_start",
         "predicate_end",
         "predicate_symbol",
+        "predicate_symbol_verify",
         "negation",
         "actant_start",
         "actant_end",
@@ -43,6 +113,8 @@ class LLMControlWidget(QWidget):
         "role_participant",
         "role_description",
         "role_circumstance",
+        "frame_relation",
+        "relative_role",
         "query_mode",
         "requested_role",
     )
@@ -55,6 +127,14 @@ class LLMControlWidget(QWidget):
     def __init__(self, services: RuntimeServices, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.services = services
+        # Diagnostics are scoped to the most recently submitted GUI turn. This
+        # prevents Parser/Agent tabs from showing the previous turn while a new
+        # request is already running. Sequence floors are runtime-only UI state.
+        self._turn_scope_initialized = False
+        self._turn_active = False
+        self._turn_source_text = ""
+        self._turn_request_floor = 0
+        self._turn_parser_floor = 0
 
         root = QVBoxLayout(self)
         info = QFormLayout()
@@ -66,6 +146,7 @@ class LLMControlWidget(QWidget):
         self.device_policy_label = QLabel()
         self.cuda_label = QLabel()
         self.placement_label = QLabel()
+        self.ram_label = QLabel()
         self.history_label = QLabel()
         self.perception_cfg_label = QLabel()
         self.agent_cfg_label = QLabel()
@@ -77,6 +158,7 @@ class LLMControlWidget(QWidget):
         info.addRow("Device policy", self.device_policy_label)
         info.addRow("CUDA", self.cuda_label)
         info.addRow("Placement / VRAM", self.placement_label)
+        info.addRow("Process RAM", self.ram_label)
         info.addRow("History buffer", self.history_label)
         info.addRow("Perception", self.perception_cfg_label)
         info.addRow("Agent", self.agent_cfg_label)
@@ -128,6 +210,38 @@ class LLMControlWidget(QWidget):
         self.reload_prompts()
         self.refresh_status()
 
+
+    def begin_turn(self, source_text: str) -> None:
+        """Start a new GUI diagnostics scope without touching LLM/AH state."""
+        backend = self.services.llm
+        records = (
+            backend.request_diagnostics()
+            if backend is not None and hasattr(backend, "request_diagnostics")
+            else ()
+        )
+        parser = self.services.perception
+        parser_history = (
+            parser.diagnostics()
+            if parser is not None and hasattr(parser, "diagnostics")
+            else ()
+        )
+        self._turn_request_floor = max((r.sequence for r in records), default=0)
+        self._turn_parser_floor = max((d.sequence for d in parser_history), default=0)
+        self._turn_source_text = source_text
+        self._turn_scope_initialized = True
+        self._turn_active = True
+        waiting = f"TURN IN PROGRESS\nSOURCE:\n{source_text}"
+        self._set_text(self.parser_raw_view, waiting + "\n\nWaiting for perception diagnostics…")
+        self._set_text(self.parser_decoded_view, waiting + "\n\nWaiting for decoded PerceptionResult…")
+        self._set_text(self.agent_raw_view, waiting + "\n\nWaiting for agent generation…")
+        self._set_text(self.requests_view, waiting + "\n\nWaiting for LLM role calls…")
+        self.refresh_status()
+
+    def finish_turn(self) -> None:
+        """Freeze diagnostics on the just-finished turn until the next submit."""
+        self._turn_active = False
+        self.refresh_status()
+
     @staticmethod
     def _readonly(placeholder: str) -> QPlainTextEdit:
         view = QPlainTextEdit()
@@ -137,7 +251,7 @@ class LLMControlWidget(QWidget):
 
     def _probe_prompt_path(self, name: str | None = None) -> Path | None:
         cfg = self.services.config
-        if cfg.llm.perception_protocol not in {"adaptive_v1", "adaptive_v2"}:
+        if cfg.llm.perception_protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
             return cfg.paths.perception_prompt_path
         root = cfg.paths.perception_prompt_dir
         if root is None:
@@ -149,7 +263,7 @@ class LLMControlWidget(QWidget):
         return self.services.config.paths.agent_prompt_path or self.services.config.paths.system_prompt_path
 
     def reload_prompts(self) -> None:
-        adaptive = self.services.config.llm.perception_protocol in {"adaptive_v1", "adaptive_v2"}
+        adaptive = self.services.config.llm.perception_protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}
         self.probe_selector.setEnabled(adaptive)
         self._load_selected_probe_prompt()
         self.agent_editor.setPlainText(self._read(self._agent_prompt_path()))
@@ -194,7 +308,11 @@ class LLMControlWidget(QWidget):
 
     @staticmethod
     def _pretty(value) -> str:
-        return json.dumps(value, ensure_ascii=False, indent=2, default=str)
+        def encode(obj):
+            if isinstance(obj, Enum):
+                return obj.value
+            return str(obj)
+        return json.dumps(value, ensure_ascii=False, indent=2, default=encode)
 
     def _refresh_parser_diagnostics(self) -> None:
         parser = self.services.perception
@@ -203,7 +321,13 @@ class LLMControlWidget(QWidget):
             self._set_text(self.parser_decoded_view, "")
             return
         history = parser.diagnostics()
+        if self._turn_scope_initialized:
+            history = tuple(d for d in history if d.sequence > self._turn_parser_floor)
         if not history:
+            if self._turn_scope_initialized and not self._turn_active:
+                text = f"SOURCE:\n{self._turn_source_text}\n\nNo perception diagnostic was produced for this turn."
+                self._set_text(self.parser_raw_view, text)
+                self._set_text(self.parser_decoded_view, text)
             return
         diag = history[-1]
         raw_parts = [f"SOURCE:\n{diag.source_text}"]
@@ -225,7 +349,7 @@ class LLMControlWidget(QWidget):
             decoded = {"status": "INVALID", "error": diag.final_error}
         elif diag.final_error:
             decoded = {
-                "status": "FALLBACK_EMPTY",
+                "status": "INVALID",
                 "error": diag.final_error,
                 "perception": asdict(diag.decoded),
             }
@@ -238,7 +362,13 @@ class LLMControlWidget(QWidget):
         if backend is None or not hasattr(backend, "request_diagnostics"):
             return
         records = backend.request_diagnostics()
+        if self._turn_scope_initialized:
+            records = tuple(r for r in records if r.sequence > self._turn_request_floor)
         if not records:
+            if self._turn_scope_initialized and not self._turn_active:
+                text = f"SOURCE:\n{self._turn_source_text}\n\nNo LLM requests were recorded for this turn."
+                self._set_text(self.agent_raw_view, text)
+                self._set_text(self.requests_view, text)
             return
 
         agent = next((record for record in reversed(records) if record.role == "agent"), None)
@@ -250,6 +380,12 @@ class LLMControlWidget(QWidget):
             if agent.error:
                 text += f"\n\nERROR:\n{agent.error}"
             self._set_text(self.agent_raw_view, text)
+        elif self._turn_scope_initialized:
+            state = "Waiting for agent generation…" if self._turn_active else "No agent response was produced for this turn."
+            self._set_text(
+                self.agent_raw_view,
+                f"SOURCE:\n{self._turn_source_text}\n\n{state}",
+            )
 
         chunks: list[str] = []
         for record in records[-12:]:
@@ -275,8 +411,8 @@ class LLMControlWidget(QWidget):
         self.perception_cfg_label.setText(
             f"{cfg.llm.perception_protocol}, retry={cfg.llm.perception_probe_retry_attempts}, "
             f"acts≤{cfg.llm.perception_max_acts}, actants≤{cfg.llm.perception_max_actants_per_act}, "
-            f"predicate S/T={cfg.llm.perception_predicate_symbol_language}, "
-            f"fail={cfg.llm.perception_failure_policy}, T={cfg.llm.perception.temperature:g}"
+            f"predicate S/T={'lexical deterministic' if cfg.llm.perception_protocol == 'adaptive_v3' else cfg.llm.perception_predicate_symbol_language}, "
+            f"T={cfg.llm.perception.temperature:g}"
         )
         self.loader_label.setText(f"{cfg.llm.loader_type} (text-only)")
         self.device_policy_label.setText(
@@ -288,6 +424,8 @@ class LLMControlWidget(QWidget):
             f"T={cfg.llm.agent.temperature:g}, max_new={cfg.llm.agent.max_new_tokens}, "
             f"top_p={cfg.llm.agent.top_p:g}, top_k={cfg.llm.agent.top_k}"
         )
+        gui_ram = _working_set_bytes(os.getpid())
+        self.ram_label.setText(f"GUI={_format_ram(gui_ram)} | LLM=n/a")
         if backend is None:
             self.status_label.setText("DISABLED")
             self.stage_label.setText("-")
@@ -297,6 +435,10 @@ class LLMControlWidget(QWidget):
             return
 
         status = backend.status()
+        llm_ram = _working_set_bytes(status.pid)
+        self.ram_label.setText(
+            f"GUI={_format_ram(gui_ram)} | LLM={_format_ram(llm_ram)}"
+        )
         model_text = status.model_dir or status.configured_model_dir or "<not configured>"
         if status.running and status.model_dir != status.configured_model_dir:
             model_text += f"  (config → {status.configured_model_dir}; restart required)"

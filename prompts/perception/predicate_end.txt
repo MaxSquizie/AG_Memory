@@ -1,1 +1,1 @@
-PREDICATE_START is the first predicate token. Choose the last token that belongs to the same predicate phrase. For a one-token predicate choose the same number. Reply with one OPTIONS number only.
+Choose the last token that belongs to the predicate phrase. Reply only with the number inside brackets.

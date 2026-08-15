@@ -22,6 +22,7 @@ from ah.perception import (
     LLMPerceptionSettings,
     PerceptionResult,
     TextSensoryService,
+    build_morphology,
 )
 from ah.projection import ContextProjector
 
@@ -87,7 +88,7 @@ class RuntimeServices:
         materializer = InferenceMaterializer(core, config.integration)
         query_builder = QueryGoalBuilder(core)
         projector = ContextProjector(core, config.context)
-        sensory = TextSensoryService(core)
+        sensory = TextSensoryService(core, build_morphology(config.llm.perception_morphology_backend))
         dsl = DSLInterpreter(core)
         correction = SemanticCorrectionService(core)
         graph_inspector = GraphInspector(core, ignition)
@@ -103,11 +104,11 @@ class RuntimeServices:
                     protocol=config.llm.perception_protocol,
                     probe_prompt_dir=config.paths.perception_prompt_dir,
                     probe_retry_attempts=config.llm.perception_probe_retry_attempts,
-                    failure_policy=config.llm.perception_failure_policy,
                     ground_actants=config.llm.perception_ground_actants,
                     max_acts=config.llm.perception_max_acts,
                     max_actants_per_act=config.llm.perception_max_actants_per_act,
                     predicate_symbol_language=config.llm.perception_predicate_symbol_language,
+                    morphology_backend=config.llm.perception_morphology_backend,
                 ),
             )
             if llm is not None
@@ -217,11 +218,11 @@ class RuntimeServices:
                     protocol=new_config.llm.perception_protocol,
                     probe_prompt_dir=new_config.paths.perception_prompt_dir,
                     probe_retry_attempts=new_config.llm.perception_probe_retry_attempts,
-                    failure_policy=new_config.llm.perception_failure_policy,
                     ground_actants=new_config.llm.perception_ground_actants,
                     max_acts=new_config.llm.perception_max_acts,
                     max_actants_per_act=new_config.llm.perception_max_actants_per_act,
                     predicate_symbol_language=new_config.llm.perception_predicate_symbol_language,
+                    morphology_backend=new_config.llm.perception_morphology_backend,
                 ),
             )
             self.agent = LLMAgent(

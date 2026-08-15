@@ -4,10 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ah-agent-mvp"
-version = "0.11.0"
+version = "0.12.19"
 description = "Associative-heterarchical memory core for a text LLM agent"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "pymorphy3>=2.0.6,<3",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

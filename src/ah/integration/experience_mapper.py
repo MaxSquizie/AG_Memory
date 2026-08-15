@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from ah.agent import InteractionContext
 from ah.core import AHCore
 from ah.model import ActantRole, Domain, Property, Ref
-from ah.perception import PredicateCandidate
+from ah.perception import PredicateCandidate, TemplateCandidate
 
 from .errors import IntegrationError
 from .template_resolver import TemplateResolver
@@ -57,7 +57,11 @@ class ExperienceMapper:
 
         roles = [ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TIME]
         template = TemplateResolver(self.core).resolve(
-            PredicateCandidate(self.predicate_form, self.predicate_form),
+            PredicateCandidate(
+                self.predicate_form,
+                self.predicate_form,
+                template_candidate=TemplateCandidate(tuple(roles)),
+            ),
             tuple(roles),
         ).template
 

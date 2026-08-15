@@ -158,9 +158,10 @@ class LocalLLMProcessBackend:
         error: str | None = None,
     ) -> None:
         with self._status_lock:
+            sequence = self._request_count
             self._request_diagnostics.append(
                 LLMRequestDiagnostic(
-                    sequence=self._request_count,
+                    sequence=sequence,
                     req_id=req_id,
                     role=role,
                     prompt=prompt,
@@ -169,6 +170,9 @@ class LocalLLMProcessBackend:
                     error=error,
                 )
             )
+            state = "ERROR" if error else "OK"
+            detail = f": {error}" if error else ""
+            self._recent_log.append(f"[request #{sequence}] role={role} {state}{detail}")
 
     def build_command(self) -> list[str]:
         cfg = self.config

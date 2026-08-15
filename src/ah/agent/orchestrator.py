@@ -12,9 +12,9 @@ from ah.ignition import IgnitionEngine, TickResult
 from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
 from ah.inference.contracts import InferenceOutcome
 from ah.inference.materialization import MaterializationResult
-from ah.integration import IntegrationService
+from ah.integration import IntegrationError, IntegrationService
 from ah.integration.contracts import IntegrationCommit
-from ah.perception import PerceptionResult, TextSensoryResult, TextSensoryService
+from ah.perception import PerceptionParseError, PerceptionResult, TextSensoryResult, TextSensoryService
 from ah.projection import ContextProjector
 from ah.projection.contracts import AgentContext
 
@@ -43,7 +43,7 @@ class AgentTurnResult:
     ticks_after_input: tuple[TickResult, ...]
     queries: tuple[QueryExecution, ...]
     agent_context: AgentContext
-    response_text: str
+    response_text: str | None
     response_perception: PerceptionResult | None
     response_integration: IntegrationCommit | None
     ticks_after_response: tuple[TickResult, ...]
@@ -88,7 +88,14 @@ class AgentOrchestrator:
         self.persistence = persistence
         self.runtime_lock = runtime_lock
 
-    def handle_user_text(self, text: str) -> AgentTurnResult:
+    def _record_raw_external_experience(self, text: str, lock) -> None:
+        with lock:
+            failed_turn = self.integration.integrate_external(
+                PerceptionResult(source_text=text), self.context
+            )
+            self.ignition.apply_seed_requests(failed_turn.activation_seeds)
+
+    def handle_user_text(self, text: str, *, generate_response: bool = True) -> AgentTurnResult:
         lock = self.runtime_lock or nullcontext()
 
         # Memory mutations/reads are short critical sections. The expensive LLM
@@ -100,12 +107,29 @@ class AgentOrchestrator:
             sensory = self.sensory.process(text)
             self.ignition.apply_seed_requests(sensory.activation_seeds)
 
-        perception = self.perception.parse(text, self.context)
+        try:
+            perception = self.perception.parse(text, self.context)
+        except PerceptionParseError:
+            # Semantic failure never erases the fact that the external communication
+            # happened. Preserve only its raw H experience and re-raise the original
+            # parse error; no failed semantic candidate is committed.
+            self._record_raw_external_experience(text, lock)
+            raise
+
+        try:
+            with lock:
+                integration = self.integration.integrate_external(perception, self.context)
+                self.ignition.apply_seed_requests(integration.activation_seeds)
+                self.ignition.apply_refutation_requests(integration.refutations)
+        except IntegrationError:
+            # Validation/canonicalization can reject an otherwise completed
+            # PerceptionResult. The source turn is still an experienced H event,
+            # exactly as for a perception failure, while the failed semantic
+            # transaction remains rolled back.
+            self._record_raw_external_experience(text, lock)
+            raise
 
         with lock:
-            integration = self.integration.integrate_external(perception, self.context)
-            self.ignition.apply_seed_requests(integration.activation_seeds)
-            self.ignition.apply_refutation_requests(integration.refutations)
             input_ticks = tuple(self.ignition.tick() for _ in range(self.settings.ticks_after_input))
             workspace = self.ignition.workspace_refs()
 
@@ -127,31 +151,36 @@ class AgentOrchestrator:
 
             agent_context = self.projector.project(text, workspace, tuple(inference_outcomes))
 
-        response_text = self.agent.respond(agent_context)
+        response_text: str | None = None
+        response_perception: PerceptionResult | None = None
+        response_integration: IntegrationCommit | None = None
+        response_ticks: tuple[TickResult, ...] = ()
 
-        # Every agent utterance is experienced in H. Semantic re-parsing of the
-        # agent's own text is optional and never feeds C/P. The default is text-only
-        # H recording: this avoids a second fragile parser call and prevents
-        # generation/context echo from becoming pseudo-semantic self-learning.
-        if self.settings.parse_agent_response_to_h:
-            response_perception = self.perception.parse(response_text, self.context)
-        else:
-            response_perception = PerceptionResult(
-                source_text=response_text,
-                assertions=(),
-                queries=(),
-                commands=(),
-                diagnostics=("AGENT_H_TEXT_ONLY",),
-            )
-        with lock:
-            response_integration = self.integration.integrate_to_h(response_perception, self.context)
-            self.ignition.apply_seed_requests(response_integration.activation_seeds)
-            self.ignition.apply_refutation_requests(response_integration.refutations)
+        if generate_response:
+            response_text = self.agent.respond(agent_context)
+
+            # Every actual agent utterance is experienced in H.  Diagnostics may
+            # deliberately stop at AgentContext; in that mode no synthetic agent
+            # utterance is invented merely to satisfy the normal interaction path.
+            if self.settings.parse_agent_response_to_h:
+                response_perception = self.perception.parse(response_text, self.context)
+            else:
+                response_perception = PerceptionResult(
+                    source_text=response_text,
+                    assertions=(),
+                    queries=(),
+                    commands=(),
+                    diagnostics=("AGENT_H_TEXT_ONLY",),
+                )
+            with lock:
+                response_integration = self.integration.integrate_to_h(response_perception, self.context)
+                self.ignition.apply_seed_requests(response_integration.activation_seeds)
+                self.ignition.apply_refutation_requests(response_integration.refutations)
+                response_ticks = tuple(
+                    self.ignition.tick() for _ in range(self.settings.ticks_after_response)
+                )
 
         with lock:
-            response_ticks = tuple(
-                self.ignition.tick() for _ in range(self.settings.ticks_after_response)
-            )
             autosaved = False
             if self.persistence is not None:
                 autosaved = self.persistence.maybe_autosave(

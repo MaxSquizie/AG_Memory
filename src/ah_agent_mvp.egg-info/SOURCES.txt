@@ -1,13 +1,14 @@
+docs/SLICE_12_13.md
 README.md
 pyproject.toml
 src/ah/__init__.py
-src/ah/bootstrap.py
-src/ah/cli.py
-src/ah/config.py
 src/ah/agent/__init__.py
 src/ah/agent/interaction_context.py
 src/ah/agent/llm_agent.py
 src/ah/agent/orchestrator.py
+src/ah/bootstrap.py
+src/ah/cli.py
+src/ah/config.py
 src/ah/core/__init__.py
 src/ah/core/operations.py
 src/ah/core/persistence.py
@@ -16,6 +17,7 @@ src/ah/core/store.py
 src/ah/core/uid.py
 src/ah/core/validation.py
 src/ah/diagnostics/__init__.py
+src/ah/diagnostics/acceptance_runner.py
 src/ah/diagnostics/graph_dump.py
 src/ah/diagnostics/summary.py
 src/ah/diagnostics/trace_view.py
@@ -65,8 +67,11 @@ src/ah/llm/worker.py
 src/ah/model/__init__.py
 src/ah/model/types.py
 src/ah/perception/__init__.py
+src/ah/perception/adaptive_parser.py
 src/ah/perception/contracts.py
+src/ah/perception/linguistic_candidates.py
 src/ah/perception/llm_parser.py
+src/ah/perception/morphology.py
 src/ah/perception/text_sensory.py
 src/ah/projection/__init__.py
 src/ah/projection/agent_context.py
@@ -79,6 +84,7 @@ src/ah_agent_mvp.egg-info/dependency_links.txt
 src/ah_agent_mvp.egg-info/entry_points.txt
 src/ah_agent_mvp.egg-info/requires.txt
 src/ah_agent_mvp.egg-info/top_level.txt
+tests/test_acceptance_runner.py
 tests/test_ah_core.py
 tests/test_config.py
 tests/test_correction_pacemaker_diagnostics.py

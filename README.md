@@ -1,4 +1,4 @@
-# AH Agent MVP — code slice 10
+# AH Agent MVP — v0.12.19
 
 Накопительный исполняемый проект АГ-памяти для текстового LLM-агента.
 
@@ -76,9 +76,9 @@ Default parser больше не просит модель сериализов�
 
 ```text
 TEXT
-→ ACT_TYPE             enum
-→ PREDICATE_SPAN       token span
-→ PREDICATE_SYMBOL     English snake_case
+→ ACT_TYPE             deterministic when structurally obvious, finite probe otherwise
+→ PREDICATE_SPAN       deterministic linguistic candidates / finite choice
+→ PREDICATE S          source-language lexical normal form + observed R_text forms
 → NEGATION / QUERY_MODE when needed
 → NEXT_ACTANT          token span
 → ACTANT_ROLE          enum
@@ -88,9 +88,9 @@ TEXT
 
 Каждый probe имеет отдельный короткий файл в `prompts/perception/`, отвечает одним scalar value и валидируется Python runtime до следующего шага. Retry повторяет исходный probe с чистого листа и **не получает предыдущий ошибочный ответ**.
 
-Поддерживаются `AssertionCandidate`, `QueryCandidate`, `CommandCandidate`, source evidence spans, explicit negation и query `EXISTS/FILL_ROLE`. LLM не выдаёт canonical UID и не пишет AH напрямую. Если первый semantic act не удаётся собрать и `failure_policy=empty`, C/P не мутируются, но исходный turn всё равно фиксируется как пережитый H-event с `PARSER_FAILURE`.
+Поддерживаются `AssertionCandidate`, `QueryCandidate`, `CommandCandidate`, source evidence spans, explicit negation и query `EXISTS/FILL_ROLE`. LLM не выдаёт canonical UID и не пишет AH напрямую. Semantic perception имеет только два исхода: валидный `PerceptionResult` или явный `PerceptionParseError`; partial/empty semantic fallback запрещён. При ошибке исходный внешний turn всё равно фиксируется как сырой пережитый H-event, но C/P semantics не фабрикуются.
 
-Языковая политика: русский source text остаётся в `surface/mention/evidence` и lexical `S` сенсорного слоя; semantic predicate `S`, на который ссылается `T`, нормализуется в короткий английский symbol (`be`, `have`, `move_to`, ...). Русская surface-форма автоматически не сливается с этим predicate `S`.
+Языковая политика: `S` представляет одну устойчивую лексическую единицу/парадигму. Морфология используется как детерминированный индексный ключ: нормальная форма и реально наблюдаемые surface-формы расширяют один `R_text`. `adaptive_v3` не просит LLM придумывать английское имя предиката; `T` ссылается на тот же source-language lexical `S`.
 
 ### 4. Deterministic Integration
 
@@ -110,7 +110,13 @@ PerceptionResult
 Дополнительно:
 
 - неизвестный предикат может создать validated `T`;
-- словоформы расширяют `R_text` существующего `S`;
+- словоформы расширяют `R_text` существующего lexical `S`, включая predicate use;
+- turn-local `entity_ref` принудительно сводит все кореферентные упоминания к одному canonical `m`;
+- morphology-normalized nominal hint используется только для deterministic entity lookup (`Мария/Марии/Марию`), а не как identity key;
+- interrogative placeholders (`кто/что/кому/...`) формируют `QueryCandidate.requested_role` и не материализуются как `m`;
+- OR одного актанта поднимается в `g_OR` над полными proposition `N`, а не над raw-значениями;
+- passive, compound temporal/conditional connectors, relative matrix binding и contrastive `не X, а Y` имеют детерминированную структурную обработку;
+- неразрешённая pronoun/attachment ambiguity завершается явной ошибкой/неопределённостью вместо silent commit;
 - `k_AMBIGUOUS` используется только после deterministic ambiguity;
 - внешний user turn фиксируется в `H` и отдельно извлекает C/P semantics;
 - собственный ответ интегрируется через отдельный **H-only** путь;
@@ -380,12 +386,22 @@ prompts/
   agent.txt
   system.txt
   perception/
+    probe_system.txt
     act_type.txt
-    predicate_span.txt
-    predicate_symbol.txt
+    predicate_start.txt
+    predicate_end.txt
+    predicate_symbol.txt          # legacy adaptive protocols only
+    predicate_symbol_verify.txt   # legacy adaptive protocols only
     negation.txt
-    next_actant.txt
-    actant_role.txt
+    actant_start.txt
+    actant_end.txt
+    role_family.txt
+    role_participant.txt
+    role_circumstance.txt
+    role_description.txt
+    frame_relation.txt
+    control_subject.txt
+    relative_role.txt
     query_mode.txt
     requested_role.txt
 
@@ -497,7 +513,7 @@ The bundled local-27B config uses `device_map="cuda:0"` and NF4 4-bit. The LLM d
 
 ### Perception protocol
 
-По умолчанию `adaptive_v1`: parser делает серию коротких enum/span probes; source spans и итоговый `PerceptionResult` собираются детерминированно. Ответ агента всегда попадает в H, но повторный semantic parser для собственного ответа по умолчанию отключён.
+Исторический `adaptive_v1`: parser делает серию коротких enum/span probes; source spans и итоговый `PerceptionResult` собираются детерминированно. Ответ агента всегда попадает в H, но повторный semantic parser для собственного ответа по умолчанию отключён.
 
 Probe-валидаторы допускают только безопасный форматный шум в конце скалярного ответа (`ASSERTION.`, `SUBJECT:`, `2.`, `0.`), но не извлекают допустимый токен из объяснительного текста вроде `I think ASSERTION`.
 
@@ -508,4 +524,106 @@ Probe-валидаторы допускают только безопасный 
 
 ## Slice 11 — weak-model Perception
 
-Perception now defaults to `adaptive_v2`: no JSON/AST and no unexplained span notation. The local LLM receives one small task at a time and usually returns one integer selected from explicit options. Python owns tokenization, legal candidates, span construction, role mapping and validation. The LLM is not expected to know any AH terminology. See `docs/SLICE_11.md`.
+Исторический slice 11 ввёл `adaptive_v2`: no JSON/AST and no unexplained span notation. The local LLM receives one small task at a time and usually returns one integer selected from explicit options. Python owns tokenization, legal candidates, span construction, role mapping and validation. The LLM is not expected to know any AH terminology. See `docs/SLICE_11.md`.
+
+
+## Perception note
+
+`adaptive_v2` был morphology-assisted для Russian: deterministic POS/lemma narrowing runs before weak-model probes; ambiguous decisions remain discrete LLM choices.
+
+## Perception v3
+
+Default `adaptive_v3` uses deterministic linguistic candidate construction before
+calling the LLM. The model only resolves remaining ambiguity through tiny stateless
+choices and is never expected to know AH internals. Active micro-prompts contain no
+output examples. Coordination can be preserved as canonical `g.AND/g.OR`, and stable
+subordinate clauses can be linked through local `candidate_ref` before Integration.
+
+
+## Slice 12.5 — temporal direction and local coreference
+
+`adaptive_v3` now preserves directional temporal connectives as runtime situation relations that Integration materializes as canonical `FOLLOW` links. Relative antecedents and inherited omitted subjects carry turn-local `entity_ref` labels so repeated mentions resolve to the exact same canonical entity rather than relying on name equality. Prepositional evidence remains verbatim while semantic entity lookup excludes the relation-bearing preposition. See `docs/SLICE_12_5.md`.
+
+## Slice 12.7 — causal situation relations
+
+A nested semantic `CAUSE` actant now also compiles into a canonical directed
+`CAUSE` link (`cause situation -> effect situation`). The compiler operates on
+the resolved frame relation rather than matching one specific surface phrase.
+Integration supports both `FOLLOW` and `CAUSE` situation relations and exposes a
+separate `integration.cause_link_weight` setting with backward-compatible
+fallback to `follow_link_weight`.
+
+## Slice 12.10 — deterministic shared subjects
+
+`adaptive_v3` now treats subject sharing across coordinated finite predicates as a
+structural normalization rule instead of rediscovering the subject from the whole
+clause. This keeps frames correct under Russian case ambiguity and adds no LLM call.
+Prompt instructions are explicit required files: missing/empty probe prompts fail
+fast rather than being replaced by hidden hardcoded instructions. See
+`docs/SLICE_12_10.md`.
+## Slice 12.12 — file-driven acceptance diagnostics
+
+GUI contains `Прогнать acceptance-файл`. The suite is defined only by
+`data/acceptance_cases.txt`: one user request per non-empty line; `#` comments and
+blank lines are ignored. Replacing that file is enough to run a different suite.
+All requests execute sequentially in one live AH/context session through the normal
+sensory/perception/integration/inference/projection path.  The diagnostic runner
+stops at `AgentContext`: it does not generate unrelated agent prose, repair or
+reinterpret failures.
+
+Each run is saved under `data/acceptance_runs/<timestamp>/` with per-turn
+`LinguisticCandidateGraph`, decoded `PerceptionResult` (including runtime
+`TemplateCandidate`), integration/query results, full parser/LLM diagnostics,
+canonical AH diff, runtime/Workspace summary, InteractionContext and traceback on
+failure. The bundle also contains the resolved config, initial/final context and AH
+snapshots, final graph, manifest, summary and the exact cases file used. See `docs/SLICE_12_12.md`.
+
+## Slice 12.13 — memory-bounded acceptance runs
+
+Long acceptance batches now suspend live graph/status polling without stopping Ignition or changing cognitive execution. Per-turn runtime diagnostics no longer build a full semantic graph snapshot, JSON is streamed to disk, and complete AH diff snapshots are released before the next turn. The acceptance bundle format is unchanged. See `docs/SLICE_12_13.md`.
+
+
+## Slice 12.15 — LLM generation memory isolation
+
+Acceptance diagnostics no longer invoke the full LLM Agent after every parser case.
+They stop at `AgentContext`, while preserving sequential AH/context, integration,
+inference and all parser diagnostics. Perception probes explicitly run with
+`use_cache=false`; normal interactive agent generation keeps `use_cache=true`. The
+worker drops request-local generation tensors after every call and releases unused
+CUDA allocator blocks after cache-enabled generation. See `docs/SLICE_12_15.md`.
+
+## Slice 12.16 — deterministic lexical frames and strict finite probes
+
+`adaptive_v3` now derives predicate `S` identity from deterministic morphology rather
+than open-ended LLM naming, classifies obvious speech acts algorithmically, scores
+only explicitly allowed answers for every remaining finite LLM probe, and prevents
+rare morphology readings from creating structural predicate/subject candidates.
+`TemplateCandidate` is finalized after frame normalization, serial comma-separated
+predicates can inherit an omitted subject under explicit structural constraints, and
+integration-validation failures still preserve the raw external turn in H without
+committing rejected semantics. See `docs/SLICE_12_16.md`.
+
+## Slice 12.18 — lexical identity, clause scope and proposition-safe composition
+
+The parser/integration boundary now uses one source-language lexical identity across
+Text Sensory and predicate T resolution, resolves turn-local `entity_ref` through a
+named anchor before dependency-order integration, builds explicit WH queries, and
+handles passive voice, fronted temporal/conditional connectors, relative binding,
+control, contrastive negation and proposition-level OR deterministically where the
+structure is sufficient. Unresolved pronoun and `с + instrumental` attachment
+ambiguity fails explicitly instead of being guessed. Ignition/Hebbian dynamics are
+unchanged in this slice. See `docs/SLICE_12_18.md`.
+
+
+## Slice 12.19 — agreement, ellipsis and self-contained residual probes
+
+The third fixed 40-case acceptance run exposed a small residual set after the broad
+12.18 structural fixes. Predicate homographs are now ranked by grammatical sentence
+force and explicit subject-number agreement instead of morphology dictionary order;
+a remaining lexical tie fails explicitly. A resolved pronominal object can propagate
+through a tightly licensed coordinated ellipsis (`открыла её и прочитала [её]`)
+without generic previous-object fallback. Control-subject probes now include the full
+source text plus known parent/child roles and entity-ref anchors. Copular adverbial
+homographs are narrowed to descriptive roles before any LLM call. Explicit discourse
+continuation markers may license one finite pronoun-coreference choice with mandatory
+abstention, while unmarked genuine ambiguities still fail. See `docs/SLICE_12_19.md`.

@@ -42,6 +42,17 @@ class IntegratedAssertion:
     ambiguous: bool = False
 
 
+
+
+@dataclass(frozen=True, slots=True)
+class IntegratedRelation:
+    relation_id: str
+    source: Ref
+    target: Ref
+    ref: Ref
+    created: bool
+
+
 @dataclass(frozen=True, slots=True)
 class IntegrationCommit:
     assertions: tuple[IntegratedAssertion, ...]
@@ -51,3 +62,4 @@ class IntegrationCommit:
     unresolved_queries: tuple["QueryCandidate", ...] = ()
     unresolved_commands: tuple["CommandCandidate", ...] = ()
     clarification_required: bool = False
+    relations: tuple[IntegratedRelation, ...] = ()

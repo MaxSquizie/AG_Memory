@@ -119,6 +119,7 @@ class LLMAgent:
             "top_k": generation.top_k,
             "repetition_penalty": generation.repetition_penalty,
             "no_repeat_ngram_size": generation.no_repeat_ngram_size,
+            "use_cache": generation.use_cache,
         }
 
     def _sanitize(self, text: str) -> tuple[str, bool]:

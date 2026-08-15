@@ -23,10 +23,12 @@ from ah.gui.graph_state import (
     build_edge_focus_geometry,
     build_focus_geometry,
     pick_edge_key_2d,
+    rank_visible_label_indices,
 )
 from ah.gui.manual_links import ManualLinkManager, ManualLinkRequest
 from ah.gui.manual_nodes import ManualNodeManager, ManualNodeRequest
 from ah.ignition import IgnitionEngine
+from ah.llm.process_backend import LocalLLMProcessBackend
 from ah.model import ActantRole, Domain, Property
 
 
@@ -71,6 +73,54 @@ class GUIFoundationTests(unittest.TestCase):
         self.assertIn((node.uid, template.uid, "TEMPLATE"), edges)
         self.assertIn((node.uid, person.uid, "SUBJECT"), edges)
         self.assertIn((node.uid, book.uid, "OBJECT"), edges)
+
+
+    def test_visual_mapper_hides_orphan_lexical_s_but_keeps_structural_predicate_s(self):
+        core = AHCore()
+        orphan = core.add_abstract_symbol({"Яблоки"})
+        predicate = core.add_abstract_symbol({"be"})
+        template = core.add_template(Domain.C, core.ref(predicate.uid), ())
+
+        snap = GraphInspector(core).snapshot()
+        visual = GraphVisualMapper().build(snap, GUISettings(), x_max=1.0)
+
+        self.assertNotIn(orphan.uid, visual.node_index)
+        self.assertIn(predicate.uid, visual.node_index)
+        self.assertIn(template.uid, visual.node_index)
+        self.assertTrue(
+            any(
+                edge.source_uid == template.uid
+                and edge.target_uid == predicate.uid
+                and edge.relation_id == "PREDICATE"
+                for edge in visual.edges
+            )
+        )
+
+    def test_label_ranking_uses_filtered_visual_index_space(self):
+        core = AHCore()
+        # More hidden S nodes than visible positions reproduces the old refresh
+        # failure: snapshot indices could be valid while visual indices were not.
+        for i in range(32):
+            core.add_abstract_symbol({f"lexical_{i}"})
+        predicate = core.add_abstract_symbol({"write"})
+        template = core.add_template(Domain.C, core.ref(predicate.uid), ())
+
+        snap = GraphInspector(core).snapshot()
+        visual = GraphVisualMapper().build(snap, GUISettings(), x_max=1.0)
+        ranked = rank_visible_label_indices(snap, visual, max_labels=64)
+
+        self.assertEqual(set(visual.node_uids), {predicate.uid, template.uid})
+        self.assertEqual(set(ranked), {0, 1})
+        self.assertTrue(all(0 <= i < len(visual.positions) for i in ranked))
+
+    def test_visual_mapper_does_not_show_s_without_a_visible_incident_edge(self):
+        core = AHCore()
+        predicate = core.add_abstract_symbol({"be"})
+        core.add_template(Domain.C, core.ref(predicate.uid), ())
+        snap = GraphInspector(core).snapshot()
+        settings = GUISettings(show_structural_edges=False, show_relation_edges=True)
+        visual = GraphVisualMapper().build(snap, settings, x_max=1.0)
+        self.assertNotIn(predicate.uid, visual.node_index)
 
     def test_tick_exposes_real_propagation_side_channel(self):
         core = AHCore()
@@ -331,6 +381,21 @@ class GUIFoundationTests(unittest.TestCase):
         ai = visual.node_index[a.uid]
         self.assertGreater(float(visual.face_colors[ai, 0]), float(visual.face_colors[ai, 2]))
         self.assertGreater(float(visual.relation_colors[0, 0]), float(visual.relation_colors[0, 2]))
+
+
+    def test_llm_request_completion_is_visible_in_worker_log(self):
+        config = load_config(PROJECT / "config/default.toml")
+        backend = LocalLLMProcessBackend(config)
+        backend._request_count = 7
+        backend._record_request(
+            req_id="req-test",
+            role="perception",
+            prompt="probe",
+            system="",
+            response_text="1",
+        )
+        status = backend.status()
+        self.assertTrue(any("[request #7] role=perception OK" in line for line in status.recent_log))
 
     def test_runtime_services_hot_reconfigure_preserves_memory(self):
         config = load_config(PROJECT / "config/default.toml")
