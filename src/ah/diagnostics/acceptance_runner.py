@@ -12,6 +12,12 @@ from typing import Any, Mapping, TYPE_CHECKING
 from ah.model import AbstractSymbol, Domain, FunctionSymbol, Group, Hypernode, Link, SemanticEntity, Template
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import build_morphology
+from ah.diagnostics.semantic_oracle import (
+    DEFAULT_ORACLE_FILENAME,
+    evaluate_semantic_case,
+    load_semantic_oracle,
+    validate_oracle_alignment,
+)
 
 if TYPE_CHECKING:
     from ah.bootstrap import RuntimeServices
@@ -34,13 +40,18 @@ class AcceptanceRunResult:
     total: int
     succeeded: int
     failed: int
+    semantic_passed: int = 0
+    semantic_failed: int = 0
+    semantic_gaps: int = 0
+    oracle_file: Path | None = None
 
 
 def load_acceptance_cases(path: str | Path) -> tuple[AcceptanceCase, ...]:
     """Load one user turn per non-empty, non-comment line.
 
-    The file intentionally has no hidden metadata or expected answers. Replacing its
-    contents is enough to define another black-box run. Lines starting with `#` are
+    The text file remains a human-editable input list. Semantic expected outcomes
+    live in the separate acceptance_oracle.json so the runner can distinguish
+    "no exception" from actual semantic correctness. Lines starting with `#` are
     comments only and are never sent to the agent.
     """
     source = Path(path)
@@ -223,6 +234,7 @@ def run_acceptance_suite(
     services: "RuntimeServices",
     *,
     cases_file: str | Path | None = None,
+    oracle_file: str | Path | None = None,
 ) -> AcceptanceRunResult:
     """Run file-defined requests sequentially through the normal orchestrator.
 
@@ -236,6 +248,9 @@ def run_acceptance_suite(
     data_dir = Path(services.config.paths.data_dir)
     source = Path(cases_file) if cases_file is not None else data_dir / DEFAULT_CASES_FILENAME
     cases = load_acceptance_cases(source)
+    oracle_source = Path(oracle_file) if oracle_file is not None else data_dir / DEFAULT_ORACLE_FILENAME
+    oracle_cases = load_semantic_oracle(oracle_source)
+    validate_oracle_alignment(cases, oracle_cases)
 
     timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S_%z")
     runs_root = data_dir / RUNS_DIRNAME
@@ -246,6 +261,7 @@ def run_acceptance_suite(
         suffix += 1
     output_dir.mkdir(parents=True, exist_ok=False)
     shutil.copyfile(source, output_dir / "cases_used.txt")
+    shutil.copyfile(oracle_source, output_dir / "oracle_used.json")
 
     morphology = build_morphology(services.config.llm.perception_morphology_backend)
     candidate_builder = LinguisticCandidateBuilder(morphology)
@@ -262,6 +278,10 @@ def run_acceptance_suite(
     manifest_cases: list[dict[str, Any]] = []
     succeeded = 0
     failed = 0
+    semantic_passed = 0
+    semantic_failed = 0
+    semantic_gaps = 0
+    required_template_roles: dict[str, set[str]] = {}
 
     for case in cases:
         parser_floor, request_floor = _diagnostic_floors(services)
@@ -304,6 +324,22 @@ def run_acceptance_suite(
         record["runtime_after"] = runtime_after
         record["interaction_context_after"] = _jsonable(services.context)
 
+        semantic_verdict = evaluate_semantic_case(
+            record,
+            oracle_cases[case.index - 1],
+            after,
+            required_template_roles,
+        )
+        record["semantic_status"] = semantic_verdict.status
+        record["semantic_checks"] = list(semantic_verdict.checks)
+        record["semantic_note"] = semantic_verdict.note
+        if semantic_verdict.status == "PASS":
+            semantic_passed += 1
+        elif semantic_verdict.status == "GAP":
+            semantic_gaps += 1
+        else:
+            semantic_failed += 1
+
         filename = f"turn_{case.index:03d}.json"
         # record is already normalized field-by-field above. Writing it directly
         # avoids recursively cloning the complete diagnostic payload a second time.
@@ -313,6 +349,10 @@ def run_acceptance_suite(
                 "index": case.index,
                 "input": case.text,
                 "status": record["status"],
+                "semantic_status": record["semantic_status"],
+                "semantic_failures": [
+                    item["name"] for item in record["semantic_checks"] if not item.get("ok", False)
+                ],
                 "error": error_text,
                 "file": filename,
             }
@@ -335,23 +375,45 @@ def run_acceptance_suite(
         "total": len(cases),
         "succeeded": succeeded,
         "failed": failed,
+        "semantic_passed": semantic_passed,
+        "semantic_failed": semantic_failed,
+        "semantic_gaps": semantic_gaps,
+        "oracle_file": str(oracle_source.resolve()),
         "cases": manifest_cases,
     }
     _write_json(output_dir / "manifest.json", manifest)
 
     summary_lines = [
         f"Acceptance run: {output_dir.name}",
-        f"Cases: {len(cases)} | OK: {succeeded} | ERROR: {failed}",
+        f"Cases: {len(cases)} | RUNTIME OK: {succeeded} | RUNTIME ERROR: {failed}",
+        f"SEMANTIC PASS: {semantic_passed} | FAIL: {semantic_failed} | GAP: {semantic_gaps}",
         "",
     ]
     for item in manifest_cases:
-        line = f"{item['index']:03d} {item['status']}: {item['input']}"
+        line = (
+            f"{item['index']:03d} {item['semantic_status']} "
+            f"(runtime={item['status']}): {item['input']}"
+        )
+        if item["semantic_failures"]:
+            line += " | " + ", ".join(item["semantic_failures"][:6])
+            if len(item["semantic_failures"]) > 6:
+                line += f", ... (+{len(item['semantic_failures']) - 6})"
         if item["error"]:
-            line += f" | {item['error']}"
+            line += f" | runtime: {item['error']}"
         summary_lines.append(line)
     (output_dir / "summary.txt").write_text("\n".join(summary_lines) + "\n", encoding="utf-8", newline="\n")
 
     runs_root.mkdir(parents=True, exist_ok=True)
     (runs_root / "latest.txt").write_text(str(output_dir.resolve()) + "\n", encoding="utf-8", newline="\n")
 
-    return AcceptanceRunResult(output_dir, source, len(cases), succeeded, failed)
+    return AcceptanceRunResult(
+        output_dir,
+        source,
+        len(cases),
+        succeeded,
+        failed,
+        semantic_passed,
+        semantic_failed,
+        semantic_gaps,
+        oracle_source,
+    )

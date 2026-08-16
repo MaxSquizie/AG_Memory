@@ -6,10 +6,10 @@ import unittest
 from ah.config import LLMRoleSettings
 from ah.llm import LLMResponse
 from ah.model import ActantRole
-from ah.perception.adaptive_parser import AdaptiveParseError, AdaptivePerceptionParser, AdaptiveSettings
+from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.morphology import MorphInfo
 
-from test_acceptance_regressions_1218 import AcceptanceMorphology
+from test_acceptance_regressions_1218 import AcceptanceMorphology, RequestMorphology
 
 PROJECT = Path(__file__).resolve().parents[1]
 
@@ -113,9 +113,9 @@ class AcceptanceRegressions1219(unittest.TestCase):
         self.assertEqual(result.assertions[0].predicate.normalized_hint, "прийти")
 
     def test_resolved_pronominal_object_is_inherited_across_coordinated_ellipsis(self):
-        result = make_parser(ChainMorphology()).parse(
-            "Лиза взяла книгу, открыла её и прочитала."
-        ).perception
+        result = make_parser(
+            ChainMorphology(), RecordingBackend({"perception_role_participant": ["OBJECT"]})
+        ).parse("Лиза взяла книгу, открыла её и прочитала.").perception
         self.assertEqual(len(result.assertions), 3)
         take, opened, read = result.assertions
         source_object = next(a for a in opened.actants if a.role == ActantRole.OBJECT)
@@ -123,35 +123,33 @@ class AcceptanceRegressions1219(unittest.TestCase):
         self.assertIsNotNone(source_object.entity_ref)
         self.assertEqual(read_object.entity_ref, source_object.entity_ref)
         self.assertIsNone(read_object.evidence)
-        self.assertEqual(
-            set(read.predicate.template_candidate.roles),
-            {ActantRole.SUBJECT, ActantRole.OBJECT},
-        )
+        # Raw Perception no longer mistakes occurrence filling for a reusable T schema.
+        self.assertIsNone(read.predicate.template_candidate)
         self.assertEqual(
             next(a.entity_ref for a in take.actants if a.role == ActantRole.OBJECT),
             read_object.entity_ref,
         )
 
-    def test_control_probe_contains_full_text_and_known_parent_child_roles(self):
-        backend = RecordingBackend(
-            {
-                "perception_frame_relation": [1],
-                "perception_control_subject": [2],
-            }
-        )
-        result = make_parser(AcceptanceMorphology(), backend).parse(
+    def test_request_content_and_controller_use_separate_semantic_decisions(self):
+        backend = RecordingBackend({
+            "perception_content_addressee": ["CONTENT_ADDRESSEE"],
+            "perception_frame_relation": ["CONTENT_LINK"],
+            "perception_control_subject": ["SECOND"],
+        })
+        parsed = make_parser(RequestMorphology(), backend).parse(
             "Иван попросил Марию прочитать книгу."
-        ).perception
-        child = result.assertions[1]
+        )
+        parent, child = parsed.perception.assertions
+        recipient = next(a for a in parent.actants if a.role == ActantRole.RECIPIENT)
+        content = next(a for a in parent.actants if a.role == ActantRole.OBJECT)
         subject = next(a for a in child.actants if a.role == ActantRole.SUBJECT)
+        self.assertEqual(content.candidate_ref, child.local_id)
+        self.assertEqual(subject.entity_ref, recipient.entity_ref)
         self.assertEqual(subject.normalized_hint, "Мария")
-        prompt = next(prompt for role, prompt, _ in backend.calls if role == "perception_control_subject")
-        self.assertIn("TEXT:\nИван попросил Марию прочитать книгу.", prompt)
-        self.assertIn("PARENT KNOWN ROLES:", prompt)
-        self.assertIn("SUBJECT = Иван", prompt)
-        self.assertIn("OBJECT = Мария", prompt)
-        self.assertIn("CHILD KNOWN ROLES:", prompt)
-        self.assertIn("OBJECT = книга", prompt)
+        self.assertEqual(
+            [role for role, _p, _o in backend.calls],
+            ["perception_frame_relation", "perception_content_addressee", "perception_control_subject"],
+        )
 
     def test_copular_adverb_homograph_is_classified_only_within_descriptive_roles(self):
         backend = RecordingBackend({"perception_role_description": [2]})
@@ -160,30 +158,23 @@ class AcceptanceRegressions1219(unittest.TestCase):
         location = next(a for a in assertion.actants if a.role == ActantRole.LOCATION)
         self.assertEqual(location.mention, "дома")
         self.assertFalse(any(a.role == ActantRole.OBJECT for a in assertion.actants))
-        roles = [role for role, _prompt, _override in backend.calls]
-        self.assertEqual(roles, ["perception_role_description"])
-        prompt = backend.calls[0][1]
-        self.assertIn("TEXT:\nИван остался дома.", prompt)
-        self.assertIn("TARGET:\nдома", prompt)
-        self.assertNotIn("actor, object, receiver", prompt)
+        self.assertEqual(backend.calls, [])
 
-    def test_discourse_continuation_can_use_two_self_contained_pronoun_choices(self):
-        backend = RecordingBackend({"perception_pronoun_coreference": [1, 2]})
+    def test_discourse_coreference_uses_deterministic_cues_and_preserves_remaining_alternatives(self):
+        backend = RecordingBackend({"perception_role_participant": ["OBJECT"]})
         result = make_parser(DiscourseMorphology(), backend).parse(
             "Сергей положил ключ на стол. Потом он взял его."
         ).perception
         self.assertEqual(len(result.assertions), 2)
         placed, took = result.assertions
         placed_subject = next(a for a in placed.actants if a.role == ActantRole.SUBJECT)
-        placed_object = next(a for a in placed.actants if a.role == ActantRole.OBJECT)
         took_subject = next(a for a in took.actants if a.role == ActantRole.SUBJECT)
-        took_object = next(a for a in took.actants if a.role == ActantRole.OBJECT)
         self.assertEqual(took_subject.entity_ref, placed_subject.entity_ref)
+        placed_object = next(a for a in placed.actants if a.role == ActantRole.OBJECT)
+        took_object = next(a for a in took.actants if a.role == ActantRole.OBJECT)
         self.assertEqual(took_object.entity_ref, placed_object.entity_ref)
-        prompts = [prompt for role, prompt, _ in backend.calls if role == "perception_pronoun_coreference"]
-        self.assertEqual(len(prompts), 2)
-        self.assertTrue(all("TEXT:\nСергей положил ключ на стол. Потом он взял его." in p for p in prompts))
-        self.assertTrue(all("PRONOUN ROLE:" in p and "prior role=" in p for p in prompts))
+        self.assertEqual(took.alternatives, ())
+        self.assertEqual(backend.calls, [])
 
     def test_unmarked_cross_sentence_pronoun_remains_explicitly_ambiguous(self):
         class FeminineMorphology(AcceptanceMorphology):
@@ -200,9 +191,13 @@ class AcceptanceRegressions1219(unittest.TestCase):
                     return values[key]
                 return super().analyze_all(word)
 
-        backend = RecordingBackend()
-        with self.assertRaisesRegex(AdaptiveParseError, "ambiguous pronoun coreference"):
-            make_parser(FeminineMorphology(), backend).parse("Анна увидела Марию. Она улыбнулась.")
+        backend = RecordingBackend({"perception_role_participant": ["OBJECT"]})
+        result = make_parser(FeminineMorphology(), backend).parse(
+            "Анна увидела Марию. Она улыбнулась."
+        ).perception
+        self.assertEqual(len(result.assertions), 2)
+        smile = result.assertions[1]
+        self.assertEqual(len(smile.alternatives), 2)
         self.assertEqual(backend.calls, [])
 
 

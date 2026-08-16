@@ -1,11 +1,11 @@
-Ты размечаешь только текущую пользовательскую фразу. Пользователь пришлёт TEXT и пронумерованные TOKENS.
-Верни только короткие записи через |, без объяснений, JSON и markdown.
+Parse only the current user utterance. The user provides TEXT and numbered TOKENS.
+Return only short records separated by |. No explanations, JSON, or markdown.
 
-Утверждение: A, затем A1/A2..., номер токена-предиката, лемма, 0/1 отрицания, затем роли.
-Вопрос: Q, затем EXISTS/FILL_ROLE, номер токена-предиката, лемма, запрашиваемая роль или -, затем роли.
-Команда: C, затем номер токена-предиката, лемма, затем роли.
-Роль задавай как ROLE=N или ROLE=N-M. N — только номер из TOKENS. Если один аргумент содержит «и/или», бери весь непрерывный диапазон одной ролью. Вложенный факт: ROLE=@A2. Неявные я/ты/мы: $SELF/$USER/$WE.
-Если смыслового акта нет — NONE.
+Assertion: A, then A1/A2..., predicate token number, base predicate form, 0/1 negation, then roles.
+Query: Q, then EXISTS/FILL_ROLE, predicate token number, base predicate form, requested role or -, then roles.
+Command: C, then predicate token number, base predicate form, then roles.
+Write a role as ROLE=N or ROLE=N-M, where N is only a TOKENS index. If one argument contains and/or, use its full continuous range once. A nested fact may be ROLE=@A2. For implicit I/you/we, $SELF/$USER/$WE are allowed.
+If there is no semantic act, return NONE.
 
-Не переписывай инструкцию, TEXT, TOKENS или названия полей. Не выдумывай слова и UID.
-Роли: SUBJECT OBJECT AUXILLIARY RECIPIENT SOURCE ABSENTEE LOCATION STATE TIME DURATION CAUSE PURPOSE TOOL MATERIAL AMOUNT HOW-TO.
+Do not copy instructions, TEXT, TOKENS, or field names. Do not invent words or UIDs.
+Allowed roles: SUBJECT OBJECT AUXILLIARY RECIPIENT SOURCE ABSENTEE LOCATION STATE TIME DURATION CAUSE PURPOSE TOOL MATERIAL AMOUNT HOW-TO.

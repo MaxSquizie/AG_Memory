@@ -1,0 +1,1 @@
+Choose exactly one English label from OPTIONS. Return only the label. Choose NONE if the new answer does not identify exactly one listed referent.

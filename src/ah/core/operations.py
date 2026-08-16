@@ -240,6 +240,11 @@ class AHCore:
             raise TypeError(f"Unsupported canonical element type: {type(element).__name__}")
         if isinstance(element, Template):
             validate_ref_exists(self.store, element.predicate)
+            current = self.store.get_template(element.uid)
+            if element.predicate != current.predicate:
+                raise ValueError("T predicate reference is immutable; create a new T instead")
+            if not set(current.roles).issubset(set(element.roles)):
+                raise ValueError("T roles may only grow monotonically; role removal is forbidden")
         elif isinstance(element, Hypernode):
             validate_hypernode(self.store, element)
         elif isinstance(element, FunctionSymbol):
@@ -250,6 +255,27 @@ class AHCore:
                 validate_ref_exists(self.store, ref)
         self.store._replace_element(domain, element, kind)
         return element
+
+    def expand_template_roles(
+        self,
+        template_uid: str,
+        roles: tuple[ActantRole, ...],
+    ) -> Template:
+        """Monotonically add roles to one canonical T without changing its UID.
+
+        This is the canonical write primitive for controlled T valency evolution.
+        It never removes roles and never changes the predicate reference. Existing N
+        remain valid because a concrete hypernode may fill any subset of T roles.
+        """
+        current = self.store.get_template(template_uid)
+        requested = set(current.roles) | set(roles)
+        ordered = tuple(role for role in ActantRole if role in requested)
+        if ordered == current.roles:
+            return current
+        domain = self.store.domain_of(template_uid)
+        if domain is None:
+            raise ValueError(f"Template {template_uid} has no semantic domain")
+        return self.edit_element(domain, replace(current, roles=ordered))
 
     def add_property(self, uid: str, prop: Property):
         element = self.store.get_element_any_domain(uid)

@@ -6,6 +6,7 @@ from typing import Protocol
 
 from ah.config import LLMRoleSettings
 from ah.projection.contracts import AgentContext
+from ah.integration.contracts import ClarificationRequest
 
 
 class GeneratedText(Protocol):
@@ -110,6 +111,35 @@ class LLMAgent:
             "response was not committed to H"
         )
 
+    def clarify(self, request: ClarificationRequest) -> str:
+        """Verbalize a deterministic clarification request without selecting an option."""
+        generation = self.settings.generation
+        override = self._generation_override(generation)
+        options = "\n".join(f"[{item.index}] {item.label}" for item in request.options)
+        prompt = (
+            f"AMBIGUOUS EXPRESSION:\n{request.mention}\n\n"
+            f"CANDIDATES:\n{options}\n\n"
+            "Ask the user one short natural-language clarification question that lets "
+            "them identify exactly one candidate. Mention only the candidate labels above. "
+            "Do not decide which candidate is correct and do not mention internal system details."
+        )
+        response = self.backend.generate(
+            prompt,
+            system=self._system_prompt(),
+            override=override,
+            role="agent_clarification",
+        )
+        raw = str(response.text).strip()
+        cleaned, _contaminated = self._sanitize(raw)
+        if cleaned:
+            return cleaned
+        return self._deterministic_clarification(request)
+
+    @staticmethod
+    def _deterministic_clarification(request: ClarificationRequest) -> str:
+        labels = ", ".join(item.label for item in request.options)
+        return f"Уточните, кого или что означает «{request.mention}»: {labels}?"
+
     @staticmethod
     def _generation_override(generation: LLMRoleSettings) -> dict:
         return {
@@ -163,3 +193,4 @@ _DEFAULT_AGENT_PROMPT = """Ты — текстовый агент поверх �
 Не выполняй скрытый логический proof вместо reasoner-а и не объявляй неизвестное известным.
 Не повторяй секции CURRENT INPUT, ACTIVE MEMORY или INFERENCE RESULTS в ответе.
 """
+

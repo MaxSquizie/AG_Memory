@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from contextlib import nullcontext
 from typing import Protocol
+import re
 from threading import RLock
 
 from ah.agent.interaction_context import InteractionContext
@@ -13,8 +14,15 @@ from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilde
 from ah.inference.contracts import InferenceOutcome
 from ah.inference.materialization import MaterializationResult
 from ah.integration import IntegrationError, IntegrationService
-from ah.integration.contracts import IntegrationCommit
-from ah.perception import PerceptionParseError, PerceptionResult, TextSensoryResult, TextSensoryService
+from ah.integration.contracts import ClarificationRequest, ClarificationResolutionCommit, IntegrationCommit
+from ah.perception import (
+    PerceptionParseError,
+    PerceptionClarificationRequired,
+    PerceptionResult,
+    TemplateCandidate,
+    TextSensoryResult,
+    TextSensoryService,
+)
 from ah.projection import ContextProjector
 from ah.projection.contracts import AgentContext
 
@@ -22,9 +30,27 @@ from ah.projection.contracts import AgentContext
 class PerceptionService(Protocol):
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult: ...
 
+    def propose_template_candidate(
+        self,
+        source_text: str,
+        predicate,
+        filled_roles,
+        role_bindings=(),
+    ) -> TemplateCandidate: ...
+
+    def interpret_clarification_answer(
+        self, answer_text: str, option_labels: tuple[str, ...]
+    ) -> int | None: ...
+
+    def parse_with_structural_resolution(
+        self, text: str, interaction_context: InteractionContext, resolution_key: str
+    ) -> PerceptionResult: ...
+
 
 class ResponseAgent(Protocol):
     def respond(self, context: AgentContext) -> str: ...
+
+    def clarify(self, request: ClarificationRequest) -> str: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +74,8 @@ class AgentTurnResult:
     response_integration: IntegrationCommit | None
     ticks_after_response: tuple[TickResult, ...]
     autosaved: bool
+    clarification_request: ClarificationRequest | None = None
+    clarification_resolution: ClarificationResolutionCommit | None = None
 
 
 class AgentOrchestrator:
@@ -88,15 +116,321 @@ class AgentOrchestrator:
         self.persistence = persistence
         self.runtime_lock = runtime_lock
 
-    def _record_raw_external_experience(self, text: str, lock) -> None:
+    def _record_raw_external_experience(self, text: str, lock) -> IntegrationCommit:
         with lock:
             failed_turn = self.integration.integrate_external(
                 PerceptionResult(source_text=text), self.context
             )
             self.ignition.apply_seed_requests(failed_turn.activation_seeds)
+            return failed_turn
+
+    @staticmethod
+    def _apply_template_candidates(
+        result: PerceptionResult, mapping: dict[str, TemplateCandidate]
+    ) -> PerceptionResult:
+        """Attach Perception-proposed schemas without changing semantic candidates."""
+
+        def predicate_with_template(predicate):
+            if predicate.template_candidate is not None:
+                return predicate
+            candidate = mapping.get(predicate.lookup_form.casefold())
+            return replace(predicate, template_candidate=candidate) if candidate is not None else predicate
+
+        def assertion_with_template(assertion):
+            alternatives = tuple(assertion_with_template(item) for item in assertion.alternatives)
+            return replace(
+                assertion,
+                predicate=predicate_with_template(assertion.predicate),
+                alternatives=alternatives,
+            )
+
+        return replace(
+            result,
+            assertions=tuple(assertion_with_template(item) for item in result.assertions),
+            queries=tuple(
+                replace(item, predicate=predicate_with_template(item.predicate))
+                for item in result.queries
+            ),
+            commands=tuple(
+                replace(item, predicate=predicate_with_template(item.predicate))
+                for item in result.commands
+            ),
+        )
+
+    def _complete_dynamic_templates(self, result: PerceptionResult, lock) -> PerceptionResult:
+        """Route unknown predicates back to Perception before canonical integration.
+
+        Deterministic Integration performs only the read-only preflight.  Potentially
+        expensive LLM proposals run outside the runtime lock; the resulting runtime
+        TemplateCandidates are then validated by TemplateResolver during integration.
+        """
+        # If a compound PerceptionResult already contains one explicit runtime
+        # proposal for a predicate, share that same noncanonical schema across its
+        # sibling occurrences before preflight. Conflicting proposals fail rather
+        # than making integration order semantically significant.
+        existing_mapping: dict[str, TemplateCandidate] = {}
+
+        def collect(predicate) -> None:
+            candidate = predicate.template_candidate
+            if candidate is None:
+                return
+            key = predicate.lookup_form.casefold()
+            previous = existing_mapping.get(key)
+            if previous is not None and previous.roles != candidate.roles:
+                raise PerceptionParseError(
+                    f"Conflicting TemplateCandidate proposals for predicate {predicate.lookup_form!r}"
+                )
+            existing_mapping[key] = candidate
+
+        for assertion in result.assertions:
+            collect(assertion.predicate)
+            for alternative in assertion.alternatives:
+                collect(alternative.predicate)
+        for query in result.queries:
+            collect(query.predicate)
+        for command in result.commands:
+            collect(command.predicate)
+        if existing_mapping:
+            result = self._apply_template_candidates(result, existing_mapping)
+
+        with lock:
+            requests = self.integration.template_requests(result)
+        if not requests:
+            return result
+
+        proposer = getattr(self.perception, "propose_template_candidate", None)
+        if proposer is None:
+            missing = ", ".join(request.predicate.lookup_form for request in requests)
+            raise PerceptionParseError(
+                f"Unknown predicate(s) require Perception TemplateCandidate proposal: {missing}"
+            )
+
+        mapping: dict[str, TemplateCandidate] = {}
+        for request in requests:
+            candidate = proposer(
+                request.source_context,
+                request.predicate,
+                request.filled_roles,
+                request.role_bindings,
+            )
+            if not isinstance(candidate, TemplateCandidate):
+                raise PerceptionParseError("Perception template proposer returned an invalid result")
+            mapping[request.predicate.lookup_form.casefold()] = candidate
+        return self._apply_template_candidates(result, mapping)
+
+    @staticmethod
+    def _normalize_clarification_text(text: str) -> str:
+        return re.sub(r"[^\wёЁ]+", " ", text.casefold(), flags=re.UNICODE).strip()
+
+    @classmethod
+    def _deterministic_clarification_selection(
+        cls, text: str, request: ClarificationRequest
+    ) -> int | None:
+        normalized = cls._normalize_clarification_text(text)
+        if not normalized:
+            return None
+        if normalized.isdigit():
+            index = int(normalized)
+            if 1 <= index <= len(request.options):
+                return index
+        matches: list[int] = []
+        padded = f" {normalized} "
+        for option in request.options:
+            labels = [option.label]
+            if " (" in option.label:
+                labels.append(option.label.split(" (", 1)[0])
+            normalized_labels = [cls._normalize_clarification_text(label) for label in labels]
+            if any(
+                label and (normalized == label or f" {label} " in padded)
+                for label in normalized_labels
+            ):
+                matches.append(option.index)
+        return matches[0] if len(matches) == 1 else None
+
+    def _generate_clarification(self, request: ClarificationRequest) -> str:
+        clarify = getattr(self.agent, "clarify", None)
+        if callable(clarify):
+            return str(clarify(request)).strip()
+        labels = ", ".join(option.label for option in request.options)
+        return f"Уточните, кого или что означает «{request.mention}»: {labels}?"
+
+    def _enqueue_clarifications(self, requests: tuple[ClarificationRequest, ...]) -> None:
+        known = {ref.uid for ref in self.context.pending_clarification_refs}
+        for request in requests:
+            if request.ambiguous_ref.uid not in known:
+                self.context.pending_clarification_refs.append(request.ambiguous_ref)
+                known.add(request.ambiguous_ref.uid)
+
+    def _next_pending_clarification(self) -> ClarificationRequest | None:
+        while self.context.pending_clarification_refs:
+            ref = self.context.pending_clarification_refs[0]
+            try:
+                return self.integration.clarification_request(ref)
+            except IntegrationError:
+                self.context.pending_clarification_refs.pop(0)
+        return None
+
+    def _record_agent_utterance(
+        self, response_text: str, lock
+    ) -> tuple[PerceptionResult, IntegrationCommit, tuple[TickResult, ...]]:
+        if self.settings.parse_agent_response_to_h:
+            response_perception = self.perception.parse(response_text, self.context)
+            response_perception = self._complete_dynamic_templates(response_perception, lock)
+        else:
+            response_perception = PerceptionResult(
+                source_text=response_text,
+                assertions=(),
+                queries=(),
+                commands=(),
+                diagnostics=("AGENT_H_TEXT_ONLY",),
+            )
+        with lock:
+            response_integration = self.integration.integrate_to_h(response_perception, self.context)
+            self.ignition.apply_seed_requests(response_integration.activation_seeds)
+            self.ignition.apply_refutation_requests(response_integration.refutations)
+            response_ticks = tuple(
+                self.ignition.tick() for _ in range(self.settings.ticks_after_response)
+            )
+        return response_perception, response_integration, response_ticks
+
+    def _autosave(self, lock) -> bool:
+        with lock:
+            if self.persistence is None:
+                return False
+            return self.persistence.maybe_autosave(
+                self.integration.core,
+                ignition=self.ignition,
+                context=self.context,
+            )
+
+    def _handle_clarification_answer(
+        self,
+        text: str,
+        *,
+        generate_response: bool,
+        lock,
+    ) -> AgentTurnResult:
+        with lock:
+            self.ignition.begin_prompt_epoch()
+            sensory = self.sensory.process(text)
+            self.ignition.apply_seed_requests(sensory.activation_seeds)
+            request = self._next_pending_clarification()
+        if request is None:
+            # A stale pending queue was cleaned while entering the turn; resume the
+            # ordinary path rather than treating the input as a phantom answer.
+            return self.handle_user_text(text, generate_response=generate_response)
+
+        selected_index = self._deterministic_clarification_selection(text, request)
+        if selected_index is None:
+            interpreter = getattr(self.perception, "interpret_clarification_answer", None)
+            if callable(interpreter):
+                interpreted = interpreter(text, tuple(option.label for option in request.options))
+                if isinstance(interpreted, int) and 1 <= interpreted <= len(request.options):
+                    selected_index = interpreted
+
+        perception = PerceptionResult(
+            source_text=text,
+            diagnostics=("CLARIFICATION_ANSWER",),
+        )
+        resolution: ClarificationResolutionCommit | None = None
+        structural_result: PerceptionResult | None = None
+        structural_experience_ref = None
+        selected = request.options[selected_index - 1] if selected_index is not None else None
+
+        if selected is not None and request.kind == "STRUCTURAL":
+            with lock:
+                source_text, resolution_key, structural_experience_ref = (
+                    self.integration.structural_clarification_selection(
+                        request.ambiguous_ref, selected.ref
+                    )
+                )
+            parser = getattr(self.perception, "parse_with_structural_resolution", None)
+            if not callable(parser):
+                raise PerceptionParseError("Perception service cannot resolve structural clarification")
+            structural_result = parser(source_text, self.context, resolution_key)
+            structural_result = self._complete_dynamic_templates(structural_result, lock)
+
+        with lock:
+            if selected is not None:
+                if request.kind == "STRUCTURAL":
+                    assert structural_result is not None and structural_experience_ref is not None
+                    delayed = self.integration.integrate_external_resolution(
+                        structural_result, self.context, structural_experience_ref
+                    )
+                    self.ignition.apply_seed_requests(delayed.activation_seeds)
+                    self.ignition.apply_refutation_requests(delayed.refutations)
+                    resolution = self.integration.finalize_structural_clarification(
+                        request.ambiguous_ref, selected.ref
+                    )
+                else:
+                    resolution = self.integration.resolve_clarification(
+                        request.ambiguous_ref, selected.ref
+                    )
+                    self.ignition.apply_seed_requests(resolution.activation_seeds)
+                if (
+                    self.context.pending_clarification_refs
+                    and self.context.pending_clarification_refs[0] == request.ambiguous_ref
+                ):
+                    self.context.pending_clarification_refs.pop(0)
+                else:
+                    self.context.pending_clarification_refs = [
+                        ref for ref in self.context.pending_clarification_refs
+                        if ref != request.ambiguous_ref
+                    ]
+
+            # The user's clarification utterance is still an H experience. It is
+            # not promoted to a standalone C/P assertion such as M("Мария").
+            integration = self.integration.integrate_external(perception, self.context)
+            self.ignition.apply_seed_requests(integration.activation_seeds)
+            input_ticks = tuple(
+                self.ignition.tick() for _ in range(self.settings.ticks_after_input)
+            )
+            workspace = self.ignition.workspace_refs()
+            next_request = self._next_pending_clarification()
+            agent_context = self.projector.project(text, workspace, ())
+
+        response_text: str | None = None
+        response_perception: PerceptionResult | None = None
+        response_integration: IntegrationCommit | None = None
+        response_ticks: tuple[TickResult, ...] = ()
+        active_request = next_request if resolution is not None else request
+        if generate_response:
+            if active_request is not None:
+                response_text = self._generate_clarification(active_request)
+            else:
+                response_text = self.agent.respond(agent_context)
+            response_perception, response_integration, response_ticks = self._record_agent_utterance(
+                response_text, lock
+            )
+
+        autosaved = self._autosave(lock)
+        return AgentTurnResult(
+            user_text=text,
+            sensory=sensory,
+            perception=perception,
+            integration=integration,
+            ticks_after_input=input_ticks,
+            queries=(),
+            agent_context=agent_context,
+            response_text=response_text,
+            response_perception=response_perception,
+            response_integration=response_integration,
+            ticks_after_response=response_ticks,
+            autosaved=autosaved,
+            clarification_request=active_request,
+            clarification_resolution=resolution,
+        )
 
     def handle_user_text(self, text: str, *, generate_response: bool = True) -> AgentTurnResult:
         lock = self.runtime_lock or nullcontext()
+
+        if self.context.pending_clarification_refs:
+            with lock:
+                pending_request = self._next_pending_clarification()
+            if pending_request is not None:
+                return self._handle_clarification_answer(
+                    text, generate_response=generate_response, lock=lock
+                )
 
         # Memory mutations/reads are short critical sections. The expensive LLM
         # calls stay outside the lock so a continuously running IgnitionClock can
@@ -109,6 +443,60 @@ class AgentOrchestrator:
 
         try:
             perception = self.perception.parse(text, self.context)
+            perception = self._complete_dynamic_templates(perception, lock)
+        except PerceptionClarificationRequired as exc:
+            # Genuine structural ambiguity is not an error and must not be guessed.
+            # Record the external utterance in H, persist only the pending structural
+            # choice in H dialogue state, and return an explicit clarification path.
+            raw_commit = self._record_raw_external_experience(text, lock)
+            with lock:
+                request = self.integration.register_structural_clarification(
+                    exc.spec, raw_commit.experience_ref
+                )
+                # Diagnostic/no-response turns surface the clarification contract but
+                # must not arm dialogue state: acceptance executes independent cases
+                # sequentially with generate_response=False. Live dialogue state is
+                # armed only when the clarification is actually presented to the user.
+                if generate_response:
+                    self._enqueue_clarifications((request,))
+                integration = replace(
+                    raw_commit,
+                    clarification_required=True,
+                    clarifications=(request,),
+                )
+                input_ticks = tuple(
+                    self.ignition.tick() for _ in range(self.settings.ticks_after_input)
+                )
+                workspace = self.ignition.workspace_refs()
+                agent_context = self.projector.project(text, workspace, ())
+
+            response_text: str | None = None
+            response_perception: PerceptionResult | None = None
+            response_integration: IntegrationCommit | None = None
+            response_ticks: tuple[TickResult, ...] = ()
+            if generate_response:
+                response_text = self._generate_clarification(request)
+                response_perception, response_integration, response_ticks = self._record_agent_utterance(
+                    response_text, lock
+                )
+            autosaved = self._autosave(lock)
+            return AgentTurnResult(
+                user_text=text,
+                sensory=sensory,
+                perception=PerceptionResult(
+                    source_text=text, diagnostics=("STRUCTURAL_CLARIFICATION_REQUIRED",)
+                ),
+                integration=integration,
+                ticks_after_input=input_ticks,
+                queries=(),
+                agent_context=agent_context,
+                response_text=response_text,
+                response_perception=response_perception,
+                response_integration=response_integration,
+                ticks_after_response=response_ticks,
+                autosaved=autosaved,
+                clarification_request=request,
+            )
         except PerceptionParseError:
             # Semantic failure never erases the fact that the external communication
             # happened. Preserve only its raw H experience and re-raise the original
@@ -156,38 +544,22 @@ class AgentOrchestrator:
         response_integration: IntegrationCommit | None = None
         response_ticks: tuple[TickResult, ...] = ()
 
+        clarification_request = integration.clarifications[0] if integration.clarifications else None
         if generate_response:
-            response_text = self.agent.respond(agent_context)
-
-            # Every actual agent utterance is experienced in H.  Diagnostics may
-            # deliberately stop at AgentContext; in that mode no synthetic agent
-            # utterance is invented merely to satisfy the normal interaction path.
-            if self.settings.parse_agent_response_to_h:
-                response_perception = self.perception.parse(response_text, self.context)
+            if integration.clarifications:
+                response_text = self._generate_clarification(clarification_request)
             else:
-                response_perception = PerceptionResult(
-                    source_text=response_text,
-                    assertions=(),
-                    queries=(),
-                    commands=(),
-                    diagnostics=("AGENT_H_TEXT_ONLY",),
-                )
-            with lock:
-                response_integration = self.integration.integrate_to_h(response_perception, self.context)
-                self.ignition.apply_seed_requests(response_integration.activation_seeds)
-                self.ignition.apply_refutation_requests(response_integration.refutations)
-                response_ticks = tuple(
-                    self.ignition.tick() for _ in range(self.settings.ticks_after_response)
-                )
+                response_text = self.agent.respond(agent_context)
+            response_perception, response_integration, response_ticks = self._record_agent_utterance(
+                response_text, lock
+            )
+            if integration.clarifications:
+                # Arm the dialogue state only after the clarification utterance was
+                # successfully generated and committed as an H experience.
+                with lock:
+                    self._enqueue_clarifications(integration.clarifications)
 
-        with lock:
-            autosaved = False
-            if self.persistence is not None:
-                autosaved = self.persistence.maybe_autosave(
-                    self.integration.core,
-                    ignition=self.ignition,
-                    context=self.context,
-                )
+        autosaved = self._autosave(lock)
 
         return AgentTurnResult(
             user_text=text,
@@ -202,4 +574,6 @@ class AgentOrchestrator:
             response_integration=response_integration,
             ticks_after_response=response_ticks,
             autosaved=autosaved,
+            clarification_request=clarification_request,
+            clarification_resolution=None,
         )

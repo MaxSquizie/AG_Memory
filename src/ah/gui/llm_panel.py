@@ -115,6 +115,9 @@ class LLMControlWidget(QWidget):
         "role_circumstance",
         "frame_relation",
         "relative_role",
+        "control_subject",
+        "template_hidden_valency",
+        "clarification_answer",
         "query_mode",
         "requested_role",
     )

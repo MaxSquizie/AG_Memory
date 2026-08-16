@@ -1,1 +1,1 @@
-Choose the kind of information expressed by TARGET. Reply only with the number inside brackets.
+Choose exactly one label from ROLE FAMILY OPTIONS. Classify only the TARGET in this sentence. Do not explain.

@@ -1,0 +1,1 @@
+Evaluate only the additional-valency task. The assistant continuation must be exactly one of the supplied complete English statements. A role already shown in the prompt is not an additional slot. Do not explain, add a label, or add punctuation outside that statement.

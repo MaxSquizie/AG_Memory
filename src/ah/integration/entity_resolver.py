@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from ah.agent import InteractionContext
 from ah.core import AHCore
-from ah.model import Ref
+from ah.model import Domain, Ref
 from ah.perception import ActantCandidate
 
 from .deixis_resolver import DeixisResolver
@@ -42,6 +42,7 @@ class EntityResolver:
         *,
         first_person_ref: Ref | None = None,
         second_person_ref: Ref | None = None,
+        preferred_domain: Domain | None = None,
     ) -> EntityResolution:
         deictic = self.deixis.resolve(
             candidate,
@@ -66,7 +67,14 @@ class EntityResolver:
                 lookup_forms.append(value.strip())
 
         for lookup in lookup_forms:
-            entities = self.core.store.find_entities_by_name(lookup)
+            # Name/alias is a retrieval index, never a cross-domain identity key.
+            # Once Integration has provenance evidence for the current assertion,
+            # lexical resolution stays inside that semantic domain.  This prevents
+            # a prior generic C entity with the same surface name from hijacking a
+            # newly introduced personalized P entity.  Stronger identity evidence
+            # (deixis, candidate_ref, turn-local entity_ref) is resolved before this
+            # lookup and may still route the assertion to P.
+            entities = self.core.store.find_entities_by_name(lookup, preferred_domain)
             if len(entities) == 1:
                 return ExistingEntity(self.core.ref(entities[0].uid))
             if len(entities) > 1:

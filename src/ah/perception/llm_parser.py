@@ -13,7 +13,12 @@ from ah.config import LLMRoleSettings
 from ah.llm.process_backend import LLMResponse
 from ah.model import ActantRole
 
-from .adaptive_parser import AdaptiveParseError, AdaptivePerceptionParser, AdaptiveSettings
+from .adaptive_parser import (
+    AdaptiveParseError,
+    AdaptivePerceptionParser,
+    AdaptiveSettings,
+    AdaptiveStructuralClarificationRequired,
+)
 
 from .contracts import (
     ActantCandidate,
@@ -22,6 +27,7 @@ from .contracts import (
     EvidenceSpan,
     PerceptionResult,
     PredicateCandidate,
+    StructuralClarificationSpec,
     TemplateCandidate,
     QueryCandidate,
     QueryMode,
@@ -77,6 +83,12 @@ class LLMPerceptionSettings:
 
 class PerceptionParseError(ValueError):
     pass
+
+
+class PerceptionClarificationRequired(PerceptionParseError):
+    def __init__(self, spec: StructuralClarificationSpec) -> None:
+        super().__init__(f"structural clarification required: {spec.mention}")
+        self.spec = spec
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,7 +159,49 @@ class LLMPerceptionService:
             return self._parse_adaptive(text)
         return self._parse_legacy_protocol(text, interaction_context)
 
-    def _parse_adaptive(self, text: str) -> PerceptionResult:
+    def parse_with_structural_resolution(
+        self,
+        text: str,
+        interaction_context: InteractionContext,
+        resolution_key: str,
+    ) -> PerceptionResult:
+        del interaction_context
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            raise PerceptionParseError("Structural clarification requires an adaptive perception protocol")
+        return self._parse_adaptive(text, structural_resolution=resolution_key)
+
+    def propose_template_candidate(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        filled_roles: tuple[ActantRole, ...],
+        role_bindings: tuple[tuple[ActantRole, str], ...] = (),
+    ) -> TemplateCandidate:
+        """Return the explicit runtime schema for an unknown predicate.
+
+        v0.12.39 deliberately performs no extra LLM call here. The semantic parser
+        has already produced the assertion/query/command roles; this boundary only
+        packages those validated runtime roles as a noncanonical TemplateCandidate.
+        Deterministic Integration owns canonical registration and later monotonic T
+        expansion. ``source_text``/``role_bindings`` remain in the interface for
+        provenance and compatibility with the orchestrator contract.
+        """
+        del source_text, predicate, role_bindings
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            raise PerceptionParseError(
+                "Dynamic TemplateCandidate proposal requires an adaptive perception protocol"
+            )
+        explicit = set(filled_roles)
+        return TemplateCandidate(tuple(role for role in ActantRole if role in explicit))
+
+    def interpret_clarification_answer(
+        self,
+        answer_text: str,
+        option_labels: tuple[str, ...],
+    ) -> int | None:
+        """Perception-only interpretation of the user's explicit clarification reply."""
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            return None
         parser = AdaptivePerceptionParser(
             self.backend,
             AdaptiveSettings(
@@ -162,7 +216,55 @@ class LLMPerceptionService:
             ),
         )
         try:
-            parsed = parser.parse(text)
+            parsed = parser.interpret_clarification_answer(answer_text, option_labels)
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(answer_text, attempts, None, str(exc))
+            return None
+        return parsed.option_index
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_acts=self.settings.max_acts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
         except AdaptiveParseError as exc:
             attempts = [
                 PerceptionAttemptDiagnostic(
@@ -271,7 +373,6 @@ class LLMPerceptionService:
                     result = self._compact_result(source_text, payload)
                 else:
                     result = self._legacy_result(source_text, payload)
-            result = self._attach_template_candidates(result)
             if self.settings.ground_actants:
                 self._validate_grounding(source_text, result, strict_predicate=(using_line_protocol or using_span_protocol))
             return result
@@ -279,40 +380,6 @@ class LLMPerceptionService:
             raise
         except (KeyError, TypeError, ValueError) as exc:
             raise PerceptionParseError(f"Invalid perception payload: {exc}") from exc
-
-    @staticmethod
-    def _attach_template_candidates(result: PerceptionResult) -> PerceptionResult:
-        def with_schema(
-            predicate: PredicateCandidate,
-            actants: tuple[ActantCandidate, ...],
-            requested_role: ActantRole | None = None,
-        ) -> PredicateCandidate:
-            if predicate.template_candidate is not None:
-                return predicate
-            roles = list(dict.fromkeys(actant.role for actant in actants))
-            if requested_role is not None and requested_role not in roles:
-                roles.append(requested_role)
-            return replace(
-                predicate,
-                template_candidate=TemplateCandidate(tuple(roles)),
-            )
-
-        assertions = tuple(
-            replace(item, predicate=with_schema(item.predicate, item.actants))
-            for item in result.assertions
-        )
-        queries = tuple(
-            replace(
-                item,
-                predicate=with_schema(item.predicate, item.actants, item.requested_role),
-            )
-            for item in result.queries
-        )
-        commands = tuple(
-            replace(item, predicate=with_schema(item.predicate, item.actants))
-            for item in result.commands
-        )
-        return replace(result, assertions=assertions, queries=queries, commands=commands)
 
     @staticmethod
     def _unquote(value: str) -> str:
@@ -935,37 +1002,36 @@ class LLMPerceptionService:
         )
 
 
-_SPAN_SYSTEM_PROMPT = """Ты размечаешь только текущую пользовательскую фразу. Пользователь пришлёт TEXT и пронумерованные TOKENS.
-Верни только короткие записи через |, без объяснений, JSON и markdown.
+_SPAN_SYSTEM_PROMPT = """Parse only the current user utterance. The user provides TEXT and numbered TOKENS.
+Return only short records separated by |. No explanations, JSON, or markdown.
 
-Для утверждения: сначала A, затем A1/A2..., номер токена-предиката, его лемма, 0 или 1 для отрицания, затем роли.
-Для вопроса: сначала Q, затем EXISTS или FILL_ROLE, номер токена-предиката, лемма, запрашиваемая роль или -, затем роли.
-Для команды: сначала C, затем номер токена-предиката, лемма, затем роли.
-Роль записывай как ROLE=N или ROLE=N-M, где N — только номер из TOKENS. Если один аргумент содержит «и/или», укажи весь непрерывный диапазон один раз. Вложенный факт можно указать как ROLE=@A2. Для неявного «я/ты/мы» допустимы $SELF/$USER/$WE. Если актов нет, ответь NONE.
+Assertion: A, then A1/A2..., predicate token number, base predicate form, 0 or 1 for negation, then roles.
+Query: Q, then EXISTS or FILL_ROLE, predicate token number, base predicate form, requested role or -, then roles.
+Command: C, then predicate token number, base predicate form, then roles.
+Write a role as ROLE=N or ROLE=N-M, where N is only a TOKENS index. If one argument contains and/or, give its full continuous token range once. A nested fact may be ROLE=@A2. For implicit I/you/we, $SELF/$USER/$WE are allowed. If there are no acts, return NONE.
 
-Не переписывай формат, TEXT или TOKENS. Не придумывай слова и UID.
-Допустимые роли: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO."""
+Do not copy TEXT or TOKENS. Do not invent words or UIDs.
+Allowed roles: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO."""
 
-_SPAN_REPAIR_SYSTEM_PROMPT = """Предыдущий ответ был не разбором, а ошибочным текстом. Разбери только TEXT. Верни только записи A/Q/C с числовыми ссылками на TOKENS или NONE. Не повторяй инструкцию, названия полей и примеры формата."""
+_SPAN_REPAIR_SYSTEM_PROMPT = """The previous answer was malformed. Parse only TEXT. Return only A/Q/C records with numeric TOKENS references, or NONE. Do not repeat instructions or examples."""
 
-_LINE_SYSTEM_PROMPT = """Ты семантический парсер. Ответ только строками line_v1, без JSON, markdown и пояснений.
+_LINE_SYSTEM_PROMPT = """You are a semantic parser. Return only line_v1 records. No JSON, markdown, or explanations.
 A|ID|surface|lemma|0/1|ROLE=value...
 Q|EXISTS/FILL_ROLE|surface|lemma|ROLE_OR_-|ROLE=value...
 C|surface|lemma|ROLE=value...
-Если актов нет: NONE
+If there are no acts: NONE
 
-Правила: surface и значения ROLE копируй из SOURCE дословно. lemma — нормальная форма предиката. Если предикат не выражен отдельным словом, surface=_. @A2 означает ссылку на assertion A2. Вопрос не превращай в A. Не выдавай UID, C/P/H/L. Не добавляй фактов.
-Роли: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO."""
+Copy surface and ROLE values from SOURCE exactly. Use the base predicate form for lemma. If the predicate is implicit, surface=_. @A2 refers to assertion A2. Do not turn a question into an assertion. Do not emit UIDs or C/P/H/L. Do not add facts.
+Allowed roles: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO."""
 
-_LINE_REPAIR_SYSTEM_PROMPT = """Исправь только формат line_v1 предыдущего разбора. Верни только строки A|..., Q|..., C|... или NONE. Не добавляй и не удаляй смысловые акты. Значения ROLE копируй из SOURCE."""
+_LINE_REPAIR_SYSTEM_PROMPT = """Repair only the line_v1 format of the previous parse. Return only A|..., Q|..., C|..., or NONE. Do not add or remove semantic acts. Copy ROLE values from SOURCE."""
 
-_DEFAULT_SYSTEM_PROMPT = """Ты семантический парсер. Ответ — только JSON, без markdown.
-Формат: {"a":[{"id":"A1","p":"форма предиката","n":"нормальная форма","neg":false,"r":[["SUBJECT","текст"],["OBJECT","текст"]]}],"q":[],"c":[]}
-"@A2" вместо текста = ссылка на assertion A2.
-Вопрос: {"m":"EXISTS","p":"предикат","n":"нормальная форма","role":null,"r":[]}. Для значения роли: m="FILL_ROLE", role="OBJECT".
-Команда: {"p":"предикат","n":"нормальная форма","r":[]}
-Роли: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO.
-Не выдавай UID, C/P/H/L. Не выдумывай факты. Вопрос не превращай в assertion. Команду клади в c. Я/ты/он/вчера/там оставляй текстом.
-Если актов нет: {"a":[],"q":[],"c":[]}"""
+_DEFAULT_SYSTEM_PROMPT = """You are a semantic parser. Return only JSON, without markdown.
+Format: {"a":[{"id":"A1","p":"predicate surface","n":"base form","neg":false,"r":[["SUBJECT","text"],["OBJECT","text"]]}],"q":[],"c":[]}
+Use @A2 instead of text for a nested assertion.
+Query: {"m":"EXISTS","p":"predicate","n":"base form","role":null,"r":[]}. For a missing role use m="FILL_ROLE" and role="OBJECT".
+Command: {"p":"predicate","n":"base form","r":[]}.
+Allowed roles: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO.
+Do not emit UIDs or C/P/H/L. Do not invent facts. Keep pronouns, deictic words, dates, and places as source text. If there are no acts, return {"a":[],"q":[],"c":[]}."""
 
-_REPAIR_SYSTEM_PROMPT = """Исправь только формат предыдущего разбора. Верни один валидный JSON без markdown в compact-схеме {"a":[],"q":[],"c":[]}. Не добавляй и не удаляй смысловые акты."""
+_REPAIR_SYSTEM_PROMPT = """Repair only the format of the previous parse. Return one valid compact JSON object with keys a, q, c. Do not add or remove semantic acts."""

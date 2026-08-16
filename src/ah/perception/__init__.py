@@ -14,6 +14,8 @@ from .contracts import (
     QueryCandidate,
     QueryMode,
     SituationRelationCandidate,
+    StructuralClarificationOption,
+    StructuralClarificationSpec,
 )
 from .llm_parser import (
     LLMPerceptionService,
@@ -21,6 +23,7 @@ from .llm_parser import (
     PerceptionAttemptDiagnostic,
     PerceptionDiagnostic,
     PerceptionParseError,
+    PerceptionClarificationRequired,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 
@@ -40,13 +43,16 @@ __all__ = [
     "QueryCandidate",
     "QueryMode",
     "SituationRelationCandidate",
+    "StructuralClarificationOption",
+    "StructuralClarificationSpec",
     "LLMPerceptionService",
     "LLMPerceptionSettings",
     "PerceptionAttemptDiagnostic",
     "PerceptionDiagnostic",
     "PerceptionParseError",
+    "PerceptionClarificationRequired",
     "TextSensoryResult",
     "TextSensoryService",
 ]
 
-from .morphology import MorphInfo, Morphology, NullMorphology, Pymorphy3Morphology, build_morphology
+from .morphology import MorphInfo, Morphology, NullMorphology, Pymorphy3Morphology, build_morphology, stable_transitivity

@@ -1,1 +1,1 @@
-Choose which listed participant performs the CHILD predicate. Reply only with the option number. Choose 0 if the text does not determine it reliably.
+Choose exactly one label from CHOICES. Return only the label of the participant who performs the CHILD predicate. Do not explain.

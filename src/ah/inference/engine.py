@@ -65,6 +65,11 @@ class InferenceEngine:
         for element in self.core.store.all_elements():
             if not isinstance(element, Hypernode) or element.template.uid != template_uid:
                 continue
+            # Scoped propositions are operands of canonical semantic operators
+            # (currently IF).  Their presence represents proposition content, not
+            # an asserted world fact, so ordinary EXISTS/ROLE_FILL must ignore them.
+            if element.meta.get("semantic_scope"):
+                continue
             if all(element.actants.get(role) == ref for role, ref in known_roles.items()):
                 out.append(element)
         out.sort(key=lambda n: n.uid)

@@ -23,7 +23,13 @@ from PySide6.QtWidgets import (
 
 from ah.bootstrap import RuntimeServices
 from ah.config import AppConfig
-from ah.diagnostics import load_acceptance_cases, run_acceptance_suite
+from ah.diagnostics import (
+    load_acceptance_cases,
+    load_semantic_oracle,
+    run_acceptance_suite,
+    run_hidden_valency_diagnostic,
+    validate_oracle_alignment,
+)
 
 from .config_editor import ConfigEditor
 from .config_store import ApplyMode, ConfigDocument
@@ -66,13 +72,14 @@ class MainWindow(QMainWindow):
         self._last_turn = None
         self._chat_worker: FunctionWorker | None = None
         self._acceptance_worker: FunctionWorker | None = None
+        self._hidden_valency_worker: FunctionWorker | None = None
         self._llm_operation_worker: FunctionWorker | None = None
         self._llm_operation_clears_restart = False
         self._selected_uid: str | None = None
         self._selected_edge_key: str | None = None
         self._llm_restart_required = False
         self._runtime_restart_required = False
-        self._acceptance_visuals_suspended = False
+        self._acceptance_status_suspended = False
 
         self.setWindowTitle("AH Agent — Cognitive Runtime")
         self.resize(1580, 980)
@@ -91,10 +98,11 @@ class MainWindow(QMainWindow):
         self._build_link_manager_dock()
         self._build_runtime_dock()
 
-        # Heavy runtime status includes a full GraphInspector snapshot and may be
-        # suspended during long acceptance runs. LLM diagnostics are deliberately
-        # polled by a separate lightweight timer so the LLM dock remains live while
-        # graph/AH visualization is frozen.
+        # Runtime status includes a full GraphInspector snapshot. During acceptance
+        # it is suspended to avoid duplicating the snapshot already rebuilt by the
+        # live canvas timer. The VisPy canvas itself deliberately remains live so a
+        # batch run can be observed as the AH grows. LLM diagnostics use a separate
+        # lightweight timer and remain live as well.
         self.status_timer = QTimer(self)
         self.status_timer.timeout.connect(self._refresh_status)
         self.status_timer.start(300)
@@ -145,13 +153,20 @@ class MainWindow(QMainWindow):
         self.send_button.clicked.connect(self._send_chat)
         self.acceptance_button = QPushButton("Прогнать acceptance-файл")
         self.acceptance_button.setToolTip(
-            str(self.services.config.paths.data_dir / "acceptance_cases.txt")
-            + "\nОдин запрос на строку; пустые строки и # комментарии игнорируются."
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_cases.txt")
+            + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_oracle.json")
         )
         self.acceptance_button.clicked.connect(self._run_acceptance_cases)
+        self.hidden_valency_button = QPushButton("Hidden-valency preflight")
+        self.hidden_valency_button.setToolTip(
+            "12 LLM-вызовов: 6 semantic cases × 2 порядка binary labels. "
+            "Диагностика не пишет в AH."
+        )
+        self.hidden_valency_button.clicked.connect(self._run_hidden_valency_diagnostic)
         chat_buttons = QHBoxLayout()
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
+        chat_buttons.addWidget(self.hidden_valency_button)
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
         layout.addLayout(chat_buttons)
@@ -263,8 +278,8 @@ class MainWindow(QMainWindow):
         self._refresh_status()
 
     def _start_llm(self) -> None:
-        if self._acceptance_worker is not None:
-            self.statusBar().showMessage("Acceptance suite использует LLM", 2500)
+        if self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+            self.statusBar().showMessage("Диагностический run использует LLM", 2500)
             return
         llm = self.services.llm
         if llm is None:
@@ -275,8 +290,8 @@ class MainWindow(QMainWindow):
         self._run_llm_operation(llm.start, clears_restart=True)
 
     def _stop_llm(self) -> None:
-        if self._acceptance_worker is not None:
-            self.statusBar().showMessage("Acceptance suite использует LLM", 2500)
+        if self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+            self.statusBar().showMessage("Диагностический run использует LLM", 2500)
             return
         llm = self.services.llm
         if llm is None or not llm.is_running:
@@ -284,8 +299,8 @@ class MainWindow(QMainWindow):
         self._run_llm_operation(llm.stop)
 
     def _restart_llm(self) -> None:
-        if self._acceptance_worker is not None:
-            self.statusBar().showMessage("Acceptance suite использует LLM", 2500)
+        if self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+            self.statusBar().showMessage("Диагностический run использует LLM", 2500)
             return
         llm = self.services.llm
         if llm is None:
@@ -328,7 +343,7 @@ class MainWindow(QMainWindow):
         # delivered. The previous implementation kept the worker only in a local
         # variable and re-enabled the button through a lambda, which is fragile
         # across worker-thread/UI-thread boundaries.
-        if self._chat_worker is not None or self._acceptance_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2000)
             return
 
@@ -359,7 +374,7 @@ class MainWindow(QMainWindow):
         self.thread_pool.start(worker)
 
     def _run_acceptance_cases(self) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -370,8 +385,11 @@ class MainWindow(QMainWindow):
             return
 
         cases_file = self.services.config.paths.data_dir / "acceptance_cases.txt"
+        oracle_file = self.services.config.paths.data_dir / "acceptance_oracle.json"
         try:
             cases = load_acceptance_cases(cases_file)
+            oracle = load_semantic_oracle(oracle_file)
+            validate_oracle_alignment(cases, oracle)
         except Exception as exc:
             QMessageBox.critical(self, "Acceptance suite", f"{type(exc).__name__}: {exc}")
             return
@@ -379,19 +397,22 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.hidden_valency_button.setEnabled(False)
         self.action_llm.setEnabled(False)
         self.action_ignition.setEnabled(False)
         self.action_tick.setEnabled(False)
         self.action_save.setEnabled(False)
         self.chat_history.append(
-            f"<b>Acceptance:</b> запускаю {len(cases)} запросов из "
+            f"<b>Acceptance:</b> запускаю {len(cases)} запросов с semantic oracle: "
             f"{self._html(str(cases_file))}."
         )
         self.statusBar().showMessage(f"Acceptance suite: 0/{len(cases)} — выполняется")
-        self._suspend_acceptance_visuals()
+        self._suspend_acceptance_status_polling()
 
         def run_suite():
-            return run_acceptance_suite(self.services, cases_file=cases_file)
+            return run_acceptance_suite(
+                self.services, cases_file=cases_file, oracle_file=oracle_file
+            )
 
         worker = FunctionWorker(run_suite)
         self._acceptance_worker = worker
@@ -403,18 +424,25 @@ class MainWindow(QMainWindow):
     @Slot(object)
     def _acceptance_finished(self, result) -> None:
         self.chat_history.append(
-            f"<b>Acceptance:</b> готово — OK {result.succeeded}/{result.total}, "
-            f"ERROR {result.failed}. Результаты: {self._html(str(result.output_dir))}"
+            f"<b>Acceptance:</b> semantic PASS {result.semantic_passed}/{result.total}, "
+            f"FAIL {result.semantic_failed}, GAP {result.semantic_gaps}; "
+            f"runtime ERROR {result.failed}. Результаты: {self._html(str(result.output_dir))}"
         )
         self.statusBar().showMessage(
-            f"Acceptance suite завершён: OK {result.succeeded}/{result.total}; ERROR {result.failed}",
-            8000,
+            f"Semantic PASS {result.semantic_passed}/{result.total}; "
+            f"FAIL {result.semantic_failed}; GAP {result.semantic_gaps}",
+            10000,
         )
         QMessageBox.information(
             self,
             "Acceptance suite",
-            f"Прогон завершён.\n\nOK: {result.succeeded}/{result.total}\n"
-            f"ERROR: {result.failed}\n\nРезультаты:\n{result.output_dir}",
+            f"Прогон завершён.\n\n"
+            f"SEMANTIC PASS: {result.semantic_passed}/{result.total}\n"
+            f"SEMANTIC FAIL: {result.semantic_failed}\n"
+            f"ARCHITECTURE GAP: {result.semantic_gaps}\n\n"
+            f"Runtime OK: {result.succeeded}/{result.total}\n"
+            f"Runtime ERROR: {result.failed}\n\n"
+            f"Результаты:\n{result.output_dir}",
         )
 
     @Slot(str)
@@ -428,27 +456,112 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.hidden_valency_button.setEnabled(True)
         self.action_llm.setEnabled(True)
         self.action_ignition.setEnabled(True)
         self.action_tick.setEnabled(True)
         self.action_save.setEnabled(True)
         self.chat_input.setFocus()
-        self._resume_acceptance_visuals()
+        self._resume_acceptance_status_polling()
 
-    def _suspend_acceptance_visuals(self) -> None:
-        if self._acceptance_visuals_suspended:
+    def _run_hidden_valency_diagnostic(self) -> None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
-        self._acceptance_visuals_suspended = True
+        if self._llm_operation_worker is not None:
+            self.statusBar().showMessage("Дождитесь завершения операции LLM", 2500)
+            return
+        if self.services.llm is None or not self.services.llm.is_running:
+            QMessageBox.warning(self, "Hidden-valency preflight", "Сначала запустите локальную LLM.")
+            return
+
+        self.send_button.setEnabled(False)
+        self.chat_input.setEnabled(False)
+        self.acceptance_button.setEnabled(False)
+        self.hidden_valency_button.setEnabled(False)
+        self.action_llm.setEnabled(False)
+        self.action_ignition.setEnabled(False)
+        self.action_tick.setEnabled(False)
+        self.action_save.setEnabled(False)
+        self.chat_history.append(
+            "<b>Hidden valency:</b> запускаю capability preflight — "
+            "6 cases × 2 порядка labels, без записи в AH."
+        )
+        self.statusBar().showMessage("Hidden-valency preflight: 12 LLM-вызовов — выполняется")
+
+        worker = FunctionWorker(lambda: run_hidden_valency_diagnostic(self.services))
+        self._hidden_valency_worker = worker
+        worker.signals.result.connect(self._hidden_valency_finished)
+        worker.signals.error.connect(self._hidden_valency_error)
+        worker.signals.finished.connect(self._hidden_valency_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _hidden_valency_finished(self, result) -> None:
+        self.chat_history.append(
+            f"<b>Hidden valency:</b> semantic OK {result.semantic_ok}/{result.cases}; "
+            f"ORDER_BIAS {result.order_bias}; MALFORMED {result.malformed}; "
+            f"first-choice {result.first_choice_calls}/{result.calls}; "
+            f"AH unchanged={result.ah_unchanged}. "
+            f"Bundle: {self._html(str(result.archive_path))}"
+        )
+        self.statusBar().showMessage(
+            f"Hidden-valency preflight: OK {result.semantic_ok}/{result.cases}; "
+            f"ORDER_BIAS {result.order_bias}; first-choice {result.first_choice_calls}/{result.calls}",
+            10000,
+        )
+        QMessageBox.information(
+            self,
+            "Hidden-valency preflight",
+            f"Диагностика завершена.\n\n"
+            f"SEMANTIC_OK: {result.semantic_ok}/{result.cases}\n"
+            f"ORDER_BIAS: {result.order_bias}\n"
+            f"SEMANTIC_WRONG: {result.semantic_wrong}\n"
+            f"INCONSISTENT: {result.inconsistent}\n"
+            f"MALFORMED: {result.malformed}\n"
+            f"Exact protocol: {result.exact_protocol_calls}/{result.calls}\n"
+            f"Recovered </think>: {result.wrapper_recovered_calls}/{result.calls}\n"
+            f"First-choice: {result.first_choice_calls}/{result.calls}\n"
+            f"AH unchanged: {result.ah_unchanged}\n\n"
+            f"Архив для анализа:\n{result.archive_path}",
+        )
+
+    @Slot(str)
+    def _hidden_valency_error(self, message: str) -> None:
+        self.chat_history.append(f"<b>HIDDEN VALENCY ERROR:</b> {self._html(message)}")
+        QMessageBox.critical(self, "Hidden-valency preflight", message)
+
+    @Slot()
+    def _hidden_valency_worker_finished(self) -> None:
+        self._hidden_valency_worker = None
+        self.send_button.setEnabled(True)
+        self.chat_input.setEnabled(True)
+        self.acceptance_button.setEnabled(True)
+        self.hidden_valency_button.setEnabled(True)
+        self.action_llm.setEnabled(True)
+        self.action_ignition.setEnabled(True)
+        self.action_tick.setEnabled(True)
+        self.action_save.setEnabled(True)
+        self.chat_input.setFocus()
+        self.llm_panel.refresh_status()
+        self._refresh_status()
+
+    def _suspend_acceptance_status_polling(self) -> None:
+        if self._acceptance_status_suspended:
+            return
+        self._acceptance_status_suspended = True
+        # Keep the canvas render loop alive during acceptance. It already rebuilds
+        # the current GraphInspector snapshot at gui.refresh_hz, so the separate
+        # status poll would only duplicate expensive graph projection work.
         self.status_timer.stop()
-        self.canvas.set_live_updates_enabled(False)
 
-    def _resume_acceptance_visuals(self) -> None:
-        if not self._acceptance_visuals_suspended:
+    def _resume_acceptance_status_polling(self) -> None:
+        if not self._acceptance_status_suspended:
             return
-        self._acceptance_visuals_suspended = False
-        # One graph rebuild is enough after the whole batch. Normal status polling
-        # resumes only after that; nothing here changes ignition or AH runtime.
-        self.canvas.set_live_updates_enabled(True)
+        self._acceptance_status_suspended = False
+        # Canvas rendering never stopped; refresh once to expose the final batch
+        # state immediately, then restore the secondary runtime/status poll.
+        self.canvas.refresh()
         self.llm_panel.refresh_status()
         self.status_timer.start(300)
 
@@ -519,8 +632,8 @@ class MainWindow(QMainWindow):
             self.canvas.set_settings(new_config.gui)
             self.llm_panel.reload_prompts()
             self.acceptance_button.setToolTip(
-                str(new_config.paths.data_dir / "acceptance_cases.txt")
-                + "\nОдин запрос на строку; пустые строки и # комментарии игнорируются."
+                "Cases: " + str(new_config.paths.data_dir / "acceptance_cases.txt")
+                + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_oracle.json")
             )
         except Exception as exc:
             QMessageBox.critical(self, "Config apply", str(exc))

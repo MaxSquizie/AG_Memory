@@ -100,6 +100,33 @@ class ProjectionInferenceTests(unittest.TestCase):
         self.assertEqual(outcome.conclusion_domain, Domain.P)
 
 
+
+    def test_scoped_conditional_proposition_does_not_satisfy_exists_or_role_fill(self) -> None:
+        masha = self.entity(Domain.C, "Маша")
+        book = self.entity(Domain.C, "Книга")
+        pred = self.core.ensure_abstract_symbol("читать")
+        template = self.core.add_template(
+            Domain.C, self.core.ref(pred.uid), (ActantRole.SUBJECT, ActantRole.OBJECT)
+        )
+        scoped, _ = self.core.add_hypernode(
+            Domain.C,
+            self.core.ref(template.uid),
+            {ActantRole.SUBJECT: masha, ActantRole.OBJECT: book},
+            0.4,
+            meta={"semantic_scope": "CONDITIONAL"},
+            count_occurrence=False,
+        )
+        engine = InferenceEngine(self.core, self.inference_settings)
+        exists = engine.solve(
+            ExistsGoal(self.core.ref(template.uid), {ActantRole.SUBJECT: masha, ActantRole.OBJECT: book})
+        )
+        fill = engine.solve(
+            RoleFillGoal(self.core.ref(template.uid), {ActantRole.SUBJECT: masha}, ActantRole.OBJECT)
+        )
+        self.assertIs(exists.status, LogicalStatus.UNKNOWN)
+        self.assertIs(fill.status, LogicalStatus.UNKNOWN)
+        self.assertEqual(self.core.store.get_hypernode(scoped.uid).meta.get("semantic_scope"), "CONDITIONAL")
+
     def test_explicit_false_disproves_precise_exists_goal(self) -> None:
         masha = self.entity(Domain.P, "Маша")
         spb = self.entity(Domain.C, "Санкт-Петербург")

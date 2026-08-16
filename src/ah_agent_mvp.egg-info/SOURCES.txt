@@ -1,5 +1,11 @@
-docs/SLICE_12_13.md
 README.md
+data/acceptance_oracle.json
+docs/ARCHITECTURE_AUDIT_01238.md
+docs/SEMANTIC_ORACLE.md
+docs/SLICE_12_13.md
+docs/SLICE_12_30.md
+docs/SLICE_12_37.md
+docs/SLICE_12_38.md
 pyproject.toml
 src/ah/__init__.py
 src/ah/agent/__init__.py
@@ -19,6 +25,8 @@ src/ah/core/validation.py
 src/ah/diagnostics/__init__.py
 src/ah/diagnostics/acceptance_runner.py
 src/ah/diagnostics/graph_dump.py
+src/ah/diagnostics/hidden_valency_diagnostic.py
+src/ah/diagnostics/semantic_oracle.py
 src/ah/diagnostics/summary.py
 src/ah/diagnostics/trace_view.py
 src/ah/dsl/__init__.py
@@ -86,12 +94,15 @@ src/ah_agent_mvp.egg-info/requires.txt
 src/ah_agent_mvp.egg-info/top_level.txt
 tests/test_acceptance_runner.py
 tests/test_ah_core.py
+tests/test_architecture_alignment_1230.py
 tests/test_config.py
 tests/test_correction_pacemaker_diagnostics.py
 tests/test_dsl.py
 tests/test_gui_foundation.py
+tests/test_hidden_valency_diagnostic_1237.py
 tests/test_ignition.py
 tests/test_integration.py
 tests/test_lifecycle_persistence_orchestrator.py
 tests/test_llm_roles.py
 tests/test_projection_inference.py
+tests/test_semantic_oracle_1238.py

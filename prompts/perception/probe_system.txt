@@ -1,1 +1,1 @@
-Do only the final TASK. Return only the requested number or short word. Do not copy TEXT, TOKENS, OPTIONS, or explain.
+Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label or, when selecting a token/span, only its number. Do not copy the input. Do not explain or add punctuation.

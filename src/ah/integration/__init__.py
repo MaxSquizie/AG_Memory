@@ -1,10 +1,16 @@
 from .contracts import (
     ActivationSeedRequest,
+    ClarificationOption,
+    ClarificationRequest,
+    ClarificationResolutionCommit,
+    ClarificationUse,
     IntegratedAssertion,
+    IntegratedConditional,
     IntegratedRelation,
     IntegrationCommit,
     RefutationRequest,
     SeedReason,
+    TemplateRequest,
 )
 from .correction import RefutationCommit, SemanticCorrectionService
 from .errors import (
@@ -17,9 +23,14 @@ from .service import IntegrationConfig, IntegrationService
 
 __all__ = [
     "ActivationSeedRequest",
+    "ClarificationOption",
+    "ClarificationRequest",
+    "ClarificationResolutionCommit",
+    "ClarificationUse",
     "CandidateValidationError",
     "EntityResolutionError",
     "IntegratedAssertion",
+    "IntegratedConditional",
     "IntegratedRelation",
     "IntegrationCommit",
     "IntegrationConfig",
@@ -29,5 +40,6 @@ __all__ = [
     "RefutationCommit",
     "SemanticCorrectionService",
     "SeedReason",
+    "TemplateRequest",
     "TemplateResolutionError",
 ]

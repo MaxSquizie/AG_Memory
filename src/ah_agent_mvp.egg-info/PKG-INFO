@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: ah-agent-mvp
-Version: 0.12.19
+Version: 0.12.44
 Summary: Associative-heterarchical memory core for a text LLM agent
 Requires-Python: >=3.12
 Requires-Dist: pymorphy3<3,>=2.0.6

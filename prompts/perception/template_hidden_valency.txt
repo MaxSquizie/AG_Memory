@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Decide only whether the tested additional slot exists beyond Known roles. Do not count a shown SUBJECT or OBJECT again. Return only the label.

@@ -15,6 +15,8 @@ class MorphInfo:
     gender: str | None = None
     mood: str | None = None
     animacy: str | None = None
+    transitivity: str | None = None
+    grammemes: frozenset[str] = frozenset()
     score: float = 0.0
 
 
@@ -42,6 +44,27 @@ def material_analyses(analyses: tuple[MorphInfo, ...]) -> tuple[MorphInfo, ...]:
     return tuple(item for item in analyses if item.score >= floor)
 
 
+
+def stable_transitivity(analyses: tuple[MorphInfo, ...]) -> str | None:
+    """Return a deterministic lexical transitivity cue, or ``None``.
+
+    This is perception-side dictionary evidence only.  It may narrow a latent
+    OBJECT hypothesis before any SLM call, but it never creates canonical AH
+    objects or mutates a T.  A cue is accepted only when all material verbal
+    readings that expose transitivity agree.
+    """
+    material = tuple(
+        item for item in material_analyses(analyses)
+        if item.pos in {"VERB", "INFN", "PRTF", "PRTS", "GRND"}
+        and item.transitivity in {"tran", "intr"}
+    )
+    if not material:
+        return None
+    values = {item.transitivity for item in material}
+    if len(values) != 1:
+        return None
+    return next(iter(values))
+
 def stable_normal_form(
     analyses: tuple[MorphInfo, ...],
     *,
@@ -54,17 +77,40 @@ def stable_normal_form(
     paradigms such as ``Мария/Марии/Марию`` share one lexical key without silently
     collapsing genuine homonymy.
     """
-    candidates = [
-        item.normal_form.strip()
-        for item in material_analyses(analyses)
+    # Materiality is computed against *all* readings before an optional POS
+    # restriction. Otherwise a tiny noun reading of an overwhelmingly adverbial
+    # token (e.g. ``Потом``) could become "stable" merely because ADVB was filtered
+    # out by a nominal caller.
+    globally_material = material_analyses(analyses)
+    material = tuple(
+        item for item in globally_material
         if item.normal_form.strip() and (poses is None or item.pos in poses)
-    ]
-    if not candidates:
+    )
+    if not material:
         return None
-    folded = {item.casefold() for item in candidates}
-    if len(folded) != 1:
-        return None
-    return candidates[0]
+    folded = {item.normal_form.strip().casefold() for item in material}
+    if len(folded) == 1:
+        return material[0].normal_form.strip()
+
+    # Proper-name paradigms occasionally receive one secondary dictionary reading
+    # at about half the probability of the dominant analysis (e.g. ``Петру``:
+    # Пётр/datv vs Петра/accs). When one lexical normal form is strongly dominant
+    # among globally material readings, use it; equal/near-equal forms such as
+    # ``пришли`` remain unresolved for later syntactic disambiguation.
+    scores: dict[str, float] = {}
+    surfaces: dict[str, str] = {}
+    for item in material:
+        key = item.normal_form.strip().casefold()
+        scores[key] = scores.get(key, 0.0) + max(0.0, item.score)
+        surfaces.setdefault(key, item.normal_form.strip())
+    ranked = sorted(scores.items(), key=lambda pair: pair[1], reverse=True)
+    if len(ranked) == 1:
+        return surfaces[ranked[0][0]]
+    best_key, best_score = ranked[0]
+    second_score = ranked[1][1]
+    if best_score >= 0.60 and best_score >= second_score * 1.8:
+        return surfaces[best_key]
+    return None
 
 
 class NullMorphology:
@@ -105,6 +151,12 @@ class Pymorphy3Morphology:
         seen: set[tuple[object, ...]] = set()
         for item in parses:
             tag = item.tag
+            grammemes = frozenset(str(value) for value in getattr(tag, "grammemes", ()))
+            transitivity = (
+                "tran" if "tran" in grammemes
+                else "intr" if "intr" in grammemes
+                else None
+            )
             info = MorphInfo(
                 normal_form=str(item.normal_form),
                 pos=getattr(tag, "POS", None),
@@ -113,9 +165,14 @@ class Pymorphy3Morphology:
                 gender=getattr(tag, "gender", None),
                 mood=getattr(tag, "mood", None),
                 animacy=getattr(tag, "animacy", None),
+                transitivity=transitivity,
+                grammemes=grammemes,
                 score=float(getattr(item, "score", 0.0) or 0.0),
             )
-            key = (info.normal_form, info.pos, info.case, info.number, info.gender, info.mood, info.animacy)
+            key = (
+                info.normal_form, info.pos, info.case, info.number, info.gender,
+                info.mood, info.animacy, info.transitivity, info.grammemes,
+            )
             if key in seen:
                 continue
             seen.add(key)

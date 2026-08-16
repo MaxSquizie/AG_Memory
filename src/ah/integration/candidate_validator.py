@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ah.model import ActantRole
 from ah.perception import AssertionCandidate, AssertionStatus, PerceptionResult
 
 from .errors import CandidateValidationError
@@ -35,13 +36,49 @@ class CandidateValidator:
                 candidate.predicate, roles, label=candidate.local_id
             )
 
-        for candidate in result.assertions:
-            for actant in candidate.actants:
-                if actant.candidate_ref is not None and actant.candidate_ref not in by_id:
-                    raise CandidateValidationError(
-                        f"Unknown candidate_ref {actant.candidate_ref!r} "
-                        f"in {candidate.local_id}"
+            if candidate.alternatives:
+                alternative_role_sets: list[set] = []
+                for alt_index, alternative in enumerate(candidate.alternatives, start=1):
+                    if alternative.alternatives:
+                        raise CandidateValidationError(
+                            f"Nested runtime alternatives are not supported in {candidate.local_id}"
+                        )
+                    if alternative.local_id != candidate.local_id:
+                        raise CandidateValidationError(
+                            f"Alternative local_id mismatch in {candidate.local_id}"
+                        )
+                    if alternative.predicate.lookup_form.casefold() != candidate.predicate.lookup_form.casefold():
+                        raise CandidateValidationError(
+                            f"Alternative predicate mismatch in {candidate.local_id}"
+                        )
+                    if alternative.negated != candidate.negated or alternative.status is not candidate.status:
+                        raise CandidateValidationError(
+                            f"Alternative assertion status mismatch in {candidate.local_id}"
+                        )
+                    alt_roles = [a.role for a in alternative.actants]
+                    if len(alt_roles) != len(set(alt_roles)):
+                        raise CandidateValidationError(
+                            f"Duplicate actant role in {candidate.local_id} alternative#{alt_index}"
+                        )
+                    self._validate_template_roles(
+                        alternative.predicate, alt_roles,
+                        label=f"{candidate.local_id}.alternative#{alt_index}",
                     )
+                    alternative_role_sets.append(set(alt_roles))
+                if any(role_set != alternative_role_sets[0] for role_set in alternative_role_sets[1:]):
+                    raise CandidateValidationError(
+                        f"Runtime alternatives in {candidate.local_id} must share one role schema"
+                    )
+
+        for candidate in result.assertions:
+            variants = (candidate, *candidate.alternatives)
+            for variant in variants:
+                for actant in variant.actants:
+                    if actant.candidate_ref is not None and actant.candidate_ref not in by_id:
+                        raise CandidateValidationError(
+                            f"Unknown candidate_ref {actant.candidate_ref!r} "
+                            f"in {candidate.local_id}"
+                        )
 
 
         conditional_refs: set[str] = set()
@@ -74,6 +111,25 @@ class CandidateValidator:
                     f"Unknown situation relation endpoint: "
                     f"{relation.source_ref!r} -> {relation.target_ref!r}"
                 )
+            target = by_id[relation.target_ref]
+            if relation.canonical_relation_id == "CAUSE" and any(
+                actant.role == ActantRole.CAUSE and actant.candidate_ref == relation.source_ref
+                for actant in target.actants
+            ):
+                raise CandidateValidationError(
+                    "Inter-situation CAUSE must be represented once as L, not duplicated as N.CAUSE"
+                )
+            if relation.canonical_relation_id == "FOLLOW":
+                pair = {relation.source_ref, relation.target_ref}
+                for assertion in (by_id[relation.source_ref], by_id[relation.target_ref]):
+                    if any(
+                        actant.role == ActantRole.TIME
+                        and actant.candidate_ref in pair - {assertion.local_id}
+                        for actant in assertion.actants
+                    ):
+                        raise CandidateValidationError(
+                            "Directional inter-situation time must be represented once as FOLLOW, not duplicated as N.TIME"
+                        )
 
         for index, query in enumerate(result.queries, start=1):
             roles = [a.role for a in query.actants]

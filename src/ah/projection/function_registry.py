@@ -34,6 +34,7 @@ class FunctionRegistry:
         self.register(FunctionSpec("OR", 2, None, lambda xs: " OR ".join(f"({x})" for x in xs)))
         self.register(FunctionSpec("FALSE", 1, 1, lambda xs: f"NOT ({xs[0]})"))
         self.register(FunctionSpec("NOT", 1, 1, lambda xs: f"NOT ({xs[0]})"))
+        self.register(FunctionSpec("IF", 2, 2, lambda xs: f"IF ({xs[0]}) THEN ({xs[1]})"))
 
     def register(self, spec: FunctionSpec) -> None:
         key = spec.function_id.strip().upper()

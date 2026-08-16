@@ -341,7 +341,6 @@ class IntegrationServiceTests(unittest.TestCase):
                     "write",
                     ActantCandidate(ActantRole.SUBJECT, mention="Лиза"),
                     ActantCandidate(ActantRole.OBJECT, mention="текст"),
-                    ActantCandidate(ActantRole.CAUSE, candidate_ref="A2"),
                 ),
                 self._assertion(
                     "A2",
@@ -367,17 +366,16 @@ class IntegrationServiceTests(unittest.TestCase):
 
 
 
-    def test_conditional_components_are_not_committed_as_world_facts(self) -> None:
-        before_c_n = sum(isinstance(e, Hypernode) for e in self.core.store.elements(Domain.C))
-        before_p_n = sum(isinstance(e, Hypernode) for e in self.core.store.elements(Domain.P))
-        before_c_m = sum(e.__class__.__name__ == "SemanticEntity" for e in self.core.store.elements(Domain.C))
-        before_p_m = sum(e.__class__.__name__ == "SemanticEntity" for e in self.core.store.elements(Domain.P))
+    def test_conditional_components_are_scoped_under_canonical_if(self) -> None:
         result = PerceptionResult(
             source_text="Если Лиза получит советы, она напишет текст.",
             assertions=(
                 AssertionCandidate(
                     "A1",
-                    PredicateCandidate("получит", "receive"),
+                    PredicateCandidate(
+                        "получит", "receive",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.OBJECT)),
+                    ),
                     (
                         ActantCandidate(ActantRole.SUBJECT, mention="Лиза", entity_ref="E1"),
                         ActantCandidate(ActantRole.OBJECT, mention="советы"),
@@ -386,7 +384,10 @@ class IntegrationServiceTests(unittest.TestCase):
                 ),
                 AssertionCandidate(
                     "A2",
-                    PredicateCandidate("напишет", "write"),
+                    PredicateCandidate(
+                        "напишет", "write",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.OBJECT)),
+                    ),
                     (
                         ActantCandidate(ActantRole.SUBJECT, mention="она", entity_ref="E1"),
                         ActantCandidate(ActantRole.OBJECT, mention="текст"),
@@ -400,12 +401,218 @@ class IntegrationServiceTests(unittest.TestCase):
         commit = self.service.integrate_external(result, self.context)
         self.assertEqual(commit.assertions, ())
         self.assertEqual(commit.relations, ())
-        self.assertEqual(sum(isinstance(e, Hypernode) for e in self.core.store.elements(Domain.C)), before_c_n)
-        self.assertEqual(sum(isinstance(e, Hypernode) for e in self.core.store.elements(Domain.P)), before_p_n)
-        self.assertEqual(sum(e.__class__.__name__ == "SemanticEntity" for e in self.core.store.elements(Domain.C)), before_c_m)
-        self.assertEqual(sum(e.__class__.__name__ == "SemanticEntity" for e in self.core.store.elements(Domain.P)), before_p_m)
+        self.assertEqual(len(commit.conditionals), 1)
+        conditional = commit.conditionals[0]
+        function = self.core.store.get_element_any_domain(conditional.ref.uid)
+        self.assertEqual(function.function_id, "IF")
+        self.assertEqual(function.operands, (conditional.antecedent, conditional.consequent))
+        self.assertEqual(len(conditional.member_refs), 2)
+        for ref in conditional.member_refs:
+            node = self.core.store.get_hypernode(ref.uid)
+            self.assertEqual(node.meta.get("semantic_scope"), "CONDITIONAL")
+            self.assertEqual(node.meta.get("occurrence_count"), 0)
+        self.assertEqual(self.core.store.domain_of(conditional.ref.uid), Domain.C)
         self.assertEqual(self.core.store.domain_of(commit.experience_ref.uid), Domain.H)
-        self.assertEqual(len(commit.activation_seeds), 1)
+        self.assertEqual(tuple(seed.ref for seed in commit.activation_seeds), (conditional.ref, commit.experience_ref))
+
+    def test_scoped_conditional_proposition_does_not_dedup_with_later_asserted_fact(self) -> None:
+        conditional_result = PerceptionResult(
+            source_text="Если Лиза получит советы, она напишет текст.",
+            assertions=(
+                AssertionCandidate(
+                    "A1",
+                    PredicateCandidate(
+                        "получит", "получить",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.OBJECT)),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="Лиза", entity_ref="E1"),
+                        ActantCandidate(ActantRole.OBJECT, mention="советы"),
+                    ),
+                    status=AssertionStatus.CONDITIONAL,
+                ),
+                AssertionCandidate(
+                    "A2",
+                    PredicateCandidate(
+                        "напишет", "написать",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.OBJECT)),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="она", entity_ref="E1"),
+                        ActantCandidate(ActantRole.OBJECT, mention="текст"),
+                    ),
+                    status=AssertionStatus.CONDITIONAL,
+                ),
+            ),
+            conditionals=(ConditionalCandidate(("A1",), ("A2",)),),
+        )
+        conditional_commit = self.service.integrate_external(conditional_result, self.context)
+        scoped_ref = conditional_commit.conditionals[0].member_refs[0]
+        scoped = self.core.store.get_hypernode(scoped_ref.uid)
+
+        asserted_result = PerceptionResult(
+            source_text="Лиза получила советы.",
+            assertions=(
+                AssertionCandidate(
+                    "B1",
+                    PredicateCandidate("получила", "получить"),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="Лиза"),
+                        ActantCandidate(ActantRole.OBJECT, mention="советы"),
+                    ),
+                ),
+            ),
+        )
+        asserted_commit = self.service.integrate_external(asserted_result, self.context)
+        asserted = self.core.store.get_hypernode(asserted_commit.assertions[0].ref.uid)
+
+        self.assertNotEqual(scoped.uid, asserted.uid)
+        self.assertEqual(scoped.template, asserted.template)
+        self.assertEqual(scoped.actants, asserted.actants)
+        self.assertEqual(scoped.meta.get("semantic_scope"), "CONDITIONAL")
+        self.assertIsNone(asserted.meta.get("semantic_scope"))
+
+    def test_repeated_same_conditional_reuses_scoped_members_and_if_without_occurrence_count(self) -> None:
+        def make_result():
+            return PerceptionResult(
+                source_text="Если Иван придёт, Мария уйдёт.",
+                assertions=(
+                    AssertionCandidate(
+                        "A1", PredicateCandidate(
+                            "придёт", "прийти",
+                            template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+                        ),
+                        (ActantCandidate(ActantRole.SUBJECT, mention="Иван"),),
+                        status=AssertionStatus.CONDITIONAL,
+                    ),
+                    AssertionCandidate(
+                        "A2", PredicateCandidate(
+                            "уйдёт", "уйти",
+                            template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+                        ),
+                        (ActantCandidate(ActantRole.SUBJECT, mention="Мария"),),
+                        status=AssertionStatus.CONDITIONAL,
+                    ),
+                ),
+                conditionals=(ConditionalCandidate(("A1",), ("A2",)),),
+            )
+        first = self.service.integrate_external(make_result(), self.context)
+        second = self.service.integrate_external(make_result(), self.context)
+        self.assertEqual(first.conditionals[0].ref, second.conditionals[0].ref)
+        self.assertEqual(first.conditionals[0].member_refs, second.conditionals[0].member_refs)
+        self.assertFalse(second.conditionals[0].created)
+        for ref in second.conditionals[0].member_refs:
+            self.assertEqual(self.core.store.get_hypernode(ref.uid).meta.get("occurrence_count"), 0)
+
+    def test_conditional_multi_branch_uses_and_inside_if(self) -> None:
+        def conditional_assertion(local_id: str, predicate: str, subject: str, obj: str | None = None):
+            actants = [ActantCandidate(ActantRole.SUBJECT, mention=subject)]
+            if obj is not None:
+                actants.append(ActantCandidate(ActantRole.OBJECT, mention=obj))
+            roles = tuple(item.role for item in actants)
+            return AssertionCandidate(
+                local_id,
+                PredicateCandidate(
+                    predicate, predicate, template_candidate=TemplateCandidate(roles)
+                ),
+                tuple(actants),
+                status=AssertionStatus.CONDITIONAL,
+            )
+
+        result = PerceptionResult(
+            source_text="Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.",
+            assertions=(
+                conditional_assertion("A1", "прийти", "Иван"),
+                conditional_assertion("A2", "принести", "Мария", "документы"),
+                conditional_assertion("A3", "начать", "Пётр", "работу"),
+            ),
+            conditionals=(ConditionalCandidate(("A1", "A2"), ("A3",)),),
+        )
+
+        commit = self.service.integrate_external(result, self.context)
+        conditional = commit.conditionals[0]
+        top = self.core.store.get_element_any_domain(conditional.ref.uid)
+        antecedent = self.core.store.get_element_any_domain(conditional.antecedent.uid)
+        self.assertEqual(top.function_id, "IF")
+        self.assertEqual(antecedent.function_id, "AND")
+        self.assertEqual(tuple(ref.uid for ref in antecedent.operands), tuple(ref.uid for ref in conditional.member_refs[:2]))
+        self.assertEqual(conditional.consequent, conditional.member_refs[2])
+
+    def test_conditional_multi_consequent_uses_and_inside_if(self) -> None:
+        def conditional_assertion(local_id: str, predicate: str, subject: str, obj: str | None = None):
+            actants = [ActantCandidate(ActantRole.SUBJECT, mention=subject)]
+            if obj is not None:
+                actants.append(ActantCandidate(ActantRole.OBJECT, mention=obj))
+            return AssertionCandidate(
+                local_id,
+                PredicateCandidate(
+                    predicate, predicate,
+                    template_candidate=TemplateCandidate(tuple(item.role for item in actants)),
+                ),
+                tuple(actants),
+                status=AssertionStatus.CONDITIONAL,
+            )
+
+        result = PerceptionResult(
+            source_text="Если Иван придёт, Мария прочитает документ и отправит его Петру.",
+            assertions=(
+                conditional_assertion("A1", "прийти", "Иван"),
+                conditional_assertion("A2", "прочитать", "Мария", "документ"),
+                AssertionCandidate(
+                    "A3",
+                    PredicateCandidate(
+                        "отправить", "отправить",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT)),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="Мария"),
+                        ActantCandidate(ActantRole.OBJECT, mention="документ"),
+                        ActantCandidate(ActantRole.RECIPIENT, mention="Пётр"),
+                    ),
+                    status=AssertionStatus.CONDITIONAL,
+                ),
+            ),
+            conditionals=(ConditionalCandidate(("A1",), ("A2", "A3")),),
+        )
+
+        commit = self.service.integrate_external(result, self.context)
+        conditional = commit.conditionals[0]
+        consequent = self.core.store.get_element_any_domain(conditional.consequent.uid)
+        self.assertEqual(consequent.function_id, "AND")
+        self.assertEqual(tuple(ref.uid for ref in consequent.operands), tuple(ref.uid for ref in conditional.member_refs[1:]))
+        self.assertEqual(conditional.antecedent, conditional.member_refs[0])
+
+    def test_personalized_conditional_routes_if_and_scoped_branches_to_p(self) -> None:
+        result = PerceptionResult(
+            source_text="Если я приду, Мария уйдёт.",
+            assertions=(
+                AssertionCandidate(
+                    "A1",
+                    PredicateCandidate(
+                        "приду", "прийти", template_candidate=TemplateCandidate((ActantRole.SUBJECT,))
+                    ),
+                    (ActantCandidate(ActantRole.SUBJECT, mention="я"),),
+                    status=AssertionStatus.CONDITIONAL,
+                ),
+                AssertionCandidate(
+                    "A2",
+                    PredicateCandidate(
+                        "уйдёт", "уйти", template_candidate=TemplateCandidate((ActantRole.SUBJECT,))
+                    ),
+                    (ActantCandidate(ActantRole.SUBJECT, mention="Мария"),),
+                    status=AssertionStatus.CONDITIONAL,
+                ),
+            ),
+            conditionals=(ConditionalCandidate(("A1",), ("A2",)),),
+        )
+
+        commit = self.service.integrate_external(result, self.context)
+        conditional = commit.conditionals[0]
+        self.assertEqual(self.core.store.domain_of(conditional.ref.uid), Domain.P)
+        self.assertEqual(self.core.store.domain_of(conditional.member_refs[0].uid), Domain.P)
+        # The consequent becomes personalized too because IF binds it to a P antecedent,
+        # while the scoped proposition itself may remain C when all its own actants are C.
+        self.assertEqual(self.core.store.domain_of(conditional.member_refs[1].uid), Domain.C)
 
     def test_actant_coordination_materializes_canonical_or_function(self) -> None:
         result = PerceptionResult(
@@ -460,13 +667,15 @@ class TemplateBoundaryTests(unittest.TestCase):
             )
         self.assertIsNone(core.store.find_symbol_by_form("read"))
 
-    def test_template_schema_is_separate_from_concrete_n_filling(self) -> None:
+    def test_template_schema_grows_monotonically_from_explicit_roles(self) -> None:
         from ah.integration.template_resolver import TemplateResolver
 
         core = AHCore(uid_generator=SequentialUidGenerator())
         predicate = PredicateCandidate(
             "читает",
             "read",
+            # Perception may over-propose, but deterministic canonicalization commits
+            # only explicit evidence from the current semantic act.
             template_candidate=TemplateCandidate(
                 (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TIME)
             ),
@@ -478,7 +687,7 @@ class TemplateBoundaryTests(unittest.TestCase):
         self.assertTrue(resolution.created)
         self.assertEqual(
             resolution.template.roles,
-            (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TIME),
+            (ActantRole.SUBJECT, ActantRole.OBJECT),
         )
 
         subject = core.add_entity(Domain.C, properties={"name": Property("name", "Иван", "str")})
@@ -492,8 +701,19 @@ class TemplateBoundaryTests(unittest.TestCase):
             },
             weight=0.4,
         )
-        self.assertEqual(set(node.actants), {ActantRole.SUBJECT, ActantRole.OBJECT})
-        self.assertIn(ActantRole.TIME, resolution.template.roles)
+
+        expanded = TemplateResolver(core, Domain.C).resolve(
+            PredicateCandidate("читает", "read"),
+            (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TIME),
+        )
+        self.assertFalse(expanded.created)
+        self.assertEqual(expanded.template.uid, resolution.template.uid)
+        self.assertEqual(
+            expanded.template.roles,
+            (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TIME),
+        )
+        # The old concrete N remains valid and intentionally leaves TIME unfilled.
+        self.assertEqual(set(core.store.get_hypernode(node.uid).actants), {ActantRole.SUBJECT, ActantRole.OBJECT})
 
     def test_template_candidate_must_cover_every_filled_role(self) -> None:
         from ah.integration import TemplateResolutionError

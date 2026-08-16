@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Answer only about the tested verb slot. Use TEXT only to identify the verb meaning. Do not explain.

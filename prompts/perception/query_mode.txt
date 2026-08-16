@@ -1,1 +1,1 @@
-Choose the question type. Reply only with the number inside brackets.
+Choose exactly one English label from OPTIONS. Return only the label.

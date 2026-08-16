@@ -16,7 +16,7 @@ from ah.model import ActantRole, Domain
 from ah.core import AHCore, SequentialUidGenerator
 from ah.perception import PredicateCandidate, TextSensoryService
 from ah.integration.template_resolver import TemplateResolver
-from ah.llm.worker import _resolve_loader_type, _resolve_device_map, _generation_config_values, _score_fixed_choices, generate as worker_generate
+from ah.llm.worker import _resolve_loader_type, _resolve_device_map, _generation_config_values, _score_fixed_choices, _score_fixed_choice_details, generate as worker_generate
 from ah.projection.contracts import AgentContext
 
 
@@ -63,6 +63,10 @@ class LLMRoleTests(unittest.TestCase):
             "attention_mask": torch.tensor([[1, 1]], dtype=torch.long),
         }
         self.assertEqual(_score_fixed_choices(runtime, inputs, ["0", "1"]), "1")
+        details = _score_fixed_choice_details(runtime, inputs, ["0", "1"])
+        self.assertEqual(details["choice"], "1")
+        self.assertGreater(details["choice_margin"], 0.0)
+        self.assertEqual(set(details["choice_scores"]), {"0", "1"})
 
     def test_same_backend_can_serve_stateless_perception_and_agent_roles(self) -> None:
         with TemporaryDirectory() as td:
@@ -178,19 +182,19 @@ class LLMRoleTests(unittest.TestCase):
         self.assertIsNotNone(diag.decoded)
         self.assertIsNone(diag.final_error)
 
-    def test_adaptive_parser_uses_explicit_numeric_choices_and_english_predicate_symbol(self) -> None:
+    def test_adaptive_parser_uses_english_semantic_labels_and_numeric_token_choices(self) -> None:
         class ScriptedBackend:
             def __init__(self):
                 self.calls = []
                 self.answers = {
-                    "perception_act_type": ["1", "0"],
+                    "perception_act_type": ["ASSERTION", "NONE"],
                     "perception_predicate_start": ["2"],
                     "perception_predicate_end": ["2"],
                     "perception_predicate_symbol": ["be"],
                     "perception_actant_start": ["1", "1"],
-                    "perception_role_family": ["1", "2"],
-                    "perception_role_participant": ["1"],
-                    "perception_role_description": ["1"],
+                    "perception_role_family": ["PARTICIPANT", "DESCRIPTION"],
+                    "perception_role_participant": ["SUBJECT"],
+                    "perception_role_description": ["STATE"],
                 }
 
             def generate(self, prompt, *, system="", override=None, role="generic"):
@@ -238,8 +242,8 @@ class LLMRoleTests(unittest.TestCase):
                     "perception_predicate_end": ["2"],
                     "perception_predicate_symbol": ["love"],
                     "perception_query_mode": ["2"],
-                    "perception_role_family": ["1", "1"],
-                    "perception_role_participant": ["1", "1"],
+                    "perception_role_family": ["PARTICIPANT"],
+                    "perception_role_participant": ["OBJECT"],
                     "perception_actant_start": ["1"],
                 }
             def generate(self, prompt, *, system="", override=None, role="generic"):
@@ -256,10 +260,7 @@ class LLMRoleTests(unittest.TestCase):
         self.assertEqual(query.requested_role, ActantRole.SUBJECT)
         self.assertEqual(query.query_mode.value, "FILL_ROLE")
         self.assertEqual([(a.role, a.mention) for a in query.actants], [(ActantRole.OBJECT, "чай")])
-        self.assertEqual(
-            query.predicate.template_candidate.roles,
-            (ActantRole.OBJECT, ActantRole.SUBJECT),
-        )
+        self.assertIsNone(query.predicate.template_candidate)
 
     def test_adaptive_command_uses_same_discrete_span_and_role_pipeline(self) -> None:
         class Backend:
@@ -270,8 +271,8 @@ class LLMRoleTests(unittest.TestCase):
                     "perception_predicate_end": ["1"],
                     "perception_predicate_symbol": ["open"],
                     "perception_actant_start": ["1"],
-                    "perception_role_family": ["1"],
-                    "perception_role_participant": ["2"],
+                    "perception_role_family": ["PARTICIPANT"],
+                    "perception_role_participant": ["OBJECT"],
                 }
             def generate(self, prompt, *, system="", override=None, role="generic"):
                 return LLMResponse(self.answers[role].pop(0), {})
@@ -295,9 +296,9 @@ class LLMRoleTests(unittest.TestCase):
                     "perception_predicate_end": ["2."],
                     "perception_predicate_symbol": ["be."],
                     "perception_actant_start": ["1.", "1."],
-                    "perception_role_family": ["1.", "2."],
-                    "perception_role_participant": ["1."],
-                    "perception_role_description": ["1."],
+                    "perception_role_family": ["PARTICIPANT.", "DESCRIPTION."],
+                    "perception_role_participant": ["SUBJECT."],
+                    "perception_role_description": ["STATE."],
                 }
 
             def generate(self, prompt, *, system="", override=None, role="generic"):
@@ -361,7 +362,7 @@ class LLMRoleTests(unittest.TestCase):
                     self.act_type_calls += 1
                     if self.act_type_calls == 1:
                         return LLMResponse("I choose 1", {})
-                    return LLMResponse("0", {})
+                    return LLMResponse("NONE", {})
                 raise AssertionError(role)
 
         backend = RetryBackend()
@@ -390,7 +391,7 @@ class LLMRoleTests(unittest.TestCase):
         for anchor in ("for example", "e.g.", "example", "например"):
             self.assertNotIn(anchor, joined.casefold())
         self.assertIn("number inside brackets", (probe_dir / "predicate_start.txt").read_text(encoding="utf-8"))
-        self.assertIn("number inside brackets", (probe_dir / "role_family.txt").read_text(encoding="utf-8"))
+        self.assertIn("Choose exactly one label", (probe_dir / "role_family.txt").read_text(encoding="utf-8"))
 
     def test_template_predicate_s_reuses_source_lexeme_and_registers_surface_form(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
@@ -431,10 +432,10 @@ class LLMRoleTests(unittest.TestCase):
         self.assertEqual(role, "perception_act_type")
         self.assertIn("TEXT:\nЯблоки бывают зелёные", prompt)
         self.assertNotIn("TOKENS:", prompt)
-        self.assertIn("OPTIONS:\n[0] none or unclear", prompt)
-        self.assertIn("[1] states information as a claim/fact", prompt)
+        self.assertIn("OPTIONS:\nNONE: none or unclear", prompt)
+        self.assertIn("ASSERTION: states information as a claim/fact", prompt)
         self.assertIn("\n\nTASK:\n", prompt)
-        self.assertTrue(prompt.rstrip().endswith("number inside brackets."))
+        self.assertTrue(prompt.rstrip().endswith("Return only the label."))
         self.assertNotIn("example", prompt.casefold())
         self.assertIn("Do not copy", system)
 
@@ -838,10 +839,7 @@ class AdaptiveConditionalRegressionTests(unittest.TestCase):
         self.assertEqual(write_roles[ActantRole.SUBJECT].entity_ref, receive_subject.entity_ref)
         self.assertEqual(read.evidence.text, "она прочитает документ")
         self.assertEqual(write.evidence.text, "напишет текст")
-        self.assertEqual(
-            write.predicate.template_candidate.roles,
-            (ActantRole.SUBJECT, ActantRole.OBJECT),
-        )
+        self.assertIsNone(write.predicate.template_candidate)
         CandidateValidator().validate(perception)
         self.assertEqual(backend.roles, [])
 
@@ -1026,7 +1024,7 @@ class MorphologyAssistedAdaptiveParserTests(unittest.TestCase):
                     "perception_act_type": ["1"],
                     "perception_predicate_start": ["2"],
                     "perception_predicate_symbol": ["sleep"],
-                    "perception_frame_relation": ["1"],
+                    "perception_frame_relation": ["CONTENT_LINK"],
                 }
             def generate(self, prompt, *, system="", override=None, role="generic"):
                 values = self.answers.get(role)
@@ -1159,7 +1157,7 @@ class MorphologyAssistedAdaptiveParserTests(unittest.TestCase):
                 if role == "perception_act_type":
                     return LLMResponse("1", {})
                 if role == "perception_frame_relation":
-                    return LLMResponse("1", {})
+                    return LLMResponse("CONTENT_LINK", {})
                 raise AssertionError(role)
 
         backend = Backend()
@@ -1254,7 +1252,7 @@ class MorphologyAssistedAdaptiveParserTests(unittest.TestCase):
                 if role == "perception_act_type":
                     return LLMResponse("1", {})
                 if role == "perception_frame_relation":
-                    return LLMResponse("0", {})
+                    return LLMResponse("NOT_CONTENT", {})
                 raise AssertionError(role)
 
         parser = AdaptivePerceptionParser(
@@ -1492,6 +1490,8 @@ class StructuralMorphologyConfidenceTests(unittest.TestCase):
 
         class Backend:
             def generate(self, prompt, *, system="", override=None, role="generic"):
+                if role == "perception_role_participant":
+                    return LLMResponse("OBJECT", {})
                 raise AssertionError(f"unexpected LLM probe: {role}")
 
         parser = AdaptivePerceptionParser(
@@ -1510,7 +1510,7 @@ class StructuralMorphologyConfidenceTests(unittest.TestCase):
         subject = next(a for a in third.actants if a.role == ActantRole.SUBJECT)
         self.assertEqual(subject.mention, "Лиза")
         self.assertNotEqual(subject.mention, "её и")
-        self.assertIn(ActantRole.SUBJECT, third.predicate.template_candidate.roles)
+        self.assertIsNone(third.predicate.template_candidate)
 
 
 class AdaptivePredicateSymbolRegressionTests(unittest.TestCase):
@@ -1527,8 +1527,8 @@ class AdaptivePredicateSymbolRegressionTests(unittest.TestCase):
                     "perception_predicate_start": ["2"],
                     "perception_predicate_end": ["2"],
                     "perception_actant_start": ["1"],
-                    "perception_role_family": ["1"],
-                    "perception_role_participant": ["1"],
+                    "perception_role_family": ["PARTICIPANT"],
+                    "perception_role_participant": ["SUBJECT"],
                 }
                 self.calls = []
             def generate(self, prompt, *, system="", override=None, role="generic"):
@@ -1673,7 +1673,7 @@ class AdaptiveFunctionWordRegressionTests(unittest.TestCase):
                 if role == "perception_act_type":
                     return LLMResponse("1", {})
                 if role == "perception_frame_relation":
-                    return LLMResponse("1", {})
+                    return LLMResponse("CONTENT_LINK", {})
                 raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
 
         backend = Backend()
@@ -1708,7 +1708,7 @@ class AdaptiveFunctionWordRegressionTests(unittest.TestCase):
                 if role == "perception_act_type":
                     return LLMResponse("1", {})
                 if role == "perception_frame_relation":
-                    return LLMResponse("1", {})
+                    return LLMResponse("CONTENT_LINK", {})
                 raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
 
         backend = Backend()
@@ -1802,7 +1802,7 @@ class AdaptiveComplexClauseRegressionTests(unittest.TestCase):
             def generate(self, prompt, *, system="", override=None, role="generic"):
                 self.roles.append(role)
                 if role == "perception_act_type":
-                    return LLMResponse("1", {})
+                    return LLMResponse("PARENT_ARGUMENT", {})
                 raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
 
         backend = Backend()
@@ -1837,7 +1837,6 @@ class AdaptiveComplexClauseRegressionTests(unittest.TestCase):
             [
                 (ActantRole.SUBJECT, "Лиза", None),
                 (ActantRole.OBJECT, "текст", None),
-                (ActantRole.TIME, None, receive.local_id),
             ],
         )
 
@@ -1891,7 +1890,7 @@ class AdaptiveComplexClauseRegressionTests(unittest.TestCase):
             def generate(self, prompt, *, system="", override=None, role="generic"):
                 self.roles.append(role)
                 if role == "perception_act_type":
-                    return LLMResponse("1", {})
+                    return LLMResponse("PARENT_ARGUMENT", {})
                 raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
 
         def parse(text):
@@ -1930,7 +1929,7 @@ class AdaptiveComplexClauseRegressionTests(unittest.TestCase):
             def generate(self, prompt, *, system="", override=None, role="generic"):
                 self.roles.append(role)
                 if role == "perception_act_type":
-                    return LLMResponse("1", {})
+                    return LLMResponse("PARENT_ARGUMENT", {})
                 raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
 
         backend = Backend()
@@ -1950,8 +1949,7 @@ class AdaptiveComplexClauseRegressionTests(unittest.TestCase):
 
         self.assertEqual(len(result.assertions), 2)
         write, receive = result.assertions
-        cause = next(a for a in write.actants if a.role == ActantRole.CAUSE)
-        self.assertEqual(cause.candidate_ref, receive.local_id)
+        self.assertFalse(any(a.role == ActantRole.CAUSE for a in write.actants))
         self.assertEqual(len(result.relations), 1)
         relation = result.relations[0]
         self.assertEqual(relation.relation_id, "CAUSE")

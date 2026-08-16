@@ -30,6 +30,16 @@ class LLMRequestDiagnostic:
     prompt: str
     system: str
     response_text: str
+    choice_outputs: tuple[str, ...] = ()
+    choice_scores: dict[str, float] | None = None
+    calibration_choice_scores: dict[str, float] | None = None
+    calibrated_choice_scores: dict[str, float] | None = None
+    choice_winner: str | None = None
+    raw_choice_margin: float | None = None
+    choice_margin: float | None = None
+    choice_scoring_mode: str | None = None
+    decision_margin_threshold: float | None = None
+    decision_accepted: bool | None = None
     error: str | None = None
 
 
@@ -155,8 +165,49 @@ class LocalLLMProcessBackend:
         prompt: str,
         system: str,
         response_text: str,
+        override: dict[str, Any] | None = None,
+        response_meta: dict[str, Any] | None = None,
         error: str | None = None,
     ) -> None:
+        override = override or {}
+        response_meta = response_meta or {}
+        raw_choices = override.get("choice_outputs")
+        choice_outputs = tuple(str(item) for item in raw_choices) if isinstance(raw_choices, list) else ()
+        def _score_map(name: str) -> dict[str, float] | None:
+            raw = response_meta.get(name)
+            if not isinstance(raw, dict):
+                return None
+            parsed: dict[str, float] = {}
+            for key, value in raw.items():
+                try:
+                    parsed[str(key)] = float(value)
+                except (TypeError, ValueError):
+                    continue
+            return parsed or None
+
+        choice_scores = _score_map("choice_scores")
+        calibration_choice_scores = _score_map("calibration_choice_scores")
+        calibrated_choice_scores = _score_map("calibrated_choice_scores")
+        raw_winner = response_meta.get("choice")
+        choice_winner = None if raw_winner is None else str(raw_winner)
+        try:
+            raw_choice_margin = float(response_meta.get("raw_choice_margin"))
+        except (TypeError, ValueError):
+            raw_choice_margin = None
+        try:
+            choice_margin = float(response_meta.get("choice_margin"))
+        except (TypeError, ValueError):
+            choice_margin = None
+        raw_mode = response_meta.get("choice_scoring_mode")
+        choice_scoring_mode = None if raw_mode is None else str(raw_mode)
+        try:
+            threshold = float(override.get("decision_margin_threshold"))
+        except (TypeError, ValueError):
+            threshold = None
+        decision_accepted = None
+        if choice_margin is not None and threshold is not None:
+            decision_accepted = choice_margin >= threshold
+
         with self._status_lock:
             sequence = self._request_count
             self._request_diagnostics.append(
@@ -167,6 +218,16 @@ class LocalLLMProcessBackend:
                     prompt=prompt,
                     system=system,
                     response_text=response_text,
+                    choice_outputs=choice_outputs,
+                    choice_scores=choice_scores,
+                    calibration_choice_scores=calibration_choice_scores,
+                    calibrated_choice_scores=calibrated_choice_scores,
+                    choice_winner=choice_winner,
+                    raw_choice_margin=raw_choice_margin,
+                    choice_margin=choice_margin,
+                    choice_scoring_mode=choice_scoring_mode,
+                    decision_margin_threshold=threshold,
+                    decision_accepted=decision_accepted,
                     error=error,
                 )
             )
@@ -352,7 +413,7 @@ class LocalLLMProcessBackend:
                 error = f"LLM request timed out: {req_id}"
                 self._record_request(
                     req_id=req_id, role=role, prompt=prompt, system=system,
-                    response_text="", error=error,
+                    response_text="", override=defaults, error=error,
                 )
                 raise TimeoutError(error) from exc
             response_text = str(response.get("text", ""))
@@ -360,12 +421,12 @@ class LocalLLMProcessBackend:
                 error = str(response.get("error") or "LLM generation failed")
                 self._record_request(
                     req_id=req_id, role=role, prompt=prompt, system=system,
-                    response_text=response_text, error=error,
+                    response_text=response_text, override=defaults, response_meta=response, error=error,
                 )
                 raise RuntimeError(error)
             self._record_request(
                 req_id=req_id, role=role, prompt=prompt, system=system,
-                response_text=response_text,
+                response_text=response_text, override=defaults, response_meta=response,
             )
             return LLMResponse(response_text, response)
         finally:

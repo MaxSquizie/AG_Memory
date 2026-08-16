@@ -1,4 +1,4 @@
-# AH Agent MVP — v0.12.19
+# AH Agent MVP — v0.12.44
 
 Накопительный исполняемый проект АГ-памяти для текстового LLM-агента.
 
@@ -116,8 +116,10 @@ PerceptionResult
 - interrogative placeholders (`кто/что/кому/...`) формируют `QueryCandidate.requested_role` и не материализуются как `m`;
 - OR одного актанта поднимается в `g_OR` над полными proposition `N`, а не над raw-значениями;
 - passive, compound temporal/conditional connectors, relative matrix binding и contrastive `не X, а Y` имеют детерминированную структурную обработку;
-- неразрешённая pronoun/attachment ambiguity завершается явной ошибкой/неопределённостью вместо silent commit;
-- `k_AMBIGUOUS` используется только после deterministic ambiguity;
+- неоднозначная entity/coreference reference после deterministic resolution материализуется как `k_AMBIGUOUS`;
+- `k_AMBIGUOUS` запускает explicit clarification path, а не LLM-угадывание canonical entity;
+- после явного ответа пользователя deterministic clarification resolver заменяет ссылку `k → m` в фактах;
+- attachment ambiguity, которая ещё не выражена runtime alternatives, остаётся explicit error вместо silent commit;
 - внешний user turn фиксируется в `H` и отдельно извлекает C/P semantics;
 - собственный ответ интегрируется через отдельный **H-only** путь;
 - H-only path не создаёт новый C/P `T` как побочный эффект;
@@ -325,7 +327,7 @@ GUI содержит dock-панели диалога, полного config edi
 
 В slice 7.4 добавлены:
 
-- default LLM path `C:/AI/qwen_3.6_27B_uncesored`;
+- default LLM path `C:/AI/Qwen3.5-21B-Claude-4.6-Opus-Deckard-Heretic-Uncensored-Thinking`;
 - hover focus (жёлтый) и persistent selection focus (cyan);
 - подсветка всех непосредственных incoming/outgoing `L` и structural edges выбранного/hovered узла;
 - подсветка соседних узлов без изменения AH/Workspace;
@@ -401,6 +403,7 @@ prompts/
     role_description.txt
     frame_relation.txt
     control_subject.txt
+    template_hidden_valency.txt       # diagnostics-only capability preflight
     relative_role.txt
     query_mode.txt
     requested_role.txt
@@ -578,6 +581,13 @@ canonical AH diff, runtime/Workspace summary, InteractionContext and traceback o
 failure. The bundle also contains the resolved config, initial/final context and AH
 snapshots, final graph, manifest, summary and the exact cases file used. See `docs/SLICE_12_12.md`.
 
+Since v0.12.38, `data/acceptance_cases.txt` remains the input corpus, while
+`data/acceptance_oracle.json` is the separate semantic oracle. Runtime `OK/ERROR`
+is retained only as execution diagnostics; acceptance quality is reported as
+`SEMANTIC PASS / FAIL / ARCHITECTURE GAP`. Old bundles can be re-graded offline
+against the oracle without rerunning the LLM. See `docs/SEMANTIC_ORACLE.md` and
+`docs/SLICE_12_38.md`.
+
 ## Slice 12.13 — memory-bounded acceptance runs
 
 Long acceptance batches now suspend live graph/status polling without stopping Ignition or changing cognitive execution. Per-turn runtime diagnostics no longer build a full semantic graph snapshot, JSON is streamed to disk, and complete AH diff snapshots are released before the next turn. The acceptance bundle format is unchanged. See `docs/SLICE_12_13.md`.
@@ -614,16 +624,250 @@ structure is sufficient. Unresolved pronoun and `с + instrumental` attachment
 ambiguity fails explicitly instead of being guessed. Ignition/Hebbian dynamics are
 unchanged in this slice. See `docs/SLICE_12_18.md`.
 
+## Slice 12.20 — architecture-aligned dynamic T and ambiguity handling
 
-## Slice 12.19 — agreement, ellipsis and self-contained residual probes
+Raw Perception no longer treats the roles filled by one occurrence as the reusable
+`TemplateCandidate`. Unknown predicates are detected by deterministic preflight,
+routed back to Perception for a finite role-schema proposal, then validated and
+registered as one canonical `T`; later role expansion fails explicitly because
+valency evolution is deferred. Pronoun/control uncertainty is preserved as runtime
+`AssertionCandidate.alternatives` and becomes canonical `k_AMBIGUOUS` only after
+deterministic Entity Resolution. Query/Command acts also participate in Predicate/T
+Resolution without creating asserted facts. Ignition is unchanged. See
+`docs/SLICE_12_20.md`.
 
-The third fixed 40-case acceptance run exposed a small residual set after the broad
-12.18 structural fixes. Predicate homographs are now ranked by grammatical sentence
-force and explicit subject-number agreement instead of morphology dictionary order;
-a remaining lexical tie fails explicitly. A resolved pronominal object can propagate
-through a tightly licensed coordinated ellipsis (`открыла её и прочитала [её]`)
-without generic previous-object fallback. Control-subject probes now include the full
-source text plus known parent/child roles and entity-ref anchors. Copular adverbial
-homographs are narrowed to descriptive roles before any LLM call. Explicit discourse
-continuation markers may license one finite pronoun-coreference choice with mandatory
-abstention, while unmarked genuine ambiguities still fail. See `docs/SLICE_12_19.md`.
+
+## Slice 12.21 — end-to-end clarification lifecycle
+
+Canonical `k_AMBIGUOUS` is no longer only a terminal diagnostic marker. Integration
+returns a structured `ClarificationRequest` containing the ambiguous mention,
+user-visible candidate labels and affected fact/role positions. In interactive mode
+the orchestrator calls a dedicated `agent_clarification` LLM role that may only
+verbalize the deterministic options; it cannot select a canonical member itself.
+
+The emitted clarification arms runtime `InteractionContext.pending_clarification_refs`
+(and that queue is persisted). The next user utterance is handled as clarification
+evidence, not promoted to an independent C/P assertion. Exact candidate-name/number
+answers resolve deterministically; otherwise a tiny `perception_clarification_answer`
+probe may identify which already-presented option the new answer explicitly names.
+Integration validates that option against `k.members` and atomically replaces
+`k_AMBIGUOUS → selected m` across canonical uses. If the corrected N collides with an
+already canonical fact, domain-local N dedup is preserved and references are redirected.
+Diagnostic acceptance runs with `generate_response=False` expose clarification
+requests but do not arm pending dialogue state. See `docs/SLICE_12_21.md`.
+
+## Slice 12.22 — structural relation normalization and stronger Perception narrowing
+
+Perception now normalizes inter-situation semantics before Integration: when a
+causal child is already represented by canonical `CAUSE` or a directional temporal
+clause by `FOLLOW`, the same child is no longer duplicated as `N.CAUSE` / `N.TIME`.
+Entity-valued CAUSE/TIME actants are unaffected. Candidate validation rejects an
+externally supplied duplicate encoding as malformed input.
+
+Dynamic `TemplateCandidate` discovery is now hierarchical and atomic for weak models:
+first a binary omitted-role decision, then role family, then one exact canonical role.
+The model is explicitly told to include TIME/LOCATION/CAUSE/PURPOSE only when the
+predicate sense lexically selects that complement rather than because every event may
+have incidental circumstances. Strict one-`T` reuse and deferred valency evolution
+remain unchanged.
+
+Deterministic linguistic narrowing also gains dominant-paradigm lexical normalization
+(`Петру → Пётр` while equal-score homonymy remains unresolved), material morphology
+filtering for coreference, conservative same-role continuity after explicit discourse
+markers (`Потом/Затем/...`), and lexical spatial-adverb recognition (`дома` → LOCATION).
+`с + instrumental` noun-vs-predicate attachment remains an explicit Perception error:
+the current architecture has no canonical noun-modifier representation that would let
+us encode both readings without inventing a false `N`/actant. See `docs/SLICE_12_22.md`.
+
+
+## v0.12.25
+
+- Restored live VisPy canvas rendering during file-driven acceptance runs.
+- Acceptance no longer disables `GraphCanvasWidget` live updates.
+- The duplicate heavy runtime/status snapshot poll remains paused during acceptance; LLM diagnostics remain live.
+- No semantic/runtime changes relative to v0.12.24.
+
+## v0.12.26
+
+- Replaced recursive TemplateCandidate discovery with one bounded template probe.
+- Kept strict existing-T reuse and deferred valency evolution.
+
+## v0.12.27
+
+- Reworked TemplateCandidate discovery for weak SLMs: deterministic code keeps all observed roles and the model may add at most one latent core role from a tiny fixed shortlist.
+- `perception_template_hidden_role` uses exact fixed-choice scoring; there is no free schema generation, ontology walk, explanatory output, or recursive follow-up.
+- Service prompts and protocol instructions are English. Semantic protocol labels are English; only literal token/span addressing remains numeric.
+- Top-level Perception/Agent/System prompts and legacy parser system prompts were translated to English. User text itself remains in its source language.
+- Live acceptance canvas behavior from v0.12.25 is unchanged.
+
+
+
+## v0.12.28
+
+- Replaced semantic abstention labels in critical SLM probes with pairwise `YES/NO` hypothesis tests.
+- Fixed-choice worker now returns per-choice log-likelihood scores and a separation margin; low-margin decisions remain unresolved parser evidence and never become AH truth confidence or `w`.
+- Dynamic T discovery tests one deterministic hidden-role hypothesis at a time (`RECIPIENT`, then `SOURCE` where structurally applicable) and stops at the first confident YES.
+- Nested-frame semantics are hypothesis-driven: `CONTENT`, `PURPOSE`, `CAUSE`, and `MANNER` are tested independently instead of one multi-class + `NONE` choice.
+- Control-subject ambiguity is reduced to one candidate controller per YES/NO probe; one controller remains deterministic.
+- Ambiguous role-family / exact-role classification uses ordered pairwise YES/NO hypotheses and stops on the first confident match.
+- Discourse sequencing adverbs such as `Потом`/`Затем` compile deterministically to `FOLLOW`; the temporary TIME actant is removed instead of creating `M("Потом")`.
+- All critical semantic service prompts remain simple English.
+
+## v0.12.29
+
+- Replaced universal semantic YES/NO with contrastive fixed-choice labels and one direct mutually-exclusive controller choice.
+- Acceptance diagnostics now preserve `choice_outputs`, per-choice scores, winner, margin, threshold and accepted/rejected status.
+- Existing-T reuse, deferred valency evolution, clarification and live acceptance canvas remain unchanged.
+
+## v0.12.30
+
+- Preserves dictionary grammemes in `MorphInfo` and uses stable `tran/intr` evidence inside Perception to settle the hidden direct-object slot before any SLM call.
+- Remaining latent slots use concrete English slot questions (`TAKES_RECEIVER`, `TAKES_SOURCE`, etc.) rather than abstract argument-schema labels.
+- Low-margin hidden valency is fail-closed: no narrower canonical T is registered when the reusable schema is unresolved.
+- Nested frame attachment now uses relation-specific micro-decisions (`CONTENT_LINK`, `GOAL_LINK`, `CAUSE_LINK`, `MANNER_LINK`).
+- Low-margin frame attachment is an explicit Perception ambiguity/error; it can no longer silently degrade into independent events.
+- Bare `что` subordinate clauses are narrowed to the CONTENT hypothesis; causal compound markers keep their deterministic CAUSE representation.
+- Direct controller choice, score diagnostics, FOLLOW/CAUSE normalization, clarification lifecycle and live VisPy acceptance rendering are preserved.
+
+
+## v0.12.31
+
+- Removed hidden-role ontology walking from dynamic TemplateCandidate discovery.
+- SUBJECT/OBJECT are resolved first by deterministic grammar/dictionary evidence; unknown direct-object grammar uses one English `TAKES_DIRECT_ACCUSATIVE / NO_DIRECT_ACCUSATIVE` probe.
+- Russian finite active plural with no overt nominative participant can deterministically contribute an omitted SUBJECT slot to T (for example, `Мне дали книгу`), while the concrete N may leave SUBJECT unfilled.
+- Hidden RECIPIENT/SOURCE discovery is gated by one finite event-type cue: `TRANSFER_TO_RECEIVER`, `COMMUNICATE_TO_ADDRESSEE`, `ACQUIRE_FROM_SOURCE`, or `OTHER_EVENT`.
+- One event cue can add at most one hidden directional role; if RECIPIENT or SOURCE is already observed, semantic role discovery stops immediately.
+- Low-margin event classification remains fail-closed before canonical T creation, preserving deferred valency evolution.
+- Relation-specific frame attachment, direct controller choice, score diagnostics, clarification and live VisPy acceptance rendering are unchanged.
+
+
+## v0.12.32
+
+- Replaced four-way semantic output labels in hidden directional-role discovery with two tiny ordinal `FIRST/SECOND` decisions.
+- Each binary semantic cue is scored twice with its option descriptions swapped. Python maps answers back to semantic alternatives and accepts only swap-consistent results; positional/token bias becomes explicit ambiguity rather than canonical T pollution.
+- Directional discovery remains bounded: first decide whether a normal receiver/addressee/destination/source/origin participant exists; only then decide recipient-side vs source-side. At most one hidden directional role is added.
+- Template transitivity now reuses the predicate lexeme already resolved by raw Perception before considering surface-form homographs. Explicit subject-number agreement further removes grammatically incompatible readings before `tran/intr` consensus.
+- `Иван и Мария пришли и ушли` therefore resolves `прийти/уйти` as intransitive without an OBJECT SLM probe when morphology exposes competing singular imperative transitive homographs.
+- Relation-specific nested-frame probes, direct controller choice, omitted-agent grammar, fail-closed `[DEFER]`, clarification and live acceptance rendering are unchanged.
+
+## v0.12.33
+
+- Replaced hidden directional-role `FIRST/SECOND` scoring with **semantic completion likelihood**. The model now scores three complete English statements: recipient/addressee/destination, source/origin, or neither.
+- Added content-free calibration in the worker: every semantic continuation is scored under the real Russian verb context and under an otherwise identical `UNKNOWN_VERB` context; deterministic Perception ranks `score(real) - score(neutral)`.
+- Acceptance diagnostics now persist raw continuation scores, neutral-baseline scores, calibrated scores, raw margin, calibrated margin, and the scoring mode. Parser margin gating uses the calibrated margin only; it remains parser evidence and never maps to AH truth or `w`.
+- Added a dedicated semantic-completion system prompt so these likelihood requests are not contaminated by the ordinary “return a protocol label” instruction.
+- Removed active `template_event_directionality` / `template_event_direction` prompts and their swap-and-agree runtime path. Directional discovery remains one bounded semantic decision and can add at most one hidden `RECIPIENT` or `SOURCE`.
+- `PURPOSE -> infinitive` frames with exactly one parent `OBJECT` now use deterministic object-control inside Perception. This removes the biased ordinal controller probe for `просить X + infinitive` while leaving canonical `N` construction to Integration.
+- Existing morphology/lexeme filtering, relation-specific frame attachment, omitted-agent grammar, strict existing-T reuse, `[DEFER]` valency evolution, explicit ambiguity, and live acceptance rendering remain unchanged.
+
+
+## v0.12.34
+
+- Added predicate-specific source context and noncanonical textual role bindings to dynamic `TemplateRequest` preflight.
+- Hidden directional scoring was retargeted from broad event participants to additional valency slots beyond already-known roles.
+- Canonical AH UIDs remained outside Perception prompts and low calibrated margins stayed fail-closed under deferred T valency evolution.
+
+
+## v0.12.39
+
+- Implemented controlled monotonic canonical `T` evolution from validated explicit semantic evidence: `Roles(T_old) ⊆ Roles(T_new)` while the canonical T UID remains stable.
+- Existing `N` are not rewritten when `T` expands; concrete hypernodes may continue to leave newly learned roles unfilled, as required by the architecture.
+- Query `requested_role` is schema evidence: it may expand `T` without creating a factual actant value or an `N`.
+- Production TemplateCandidate construction now contains only roles already present in the parsed assertion/query/command. Hidden SUBJECT/OBJECT/RECIPIENT/SOURCE prediction no longer participates in canonical T creation.
+- Removed the retired template-guessing morphology/SLM path and its unused prompt files. `template_hidden_valency` remains only for the standalone model capability diagnostic and has no canonical write authority.
+- Speculative extra roles in a runtime `TemplateCandidate` are not committed without current explicit evidence.
+- Legacy memories with several incompatible `T` for one lexical `S` remain fail-closed when deterministic Integration cannot choose which frame to expand; that is treated as lexical-sense ambiguity, not valency merging.
+- Updated the normative Architecture_v3 reference to working specification v0.5: controlled monotonic T evolution is now part of MVP and removed from `[DEFER]`.
+- The semantic oracle remains the acceptance criterion. This slice intentionally does not tune prompts or claim that the remaining control/domain/conditional/attachment errors are solved.
+
+## v0.12.38
+
+- Replaced `no exception = acceptance success` as the quality metric with a curated semantic oracle in `data/acceptance_oracle.json`; the 40 input sentences remain separately editable in `data/acceptance_cases.txt`.
+- Acceptance runs now report `SEMANTIC PASS`, `SEMANTIC FAIL`, and `ARCHITECTURE GAP` in addition to runtime `OK/ERROR`, and persist per-check semantic verdicts plus the exact oracle used.
+- Added offline re-grading of existing acceptance bundles, so parser/model changes are not required merely to improve the evaluator.
+- Added cumulative explicit-role coverage checks for canonical `T`: later explicit assertion/query evidence must be representable by the predicate schema; speculative hidden roles are not required by the oracle.
+- Re-graded the supplied v0.12.37 40-case run as `27 PASS / 9 FAIL / 4 GAP` despite `33 OK / 7 ERROR`, exposing semantic defects that the old crash-only counter could not see.
+- Added `docs/ARCHITECTURE_AUDIT_01238.md`. The audit keeps the LLM→runtime-candidate→deterministic-Integration boundary, but concludes that one-shot hidden template-valency guessing should leave the production critical path.
+- The audit explicitly **un-defers controlled monotonic T valency evolution as the next required implementation**, because concrete `N` may fill only a subset of `T` roles and later validated explicit syntax must not be blocked by a first-use incomplete schema. `[DEFER]` is treated as a scope decision, not an absolute prohibition.
+- No production perception/integration behavior is intentionally changed in this slice; v0.12.38 is the measurement and architecture-revision baseline before simplifying the parser.
+
+
+## v0.12.37
+
+- Added a diagnostics-only hidden-valency capability preflight: 6 semantic cases × both binary label orders = 12 real calls to the same local Qwen backend.
+- Each case is classified as `SEMANTIC_OK`, `ORDER_BIAS`, `SEMANTIC_WRONG`, `INCONSISTENT`, or `MALFORMED`; the report also counts first-position selections across all calls.
+- The diagnostic uses the exact production hidden-valency prompt shape but may reverse the two choices. Production hidden-valency behavior and strict fail-closed validation are unchanged.
+- The already-observed trailing orphan `</think>` is separated from semantic choice only inside diagnostics: protocol compliance remains visible as `EXACT` vs `RECOVERED_ORPHAN_THINK_CLOSE`, while explanations or other extra text stay malformed.
+- The preflight never invokes Orchestrator/Integration or AH writes. Ignition is paused and restored around the run, and an exact canonical before/after diff is required to be empty.
+- GUI now exposes `Hidden-valency preflight` next to the acceptance button and automatically writes a small timestamped diagnostic directory plus a ZIP bundle for upload/analysis.
+
+## v0.12.36
+
+- Replaced the five-way hidden-valency generation protocol with sequential ordinary binary generation.
+- The first call tests only `HAS_RECIPIENT_SLOT` vs `NO_RECIPIENT_SLOT`; only an exact negative reaches a second call testing `HAS_SOURCE_SLOT` vs `NO_SOURCE_SLOT`.
+- A positive RECIPIENT answer stops the procedure, so hidden discovery can add at most one directional slot. `RECIPIENT,SOURCE` and `AMBIGUOUS` are no longer active hidden-valency outcomes.
+- Both calls use temperature-zero normal generation with no `choice_outputs`, logprob scoring, margins, calibration prompt, token probabilities, or scorer fallback.
+- Hidden-valency output is strict fail-closed: after outer whitespace trimming, anything other than the exact expected binary label is rejected before `TemplateCandidate` acceptance.
+- The prompt carries only the source sentence, lexical verb, textual known-role bindings, one narrow English question, and two English labels. Canonical AH refs/UIDs remain outside Perception.
+- Retired hidden-valency scoring/system prompt files were removed from the active prompt set; deterministic Integration still owns validation, UID allocation, T registration and atomic AH mutation.
+
+## v0.12.35
+
+- Replaced hidden directional-valency logprob/calibration classification with one ordinary bounded generation from the same local Qwen parser model.
+- `perception_template_hidden_valency` receives only the source text, predicate surface/lexeme, and textual `ALREADY KNOWN ROLE BINDINGS`.
+- The only accepted protocol lines are `NONE`, `RECIPIENT`, `SOURCE`, `RECIPIENT,SOURCE`, and `AMBIGUOUS`; explanatory or unknown output is an explicit Perception protocol error.
+- `AMBIGUOUS` remains fail-closed before canonical T creation. `RECIPIENT`/`SOURCE` labels are mapped to runtime roles by Python; Integration still validates/registers canonical T and owns all AH mutation.
+- Hidden-valency generation sends no `choice_outputs`, score request, calibration prompt, margin threshold, UID, or canonical AH reference.
+- Deterministic morphology, direct-object grammar, omitted-agent handling, nested-frame semantics, object-control, strict existing-T reuse, and live acceptance rendering are unchanged.
+
+
+## v0.12.40
+
+- The real v0.12.39 semantic run measured `32 PASS / 4 FAIL / 4 GAP`; all template-evolution cases 14–21 passed, validating controlled monotonic T growth.
+- Binary semantic decisions now use strict temperature-zero label generation. A valid binary label is no longer vetoed by the legacy continuation-score margin; no `choice_outputs`/score request is sent for two-choice probes.
+- Nested wanted/requested/selected situations are represented as `OBJECT -> candidate_ref(child)` content. `PURPOSE` is reserved for the actual goal of performing the parent action.
+- Animate accusative participants are narrowed to `OBJECT` versus `RECIPIENT` instead of being forced to OBJECT; controller identity is resolved independently. The retired `PURPOSE + OBJECT` controller shortcut was removed.
+- Relative antecedent identity may reuse a containing parent actant span when the normalized semantic head matches, fixing cases such as `рядом с журналом ... который ...` without a domain-specific special case. Shared turn-local identity then preserves P provenance through normal DomainRouter behavior.
+- Architecture reference advanced to working specification v0.6. The four current `ARCHITECTURE_GAP` cases (three CONDITION structures and general prepositional attachment clarification) are intentionally untouched in this slice.
+
+
+## v0.12.42
+
+- Real v0.12.41 semantic acceptance baseline: **34 PASS / 2 FAIL / 4 GAP**. The only two FAIL cases share the same `попросить + infinitive` content/participant reconciliation root.
+- A positive `CONTENT_LINK` is now semantically sticky inside one parse hypothesis: later failure to reconcile an occupied entity-valued `OBJECT` cannot silently reinterpret the same child as `PURPOSE`, `CAUSE`, or another relation. The parser fails closed on the unresolved role conflict instead.
+- The post-structural participant probe remains binary and is narrower: after proposition-valued `OBJECT` content is already established, it asks only whether the explicit participant is the receiver/addressee/target of the parent action (for example the person being asked or told).
+- The default local model remains `C:/AI/Qwen3.5-21B-Claude-4.6-Opus-Deckard-Heretic-Uncensored-Thinking`.
+- Architecture_v3 is updated to working specification v0.8 with semantic-relation monotonicity inside a parse hypothesis: downstream reconciliation may refine participant roles but may not overwrite an already accepted parent-child relation.
+
+## v0.12.41
+
+- Corrected the v0.12.40 regression that asked the LLM to classify every animate/pronominal accusative as `OBJECT` vs `RECIPIENT`. Ordinary accusatives are deterministic `OBJECT` again.
+- Added a much narrower `RECIPIENT / NOT_RECIPIENT` decision only after a nested proposition has independently been classified as semantic `OBJECT` content and creates a real OBJECT-slot conflict.
+- Controller `FIRST/SECOND` prompts now keep participant descriptions outside the exact `CHOICES`, preventing descriptive pseudo-label output.
+- Entity name/alias lookup is now provenance-aware: strong `SELF/USER`, `candidate_ref`, or turn-local `entity_ref` evidence may lock lexical lookup to a provisional semantic domain, so a same-name entity in another domain cannot hijack identity.
+- Global lexical lookup remains available when no strong provenance exists; ambiguity is still explicit rather than silently merged.
+- Architecture_v3 is updated to working specification v0.7 with delayed semantic-decision, bare-label protocol, and retrieval-vs-identity invariants.
+- Added `tests/test_semantic_roots_1241.py` covering ordinary object pronouns, discourse coreference, request/content recipient reclassification, controller protocol shape, and cross-domain same-name isolation.
+- This slice is a regression correction based on the real v0.12.40 result (`31 PASS / 6 FAIL / 3 GAP`), not a claim of a new 40-case result. A fresh model acceptance run is required.
+
+
+## v0.12.43
+
+- The post-structural content-participant probe no longer asks the model to emit the canonical AH role `RECIPIENT`.
+- The bounded semantic cue is now `CONTENT_ADDRESSEE / NOT_CONTENT_ADDRESSEE`: whether already-proven proposition content is directed to the explicit participant as the person being asked/told/advised/instructed/addressed.
+- Python maps positive `CONTENT_ADDRESSEE` deterministically to runtime `ActantRole.RECIPIENT`; Integration remains the only canonical writer.
+- `CONTENT_LINK` remains sticky: a negative/invalid addressee cue fails closed and cannot reinterpret the child as PURPOSE/CAUSE/HOW_TO.
+
+## v0.12.44 — canonical conditionals + structural clarification
+
+- Real v0.12.43 acceptance baseline is **36 semantic PASS / 0 FAIL / 4 GAP**. The two former `попросить + infinitive` failures are fully resolved by the `CONTENT_ADDRESSEE` cue; no known semantic FAIL remains in the 40-case oracle.
+- Conditional branches are now canonical proposition content rather than H-text-only safety placeholders. Each branch is stored as `N` with `meta.semantic_scope = CONDITIONAL`; scoped propositions do not satisfy ordinary `EXISTS` / `ROLE_FILL`.
+- Added deterministic `g.IF(antecedent, consequent)` to `FunctionRegistry`. Multi-member antecedent/consequent sides use `g.AND`, preserving `(A AND B) -> C` and `A -> (B AND C)` instead of incorrect pairwise condition links.
+- Scoped `N` participates in canonical signatures, so a conditional proposition and a later independently asserted fact with identical T/actants remain distinct semantic objects.
+- General `с + instrumental` attachment ambiguity after a direct object now produces an H-level **structural clarification** instead of a parse exception or LLM guess. No C/P reading is committed before explicit user selection.
+- Structural clarification replays the original source with a program-owned resolution key and attaches delayed semantics to the **original H experience**, avoiding duplicate source experiences.
+- Diagnostic/acceptance turns with `generate_response=False` surface structural clarification in the commit but do not arm pending dialogue state, so the next independent acceptance case is never consumed as a clarification answer.
+- `data/acceptance_oracle.json` now treats cases 30–32 as exact canonical IF semantics and case 39 as exact successful clarification behavior. A correct ambiguous result is therefore PASS, not ERROR/GAP.
+- Architecture reference advanced to working specification **v0.10** with scoped propositions, canonical IF/AND condition semantics and the general structural-clarification contract.
+- No claim of real `40/40` is made until this build is rerun with the selected Qwen model; local tests verify mechanics and oracle contracts only.
+

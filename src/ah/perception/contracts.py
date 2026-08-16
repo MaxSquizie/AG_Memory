@@ -21,11 +21,13 @@ class EvidenceSpan:
 
 @dataclass(frozen=True, slots=True)
 class TemplateCandidate:
-    """Runtime-only role schema proposed for one predicate use.
+    """Runtime-only reusable role schema proposed for a predicate.
 
-    This is not canonical T and carries no UID.  Perception may propose it;
-    deterministic integration validates it before a new Template is created.
-    Concrete N filling is checked against this schema but does not define it.
+    This is not canonical T and carries no UID. Perception proposes it only when
+    the predicate has no canonical T; deterministic integration validates it before
+    registration. In the production path the candidate contains only roles supported
+    by explicit semantic evidence. Later validated occurrences may monotonically
+    expand the canonical T.
     """
 
     roles: tuple[ActantRole, ...]
@@ -188,9 +190,10 @@ class SituationRelationCandidate:
 class ConditionalCandidate:
     """Runtime-only conditional dependency between two recognized situations.
 
-    The antecedent and consequent remain semantic candidates for diagnostics and
-    composition, but they are not ordinary asserted world facts. Integration uses
-    their AssertionStatus to avoid committing either branch to C/P/H as a fact.
+    The antecedent and consequent are semantic proposition candidates, but they are
+    not ordinary asserted world facts. Integration canonicalizes them as scoped N
+    operands and binds the two sides with deterministic g_IF / g_AND composition.
+    Ordinary EXISTS/ROLE_FILL therefore cannot treat either branch as already true.
     """
 
     antecedent_refs: tuple[str, ...]
@@ -205,6 +208,34 @@ class ConditionalCandidate:
         if set(self.antecedent_refs) & set(self.consequent_refs):
             raise ValueError("ConditionalCandidate branches must not overlap")
 
+
+
+
+@dataclass(frozen=True, slots=True)
+class StructuralClarificationOption:
+    key: str
+    label: str
+
+    def __post_init__(self) -> None:
+        if not self.key.strip() or not self.label.strip():
+            raise ValueError("Structural clarification option key/label must be non-empty")
+
+
+@dataclass(frozen=True, slots=True)
+class StructuralClarificationSpec:
+    ambiguity_type: str
+    mention: str
+    source_text: str
+    options: tuple[StructuralClarificationOption, ...]
+
+    def __post_init__(self) -> None:
+        if not self.ambiguity_type.strip() or not self.mention.strip() or not self.source_text.strip():
+            raise ValueError("Structural clarification spec fields must be non-empty")
+        if len(self.options) < 2:
+            raise ValueError("Structural clarification requires at least two options")
+        keys = [item.key for item in self.options]
+        if len(set(keys)) != len(keys):
+            raise ValueError("Structural clarification option keys must be unique")
 
 @dataclass(frozen=True, slots=True)
 class PerceptionResult:

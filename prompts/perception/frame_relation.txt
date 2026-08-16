@@ -1,1 +1,1 @@
-Choose how CHILD SITUATION relates to PARENT PREDICATE. Reply only with the number inside brackets.
+Choose exactly one label from CHOICES. Answer only the QUESTION about the PARENT and CHILD verbs. Do not test any other relation. Do not explain.

@@ -5,7 +5,7 @@
 project_dir = ".."
 # Главное: укажи здесь локальную папку с моделью Hugging Face / Qwen.
 # На Windows удобнее использовать прямые слэши.
-llm_model_dir = "C:/AI/qwen_3.6_27B_uncesored"
+llm_model_dir = "C:/AI/Qwen3.5-21B-Claude-4.6-Opus-Deckard-Heretic-Uncensored-Thinking"
 tokenizer_dir = ""
 adapter_dir = ""
 system_prompt_path = "../prompts/agent.txt" # legacy alias for generic backend calls
@@ -24,7 +24,7 @@ device_map = "cuda:0"            # cuda:0 = строго GPU 0; auto может 
 dtype = "auto"                   # auto | bfloat16 | float16 | float32
 local_files_only = true
 trust_remote_code = true
-use_4bit = true                  # 27B: NF4, чтобы модель помещалась в VRAM
+use_4bit = true                  # NF4, чтобы локальная модель помещалась в VRAM
 ctx_total = 0                     # 0 = определить по config модели
 max_new_tokens = 256
 temperature = 0.2

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ah.agent import InteractionContext
 from ah.core import AHCore
@@ -32,6 +32,47 @@ class ExperienceMapper:
         self.event_weight = event_weight
         self.follow_weight = follow_weight
         self.predicate_form = predicate_form
+
+    def attach_content(
+        self,
+        event_ref: Ref,
+        semantic_refs: tuple[Ref, ...],
+    ) -> ExperienceResult:
+        """Attach delayed semantic content to an already-recorded H turn.
+
+        Structural clarification records the original external utterance in H before
+        its semantics are known.  After the user selects one reading, Integration
+        fills that same event's OBJECT instead of creating a duplicate experience.
+        """
+        if event_ref.kind.value != "N" or not self.core.store.has_uid(event_ref.uid):
+            raise IntegrationError("Existing experience must be a canonical H N")
+        if self.core.store.domain_of(event_ref.uid) is not Domain.H:
+            raise IntegrationError("Existing experience must be in H")
+        event = self.core.store.get_hypernode(event_ref.uid)
+        if not bool(event.meta.get("event_instance", False)):
+            raise IntegrationError("Existing H N is not an experience event")
+
+        content_ref: Ref | None = None
+        if len(semantic_refs) == 1:
+            content_ref = semantic_refs[0]
+        elif len(semantic_refs) > 1:
+            group = self.core.add_group(
+                Domain.H,
+                semantic_refs,
+                meta={"type": "UTTERANCE_CONTENT", "gc_auto_created": True},
+            )
+            content_ref = self.core.ref(group.uid)
+
+        if content_ref is not None:
+            existing = event.actants.get(ActantRole.OBJECT)
+            if existing is not None and existing != content_ref:
+                raise IntegrationError("Existing experience already has different semantic content")
+            if existing is None:
+                self.core.edit_element(
+                    Domain.H,
+                    replace(event, actants={**dict(event.actants), ActantRole.OBJECT: content_ref}),
+                )
+        return ExperienceResult(event_ref, None)
 
     def record_turn(
         self,

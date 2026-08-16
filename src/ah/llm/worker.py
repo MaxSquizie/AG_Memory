@@ -416,16 +416,16 @@ def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str,
     rendered = (f"[SYSTEM]\n{system}\n\n" if system else "") + f"[USER]\n{user}\n\n[ASSISTANT]\n"
     return dict(tok(rendered, return_tensors="pt", add_special_tokens=False))
 
-def _score_fixed_choices(
+def _score_exact_continuations(
     runtime: dict[str, Any],
     inputs: dict[str, Any],
     choices: list[str],
-) -> str:
-    """Select one exact continuation by model likelihood.
+) -> dict[str, float]:
+    """Return length-normalized log-likelihood for each exact continuation.
 
-    Finite mechanical perception probes must never ask the model to generate an
-    arbitrary string and then hope it matches the protocol.  Score only the
-    explicitly allowed continuations and return the best one verbatim.
+    The scored strings are literal continuations, not semantic class labels.  This
+    primitive is intentionally context-agnostic: callers may compare the same
+    continuations under multiple prompts to remove continuation-specific priors.
     """
     if not choices or any(not str(choice).strip() for choice in choices):
         raise ValueError("choice_outputs must contain non-empty strings")
@@ -443,8 +443,7 @@ def _score_fixed_choices(
     else:
         base_mask = base_mask.to(input_device)
 
-    best_choice: str | None = None
-    best_score: float | None = None
+    scores: dict[str, float] = {}
     for choice in choices:
         encoded = tok(str(choice), return_tensors="pt", add_special_tokens=False)
         choice_ids = encoded["input_ids"].to(input_device)
@@ -464,10 +463,7 @@ def _score_fixed_choices(
                 stop = start + choice_ids.shape[-1]
                 selected = logits[:, start:stop, :].float().log_softmax(dim=-1)
                 token_log_probs = selected.gather(-1, choice_ids.unsqueeze(-1)).squeeze(-1)
-                # Length-normalized conditional log-likelihood avoids preferring
-                # a one-token option solely because another allowed option happens
-                # to tokenize into two pieces.
-                score = float(token_log_probs.mean().item())
+                scores[str(choice)] = float(token_log_probs.mean().item())
         finally:
             del token_log_probs
             del selected
@@ -477,16 +473,78 @@ def _score_fixed_choices(
             del full_ids
             del choice_ids
             del encoded
-        if best_score is None or score > best_score:
-            best_score = score
-            best_choice = str(choice)
+    return scores
 
-    if best_choice is None:
+
+def _rank_choice_scores(scores: dict[str, float]) -> tuple[str, float]:
+    if not scores:
         raise RuntimeError("fixed-choice scoring produced no result")
-    return best_choice
+    ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    best_choice, best_score = ranked[0]
+    margin = float("inf") if len(ranked) == 1 else float(best_score - ranked[1][1])
+    return best_choice, margin
 
 
-def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argparse.Namespace) -> str:
+def _score_fixed_choice_details(
+    runtime: dict[str, Any],
+    inputs: dict[str, Any],
+    choices: list[str],
+) -> dict[str, Any]:
+    """Score exact continuations and expose the winner plus separation margin.
+
+    The margin is parser evidence only.  It is never AH truth confidence and is
+    never written to ``w``.  Returning it lets deterministic perception reject a
+    nearly-tied fixed-choice decision without asking the SLM for confidence prose.
+    """
+    scores = _score_exact_continuations(runtime, inputs, choices)
+    best_choice, margin = _rank_choice_scores(scores)
+    return {
+        "choice": best_choice,
+        "choice_scores": scores,
+        "choice_margin": margin,
+        "choice_scoring_mode": "raw_exact_continuation",
+    }
+
+
+def _score_calibrated_choice_details(
+    runtime: dict[str, Any],
+    inputs: dict[str, Any],
+    calibration_inputs: dict[str, Any],
+    choices: list[str],
+) -> dict[str, Any]:
+    """Score semantic continuations after subtracting content-free priors.
+
+    Each continuation is evaluated under the real lexical context and under a
+    structurally identical neutral context.  Deterministic perception uses only
+    the difference.  This removes stable token/phrase priors such as a model's
+    preference for ``SECOND`` or for one longer semantic class name.
+    """
+    actual = _score_exact_continuations(runtime, inputs, choices)
+    baseline = _score_exact_continuations(runtime, calibration_inputs, choices)
+    calibrated = {choice: float(actual[choice] - baseline[choice]) for choice in choices}
+    best_choice, calibrated_margin = _rank_choice_scores(calibrated)
+    _raw_best, raw_margin = _rank_choice_scores(actual)
+    return {
+        "choice": best_choice,
+        "choice_scores": actual,
+        "calibration_choice_scores": baseline,
+        "calibrated_choice_scores": calibrated,
+        "raw_choice_margin": raw_margin,
+        "choice_margin": calibrated_margin,
+        "choice_scoring_mode": "content_free_calibrated_semantic_completion",
+    }
+
+
+def _score_fixed_choices(
+    runtime: dict[str, Any],
+    inputs: dict[str, Any],
+    choices: list[str],
+) -> str:
+    """Select one exact continuation by model likelihood."""
+    return str(_score_fixed_choice_details(runtime, inputs, choices)["choice"])
+
+
+def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argparse.Namespace) -> str | dict[str, Any]:
     tok = runtime["tokenizer"]
     model = runtime["model"]
     inputs = _encode_prompt(runtime, str(request.get("system") or ""), str(request.get("prompt") or ""))
@@ -511,9 +569,31 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
         if not isinstance(choice_outputs_raw, list):
             raise ValueError("choice_outputs must be a JSON list")
         choices = [str(item) for item in choice_outputs_raw]
+        calibration_inputs = None
         try:
-            return _score_fixed_choices(runtime, inputs, choices)
+            calibration_prompt = override.get("choice_calibration_prompt")
+            if calibration_prompt is not None:
+                calibration_system = str(
+                    override.get("choice_calibration_system", request.get("system") or "")
+                )
+                calibration_inputs = _encode_prompt(
+                    runtime, calibration_system, str(calibration_prompt)
+                )
+                calibration_ids = calibration_inputs["input_ids"]
+                if calibration_ids.shape[-1] > budget:
+                    calibration_inputs["input_ids"] = calibration_ids[:, -budget:]
+                    if "attention_mask" in calibration_inputs:
+                        calibration_inputs["attention_mask"] = calibration_inputs["attention_mask"][:, -budget:]
+                details = _score_calibrated_choice_details(
+                    runtime, inputs, calibration_inputs, choices
+                )
+            else:
+                details = _score_fixed_choice_details(runtime, inputs, choices)
+            if bool(override.get("return_choice_scores", False)):
+                return {"text": str(details["choice"]), **details}
+            return str(details["choice"])
         finally:
+            del calibration_inputs
             del inputs
 
     inputs = {k: v.to(runtime.get("input_device", getattr(model, "device", "cpu"))) for k, v in inputs.items()}
@@ -586,8 +666,13 @@ def serve(runtime: dict[str, Any], args: argparse.Namespace) -> None:
         try:
             if req.get("req") != "generate":
                 raise ValueError(f"unsupported request: {req.get('req')}")
-            text = generate(runtime, req, args)
-            emit({"req_id": req_id, "ok": True, "final": True, "text": text, "role": req.get("role", "generic")})
+            generated = generate(runtime, req, args)
+            if isinstance(generated, dict):
+                payload = dict(generated)
+                payload["text"] = str(payload.get("text", ""))
+            else:
+                payload = {"text": generated}
+            emit({"req_id": req_id, "ok": True, "final": True, "role": req.get("role", "generic"), **payload})
         except Exception as exc:
             emit({"req_id": req_id, "ok": False, "final": True, "text": "", "error": str(exc)})
 

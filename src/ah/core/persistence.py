@@ -198,6 +198,7 @@ def _serialize_context(context: InteractionContext | None) -> dict[str, Any] | N
         "active_location_ref": _ref(context.active_location_ref) if context.active_location_ref else None,
         "pronoun_refs": {k: _ref(v) for k, v in context.pronoun_refs.items()},
         "last_experience_ref": _ref(context.last_experience_ref) if context.last_experience_ref else None,
+        "pending_clarification_refs": [_ref(ref) for ref in context.pending_clarification_refs],
     }
 
 
@@ -366,6 +367,11 @@ def _parse_context(core: AHCore, raw: dict[str, Any] | None) -> InteractionConte
         for k, value in (raw.get("pronoun_refs") or {}).items()
         if (ref := existing(value)) is not None
     }
+    ctx.pending_clarification_refs = [
+        ref
+        for value in (raw.get("pending_clarification_refs") or [])
+        if (ref := existing(value)) is not None and ref.kind is RefKind.K
+    ]
     return ctx
 
 

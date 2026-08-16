@@ -1,1 +1,1 @@
-Choose what information the question requests. Reply only with the number inside brackets.
+Choose exactly one English label from OPTIONS. Return only the label. Choose UNKNOWN if the requested information type is not clear.

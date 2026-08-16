@@ -1,0 +1,1 @@
+Solve only the TEMPLATE VALENCY TASK. Return exactly one protocol line: NONE, RECIPIENT, SOURCE, RECIPIENT,SOURCE, or AMBIGUOUS. These labels describe additional reusable core slots beyond roles already shown. Do not explain, quote the input, or add any other text.

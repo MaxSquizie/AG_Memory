@@ -7,7 +7,12 @@ from ah.config import LLMRoleSettings
 from ah.llm import LLMResponse
 from ah.model import ActantRole
 from ah.perception import CompositionOperator
-from ah.perception.adaptive_parser import AdaptiveParseError, AdaptivePerceptionParser, AdaptiveSettings
+from ah.perception.adaptive_parser import (
+    AdaptiveParseError,
+    AdaptivePerceptionParser,
+    AdaptiveSettings,
+    AdaptiveStructuralClarificationRequired,
+)
 from ah.perception.morphology import MorphInfo
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -71,7 +76,7 @@ class Backend:
         return LLMResponse(str(values.pop(0)), {})
 
 
-def parser(backend=None):
+def parser(backend=None, morphology=None):
     return AdaptivePerceptionParser(
         backend or Backend(),
         AdaptiveSettings(
@@ -80,8 +85,22 @@ def parser(backend=None):
             retry_attempts=0,
             morphology_backend="none",
         ),
-        morphology=AcceptanceMorphology(),
+        morphology=morphology or AcceptanceMorphology(),
     )
+
+
+class RequestMorphology(AcceptanceMorphology):
+    """Test morphology with material animacy for semantic participant roles."""
+    def analyze_all(self, word: str):
+        info = self.analyze(word)
+        if info is None:
+            return ()
+        if word.casefold() in {"марию", "петра", "его"}:
+            return (MorphInfo(
+                info.normal_form, info.pos, case=info.case,
+                animacy="anim", score=1.0,
+            ),)
+        return (info,)
 
 
 class AcceptanceRegressions1218(unittest.TestCase):
@@ -144,17 +163,61 @@ class AcceptanceRegressions1218(unittest.TestCase):
         self.assertEqual(next(a.normalized_hint for a in negative.actants if a.role == ActantRole.OBJECT), "книга")
         self.assertEqual(next(a.normalized_hint for a in positive.actants if a.role == ActantRole.OBJECT), "журнал")
 
-    def test_unclear_prepositional_attachment_fails_explicitly(self):
+    def test_unclear_prepositional_attachment_requests_structural_clarification(self):
         backend = Backend()
-        with self.assertRaises(AdaptiveParseError):
+        with self.assertRaises(AdaptiveStructuralClarificationRequired) as caught:
             parser(backend).parse("Иван увидел Петра с биноклем.")
+        spec = caught.exception.spec
+        self.assertEqual(spec.ambiguity_type, "WITH_ATTACHMENT")
+        self.assertEqual(spec.mention, "с биноклем")
+        self.assertEqual(tuple(item.key for item in spec.options), (
+            "PREDICATE_ATTACHMENT", "OBJECT_ATTACHMENT",
+        ))
+        self.assertEqual(tuple(item.label for item in spec.options), (
+            "«с биноклем» относится к действию «увидел»",
+            "«с биноклем» описывает «Петра»",
+        ))
         self.assertEqual(backend.roles, [])
 
-    def test_ambiguous_embedded_pronoun_can_fail_explicitly(self):
+    def test_structural_resolution_predicate_attachment_materializes_tool(self):
+        backend = Backend({"perception_role_family": ["CIRCUMSTANCE"]})
+        result = parser(backend).parse(
+            "Иван увидел Петра с биноклем.",
+            structural_resolution="PREDICATE_ATTACHMENT",
+        ).perception
+        self.assertEqual(len(result.assertions), 1)
+        assertion = result.assertions[0]
+        roles = {item.role: item.normalized_hint for item in assertion.actants}
+        self.assertEqual(roles[ActantRole.SUBJECT], "Иван")
+        self.assertEqual(roles[ActantRole.OBJECT], "Пётр")
+        self.assertEqual(roles[ActantRole.TOOL], "бинокль")
+        self.assertEqual(backend.roles, ["perception_role_family"])
+
+    def test_structural_resolution_object_attachment_materializes_sibling_lexical_relation(self):
         backend = Backend()
-        with self.assertRaises(AdaptiveParseError):
-            parser(backend).parse("Анна сказала Марии, что она победила.")
+        result = parser(backend).parse(
+            "Иван увидел Петра с биноклем.",
+            structural_resolution="OBJECT_ATTACHMENT",
+        ).perception
+        self.assertEqual(len(result.assertions), 2)
+        seen, with_relation = result.assertions
+        seen_roles = {item.role: item for item in seen.actants}
+        with_roles = {item.role: item for item in with_relation.actants}
+        self.assertEqual(seen.predicate.lookup_form, "увидеть")
+        self.assertEqual(seen_roles[ActantRole.OBJECT].normalized_hint, "Пётр")
+        self.assertEqual(with_relation.predicate.lookup_form, "с")
+        self.assertEqual(with_relation.predicate.sense_hint, "STRUCTURAL_OBJECT_ATTACHMENT")
+        self.assertEqual(with_roles[ActantRole.SUBJECT].normalized_hint, "Пётр")
+        self.assertEqual(with_roles[ActantRole.OBJECT].normalized_hint, "бинокль")
         self.assertEqual(backend.roles, [])
+
+    def test_ambiguous_embedded_pronoun_survives_as_runtime_alternatives(self):
+        backend = Backend({"perception_frame_relation": ["CONTENT_LINK"]})
+        result = parser(backend).parse("Анна сказала Марии, что она победила.").perception
+        self.assertEqual(len(result.assertions), 2)
+        embedded = result.assertions[1]
+        self.assertEqual(len(embedded.alternatives), 2)
+        self.assertEqual(backend.roles, ["perception_frame_relation"])
 
 
 if __name__ == "__main__":
@@ -231,10 +294,13 @@ class StructuralRegressions1218(unittest.TestCase):
 
     def test_control_subject_is_selected_only_after_nested_frame_is_known(self):
         backend = Backend({
-            "perception_frame_relation": [1],  # PURPOSE is first free nested-situation role
-            "perception_control_subject": [2],  # Maria, not matrix subject Ivan
+            "perception_content_addressee": ["CONTENT_ADDRESSEE"],
+            "perception_frame_relation": ["CONTENT_LINK"],
+            "perception_control_subject": ["SECOND"],  # Ivan? no; Maria? yes
         })
-        result = parser(backend).parse("Иван попросил Марию прочитать книгу.").perception
+        result = parser(backend, RequestMorphology()).parse(
+            "Иван попросил Марию прочитать книгу."
+        ).perception
         self.assertEqual(len(result.assertions), 2)
         parent, child = result.assertions
         self.assertTrue(any(a.candidate_ref == child.local_id for a in parent.actants))
@@ -269,8 +335,9 @@ class StructuralRegressions1218(unittest.TestCase):
                 return () if info is None else (info,)
 
         backend = Backend({
-            "perception_frame_relation": [1],  # PURPOSE after REQUEST already has OBJECT
-            "perception_control_subject": [2],  # object pronoun=Ivan, not Maria
+            "perception_content_addressee": ["CONTENT_ADDRESSEE"],
+            "perception_frame_relation": ["CONTENT_LINK"],
+            "perception_control_subject": ["SECOND"],  # Maria? no; Ivan? yes
         })
         p = AdaptivePerceptionParser(
             backend,
@@ -285,11 +352,13 @@ class StructuralRegressions1218(unittest.TestCase):
         result = p.parse("Иван открыл дверь, потому что Мария попросила его войти.").perception
         self.assertEqual(len(result.assertions), 3)
         opened, requested, entered = result.assertions
-        self.assertTrue(any(a.role == ActantRole.CAUSE and a.candidate_ref == requested.local_id for a in opened.actants))
-        request_object = next(a for a in requested.actants if a.role == ActantRole.OBJECT)
+        self.assertFalse(any(a.role == ActantRole.CAUSE and a.candidate_ref == requested.local_id for a in opened.actants))
+        request_recipient = next(a for a in requested.actants if a.role == ActantRole.RECIPIENT)
+        request_content = next(a for a in requested.actants if a.role == ActantRole.OBJECT)
         enter_subject = next(a for a in entered.actants if a.role == ActantRole.SUBJECT)
-        self.assertIsNotNone(request_object.entity_ref)
-        self.assertEqual(enter_subject.entity_ref, request_object.entity_ref)
+        self.assertEqual(request_content.candidate_ref, entered.local_id)
+        self.assertIsNotNone(request_recipient.entity_ref)
+        self.assertEqual(enter_subject.entity_ref, request_recipient.entity_ref)
         self.assertEqual(result.relations[0].relation_id, "CAUSE")
         self.assertEqual((result.relations[0].source_ref, result.relations[0].target_ref), (requested.local_id, opened.local_id))
 

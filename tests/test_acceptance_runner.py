@@ -136,14 +136,50 @@ class AcceptanceRunnerTests(unittest.TestCase):
             data_dir = Path(td)
             cases_file = data_dir / "acceptance_cases.txt"
             cases_file.write_text("Кошка спит.\nИван читает.\n", encoding="utf-8")
+            oracle_file = data_dir / "acceptance_oracle.json"
+            oracle_file.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "cases": [
+                            {
+                                "text": "Кошка спит.",
+                                "expect": {
+                                    "perception": {
+                                        "assertions": [], "queries": [], "relations": [], "conditionals": []
+                                    },
+                                    "integration": {"must_succeed": True},
+                                },
+                            },
+                            {
+                                "text": "Иван читает.",
+                                "expect": {
+                                    "perception": {
+                                        "assertions": [], "queries": [], "relations": [], "conditionals": []
+                                    },
+                                    "integration": {"must_succeed": True},
+                                },
+                            },
+                        ],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
             services = _FakeServices(data_dir)
 
-            result = run_acceptance_suite(services, cases_file=cases_file)
+            result = run_acceptance_suite(
+                services, cases_file=cases_file, oracle_file=oracle_file
+            )
 
             self.assertEqual(result.total, 2)
             self.assertEqual(result.succeeded, 2)
             self.assertEqual(result.failed, 0)
+            self.assertEqual(result.semantic_passed, 2)
+            self.assertEqual(result.semantic_failed, 0)
+            self.assertEqual(result.semantic_gaps, 0)
             self.assertTrue((result.output_dir / "cases_used.txt").is_file())
+            self.assertTrue((result.output_dir / "oracle_used.json").is_file())
             self.assertTrue((result.output_dir / "config.json").is_file())
             self.assertTrue((result.output_dir / "initial_context.json").is_file())
             self.assertTrue((result.output_dir / "initial_ah.json").is_file())
@@ -156,6 +192,8 @@ class AcceptanceRunnerTests(unittest.TestCase):
             turn = json.loads((result.output_dir / "turn_001.json").read_text(encoding="utf-8"))
             self.assertEqual(turn["input"], "Кошка спит.")
             self.assertEqual(turn["status"], "OK")
+            self.assertEqual(turn["semantic_status"], "PASS")
+            self.assertTrue(turn["semantic_checks"])
             self.assertIn("linguistic_candidate_graph", turn)
             self.assertIn("perception_result", turn)
             self.assertIn("ah_diff", turn)

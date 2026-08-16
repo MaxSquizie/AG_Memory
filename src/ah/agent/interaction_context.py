@@ -15,6 +15,7 @@ class InteractionContext:
     active_location_ref: Ref | None = None
     pronoun_refs: dict[str, Ref] = field(default_factory=dict)
     last_experience_ref: Ref | None = None
+    pending_clarification_refs: list[Ref] = field(default_factory=list)
 
     def resolve_pronoun(self, text: str) -> Ref | None:
         return self.pronoun_refs.get(text.casefold())

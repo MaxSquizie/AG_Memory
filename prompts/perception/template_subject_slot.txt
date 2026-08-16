@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Answer only whether this verb meaning has a subject-like actor, experiencer, or state bearer. Do not explain.

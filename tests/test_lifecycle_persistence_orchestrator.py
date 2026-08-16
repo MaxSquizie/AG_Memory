@@ -242,10 +242,8 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         result = service.parse("Маша любит чай", InteractionContext())
         self.assertEqual(result.assertions[0].predicate.lookup_form, "любить")
         self.assertEqual(result.assertions[0].actants[0].role, ActantRole.SUBJECT)
-        self.assertEqual(
-            result.assertions[0].predicate.template_candidate.roles,
-            (ActantRole.SUBJECT, ActantRole.OBJECT),
-        )
+        # Legacy payload parsing does not fabricate a reusable T schema from one occurrence.
+        self.assertIsNone(result.assertions[0].predicate.template_candidate)
 
     def test_full_orchestrator_records_response_only_in_h(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())

@@ -1,0 +1,1 @@
+Decide only whether the same predicate sense has at least one omitted lexically selected core role. Reply only with [0] or [1].

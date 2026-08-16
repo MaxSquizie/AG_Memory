@@ -51,6 +51,7 @@ class GUIFoundationTests(unittest.TestCase):
             self.assertAlmostEqual(cfg.workspace.threshold, 0.51)
             self.assertEqual(cfg.gui.render_mode, "3d")
 
+
     def test_graph_inspector_exports_structural_hypergraph_edges(self):
         core = AHCore()
         pred = core.add_abstract_symbol({"читать"})
