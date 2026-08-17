@@ -91,6 +91,7 @@ class MainWindow(QMainWindow):
 
         self.canvas = GraphCanvasWidget(services)
         self.canvas.node_selected.connect(self._select_node)
+        self.canvas.node_hovered.connect(self._hover_node)
         self.canvas.edge_selected.connect(self._select_edge)
         self.setCentralWidget(self.canvas)
 
@@ -202,10 +203,11 @@ class MainWindow(QMainWindow):
     def _build_llm_dock(self) -> None:
         dock = QDockWidget("LLM", self)
         self.llm_dock = dock
-        self.llm_panel = LLMControlWidget(self.services)
+        self.llm_panel = LLMControlWidget(self.services, self.config_path)
         self.llm_panel.start_requested.connect(self._start_llm)
         self.llm_panel.stop_requested.connect(self._stop_llm)
         self.llm_panel.restart_requested.connect(self._restart_llm)
+        self.llm_panel.ollama_model_changed.connect(self._ollama_model_changed)
         self.llm_panel.prompts_saved.connect(
             lambda: self.statusBar().showMessage("LLM prompt-файлы сохранены", 3000)
         )
@@ -788,6 +790,24 @@ class MainWindow(QMainWindow):
         self.canvas.refresh()
 
     # ---------- config ----------
+    def _ollama_model_changed(self, model_name: str) -> None:
+        doc = self.config_editor.document
+        try:
+            doc.set("llm.ollama_model", model_name)
+            new_config = doc.save()
+        except Exception as exc:
+            QMessageBox.warning(self, "Ollama model", str(exc))
+            return
+        try:
+            self.services.apply_config(new_config)
+            self.llm_panel.refresh_status()
+        except Exception as exc:
+            QMessageBox.critical(self, "Ollama model", str(exc))
+            return
+        self._llm_restart_required = True
+        self.statusBar().showMessage("Ollama model изменена: требуется перезапуск LLM", 6000)
+        self._refresh_status()
+
     def _config_saved(self, new_config: AppConfig, changed_paths: tuple[str, ...]) -> None:
         modes = {ConfigDocument.apply_mode(path) for path in changed_paths}
         try:
@@ -823,6 +843,21 @@ class MainWindow(QMainWindow):
         self._refresh_status()
 
     # ---------- diagnostics / inspector ----------
+    def _hover_node(self, uid: str) -> None:
+        if not uid:
+            return
+        snap = self.services.graph_inspector.snapshot()
+        node = next((n for n in snap.nodes if n.uid == uid), None)
+        if node is None:
+            return
+        domain = node.domain or "—"
+        semantic = (node.semantic or "").strip()
+        detail = f" | {semantic}" if semantic else ""
+        self.statusBar().showMessage(
+            f"{node.kind} {domain} {node.uid}{detail}",
+            2500,
+        )
+
     def _select_node(self, uid: str) -> None:
         self._selected_uid = uid or None
         if self._selected_uid is not None:

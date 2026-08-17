@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Protocol
 
 from ah.config import LLMRoleSettings
+from ah.diagnostics.session_log import emit
 from ah.projection.contracts import AgentContext
 from ah.integration.contracts import ClarificationRequest
 
@@ -94,12 +95,36 @@ class LLMAgent:
         raw = str(response.text).strip()
         cleaned, contaminated = self._sanitize(raw)
         if cleaned and (not contaminated or self.settings.sanitize_context_echo):
+            emit(
+                "agent_sanitize",
+                contaminated=contaminated,
+                cleaned_empty=False,
+                action="accept",
+                raw=raw,
+                cleaned=cleaned,
+            )
             return cleaned
         if not self.settings.sanitize_context_echo:
+            emit(
+                "agent_sanitize",
+                contaminated=contaminated,
+                cleaned_empty=not bool(cleaned),
+                action="passthrough",
+                raw=raw,
+                cleaned=cleaned,
+            )
             return raw
 
+        emit(
+            "agent_sanitize",
+            contaminated=contaminated,
+            cleaned_empty=not bool(cleaned),
+            action="repair",
+            raw=raw,
+            cleaned=cleaned,
+        )
         last_raw = raw
-        for _ in range(self.settings.repair_attempts):
+        for attempt in range(self.settings.repair_attempts):
             repaired = self.backend.generate(
                 self._repair_prompt(context, last_raw),
                 system=_AGENT_REPAIR_SYSTEM_PROMPT,
@@ -108,6 +133,15 @@ class LLMAgent:
             )
             last_raw = str(repaired.text).strip()
             cleaned, contaminated = self._sanitize(last_raw)
+            emit(
+                "agent_repair",
+                attempt=attempt + 1,
+                contaminated=contaminated,
+                cleaned_empty=not bool(cleaned),
+                bad_draft_chars=len(raw),
+                raw=last_raw,
+                cleaned=cleaned,
+            )
             if cleaned:
                 return cleaned
 

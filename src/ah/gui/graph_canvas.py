@@ -9,7 +9,6 @@ from PySide6.QtCore import QTimer, Signal
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from vispy import scene, use
 from vispy.scene.visuals import Markers
-from vispy.visuals.filters import MarkerPickingFilter
 
 from ah.bootstrap import RuntimeServices
 from ah.config import GUISettings
@@ -21,8 +20,10 @@ from .graph_state import (
     VisualGraph,
     build_edge_focus_geometry,
     build_focus_geometry,
-    rank_visible_label_indices,
+    format_node_label,
     pick_edge_key_2d,
+    pick_node_uid_2d,
+    rank_visible_label_indices,
 )
 
 
@@ -58,7 +59,6 @@ class GraphCanvasWidget(QWidget):
         self._snapshot = None
         self._flows: dict[str, _FlowTrack] = {}
         self._flow_lock = Lock()
-        self._last_uid_order: tuple[str, ...] = ()
         self._selected_uid: str | None = None
         self._selected_edge_key: str | None = None
         self._hover_uid: str | None = None
@@ -108,9 +108,6 @@ class GraphCanvasWidget(QWidget):
         self._prime_markers(self.nodes, placeholder_point)
         self.nodes.update_gl_state(depth_test=True, blend=True)
         self.nodes.scaling = False
-        self._picker = MarkerPickingFilter()
-        self.nodes.attach(self._picker)
-        self._picker.enabled = False
 
         self.flow_lines = scene.visuals.Line(
             pos=placeholder_segment.copy(),
@@ -328,7 +325,6 @@ class GraphCanvasWidget(QWidget):
         )
         self._snapshot = snapshot
         self.visual = visual
-        self._last_uid_order = visual.node_uids
 
         if len(visual.structural_segments):
             self.structural_lines.set_data(
@@ -364,10 +360,23 @@ class GraphCanvasWidget(QWidget):
             self.nodes.visible = False
 
         if self.settings.show_labels and self.settings.max_labels > 0 and len(visual.node_uids):
-            ranked = rank_visible_label_indices(snapshot, visual, self.settings.max_labels)
+            force_uids = tuple(
+                uid for uid in (self._selected_uid, self._hover_uid) if uid
+            )
+            ranked = rank_visible_label_indices(
+                snapshot,
+                visual,
+                self.settings.max_labels,
+                force_uids=force_uids,
+            )
             by_uid = {node.uid: node for node in snapshot.nodes}
-            texts = [by_uid[visual.node_uids[i]].semantic[:72] for i in ranked]
-            label_pos = visual.positions[list(ranked)].copy()
+            texts = [
+                format_node_label(by_uid[visual.node_uids[i]])
+                for i in ranked
+                if visual.node_uids[i] in by_uid
+            ]
+            label_indices = [i for i in ranked if visual.node_uids[i] in by_uid]
+            label_pos = visual.positions[label_indices].copy()
             if len(label_pos):
                 label_pos[:, 0] += 0.22
                 label_pos[:, 1] += 0.22
@@ -636,8 +645,8 @@ class GraphCanvasWidget(QWidget):
         self._update_focus_layers()
         self.canvas.update()
 
-    def _pick_edge_key(self, pos) -> str | None:
-        if self.visual is None or not self.visual.edges or not len(self.visual.positions):
+    def _project_positions(self) -> np.ndarray | None:
+        if self.visual is None or not len(self.visual.positions):
             return None
         try:
             transform = self.nodes.get_transform(map_from="visual", map_to="canvas")
@@ -648,6 +657,17 @@ class GraphCanvasWidget(QWidget):
                 w = projected[:, 3:4]
                 valid = np.abs(w[:, 0]) > 1e-12
                 projected[valid, :3] /= w[valid]
+            return projected
+        except Exception:
+            return None
+
+    def _pick_edge_key(self, pos) -> str | None:
+        if self.visual is None or not self.visual.edges or not len(self.visual.positions):
+            return None
+        projected = self._project_positions()
+        if projected is None:
+            return None
+        try:
             return pick_edge_key_2d(
                 self.visual,
                 projected,
@@ -658,52 +678,19 @@ class GraphCanvasWidget(QWidget):
             return None
 
     def _pick_node_uid(self, pos) -> str | None:
-        """Pick a base marker while temporarily hiding every non-picking overlay."""
-        if self.visual is None or not self._last_uid_order or not self.nodes.visible:
+        """Pick the nearest node marker in screen space (Retina-safe)."""
+        if self.visual is None or not self.visual.node_uids or not self.nodes.visible:
             return None
-
-        render_size = tuple(int(d * self.canvas.pixel_scale) for d in self.canvas.size)
-        if render_size[0] < 3 or render_size[1] < 3:
+        projected = self._project_positions()
+        if projected is None:
             return None
-        x_pos = int(pos[0] * self.canvas.pixel_scale)
-        y_pos = int(render_size[1] - pos[1] * self.canvas.pixel_scale)
-        x_pos = max(1, min(render_size[0] - 2, x_pos))
-        y_pos = max(1, min(render_size[1] - 2, y_pos))
-
-        other_visuals = (
-            self.structural_lines,
-            self.relation_lines,
-            self.flow_lines,
-            self.selection_lines,
-            self.selection_markers,
-            self.hover_lines,
-            self.hover_markers,
-            self.pulse_markers,
-            self.labels,
-        )
-        states = tuple(v.visible for v in other_visuals)
-        restore_picker = not self._picker.enabled
-        for visual in other_visuals:
-            visual.visible = False
-        self._picker.enabled = True
-        self.nodes.update_gl_state(blend=False)
         try:
-            picked = self.canvas.render(
-                region=(x_pos - 1, y_pos - 1, 3, 3),
-                size=(3, 3),
-                bgcolor=(0, 0, 0, 0),
-                alpha=True,
+            return pick_node_uid_2d(
+                self.visual,
+                projected,
+                pos,
+                self.settings.edge_pick_radius_px,
+                sizes=self.visual.sizes,
             )
-            marker_idx = int((picked.view(np.uint32) - 1)[1, 1, 0])
         except Exception:
-            marker_idx = -1
-        finally:
-            if restore_picker:
-                self._picker.enabled = False
-            self.nodes.update_gl_state(blend=True)
-            for visual, visible in zip(other_visuals, states):
-                visual.visible = visible
-
-        if 0 <= marker_idx < len(self._last_uid_order):
-            return self._last_uid_order[marker_idx]
-        return None
+            return None

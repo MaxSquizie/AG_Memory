@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from ah.bootstrap import RuntimeServices
+from ah.llm import OllamaBackend, OllamaClient, OllamaClientError
 from ah.projection.contracts import AgentContext, AgentContextDiagnostic
 
 
@@ -83,6 +84,13 @@ def _working_set_bytes(pid: int | None) -> int | None:
             fields = Path(f"/proc/{pid}/statm").read_text(encoding="ascii").split()
             if len(fields) >= 2:
                 return int(fields[1]) * int(os.sysconf("SC_PAGE_SIZE"))
+
+        if sys.platform == "darwin":
+            import resource
+
+            usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+            # macOS reports ru_maxrss in bytes for this API surface.
+            return int(usage.ru_maxrss)
     except (OSError, ValueError, AttributeError):
         return None
     return None
@@ -131,10 +139,17 @@ class LLMControlWidget(QWidget):
     stop_requested = Signal()
     restart_requested = Signal()
     prompts_saved = Signal()
+    ollama_model_changed = Signal(str)
 
-    def __init__(self, services: RuntimeServices, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        services: RuntimeServices,
+        config_path: str | Path | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
         super().__init__(parent)
         self.services = services
+        self.config_path = Path(config_path).resolve() if config_path is not None else None
         # Diagnostics are scoped to the most recently submitted GUI turn. This
         # prevents Parser/Agent tabs from showing the previous turn while a new
         # request is already running. Sequence floors are runtime-only UI state.
@@ -163,8 +178,22 @@ class LLMControlWidget(QWidget):
         self.perception_cfg_label = QLabel()
         self.agent_cfg_label = QLabel()
         self.stage_label = QLabel()
+        self.ollama_model_row = QWidget()
+        ollama_row_layout = QHBoxLayout(self.ollama_model_row)
+        ollama_row_layout.setContentsMargins(0, 0, 0, 0)
+        self.ollama_model_combo = QComboBox()
+        self.ollama_refresh_button = QPushButton("Обновить")
+        self.ollama_refresh_button.clicked.connect(self._refresh_ollama_models)
+        self.ollama_model_combo.currentTextChanged.connect(self._on_ollama_model_selected)
+        ollama_row_layout.addWidget(self.ollama_model_combo, 1)
+        ollama_row_layout.addWidget(self.ollama_refresh_button)
+        self.ollama_endpoint_label = QLabel()
+        self.backend_label = QLabel()
         info.addRow("Статус", self.status_label)
+        info.addRow("Backend", self.backend_label)
         info.addRow("Модель", self.model_label)
+        info.addRow("Ollama model", self.ollama_model_row)
+        info.addRow("Ollama URL", self.ollama_endpoint_label)
         info.addRow("Роли", self.role_label)
         info.addRow("Loader", self.loader_label)
         info.addRow("Device policy", self.device_policy_label)
@@ -233,7 +262,57 @@ class LLMControlWidget(QWidget):
         root.addWidget(save_prompts)
 
         self.reload_prompts()
+        self._sync_ollama_controls()
         self.refresh_status()
+
+    def _is_ollama_backend(self) -> bool:
+        return self.services.config.llm.backend.strip().lower() == "ollama"
+
+    def _sync_ollama_controls(self) -> None:
+        ollama = self._is_ollama_backend()
+        self.ollama_model_row.setVisible(ollama)
+        self.ollama_endpoint_label.setVisible(ollama)
+        self.loader_label.setVisible(not ollama)
+        self.device_policy_label.setVisible(not ollama)
+        self.cuda_label.setVisible(not ollama)
+        self.placement_label.setVisible(not ollama)
+        if ollama:
+            self._populate_ollama_models()
+
+    def _populate_ollama_models(self, *, selected: str | None = None) -> None:
+        cfg = self.services.config.llm
+        models: list[str] = []
+        if isinstance(self.services.llm, OllamaBackend):
+            models = list(self.services.llm.list_models())
+        if not models:
+            try:
+                models = OllamaClient(cfg.ollama_base_url).list_models()
+            except OllamaClientError:
+                models = []
+        current = selected or cfg.ollama_model
+        self.ollama_model_combo.blockSignals(True)
+        self.ollama_model_combo.clear()
+        if current and current not in models:
+            self.ollama_model_combo.addItem(current)
+        self.ollama_model_combo.addItems(models)
+        if current:
+            index = self.ollama_model_combo.findText(current)
+            if index >= 0:
+                self.ollama_model_combo.setCurrentIndex(index)
+        self.ollama_model_combo.blockSignals(False)
+
+    def _refresh_ollama_models(self) -> None:
+        try:
+            self._populate_ollama_models()
+        except OllamaClientError as exc:
+            QMessageBox.warning(self, "Ollama", str(exc))
+
+    def _on_ollama_model_selected(self, model_name: str) -> None:
+        if not self._is_ollama_backend() or not model_name:
+            return
+        if model_name == self.services.config.llm.ollama_model:
+            return
+        self.ollama_model_changed.emit(model_name)
 
 
     def begin_turn(self, source_text: str) -> None:
@@ -636,7 +715,14 @@ class LLMControlWidget(QWidget):
             return
         backend = self.services.llm
         cfg = self.services.config
-        self.model_label.setText(str(cfg.paths.llm_model_dir or "<not configured>"))
+        self._sync_ollama_controls()
+        self.backend_label.setText(cfg.llm.backend)
+        if self._is_ollama_backend():
+            self.model_label.setText(cfg.llm.ollama_model or "<not configured>")
+            self.ollama_endpoint_label.setText(cfg.llm.ollama_base_url)
+        else:
+            self.model_label.setText(str(cfg.paths.llm_model_dir or "<not configured>"))
+            self.ollama_endpoint_label.clear()
         self.history_label.setText(
             f"{cfg.llm.history_messages} сообщений — "
             + ("stateless" if cfg.llm.history_messages == 0 else "history enabled")
@@ -648,9 +734,10 @@ class LLMControlWidget(QWidget):
             f"T={cfg.llm.perception.temperature:g}"
         )
         self.loader_label.setText(f"{cfg.llm.loader_type} (text-only)")
-        self.device_policy_label.setText(
-            f"device_map={cfg.llm.device_map}; dtype={cfg.llm.dtype}; 4bit={'ON' if cfg.llm.use_4bit else 'OFF'}"
-        )
+        if not self._is_ollama_backend():
+            self.device_policy_label.setText(
+                f"device_map={cfg.llm.device_map}; dtype={cfg.llm.dtype}; 4bit={'ON' if cfg.llm.use_4bit else 'OFF'}"
+            )
         self.cuda_label.setText("not probed")
         self.placement_label.setText("not loaded")
         self.agent_cfg_label.setText(
@@ -669,12 +756,18 @@ class LLMControlWidget(QWidget):
 
         status = backend.status()
         llm_ram = _working_set_bytes(status.pid)
-        self.ram_label.setText(
-            f"GUI={_format_ram(gui_ram)} | LLM={_format_ram(llm_ram)}"
-        )
-        model_text = status.model_dir or status.configured_model_dir or "<not configured>"
-        if status.running and status.model_dir != status.configured_model_dir:
-            model_text += f"  (config → {status.configured_model_dir}; restart required)"
+        if self._is_ollama_backend():
+            self.ram_label.setText(f"GUI={_format_ram(gui_ram)} | Ollama remote")
+        else:
+            self.ram_label.setText(
+                f"GUI={_format_ram(gui_ram)} | LLM={_format_ram(llm_ram)}"
+            )
+        if self._is_ollama_backend():
+            model_text = cfg.llm.ollama_model or "<not configured>"
+        else:
+            model_text = status.model_dir or status.configured_model_dir or "<not configured>"
+            if status.running and status.model_dir != status.configured_model_dir:
+                model_text += f"  (config → {status.configured_model_dir}; restart required)"
         self.model_label.setText(model_text)
         self.status_label.setText(
             ("READY" if status.ready else "RUNNING" if status.running else "STOPPED")
@@ -682,13 +775,19 @@ class LLMControlWidget(QWidget):
             + (f" | ctx={status.context_window}" if status.context_window else "")
             + (f" | transformers={status.transformers_version}" if status.transformers_version else "")
         )
-        if status.loader_type:
+        if self._is_ollama_backend():
+            self.loader_label.setText("ollama (HTTP)")
+            if status.cuda_summary:
+                self.cuda_label.setText(status.cuda_summary)
+            if status.placement_summary:
+                self.placement_label.setText(status.placement_summary)
+        elif status.loader_type:
             self.loader_label.setText(f"{status.loader_type} (text-only)")
-        if status.cuda_summary:
-            self.cuda_label.setText(status.cuda_summary)
-        if status.placement_summary:
-            quant = " | NF4 4-bit" if status.effective_4bit else ""
-            self.placement_label.setText(status.placement_summary + quant)
+            if status.cuda_summary:
+                self.cuda_label.setText(status.cuda_summary)
+            if status.placement_summary:
+                quant = " | NF4 4-bit" if status.effective_4bit else ""
+                self.placement_label.setText(status.placement_summary + quant)
         self.stage_label.setText(
             status.current_stage
             + (f" | last role={status.last_role}" if status.last_role else "")

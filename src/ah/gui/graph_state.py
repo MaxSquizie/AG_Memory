@@ -7,7 +7,7 @@ from math import pi
 import numpy as np
 
 from ah.config import GUISettings
-from ah.diagnostics import GraphSnapshot
+from ah.diagnostics import GraphSnapshot, NodeDiagnostic
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,10 +109,22 @@ def build_edge_focus_geometry(visual: VisualGraph, key: str | None) -> EdgeFocus
 
 
 
+def format_node_label(node: NodeDiagnostic, *, max_len: int = 72) -> str:
+    """Human-readable canvas label: kind@domain plus semantic text."""
+    kind = (node.kind or "?").strip()
+    domain = (node.domain or "").strip()
+    prefix = f"{kind}@{domain}" if domain else kind
+    semantic = (node.semantic or "").strip()
+    text = f"{prefix} {semantic}".strip() if semantic else prefix
+    return text[:max_len]
+
+
 def rank_visible_label_indices(
     snapshot: GraphSnapshot,
     visual: VisualGraph,
     max_labels: int,
+    *,
+    force_uids: tuple[str, ...] = (),
 ) -> tuple[int, ...]:
     """Rank labels in *visual* index space, never snapshot index space.
 
@@ -137,7 +149,21 @@ def rank_visible_label_indices(
         ),
         reverse=True,
     )
-    return tuple(candidates[:max_labels])
+    index = visual.node_index
+    forced = tuple(index[uid] for uid in force_uids if uid in index)
+    slots = max(max_labels, len(forced))
+    ordered: list[int] = []
+    seen: set[int] = set()
+    for i in forced:
+        if i not in seen:
+            ordered.append(i)
+            seen.add(i)
+    for i in candidates:
+        if i in seen or len(ordered) >= slots:
+            continue
+        ordered.append(i)
+        seen.add(i)
+    return tuple(ordered)
 
 def point_segment_distance_2d(point: np.ndarray, a: np.ndarray, b: np.ndarray) -> float:
     """Screen-space distance from a point to a finite segment."""
@@ -184,6 +210,36 @@ def pick_edge_key_2d(
         if best is None or candidate < best:
             best = candidate
     return None if best is None else best[2]
+
+
+def pick_node_uid_2d(
+    visual: VisualGraph,
+    projected_positions: np.ndarray,
+    point: tuple[float, float] | np.ndarray,
+    tolerance_px: float,
+    *,
+    sizes: np.ndarray | None = None,
+) -> str | None:
+    """Pick the nearest visible node marker in projected canvas coordinates."""
+    if tolerance_px <= 0 or len(projected_positions) != len(visual.node_uids):
+        return None
+    p = np.asarray(point, dtype=np.float64)[:2]
+    best: tuple[float, float, int] | None = None
+    for i, uid in enumerate(visual.node_uids):
+        center = np.asarray(projected_positions[i], dtype=np.float64)[:2]
+        if not np.all(np.isfinite(center)):
+            continue
+        radius = float(tolerance_px)
+        if sizes is not None and i < len(sizes):
+            radius = max(radius, float(sizes[i]) * 0.5 + 2.0)
+        distance = float(np.linalg.norm(p - center))
+        if distance > radius:
+            continue
+        size_bias = float(sizes[i]) if sizes is not None and i < len(sizes) else 0.0
+        candidate = (distance, -size_bias, i)
+        if best is None or candidate < best:
+            best = candidate
+    return None if best is None else visual.node_uids[best[2]]
 
 
 class GraphLayout:

@@ -37,6 +37,8 @@ class ConfigEditor(QWidget):
 
         self.browse_model = QPushButton("Папка LLM…")
         self.browse_model.clicked.connect(self._browse_llm)
+        self.ollama_hint = QLabel("Для backend=ollama модель выбирается на панели LLM.")
+        self.ollama_hint.setWordWrap(True)
         self.validate_button = QPushButton("Проверить")
         self.validate_button.clicked.connect(self._validate)
         self.save_button = QPushButton("Сохранить / применить")
@@ -46,7 +48,7 @@ class ConfigEditor(QWidget):
 
         buttons = QHBoxLayout()
         buttons.addWidget(self.browse_model)
-        buttons.addStretch(1)
+        buttons.addWidget(self.ollama_hint, 1)
         buttons.addWidget(self.validate_button)
         buttons.addWidget(self.save_button)
         buttons.addWidget(self.reload_button)
@@ -56,6 +58,15 @@ class ConfigEditor(QWidget):
         layout.addWidget(self.tree, 1)
         layout.addLayout(buttons)
         self.reload()
+
+    def _sync_backend_controls(self) -> None:
+        try:
+            backend = str(self.document.get("llm.backend") or "builtin_process").strip().lower()
+        except KeyError:
+            backend = "builtin_process"
+        pytorch = backend != "ollama"
+        self.browse_model.setVisible(pytorch)
+        self.ollama_hint.setVisible(not pytorch)
 
     def reload(self) -> None:
         try:
@@ -87,6 +98,7 @@ class ConfigEditor(QWidget):
             root.addChild(item)
         self.tree.expandAll()
         self._loading = False
+        self._sync_backend_controls()
         self._update_status()
 
     @staticmethod
@@ -115,6 +127,7 @@ class ConfigEditor(QWidget):
             self._loading = True
             item.setText(1, self._display(value))
             self._loading = False
+            self._sync_backend_controls()
             self._update_status()
         except Exception as exc:
             self._loading = True

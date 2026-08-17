@@ -9,7 +9,7 @@ import tempfile
 import tomllib
 from typing import Any, Iterable
 
-from ah.config import AppConfig, load_config
+from ah.config import AppConfig, load_config, validate_app_config
 
 
 class ApplyMode(str, Enum):
@@ -36,6 +36,8 @@ def _classify(path: str) -> ApplyMode:
         "paths.tokenizer_dir",
         "paths.adapter_dir",
         "llm.backend",
+        "llm.ollama_base_url",
+        "llm.ollama_model",
         "llm.loader_type",
         "llm.device_map",
         "llm.dtype",
@@ -210,7 +212,9 @@ class ConfigDocument:
             import os
             with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
                 fh.write(text)
-            return load_config(tmp)
+            config = load_config(tmp)
+            validate_app_config(config)
+            return config
         finally:
             try:
                 tmp.unlink()

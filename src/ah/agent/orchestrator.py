@@ -8,6 +8,7 @@ from threading import RLock
 
 from ah.agent.interaction_context import InteractionContext
 from ah.config import OrchestratorSettings
+from ah.diagnostics.session_log import emit
 from ah.core.persistence import JsonPersistence
 from ah.ignition import IgnitionEngine, TickResult
 from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
@@ -499,6 +500,24 @@ class AgentOrchestrator:
         )
 
     def handle_user_text(self, text: str, *, generate_response: bool = True) -> AgentTurnResult:
+        emit("turn_start", user_text=text, generate_response=generate_response)
+        try:
+            result = self._handle_user_text(text, generate_response=generate_response)
+        except Exception as exc:
+            emit("turn_error", user_text=text, error=f"{type(exc).__name__}: {exc}")
+            raise
+        emit(
+            "turn_end",
+            user_text=result.user_text,
+            response_text=result.response_text,
+            clarification_kind=(
+                None if result.clarification_request is None else result.clarification_request.kind
+            ),
+            perception_diagnostics=list(result.perception.diagnostics),
+        )
+        return result
+
+    def _handle_user_text(self, text: str, *, generate_response: bool = True) -> AgentTurnResult:
         lock = self.runtime_lock or nullcontext()
 
         if self.context.pending_clarification_refs:

@@ -15,6 +15,7 @@ from .hidden_valency_diagnostic import (
     run_hidden_valency_diagnostic,
 )
 from .graph_dump import GraphInspector, GraphSnapshot, LinkDiagnostic, NodeDiagnostic, StructuralEdgeDiagnostic
+from .session_log import SessionLogger, emit, start_session
 from .summary import RuntimeDiagnostics, RuntimeSummary
 from .trace_view import TraceView
 from .propagation_audit import (
@@ -44,10 +45,13 @@ __all__ = [
     "StructuralEdgeDiagnostic",
     "RuntimeDiagnostics",
     "RuntimeSummary",
+    "SessionLogger",
     "TraceView",
     "FanoutAudit",
     "PropagationAudit",
     "PropagationEdgeAudit",
     "analyze_propagation",
     "propagation_edges",
+    "emit",
+    "start_session",
 ]

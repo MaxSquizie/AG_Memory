@@ -15,7 +15,7 @@ from ah.integration import IntegrationConfig, IntegrationService
 from ah.integration.correction import RefutationCommit, SemanticCorrectionService
 from ah.integration.contracts import IntegrationCommit
 from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
-from ah.llm import LocalLLMProcessBackend
+from ah.llm import LLMBackend, OllamaBackend, build_llm_backend
 from ah.model import Domain, Property, SemanticEntity
 from ah.perception import (
     LLMPerceptionService,
@@ -46,7 +46,7 @@ class RuntimeServices:
     correction: SemanticCorrectionService
     graph_inspector: GraphInspector
     diagnostics: RuntimeDiagnostics
-    llm: LocalLLMProcessBackend | None
+    llm: LLMBackend | None
     perception: LLMPerceptionService | None
     agent: LLMAgent | None
 
@@ -94,7 +94,7 @@ class RuntimeServices:
         graph_inspector = GraphInspector(core, ignition, runtime_lock=operation_lock)
         diagnostics = RuntimeDiagnostics(core, ignition, runtime_lock=operation_lock)
 
-        llm = LocalLLMProcessBackend(config) if config.llm.enabled else None
+        llm = build_llm_backend(config)
         perception = (
             LLMPerceptionService(
                 llm,
@@ -207,8 +207,18 @@ class RuntimeServices:
             self.perception = None
             self.agent = None
         else:
-            if self.llm is None:
-                self.llm = LocalLLMProcessBackend(new_config)
+            backend_kind = new_config.llm.backend.strip().lower()
+            current_kind = (
+                "ollama"
+                if isinstance(self.llm, OllamaBackend)
+                else "builtin_process"
+                if self.llm is not None
+                else None
+            )
+            if self.llm is None or backend_kind != current_kind:
+                if self.llm is not None:
+                    self.llm.stop()
+                self.llm = build_llm_backend(new_config)
             else:
                 self.llm.config = new_config
             self.perception = LLMPerceptionService(

@@ -23,7 +23,9 @@ from ah.gui.graph_state import (
     GraphVisualMapper,
     build_edge_focus_geometry,
     build_focus_geometry,
+    format_node_label,
     pick_edge_key_2d,
+    pick_node_uid_2d,
     rank_visible_label_indices,
 )
 from ah.gui.manual_links import ManualLinkManager, ManualLinkRequest
@@ -442,6 +444,56 @@ class GUIFoundationTests(unittest.TestCase):
         self.assertAlmostEqual(services.ignition.workspace_settings.threshold, 0.61)
         self.assertAlmostEqual(services.ignition.settings.x_max, 2.0)
         self.assertAlmostEqual(services.clock.interval_seconds, 0.1)
+
+    def test_format_node_label_includes_kind_and_domain(self) -> None:
+        core = AHCore()
+        entity = core.add_entity(Domain.P, {"name": Property("name", "АГент", "str")})
+        snap = GraphInspector(core).snapshot()
+        node = next(n for n in snap.nodes if n.uid == entity.uid)
+        label = format_node_label(node)
+        self.assertTrue(label.startswith("M@P"))
+        self.assertIn("АГент", label)
+
+    def test_node_screen_pick_hits_marker_and_misses_outside(self) -> None:
+        core = AHCore()
+        a = core.add_entity(Domain.C, {"name": Property("name", "A", "str")})
+        b = core.add_entity(Domain.C, {"name": Property("name", "B", "str")})
+        core.add_link("CAUSE", core.ref(a.uid), core.ref(b.uid), 0.5)
+        snap = GraphInspector(core).snapshot()
+        visual = GraphVisualMapper().build(snap, GUISettings(), x_max=1.0)
+        projected = visual.positions[:, :2].copy()
+        ia = visual.node_index[a.uid]
+        picked = pick_node_uid_2d(
+            visual,
+            projected,
+            projected[ia],
+            tolerance_px=8.0,
+            sizes=visual.sizes,
+        )
+        self.assertEqual(picked, a.uid)
+        missed = pick_node_uid_2d(
+            visual,
+            projected,
+            (9999.0, 9999.0),
+            tolerance_px=8.0,
+            sizes=visual.sizes,
+        )
+        self.assertIsNone(missed)
+
+    def test_rank_visible_label_indices_forces_selected_nodes(self) -> None:
+        core = AHCore()
+        core.add_entity(Domain.C, {"name": Property("name", "A", "str")})
+        core.add_entity(Domain.C, {"name": Property("name", "B", "str")})
+        quiet = core.add_entity(Domain.C, {"name": Property("name", "C", "str")})
+        snap = GraphInspector(core).snapshot()
+        visual = GraphVisualMapper().build(snap, GUISettings(), x_max=1.0)
+        ranked = rank_visible_label_indices(
+            snap,
+            visual,
+            max_labels=1,
+            force_uids=(quiet.uid,),
+        )
+        self.assertIn(visual.node_index[quiet.uid], ranked)
 
 
 if __name__ == "__main__":

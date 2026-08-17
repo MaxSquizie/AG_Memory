@@ -14,6 +14,8 @@ import time
 import uuid
 
 from ah.config import AppConfig
+from ah.diagnostics.session_log import log_llm_request
+from ah.llm.constants import LLM_PYTORCH_INSTALL_HINT
 
 
 @dataclass(frozen=True, slots=True)
@@ -264,6 +266,18 @@ class LocalLLMProcessBackend:
             state = "ERROR" if error else "OK"
             detail = f": {error}" if error else ""
             self._recent_log.append(f"[request #{sequence}] role={role} {state}{detail}")
+        log_llm_request(
+            sequence=sequence,
+            req_id=req_id,
+            role=role,
+            prompt=prompt,
+            system=system,
+            response_text=response_text,
+            error=error,
+            choice_winner=choice_winner,
+            choice_margin=choice_margin,
+            choice_outputs=choice_outputs,
+        )
 
     def build_command(self) -> list[str]:
         cfg = self.config
@@ -321,6 +335,13 @@ class LocalLLMProcessBackend:
             return
         if self.config.llm.history_messages != 0:
             raise ValueError("Only stateless LLM requests (history_messages=0) are supported")
+        if self.config.llm.backend.strip().lower() == "builtin_process":
+            try:
+                import torch  # noqa: F401
+            except ImportError as exc:
+                raise RuntimeError(
+                    f"PyTorch worker is not installed. Run: {LLM_PYTORCH_INSTALL_HINT}"
+                ) from exc
         env = os.environ.copy()
         env.setdefault("PYTHONUNBUFFERED", "1")
         env.setdefault("PYTHONUTF8", "1")

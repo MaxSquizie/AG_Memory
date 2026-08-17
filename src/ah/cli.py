@@ -9,6 +9,7 @@ from typing import Any
 
 from ah.bootstrap import RuntimeServices
 from ah.config import load_config
+from ah.diagnostics.session_log import start_session
 
 
 def _jsonable(value: Any) -> Any:
@@ -49,6 +50,10 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     cfg = load_config(Path(args.config))
+    start_session(
+        cfg.paths.logs_dir,
+        extra={"entry": "cli", "command": args.command, "backend": cfg.llm.backend},
+    )
     services = RuntimeServices.build(cfg)
 
     if args.command == "dsl":

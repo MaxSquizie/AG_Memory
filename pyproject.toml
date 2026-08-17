@@ -37,3 +37,8 @@ gui = [
 [project.scripts]
 ah-agent = "ah.cli:main"
 ah-gui = "ah.gui.app:main"
+
+# Base install (uv pip install -e ".[gui]") does not include torch/transformers.
+# PyTorch worker: uv pip install -e ".[llm]"
+[tool.uv]
+dev-dependencies = []

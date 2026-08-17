@@ -1,0 +1,116 @@
+{
+  "tick": 79,
+  "workspace_uids": [
+    "M_5b420d5c902a4051a351540d4c04c251",
+    "M_62356d38f31b4e11998ff39a775d8b61",
+    "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+    "M_a4a27a9e5230469ab269034b14a1e4d5",
+    "M_fc69b4786a6b4fce93342f330f8d03af",
+    "N_166d80888d044995b32991772e3d4ac0",
+    "N_16acd6e90eb54438beb2cc4488a8f89d",
+    "N_1b292003b75b48a886b0a0ecdff89b93",
+    "N_222258eee8e04f26bf5735d408209c9d",
+    "N_5762396d099c4b3795b9b8c61f98f50c",
+    "N_82353b674761408a98159bcaa210550b",
+    "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+    "N_cf5dab81b6774a929d4b64d870af289c",
+    "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+    "N_db79000de35946ad81f0fb14ba605aa5",
+    "S_0a3a560a311b4473808065c3aa0ed334",
+    "S_3613c2e3388149fead3b711dec79c9d5",
+    "S_e4e3f811631d419896d1e50ffe89431e"
+  ],
+  "workspace": {
+    "M_5b420d5c902a4051a351540d4c04c251": {
+      "semantic": "Пользователь",
+      "excitation": 1.0
+    },
+    "M_62356d38f31b4e11998ff39a775d8b61": {
+      "semantic": "Иван",
+      "excitation": 1.0
+    },
+    "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+      "semantic": "АГент",
+      "excitation": 1.0
+    },
+    "M_a4a27a9e5230469ab269034b14a1e4d5": {
+      "semantic": "чай",
+      "excitation": 1.0
+    },
+    "M_fc69b4786a6b4fce93342f330f8d03af": {
+      "semantic": "Кошка",
+      "excitation": 1.0
+    },
+    "N_166d80888d044995b32991772e3d4ac0": {
+      "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+      "excitation": 1.0
+    },
+    "N_16acd6e90eb54438beb2cc4488a8f89d": {
+      "semantic": "высказать(SUBJECT=Пользователь)",
+      "excitation": 1.0
+    },
+    "N_1b292003b75b48a886b0a0ecdff89b93": {
+      "semantic": "высказать(SUBJECT=АГент)",
+      "excitation": 1.0
+    },
+    "N_222258eee8e04f26bf5735d408209c9d": {
+      "semantic": "высказать(SUBJECT=АГент)",
+      "excitation": 0.5
+    },
+    "N_5762396d099c4b3795b9b8c61f98f50c": {
+      "semantic": "высказать(SUBJECT=Пользователь)",
+      "excitation": 1.0
+    },
+    "N_82353b674761408a98159bcaa210550b": {
+      "semantic": "спит(SUBJECT=Кошка)",
+      "excitation": 1.0
+    },
+    "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+      "semantic": "любит(SUBJECT=Иван, OBJECT=чай)",
+      "excitation": 1.0
+    },
+    "N_cf5dab81b6774a929d4b64d870af289c": {
+      "semantic": "высказать(SUBJECT=АГент)",
+      "excitation": 1.0
+    },
+    "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+      "semantic": "высказать(SUBJECT=АГент)",
+      "excitation": 1.0
+    },
+    "N_db79000de35946ad81f0fb14ba605aa5": {
+      "semantic": "высказать(SUBJECT=Пользователь)",
+      "excitation": 0.7
+    },
+    "S_0a3a560a311b4473808065c3aa0ed334": {
+      "semantic": "любит",
+      "excitation": 0.5188423375663449
+    },
+    "S_3613c2e3388149fead3b711dec79c9d5": {
+      "semantic": "Кто",
+      "excitation": 0.48324877259723464
+    },
+    "S_e4e3f811631d419896d1e50ffe89431e": {
+      "semantic": "чай",
+      "excitation": 0.5188423375663449
+    }
+  },
+  "pending_incoming": {
+    "M_5b420d5c902a4051a351540d4c04c251": 1.1215445695889834,
+    "M_62356d38f31b4e11998ff39a775d8b61": 0.4,
+    "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": 1.1005911588461483,
+    "M_a4a27a9e5230469ab269034b14a1e4d5": 0.4,
+    "M_fc69b4786a6b4fce93342f330f8d03af": 0.4,
+    "N_07e962ffa60a410a99819efa6106b60b": 0.0017701673369774568,
+    "N_166d80888d044995b32991772e3d4ac0": 1.0,
+    "N_16acd6e90eb54438beb2cc4488a8f89d": 0.16863719615382786,
+    "N_1b292003b75b48a886b0a0ecdff89b93": 1.0,
+    "N_222258eee8e04f26bf5735d408209c9d": 0.13999999999999999,
+    "N_5762396d099c4b3795b9b8c61f98f50c": 1.0,
+    "N_82353b674761408a98159bcaa210550b": 0.011544569588983445,
+    "N_9dbaf31287954e5cabfa71dfa7a8b6a2": 0.3,
+    "N_cf5dab81b6774a929d4b64d870af289c": 1.0,
+    "N_d6fa4f8c6d0f4222aede7b4143bb17d8": 1.0,
+    "N_db79000de35946ad81f0fb14ba605aa5": 0.21500000000000002
+  },
+  "pending_refutations": []
+}
