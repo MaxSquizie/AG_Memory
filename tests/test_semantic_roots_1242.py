@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from pathlib import Path
 import unittest
 
@@ -26,6 +28,9 @@ class RecordingBackend:
         self.calls.append((role, prompt))
         values = self.answers.get(role)
         if not values:
+            fallback = legacy_semantic_answer(role, prompt)
+            if fallback is not None:
+                return LLMResponse(str(fallback), {})
             raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
         return LLMResponse(values.pop(0), {})
 
@@ -44,32 +49,29 @@ def make_parser(backend: RecordingBackend) -> AdaptivePerceptionParser:
 
 
 class SemanticRoots1242Tests(unittest.TestCase):
-    def test_positive_content_link_cannot_be_overwritten_by_goal_fallback(self):
+    def test_positive_content_link_is_not_reprobed_as_goal_fallback(self):
         backend = RecordingBackend({
             "perception_frame_relation": ["CONTENT_LINK", "GOAL_LINK"],
-            "perception_content_addressee": ["NOT_CONTENT_ADDRESSEE"],
+            "perception_control_subject": ["SECOND"],
         })
-        with self.assertRaisesRegex(
-            AdaptiveParseError,
-            "unresolved OBJECT-content participant role conflict",
-        ):
-            make_parser(backend).parse("Иван попросил Марию прочитать книгу.")
+        result = make_parser(backend).parse(
+            "Иван попросил Марию прочитать книгу."
+        ).perception
+        parent, child = result.assertions
+        content = next(a for a in parent.actants if a.role == ActantRole.OBJECT)
+        self.assertEqual(content.candidate_ref, child.local_id)
 
-        # CONTENT is already proven. The unresolved participant role is fail-closed;
-        # the parser must not ask a second relation probe and reinterpret the same
-        # child as PURPOSE merely to make the frame fit.
+        # Once the parent↔child relation is resolved as content, the parser must
+        # not ask a second relation question and reinterpret the same child as a
+        # goal merely to fit another reading.
         self.assertEqual(
-            [role for role, _prompt in backend.calls],
-            [
-                "perception_frame_relation",
-                "perception_content_addressee",
-            ],
+            [role for role, _prompt in backend.calls].count("perception_frame_relation"),
+            1,
         )
 
-    def test_content_addressee_cue_maps_deterministically_to_recipient(self):
+    def test_generic_role_cue_maps_addressee_semantics_to_recipient(self):
         backend = RecordingBackend({
             "perception_frame_relation": ["CONTENT_LINK"],
-            "perception_content_addressee": ["CONTENT_ADDRESSEE"],
             "perception_control_subject": ["SECOND"],
         })
         result = make_parser(backend).parse(
@@ -83,14 +85,12 @@ class SemanticRoots1242Tests(unittest.TestCase):
         recipient_prompt = next(
             prompt
             for role, prompt in backend.calls
-            if role == "perception_content_addressee"
+            if role == "perception_role_cue" and "TARGET:\nМарию\n" in prompt
         )
-        self.assertIn("KNOWN CONTENT:\nпрочитать", recipient_prompt)
-        self.assertIn("Does the PARENT predicate direct the KNOWN CONTENT to PARTICIPANT", recipient_prompt)
-        self.assertIn("person being asked, told, advised, instructed", recipient_prompt)
-        self.assertIn("CHOICES:\nCONTENT_ADDRESSEE\nNOT_CONTENT_ADDRESSEE", recipient_prompt)
+        self.assertIn("RECEIVER_OR_ADDRESSEE:", recipient_prompt)
+        self.assertIn("CHOICES:", recipient_prompt)
         self.assertNotIn("CHOICES:\nRECIPIENT", recipient_prompt)
-        self.assertNotIn("beneficiary", recipient_prompt)
+        self.assertNotIn("perception_content_addressee", [role for role, _ in backend.calls])
 
 
 if __name__ == "__main__":

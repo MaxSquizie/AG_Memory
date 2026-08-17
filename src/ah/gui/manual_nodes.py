@@ -149,24 +149,35 @@ class ManualNodeManager:
         if not forms:
             raise ValueError("S requires at least one wordform")
 
-        owners = {
-            symbol.uid: symbol
+        candidate_sets = [
+            {symbol.uid for symbol in core.store.find_symbols_by_form(form)}
             for form in forms
-            if (symbol := core.store.find_symbol_by_form(form)) is not None
-        }
-        if len(owners) > 1:
-            detail = ", ".join(sorted(owners))
+        ]
+        known_sets = [uids for uids in candidate_sets if uids]
+        if not known_sets:
+            return core.add_abstract_symbol(set(forms)), True
+
+        common = set.intersection(*known_sets)
+        if len(common) > 1:
             raise ValueError(
-                "Requested wordforms already belong to different S nodes "
-                f"({detail}); merge/resolve them explicitly before editing."
+                "Requested wordforms are homographic across multiple existing S nodes "
+                f"({', '.join(sorted(common))}); add a distinguishing paradigm form."
             )
-        if owners:
-            symbol = next(iter(owners.values()))
+        if len(common) == 1:
+            symbol = core.store.get_symbol(next(iter(common)))
             for form in forms:
-                if core.store.find_symbol_by_form(form) is None:
+                if form not in symbol.forms:
                     symbol = core.add_symbol_form(symbol.uid, form)
             return symbol, False
-        return core.add_abstract_symbol(set(forms)), True
+
+        # At least two supplied forms point only to disjoint existing paradigms.
+        # Do not infer that those S nodes should be merged merely because the GUI
+        # request listed them together.
+        owners = sorted(set().union(*known_sets))
+        raise ValueError(
+            "Requested wordforms do not identify one existing S node "
+            f"({', '.join(owners)}); resolve the lexical identity explicitly."
+        )
 
     @staticmethod
     def _resolve_or_create_entity(

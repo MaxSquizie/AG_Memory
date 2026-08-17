@@ -4,7 +4,7 @@ import unittest
 
 from ah.agent import InteractionContext
 from ah.core import AHCore, SequentialUidGenerator
-from ah.integration import CandidateValidationError, IntegrationConfig, IntegrationService
+from ah.integration import CandidateValidationError, IntegrationConfig, IntegrationService, SeedReason
 from ah.model import ActantRole, Domain, Hypernode, Property, RefKind
 from ah.perception import (
     ActantCandidate,
@@ -79,7 +79,33 @@ class IntegrationServiceTests(unittest.TestCase):
         self.assertEqual(self.core.store.domain_of(commit.assertions[0].ref.uid), Domain.C)
         self.assertEqual(self.core.store.domain_of(commit.experience_ref.uid), Domain.H)
         self.assertEqual(self.context.last_experience_ref, commit.experience_ref)
-        self.assertEqual(len(commit.activation_seeds), 2)
+        self.assertEqual(len(commit.activation_seeds), 3)
+
+    def test_external_semantic_predicate_gets_strong_resolved_symbol_seed(self) -> None:
+        result = PerceptionResult(
+            source_text="Что произошло?",
+            assertions=(self._assertion("A1", "произойти"),),
+        )
+
+        commit = self.service.integrate_external(result, self.context)
+
+        node = self.core.store.get_hypernode(commit.assertions[0].ref.uid)
+        template = self.core.store.get_template(node.template.uid)
+        resolved = [
+            seed for seed in commit.activation_seeds
+            if seed.reason is SeedReason.RESOLVED_SYMBOL
+        ]
+        self.assertEqual(tuple(seed.ref for seed in resolved), (template.predicate,))
+
+    def test_agent_h_only_integration_does_not_self_stimulate_resolved_symbol(self) -> None:
+        result = PerceptionResult(
+            source_text="Я отвечаю",
+            assertions=(self._assertion("A1", "отвечать"),),
+        )
+
+        commit = self.service.integrate_to_h(result, self.context)
+
+        self.assertFalse(any(seed.reason is SeedReason.RESOLVED_SYMBOL for seed in commit.activation_seeds))
 
     def test_external_fact_with_known_p_entity_routes_to_p(self) -> None:
         masha = self.core.add_entity(
@@ -295,6 +321,39 @@ class IntegrationServiceTests(unittest.TestCase):
         self.assertEqual(len(self.core.store.elements(Domain.H)), before_h)
         self.assertIsNone(self.context.last_experience_ref)
 
+    def test_same_new_entity_ref_reused_inside_one_assertion(self) -> None:
+        result = PerceptionResult(
+            source_text="Иван видит себя",
+            assertions=(
+                self._assertion(
+                    "A1",
+                    "видеть",
+                    ActantCandidate(
+                        ActantRole.SUBJECT,
+                        mention="Иван",
+                        normalized_hint="Иван",
+                        entity_ref="E1",
+                    ),
+                    ActantCandidate(
+                        ActantRole.OBJECT,
+                        mention="себя",
+                        normalized_hint="Иван",
+                        entity_ref="E1",
+                    ),
+                ),
+            ),
+        )
+
+        commit = self.service.integrate_external(result, self.context)
+        node = self.core.store.get_hypernode(commit.assertions[0].ref.uid)
+
+        self.assertEqual(node.actants[ActantRole.SUBJECT], node.actants[ActantRole.OBJECT])
+        ivans = [
+            item for item in self.core.store.elements(commit.assertions[0].domain)
+            if getattr(getattr(item, "properties", {}).get("name"), "value", None) == "Иван"
+        ]
+        self.assertEqual(len(ivans), 1)
+
     def test_local_entity_coreference_reuses_exact_same_m_and_follow_relation_becomes_l(self) -> None:
         result = PerceptionResult(
             source_text="Я прочитал текст, который Лиза написала позже",
@@ -413,7 +472,9 @@ class IntegrationServiceTests(unittest.TestCase):
             self.assertEqual(node.meta.get("occurrence_count"), 0)
         self.assertEqual(self.core.store.domain_of(conditional.ref.uid), Domain.C)
         self.assertEqual(self.core.store.domain_of(commit.experience_ref.uid), Domain.H)
-        self.assertEqual(tuple(seed.ref for seed in commit.activation_seeds), (conditional.ref, commit.experience_ref))
+        self.assertEqual(tuple(seed.ref for seed in commit.activation_seeds[:2]), (conditional.ref, commit.experience_ref))
+        resolved = [seed for seed in commit.activation_seeds if seed.reason is SeedReason.RESOLVED_SYMBOL]
+        self.assertEqual(len(resolved), 2)
 
     def test_scoped_conditional_proposition_does_not_dedup_with_later_asserted_fact(self) -> None:
         conditional_result = PerceptionResult(

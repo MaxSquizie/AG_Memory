@@ -142,6 +142,18 @@ class ConfigEditor(QWidget):
                     self._loading = False
                     return
 
+    def set_external_values(self, values: dict[str, object], *, save: bool = False) -> None:
+        """Synchronize specialized live controls with the generic TOML editor."""
+        try:
+            for path, value in values.items():
+                self.document.set(path, value)
+                self._sync_path(path)
+            self._update_status()
+            if save:
+                self._save()
+        except Exception as exc:
+            QMessageBox.warning(self, "Config", str(exc))
+
     def _validate(self) -> None:
         try:
             self.document.validate()

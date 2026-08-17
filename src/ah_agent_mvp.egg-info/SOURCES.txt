@@ -6,6 +6,7 @@ docs/SLICE_12_13.md
 docs/SLICE_12_30.md
 docs/SLICE_12_37.md
 docs/SLICE_12_38.md
+docs/SLICE_12_48.md
 pyproject.toml
 src/ah/__init__.py
 src/ah/agent/__init__.py
@@ -106,3 +107,9 @@ tests/test_lifecycle_persistence_orchestrator.py
 tests/test_llm_roles.py
 tests/test_projection_inference.py
 tests/test_semantic_oracle_1238.py
+docs/SLICE_12_58.md
+docs/reference/Архитектура_v3.md
+prompts/perception/lexeme_hypothesis.txt
+prompts/perception/antecedent_choice.txt
+prompts/perception/role_cue.txt
+tests/test_semantic_boundaries_1258.py

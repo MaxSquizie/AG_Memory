@@ -58,6 +58,19 @@ class GarbageCollector:
         )
 
     def _is_protected(self, uid: str) -> bool:
+        # Dialogue turns are experienced history, not disposable semantic cache.
+        # A local LLM call may take longer than NEW TTL while IgnitionClock keeps
+        # advancing; deleting the current H event would both lose the episode and
+        # leave InteractionContext.last_experience_ref dangling.  Protect explicit
+        # H event instances independently of consolidation stage.
+        if self.core.store.domain_of(uid) is Domain.H:
+            try:
+                node = self.core.store.get_hypernode(uid)
+            except (KeyError, TypeError):
+                node = None
+            if node is not None and bool(node.meta.get("event_instance", False)):
+                return True
+
         # N used as an actant, g operand or k member is semantically referenced.
         if self.core.store.structural_referrers(uid):
             return True

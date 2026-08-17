@@ -538,7 +538,7 @@ class Clarification1221Tests(unittest.TestCase):
         self.assertIn("CLARIFICATION ANSWER:\nвторая", prompt)
         self.assertIn("FIRST: Анна", prompt)
         self.assertIn("SECOND: Мария", prompt)
-        self.assertEqual(override["choice_outputs"], ["NONE", "FIRST", "SECOND"])
+        self.assertNotIn("choice_outputs", override)
 
     def test_llm_agent_clarification_prompt_contains_labels_but_not_uids(self):
         backend = ChoiceBackend("Анна или Мария?")

@@ -1,0 +1,1 @@
+Choose whether the ACTANT fills the stated semantic role for every coordinated predicate. Answer exactly SHARED or LOCAL. Do not infer a new role and do not explain.

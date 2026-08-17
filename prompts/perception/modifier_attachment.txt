@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. EVENT means the modifier belongs to the predicate/event; NOMINAL_n means it describes that nominal phrase. Choose UNCLEAR only when the source text itself does not determine one reading. Return only the label.

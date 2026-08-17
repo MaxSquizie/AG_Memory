@@ -1,4 +1,6 @@
 from .contracts import (
+    ActDependencyCandidate,
+    ActDependencyKind,
     ActantCandidate,
     ActantCompositionCandidate,
     CompositionMemberCandidate,
@@ -9,8 +11,11 @@ from .contracts import (
     CommandCandidate,
     EvidenceSpan,
     PerceptionResult,
+    PropositionExprCandidate,
+    PropositionOperator,
     PredicateCandidate,
     TemplateCandidate,
+    TemplateSelection,
     QueryCandidate,
     QueryMode,
     SituationRelationCandidate,
@@ -28,6 +33,8 @@ from .llm_parser import (
 from .text_sensory import TextSensoryResult, TextSensoryService
 
 __all__ = [
+    "ActDependencyCandidate",
+    "ActDependencyKind",
     "ActantCandidate",
     "ActantCompositionCandidate",
     "CompositionMemberCandidate",
@@ -38,8 +45,11 @@ __all__ = [
     "CommandCandidate",
     "EvidenceSpan",
     "PerceptionResult",
+    "PropositionExprCandidate",
+    "PropositionOperator",
     "PredicateCandidate",
     "TemplateCandidate",
+    "TemplateSelection",
     "QueryCandidate",
     "QueryMode",
     "SituationRelationCandidate",

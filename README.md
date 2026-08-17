@@ -1,8 +1,25 @@
-# AH Agent MVP — v0.12.44
+# AH Agent MVP — v0.12.58
 
 Накопительный исполняемый проект АГ-памяти для текстового LLM-агента.
 
 `docs/reference/Архитектура_v3.md` — архитектурный источник для реализации. Код строится так, чтобы каноническая память, runtime-динамика, inference и LLM boundary оставались отдельными слоями.
+
+## v0.12.58 — structural ambiguity boundaries, not corpus patches
+
+Этот срез продолжает single-shot `RuntimeRoleCue` из v0.12.57 и исправляет оставшиеся ошибки на границах до/после semantic role decision, не добавляя словарных правил под broad200:
+
+- NOM/ACC и DAT/ACC синкретизм сохраняется как структурная неоднозначность; ordered case precedence больше не назначает `SUBJECT/RECIPIENT` там, где форма допускает конкурирующее чтение;
+- postverbal NOM/ACC под устойчиво transitive predicate не считается однозначным `SUBJECT`;
+- OR coordination получает ту же object-region структурную обработку, что AND;
+- NP-internal genitive absorption выполняется только при отсутствии materially possible non-genitive core case;
+- relative PP сохраняет governing preposition и использует тот же one-shot role cue; antecedent matching игнорирует нематериальные homonym readings служебных слов;
+- бинарная lexical ambiguity проверяется двумя симметричными `YES/NO` hypothesis probes; ровно одна гипотеза должна подтвердиться;
+- numeral включается в `DURATION` только после независимого semantic решения `DURATION`; counted `OBJECT + AMOUNT` не склеивается;
+- local `candidate_ref`-content наследует P provenance до dependency-order Integration, если parent прямо anchored к SELF/USER;
+- morphology-marked substantivized anaphor может выбрать только turn-local source label (`C1..Cn/UNCLEAR`), никогда canonical UID;
+- fronted CONDITION включает contiguous additive consequent siblings.
+
+Из последнего реального v0.12.57 broad200: raw evaluator дал `178/200`. Аудит oracle выявил восемь переограничений, требовавших искусственной noun-normalization для source-denoting adverbial/directional fillers; тот же сохранённый runtime bundle без повторного запуска переоценивается как `186/200` под `broad200-v3`. Это evaluator correction, а не новый product score. Реального broad200 для v0.12.58 ещё нет.
 
 ## Текущий end-to-end pipeline
 
@@ -588,6 +605,21 @@ is retained only as execution diagnostics; acceptance quality is reported as
 against the oracle without rerunning the LLM. See `docs/SEMANTIC_ORACLE.md` and
 `docs/SLICE_12_38.md`.
 
+Since v0.12.47 the default suite is `broad200-v2`: 200 exact-oracle turns. The first
+40 are the frozen corpus that reached real 40/40; 160 new cases add sixteen stress
+families. The old corpus remains separately runnable via
+`data/acceptance_cases_regression40.txt` + `data/acceptance_oracle_regression40.json`.
+Oracle cases carry `family`/`tags`, and acceptance summaries report per-family
+PASS/FAIL/GAP so broad failures can be diagnosed by mechanism rather than by one
+global percentage. See `docs/ACCEPTANCE_CORPUS.md` and `docs/SLICE_12_47.md`.
+
+Since v0.12.50 broad200 is **scenario-isolated**. The frozen first 40 still run as
+one sequential regression scenario, but independent stress examples start from the
+same acceptance baseline; only explicit learning/query chains share state. The runner
+also restores the user's pre-run AH, InteractionContext and Ignition state after
+diagnostics, so acceptance no longer pollutes working memory. See
+`docs/SLICE_12_50.md`.
+
 ## Slice 12.13 — memory-bounded acceptance runs
 
 Long acceptance batches now suspend live graph/status polling without stopping Ignition or changing cognitive execution. Per-turn runtime diagnostics no longer build a full semantic graph snapshot, JSON is streamed to disk, and complete AH diff snapshots are released before the next turn. The acceptance bundle format is unchanged. See `docs/SLICE_12_13.md`.
@@ -871,3 +903,145 @@ us encode both readings without inventing a false `N`/actant. See `docs/SLICE_12
 - Architecture reference advanced to working specification **v0.10** with scoped propositions, canonical IF/AND condition semantics and the general structural-clarification contract.
 - No claim of real `40/40` is made until this build is rerun with the selected Qwen model; local tests verify mechanics and oracle contracts only.
 
+
+
+## v0.12.45 — case-syncretic morphology + no partial semantic frames
+
+- Real v0.12.44 semantic acceptance reached **39 PASS / 1 FAIL / 0 GAP**; CONDITION cases 30–32 passed.
+- Preserves lower-scored case readings when they belong to the same nominal lexeme and differ only in syntactic case-relevant analysis, fixing context-free pymorphy priors such as `Петра` genitive vs accusative.
+- A selected semantically relevant actant with unresolved role now fails closed instead of being silently dropped and allowing a partial canonical frame.
+- This routes case 39 back into the already implemented H-only structural clarification mechanism without an extra LLM role decision.
+- Architecture reference advanced to working specification v0.11.
+
+
+## v0.12.46 — semantic-oracle H chronology correction
+
+- Real v0.12.45 run: runtime **40/40**, semantic **39 PASS / 1 FAIL / 0 GAP**. The only failing check was evaluator-only: case 39 had correct H-level structural clarification but `cp_semantic_addition_count` treated its normal H→H `FOLLOW` chronology link as a C/P semantic write.
+- `cp_semantic_addition_count` now classifies domainless links by their endpoint domains. `FOLLOW(H→H)` is excluded; links touching C/P remain semantic additions.
+- The exact saved real run regrades offline as **40 PASS / 0 FAIL / 0 GAP**. Production parser/integration behavior is unchanged.
+- `Архитектура_v3.md` remains working specification v0.11 because this slice changes diagnostics only, not the product semantics.
+
+
+
+
+## v0.12.50 — scenario-isolated broad acceptance
+
+- The completed broad200 run (`107 PASS / 93 FAIL`) exposed strong cross-case contamination: independent examples accumulated duplicate same-name entities and generated later `AMBIGUOUS_REFERENCE` structures.
+- Oracle cases now carry a `scenario` id. Canonical AH, InteractionContext and Ignition state reset to the run baseline when the scenario changes.
+- The frozen 40-case regression remains one sequential scenario; intentional T-evolution and query pairs remain sequential inside their own scenarios.
+- Acceptance pauses the Ignition clock for determinism and restores the user's complete pre-run cognitive state when the suite ends. The loaded LLM process is reused and is not restarted.
+- Offline re-grading mirrors the same scenario boundaries.
+- Production Perception, Integration, AH Core semantics and Architecture v0.11 are unchanged.
+
+## v0.12.49 — acceptance evaluator resilience
+
+- Fixes the broad200 acceptance crash when an inference query record contains `outcome=null`: the semantic oracle now grades it as a normal failed query outcome instead of calling `.get()` on `None`.
+- Adds a diagnostics boundary around semantic-oracle evaluation. An evaluator defect is written into the turn bundle as `oracle.evaluation_error` and the remaining corpus continues instead of being truncated.
+- Hardens manifest failure extraction against malformed diagnostic checks.
+- Production Perception, Integration, AH Core semantics, prompts, broad200 corpus, and Architecture v0.11 are unchanged.
+
+## v0.12.48 — atomic diagnostics snapshots + broad-run graph suspension
+
+- `GraphInspector.snapshot()` now reads the whole canonical/runtime graph under the shared `RuntimeServices.operation_lock`. This prevents GUI snapshots from observing a pre-GC runtime UID together with post-GC canonical indexes.
+- `RuntimeDiagnostics.summary()` uses the same read barrier for consistent multi-read summaries.
+- `RuntimeServices.build()` wires both diagnostic readers to the same lock already used by IgnitionClock and orchestrator canonical mutations.
+- During broad acceptance runs the VisPy graph refresh loop is paused; cognitive runtime and Ignition continue normally. The graph resumes with one fresh snapshot when the run ends.
+- Production Perception/Integration/AH semantics and `Архитектура_v3` v0.11 are unchanged.
+
+## v0.12.47 — broad200 semantic acceptance corpus
+
+- Default semantic suite expanded from 40 to **200** sequential exact-oracle cases.
+- Original real-40/40 corpus preserved verbatim as `acceptance_*_regression40`.
+- Added 160 cases across 16 new stress families: lexical frames, transfer/recipient, adjunct roles, T evolution, coordination, coreference, relative clauses, nested content, temporal/causal, conditionals, negation, passive/impersonal, WH queries, personal provenance, ambiguity and morphology case pressure.
+- Oracle cases now support `family` and `tags`; live/offline reports aggregate semantic results by family.
+- Production parser, Integration, AH Core and Architecture_v3 are unchanged. The expanded corpus is intentionally expected to discover new FAILs rather than preserve the old score.
+
+## v0.12.51 — broad200 oracle audit correction
+
+The first scenario-isolated broad200 run exposed two diagnostics defects rather than
+production semantic defects. `broad200-v2` now expects the explicit `FOLLOW` relation
+in case 100 (`затем`) and `cp_semantic_addition_count` no longer counts a canonical T
+that exists only as the template wrapper of a newly added H `event_instance`.
+Production Perception/Integration/AH semantics remain unchanged.
+
+
+## v0.12.53 — generic binary semantic role router
+
+v0.12.53 supersedes the over-specialized v0.12.52 role-narrowing attempt. The
+production parser no longer contains the broad200-driven temporal word list,
+duration-unit list, bare-instrumental TOOL/HOW_TO shortcut, `из` SOURCE/MATERIAL
+shortcut, `чем` role whitelist, or morphology filters introduced specifically after
+`Анне`/`вазу` failures. Those forms remain regression data, not production rules.
+
+The retained architectural mechanisms are general: finite subject-predicate
+agreement may reject a grammatically impossible SUBJECT reading; a governing
+preposition is preserved as part of question evidence but is not mapped directly to
+an AH role; and unresolved semantic roles are routed through a binary natural-cue
+decision tree. Every model decision in role routing has exactly two protocol labels,
+uses ordinary deterministic generation, and never invokes the legacy multi-choice
+scorer/margin path. Any role subset established by valid earlier structure can only
+shrink during this routing. See `docs/SLICE_12_53.md`.
+
+## v0.12.54 — neutral role partitions + contextual lexical disambiguation
+
+The broad200 v0.12.53 run established a stable real baseline of **158/200 semantic PASS** with the frozen regression40 still at **40/40**.  The largest remaining failures showed two architecture-level issues rather than missing word rules:
+
+- intermediate role labels such as `ENTITY_OR_CONTENT_RELATION` and `CIRCUMSTANTIAL_MODIFIER` had their own ordinary-language meaning, which overlapped the hidden canonical partition and could bias a weak local model;
+- dictionary morphology could expose two materially plausible lexemes for one surface form, while analyser score/order was being consumed before sentence context could disambiguate lexical identity.
+
+v0.12.54 therefore keeps every role model decision binary but makes the protocol labels semantically neutral: the model returns only `A` or `B`, while the prompt shows the natural-language meanings of the *actual remaining role sets*.  Python alone owns the mapping from A/B to the surviving `ActantRole` candidates.
+
+For genuine two-lexeme morphology ambiguity, Perception now performs one separate A/B `lexeme_identity` probe.  The selected lexeme only filters morphology evidence; it never writes canonical AH semantics.  The same boundary is used for predicate homographs.  More-than-binary lexical ambiguity fails closed instead of being collapsed by dictionary probability.
+
+No broad200 sentence literal was added to production code, and the acceptance corpus/oracle are unchanged.
+
+## v0.12.55 — relation contracts + lexical-decision monotonicity
+
+The real v0.12.54 broad200 run reached **159/200 semantic PASS** with **198/200 runtime OK** and kept the frozen regression40 at **40/40**.  The dominant remaining adjunct failures showed that neutral A/B labels alone were not sufficient: several canonical-role glosses still overlapped in ordinary language (`TOOL` vs `MATERIAL`, `TIME` vs `HOW-TO`, `SOURCE` vs neighboring relations).
+
+v0.12.55 keeps the same binary A/B protocol but turns each role description into a relation contract about the current `TARGET` and event.  Neighboring roles explicitly state their semantic boundary (for example, a TOOL is a separate implement used to perform the event, while MATERIAL is a constituent substance of an affected/result object).  Purely adverbial morphology may now exclude nominal participant/tool/material roles as negative POS evidence, but it never directly assigns TIME/LOCATION/HOW-TO/etc.
+
+Lexical A/B prompts now expose the analyser morphology profile of each candidate (POS/case/number/gender and selected grammeme markers).  Once a nominal lexeme is contextually selected, `normalized_hint` reuses that exact selection instead of reopening homonymy through a later `stable_normal_form()` call.  Predicate lexeme probes receive the same morphology profiles, including passive-participle vs adjective evidence.
+
+A relative-antecedent lookup no longer calls `.casefold()` on a missing normalized form; it falls back to source mention safely.  Finite SUBJECT agreement is also respected when a contextually selected nominative candidate is considered, while AND-coordinated nominative subjects correctly count as plural.
+
+No broad200 sentence literal or new lexical role table was added.  The corpus/oracle remain `broad200-v2`; a fresh real-model run is required before claiming any score above the confirmed 159/200.
+
+## v0.12.56 — semantic-property role routing
+
+The real v0.12.55 broad200-v2 run reached **171/200 semantic PASS**, **199/200 runtime OK**, and kept the frozen regression40 at **40/40**. The remaining adjunct/query traces exposed a general routing defect: even with good relation contracts, an early A/B choice between large heterogeneous role groups could eliminate the correct role before its own relation was directly tested.
+
+v0.12.56 replaces that family partition with independent binary semantic-property probes. Each model call answers only `YES` or `NO` for one natural relation property (temporal, non-temporal measure, cause/goal, means/material/manner, place/transfer endpoint, or predicated state). Python owns the exact canonical-role subset for the property. `NO` removes only that subset; `YES` selects it and any remaining local ambiguity is resolved by a small A/B contrast. A pre-existing `allowed_roles` set can only shrink.
+ The obsolete family-router helpers/constants are removed instead of remaining as a dormant second routing path.
+
+The legacy direct `из/от -> SOURCE` shortcut is removed: a governing preposition remains evidence but no longer proves SOURCE by itself. v0.12.56 also adds a generic NUMERAL+nominal structural boundary. One binary cue distinguishes a counted participant from a whole event/state measure; the latter fuses the phrase and routes only within DURATION/AMOUNT. No unit-word lexicon is introduced.
+
+The broad200 corpus/oracle remain `broad200-v2`. No score above the confirmed **171/200** is claimed until a fresh real-model run of v0.12.56.
+
+
+## v0.12.57 — single-shot runtime role cues
+
+The real v0.12.56 broad200-v2 run regressed to **163/200 semantic PASS** with **199/200 runtime OK** while the frozen regression40 remained **40/40**. Raw traces showed the cause: the semantic-property ladder multiplied false-negative opportunities. A correct TOOL/TIME/SOURCE/MATERIAL reading could be rejected by one early `NO`, after which the residual participant router produced a formally valid but wrong role.
+
+v0.12.57 therefore supersedes the v0.12.56 property ladder. Deterministic morphology/syntax still removes only formally impossible roles, but unresolved role semantics are now delegated as **one bounded decision for one TARGET**. The model returns exactly one non-canonical `RuntimeRoleCue` such as `INSTRUMENT`, `ORIGIN`, `TIME_POINT`, or `CONSTITUENT_MATERIAL`; Python alone maps the cue to an admissible `ActantRole`. The prompt contains only roles that survived deterministic narrowing. Role-cue generation uses ordinary deterministic generation, not likelihood choice scoring, margins, or a hidden tournament. Malformed or out-of-set labels fail closed.
+
+The direct `из/от -> SOURCE` shortcut remains removed, so those prepositions are evidence rather than canonical decisions. The experimental v0.12.56 NUMERAL+nominal post-normalizer is not retained in this slice because the real run showed it could collapse a counted entity into a whole-event measure; quantified structure will be revisited as its own architecture task.
+
+A separate deterministic coreference fix uses explicit grammatical person only as negative compatibility evidence: a `3per` anaphor cannot create a local alternative to an explicit `1per/2per` deictic antecedent. This prevents spurious cross-role correlated alternatives such as treating third-person `её` as potentially identical to the current speaker, without asking the LLM to choose an entity.
+
+Architecture is **v0.16**. The broad200 corpus/oracle remain unchanged. The confirmed real score remains **163/200 for v0.12.56** until v0.12.57 is run on the local model.
+
+
+## 2026-08-17 MVP freeze / memory-runtime hardening
+
+Formalization is time-boxed for the hackathon MVP after the real Qwen broad200 reached **154/200 semantic PASS with 198/200 runtime OK**. Broad200 is no longer a normal iteration gate; use the deterministic/unit suite and `tests/test_mvp_memory_smoke.py`.
+
+Memory-runtime fixes in the freeze slice:
+
+- pacemaker-only provenance survives causal propagation/residual excitation and never becomes `h`/lifecycle experience;
+- H dialogue `event_instance` nodes are protected from ordinary TTL GC, so a slow local LLM cannot delete the current turn while thinking;
+- the LLM worker refuses silent left-truncation of AgentContext and enforces the configured context token limit against exact tokenizer output;
+- the MVP decay profile uses `alpha=0`, because non-zero asymptotic `x` plus `output=x_act` and additive activation leaves a permanent impulse source and eventually saturates downstream Workspace nodes; long-term memory remains canonical AH/weights/lifecycle, not residual excitation;
+- naive reverse `actant→N` hyperedge propagation was experimentally rejected for MVP because it creates uncontrolled recurrent saturation under the current additive activation policy.
+
+See `docs/FORMALIZATION_FREEZE_20260817.md` and `docs/MVP_MEMORY_AUDIT_20260817.md`.

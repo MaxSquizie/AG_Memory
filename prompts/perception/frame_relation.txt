@@ -1,1 +1,1 @@
-Choose exactly one label from CHOICES. Answer only the QUESTION about the PARENT and CHILD verbs. Do not test any other relation. Do not explain.
+Choose exactly one label from CHOICES. CONTENT_LINK = selected content/complement: what is said, known, wanted, decided, requested, begun. If CHILD is what PARENT wants/decides/requests/begins, use CONTENT_LINK. GOAL_LINK = PARENT itself is done in order to achieve CHILD. Surface form is evidence only. Return only the label.

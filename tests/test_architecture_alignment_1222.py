@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from pathlib import Path
 import unittest
 
@@ -146,18 +148,26 @@ class ArchitectureAlignment1222Tests(unittest.TestCase):
         self.assertEqual(stable_normal_form(morph.analyze_all("Петру"), poses={"NOUN"}), "пётр")
         core = AHCore(uid_generator=SequentialUidGenerator())
         sensory = TextSensoryService(core, morph)
+        # Text Sensory no longer creates or merges lexical identity from a
+        # morphology winner. Unknown forms stay unresolved until Perception /
+        # Integration has selected the lexeme.
+        self.assertEqual(sensory.process("Пётр").symbol_refs, ())
+        self.assertEqual(sensory.process("Петру").symbol_refs, ())
+
+        symbol = core.add_abstract_symbol({"Пётр", "Петру"})
         first = sensory.process("Пётр")
         second = sensory.process("Петру")
-        self.assertEqual(first.symbol_refs[0], second.symbol_refs[0])
-        symbol = core.store.get_symbol(first.symbol_refs[0].uid)
-        self.assertIn("Пётр", symbol.forms)
-        self.assertIn("Петру", symbol.forms)
+        self.assertEqual(first.symbol_refs, (core.ref(symbol.uid),))
+        self.assertEqual(second.symbol_refs, (core.ref(symbol.uid),))
 
     def test_explicit_discourse_continuation_resolves_same_role_coreference_without_llm(self):
         result = make_parser(
             DiscourseMorphology(),
             RecordingBackend({"perception_role_participant": ["OBJECT"]}),
-        ).parse("Сергей положил ключ на стол. Потом он взял его.").perception
+        ).parse(
+            "Сергей положил ключ на стол. Потом он взял его.",
+            structural_resolution="PREDICATE_ATTACHMENT",
+        ).perception
         placed, took = result.assertions
         self.assertEqual(took.alternatives, ())
         for role in (ActantRole.SUBJECT, ActantRole.OBJECT):
@@ -181,7 +191,9 @@ class ArchitectureAlignment1222Tests(unittest.TestCase):
         result = make_parser(HomeMorphology(), backend).parse("Иван остался дома.").perception
         self.assertTrue(any(a.role == ActantRole.LOCATION for a in result.assertions[0].actants))
         self.assertFalse(any(a.role == ActantRole.STATE for a in result.assertions[0].actants))
-        self.assertEqual(backend.calls, [])
+        roles = [role for role, _prompt, _override in backend.calls]
+        self.assertIn("perception_role_cue", roles)
+        self.assertTrue(all((override or {}).get("choice_outputs") is None for _r, _p, override in backend.calls))
 
 
 if __name__ == "__main__":

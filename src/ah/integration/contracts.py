@@ -11,20 +11,45 @@ if TYPE_CHECKING:
 
 
 
+
+
+@dataclass(frozen=True, slots=True)
+class TemplateSenseOption:
+    """One local, non-UID-facing sense option for a known canonical T.
+
+    ``template_uid`` is consumed only by deterministic orchestration after the
+    Perception layer chooses ``label``. The LLM receives label + description,
+    never the UID itself.
+    """
+
+    label: str
+    template_uid: str
+    description: str
+
+    def __post_init__(self) -> None:
+        if not self.label.strip():
+            raise ValueError("TemplateSenseOption.label must be non-empty")
+        if not self.template_uid.strip():
+            raise ValueError("TemplateSenseOption.template_uid must be non-empty")
+        if not self.description.strip():
+            raise ValueError("TemplateSenseOption.description must be non-empty")
+
 @dataclass(frozen=True, slots=True)
 class TemplateRequest:
-    """Runtime request for a Perception-layer TemplateCandidate proposal.
+    """Runtime request for explicit T schema and/or lexical-sense resolution.
 
-    Deterministic integration may detect that no canonical T exists, but it does
-    not invent unobserved valency. The orchestrator routes this request back to
-    Perception so the runtime candidate can acknowledge the explicit roles already
-    present in the semantic act before canonical registration.
+    With no ``sense_options`` the predicate is unknown and Perception only packages
+    the explicit roles already present in the semantic act. With options, each Cn
+    label represents one existing canonical T through a UID-free usage profile;
+    Perception returns only a local label and deterministic orchestration maps it
+    back to the corresponding T or creates a NEW sense.
     """
 
     predicate: "PredicateCandidate"
     filled_roles: tuple[ActantRole, ...]
     source_context: str
     role_bindings: tuple[tuple[ActantRole, str], ...] = ()
+    sense_options: tuple[TemplateSenseOption, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.source_context.strip():
@@ -34,12 +59,17 @@ class TemplateRequest:
                 raise ValueError("TemplateRequest binding role must be in filled_roles")
             if not value.strip():
                 raise ValueError("TemplateRequest role binding text must be non-empty")
+        labels = tuple(option.label for option in self.sense_options)
+        if len(set(labels)) != len(labels):
+            raise ValueError("TemplateRequest sense option labels must be unique")
 
 class SeedReason(str, Enum):
     NEW_FACT = "NEW_FACT"
     REACTIVATED_FACT = "REACTIVATED_FACT"
     EXPERIENCE = "EXPERIENCE"
     SENSORY_SYMBOL = "SENSORY_SYMBOL"
+    RESOLVED_SYMBOL = "RESOLVED_SYMBOL"
+    QUERY_RECALL = "QUERY_RECALL"
     CORRECTION = "CORRECTION"
     PACEMAKER = "PACEMAKER"
 
@@ -123,6 +153,7 @@ class IntegratedAssertion:
     domain: Domain
     created: bool
     ambiguous: bool = False
+    semantic_scope: str | None = None
 
 
 

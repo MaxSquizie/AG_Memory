@@ -27,6 +27,19 @@ class RoleFillGoal:
 
 
 @dataclass(frozen=True, slots=True)
+class MultiRoleFillGoal:
+    template_ref: Ref
+    known_roles: Mapping[ActantRole, Ref]
+    requested_roles: tuple[ActantRole, ...]
+
+    def __post_init__(self) -> None:
+        if len(self.requested_roles) < 2:
+            raise ValueError("MultiRoleFillGoal requires at least two requested roles")
+        if len(set(self.requested_roles)) != len(self.requested_roles):
+            raise ValueError("MultiRoleFillGoal.requested_roles must be unique")
+
+
+@dataclass(frozen=True, slots=True)
 class ExistsGoal:
     template_ref: Ref
     known_roles: Mapping[ActantRole, Ref]
@@ -44,7 +57,7 @@ class CauseEntailmentGoal:
     effect: Ref
 
 
-InferenceGoal = RoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,13 +73,26 @@ class RoleBindingConclusion:
 
 
 @dataclass(frozen=True, slots=True)
+class MultiRoleBindingConclusion:
+    bindings: tuple[tuple[ActantRole, Ref], ...]
+    fact: Ref
+
+    def __post_init__(self) -> None:
+        if len(self.bindings) < 2:
+            raise ValueError("MultiRoleBindingConclusion requires at least two bindings")
+        roles = tuple(role for role, _ in self.bindings)
+        if len(set(roles)) != len(roles):
+            raise ValueError("MultiRoleBindingConclusion roles must be unique")
+
+
+@dataclass(frozen=True, slots=True)
 class DerivedLinkConclusion:
     relation_id: str
     source: Ref
     target: Ref
 
 
-SemanticConclusion = ExistingRefConclusion | RoleBindingConclusion | DerivedLinkConclusion
+SemanticConclusion = ExistingRefConclusion | RoleBindingConclusion | MultiRoleBindingConclusion | DerivedLinkConclusion
 
 
 @dataclass(frozen=True, slots=True)

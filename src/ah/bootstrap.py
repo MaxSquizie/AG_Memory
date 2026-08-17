@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from threading import RLock
 
 from ah.agent.interaction_context import InteractionContext
@@ -91,8 +91,8 @@ class RuntimeServices:
         sensory = TextSensoryService(core, build_morphology(config.llm.perception_morphology_backend))
         dsl = DSLInterpreter(core)
         correction = SemanticCorrectionService(core)
-        graph_inspector = GraphInspector(core, ignition)
-        diagnostics = RuntimeDiagnostics(core, ignition)
+        graph_inspector = GraphInspector(core, ignition, runtime_lock=operation_lock)
+        diagnostics = RuntimeDiagnostics(core, ignition, runtime_lock=operation_lock)
 
         llm = LocalLLMProcessBackend(config) if config.llm.enabled else None
         perception = (
@@ -122,6 +122,7 @@ class RuntimeServices:
                     config.llm.agent,
                     repair_attempts=config.llm.agent_repair_attempts,
                     sanitize_context_echo=config.llm.agent_sanitize_context_echo,
+                    context_max_tokens=config.context.max_tokens,
                 ),
             )
             if llm is not None
@@ -232,11 +233,44 @@ class RuntimeServices:
                     new_config.llm.agent,
                     repair_attempts=new_config.llm.agent_repair_attempts,
                     sanitize_context_echo=new_config.llm.agent_sanitize_context_echo,
+                    context_max_tokens=new_config.context.max_tokens,
                 ),
             )
 
         # Persistence path/settings are intentionally not swapped hot; the GUI marks
         # those fields RESTART_RUNTIME to avoid writing half a session to two stores.
+
+    def tune_decay(
+        self,
+        *,
+        alpha: float,
+        midpoint_ticks: float,
+        reactivation_min_input: float | None = None,
+        resolved_symbol_seed: float | None = None,
+    ) -> None:
+        """Apply operator-facing decay controls immediately without resetting memory.
+
+        Current x, decay origin and age are preserved. reactivation_min_input is
+        hot-tunable as well because it is part of the decay-epoch reset policy,
+        not a restart-only structural setting.
+        """
+        decay = replace(
+            self.config.ignition.decay,
+            alpha=float(alpha),
+            midpoint_ticks=float(midpoint_ticks),
+            reactivation_min_input=(
+                self.config.ignition.decay.reactivation_min_input
+                if reactivation_min_input is None
+                else float(reactivation_min_input)
+            ),
+        )
+        seeds = self.config.ignition.seeds
+        if resolved_symbol_seed is not None:
+            seeds = replace(seeds, resolved_symbol=float(resolved_symbol_seed))
+        ignition = replace(self.config.ignition, decay=decay, seeds=seeds)
+        self.config = replace(self.config, ignition=ignition)
+        self.ignition.reconfigure_decay(decay)
+        self.ignition.reconfigure_seed_levels(seeds)
 
     def create_orchestrator(self) -> AgentOrchestrator:
         if self.perception is None or self.agent is None:

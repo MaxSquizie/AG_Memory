@@ -14,17 +14,22 @@ from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilde
 from ah.inference.contracts import InferenceOutcome
 from ah.inference.materialization import MaterializationResult
 from ah.integration import IntegrationError, IntegrationService
-from ah.integration.contracts import ClarificationRequest, ClarificationResolutionCommit, IntegrationCommit
+from ah.integration.contracts import (
+    ActivationSeedRequest, ClarificationRequest, ClarificationResolutionCommit,
+    IntegrationCommit, SeedReason,
+)
 from ah.perception import (
     PerceptionParseError,
     PerceptionClarificationRequired,
     PerceptionResult,
+    PredicateCandidate,
     TemplateCandidate,
+    TemplateSelection,
     TextSensoryResult,
     TextSensoryService,
 )
 from ah.projection import ContextProjector
-from ah.projection.contracts import AgentContext
+from ah.projection.contracts import AgentContext, AgentContextDiagnostic
 
 
 class PerceptionService(Protocol):
@@ -37,6 +42,15 @@ class PerceptionService(Protocol):
         filled_roles,
         role_bindings=(),
     ) -> TemplateCandidate: ...
+
+    def resolve_template_sense(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        filled_roles,
+        role_bindings,
+        options: tuple[tuple[str, str], ...],
+    ) -> str | None: ...
 
     def interpret_clarification_answer(
         self, answer_text: str, option_labels: tuple[str, ...]
@@ -76,6 +90,7 @@ class AgentTurnResult:
     autosaved: bool
     clarification_request: ClarificationRequest | None = None
     clarification_resolution: ClarificationResolutionCommit | None = None
+    agent_context_diagnostic: AgentContextDiagnostic | None = None
 
 
 class AgentOrchestrator:
@@ -116,6 +131,20 @@ class AgentOrchestrator:
         self.persistence = persistence
         self.runtime_lock = runtime_lock
 
+    def _settle_input_wave(self) -> tuple[TickResult, ...]:
+        """Drain the current prompt's causal wave before freezing Workspace.
+
+        A resolved lexical mention starts at S. With synchronous one-edge-per-tick
+        propagation, one old post-input tick only reaches T; the proposition N would
+        still be pending when AgentContext is built. The configured settling ticks
+        therefore run before projection. They do not schedule fresh pacemaker pulses,
+        so a single user turn cannot inject multiple seconds of ν background noise.
+        """
+        return tuple(
+            self.ignition.tick(include_pacemaker=False)
+            for _ in range(self.settings.ticks_after_input)
+        )
+
     def _record_raw_external_experience(self, text: str, lock) -> IntegrationCommit:
         with lock:
             failed_turn = self.integration.integrate_external(
@@ -125,98 +154,140 @@ class AgentOrchestrator:
             return failed_turn
 
     @staticmethod
-    def _apply_template_candidates(
-        result: PerceptionResult, mapping: dict[str, TemplateCandidate]
+    def _apply_template_resolutions(
+        result: PerceptionResult,
+        candidates: dict[PredicateCandidate, TemplateCandidate],
+        selections: dict[PredicateCandidate, TemplateSelection],
     ) -> PerceptionResult:
-        """Attach Perception-proposed schemas without changing semantic candidates."""
+        """Attach occurrence-local schema/sense decisions.
 
-        def predicate_with_template(predicate):
-            if predicate.template_candidate is not None:
+        Keys are full frozen ``PredicateCandidate`` values, including evidence
+        spans. Two uses of the same surface predicate in one turn can therefore
+        select different lexical senses without a lookup-form-wide overwrite.
+        """
+
+        def resolve_predicate(predicate: PredicateCandidate) -> PredicateCandidate:
+            candidate = candidates.get(predicate, predicate.template_candidate)
+            selection = selections.get(predicate, predicate.template_selection)
+            if candidate is predicate.template_candidate and selection is predicate.template_selection:
                 return predicate
-            candidate = mapping.get(predicate.lookup_form.casefold())
-            return replace(predicate, template_candidate=candidate) if candidate is not None else predicate
+            return replace(
+                predicate,
+                template_candidate=candidate,
+                template_selection=selection,
+            )
 
-        def assertion_with_template(assertion):
-            alternatives = tuple(assertion_with_template(item) for item in assertion.alternatives)
+        def resolve_assertion(assertion):
+            alternatives = tuple(resolve_assertion(item) for item in assertion.alternatives)
             return replace(
                 assertion,
-                predicate=predicate_with_template(assertion.predicate),
+                predicate=resolve_predicate(assertion.predicate),
                 alternatives=alternatives,
             )
 
         return replace(
             result,
-            assertions=tuple(assertion_with_template(item) for item in result.assertions),
+            assertions=tuple(resolve_assertion(item) for item in result.assertions),
             queries=tuple(
-                replace(item, predicate=predicate_with_template(item.predicate))
+                replace(item, predicate=resolve_predicate(item.predicate))
                 for item in result.queries
             ),
             commands=tuple(
-                replace(item, predicate=predicate_with_template(item.predicate))
+                replace(item, predicate=resolve_predicate(item.predicate))
                 for item in result.commands
             ),
         )
 
     def _complete_dynamic_templates(self, result: PerceptionResult, lock) -> PerceptionResult:
-        """Route unknown predicates back to Perception before canonical integration.
+        """Complete explicit T schemas and lexical-sense choices before writes.
 
-        Deterministic Integration performs only the read-only preflight.  Potentially
-        expensive LLM proposals run outside the runtime lock; the resulting runtime
-        TemplateCandidates are then validated by TemplateResolver during integration.
+        Unknown predicates need only the explicit roles already present in the
+        semantic act. Known lexical predicates are compared against UID-free
+        observed-use profiles. Perception returns a local label (Cn / NEW /
+        UNCLEAR); deterministic orchestration maps Cn to a canonical T and never
+        exposes that UID to the model.
         """
-        # If a compound PerceptionResult already contains one explicit runtime
-        # proposal for a predicate, share that same noncanonical schema across its
-        # sibling occurrences before preflight. Conflicting proposals fail rather
-        # than making integration order semantically significant.
-        existing_mapping: dict[str, TemplateCandidate] = {}
-
-        def collect(predicate) -> None:
-            candidate = predicate.template_candidate
-            if candidate is None:
-                return
-            key = predicate.lookup_form.casefold()
-            previous = existing_mapping.get(key)
-            if previous is not None and previous.roles != candidate.roles:
-                raise PerceptionParseError(
-                    f"Conflicting TemplateCandidate proposals for predicate {predicate.lookup_form!r}"
-                )
-            existing_mapping[key] = candidate
-
-        for assertion in result.assertions:
-            collect(assertion.predicate)
-            for alternative in assertion.alternatives:
-                collect(alternative.predicate)
-        for query in result.queries:
-            collect(query.predicate)
-        for command in result.commands:
-            collect(command.predicate)
-        if existing_mapping:
-            result = self._apply_template_candidates(result, existing_mapping)
-
         with lock:
             requests = self.integration.template_requests(result)
         if not requests:
             return result
 
         proposer = getattr(self.perception, "propose_template_candidate", None)
-        if proposer is None:
-            missing = ", ".join(request.predicate.lookup_form for request in requests)
-            raise PerceptionParseError(
-                f"Unknown predicate(s) require Perception TemplateCandidate proposal: {missing}"
-            )
+        sense_resolver = getattr(self.perception, "resolve_template_sense", None)
+        candidate_mapping: dict[PredicateCandidate, TemplateCandidate] = {}
+        selection_mapping: dict[PredicateCandidate, TemplateSelection] = {}
 
-        mapping: dict[str, TemplateCandidate] = {}
         for request in requests:
+            predicate = request.predicate
+            if request.sense_options:
+                if sense_resolver is None:
+                    raise PerceptionParseError(
+                        f"Predicate {predicate.lookup_form!r} requires lexical-sense resolution"
+                    )
+                decision = sense_resolver(
+                    request.source_context,
+                    predicate,
+                    request.filled_roles,
+                    request.role_bindings,
+                    tuple((option.label, option.description) for option in request.sense_options),
+                )
+                if decision is None:
+                    raise PerceptionParseError(
+                        f"Lexical sense is explicitly ambiguous for predicate {predicate.lookup_form!r}"
+                    )
+                if decision == "NEW":
+                    candidate = predicate.template_candidate
+                    if candidate is None:
+                        if proposer is None:
+                            raise PerceptionParseError(
+                                f"New lexical sense for {predicate.lookup_form!r} requires TemplateCandidate proposal"
+                            )
+                        candidate = proposer(
+                            request.source_context, predicate,
+                            request.filled_roles, request.role_bindings,
+                        )
+                    if not isinstance(candidate, TemplateCandidate):
+                        raise PerceptionParseError(
+                            "Perception template proposer returned an invalid result"
+                        )
+                    candidate_mapping[predicate] = candidate
+                    selection_mapping[predicate] = TemplateSelection(create_new=True)
+                    continue
+
+                option = next(
+                    (item for item in request.sense_options if item.label == decision),
+                    None,
+                )
+                if option is None:
+                    raise PerceptionParseError(
+                        f"Template sense resolver returned invalid local label {decision!r}"
+                    )
+                selection_mapping[predicate] = TemplateSelection(
+                    existing_template_uid=option.template_uid
+                )
+                continue
+
+            if predicate.template_candidate is not None:
+                continue
+            if proposer is None:
+                raise PerceptionParseError(
+                    f"Unknown predicate {predicate.lookup_form!r} requires TemplateCandidate proposal"
+                )
             candidate = proposer(
                 request.source_context,
-                request.predicate,
+                predicate,
                 request.filled_roles,
                 request.role_bindings,
             )
             if not isinstance(candidate, TemplateCandidate):
-                raise PerceptionParseError("Perception template proposer returned an invalid result")
-            mapping[request.predicate.lookup_form.casefold()] = candidate
-        return self._apply_template_candidates(result, mapping)
+                raise PerceptionParseError(
+                    "Perception template proposer returned an invalid result"
+                )
+            candidate_mapping[predicate] = candidate
+
+        return self._apply_template_resolutions(
+            result, candidate_mapping, selection_mapping
+        )
 
     @staticmethod
     def _normalize_clarification_text(text: str) -> str:
@@ -289,7 +360,8 @@ class AgentOrchestrator:
             self.ignition.apply_seed_requests(response_integration.activation_seeds)
             self.ignition.apply_refutation_requests(response_integration.refutations)
             response_ticks = tuple(
-                self.ignition.tick() for _ in range(self.settings.ticks_after_response)
+                self.ignition.tick(include_pacemaker=False)
+                for _ in range(self.settings.ticks_after_response)
             )
         return response_perception, response_integration, response_ticks
 
@@ -382,12 +454,16 @@ class AgentOrchestrator:
             # not promoted to a standalone C/P assertion such as M("Мария").
             integration = self.integration.integrate_external(perception, self.context)
             self.ignition.apply_seed_requests(integration.activation_seeds)
-            input_ticks = tuple(
-                self.ignition.tick() for _ in range(self.settings.ticks_after_input)
-            )
+            input_ticks = self._settle_input_wave()
             workspace = self.ignition.workspace_refs()
             next_request = self._next_pending_clarification()
             agent_context = self.projector.project(text, workspace, ())
+            agent_context_diagnostic = self.projector.diagnose(
+                agent_context,
+                tick_index=self.ignition.tick_index,
+                workspace_threshold=self.ignition.workspace_settings.threshold,
+                settle_ticks=len(input_ticks),
+            )
 
         response_text: str | None = None
         response_perception: PerceptionResult | None = None
@@ -412,6 +488,7 @@ class AgentOrchestrator:
             ticks_after_input=input_ticks,
             queries=(),
             agent_context=agent_context,
+            agent_context_diagnostic=agent_context_diagnostic,
             response_text=response_text,
             response_perception=response_perception,
             response_integration=response_integration,
@@ -464,11 +541,15 @@ class AgentOrchestrator:
                     clarification_required=True,
                     clarifications=(request,),
                 )
-                input_ticks = tuple(
-                    self.ignition.tick() for _ in range(self.settings.ticks_after_input)
-                )
+                input_ticks = self._settle_input_wave()
                 workspace = self.ignition.workspace_refs()
                 agent_context = self.projector.project(text, workspace, ())
+                agent_context_diagnostic = self.projector.diagnose(
+                    agent_context,
+                    tick_index=self.ignition.tick_index,
+                    workspace_threshold=self.ignition.workspace_settings.threshold,
+                    settle_ticks=len(input_ticks),
+                )
 
             response_text: str | None = None
             response_perception: PerceptionResult | None = None
@@ -490,6 +571,7 @@ class AgentOrchestrator:
                 ticks_after_input=input_ticks,
                 queries=(),
                 agent_context=agent_context,
+                agent_context_diagnostic=agent_context_diagnostic,
                 response_text=response_text,
                 response_perception=response_perception,
                 response_integration=response_integration,
@@ -518,13 +600,33 @@ class AgentOrchestrator:
             raise
 
         with lock:
-            input_ticks = tuple(self.ignition.tick() for _ in range(self.settings.ticks_after_input))
+            # Query reference resolution happens before the turn-local ignition tick.
+            # A relational description such as ``моего друга`` may traverse an
+            # already canonical support fact (USER + ДРУГ -> N_ЕСТЬ -> МИША).
+            # The resolved referent and that support N are attention anchors only:
+            # no fact is created and h_N confirmation is not triggered.
+            built_queries = [
+                (query, self.query_builder.build(query, self.context))
+                for query in integration.unresolved_queries
+            ]
+            attention: dict[str, object] = {}
+            for _query, built in built_queries:
+                for ref in built.attention_refs:
+                    attention[ref.uid] = ref
+            if attention:
+                self.ignition.apply_seed_requests(
+                    tuple(
+                        ActivationSeedRequest(ref, SeedReason.QUERY_RECALL)
+                        for ref in attention.values()
+                    )
+                )
+
+            input_ticks = self._settle_input_wave()
             workspace = self.ignition.workspace_refs()
 
             query_results: list[QueryExecution] = []
             inference_outcomes: list[InferenceOutcome] = []
-            for query in integration.unresolved_queries:
-                built = self.query_builder.build(query, self.context)
+            for _query, built in built_queries:
                 if built.goal is None:
                     query_results.append(QueryExecution(None, None, built.diagnostics))
                     continue
@@ -538,6 +640,12 @@ class AgentOrchestrator:
                 query_results.append(QueryExecution(outcome, materialized, built.diagnostics))
 
             agent_context = self.projector.project(text, workspace, tuple(inference_outcomes))
+            agent_context_diagnostic = self.projector.diagnose(
+                agent_context,
+                tick_index=self.ignition.tick_index,
+                workspace_threshold=self.ignition.workspace_settings.threshold,
+                settle_ticks=len(input_ticks),
+            )
 
         response_text: str | None = None
         response_perception: PerceptionResult | None = None
@@ -569,6 +677,7 @@ class AgentOrchestrator:
             ticks_after_input=input_ticks,
             queries=tuple(query_results),
             agent_context=agent_context,
+            agent_context_diagnostic=agent_context_diagnostic,
             response_text=response_text,
             response_perception=response_perception,
             response_integration=response_integration,

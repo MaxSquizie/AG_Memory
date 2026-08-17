@@ -30,6 +30,8 @@ class LLMRequestDiagnostic:
     prompt: str
     system: str
     response_text: str
+    rendered_prompt: str | None = None
+    input_tokens: int | None = None
     choice_outputs: tuple[str, ...] = ()
     choice_scores: dict[str, float] | None = None
     calibration_choice_scores: dict[str, float] | None = None
@@ -41,6 +43,15 @@ class LLMRequestDiagnostic:
     decision_margin_threshold: float | None = None
     decision_accepted: bool | None = None
     error: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class LLMActiveRequestDiagnostic:
+    sequence: int
+    req_id: str
+    role: str
+    prompt: str
+    system: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +102,7 @@ class LocalLLMProcessBackend:
         self._last_role: str | None = None
         self._request_count = 0
         self._request_diagnostics: deque[LLMRequestDiagnostic] = deque(maxlen=50)
+        self._active_request: LLMActiveRequestDiagnostic | None = None
 
     @property
     def is_running(self) -> bool:
@@ -148,6 +160,16 @@ class LocalLLMProcessBackend:
             chunks.append(f"cuda:{m.get('index')} allocated={allocated:.2f} GiB reserved={reserved:.2f} GiB")
         return "; ".join(chunks)
 
+    def active_request_diagnostic(self) -> LLMActiveRequestDiagnostic | None:
+        """Return the currently executing request, including AgentContext, if any.
+
+        Unlike completed request diagnostics this is populated before the worker
+        starts generation, allowing the GUI to inspect model-visible memory during
+        a slow local LLM call. It is runtime-only and never persisted into AH.
+        """
+        with self._status_lock:
+            return self._active_request
+
     def request_diagnostics(self) -> tuple[LLMRequestDiagnostic, ...]:
         """Return a thread-safe snapshot of recent role calls for GUI diagnostics.
 
@@ -173,6 +195,12 @@ class LocalLLMProcessBackend:
         response_meta = response_meta or {}
         raw_choices = override.get("choice_outputs")
         choice_outputs = tuple(str(item) for item in raw_choices) if isinstance(raw_choices, list) else ()
+        raw_rendered_prompt = response_meta.get("rendered_prompt")
+        rendered_prompt = None if raw_rendered_prompt is None else str(raw_rendered_prompt)
+        try:
+            input_tokens = int(response_meta.get("input_tokens"))
+        except (TypeError, ValueError):
+            input_tokens = None
         def _score_map(name: str) -> dict[str, float] | None:
             raw = response_meta.get(name)
             if not isinstance(raw, dict):
@@ -218,6 +246,8 @@ class LocalLLMProcessBackend:
                     prompt=prompt,
                     system=system,
                     response_text=response_text,
+                    rendered_prompt=rendered_prompt,
+                    input_tokens=input_tokens,
                     choice_outputs=choice_outputs,
                     choice_scores=choice_scores,
                     calibration_choice_scores=calibration_choice_scores,
@@ -404,6 +434,14 @@ class LocalLLMProcessBackend:
         with self._status_lock:
             self._last_role = role
             self._request_count += 1
+            sequence = self._request_count
+            self._active_request = LLMActiveRequestDiagnostic(
+                sequence=sequence,
+                req_id=req_id,
+                role=role,
+                prompt=prompt,
+                system=system,
+            )
             self._stage = f"generating:{role}"
         try:
             self._send(payload)
@@ -433,6 +471,8 @@ class LocalLLMProcessBackend:
             with self._rpc_lock:
                 self._rpc.pop(req_id, None)
             with self._status_lock:
+                if self._active_request is not None and self._active_request.req_id == req_id:
+                    self._active_request = None
                 self._stage = "ready" if self._ready.is_set() else "running"
 
     def _send(self, payload: dict[str, Any]) -> None:

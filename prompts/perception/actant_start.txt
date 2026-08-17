@@ -1,1 +1,1 @@
-Choose one not-yet-selected phrase connected to the predicate, or the stop option. Reply only with the number inside brackets.
+Choose one not-yet-selected phrase connected to the predicate, or the stop option. Reply only with the integer option number, without brackets or punctuation.

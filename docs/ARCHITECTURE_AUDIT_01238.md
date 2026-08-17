@@ -296,3 +296,37 @@ The two architecture gaps identified above are now resolved by explicit mechanis
 
 The real v0.12.43 run immediately preceding this implementation measured `36 PASS / 0 FAIL / 4 GAP`. v0.12.44 changes those four oracle entries from GAP to exact contracts; a fresh real-model run is required before claiming `40/40`.
 
+
+
+## Follow-up v0.12.45
+
+The real v0.12.44 run reached `39 PASS / 1 FAIL / 0 GAP`. CONDITION was validated by the real model/runtime. Case 39 failed before the new clarification mechanism because context-free morphology filtering discarded a low-scored but syntactically legitimate accusative reading of the same lexeme (`Петра`), after which the legacy multi-way scorer became ambiguous and actant extraction silently committed a partial frame.
+
+v0.12.45 does not add a sentence-specific attachment rule. It strengthens the general perception boundary: same-lexeme case syncretism survives morph-score filtering until syntax can narrow it, and a selected actant whose role cannot be resolved is fail-closed rather than omitted. This prevents model/morphology uncertainty from becoming false canonical absence.
+
+
+## Follow-up v0.12.46
+
+The real v0.12.45 run reached runtime 40/40. Its sole semantic-oracle failure was diagnostic, not architectural: the evaluator counted the H→H FOLLOW chronology edge emitted for the structural-clarification experience as a C/P semantic addition. v0.12.46 corrects link-domain accounting by inspecting endpoint domains. The unchanged stored real run then grades 40/40 exactly. No production or architecture mechanism changed, so Architecture_v3 remains working specification v0.11.
+
+
+## Follow-up v0.12.47
+
+The first 40-case semantic corpus reached a real exact 40/40, so further parser tuning on that corpus is frozen. v0.12.47 expands diagnostics to the 200-case `broad200-v2` corpus while preserving the original 40-case files verbatim. The 160 new cases are grouped into sixteen stress families and remain EXACT even when current implementation is expected to fail. Family/tag reporting is diagnostic metadata only; production Perception/Integration/AH semantics and Architecture_v3 v0.11 are unchanged.
+
+## Follow-up v0.12.56
+
+The real v0.12.55 broad200-v2 run reached 171/200 semantic PASS (199/200 runtime, frozen40 40/40). The remaining adjunct/query traces showed that relation-contract wording was not the only issue: an early binary split over *heterogeneous sets* could eliminate the correct role before a direct local comparison. A source PP could be judged as a general circumstance and lose SOURCE; a temporal adverb could lose TIME for the same reason.
+
+v0.12.56 removes that architecture pattern. Role resolution now asks one independent natural semantic property at a time with a strict YES/NO protocol. Python owns the exact role subset for each property; NO removes only that subset, YES selects it and a local A/B contrast resolves neighbors. This preserves monotonic narrowing without making the model classify a hidden ontology family.
+
+The obsolete family-router helpers are deleted, not merely bypassed, to prevent two competing role-routing mechanisms from accumulating in the parser.
+
+The same audit identified the old `из/от -> SOURCE` shortcut as a direct semantic write from a polysemous surface preposition, so that shortcut is removed. The preposition remains evidence for the bounded property/contrast probes. Other older PP/time shortcuts remain explicit debt for later evidence-based removal.
+
+A separate generic structural ambiguity, NUMERAL+nominal, is handled without a duration-unit lexicon. One bounded cue distinguishes counted participant from whole event/state measure; only the latter fuses the span and proceeds within DURATION/AMOUNT. Malformed outputs fail closed. No parser changes are justified by individual broad200 lexical forms.
+
+
+## Follow-up: v0.12.57
+
+The real v0.12.56 run disproved the semantic-property ladder as a stable perception boundary (163/200 versus the prior 171/200). The production architecture now treats role semantics as one bounded model decision after deterministic narrowing. Runtime cue labels are non-canonical; Python owns the mapping and admissibility check. Grammatical person is used only as negative coreference compatibility evidence. The broad200 oracle/corpus are unchanged.

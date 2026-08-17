@@ -64,11 +64,16 @@ class LifecycleManager:
                 before_stage = self._stage(meta)
                 reasons = seed_reasons.get(element.uid, ())
                 just_created = SeedReason.NEW_FACT in reasons and before_stage is None
+                pacemaker_only = bool(reasons) and all(
+                    reason is SeedReason.PACEMAKER for reason in reasons
+                )
+                qualifying_activation = element.uid in activation_uids and not pacemaker_only
 
                 if before_stage is None:
-                    # Lifecycle begins when a fact first participates in cognitive
-                    # runtime. Static fixtures can opt out by setting no lifecycle Mt.
-                    if not (just_created or element.uid in activation_uids):
+                    # Lifecycle begins only from semantic/cognitive participation.
+                    # The pacemaker is background excitability noise and must never
+                    # create or consolidate memory merely by periodically pulsing it.
+                    if not (just_created or qualifying_activation):
                         continue
                     meta[self.META_STAGE] = LifecycleStage.NEW.value
                     meta[self.META_CREATED] = tick
@@ -78,7 +83,7 @@ class LifecycleManager:
                     after_stage = LifecycleStage.NEW
                 else:
                     after_stage = before_stage
-                    if element.uid in activation_uids and not just_created:
+                    if qualifying_activation and not just_created:
                         last = int(meta.get(self.META_LAST_QUALIFY, meta.get(self.META_CREATED, tick)))
                         required = (
                             self.settings.min_spacing_1_ticks

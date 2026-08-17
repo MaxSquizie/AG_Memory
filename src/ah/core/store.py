@@ -33,11 +33,23 @@ class _StoreState:
     # Runtime state exists only for excitable S/C/P/H elements. L has no x.
     runtime: dict[str, RuntimeState] = field(default_factory=dict)
 
+    # Diagnostic insertion chronology. This is not semantic AH content and never
+    # participates in identity/inference. It exists so operator tooling can show
+    # the complete graph in true add order across S/C/P/H/L without smuggling
+    # timestamps into canonical S/T/L records that do not own Mt.
+    creation_sequence: dict[str, int] = field(default_factory=dict)
+    next_creation_sequence: int = 1
+
     # Derived indexes. None of these are a second source of truth.
     uid_kind: dict[str, RefKind] = field(default_factory=dict)
     uid_domain: dict[str, Domain] = field(default_factory=dict)
-    forms_index: dict[str, str] = field(default_factory=dict)
+    # One observed wordform may belong to several lexical S nodes.  This is
+    # required for genuine homography (e.g. one surface form shared by distinct
+    # paradigms).  The index is therefore retrieval-only and never an identity
+    # constraint.
+    forms_index: dict[str, set[str]] = field(default_factory=dict)
     template_by_predicate: dict[str, list[str]] = field(default_factory=dict)
+    hypernodes_by_template: dict[str, list[str]] = field(default_factory=dict)
     entity_name_index: dict[str, list[str]] = field(default_factory=dict)
     property_name_index: dict[str, list[str]] = field(default_factory=dict)
     property_value_index: dict[tuple[str, str], list[str]] = field(default_factory=dict)
@@ -51,6 +63,7 @@ class _StoreState:
     n_actants: dict[str, tuple[str, ...]] = field(default_factory=dict)
     actant_hypernodes: dict[str, list[str]] = field(default_factory=dict)
     group_memberships: dict[str, list[str]] = field(default_factory=dict)
+    function_parents: dict[str, list[str]] = field(default_factory=dict)
 
 
 class AHStore:
@@ -122,6 +135,16 @@ class AHStore:
     def all_uids(self) -> tuple[str, ...]:
         return tuple(self._state.uid_kind.keys())
 
+    def creation_sequence(self, uid: str) -> int:
+        """Return stable diagnostic insertion order for one canonical UID."""
+        try:
+            return int(self._state.creation_sequence[uid])
+        except KeyError as exc:
+            raise KeyError(f"No creation sequence for {uid}") from exc
+
+    def creation_items(self) -> tuple[tuple[str, int], ...]:
+        return tuple(self._state.creation_sequence.items())
+
     def runtime_items(self) -> tuple[tuple[str, RuntimeState], ...]:
         return tuple(self._state.runtime.items())
 
@@ -132,13 +155,44 @@ class AHStore:
         return tuple(out)
 
     # ---------- indexed reads ----------
+    def find_symbols_by_form(self, form: str) -> tuple[AbstractSymbol, ...]:
+        """Return every canonical S whose ``R_text`` contains ``form``.
+
+        A wordform is not an identity key: homographs may legitimately appear in
+        several paradigms.  Callers that need one lexical identity must resolve
+        that ambiguity using additional perception context instead of relying on
+        insertion order.
+        """
+        uids = self._state.forms_index.get(form.casefold(), set())
+        return tuple(self._state.symbols[uid] for uid in sorted(uids))
+
     def find_symbol_by_form(self, form: str) -> AbstractSymbol | None:
-        uid = self._state.forms_index.get(form.casefold())
-        return self._state.symbols.get(uid) if uid else None
+        """Return the unique S for ``form`` or fail closed on homography.
+
+        This compatibility helper is intentionally strict so legacy callers cannot
+        silently collapse ``wordform -> set[S]`` back into ``wordform -> S``.
+        New ambiguity-aware code should use :meth:`find_symbols_by_form`.
+        """
+        matches = self.find_symbols_by_form(form)
+        if len(matches) > 1:
+            raise ValueError(
+                f"Ambiguous wordform {form!r} belongs to multiple S nodes: "
+                + ", ".join(symbol.uid for symbol in matches)
+            )
+        return matches[0] if matches else None
 
     def find_templates_by_predicate(self, predicate_uid: str) -> tuple[Template, ...]:
         uids = self._state.template_by_predicate.get(predicate_uid, [])
         return tuple(self.get_template(uid) for uid in uids)
+
+    def find_hypernodes_by_template(self, template_uid: str) -> tuple[Hypernode, ...]:
+        """Return canonical N realizations of one T across C/P/H.
+
+        This is a derived retrieval index used by ignition lexical spreading; it
+        never changes canonical ownership or semantic identity.
+        """
+        uids = self._state.hypernodes_by_template.get(template_uid, [])
+        return tuple(self.get_hypernode(uid) for uid in uids)
 
     def find_entities_by_name(
         self,
@@ -193,6 +247,20 @@ class AHStore:
         uid = self._state.n_signature[domain].get(signature)
         return self.get_hypernode(uid) if uid else None
 
+    def function_parents(self, operand_uid: str) -> tuple[FunctionSymbol, ...]:
+        """Return canonical g nodes that directly use ``operand_uid``.
+
+        This is a derived reverse operand index used by semantic recall/correction
+        diagnostics; it never changes canonical function direction.
+        """
+        uids = self._state.function_parents.get(operand_uid, [])
+        out: list[FunctionSymbol] = []
+        for uid in uids:
+            element = self.get_element_any_domain(uid)
+            if isinstance(element, FunctionSymbol):
+                out.append(element)
+        return tuple(out)
+
     def hypernode_actants(self, uid: str) -> tuple[Ref, ...]:
         node = self.get_hypernode(uid)
         return tuple(node.actants.values())
@@ -232,7 +300,6 @@ class AHStore:
     def _replace_symbol(self, symbol: AbstractSymbol) -> None:
         if symbol.uid not in self._state.symbols:
             raise KeyError(symbol.uid)
-        self._assert_symbol_forms_available(symbol, replacing_uid=symbol.uid)
         self._state.symbols[symbol.uid] = symbol
         self.rebuild_indexes()
 
@@ -264,6 +331,7 @@ class AHStore:
                 raise KeyError(uid)
             self._state.domains[domain].pop(uid, None)
         self._state.runtime.pop(uid, None)
+        self._state.creation_sequence.pop(uid, None)
         self.rebuild_indexes()
 
     # ---------- canonical insertions ----------
@@ -274,15 +342,74 @@ class AHStore:
     def _register_runtime(self, uid: str) -> None:
         self._state.runtime[uid] = RuntimeState()
 
+    def _register_creation(self, uid: str) -> None:
+        if uid in self._state.creation_sequence:
+            return
+        sequence = max(1, int(self._state.next_creation_sequence))
+        self._state.creation_sequence[uid] = sequence
+        self._state.next_creation_sequence = sequence + 1
+
+    def _restore_creation_sequence(
+        self, mapping: dict[str, int], *, next_sequence: int | None = None
+    ) -> None:
+        """Restore optional persisted diagnostic chronology.
+
+        Invalid/missing UIDs are ignored. Missing canonical UIDs receive new tail
+        positions deterministically, so older persistence files remain readable.
+        """
+        cleaned: dict[str, int] = {}
+        used: set[int] = set()
+        for uid, raw in sorted(mapping.items(), key=lambda item: (int(item[1]), item[0])):
+            if not self.has_uid(uid):
+                continue
+            value = int(raw)
+            if value <= 0 or value in used:
+                continue
+            cleaned[uid] = value
+            used.add(value)
+        self._state.creation_sequence = cleaned
+        baseline = max(used, default=0) + 1
+        self._state.next_creation_sequence = max(
+            baseline, int(next_sequence) if next_sequence is not None else baseline
+        )
+        for uid in self.all_uids():
+            self._register_creation(uid)
+
+    def _rebuild_legacy_creation_sequence(self) -> None:
+        """Best-effort chronology for pre-v0.31 persistence without metadata.
+
+        Existing old files cannot reveal exact insertion order for S/T/M because
+        canonical JSON was UID-sorted. We therefore use canonical N.created_tick
+        when available, otherwise first_excitation_tick, and keep deterministic
+        tail ordering for never-excited nodes. From the first v0.31 save onward the
+        exact insertion sequence is persisted.
+        """
+        ranked: list[tuple[int, int, str]] = []
+        for uid in self.all_uids():
+            kind = self.kind_of(uid)
+            tick: int | None = None
+            if kind is RefKind.N:
+                node = self.get_hypernode(uid)
+                raw = node.meta.get("created_tick")
+                if raw is not None:
+                    try:
+                        tick = int(raw)
+                    except (TypeError, ValueError):
+                        tick = None
+            if tick is None and kind is not RefKind.L:
+                first = self.runtime_state(uid).first_excitation_tick
+                tick = None if first is None else int(first)
+            ranked.append((1 if tick is None else 0, tick if tick is not None else 10**18, uid))
+        ranked.sort()
+        self._state.creation_sequence = {uid: index for index, (*_, uid) in enumerate(ranked, 1)}
+        self._state.next_creation_sequence = len(ranked) + 1
+
     def _insert_symbol(self, symbol: AbstractSymbol) -> None:
         self._assert_uid_free(symbol.uid)
-        # Validate every wordform before touching canonical storage. Historically this
-        # check lived only in _index_symbol(), which could raise after the record had
-        # already been inserted and therefore leave an invalid S behind.
-        self._assert_symbol_forms_available(symbol)
         self._state.symbols[symbol.uid] = symbol
         self._state.uid_kind[symbol.uid] = RefKind.S
         self._register_runtime(symbol.uid)
+        self._register_creation(symbol.uid)
         self._index_symbol(symbol)
 
     def _insert_element(self, domain: Domain, element: CanonicalElement, kind: RefKind) -> None:
@@ -291,12 +418,14 @@ class AHStore:
         self._state.uid_kind[element.uid] = kind
         self._state.uid_domain[element.uid] = domain
         self._register_runtime(element.uid)
+        self._register_creation(element.uid)
         self._index_element(domain, element)
 
     def _insert_link(self, link: Link) -> None:
         self._assert_uid_free(link.uid)
         self._state.links[link.uid] = link
         self._state.uid_kind[link.uid] = RefKind.L
+        self._register_creation(link.uid)
         # L belongs to AH.L and has no excitation state of its own.
         self._index_link(link)
 
@@ -308,24 +437,10 @@ class AHStore:
         except Exception:
             return repr(value)
 
-    def _assert_symbol_forms_available(
-        self,
-        symbol: AbstractSymbol,
-        *,
-        replacing_uid: str | None = None,
-    ) -> None:
-        for form in symbol.forms:
-            existing = self._state.forms_index.get(form.casefold())
-            if existing is not None and existing != (replacing_uid or symbol.uid):
-                raise ValueError(f"Wordform already belongs to another S: {form!r}")
-
     def _index_symbol(self, symbol: AbstractSymbol) -> None:
         for form in symbol.forms:
             key = form.casefold()
-            existing = self._state.forms_index.get(key)
-            if existing is not None and existing != symbol.uid:
-                raise ValueError(f"Wordform already belongs to another S: {form!r}")
-            self._state.forms_index[key] = symbol.uid
+            self._state.forms_index.setdefault(key, set()).add(symbol.uid)
 
     def _index_properties(self, uid: str, properties) -> None:
         for name, prop in properties.items():
@@ -363,11 +478,15 @@ class AHStore:
         if isinstance(element, SemanticEntity):
             self._index_entity_names(element)
             self._index_properties(element.uid, element.properties)
+        elif isinstance(element, FunctionSymbol):
+            for operand in element.operands:
+                self._state.function_parents.setdefault(operand.uid, []).append(element.uid)
         elif isinstance(element, Group):
             self._index_properties(element.uid, element.properties)
             for member in element.members:
                 self._state.group_memberships.setdefault(member.uid, []).append(element.uid)
         elif isinstance(element, Hypernode):
+            self._state.hypernodes_by_template.setdefault(element.template.uid, []).append(element.uid)
             self._index_properties(element.uid, element.properties)
             self._state.n_actants[element.uid] = tuple(ref.uid for ref in element.actants.values())
             for ref in element.actants.values():
@@ -404,6 +523,7 @@ class AHStore:
         self._state.uid_domain = {}
         self._state.forms_index = {}
         self._state.template_by_predicate = {}
+        self._state.hypernodes_by_template = {}
         self._state.entity_name_index = {}
         self._state.property_name_index = {}
         self._state.property_value_index = {}
@@ -415,6 +535,7 @@ class AHStore:
         self._state.n_actants = {}
         self._state.actant_hypernodes = {}
         self._state.group_memberships = {}
+        self._state.function_parents = {}
 
         new_runtime: dict[str, RuntimeState] = {}
         for symbol in self._state.symbols.values():
@@ -452,6 +573,21 @@ class AHStore:
             self._index_link(link)
 
         self._state.runtime = new_runtime
+        # Creation chronology is diagnostic metadata rather than a derived index,
+        # therefore index rebuilds preserve it and only append missing UIDs.
+        existing = set(self._state.uid_kind)
+        self._state.creation_sequence = {
+            uid: seq for uid, seq in self._state.creation_sequence.items() if uid in existing
+        }
+        if self._state.creation_sequence:
+            self._state.next_creation_sequence = max(
+                int(self._state.next_creation_sequence),
+                max(self._state.creation_sequence.values()) + 1,
+            )
+        else:
+            self._state.next_creation_sequence = max(1, int(self._state.next_creation_sequence))
+        for uid in self._state.uid_kind:
+            self._register_creation(uid)
 
     # ---------- reference inspection / GC support ----------
     def structural_referrers(self, uid: str) -> tuple[Ref, ...]:
@@ -492,6 +628,7 @@ class AHStore:
             if domain is not None:
                 self._state.domains[domain].pop(uid, None)
             self._state.runtime.pop(uid, None)
+            self._state.creation_sequence.pop(uid, None)
 
         self.rebuild_indexes()
         return removed

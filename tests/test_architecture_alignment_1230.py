@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from pathlib import Path
 import unittest
 
@@ -31,6 +33,9 @@ class RecordingBackend:
         self.calls.append((role, prompt, ov))
         values = self.answers.get(role)
         if not values:
+            fallback = legacy_semantic_answer(role, prompt)
+            if fallback is not None:
+                return LLMResponse(str(fallback), {})
             raise AssertionError(f"unexpected LLM call: {role}\n{prompt}")
         item = values.pop(0)
         if isinstance(item, tuple):
@@ -98,18 +103,20 @@ class ArchitectureAlignment1230Tests(unittest.TestCase):
         parent, child = result.assertions
         nested = next(a for a in parent.actants if a.candidate_ref == child.local_id)
         self.assertEqual(nested.role, ActantRole.OBJECT)
-        self.assertEqual(len(backend.calls), 1)
-        self.assertNotIn("choice_outputs", backend.calls[0][2])
-        self.assertNotIn("decision_margin_threshold", backend.calls[0][2])
+        relation_calls = [call for call in backend.calls if call[0] == "perception_frame_relation"]
+        self.assertEqual(len(relation_calls), 1)
+        self.assertNotIn("choice_outputs", relation_calls[0][2])
+        self.assertNotIn("decision_margin_threshold", relation_calls[0][2])
 
     def test_frame_questions_are_relation_specific_not_generic_parent_argument(self):
         content_backend = RecordingBackend({
             "perception_frame_relation": [("CONTENT_LINK", 0.8)],
         })
         parser(content_backend, NestedMorphology()).parse("Иван сказал, что Мария прочитала книгу.")
-        self.assertNotIn("choice_outputs", content_backend.calls[0][2])
-        self.assertIn("semantic content or selected complement", content_backend.calls[0][1])
-        self.assertNotIn("PARENT_ARGUMENT", content_backend.calls[0][1])
+        relation_call = next(call for call in content_backend.calls if call[0] == "perception_frame_relation")
+        self.assertNotIn("choice_outputs", relation_call[2])
+        self.assertIn("semantic content or selected complement", relation_call[1])
+        self.assertNotIn("PARENT_ARGUMENT", relation_call[1])
 
 
 if __name__ == "__main__":

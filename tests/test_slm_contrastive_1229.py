@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from collections import deque
 from pathlib import Path
 from threading import Lock
@@ -30,6 +32,9 @@ class MarginBackend:
         self.calls.append((role, prompt, ov))
         values = self.answers.get(role)
         if not values:
+            fallback = legacy_semantic_answer(role, prompt)
+            if fallback is not None:
+                return LLMResponse(str(fallback), {})
             raise AssertionError(f"unexpected LLM call: {role}\n{prompt}")
         item = values.pop(0)
         if isinstance(item, tuple):

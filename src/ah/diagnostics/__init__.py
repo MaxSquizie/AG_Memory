@@ -17,6 +17,9 @@ from .hidden_valency_diagnostic import (
 from .graph_dump import GraphInspector, GraphSnapshot, LinkDiagnostic, NodeDiagnostic, StructuralEdgeDiagnostic
 from .summary import RuntimeDiagnostics, RuntimeSummary
 from .trace_view import TraceView
+from .propagation_audit import (
+    FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
+)
 
 __all__ = [
     "AcceptanceCase",
@@ -42,4 +45,9 @@ __all__ = [
     "RuntimeDiagnostics",
     "RuntimeSummary",
     "TraceView",
+    "FanoutAudit",
+    "PropagationAudit",
+    "PropagationEdgeAudit",
+    "analyze_propagation",
+    "propagation_edges",
 ]

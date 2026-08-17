@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from collections import deque
 from pathlib import Path
 from threading import Lock
@@ -55,6 +57,9 @@ class SemanticBackend:
             return LLMResponse(winner, {"choice_margin": self.margin})
         if role == "perception_frame_relation":
             return LLMResponse("GOAL_LINK", {"choice": "GOAL_LINK", "choice_margin": 0.8})
+        fallback = legacy_semantic_answer(role, prompt)
+        if fallback is not None:
+            return LLMResponse(str(fallback), {})
         raise AssertionError(f"unexpected LLM call: {role}\n{prompt}")
 
 

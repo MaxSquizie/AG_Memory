@@ -359,6 +359,29 @@ def load_runtime(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _render_prompt_for_diagnostics(runtime: dict[str, Any], system: str, user: str) -> str:
+    """Render the exact chat-template text for operator diagnostics.
+
+    Generation still uses _encode_prompt directly so this helper cannot alter model
+    input semantics. It is called only for Agent-role requests where the operator
+    explicitly needs to see the final text envelope presented to the checkpoint.
+    """
+    tok = runtime["tokenizer"]
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": user})
+    if hasattr(tok, "apply_chat_template"):
+        try:
+            return str(tok.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
+                enable_thinking=runtime["enable_thinking"],
+            ))
+        except TypeError:
+            return str(tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True))
+    return (f"[SYSTEM]\n{system}\n\n" if system else "") + f"[USER]\n{user}\n\n[ASSISTANT]\n"
+
+
 def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str, Any]:
     """Apply the checkpoint chat template and tokenize it exactly once.
 
@@ -547,7 +570,15 @@ def _score_fixed_choices(
 def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argparse.Namespace) -> str | dict[str, Any]:
     tok = runtime["tokenizer"]
     model = runtime["model"]
-    inputs = _encode_prompt(runtime, str(request.get("system") or ""), str(request.get("prompt") or ""))
+    system_text = str(request.get("system") or "")
+    prompt_text = str(request.get("prompt") or "")
+    role = str(request.get("role") or "generic")
+    rendered_prompt = (
+        _render_prompt_for_diagnostics(runtime, system_text, prompt_text)
+        if role.startswith("agent")
+        else None
+    )
+    inputs = _encode_prompt(runtime, system_text, prompt_text)
     override = request.get("override") or {}
     max_new = int(override.get("max_new_tokens", defaults.max_new_tokens))
     temperature = float(override.get("temperature", defaults.temperature))
@@ -558,12 +589,23 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
     use_cache = bool(override.get("use_cache", True))
 
     input_ids = inputs["input_ids"]
-    budget = max(1, runtime["ctx_total"] - max_new)
-    if input_ids.shape[-1] > budget:
-        input_ids = input_ids[:, -budget:]
-        inputs["input_ids"] = input_ids
-        if "attention_mask" in inputs:
-            inputs["attention_mask"] = inputs["attention_mask"][:, -budget:]
+    model_budget = max(1, runtime["ctx_total"] - max_new)
+    configured_budget_raw = override.get("max_input_tokens")
+    configured_budget = (
+        model_budget
+        if configured_budget_raw is None
+        else max(1, int(configured_budget_raw))
+    )
+    budget = min(model_budget, configured_budget)
+    input_tokens = int(input_ids.shape[-1])
+    if input_tokens > budget:
+        raise ValueError(
+            "LLM input exceeds context budget: "
+            f"input_tokens={input_tokens}, available={budget}, "
+            f"model_available={model_budget}, configured_limit={configured_budget}, "
+            f"ctx_total={runtime['ctx_total']}, reserved_generation={max_new}. "
+            "Refusing to silently truncate AgentContext."
+        )
     choice_outputs_raw = override.get("choice_outputs")
     if choice_outputs_raw is not None:
         if not isinstance(choice_outputs_raw, list):
@@ -622,7 +664,14 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
             out = model.generate(**inputs, generation_config=gc)
         generated = out[0, inputs["input_ids"].shape[-1]:]
         text = tok.decode(generated, skip_special_tokens=True).strip()
-        return _strip_thinking(text) if runtime["strip_thinking"] else text
+        final_text = _strip_thinking(text) if runtime["strip_thinking"] else text
+        if rendered_prompt is not None:
+            return {
+                "text": final_text,
+                "rendered_prompt": rendered_prompt,
+                "input_tokens": input_tokens,
+            }
+        return final_text
     finally:
         # Generation caches and request tensors are strictly request-local.  Drop
         # all references before the next JSONL request; on CUDA also return unused

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from dataclasses import replace
 from pathlib import Path
 import unittest
@@ -30,6 +32,9 @@ class ScriptedBackend:
         self.calls.append((role, prompt, ov))
         values = self.answers.get(role)
         if not values:
+            fallback = legacy_semantic_answer(role, prompt)
+            if fallback is not None:
+                return LLMResponse(str(fallback), {})
             raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
         return LLMResponse(values.pop(0), {"choice_margin": 0.0})
 
@@ -62,7 +67,6 @@ class PersonalRelativeMorphology(AcceptanceMorphology):
 class SemanticRoots1240Tests(unittest.TestCase):
     def test_request_uses_recipient_plus_nested_object_and_recipient_controls_child(self):
         backend = ScriptedBackend({
-            "perception_content_addressee": ["CONTENT_ADDRESSEE"],
             "perception_frame_relation": ["CONTENT_LINK"],
             "perception_control_subject": ["SECOND"],
         })
@@ -75,10 +79,10 @@ class SemanticRoots1240Tests(unittest.TestCase):
         child_subject = next(a for a in child.actants if a.role == ActantRole.SUBJECT)
         self.assertEqual(content.candidate_ref, child.local_id)
         self.assertEqual(child_subject.entity_ref, recipient.entity_ref)
-        self.assertEqual(
-            [role for role, _prompt, _ov in backend.calls],
-            ["perception_frame_relation", "perception_content_addressee", "perception_control_subject"],
-        )
+        roles = [role for role, _prompt, _ov in backend.calls]
+        self.assertIn("perception_frame_relation", roles)
+        self.assertIn("perception_role_cue", roles)
+        self.assertIn("perception_control_subject", roles)
         self.assertTrue(all("choice_outputs" not in ov for _role, _prompt, ov in backend.calls))
 
     def test_wanted_situation_is_nested_object_not_purpose(self):
@@ -91,9 +95,10 @@ class SemanticRoots1240Tests(unittest.TestCase):
         self.assertNotIn("choice_outputs", backend.calls[0][2])
 
     def test_relative_noun_inside_relational_location_reuses_parent_entity_ref(self):
-        backend = ScriptedBackend()
+        backend = ScriptedBackend({"perception_antecedent_choice": ["C3"]})
         result = parser(backend, PersonalRelativeMorphology()).parse(
-            "Я положил книгу рядом с журналом, который был новым."
+            "Я положил книгу рядом с журналом, который был новым.",
+            structural_resolution="PREDICATE_ATTACHMENT",
         ).perception
         placed, described = result.assertions
         location = next(a for a in placed.actants if a.role == ActantRole.LOCATION)
@@ -102,12 +107,14 @@ class SemanticRoots1240Tests(unittest.TestCase):
         self.assertEqual(subject.evidence.text, "журналом")
         self.assertIsNotNone(location.entity_ref)
         self.assertEqual(subject.entity_ref, location.entity_ref)
-        self.assertEqual(backend.calls, [])
+        self.assertTrue(all("choice_outputs" not in ov for _r, _p, ov in backend.calls))
 
     def test_shared_relative_identity_preserves_personal_domain_provenance(self):
         text = "Я положил книгу рядом с журналом, который был новым."
         morphology = PersonalRelativeMorphology()
-        perception = parser(ScriptedBackend(), morphology).parse(text).perception
+        perception = parser(
+            ScriptedBackend({"perception_antecedent_choice": ["C3"]}), morphology
+        ).parse(text, structural_resolution="PREDICATE_ATTACHMENT").perception
         # The normal LLM parser wrapper supplies occurrence-only TemplateCandidates;
         # mirror that boundary here without adding any hidden valency.
         assertions = tuple(

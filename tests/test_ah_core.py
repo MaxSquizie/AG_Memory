@@ -115,13 +115,17 @@ class AHCoreTests(unittest.TestCase):
             uid = entity.uid
         self.assertTrue(self.core.store.has_uid(uid))
 
-    def test_duplicate_symbol_insert_is_atomic(self) -> None:
+    def test_homographic_symbols_coexist_and_single_lookup_fails_closed(self) -> None:
         first = self.core.add_abstract_symbol({"Крипл"})
-        before = set(self.core.store.all_uids())
+        second = self.core.add_abstract_symbol({"Крипл", "Kripl"})
+        self.assertNotEqual(first.uid, second.uid)
+        self.assertEqual(
+            {item.uid for item in self.core.store.find_symbols_by_form("Крипл")},
+            {first.uid, second.uid},
+        )
         with self.assertRaises(ValueError):
-            self.core.add_abstract_symbol({"Крипл"})
-        self.assertEqual(set(self.core.store.all_uids()), before)
-        self.assertEqual(self.core.store.find_symbol_by_form("Крипл").uid, first.uid)
+            self.core.store.find_symbol_by_form("Крипл")
+
 
     def test_uid_is_global_across_domains(self) -> None:
         entity = self.core.add_entity(Domain.C, uid="M_SHARED")

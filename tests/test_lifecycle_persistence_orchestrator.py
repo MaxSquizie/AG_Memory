@@ -117,6 +117,45 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         self.assertEqual(core.store.get_hypernode(n.uid).meta["lifecycle_state"], LifecycleStage.CONSOLIDATED.value)
         self.assertNotIn("expires_tick", core.store.get_hypernode(n.uid).meta)
 
+    def test_pacemaker_only_activation_does_not_advance_lifecycle(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        n = self._fact(core)
+        engine = IgnitionEngine(
+            core,
+            IgnitionSettings(),
+            WorkspaceSettings(threshold=0.1),
+            LifecycleSettings(
+                initial_lifetime_ticks=100,
+                reinforced_lifetime_ticks=100,
+                min_spacing_1_ticks=2,
+                min_spacing_2_ticks=3,
+            ),
+        )
+        engine.seed(n, 0.4, reason=SeedReason.NEW_FACT)
+        engine.tick()
+        self.assertEqual(
+            core.store.get_hypernode(n.uid).meta["lifecycle_state"],
+            LifecycleStage.NEW.value,
+        )
+
+        # Even when enough spacing has elapsed, pure pacemaker pulses are not
+        # semantic reactivations and cannot reinforce/consolidate the fact.
+        engine.tick()
+        engine.seed(n, 0.4, reason=SeedReason.PACEMAKER)
+        engine.tick()
+        self.assertEqual(
+            core.store.get_hypernode(n.uid).meta["lifecycle_state"],
+            LifecycleStage.NEW.value,
+        )
+
+        # A real semantic reactivation at the same spacing still advances it.
+        engine.seed(n, 0.4, reason=SeedReason.REACTIVATED_FACT)
+        engine.tick()
+        self.assertEqual(
+            core.store.get_hypernode(n.uid).meta["lifecycle_state"],
+            LifecycleStage.REINFORCED.value,
+        )
+
     def test_expired_unreferenced_new_n_is_gc_deleted(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
         n = self._fact(core)
@@ -137,6 +176,40 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         result = engine.tick()
         self.assertFalse(core.store.has_uid(n.uid))
         self.assertIn(n.uid, set(result.gc.deleted))
+
+    def test_unlinked_h_experience_event_survives_ordinary_ttl(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        pred = core.ensure_abstract_symbol("высказать")
+        template = core.add_template(
+            Domain.H, core.ref(pred.uid), (ActantRole.SUBJECT,)
+        )
+        speaker = core.add_entity(
+            Domain.P, properties={"name": Property("name", "User", "str")}
+        )
+        event, _ = core.add_hypernode(
+            Domain.H,
+            core.ref(template.uid),
+            {ActantRole.SUBJECT: core.ref(speaker.uid)},
+            0.3,
+            meta={"event_instance": True},
+            deduplicate=False,
+        )
+        ref = core.ref(event.uid)
+        engine = IgnitionEngine(
+            core,
+            IgnitionSettings(),
+            WorkspaceSettings(threshold=0.1),
+            LifecycleSettings(
+                initial_lifetime_ticks=2,
+                reinforced_lifetime_ticks=10,
+                min_spacing_1_ticks=10,
+                min_spacing_2_ticks=10,
+            ),
+        )
+        engine.seed(ref, 0.4, reason=SeedReason.NEW_FACT)
+        engine.tick(); engine.tick(); result = engine.tick()
+        self.assertTrue(core.store.has_uid(ref.uid))
+        self.assertIn(ref.uid, set(result.gc.protected))
 
     def test_h_structural_reference_protects_expired_c_fact(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
@@ -233,6 +306,11 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             self.assertAlmostEqual(restored.pacemaker.phase, before.pacemaker.phase)
             self.assertEqual(restored.pacemaker.cursor, before.pacemaker.cursor)
             self.assertEqual(restored.pacemaker.pulse_count, before.pacemaker.pulse_count)
+            self.assertEqual(restored.pacemaker_incoming, before.pacemaker_incoming)
+            self.assertEqual(
+                restored.pacemaker_only_excitation,
+                before.pacemaker_only_excitation,
+            )
 
     def test_llm_perception_json_parser_does_not_emit_uids(self) -> None:
         backend = FakeLLMBackend([

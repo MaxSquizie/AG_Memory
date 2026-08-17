@@ -241,6 +241,16 @@ class GraphCanvasWidget(QWidget):
         self.canvas.update()
 
     @property
+    def current_snapshot(self):
+        """Most recent canvas snapshot for read-only dock diagnostics.
+
+        The canvas already pays for GraphInspector.snapshot() at its own refresh
+        cadence; dock widgets may safely reuse this immutable snapshot rather than
+        duplicating the same expensive work on the Qt UI thread.
+        """
+        return self._snapshot
+
+    @property
     def selected_uid(self) -> str | None:
         return self._selected_uid
 

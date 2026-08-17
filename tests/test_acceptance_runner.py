@@ -7,9 +7,11 @@ from types import SimpleNamespace
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from ah.core import AHCore
 from ah.diagnostics import GraphInspector
+from ah.diagnostics.semantic_oracle import SemanticCaseVerdict
 from ah.diagnostics.acceptance_runner import (
     canonical_ah_snapshot,
     diff_canonical_ah,
@@ -55,15 +57,23 @@ class _FakeOrchestrator:
 
 
 class _FakeIgnition:
+    def __init__(self) -> None:
+        self._snapshot = SimpleNamespace(
+            tick_index=0,
+            incoming={},
+            seed_reasons={},
+            pending_refutations=(),
+            pacemaker=None,
+        )
+
     def workspace_refs(self):
         return ()
 
     def export_snapshot(self, *, include_pending: bool = False):
-        return SimpleNamespace(
-            tick_index=0,
-            incoming={},
-            pending_refutations=(),
-        )
+        return self._snapshot
+
+    def restore_snapshot(self, snapshot):
+        self._snapshot = snapshot
 
 
 class _FakeServices:
@@ -188,11 +198,16 @@ class AcceptanceRunnerTests(unittest.TestCase):
             self.assertTrue((result.output_dir / "final_graph.json").is_file())
             self.assertTrue((result.output_dir / "manifest.json").is_file())
             self.assertTrue((result.output_dir / "summary.txt").is_file())
+            manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["semantic_families"]["uncategorized"]["passed"], 2)
+            self.assertIn("Families:", (result.output_dir / "summary.txt").read_text(encoding="utf-8"))
 
             turn = json.loads((result.output_dir / "turn_001.json").read_text(encoding="utf-8"))
             self.assertEqual(turn["input"], "Кошка спит.")
             self.assertEqual(turn["status"], "OK")
             self.assertEqual(turn["semantic_status"], "PASS")
+            self.assertEqual(turn["semantic_family"], "uncategorized")
+            self.assertEqual(turn["semantic_tags"], [])
             self.assertTrue(turn["semantic_checks"])
             self.assertIn("linguistic_candidate_graph", turn)
             self.assertIn("perception_result", turn)
@@ -205,6 +220,129 @@ class AcceptanceRunnerTests(unittest.TestCase):
                 (data_dir / "acceptance_runs" / "latest.txt").read_text(encoding="utf-8").strip(),
                 str(result.output_dir.resolve()),
             )
+
+    def test_scenarios_reset_canonical_state_and_restore_live_memory_after_suite(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            data_dir = Path(td)
+            cases_file = data_dir / "acceptance_cases.txt"
+            cases_file.write_text("Первый.\nВторой.\n", encoding="utf-8")
+            oracle_file = data_dir / "acceptance_oracle.json"
+            oracle_file.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "cases": [
+                            {
+                                "text": "Первый.",
+                                "scenario": "one",
+                                "expect": {
+                                    "perception": {"assertions": [], "queries": [], "relations": [], "conditionals": []},
+                                    "integration": {"must_succeed": True},
+                                },
+                            },
+                            {
+                                "text": "Второй.",
+                                "scenario": "two",
+                                "expect": {
+                                    "perception": {"assertions": [], "queries": [], "relations": [], "conditionals": []},
+                                    "integration": {"must_succeed": True},
+                                },
+                            },
+                        ],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            services = _FakeServices(data_dir)
+            services.core.ensure_abstract_symbol("sentinel")
+
+            result = run_acceptance_suite(services, cases_file=cases_file, oracle_file=oracle_file)
+
+            # The user's live AH is restored after diagnostics.
+            self.assertIsNotNone(services.core.store.find_symbol_by_form("sentinel"))
+            self.assertIsNone(services.core.store.find_symbol_by_form("Первый."))
+            self.assertIsNone(services.core.store.find_symbol_by_form("Второй."))
+
+            first = json.loads((result.output_dir / "turn_001.json").read_text(encoding="utf-8"))
+            second = json.loads((result.output_dir / "turn_002.json").read_text(encoding="utf-8"))
+            self.assertEqual(first["scenario_id"], "one")
+            self.assertEqual(second["scenario_id"], "two")
+            # Both independent scenarios start from the same sentinel-only baseline.
+            self.assertIn("Первый.", [item.get("forms", [None])[0] for item in first["ah_diff"]["added"].values() if item.get("kind") == "S"])
+            self.assertIn("Второй.", [item.get("forms", [None])[0] for item in second["ah_diff"]["added"].values() if item.get("kind") == "S"])
+            final = json.loads((result.output_dir / "final_ah.json").read_text(encoding="utf-8"))
+            forms = [form for item in final.values() if item.get("kind") == "S" for form in item.get("forms", [])]
+            self.assertIn("sentinel", forms)
+            self.assertNotIn("Первый.", forms)
+            self.assertIn("Второй.", forms)
+            manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+            self.assertTrue(manifest["scenario_isolation"])
+            self.assertEqual(manifest["scenario_count"], 2)
+
+    def test_semantic_evaluator_exception_is_recorded_and_suite_continues(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            data_dir = Path(td)
+            cases_file = data_dir / "acceptance_cases.txt"
+            cases_file.write_text("Первый.\nВторой.\n", encoding="utf-8")
+            oracle_file = data_dir / "acceptance_oracle.json"
+            oracle_file.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "cases": [
+                            {
+                                "text": "Первый.",
+                                "family": "diagnostics",
+                                "expect": {
+                                    "perception": {
+                                        "assertions": [], "queries": [],
+                                        "relations": [], "conditionals": []
+                                    },
+                                    "integration": {"must_succeed": True},
+                                },
+                            },
+                            {
+                                "text": "Второй.",
+                                "family": "diagnostics",
+                                "expect": {
+                                    "perception": {
+                                        "assertions": [], "queries": [],
+                                        "relations": [], "conditionals": []
+                                    },
+                                    "integration": {"must_succeed": True},
+                                },
+                            },
+                        ],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            services = _FakeServices(data_dir)
+            second = SemanticCaseVerdict(
+                2, "Второй.", "PASS", ({"name": "ok", "ok": True},),
+                None, "diagnostics", (),
+            )
+            with patch(
+                "ah.diagnostics.acceptance_runner.evaluate_semantic_case",
+                side_effect=[RuntimeError("oracle boom"), second],
+            ):
+                result = run_acceptance_suite(
+                    services, cases_file=cases_file, oracle_file=oracle_file
+                )
+
+            self.assertEqual(result.total, 2)
+            self.assertEqual(result.semantic_failed, 1)
+            self.assertEqual(result.semantic_passed, 1)
+            first = json.loads((result.output_dir / "turn_001.json").read_text(encoding="utf-8"))
+            second_record = json.loads((result.output_dir / "turn_002.json").read_text(encoding="utf-8"))
+            self.assertEqual(first["semantic_status"], "FAIL")
+            self.assertIn("RuntimeError: oracle boom", first["semantic_evaluator_error"])
+            self.assertEqual(first["semantic_checks"][0]["name"], "oracle.evaluation_error")
+            self.assertEqual(second_record["semantic_status"], "PASS")
+            manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(manifest["cases"]), 2)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 from dataclasses import dataclass
+from threading import RLock
 
 from ah.core import AHCore
 from ah.ignition import IgnitionEngine
@@ -20,11 +22,23 @@ class RuntimeSummary:
 
 
 class RuntimeDiagnostics:
-    def __init__(self, core: AHCore, ignition: IgnitionEngine) -> None:
+    def __init__(
+        self,
+        core: AHCore,
+        ignition: IgnitionEngine,
+        *,
+        runtime_lock: RLock | None = None,
+    ) -> None:
         self.core = core
         self.ignition = ignition
+        self.runtime_lock = runtime_lock
 
     def summary(self) -> RuntimeSummary:
+        lock = self.runtime_lock or nullcontext()
+        with lock:
+            return self._summary_locked()
+
+    def _summary_locked(self) -> RuntimeSummary:
         by_domain = {d.value: len(self.core.store.elements(d)) for d in Domain}
         by_kind = {kind.value: 0 for kind in RefKind}
         for uid in self.core.store.all_uids():

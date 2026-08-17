@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Decide only whether the CHILD predicate has the same omitted semantic subject as PARENT SUBJECT in this sentence. Return only SAME_SUBJECT or INDEPENDENT. Do not explain.

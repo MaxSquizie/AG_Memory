@@ -1,1 +1,1 @@
-Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label or, when selecting a token/span, only its number. Do not copy the input. Do not explain or add punctuation.
+Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.

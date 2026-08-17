@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 import json
+from threading import RLock
 
 from ah.config import ContextSettings
 from ah.core import AHCore
@@ -16,6 +18,8 @@ class NodeDiagnostic:
     kind: str
     domain: str | None
     semantic: str
+    creation_sequence: int
+    first_excitation_tick: int | None
     excitation: float | None
     associative_weight: float | None
     output: float | None
@@ -46,6 +50,7 @@ class StructuralEdgeDiagnostic:
 class GraphSnapshot:
     tick: int
     workspace_uids: tuple[str, ...]
+    workspace_semantics: dict[str, str]
     nodes: tuple[NodeDiagnostic, ...]
     links: tuple[LinkDiagnostic, ...]
     structural_edges: tuple[StructuralEdgeDiagnostic, ...]
@@ -56,12 +61,24 @@ class GraphSnapshot:
 class GraphInspector:
     """Read-only graph/runtime snapshot intended for diagnostics and future GUI."""
 
-    def __init__(self, core: AHCore, ignition: IgnitionEngine | None = None) -> None:
+    def __init__(
+        self,
+        core: AHCore,
+        ignition: IgnitionEngine | None = None,
+        *,
+        runtime_lock: RLock | None = None,
+    ) -> None:
         self.core = core
         self.ignition = ignition
+        self.runtime_lock = runtime_lock
         self.semantic = SemanticProjector(core, ContextSettings(include_structural_uids=False))
 
     def snapshot(self) -> GraphSnapshot:
+        lock = self.runtime_lock or nullcontext()
+        with lock:
+            return self._snapshot_locked()
+
+    def _snapshot_locked(self) -> GraphSnapshot:
         workspace = self.ignition.workspace_refs() if self.ignition is not None else ()
         workspace_uids = {ref.uid for ref in workspace}
         nodes: list[NodeDiagnostic] = []
@@ -85,6 +102,8 @@ class GraphInspector:
                     kind=kind.value,
                     domain=domain.value if domain is not None else None,
                     semantic=semantic,
+                    creation_sequence=self.core.store.creation_sequence(uid),
+                    first_excitation_tick=runtime.first_excitation_tick,
                     excitation=runtime.excitation,
                     associative_weight=associative_weight,
                     output=runtime.output,
@@ -124,15 +143,41 @@ class GraphInspector:
             tick = snap.tick_index
             incoming = dict(snap.incoming)
             refutations = snap.pending_refutations
+        workspace_semantics: dict[str, str] = {}
+        for uid in sorted(workspace_uids):
+            try:
+                workspace_semantics[uid] = self.semantic.active_block(self.core.ref(uid)).semantic
+            except Exception:
+                workspace_semantics[uid] = self._semantic(uid)
+
         return GraphSnapshot(
             tick=tick,
             workspace_uids=tuple(sorted(workspace_uids)),
+            workspace_semantics=workspace_semantics,
             nodes=tuple(nodes),
             links=links,
             structural_edges=structural_edges,
             pending_incoming=incoming,
             pending_refutations=refutations,
         )
+
+    def active_semantics(self, uids: tuple[str, ...] | list[str]) -> dict[str, str]:
+        """Human-readable ACTIVE projection for operator diagnostics only.
+
+        Kept out of the high-frequency canvas snapshot because ACTIVE projection
+        may include Pr/text and is more expensive than compact dependency labels.
+        """
+        lock = self.runtime_lock or nullcontext()
+        with lock:
+            out: dict[str, str] = {}
+            for uid in uids:
+                if not self.core.store.has_uid(uid) or self.core.store.kind_of(uid) is RefKind.L:
+                    continue
+                try:
+                    out[uid] = self.semantic.active_block(self.core.ref(uid)).semantic
+                except Exception:
+                    out[uid] = self._semantic(uid)
+            return out
 
     def to_json(self, *, indent: int = 2) -> str:
         return json.dumps(asdict(self.snapshot()), ensure_ascii=False, indent=indent, sort_keys=True)

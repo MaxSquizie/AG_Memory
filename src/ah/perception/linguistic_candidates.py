@@ -13,6 +13,18 @@ class CoordinationKind(str, Enum):
     OR = "OR"
 
 
+class FrameDependencyKind(str, Enum):
+    """Purely runtime orientation between proposition frames.
+
+    The kind records why the orientation is structurally available; it is not an
+    AH relation and never assigns an actant role.
+    """
+
+    SUBORDINATE = "SUBORDINATE"
+    NONFINITE = "NONFINITE"
+    QUOTED = "QUOTED"
+
+
 @dataclass(frozen=True, slots=True)
 class SourceToken:
     index: int
@@ -62,6 +74,54 @@ class ClauseCandidate:
     parent_role_hint: str | None = None
     connector_span: CandidateSpan | None = None
     relative: bool = False
+    quoted: bool = False
+    implicit_copula: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class FrameDependencyCandidate:
+    parent_token_index: int
+    child_token_index: int
+    kind: FrameDependencyKind
+    parent_clause_id: str
+    child_clause_id: str
+
+    def __post_init__(self) -> None:
+        if self.parent_token_index == self.child_token_index:
+            raise ValueError("frame dependency cannot be self-referential")
+
+
+@dataclass(frozen=True, slots=True)
+class ClauseFrameGraph:
+    """Dependency-oriented runtime view of predicate frames.
+
+    Source order is intentionally absent from dependency semantics. Predicate
+    coordination groups live here as structural peer sets; they do not themselves
+    assert that any particular actant is shared.
+    """
+
+    dependencies: tuple[FrameDependencyCandidate, ...] = ()
+    coordinations: tuple["PredicateCoordinationCandidate", ...] = ()
+
+    def parent_of(self, token_index: int) -> int | None:
+        parents = {
+            edge.parent_token_index
+            for edge in self.dependencies
+            if edge.child_token_index == token_index
+        }
+        return next(iter(parents)) if len(parents) == 1 else None
+
+    def is_embedded(self, token_index: int) -> bool:
+        return any(edge.child_token_index == token_index for edge in self.dependencies)
+
+    def roots(self, token_indices: set[int] | None = None) -> tuple[int, ...]:
+        children = {edge.child_token_index for edge in self.dependencies}
+        values = (
+            token_indices
+            if token_indices is not None
+            else ({edge.parent_token_index for edge in self.dependencies} | children)
+        )
+        return tuple(sorted(index for index in values if index not in children))
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,12 +132,36 @@ class CoordinationCandidate:
 
 
 @dataclass(frozen=True, slots=True)
+class PredicateCoordinationCandidate:
+    """Runtime coordination group over predicate frames.
+
+    This object records only the surface coordination skeleton.  It does not say
+    that any particular actant is shared and it never assigns an AH role.  Shared
+    arguments are resolved later against the already-built semantic frames.
+    """
+
+    operator: CoordinationKind
+    clause_id: str
+    member_token_indices: tuple[int, ...]
+    coordinator_token_indices: tuple[int, ...]
+
+    def __post_init__(self) -> None:
+        if len(self.member_token_indices) < 2:
+            raise ValueError("predicate coordination requires at least two members")
+        if len(set(self.member_token_indices)) != len(self.member_token_indices):
+            raise ValueError("predicate coordination members must be unique")
+        if tuple(sorted(self.member_token_indices)) != self.member_token_indices:
+            raise ValueError("predicate coordination members must be source-ordered")
+
+
+@dataclass(frozen=True, slots=True)
 class LinguisticCandidateGraph:
     text: str
     tokens: tuple[SourceToken, ...]
     clauses: tuple[ClauseCandidate, ...]
     predicates: tuple[PredicateHeadCandidate, ...]
     coordinations: tuple[CoordinationCandidate, ...]
+    frame_graph: ClauseFrameGraph = ClauseFrameGraph()
 
     def token(self, index: int) -> SourceToken:
         return self.tokens[index - 1]
@@ -92,15 +176,19 @@ class LinguisticCandidateGraph:
 _STRONG_PREDICATE_POS = {"VERB", "PRED"}
 _SECONDARY_PREDICATE_POS = {"INFN", "GRND", "ADJS", "PRTS"}
 _SUBORDINATORS: dict[str, str | None] = {
+    # Surface markers establish only a subordinate edge.  They do not assign an
+    # AH actant role: ``чтобы`` may introduce content or purpose; ``где/когда``
+    # may introduce embedded content or an adjunct.  Semantic relation is chosen
+    # only after both predicate frames exist.
     "что": None,
-    "чтобы": "PURPOSE",
-    "потому": "CAUSE",
-    "поскольку": "CAUSE",
-    "если": "CONDITION",
-    "когда": "TIME",
-    "где": "LOCATION",
-    "куда": "LOCATION",
-    "откуда": "SOURCE",
+    "чтобы": None,
+    "потому": None,
+    "поскольку": None,
+    "если": None,
+    "когда": None,
+    "где": None,
+    "куда": None,
+    "откуда": None,
 }
 
 # Multi-word Russian clause connectives.  These are linguistic operators, not
@@ -108,19 +196,22 @@ _SUBORDINATORS: dict[str, str | None] = {
 # parser can exclude it from entity candidates and attach the child situation to
 # the parent with a finite canonical role.
 _COMPOUND_SUBORDINATORS: dict[tuple[str, ...], str | None] = {
-    ("после", "того", "как"): "TIME",
-    ("до", "того", "как"): "TIME",
-    ("перед", "тем", "как"): "TIME",
-    ("с", "тех", "пор", "как"): "TIME",
-    ("потому", "что"): "CAUSE",
-    ("так", "как"): "CAUSE",
-    ("для", "того", "чтобы"): "PURPOSE",
+    ("после", "того", "как"): None,
+    ("до", "того", "как"): None,
+    ("перед", "тем", "как"): None,
+    ("с", "тех", "пор", "как"): None,
+    ("потому", "что"): None,
+    ("так", "как"): None,
+    ("для", "того", "чтобы"): None,
 }
+_SUBORDINATOR_MARKERS = frozenset(_SUBORDINATORS) | frozenset("_".join(parts) for parts in _COMPOUND_SUBORDINATORS)
 _RELATIVE_PREFIXES = ("котор",)
+_RELATIVE_ADVERBS = {"где", "куда", "откуда", "когда"}
 _CLAUSE_COORDINATORS = {"а", "но", "однако"}
 _COORD_AND = {"и", "да"}
 _COORD_OR = {"или", "либо"}
 _HARD_BOUNDARY = {".", "!", "?", ";"}
+_OPEN_QUOTES = {"«", "“", "„", "\""}
 
 
 class LinguisticCandidateBuilder:
@@ -140,7 +231,18 @@ class LinguisticCandidateBuilder:
         predicates = self._predicate_heads(tokens)
         clauses = self._clauses(text, tokens, predicates)
         coordinations = self._coordinations(text, tokens, predicates)
-        return LinguisticCandidateGraph(text, tokens, clauses, predicates, coordinations)
+        predicate_coordinations = self._predicate_coordinations(tokens, clauses)
+        frame_graph = self._frame_graph(
+            tokens, clauses, predicates, predicate_coordinations
+        )
+        return LinguisticCandidateGraph(
+            text=text,
+            tokens=tokens,
+            clauses=clauses,
+            predicates=predicates,
+            coordinations=coordinations,
+            frame_graph=frame_graph,
+        )
 
     def _tokens(self, text: str) -> tuple[SourceToken, ...]:
         result: list[SourceToken] = []
@@ -237,11 +339,53 @@ class LinguisticCandidateBuilder:
                     return True
             return False
 
+        def clause_ends_in_nominal(clause: ClauseCandidate) -> bool:
+            for index in range(clause.span.end_index, clause.span.start_index - 1, -1):
+                token = tokens[index - 1]
+                if not re.search(r"\w", token.text):
+                    continue
+                return any(
+                    info.pos in {"NOUN", "NPRO"}
+                    for info in self._material_analyses(token)
+                )
+            return False
+
+        def looks_like_zero_copula(start: int, end: int) -> bool:
+            """Detect only the structural shell of an omitted present-tense copula.
+
+            This does not decide SUBJECT/STATE.  It merely says that a clause with
+            no overt predicate has enough nominal/predicative material to license
+            an implicit BE frame whose roles will be resolved later.
+            """
+            material = [
+                token for token in tokens
+                if start <= token.index <= end and re.search(r"\w", token.text)
+            ]
+            nominatives = [
+                token for token in material
+                if any(
+                    info.case == "nomn" and info.pos in {"NOUN", "NPRO"}
+                    for info in self._material_analyses(token)
+                )
+            ]
+            descriptions = [
+                token for token in material
+                if any(
+                    info.pos in {"ADJF", "ADJS", "PRTS", "PRTF", "PRED"}
+                    for info in self._material_analyses(token)
+                )
+            ]
+            # Ivan doctor / Ivan — doctor, or Ivan smart.  Two nominatives are
+            # enough for the nominal-predicate shell; their semantic direction is
+            # deliberately left unresolved.
+            return len(nominatives) >= 2 or (len(nominatives) >= 1 and bool(descriptions))
+
         # Find multi-word connectives over the word-token stream while allowing
         # punctuation inside the surface form ("после того, как").
         word_tokens = [t for t in tokens if re.search(r"\w", t.text)]
         compound_by_start: dict[int, tuple[int, str, str | None]] = {}
         compound_ranges: list[tuple[int, int]] = []
+        quoted_starts: set[int] = set()
         for pattern, role_hint in _COMPOUND_SUBORDINATORS.items():
             width = len(pattern)
             for offset in range(0, len(word_tokens) - width + 1):
@@ -285,6 +429,19 @@ class LinguisticCandidateBuilder:
             if token.text in _HARD_BOUNDARY:
                 boundaries.add(token.index + 1)
                 continue
+
+            # Direct speech has its own illocutionary domain.  A quote opened after
+            # a colon is therefore a structural clause boundary even though the
+            # quoted sentence belongs to the same outer orthographic sentence.
+            if token.text in _OPEN_QUOTES and token.index > 1:
+                previous = tokens[token.index - 2]
+                local_preds = local_positions(token.index, pred_positions)
+                if previous.text == ":" and any(p < token.index for p in local_preds) and any(
+                    p > token.index for p in local_preds
+                ):
+                    boundaries.add(token.index)
+                    quoted_starts.add(token.index)
+                    continue
 
             # Punctuation and internal words belonging to a recognized compound
             # connective must not split that connective into a fake clause.
@@ -340,9 +497,40 @@ class LinguisticCandidateBuilder:
         if not spans:
             spans = [(1, len(tokens))]
 
+        # Comma-separated zero-copula predications have no overt predicate heads,
+        # so the ordinary predicate-driven comma splitter cannot see them. Split
+        # only when every comma-delimited segment independently has a copular shell
+        # ("Иван врач, Мария учитель").
+        expanded_spans: list[tuple[int, int]] = []
+        for start, end in spans:
+            if any(start <= p <= end for p in pred_positions):
+                expanded_spans.append((start, end))
+                continue
+            commas = [t.index for t in tokens if start <= t.index <= end and t.text == ","]
+            if not commas:
+                expanded_spans.append((start, end))
+                continue
+            pieces: list[tuple[int, int]] = []
+            previous = start
+            for comma in commas:
+                pieces.append((previous, comma - 1))
+                previous = comma + 1
+            pieces.append((previous, end))
+            cleaned = [
+                (a, b) for a, b in pieces
+                if a <= b and any(re.search(r"\w", tokens[i - 1].text) for i in range(a, b + 1))
+            ]
+            if len(cleaned) >= 2 and all(looks_like_zero_copula(a, b) for a, b in cleaned):
+                expanded_spans.extend(cleaned)
+            else:
+                expanded_spans.append((start, end))
+        spans = expanded_spans
+
         clauses: list[ClauseCandidate] = []
         for idx, (start, end) in enumerate(spans, start=1):
             heads = tuple(p for p in predicates if start <= p.token_index <= end)
+            if not heads and not any(re.search(r"\w", tokens[i - 1].text) for i in range(start, end + 1)):
+                continue
             first_word_token = next(
                 (tokens[i - 1] for i in range(start, end + 1) if re.search(r"\w", tokens[i - 1].text)),
                 None,
@@ -353,13 +541,32 @@ class LinguisticCandidateBuilder:
             parent = None
             connector_span = None
             relative = False
+            quoted = start in quoted_starts
+            implicit_copula = not heads and looks_like_zero_copula(start, end)
 
             compound = compound_by_start.get(start)
-            if compound is not None:
+            if quoted:
+                marker = "QUOTE"
+                if clauses:
+                    parent = clauses[-1].clause_id
+            elif compound is not None:
                 connector_end, marker, role_hint = compound
                 connector_span = self._span(text, tokens, start, connector_end)
                 if clauses:
                     parent = clauses[-1].clause_id
+            elif (
+                first_word in _RELATIVE_ADVERBS
+                and clauses
+                and clause_ends_in_nominal(clauses[-1])
+            ):
+                # Relative adverbs are structural relatives only when a preceding
+                # nominal anchor is present: ``дом, где...`` / ``день, когда...``.
+                # Without such an anchor (``я знаю, где...``) they remain ordinary
+                # subordinate connectors and their parent relation is resolved later.
+                relative = True
+                parent = clauses[-1].clause_id
+                if first_word_token is not None:
+                    connector_span = self._span(text, tokens, first_word_token.index, first_word_token.index)
             elif first_word in _SUBORDINATORS:
                 role_hint = _SUBORDINATORS.get(first_word)
                 if clauses:
@@ -386,19 +593,20 @@ class LinguisticCandidateBuilder:
                     parent_role_hint=role_hint,
                     connector_span=connector_span,
                     relative=relative,
+                    quoted=quoted,
+                    implicit_copula=implicit_copula,
                 )
             )
 
-        # A subordinate clause can precede its matrix clause: "если A, B",
-        # "когда A, B", "поскольку A, B".  During the left-to-right pass there
-        # is no previous clause to use as parent, so attach such a fronted child to
-        # the immediately following clause in the same sentence.  This is a generic
-        # clause-order correction driven by the already recognized semantic role,
-        # not by a predicate-specific phrase rule.
+        # A structural subordinate clause can precede its matrix clause: "если A, B",
+        # "когда A, B", "поскольку A, B". During the left-to-right pass there
+        # is no previous clause to use as parent, so orient it toward the following
+        # matrix clause using only the recognized surface subordinator. No AH role
+        # is assigned here.
         for index, clause in enumerate(tuple(clauses)):
             if (
                 clause.parent_clause_id is not None
-                or clause.parent_role_hint is None
+                or clause.marker not in _SUBORDINATOR_MARKERS
                 or clause.relative
                 or index + 1 >= len(clauses)
             ):
@@ -429,6 +637,207 @@ class LinguisticCandidateBuilder:
             clauses[index] = replace(clause, parent_clause_id=following.clause_id)
 
         return tuple(clauses)
+
+    def _predicate_coordinations(
+        self,
+        tokens: tuple[SourceToken, ...],
+        clauses: tuple[ClauseCandidate, ...],
+    ) -> tuple[PredicateCoordinationCandidate, ...]:
+        """Build predicate coordination groups without assigning shared roles.
+
+        Explicit coordinators connect neighbouring predicate heads.  A
+        comma-only pair is absorbed into the following explicit group so
+        ``A, B and C`` becomes one three-member group.  Strong punctuation and
+        clause boundaries stop grouping.
+        """
+        groups: list[PredicateCoordinationCandidate] = []
+
+        for clause in clauses:
+            heads = sorted(head.token_index for head in clause.predicate_heads)
+            if len(heads) < 2:
+                continue
+
+            pair_ops: list[CoordinationKind | None] = []
+            pair_coordinators: list[tuple[int, ...]] = []
+            comma_only: list[bool] = []
+            for left, right in zip(heads, heads[1:]):
+                between = [token for token in tokens if left < token.index < right]
+                if any(token.text in _HARD_BOUNDARY for token in between):
+                    pair_ops.append(None)
+                    pair_coordinators.append(())
+                    comma_only.append(False)
+                    continue
+                and_positions = tuple(
+                    token.index for token in between
+                    if token.text.casefold() in _COORD_AND
+                )
+                or_positions = tuple(
+                    token.index for token in between
+                    if token.text.casefold() in _COORD_OR
+                )
+                if and_positions and not or_positions:
+                    pair_ops.append(CoordinationKind.AND)
+                    pair_coordinators.append(and_positions)
+                elif or_positions and not and_positions:
+                    pair_ops.append(CoordinationKind.OR)
+                    pair_coordinators.append(or_positions)
+                else:
+                    pair_ops.append(None)
+                    pair_coordinators.append(())
+                comma_only.append(
+                    pair_ops[-1] is None
+                    and bool(between)
+                    and all(token.text == "," for token in between)
+                )
+
+            # In a list such as A, B and C the final explicit coordinator licenses
+            # the immediately preceding comma-separated members of the same list.
+            propagated = list(pair_ops)
+            for index in range(len(propagated) - 1, -1, -1):
+                if propagated[index] is not None:
+                    continue
+                if not comma_only[index]:
+                    continue
+                if index + 1 < len(propagated) and propagated[index + 1] is not None:
+                    propagated[index] = propagated[index + 1]
+
+            start = 0
+            while start < len(propagated):
+                operator = propagated[start]
+                if operator is None:
+                    start += 1
+                    continue
+                end = start
+                while end + 1 < len(propagated) and propagated[end + 1] is operator:
+                    end += 1
+                members = tuple(heads[start : end + 2])
+                coordinator_indices = tuple(
+                    index
+                    for pair_index in range(start, end + 1)
+                    for index in pair_coordinators[pair_index]
+                )
+                groups.append(
+                    PredicateCoordinationCandidate(
+                        operator=operator,
+                        clause_id=clause.clause_id,
+                        member_token_indices=members,
+                        coordinator_token_indices=coordinator_indices,
+                    )
+                )
+                start = end + 1
+
+        return tuple(groups)
+
+    def _frame_graph(
+        self,
+        tokens: tuple[SourceToken, ...],
+        clauses: tuple[ClauseCandidate, ...],
+        predicates: tuple[PredicateHeadCandidate, ...],
+        coordinations: tuple[PredicateCoordinationCandidate, ...] = (),
+    ) -> ClauseFrameGraph:
+        """Orient structural frame dependencies independently of token order."""
+        by_clause = {clause.clause_id: clause for clause in clauses}
+        head_to_clause = {
+            head.token_index: clause
+            for clause in clauses
+            for head in clause.predicate_heads
+        }
+        edges: list[FrameDependencyCandidate] = []
+        seen: set[tuple[int, int]] = set()
+
+        def primary_head(clause: ClauseCandidate) -> PredicateHeadCandidate | None:
+            if not clause.predicate_heads:
+                return None
+            finite = [head for head in clause.predicate_heads if head.finite]
+            pool = finite or list(clause.predicate_heads)
+            return max(pool, key=lambda head: (head.strength, -head.token_index))
+
+        def add(parent: PredicateHeadCandidate, child: PredicateHeadCandidate, kind: FrameDependencyKind) -> None:
+            key = (parent.token_index, child.token_index)
+            if parent.token_index == child.token_index or key in seen:
+                return
+            parent_clause = head_to_clause.get(parent.token_index)
+            child_clause = head_to_clause.get(child.token_index)
+            if parent_clause is None or child_clause is None:
+                return
+            seen.add(key)
+            edges.append(
+                FrameDependencyCandidate(
+                    parent_token_index=parent.token_index,
+                    child_token_index=child.token_index,
+                    kind=kind,
+                    parent_clause_id=parent_clause.clause_id,
+                    child_clause_id=child_clause.clause_id,
+                )
+            )
+
+        # Explicit clause parentage (subordination / quotation) orients matrix and
+        # embedded propositions, but does not decide their semantic AH relation.
+        for clause in clauses:
+            if clause.parent_clause_id is None:
+                continue
+            parent_clause = by_clause.get(clause.parent_clause_id)
+            if parent_clause is None:
+                continue
+            parent = primary_head(parent_clause)
+            child = primary_head(clause)
+            if parent is not None and child is not None:
+                add(
+                    parent, child,
+                    FrameDependencyKind.QUOTED if clause.quoted else FrameDependencyKind.SUBORDINATE,
+                )
+
+        # Non-finite hierarchy follows local predicate dependency, not a blanket
+        # "nearest finite" rule.  A non-coordinated infinitive may itself govern a
+        # later infinitive (``хочет попросить Петра прийти`` => WANT->ASK->COME).
+        # Members of one predicate coordination group remain siblings
+        # (``хочет купить и прочитать`` => WANT->{BUY,READ}).  If a non-finite
+        # predicate is fronted and has no preceding governor, prefer the nearest
+        # following finite matrix frame (``Улыбаясь, Иван вошёл`` => ENTER->SMILE).
+        finite_heads = [head for head in predicates if head.finite]
+        coord_members_by_head: dict[int, frozenset[int]] = {}
+        for group in coordinations:
+            members = frozenset(group.member_token_indices)
+            for member in members:
+                coord_members_by_head[member] = members
+
+        for child in (head for head in predicates if not head.finite):
+            child_clause = head_to_clause.get(child.token_index)
+            if child_clause is None:
+                continue
+            siblings = coord_members_by_head.get(child.token_index, frozenset({child.token_index}))
+            local_heads = [
+                head for head in child_clause.predicate_heads
+                if head.token_index not in siblings
+            ]
+            preceding = [head for head in local_heads if head.token_index < child.token_index]
+            parent: PredicateHeadCandidate | None = None
+            if preceding:
+                parent = max(preceding, key=lambda head: head.token_index)
+            else:
+                following_finite = [
+                    head for head in local_heads
+                    if head.finite and head.token_index > child.token_index
+                ]
+                if following_finite:
+                    parent = min(following_finite, key=lambda head: head.token_index)
+
+            if parent is None:
+                sentence_finite = [
+                    head for head in finite_heads
+                    if head.token_index not in siblings
+                    and (parent_clause := head_to_clause.get(head.token_index)) is not None
+                    and parent_clause.sentence_id == child_clause.sentence_id
+                ]
+                if sentence_finite:
+                    parent = min(
+                        sentence_finite,
+                        key=lambda head: (abs(head.token_index - child.token_index), head.token_index),
+                    )
+            if parent is not None:
+                add(parent, child, FrameDependencyKind.NONFINITE)
+
+        return ClauseFrameGraph(tuple(edges), coordinations)
 
     def _coordinations(
         self,

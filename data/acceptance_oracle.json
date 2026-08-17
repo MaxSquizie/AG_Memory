@@ -1,9 +1,19 @@
 {
   "version": 1,
+  "corpus_id": "broad200-v3",
+  "case_count": 200,
   "policy": {
     "purpose": "Semantic correctness oracle. PASS means the runtime interpretation, canonical integration, query result and explicit role coverage match the curated expectation; no-exception alone is never PASS.",
     "template_rule": "A canonical T must cover every role explicitly observed or requested so far. The oracle does not require speculative hidden roles.",
     "gap_rule": "ARCHITECTURE_GAP is not a pass. It marks an input whose required canonical semantics/clarification mechanism is not defined by Architecture_v3 yet."
+  },
+  "coverage": {
+    "baseline_regression_cases": 40,
+    "new_cases": 160,
+    "design": "Scenario-isolated black-box suite. The first 40 cases remain one frozen sequential regression scenario; independent stress cases reset to the run baseline; only explicit memory-learning/query chains share a scenario.",
+    "oracle_rule": "Every case is EXACT. Failures are evidence to diagnose; the corpus is not pre-shaped to current parser behavior.",
+    "scenario_count": 149,
+    "isolation_rule": "Canonical AH, InteractionContext, and Ignition state reset to the acceptance baseline whenever scenario changes. Template/query accumulation is tested only inside intentionally shared scenarios."
   },
   "cases": [
     {
@@ -33,7 +43,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "basic_frames",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван читает книгу.",
@@ -63,7 +78,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "basic_frames",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Мария читает.",
@@ -92,7 +112,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "basic_frames",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван купил хлеб и молоко.",
@@ -130,7 +155,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "basic_frames",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Яблоки бывают зелёными или красными.",
@@ -168,7 +198,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "basic_frames",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван написал письмо и отправил его Марии.",
@@ -214,7 +249,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "coordination",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Лиза взяла книгу, открыла её и прочитала.",
@@ -274,7 +314,12 @@
             "a3": "C"
           }
         }
-      }
+      },
+      "family": "coordination",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Петя встал и вышел.",
@@ -315,7 +360,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "coordination",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван и Мария пришли и ушли.",
@@ -370,7 +420,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "coordination",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван пришёл, а Мария ушла.",
@@ -409,7 +464,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "coordination",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван написал письмо, а Мария отправила его Петру.",
@@ -453,7 +513,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "coordination",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Анна увидела Марию. Она улыбнулась.",
@@ -518,7 +583,12 @@
             ]
           }
         }
-      }
+      },
+      "family": "coreference",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Сергей положил ключ на стол. Потом он взял его.",
@@ -570,7 +640,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "coreference",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван подарил книгу.",
@@ -600,7 +675,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван подарил Марии книгу.",
@@ -631,7 +711,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Кто подарил Марии книгу?",
@@ -665,7 +750,12 @@
           ],
           "world_assertion_count": 0
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Что Иван подарил Марии?",
@@ -699,7 +789,12 @@
           ],
           "world_assertion_count": 0
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Кому Иван подарил книгу?",
@@ -733,7 +828,12 @@
           ],
           "world_assertion_count": 0
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван любит чай.",
@@ -763,7 +863,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Кто любит чай?",
@@ -796,7 +901,12 @@
           ],
           "world_assertion_count": 0
         }
-      }
+      },
+      "family": "template_evolution_queries",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван сказал, что Мария прочитала книгу.",
@@ -820,7 +930,7 @@
             {
               "key": "a2",
               "predicate": "прочитать",
-              "status": "ASSERTED",
+              "status": "EMBEDDED",
               "negated": false,
               "roles": {
                 "SUBJECT": "Мария",
@@ -839,7 +949,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "nested_content_control",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван попросил Марию прочитать книгу.",
@@ -864,7 +979,7 @@
             {
               "key": "a2",
               "predicate": "прочитать",
-              "status": "ASSERTED",
+              "status": "EMBEDDED",
               "negated": false,
               "roles": {
                 "SUBJECT": {
@@ -886,7 +1001,12 @@
           }
         }
       },
-      "note": "Control complement is proposition/content (OBJECT); addressee is RECIPIENT. PURPOSE is reserved for actual goal clauses."
+      "note": "Control complement is proposition/content (OBJECT); addressee is RECIPIENT. PURPOSE is reserved for actual goal clauses.",
+      "family": "nested_content_control",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Мария хочет купить билет.",
@@ -910,7 +1030,7 @@
             {
               "key": "a2",
               "predicate": "купить",
-              "status": "ASSERTED",
+              "status": "EMBEDDED",
               "negated": false,
               "roles": {
                 "SUBJECT": {
@@ -932,7 +1052,12 @@
           }
         }
       },
-      "note": "Desired situation is nested OBJECT content, not PURPOSE."
+      "note": "Desired situation is nested OBJECT content, not PURPOSE.",
+      "family": "nested_content_control",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Книга, которую Иван купил, лежит на столе.",
@@ -975,7 +1100,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "relative_clauses",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Человек, который вошёл в комнату, сел на стул.",
@@ -1018,7 +1148,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "relative_clauses",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "После того как Мария прочитала книгу, она написала отзыв.",
@@ -1067,7 +1202,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Перед тем как Иван ушёл, он закрыл окно.",
@@ -1115,7 +1255,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван открыл дверь, потому что Мария попросила его войти.",
@@ -1152,7 +1297,7 @@
             {
               "key": "a3",
               "predicate": "войти",
-              "status": "ASSERTED",
+              "status": "EMBEDDED",
               "negated": false,
               "roles": {
                 "SUBJECT": {
@@ -1180,7 +1325,12 @@
           }
         }
       },
-      "note": "Nested requested action is OBJECT content; Иван is RECIPIENT/addressee of попросить."
+      "note": "Nested requested action is OBJECT content; Иван is RECIPIENT/addressee of попросить.",
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван остался дома, потому что шёл дождь.",
@@ -1226,7 +1376,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Если Лиза получит советы, она прочитает документ и напишет текст.",
@@ -1300,7 +1455,12 @@
           ]
         }
       },
-      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND."
+      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND.",
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.",
@@ -1369,7 +1529,12 @@
           ]
         }
       },
-      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND."
+      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND.",
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Если Иван придёт, Мария прочитает документ и отправит его Петру.",
@@ -1443,7 +1608,12 @@
           ]
         }
       },
-      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND."
+      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND.",
+      "family": "temporal_causal_conditional",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван не читает книгу.",
@@ -1473,7 +1643,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "negation_voice",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Мария не пришла.",
@@ -1502,7 +1677,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "negation_voice",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван читает не книгу, а журнал.",
@@ -1545,7 +1725,12 @@
             "a2": "C"
           }
         }
-      }
+      },
+      "family": "negation_voice",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Книга написана Иваном.",
@@ -1575,7 +1760,12 @@
             "a1": "C"
           }
         }
-      }
+      },
+      "family": "negation_voice",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Мне дали книгу.",
@@ -1608,7 +1798,12 @@
             "a1": "P"
           }
         }
-      }
+      },
+      "family": "negation_voice",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Анна сказала Марии, что она победила.",
@@ -1633,7 +1828,7 @@
             {
               "key": "a2",
               "predicate": "победить",
-              "status": "ASSERTED",
+              "status": "EMBEDDED",
               "negated": false,
               "roles": {
                 "SUBJECT": {
@@ -1676,7 +1871,12 @@
             ]
           }
         }
-      }
+      },
+      "family": "reference_ambiguity",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Иван увидел Петра с биноклем.",
@@ -1704,7 +1904,12 @@
           "cp_semantic_addition_count": 0
         }
       },
-      "note": "Genuine attachment ambiguity is a successful structural-clarification outcome: H experience is preserved and no C/P reading is committed before the user chooses."
+      "note": "Genuine attachment ambiguity is a successful structural-clarification outcome: H experience is preserved and no C/P reading is committed before the user chooses.",
+      "family": "structural_ambiguity",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
     },
     {
       "text": "Я положил книгу рядом с журналом, который был новым.",
@@ -1752,7 +1957,7336 @@
           }
         }
       },
-      "note": "The concrete journal is introduced inside the user-personal event, so both the action and its object-specific state belong to P."
+      "note": "The concrete journal is introduced inside the user-personal event, so both the action and its object-specific state belong to P.",
+      "family": "personal_provenance",
+      "tags": [
+        "regression40"
+      ],
+      "scenario": "regression40_frozen"
+    },
+    {
+      "text": "Собака бежит.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "intransitive",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "бежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Собака"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_041"
+    },
+    {
+      "text": "Ольга закрыла дверь.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "transitive",
+        "object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_042"
+    },
+    {
+      "text": "Лампа стоит на столе.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "стоять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Лампа",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_043"
+    },
+    {
+      "text": "Небо стало тёмным.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "state",
+        "copular"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "стать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Небо",
+                "STATE": "тёмным"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_044"
+    },
+    {
+      "text": "Птица летит над домом.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "location",
+        "preposition"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лететь",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Птица",
+                "LOCATION": "дом"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_045"
+    },
+    {
+      "text": "Мальчик держит мяч.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "transitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "держать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мальчик",
+                "OBJECT": "мяч"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_046"
+    },
+    {
+      "text": "Вода осталась холодной.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "state",
+        "template-evolution"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вода",
+                "STATE": "холодной"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_047"
+    },
+    {
+      "text": "Книга лежит в шкафу.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Книга",
+                "LOCATION": "шкаф"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_048"
+    },
+    {
+      "text": "Девочка открыла окно.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "transitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Девочка",
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_049"
+    },
+    {
+      "text": "Поезд прибыл на станцию.",
+      "grade": "EXACT",
+      "family": "lexical_basic_frames",
+      "tags": [
+        "location",
+        "motion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прибыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Поезд",
+                "LOCATION": "станция"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_050"
+    },
+    {
+      "text": "Ольга передала Сергею ключ.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Сергей",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_051"
+    },
+    {
+      "text": "Сергей отправил Анне письмо.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_052"
+    },
+    {
+      "text": "Анна показала Петру фотографию.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "показать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "фотография"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_053"
+    },
+    {
+      "text": "Пётр дал Ольге книгу.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Ольга",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_054"
+    },
+    {
+      "text": "Мария вернула Ивану билет.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "вернуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Иван",
+                "OBJECT": "билет"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_055"
+    },
+    {
+      "text": "Иван принёс Марии чай.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "принести",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария",
+                "OBJECT": "чай"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_056"
+    },
+    {
+      "text": "Ольга продала Сергею стол.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Сергей",
+                "OBJECT": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_057"
+    },
+    {
+      "text": "Сергей сообщил Анне новость.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сообщить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "новость"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_058"
+    },
+    {
+      "text": "Анна вручила Петру документ.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "вручить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_059"
+    },
+    {
+      "text": "Пётр предложил Марии помощь.",
+      "grade": "EXACT",
+      "family": "recipient_transfer",
+      "tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "предложить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Мария",
+                "OBJECT": "помощь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_060"
+    },
+    {
+      "text": "Иван открыл дверь ключом.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "tool",
+        "instrumental"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_061"
+    },
+    {
+      "text": "Мария написала письмо карандашом.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "tool",
+        "instrumental"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "письмо",
+                "TOOL": "карандаш"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_062"
+    },
+    {
+      "text": "Сергей получил письмо от Анны.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "source",
+        "preposition"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "письмо",
+                "SOURCE": "Анна"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_063"
+    },
+    {
+      "text": "Ольга взяла книгу со стола.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "source",
+        "preposition"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга",
+                "SOURCE": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_064"
+    },
+    {
+      "text": "Иван сделал стол из дерева.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_065"
+    },
+    {
+      "text": "Мария ждала два часа.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "duration",
+        "numeric"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "ждать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "два часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_066"
+    },
+    {
+      "text": "Иван пришёл утром.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "TIME": "утром"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_067"
+    },
+    {
+      "text": "Мария купила три книги.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "amount",
+        "numeric"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга",
+                "AMOUNT": "три"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_068"
+    },
+    {
+      "text": "Сергей открыл окно, чтобы проветрить комнату.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "purpose",
+        "nested"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "окно",
+                "PURPOSE": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "проветрить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "комната"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_069"
+    },
+    {
+      "text": "Иван сел, чтобы отдохнуть.",
+      "grade": "EXACT",
+      "family": "adjunct_roles",
+      "tags": [
+        "purpose",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сесть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "PURPOSE": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отдохнуть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_070"
+    },
+    {
+      "text": "Пётр открыл сундук.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "сундук"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_open_evolution"
+    },
+    {
+      "text": "Пётр открыл сундук ключом.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "сундук",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_open_evolution"
+    },
+    {
+      "text": "Пётр открыл сундук вечером.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "сундук",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_open_evolution"
+    },
+    {
+      "text": "Мария открыла шкаф ключом утром.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "multi-role"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "шкаф",
+                "TOOL": "ключ",
+                "TIME": "утром"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_open_evolution"
+    },
+    {
+      "text": "Сергей положил папку на полку.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "папка",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_put_evolution"
+    },
+    {
+      "text": "Сергей положил папку на полку вечером.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "папка",
+                "LOCATION": "полка",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_put_evolution"
+    },
+    {
+      "text": "Анна написала записку.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "записка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_write_evolution"
+    },
+    {
+      "text": "Анна написала записку карандашом.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "записка",
+                "TOOL": "карандаш"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_write_evolution"
+    },
+    {
+      "text": "Анна написала записку утром.",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "template-evolution",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "записка",
+                "TIME": "утром"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "template_write_evolution"
+    },
+    {
+      "text": "Чем Анна написала записку?",
+      "grade": "EXACT",
+      "family": "template_evolution_stress",
+      "tags": [
+        "query",
+        "tool",
+        "template-evolution"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "написать",
+              "mode": "FILL_ROLE",
+              "requested_role": "TOOL",
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "записка"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "TOOL",
+              "value": "карандаш"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      },
+      "scenario": "template_write_evolution"
+    },
+    {
+      "text": "Иван открыл дверь и вошёл.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "predicate-coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_081"
+    },
+    {
+      "text": "Мария взяла книгу и положила её на стол.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "predicate-coordination",
+        "coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_082"
+    },
+    {
+      "text": "Анна написала письмо и отправила его Сергею.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "predicate-coordination",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_083"
+    },
+    {
+      "text": "Сергей пришёл и сел на стул.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "predicate-coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сесть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "LOCATION": "стул"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_084"
+    },
+    {
+      "text": "Ольга закрыла окно и дверь.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "actant-coordination",
+        "and"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "окно",
+                      "дверь"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_085"
+    },
+    {
+      "text": "Иван купил чай или кофе.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "actant-coordination",
+        "or"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "composition": {
+                    "operator": "OR",
+                    "members": [
+                      "чай",
+                      "кофе"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_086"
+    },
+    {
+      "text": "Мария и Анна читают книгу.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "subject-coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "Мария",
+                      "Анна"
+                    ]
+                  }
+                },
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_087"
+    },
+    {
+      "text": "Иван и Пётр открыли окно и вышли.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "subject-coordination",
+        "predicate-coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "Иван",
+                      "Пётр"
+                    ]
+                  }
+                },
+                "OBJECT": "окно"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "выйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "Иван",
+                      "Пётр"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_088"
+    },
+    {
+      "text": "Анна вошла, а Сергей вышел.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "contrast-coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "выйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_089"
+    },
+    {
+      "text": "Ольга взяла ключ, открыла дверь и вошла.",
+      "grade": "EXACT",
+      "family": "coordination_stress",
+      "tags": [
+        "predicate-coordination",
+        "three-frame"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "case_090"
+    },
+    {
+      "text": "Иван взял мяч. Потом он бросил его.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "мяч"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "бросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_091"
+    },
+    {
+      "text": "Мария открыла книгу. Потом она закрыла её.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_092"
+    },
+    {
+      "text": "Анна дала Сергею письмо. Потом он прочитал его.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "recipient-antecedent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Сергей",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_093"
+    },
+    {
+      "text": "Пётр встретил Ольгу. Потом она ушла.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "object-antecedent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "Ольга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_094"
+    },
+    {
+      "text": "Сергей положил телефон на стол. Потом он взял телефон.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "lexical-coreference",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "телефон",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_095"
+    },
+    {
+      "text": "Ольга увидела Анну. Потом Ольга улыбнулась.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "lexical-coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_096"
+    },
+    {
+      "text": "Иван сказал Петру, что он опоздал.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "ambiguity",
+        "nested"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "опоздать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.RECIPIENT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Иван",
+              "Пётр"
+            ]
+          }
+        }
+      },
+      "scenario": "case_097"
+    },
+    {
+      "text": "Мария увидела Анну. Она ушла.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "ambiguity",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.OBJECT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Мария",
+              "Анна"
+            ]
+          }
+        }
+      },
+      "scenario": "case_098"
+    },
+    {
+      "text": "Сергей дал Петру ключ, и тот открыл дверь.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "demonstrative-coreference",
+        "тот"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_099"
+    },
+    {
+      "text": "Анна взяла книгу, а затем положила её на стол.",
+      "grade": "EXACT",
+      "family": "coreference_stress",
+      "tags": [
+        "pronoun",
+        "coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_100"
+    },
+    {
+      "text": "Мальчик, который держит мяч, бежит.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "держать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мальчик",
+                "OBJECT": "мяч"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "бежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_101"
+    },
+    {
+      "text": "Письмо, которое Мария написала, лежит на столе.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "Письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_102"
+    },
+    {
+      "text": "Дверь, которую Иван открыл, закрылась.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "Дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_103"
+    },
+    {
+      "text": "Ольга увидела человека, который вошёл в комнату.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-subject",
+        "postposed"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "человек"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "комната"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_104"
+    },
+    {
+      "text": "Стол, который Сергей купил, стоит в комнате.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "Стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "стоять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "комната"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_105"
+    },
+    {
+      "text": "Человек, которого Мария встретила, улыбнулся.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-object",
+        "animate"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "Человек"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_106"
+    },
+    {
+      "text": "Ключ, который лежит на столе, открыл дверь.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ключ",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_107"
+    },
+    {
+      "text": "Комната, в которую вошёл Пётр, была пустой.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "LOCATION": "Комната"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "быть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.LOCATION"
+                },
+                "STATE": "пустой"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_108"
+    },
+    {
+      "text": "Письмо, которое Сергей отправил Марии, пришло вчера.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-object",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Мария",
+                "OBJECT": "Письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "TIME": "вчера"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_109"
+    },
+    {
+      "text": "Книга, которую Иван положил на стол, лежит на столе.",
+      "grade": "EXACT",
+      "family": "relative_clause_stress",
+      "tags": [
+        "relative-object",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "Книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_110"
+    },
+    {
+      "text": "Иван думает, что Мария придёт.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "content",
+        "finite-complement"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "думать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_111"
+    },
+    {
+      "text": "Мария знает, что Пётр читает книгу.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "content",
+        "finite-complement"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "знать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_112"
+    },
+    {
+      "text": "Анна хочет открыть окно.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "content",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_113"
+    },
+    {
+      "text": "Сергей решил купить билет.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "content",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "билет"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_114"
+    },
+    {
+      "text": "Ольга начала читать книгу.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "content",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "начать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_115"
+    },
+    {
+      "text": "Иван попросил Петра закрыть дверь.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "request",
+        "recipient",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_116"
+    },
+    {
+      "text": "Мария сказала Анне открыть окно.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "speech",
+        "recipient",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_117"
+    },
+    {
+      "text": "Сергей попросил Ольгу принести чай.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "request",
+        "recipient",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "принести",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "чай"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_118"
+    },
+    {
+      "text": "Анна хочет попросить Петра прийти.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "nested-depth-3",
+        "control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "попросить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "RECIPIENT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a3"
+                }
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "прийти",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a2.RECIPIENT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "case_119"
+    },
+    {
+      "text": "Иван сказал Марии, что Пётр хочет купить книгу.",
+      "grade": "EXACT",
+      "family": "nested_content_stress",
+      "tags": [
+        "nested-depth-3",
+        "content"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "хотеть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a3"
+                }
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "купить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a2.SUBJECT"
+                },
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "case_120"
+    },
+    {
+      "text": "После того как Иван открыл дверь, он вошёл.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "time",
+        "follow"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_121"
+    },
+    {
+      "text": "Перед тем как Мария ушла, она закрыла окно.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "time",
+        "follow"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_122"
+    },
+    {
+      "text": "Анна улыбнулась, потому что Сергей пришёл.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "cause"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_123"
+    },
+    {
+      "text": "Пётр остался дома, потому что заболел.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "cause",
+        "omitted-subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "LOCATION": "дом"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "заболеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_124"
+    },
+    {
+      "text": "После того как Ольга купила книгу, она прочитала её.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "time",
+        "coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_125"
+    },
+    {
+      "text": "Сергей закрыл дверь, потому что начался дождь.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "cause"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "начаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "дождь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_126"
+    },
+    {
+      "text": "Перед тем как Пётр сел, он снял пальто.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "time",
+        "follow"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сесть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "снять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "пальто"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_127"
+    },
+    {
+      "text": "Мария написала письмо после того, как получила новость.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "time",
+        "postposed-clause"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "новость"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_128"
+    },
+    {
+      "text": "Иван ушёл после того, как Анна пришла.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "time",
+        "postposed-clause"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_129"
+    },
+    {
+      "text": "Ольга открыла дверь, потому что Сергей позвонил.",
+      "grade": "EXACT",
+      "family": "temporal_causal_stress",
+      "tags": [
+        "cause"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_130"
+    },
+    {
+      "text": "Если Иван придёт, Мария уйдёт.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "one-to-one"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_131"
+    },
+    {
+      "text": "Если Мария купит книгу, она прочитает её.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "купить"
+              ],
+              "then": [
+                "прочитать"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_132"
+    },
+    {
+      "text": "Если Сергей найдёт ключ, он откроет дверь.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "найти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "найти"
+              ],
+              "then": [
+                "открыть"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_133"
+    },
+    {
+      "text": "Если Анна придёт и Пётр останется, Мария улыбнётся.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "and-antecedent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "остаться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "улыбнуться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1",
+                "a2"
+              ],
+              "then": [
+                "a3"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти",
+                "остаться"
+              ],
+              "then": [
+                "улыбнуться"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_134"
+    },
+    {
+      "text": "Если Иван откроет дверь, Мария войдёт и Пётр выйдет.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "and-consequent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "войти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "выйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2",
+                "a3"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "открыть"
+              ],
+              "then": [
+                "войти",
+                "выйти"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_135"
+    },
+    {
+      "text": "Если Ольга получит письмо, она ответит Сергею.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "ответить",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "получить"
+              ],
+              "then": [
+                "ответить"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_136"
+    },
+    {
+      "text": "Если Пётр купит билет, он поедет домой.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "билет"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "поехать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "LOCATION": "домой"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "купить"
+              ],
+              "then": [
+                "поехать"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_137"
+    },
+    {
+      "text": "Если Мария не придёт, Иван уйдёт.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "negated-antecedent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_138"
+    },
+    {
+      "text": "Если Иван придёт, Мария не уйдёт.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "negated-consequent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_139"
+    },
+    {
+      "text": "Если Иван и Мария придут, Пётр начнёт работу.",
+      "grade": "EXACT",
+      "family": "conditional_stress",
+      "tags": [
+        "conditional",
+        "subject-composition"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "Иван",
+                      "Мария"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "начать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "работа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "начать"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "case_140"
+    },
+    {
+      "text": "Ольга не открыла дверь.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_141"
+    },
+    {
+      "text": "Сергей не отправил письмо Марии.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_142"
+    },
+    {
+      "text": "Анна читает не журнал, а книгу.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "contrastive-negation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "журнал"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_143"
+    },
+    {
+      "text": "Пётр купил не чай, а кофе.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "contrastive-negation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "чай"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "кофе"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_144"
+    },
+    {
+      "text": "Иван не пришёл и Мария не ушла.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation",
+        "coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_145"
+    },
+    {
+      "text": "Ольга не взяла ключ.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_146"
+    },
+    {
+      "text": "Книга не лежит на столе.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Книга",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_147"
+    },
+    {
+      "text": "Сергей не дал Марии письмо.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Мария",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_148"
+    },
+    {
+      "text": "Анна не сказала Петру правду.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "negation",
+        "speech"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "правда"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_149"
+    },
+    {
+      "text": "Пётр читает не книгу, а письмо.",
+      "grade": "EXACT",
+      "family": "negation_stress",
+      "tags": [
+        "contrastive-negation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "case_150"
+    },
+    {
+      "text": "Письмо написано Марией.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "passive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "Письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_151"
+    },
+    {
+      "text": "Дверь открыта Иваном.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "passive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "Дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_152"
+    },
+    {
+      "text": "Книга прочитана Сергеем.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "passive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "Книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_153"
+    },
+    {
+      "text": "Документ подписан Анной.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "passive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "подписать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "Документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_154"
+    },
+    {
+      "text": "Окно закрыто Петром.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "passive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "Окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_155"
+    },
+    {
+      "text": "Мне отправили письмо.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "impersonal",
+        "recipient",
+        "personal"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      },
+      "scenario": "case_156"
+    },
+    {
+      "text": "Марии дали ключ.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "impersonal",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": "Мария",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_157"
+    },
+    {
+      "text": "Петру показали документ.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "impersonal",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "показать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": "Пётр",
+                "OBJECT": "документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_158"
+    },
+    {
+      "text": "Мне принесли чай.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "impersonal",
+        "recipient",
+        "personal"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "принести",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "чай"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      },
+      "scenario": "case_159"
+    },
+    {
+      "text": "Анне сообщили новость.",
+      "grade": "EXACT",
+      "family": "passive_impersonal_stress",
+      "tags": [
+        "impersonal",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сообщить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": "Анна",
+                "OBJECT": "новость"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_160"
+    },
+    {
+      "text": "Борис починил велосипед молотком.",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query-seed",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "починить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Борис",
+                "OBJECT": "велосипед",
+                "TOOL": "молоток"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "query_tool"
+    },
+    {
+      "text": "Чем Борис починил велосипед?",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "починить",
+              "mode": "FILL_ROLE",
+              "requested_role": "TOOL",
+              "roles": {
+                "SUBJECT": "Борис",
+                "OBJECT": "велосипед"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "TOOL",
+              "value": "молоток"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      },
+      "scenario": "query_tool"
+    },
+    {
+      "text": "Елена отправила Николаю посылку.",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query-seed",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Елена",
+                "RECIPIENT": "Николай",
+                "OBJECT": "посылка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "query_recipient"
+    },
+    {
+      "text": "Кому Елена отправила посылку?",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "отправить",
+              "mode": "FILL_ROLE",
+              "requested_role": "RECIPIENT",
+              "roles": {
+                "SUBJECT": "Елена",
+                "OBJECT": "посылка"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "RECIPIENT",
+              "value": "Николай"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      },
+      "scenario": "query_recipient"
+    },
+    {
+      "text": "Дмитрий получил подарок от Ирины.",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query-seed",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Дмитрий",
+                "OBJECT": "подарок",
+                "SOURCE": "Ирина"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "query_source"
+    },
+    {
+      "text": "От кого Дмитрий получил подарок?",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "получить",
+              "mode": "FILL_ROLE",
+              "requested_role": "SOURCE",
+              "roles": {
+                "SUBJECT": "Дмитрий",
+                "OBJECT": "подарок"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "SOURCE",
+              "value": "Ирина"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      },
+      "scenario": "query_source"
+    },
+    {
+      "text": "Виктор встретил Алексея утром.",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query-seed",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Виктор",
+                "OBJECT": "Алексей",
+                "TIME": "утром"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "query_time"
+    },
+    {
+      "text": "Когда Виктор встретил Алексея?",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "встретить",
+              "mode": "FILL_ROLE",
+              "requested_role": "TIME",
+              "roles": {
+                "SUBJECT": "Виктор",
+                "OBJECT": "Алексей"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "TIME",
+              "value": "утром"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      },
+      "scenario": "query_time"
+    },
+    {
+      "text": "София положила вазу на полку.",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query-seed",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "София",
+                "OBJECT": "ваза",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "query_location"
+    },
+    {
+      "text": "Куда София положила вазу?",
+      "grade": "EXACT",
+      "family": "query_role_stress",
+      "tags": [
+        "query",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "положить",
+              "mode": "FILL_ROLE",
+              "requested_role": "LOCATION",
+              "roles": {
+                "SUBJECT": "София",
+                "OBJECT": "ваза"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "LOCATION",
+              "value": "полка"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      },
+      "scenario": "query_location"
+    },
+    {
+      "text": "Я открыл окно.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "user-subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      },
+      "scenario": "case_171"
+    },
+    {
+      "text": "Я положил телефон на стол.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "user-subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "телефон",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      },
+      "scenario": "case_172"
+    },
+    {
+      "text": "Я взял телефон. Потом я положил его на стол.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "телефон"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "scenario": "case_173"
+    },
+    {
+      "text": "Мне дали билет.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "билет"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      },
+      "scenario": "case_174"
+    },
+    {
+      "text": "Я прочитал письмо.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "user-subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      },
+      "scenario": "case_175"
+    },
+    {
+      "text": "Я сказал Марии, что прочитал письмо.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "nested"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "RECIPIENT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "scenario": "case_176"
+    },
+    {
+      "text": "Я попросил Сергея открыть дверь.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "request",
+        "nested"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "RECIPIENT": "Сергей",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "scenario": "case_177"
+    },
+    {
+      "text": "Я увидел Анну. Она улыбнулась.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "coreference",
+        "provenance"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "scenario": "case_178"
+    },
+    {
+      "text": "Мне отправили книгу. Я открыл её.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "coreference"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "scenario": "case_179"
+    },
+    {
+      "text": "Я положил книгу рядом с журналом, который был старым.",
+      "grade": "EXACT",
+      "family": "personal_provenance_stress",
+      "tags": [
+        "personal",
+        "relative",
+        "provenance"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "книга",
+                "LOCATION": "журнал"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "быть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.LOCATION"
+                },
+                "STATE": "старым"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "scenario": "case_180"
+    },
+    {
+      "text": "Мария увидела Анну с зонтом.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "clarification": {
+            "required": true,
+            "kind": "STRUCTURAL",
+            "options": [
+              "«с зонтом» относится к действию «увидела»",
+              "«с зонтом» описывает «Анну»"
+            ],
+            "pending_armed": false
+          },
+          "cp_semantic_addition_count": 0
+        }
+      },
+      "scenario": "case_181"
+    },
+    {
+      "text": "Сергей встретил Петра с собакой.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "clarification": {
+            "required": true,
+            "kind": "STRUCTURAL",
+            "options": [
+              "«с собакой» относится к действию «встретил»",
+              "«с собакой» описывает «Петра»"
+            ],
+            "pending_armed": false
+          },
+          "cp_semantic_addition_count": 0
+        }
+      },
+      "scenario": "case_182"
+    },
+    {
+      "text": "Ольга сфотографировала Ивана с телефоном.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "clarification": {
+            "required": true,
+            "kind": "STRUCTURAL",
+            "options": [
+              "«с телефоном» относится к действию «сфотографировала»",
+              "«с телефоном» описывает «Ивана»"
+            ],
+            "pending_armed": false
+          },
+          "cp_semantic_addition_count": 0
+        }
+      },
+      "scenario": "case_183"
+    },
+    {
+      "text": "Пётр заметил Марию с зонтом.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "clarification": {
+            "required": true,
+            "kind": "STRUCTURAL",
+            "options": [
+              "«с зонтом» относится к действию «заметил»",
+              "«с зонтом» описывает «Марию»"
+            ],
+            "pending_armed": false
+          },
+          "cp_semantic_addition_count": 0
+        }
+      },
+      "scenario": "case_184"
+    },
+    {
+      "text": "Анна увидела Сергея с рюкзаком.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "clarification": {
+            "required": true,
+            "kind": "STRUCTURAL",
+            "options": [
+              "«с рюкзаком» относится к действию «увидела»",
+              "«с рюкзаком» описывает «Сергея»"
+            ],
+            "pending_armed": false
+          },
+          "cp_semantic_addition_count": 0
+        }
+      },
+      "scenario": "case_185"
+    },
+    {
+      "text": "Иван сказал Петру, что он устал.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "reference-ambiguity",
+        "pronoun"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "устать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.RECIPIENT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Иван",
+              "Пётр"
+            ]
+          }
+        }
+      },
+      "scenario": "case_186"
+    },
+    {
+      "text": "Мария сообщила Анне, что она победила.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "reference-ambiguity",
+        "pronoun"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сообщить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "победить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.RECIPIENT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Мария",
+              "Анна"
+            ]
+          }
+        }
+      },
+      "scenario": "case_187"
+    },
+    {
+      "text": "Сергей увидел Петра. Он улыбнулся.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "reference-ambiguity",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "Пётр"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.OBJECT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Сергей",
+              "Пётр"
+            ]
+          }
+        }
+      },
+      "scenario": "case_188"
+    },
+    {
+      "text": "Ольга встретила Анну. Она улыбнулась.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "reference-ambiguity",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.OBJECT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Ольга",
+              "Анна"
+            ]
+          }
+        }
+      },
+      "scenario": "case_189"
+    },
+    {
+      "text": "Анна увидела Марию. Она засмеялась.",
+      "grade": "EXACT",
+      "family": "ambiguity_stress",
+      "tags": [
+        "reference-ambiguity",
+        "two-sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "засмеяться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.OBJECT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Анна",
+              "Мария"
+            ]
+          }
+        }
+      },
+      "scenario": "case_190"
+    },
+    {
+      "text": "Мария увидела Сергея.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_191"
+    },
+    {
+      "text": "Сергей встретил Ивана.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_192"
+    },
+    {
+      "text": "Анна позвала Петра.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "позвать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_193"
+    },
+    {
+      "text": "Иван заметил Алексея.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "заметить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "Алексей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_194"
+    },
+    {
+      "text": "Пётр увидел учителя.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "учитель"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_195"
+    },
+    {
+      "text": "Ольга встретила врача.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "врач"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_196"
+    },
+    {
+      "text": "Мария позвала брата.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "позвать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "брат"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_197"
+    },
+    {
+      "text": "Сергей увидел друга.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "друг"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_198"
+    },
+    {
+      "text": "Анна встретила мальчика.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встретить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "мальчик"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_199"
+    },
+    {
+      "text": "Иван заметил человека.",
+      "grade": "EXACT",
+      "family": "morphology_case_pressure",
+      "tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "заметить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "человек"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "case_200"
     }
-  ]
+  ],
+  "oracle_revision": "v4 proposition-valued OBJECT/PURPOSE/HOW-TO children are EMBEDDED and are not independently asserted world facts."
 }

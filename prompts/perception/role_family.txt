@@ -1,1 +1,1 @@
-Choose exactly one label from ROLE FAMILY OPTIONS. Classify only the TARGET in this sentence. Do not explain.
+Choose exactly one label from CHOICES. Decide only the TARGET relation in this sentence. Do not explain.

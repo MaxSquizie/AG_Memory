@@ -78,7 +78,10 @@ class ArchitectureAlignment1220Tests(unittest.TestCase):
 
     def test_raw_perception_does_not_invent_template_from_occurrence_roles(self):
         parser = AdaptivePerceptionParser(
-            FiniteBackend({}),
+            FiniteBackend({
+                "perception_actant_start": [1, 2, 0],
+                "perception_role_cue": ["ACTOR_OR_EXPERIENCER", "AFFECTED_OR_CONTENT"],
+            }),
             AdaptiveSettings(
                 prompt_dir=PROJECT / "prompts/perception",
                 generation=LLMRoleSettings(max_new_tokens=24, temperature=0.0),
@@ -116,7 +119,10 @@ class ArchitectureAlignment1220Tests(unittest.TestCase):
             self.core.ref(symbol.uid),
             (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT),
         )
-        self.assertEqual(self.integration.template_requests(result), ())
+        requests = self.integration.template_requests(result)
+        self.assertEqual(len(requests), 1)
+        self.assertEqual([option.label for option in requests[0].sense_options], ["C1"])
+        self.assertEqual(requests[0].sense_options[0].template_uid, self.core.store.find_templates_by_predicate(symbol.uid)[0].uid)
 
     def test_query_only_act_can_register_validated_template_without_creating_fact(self):
         predicate = PredicateCandidate(
@@ -141,7 +147,12 @@ class ArchitectureAlignment1220Tests(unittest.TestCase):
         self.assertEqual(len(templates), 1)
         self.assertEqual(set(templates[0].roles), {ActantRole.SUBJECT, ActantRole.OBJECT})
         self.assertEqual(commit.assertions, ())
-        self.assertEqual(commit.unresolved_queries, result.queries)
+        self.assertEqual(len(commit.unresolved_queries), 1)
+        unresolved = commit.unresolved_queries[0]
+        self.assertEqual(unresolved.predicate.lookup_form, result.queries[0].predicate.lookup_form)
+        self.assertEqual(unresolved.actants, result.queries[0].actants)
+        self.assertEqual(unresolved.requested_roles, result.queries[0].requested_roles)
+        self.assertIsNotNone(unresolved.predicate.template_selection)
 
 
     def test_runtime_entity_alternatives_become_canonical_ambiguity_group_in_integration(self):
@@ -178,6 +189,12 @@ class ArchitectureAlignment1220Tests(unittest.TestCase):
 
     def test_request_content_controller_is_semantically_resolved_before_integration(self):
         backend = FiniteBackend({
+            "perception_actant_start": [1, 2, 0, 1, 0],
+            "perception_role_cue": [
+                "ACTOR_OR_EXPERIENCER",
+                "RECEIVER_OR_ADDRESSEE",
+                "AFFECTED_OR_CONTENT",
+            ],
             "perception_content_addressee": ["CONTENT_ADDRESSEE"],
             "perception_frame_relation": ["CONTENT_LINK"],
             "perception_control_subject": ["SECOND"],

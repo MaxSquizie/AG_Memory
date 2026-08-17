@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ah.model import ActantRole
-from ah.perception import AssertionCandidate, AssertionStatus, PerceptionResult
+from ah.perception import ActDependencyKind, AssertionCandidate, AssertionStatus, PerceptionResult, PropositionExprCandidate
 
 from .errors import CandidateValidationError
 
@@ -51,9 +51,13 @@ class CandidateValidator:
                         raise CandidateValidationError(
                             f"Alternative predicate mismatch in {candidate.local_id}"
                         )
-                    if alternative.negated != candidate.negated or alternative.status is not candidate.status:
+                    if (
+                        alternative.negated != candidate.negated
+                        or alternative.status is not candidate.status
+                        or alternative.quoted != candidate.quoted
+                    ):
                         raise CandidateValidationError(
-                            f"Alternative assertion status mismatch in {candidate.local_id}"
+                            f"Alternative assertion status/scope mismatch in {candidate.local_id}"
                         )
                     alt_roles = [a.role for a in alternative.actants]
                     if len(alt_roles) != len(set(alt_roles)):
@@ -70,6 +74,31 @@ class CandidateValidator:
                         f"Runtime alternatives in {candidate.local_id} must share one role schema"
                     )
 
+        act_refs: set[str] = set(by_id)
+        for index, query in enumerate(result.queries, start=1):
+            if query.local_id is None:
+                continue
+            if not query.local_id.strip():
+                raise CandidateValidationError(f"query#{index}.local_id must be non-empty")
+            if query.local_id in act_refs:
+                raise CandidateValidationError(f"Duplicate act local_id: {query.local_id}")
+            act_refs.add(query.local_id)
+        for index, command in enumerate(result.commands, start=1):
+            if command.local_id is None:
+                continue
+            if not command.local_id.strip():
+                raise CandidateValidationError(f"command#{index}.local_id must be non-empty")
+            if command.local_id in act_refs:
+                raise CandidateValidationError(f"Duplicate act local_id: {command.local_id}")
+            act_refs.add(command.local_id)
+
+        for dependency in result.act_dependencies:
+            if dependency.parent_ref not in act_refs or dependency.child_ref not in act_refs:
+                raise CandidateValidationError(
+                    f"Unknown act dependency endpoint: "
+                    f"{dependency.parent_ref!r} -> {dependency.child_ref!r}"
+                )
+
         for candidate in result.assertions:
             variants = (candidate, *candidate.alternatives)
             for variant in variants:
@@ -79,6 +108,12 @@ class CandidateValidator:
                             f"Unknown candidate_ref {actant.candidate_ref!r} "
                             f"in {candidate.local_id}"
                         )
+                    if actant.proposition is not None:
+                        for ref in actant.proposition.leaf_refs():
+                            if ref not in by_id:
+                                raise CandidateValidationError(
+                                    f"Unknown proposition ref {ref!r} in {candidate.local_id}"
+                                )
 
 
         conditional_refs: set[str] = set()
@@ -132,9 +167,14 @@ class CandidateValidator:
                         )
 
         for index, query in enumerate(result.queries, start=1):
-            roles = [a.role for a in query.actants]
-            if query.requested_role is not None:
-                roles.append(query.requested_role)
+            known_roles = [a.role for a in query.actants]
+            overlap = set(known_roles) & set(query.requested_roles)
+            if overlap:
+                raise CandidateValidationError(
+                    f"query#{index} fills and requests the same role(s): "
+                    + ", ".join(sorted(role.value for role in overlap))
+                )
+            roles = [*known_roles, *query.requested_roles]
             self._validate_template_roles(query.predicate, roles, label=f"query#{index}")
 
         for index, command in enumerate(result.commands, start=1):
@@ -145,6 +185,58 @@ class CandidateValidator:
             )
 
         self._assert_acyclic(by_id)
+        self._assert_act_dependencies_acyclic(result)
+        self._assert_quotation_scope_consistent(result)
+
+    @staticmethod
+    def _assert_quotation_scope_consistent(result: PerceptionResult) -> None:
+        adjacency: dict[str, list[str]] = {}
+        quoted_refs: set[str] = set()
+        for dependency in result.act_dependencies:
+            adjacency.setdefault(dependency.parent_ref, []).append(dependency.child_ref)
+            if dependency.kind is ActDependencyKind.QUOTED:
+                quoted_refs.add(dependency.child_ref)
+        queue = list(quoted_refs)
+        while queue:
+            parent = queue.pop()
+            for child in adjacency.get(parent, ()):
+                if child not in quoted_refs:
+                    quoted_refs.add(child)
+                    queue.append(child)
+
+        scoped: dict[str, bool] = {}
+        scoped.update({item.local_id: item.quoted for item in result.assertions})
+        scoped.update({item.local_id: item.quoted for item in result.queries if item.local_id is not None})
+        scoped.update({item.local_id: item.quoted for item in result.commands if item.local_id is not None})
+        for ref in quoted_refs:
+            if not scoped.get(ref, False):
+                raise CandidateValidationError(
+                    f"Quoted dependency subtree endpoint {ref!r} is not marked quoted"
+                )
+    @staticmethod
+    def _assert_act_dependencies_acyclic(result: PerceptionResult) -> None:
+        adjacency: dict[str, list[str]] = {}
+        nodes: set[str] = set()
+        for dependency in result.act_dependencies:
+            adjacency.setdefault(dependency.parent_ref, []).append(dependency.child_ref)
+            nodes.add(dependency.parent_ref)
+            nodes.add(dependency.child_ref)
+        WHITE, GRAY, BLACK = 0, 1, 2
+        state = {node: WHITE for node in nodes}
+
+        def visit(node: str) -> None:
+            if state[node] == GRAY:
+                raise CandidateValidationError(f"Cyclic act dependency at {node}")
+            if state[node] == BLACK:
+                return
+            state[node] = GRAY
+            for child in adjacency.get(node, ()):
+                visit(child)
+            state[node] = BLACK
+
+        for node in tuple(nodes):
+            if state[node] == WHITE:
+                visit(node)
 
     def dependency_order(self, result: PerceptionResult) -> tuple[AssertionCandidate, ...]:
         by_id = {c.local_id: c for c in result.assertions}
@@ -158,6 +250,9 @@ class CandidateValidator:
             for actant in candidate.actants:
                 if actant.candidate_ref is not None:
                     visit(actant.candidate_ref)
+                if actant.proposition is not None:
+                    for ref in actant.proposition.leaf_refs():
+                        visit(ref)
             visited.add(local_id)
             order.append(candidate)
 
@@ -180,6 +275,9 @@ class CandidateValidator:
             for actant in by_id[local_id].actants:
                 if actant.candidate_ref is not None:
                     visit(actant.candidate_ref)
+                if actant.proposition is not None:
+                    for ref in actant.proposition.leaf_refs():
+                        visit(ref)
             state[local_id] = BLACK
 
         for local_id in by_id:

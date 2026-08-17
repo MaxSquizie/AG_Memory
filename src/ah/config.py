@@ -161,29 +161,47 @@ class ActivationSettings:
     gain: float = 1.0
     epsilon: float = 1e-9
 
+    def __post_init__(self) -> None:
+        if self.kind not in {"additive_clamp", "saturating_additive"}:
+            raise ValueError("ignition.activation.kind must be additive_clamp or saturating_additive")
+        if self.gain < 0:
+            raise ValueError("ignition.activation.gain must be >= 0")
+        if self.epsilon <= 0:
+            raise ValueError("ignition.activation.epsilon must be > 0")
+
 
 @dataclass(frozen=True, slots=True)
 class DecaySettings:
     kind: str = "sigmoid_epoch"
-    alpha: float = 0.08
+    alpha: float = 0.60
     midpoint_ticks: float = 12.0
     steepness: float = 0.35
+    half_life_ticks: float = 12.0
     reactivation_reset_ratio: float = 1.0
+    reactivation_min_input: float = 0.05
 
     def __post_init__(self) -> None:
+        if self.kind not in {"sigmoid_epoch", "exponential_epoch"}:
+            raise ValueError("ignition.decay.kind must be sigmoid_epoch or exponential_epoch")
         if not 0 <= self.alpha < 1:
             raise ValueError("ignition.decay.alpha must be in [0, 1)")
         if self.midpoint_ticks <= 0:
             raise ValueError("ignition.decay.midpoint_ticks must be > 0")
         if self.steepness <= 0:
             raise ValueError("ignition.decay.steepness must be > 0")
+        if self.half_life_ticks <= 0:
+            raise ValueError("ignition.decay.half_life_ticks must be > 0")
         if self.reactivation_reset_ratio < 0:
             raise ValueError("ignition.decay.reactivation_reset_ratio must be >= 0")
+        if self.reactivation_min_input < 0:
+            raise ValueError("ignition.decay.reactivation_min_input must be >= 0")
 
 
 @dataclass(frozen=True, slots=True)
 class PlasticitySettings:
     enabled: bool = True
+    link_kind: str = "additive_hebb"
+    hypernode_kind: str = "additive_confirmation_refutation"
     link_hebb_increment: float = 0.015
     link_async_decrement: float = 0.002
     link_weight_floor: float = 0.02
@@ -192,6 +210,10 @@ class PlasticitySettings:
     hypernode_refutation_decrement: float = 0.15
 
     def __post_init__(self) -> None:
+        if self.link_kind not in {"additive_hebb"}:
+            raise ValueError("ignition.plasticity.link_kind must be additive_hebb")
+        if self.hypernode_kind not in {"additive_confirmation_refutation"}:
+            raise ValueError("ignition.plasticity.hypernode_kind must be additive_confirmation_refutation")
         if not 0 <= self.link_weight_floor <= 1:
             raise ValueError("ignition.plasticity.link_weight_floor must be in [0, 1]")
 
@@ -201,7 +223,14 @@ class SeedSettings:
     new_fact: float = 0.65
     reactivated_fact: float = 0.55
     experience: float = 0.5
-    sensory_symbol: float = 0.45
+    # Pre-semantic lexical candidate stimulation; homographs may all receive it.
+    sensory_symbol: float = 0.85
+    # Strong post-perception stimulation of the canonical S actually resolved
+    # in the external prompt, including S created during this same turn.
+    resolved_symbol: float = 0.95
+    # Runtime relational/query recall anchor. It is attention, not proof and not
+    # an h_N confirmation event.
+    query_recall: float = 0.80
     correction: float = 0.65
     pacemaker: float = 0.08
 
@@ -224,7 +253,7 @@ class PacemakerSettings:
 
 @dataclass(frozen=True, slots=True)
 class IgnitionSettings:
-    tick_interval_seconds: float = 0.05
+    tick_interval_seconds: float = 1.0
     nu: float = 1.0
     x_max: float = 1.0
     activation: ActivationSettings = field(default_factory=ActivationSettings)
@@ -380,7 +409,10 @@ class GUISettings:
 
 @dataclass(frozen=True, slots=True)
 class OrchestratorSettings:
-    ticks_after_input: int = 1
+    # Three synchronous causal hops are the minimum needed for a resolved lexical
+    # mention to reach its proposition: S -> T -> N. These are turn-local settling
+    # ticks and suppress *new* pacemaker pulses; the scheduled clock remains 1 Hz.
+    ticks_after_input: int = 3
     ticks_after_response: int = 1
     auto_materialize_inference: bool = True
     parse_agent_response_to_h: bool = False
@@ -506,7 +538,7 @@ def load_config(path: str | Path) -> AppConfig:
     if not isinstance(raw_domains, (list, tuple)):
         raise ValueError("ignition.pacemaker.domains must be an array")
     ignition = IgnitionSettings(
-        tick_interval_seconds=float(ign.get("tick_interval_seconds", 0.05)),
+        tick_interval_seconds=float(ign.get("tick_interval_seconds", 1.0)),
         nu=float(ign.get("nu", 1.0)),
         x_max=float(ign.get("x_max", 1.0)),
         activation=ActivationSettings(
@@ -516,13 +548,17 @@ def load_config(path: str | Path) -> AppConfig:
         ),
         decay=DecaySettings(
             kind=str(dec.get("kind", "sigmoid_epoch")),
-            alpha=float(dec.get("alpha", 0.08)),
+            alpha=float(dec.get("alpha", 0.60)),
             midpoint_ticks=float(dec.get("midpoint_ticks", 12.0)),
             steepness=float(dec.get("steepness", 0.35)),
+            half_life_ticks=float(dec.get("half_life_ticks", dec.get("midpoint_ticks", 12.0))),
             reactivation_reset_ratio=float(dec.get("reactivation_reset_ratio", 1.0)),
+            reactivation_min_input=float(dec.get("reactivation_min_input", 0.05)),
         ),
         plasticity=PlasticitySettings(
             enabled=bool(pla.get("enabled", True)),
+            link_kind=str(pla.get("link_kind", "additive_hebb")),
+            hypernode_kind=str(pla.get("hypernode_kind", "additive_confirmation_refutation")),
             link_hebb_increment=float(pla.get("link_hebb_increment", 0.015)),
             link_async_decrement=float(pla.get("link_async_decrement", 0.002)),
             link_weight_floor=float(pla.get("link_weight_floor", 0.02)),
@@ -534,7 +570,9 @@ def load_config(path: str | Path) -> AppConfig:
             new_fact=float(seeds.get("new_fact", 0.65)),
             reactivated_fact=float(seeds.get("reactivated_fact", 0.55)),
             experience=float(seeds.get("experience", 0.5)),
-            sensory_symbol=float(seeds.get("sensory_symbol", 0.45)),
+            sensory_symbol=float(seeds.get("sensory_symbol", 0.85)),
+            resolved_symbol=float(seeds.get("resolved_symbol", 0.95)),
+            query_recall=float(seeds.get("query_recall", 0.80)),
             correction=float(seeds.get("correction", 0.65)),
             pacemaker=float(seeds.get("pacemaker", 0.08)),
         ),
@@ -617,7 +655,7 @@ def load_config(path: str | Path) -> AppConfig:
             propagation_edge_width=float(gui_raw.get("propagation_edge_width", 2.4)),
         ),
         orchestrator=OrchestratorSettings(
-            ticks_after_input=int(orchestrator_raw.get("ticks_after_input", 1)),
+            ticks_after_input=int(orchestrator_raw.get("ticks_after_input", 3)),
             ticks_after_response=int(orchestrator_raw.get("ticks_after_response", 1)),
             auto_materialize_inference=bool(orchestrator_raw.get("auto_materialize_inference", True)),
             parse_agent_response_to_h=bool(orchestrator_raw.get("parse_agent_response_to_h", False)),

@@ -217,11 +217,11 @@ Adaptive probe prompts live in `prompts/perception/*.txt`, are read per request,
 
 ## Weak-model discrete perception (slice 11)
 
-В slice 11 default protocol был `adaptive_v2`; slice 12 supersedes it with `adaptive_v3`. The LLM is explicitly treated as an AH-unaware semantic recognizer. Python enumerates legal numeric choices for speech-act class, token boundaries and role decisions; the model returns one number. Role names are not required model knowledge: plain-language option descriptions map to `ActantRole` after validation. Obvious negation/no-negation, empty candidate sets, single remaining ends/roles and high-confidence wh-word roles are deterministic fast paths. In current `adaptive_v3`, even predicate lexical identity is deterministic: morphology supplies the stable source-language lexeme used for the `S` referenced by `T`. Older adaptive protocols retain their compatibility path.
+В slice 11 default protocol был `adaptive_v2`; slice 12 superseded it with `adaptive_v3`. The LLM is explicitly treated as an AH-unaware semantic recognizer. Historically this path used enumerated numeric choices for several perception decisions; later slices progressively replaced semantically fragile multi-way role decisions with bounded exact-choice probes. In v0.12.54 canonical role routing uses neutral binary `A/B` partitions over the actually remaining candidate-role meanings, while morphology and deterministic syntax still eliminate choices when they provide formal evidence. Predicate lexical identity is deterministic only when structural morphology leaves one materially plausible lexeme; a remaining binary lexical homonymy is resolved by the separate bounded `lexeme_identity` A/B probe. Older adaptive protocols retain their compatibility path.
 
 ## Morphology-assisted discrete perception (slice 11.2)
 
-Before `predicate_start`, Russian tokens are analyzed by a deterministic morphology layer (`pymorphy3` when installed). High-confidence POS/lemma results narrow or eliminate LLM probes; uncertain syntax still uses the existing adaptive numeric choices. Morphology never selects UID/domain/T/N or mutates AH. For current `adaptive_v3`, the normalized source-language predicate lexeme supplies the stable lexical `S` used by `T`; morphology still never selects UID/domain/T/N or mutates AH. The older English-symbol path is compatibility-only.
+Before `predicate_start`, Russian tokens are analyzed by a deterministic morphology layer (`pymorphy3` when installed). Morphological and syntactic evidence can narrow or eliminate probes, but context-free analyzer probability is not canonical semantic authority. Morphology never selects UID/domain/T/N or mutates AH. The normalized source-language predicate lexeme supplies the lexical `S` used by `T`; when exactly two materially plausible predicate lexemes remain after structural filtering, v0.12.54 resolves only that lexical identity through the bounded `lexeme_identity` A/B probe and then returns to deterministic construction. The older English-symbol path is compatibility-only.
 
 ## Slice 12 — adaptive_v3 perception
 
@@ -509,3 +509,155 @@ Before `predicate_start`, Russian tokens are analyzed by a deterministic morphol
 - `data/acceptance_oracle.json`: former GAP cases 30–32 and 39 are now exact expectations.
 - `docs/reference/Архитектура_v3.md`: working specification v0.10.
 
+
+
+## v0.12.45 — case syncretism + fail-closed selected actants
+
+- `perception/adaptive_parser.py::_material_morph_analyses`: preserves lower-scored case alternatives for the same nominal lexeme/non-case feature bundle, so syntax can resolve Russian case syncretism such as `Петра` genitive/accusative.
+- `perception/adaptive_parser.py::_extract_actants`: a span already selected as relevant can no longer disappear when role classification is unresolved; parser fails closed instead of committing a partial frame.
+- `tests/test_acceptance_regressions_1218.py`: regression reproduces the real pymorphy score pattern from case 39 and verifies structural clarification is reached without a semantic role probe; another regression locks no-partial-frame behavior under low-margin role ambiguity.
+- `docs/reference/Архитектура_v3.md`: working specification v0.11 records both invariants.
+- Real v0.12.44 baseline: `39 PASS / 1 FAIL / 0 GAP`; the single FAIL is the exact root addressed here.
+
+
+## v0.12.46 — oracle link-domain accounting
+
+- `diagnostics/semantic_oracle.py`: `cp_semantic_addition_count` no longer treats every domainless `L` as C/P semantics. Link endpoint domains determine whether the link touches C/P.
+- `tests/test_semantic_oracle_1238.py`: H→H FOLLOW is excluded while C/P CAUSE remains counted.
+- Production Perception/Integration/AH Core unchanged; Architecture_v3 remains v0.11.
+- Exact saved v0.12.45 real bundle offline regrade: `40 PASS / 0 FAIL / 0 GAP`.
+
+
+## v0.12.47 — broad200 semantic corpus
+
+- `data/acceptance_cases.txt`: 200-case `broad200-v2` default corpus; first 40 frozen regression turns + 160 new stress turns.
+- `data/acceptance_oracle.json`: 200 EXACT expectations with optional `family` and `tags`.
+- `data/acceptance_cases_regression40.txt` / `data/acceptance_oracle_regression40.json`: preserved original 40-case real-40/40 baseline.
+- `diagnostics/semantic_oracle.py`: family/tag metadata and per-family offline report aggregation.
+- `diagnostics/acceptance_runner.py`: family/tag persistence and per-family live summary/manifest aggregation.
+- Production semantics unchanged; Architecture_v3 stays v0.11.
+
+
+
+## v0.12.49 — acceptance evaluator resilience
+
+- `src/ah/diagnostics/semantic_oracle.py`: nullable query outcomes are treated as missing inference results and produce semantic FAIL checks rather than exceptions.
+- `src/ah/diagnostics/acceptance_runner.py`: semantic evaluator exceptions are persisted per turn and do not truncate the remaining acceptance corpus.
+- No production semantic-path changes.
+
+## v0.12.48 — atomic diagnostics snapshots
+
+- `src/ah/diagnostics/graph_dump.py`: `GraphInspector` accepts the shared runtime lock and holds it for the complete graph snapshot.
+- `src/ah/diagnostics/summary.py`: `RuntimeDiagnostics` uses the same barrier for multi-read summaries.
+- `src/ah/bootstrap.py`: wires `operation_lock` into both diagnostic readers.
+- `src/ah/gui/main_window.py`: pauses graph visualization during long acceptance runs and resumes it after completion.
+- No production semantic or architecture change.
+
+
+## v0.12.50 — scenario-isolated acceptance
+
+- `src/ah/diagnostics/semantic_oracle.py`: `SemanticOracleCase.scenario_id`; offline bundle evaluation resets AH/template-role accumulation on scenario transitions.
+- `src/ah/diagnostics/acceptance_runner.py`: captures/restores canonical AH + InteractionContext + Ignition; resets state between scenarios; pauses/restarts Ignition clock; records scenario ids in turn/manifest/summary.
+- `data/acceptance_oracle.json`: 149 explicit scenarios across 200 cases; regression40 and deliberate learning/query chains preserve continuity.
+- Production Perception/Integration/AH Core unchanged.
+
+## v0.12.51 — broad200-v2 oracle audit
+
+- Production perception/integration semantics unchanged.
+- `data/acceptance_oracle.json` corpus id is `broad200-v2`.
+- Case 100 now requires the explicit `FOLLOW` signaled by `затем`.
+- `cp_semantic_addition_count` excludes canonical T wrappers referenced only by newly added H `event_instance` nodes, while genuine C/P semantic additions and C/P-touching links are still counted.
+
+
+## v0.12.53 — architecture correction of role narrowing
+
+- `src/ah/perception/adaptive_parser.py`
+  - removed broad200-specific lexical/grammar repairs from v0.12.52;
+  - preserves finite number/gender agreement only as one-way negative SUBJECT evidence;
+  - preserves a governing preposition in WH evidence; that WH path no longer strips the preposition before semantic routing;
+  - replaces role-family / role-within-family multi-choice scoring with a generic binary semantic router;
+  - maps natural semantic cue labels to `ActantRole` deterministically in Python;
+  - respects an existing `allowed_roles` subset monotonically at every binary partition.
+- `prompts/perception/role_*.txt` now require one exact label from `CHOICES`; all role-router model calls are binary.
+- `tests/test_role_router_1253.py` verifies generic TOOL/TIME routing on synthetic `TARGET_X`, monotonic allowed-role subsets, no broad200 lexical literals in production, formal finite agreement, and preposition evidence preservation.
+- `docs/reference/Архитектура_v3.md`: working specification v0.12 formalizes the distinction between valid negative constraints and semantic heuristics.
+
+
+## v0.12.54 — neutral semantic partitions and contextual lexeme identity
+
+- `src/ah/perception/adaptive_parser.py`
+  - binary role routing now uses protocol labels `A/B` only;
+  - each branch displays natural-language descriptions of the concrete role candidates actually remaining after deterministic narrowing;
+  - invented intermediate labels (`ENTITY_OR_CONTENT_RELATION`, `CIRCUMSTANTIAL_MODIFIER`, etc.) are no longer part of the runtime semantic protocol;
+  - two-way nominal lexical homonymy is resolved by a bounded `lexeme_identity` A/B probe before its morphology is consumed by role/identity logic;
+  - two-way predicate lexical homonymy uses the same boundary instead of raising solely because context-free morphology leaves two lexemes;
+  - lexical choice filters runtime morphology evidence only; canonical roles/UIDs remain deterministic Integration concerns;
+  - >2 materially plausible lexical identities fail closed.
+- `prompts/perception/lexeme_identity.txt`: exact A/B lexical protocol.
+- `tests/test_role_router_1254.py`: neutral-label routing, monotonic candidate visibility, generic nominal/predicate lexical ambiguity, and fail-closed nonbinary ambiguity.
+- `docs/reference/Архитектура_v3.md`: working specification v0.13.
+- Acceptance cases/oracle unchanged from `broad200-v2`.
+
+Note: v0.12.54 does not add new lexical role tables.  Older deterministic actant heuristics that predate this slice remain separately auditable implementation debt; the new semantic router is designed so they can be weakened later without reintroducing multi-choice role scoring.
+
+## v0.12.55 — relation contracts and lexical monotonicity
+
+- `src/ah/perception/adaptive_parser.py`
+  - canonical role descriptions used by the binary A/B router are now event-relative contracts instead of short overlapping glosses;
+  - TOOL/MATERIAL, TIME/HOW-TO, SOURCE/LOCATION and other neighboring meanings explicitly state their semantic boundary without adding new protocol labels;
+  - an exclusively ADVB span may eliminate nominal participant/TOOL/MATERIAL roles as formal negative POS evidence, while leaving the remaining modifier semantics to the bounded router;
+  - nominal `lexeme_identity` prompts include the analyser morphology profile for each remaining lemma;
+  - predicate `lexeme_identity` prompts use the same profile boundary, exposing distinctions such as passive participle vs short adjective without hard-coded words;
+  - a selected nominal lexical identity is reused by `normalized_hint`; later stable-normal-form code cannot silently replace it;
+  - pre-predicate SUBJECT assignment reuses finite agreement and handles AND-coordinated nominative groups as grammatical plural;
+  - relative antecedent matching safely falls back to the source mention when no normalized hint exists instead of raising on `None.casefold()`.
+- `tests/test_role_contract_1255.py`: generic relation-contract, ADVB negative-evidence, morphology-profile and lexical-monotonicity regressions.
+- `docs/reference/Архитектура_v3.md`: working specification v0.14.
+- Broad200 corpus/oracle unchanged (`broad200-v2`). Older deterministic lexical/preposition role hints remain separately auditable debt and are not expanded in this slice.
+
+## v0.12.56 — semantic-property role routing
+
+- `src/ah/perception/adaptive_parser.py`
+  - replaces the early heterogeneous role-family A/B partition with independent `YES/NO` semantic-property probes;
+  - each property owns an exact Python-side `ActantRole` subset; NO removes only that subset, YES selects it and permits only a local binary contrast;
+  - keeps pre-narrowed `allowed_roles` monotonic and keeps role classification off the >2 scorer path;
+  - removes the now-dead legacy family-router constants/helpers so there is only one production role-routing path;
+  - removes the legacy direct `из/от -> SOURCE` shortcut while retaining the full governing PP as semantic evidence;
+  - adds a generic NUMERAL+nominal post-extraction boundary: counted participant vs whole event/state measure, with whole measures routed only as DURATION/AMOUNT and no unit-word lexicon.
+- `prompts/perception/role_property.txt`: exact `YES/NO` single-property protocol.
+- `prompts/perception/role_contrast.txt`: exact `A/B` local relation contrast.
+- `prompts/perception/quantified_phrase.txt`: exact `A/B` counted-entity vs event-measure protocol.
+- `tests/test_role_properties_1256.py`: synthetic property-routing, monotonicity, origin-preposition, quantified-phrase and fail-closed regressions.
+- `docs/reference/Архитектура_v3.md`: working specification v0.15.
+- Broad200 corpus/oracle unchanged (`broad200-v2`). Confirmed real baseline before this slice is v0.12.55: 171/200 semantic PASS, runtime 199/200, frozen40 40/40.
+
+
+## v0.12.57
+
+- `src/ah/perception/adaptive_parser.py`: replaces multi-step family/property role routing with one exact `RuntimeRoleCue` generation over the structurally admissible candidate set; removes the direct `из/от -> SOURCE` shortcut; adds grammatical-person mismatch as negative coreference evidence.
+- `prompts/perception/role_cue.txt`: exact English protocol for the one-target role cue.
+- `tests/test_role_cue_1257.py`: cue-boundary, no-score, admissible-set and pronoun-person regressions.
+- `docs/reference/Архитектура_v3.md`: working specification v0.16.
+
+## v0.12.58 — structural ambiguity boundaries and broad200-v3
+
+- Confirmed real v0.12.57 run: runtime `200/200`, raw semantic `178/200`, frozen40 `40/40`.
+- Oracle audit corrected eight evaluator-only noun-normalization overconstraints for source-denoting adverbial/directional fillers. Regrading the exact saved v0.12.57 runtime bundle under `broad200-v3` yields `186/200`; this is not a new product run.
+- `src/ah/perception/adaptive_parser.py`
+  - preserves NOM/ACC and DAT/ACC structural ambiguity instead of ordered case winners;
+  - blocks only the formally unsafe postverbal NOM/ACC SUBJECT reading under a stably transitive predicate while preserving intransitive postverbal subjects;
+  - treats OR coordinated postverbal nominals symmetrically with AND in the direct-object region;
+  - makes NP-internal genitive absorption conservative when non-genitive material cases survive;
+  - uses materially structural readings for relative antecedents and keeps the governing PREP inside relative role evidence;
+  - routes preposition-governed relative roles through the ordinary one-shot `RuntimeRoleCue` boundary;
+  - resolves binary lexical identity with two symmetric `YES/NO` lexeme-hypothesis probes; exactly one positive hypothesis is required;
+  - fuses a numeral into a duration only after the head is already semantically DURATION;
+  - recognizes morphology-marked substantivized anaphors as nominal-like and, when needed, uses a bounded local source-label (`C1..Cn/UNCLEAR`) antecedent probe without exposing UIDs;
+  - extends fronted conditional consequents only across contiguous additive same-sentence siblings.
+- `src/ah/integration/service.py`: computes direct deictic P provenance before dependency ordering and propagates it only through turn-local `candidate_ref` containment.
+- `prompts/perception/lexeme_hypothesis.txt`: symmetric exact `YES/NO` lexical-hypothesis protocol.
+- `prompts/perception/antecedent_choice.txt`: bounded local source-label/`UNCLEAR` protocol.
+- Dead `lexeme_identity` and v0.12.56 property/contrast/quantified prompt files are removed from the current artifact; historical map entries remain as version history only.
+- `tests/test_semantic_boundaries_1258.py`: structural ambiguity, relative PP, lexical fail-closed, duration anti-overgeneralization, anaphoric source-label, conditional scope, P-provenance and oracle-v3 regressions.
+- `docs/reference/Архитектура_v3.md`: working specification v0.17.
+- No real v0.12.58 broad200 product score is claimed before a fresh run.

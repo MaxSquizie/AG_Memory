@@ -7,7 +7,7 @@ from ah.core import AHCore
 from ah.integration.contracts import ActivationSeedRequest, SeedReason
 from ah.model import Ref
 
-from .morphology import Morphology, build_morphology, stable_normal_form
+from .morphology import Morphology, build_morphology, material_analyses
 
 
 # Unicode word tokens, allowing an internal hyphen/apostrophe. Numbers are sensory
@@ -18,6 +18,10 @@ _TOKEN_RE = re.compile(r"[^\W_]+(?:[-'][^\W_]+)*", re.UNICODE)
 @dataclass(frozen=True, slots=True)
 class TextSensoryResult:
     tokens: tuple[str, ...]
+    # Candidate lattice aligned with ``tokens``.  One surface token can activate
+    # several lexical S nodes; an empty tuple means that no canonical lexeme is
+    # known yet and creation is deferred until semantic perception can resolve it.
+    candidate_refs_by_token: tuple[tuple[Ref, ...], ...]
     symbol_refs: tuple[Ref, ...]
     activation_seeds: tuple[ActivationSeedRequest, ...]
 
@@ -33,35 +37,42 @@ class TextSensoryService:
         self.core = core
         self.morphology = morphology or build_morphology("auto")
 
-    def _lexical_form(self, token: str) -> str:
-        """Return a deterministic lexical identity for primary-symbol reuse.
+    def _candidate_symbols(self, token: str):
+        """Build a lexical lattice without choosing one morphology reading.
 
-        S stores ordinary forms rather than a dedicated lemma field.  Morphology is
-        therefore used only as an index key: the observed surface form is added to
-        the same S as its highest-ranked normal form.  This keeps inflectional
-        variants such as ``Мария/Марии/Марию`` inside one lexical symbol while
-        preserving the exact observed token in R_text.
+        Surface lookup is always included.  Morphology may *retrieve* additional
+        already-known paradigms through every material normal form, but analyser
+        score/order never chooses one canonical S and this layer never extends or
+        creates S.  Unknown lexical identity is intentionally left unresolved for
+        the semantic perception/integration boundary.
         """
-        analyses = self.morphology.analyze_all(token)
-        normal = stable_normal_form(analyses)
-        if not normal:
-            return token
-        if token[:1].isupper():
-            normal = normal[:1].upper() + normal[1:]
-        return normal
+        found = {
+            symbol.uid: symbol
+            for symbol in self.core.store.find_symbols_by_form(token)
+        }
+        for analysis in material_analyses(self.morphology.analyze_all(token)):
+            normal = analysis.normal_form.strip()
+            if not normal:
+                continue
+            for symbol in self.core.store.find_symbols_by_form(normal):
+                found[symbol.uid] = symbol
+        return tuple(found[uid] for uid in sorted(found))
 
     def process(self, text: str) -> TextSensoryResult:
         tokens = tuple(match.group(0) for match in _TOKEN_RE.finditer(text))
+        lattice: list[tuple[Ref, ...]] = []
         refs: list[Ref] = []
         seeds: list[ActivationSeedRequest] = []
         for token in tokens:
-            lexical = self._lexical_form(token)
-            symbol = self.core.ensure_abstract_symbol(lexical)
-            if token not in symbol.forms:
-                symbol = self.core.add_symbol_form(symbol.uid, token)
-            ref = self.core.ref(symbol.uid)
-            refs.append(ref)
-            # One seed per observed occurrence. Repetition in the same sensory input
-            # can therefore contribute more z without changing semantic w directly.
-            seeds.append(ActivationSeedRequest(ref, SeedReason.SENSORY_SYMBOL))
-        return TextSensoryResult(tokens, tuple(refs), tuple(seeds))
+            token_refs = tuple(
+                self.core.ref(symbol.uid)
+                for symbol in self._candidate_symbols(token)
+            )
+            lattice.append(token_refs)
+            for ref in token_refs:
+                refs.append(ref)
+                # One seed per candidate per observed occurrence.  Homography may
+                # therefore stimulate several lexical hypotheses, but sensory input
+                # does not decide which one is semantically intended.
+                seeds.append(ActivationSeedRequest(ref, SeedReason.SENSORY_SYMBOL))
+        return TextSensoryResult(tokens, tuple(lattice), tuple(refs), tuple(seeds))

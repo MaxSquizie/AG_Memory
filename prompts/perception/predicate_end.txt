@@ -1,1 +1,1 @@
-Choose the last token that belongs to the predicate phrase. Reply only with the number inside brackets.
+Choose the last token that belongs to the predicate phrase. Reply only with the integer option number, without brackets or punctuation.

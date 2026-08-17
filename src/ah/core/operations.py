@@ -49,17 +49,19 @@ class AHCore:
         return symbol
 
     def ensure_abstract_symbol(self, form: str) -> AbstractSymbol:
-        found = self.store.find_symbol_by_form(form)
-        return found if found is not None else self.add_abstract_symbol({form})
+        matches = self.store.find_symbols_by_form(form)
+        if len(matches) > 1:
+            raise ValueError(
+                f"Cannot ensure one S for ambiguous wordform {form!r}; "
+                "resolve the lexical identity explicitly"
+            )
+        return matches[0] if matches else self.add_abstract_symbol({form})
 
     def add_symbol_form(self, symbol_uid: str, form: str) -> AbstractSymbol:
         value = form.strip()
         if not value:
             raise ValueError("Symbol form must be non-empty")
         symbol = self.store.get_symbol(symbol_uid)
-        existing = self.store.find_symbol_by_form(value)
-        if existing is not None and existing.uid != symbol_uid:
-            raise ValueError(f"Wordform already belongs to another S: {value!r}")
         if value in symbol.forms:
             return symbol
         updated = replace(symbol, forms=frozenset((*symbol.forms, value)))
@@ -346,8 +348,7 @@ class AHCore:
     def find_abstract_symbols(self, forms: set[str] | frozenset[str]) -> tuple[AbstractSymbol, ...]:
         found: dict[str, AbstractSymbol] = {}
         for form in forms:
-            symbol = self.store.find_symbol_by_form(form)
-            if symbol is not None:
+            for symbol in self.store.find_symbols_by_form(form):
                 found[symbol.uid] = symbol
         return tuple(found[uid] for uid in sorted(found))
 

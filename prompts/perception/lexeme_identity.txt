@@ -1,0 +1,1 @@
+Write only the dictionary lemma used by TARGET in this TEXT. Do not add labels, brackets, punctuation, or explanation.

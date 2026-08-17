@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from ah.bootstrap import RuntimeServices
+from ah.projection.contracts import AgentContext, AgentContextDiagnostic
 
 
 def _working_set_bytes(pid: int | None) -> int | None:
@@ -115,6 +116,10 @@ class LLMControlWidget(QWidget):
         "role_circumstance",
         "frame_relation",
         "relative_role",
+        "role_cue",
+        "lexeme_hypothesis",
+        "antecedent_choice",
+        "content_addressee",
         "control_subject",
         "template_hidden_valency",
         "clarification_answer",
@@ -138,6 +143,10 @@ class LLMControlWidget(QWidget):
         self._turn_source_text = ""
         self._turn_request_floor = 0
         self._turn_parser_floor = 0
+        self._turn_memory_trace_text: str | None = None
+        self._last_parser_render_key = None
+        self._last_active_request_key = None
+        self._last_completed_request_sequence = None
 
         root = QVBoxLayout(self)
         info = QFormLayout()
@@ -193,6 +202,15 @@ class LLMControlWidget(QWidget):
         self.parser_raw_view = self._readonly("Сырой ответ parser LLM появится после perception-вызова")
         self.parser_decoded_view = self._readonly("Decoded PerceptionResult появится после успешного разбора")
         self.agent_raw_view = self._readonly("Сырой ответ agent LLM появится после генерации")
+        self.agent_context_view = self._readonly(
+            "Точный AgentContext (CURRENT INPUT + ACTIVE MEMORY + INFERENCE RESULTS) появится после turn"
+        )
+        self.agent_memory_view = self._readonly(
+            "Память, реально переданная Agent LLM, и debug-причина включения каждого root появятся после turn"
+        )
+        self.agent_final_prompt_view = self._readonly(
+            "Итоговый Agent prompt после chat-template появится после вызова модели"
+        )
         self.requests_view = self._readonly("Последние LLM role calls")
         self.log_view = self._readonly("Лог загрузки / статуса LLM worker")
         self.log_view.setMaximumBlockCount(400)
@@ -202,8 +220,12 @@ class LLMControlWidget(QWidget):
         self.tabs.addTab(self.parser_raw_view, "Parser RAW")
         self.tabs.addTab(self.parser_decoded_view, "Parser decoded")
         self.tabs.addTab(self.agent_raw_view, "Agent RAW")
+        self.tabs.addTab(self.agent_context_view, "Agent CONTEXT")
+        self.tabs.addTab(self.agent_memory_view, "Memory INPUT")
+        self.tabs.addTab(self.agent_final_prompt_view, "Agent FINAL prompt")
         self.tabs.addTab(self.requests_view, "Requests")
         self.tabs.addTab(self.log_view, "Worker log")
+        self.tabs.currentChanged.connect(lambda _index: self.refresh_status(force=True))
         root.addWidget(self.tabs, 1)
 
         save_prompts = QPushButton("Сохранить prompt-файлы")
@@ -233,10 +255,17 @@ class LLMControlWidget(QWidget):
         self._turn_source_text = source_text
         self._turn_scope_initialized = True
         self._turn_active = True
+        self._turn_memory_trace_text = None
+        self._last_parser_render_key = None
+        self._last_active_request_key = None
+        self._last_completed_request_sequence = None
         waiting = f"TURN IN PROGRESS\nSOURCE:\n{source_text}"
         self._set_text(self.parser_raw_view, waiting + "\n\nWaiting for perception diagnostics…")
         self._set_text(self.parser_decoded_view, waiting + "\n\nWaiting for decoded PerceptionResult…")
         self._set_text(self.agent_raw_view, waiting + "\n\nWaiting for agent generation…")
+        self._set_text(self.agent_context_view, waiting + "\n\nWaiting for AgentContext…")
+        self._set_text(self.agent_memory_view, waiting + "\n\nWaiting for model-visible ACTIVE MEMORY…")
+        self._set_text(self.agent_final_prompt_view, waiting + "\n\nWaiting for final Agent prompt…")
         self._set_text(self.requests_view, waiting + "\n\nWaiting for LLM role calls…")
         self.refresh_status()
 
@@ -251,6 +280,71 @@ class LLMControlWidget(QWidget):
         view.setReadOnly(True)
         view.setPlaceholderText(placeholder)
         return view
+
+    def show_agent_context(
+        self,
+        context: AgentContext,
+        diagnostic: AgentContextDiagnostic | None,
+    ) -> None:
+        """Expose the exact model-visible memory and a separate debug explanation.
+
+        ``context.rendered`` is the logical user message sent to the Agent role.
+        x/t/tick/lifecycle appear only in the debug half of ``Memory INPUT`` and
+        are never appended to the LLM prompt.
+        """
+        self._set_text(
+            self.agent_context_view,
+            "MODEL-VISIBLE AGENTCONTEXT (exact logical user message before chat-template)\n"
+            "=====================================================================\n"
+            + context.rendered,
+        )
+
+        if context.workspace_blocks:
+            visible_memory = "\n".join(f"- {block.semantic}" for block in context.workspace_blocks)
+        else:
+            visible_memory = "<EMPTY — no Workspace roots were serialized>"
+        if context.inference_blocks:
+            visible_inference = "\n".join(f"- {block.semantic}" for block in context.inference_blocks)
+        else:
+            visible_inference = "<EMPTY>"
+
+        chunks = [
+            "MODEL-VISIBLE MEMORY PAYLOAD (this part IS sent to Agent LLM)",
+            "============================================================",
+            "# ACTIVE MEMORY",
+            visible_memory,
+            "",
+            "# INFERENCE RESULTS",
+            visible_inference,
+            "",
+            "DEBUG EXPLANATION (NOT sent to Agent LLM)",
+            "=========================================",
+        ]
+        if diagnostic is None:
+            chunks.append("No projection-time diagnostic snapshot was captured.")
+        else:
+            chunks.append(
+                f"projection tick={diagnostic.tick_index}; "
+                f"turn-local settle ticks={diagnostic.settle_ticks}; "
+                f"Workspace rule: x > {diagnostic.workspace_threshold:.6f}; "
+                f"source Workspace roots={len(diagnostic.workspace)}; "
+                f"model-visible memory blocks={len(context.workspace_blocks)}"
+            )
+            if not diagnostic.workspace:
+                chunks.append("No ACTIVE roots crossed the Workspace threshold.")
+            for row in diagnostic.workspace:
+                lifecycle = row.lifecycle_state or "—"
+                chunks.extend([
+                    "",
+                    f"[{row.position:02d}] INCLUDED because x={row.excitation:.6f} > "
+                    f"t={diagnostic.workspace_threshold:.6f}",
+                    f"root={row.root.uid} | kind={row.kind} | domain={row.domain or '—'} | "
+                    f"output={row.output:.6f} | age={row.decay_age} | lifecycle={lifecycle}",
+                    "SOURCE WORKSPACE SEMANTIC (debug only):",
+                    row.semantic,
+                ])
+        self._turn_memory_trace_text = "\n".join(chunks)
+        self._set_text(self.agent_memory_view, self._turn_memory_trace_text)
 
     def _probe_prompt_path(self, name: str | None = None) -> Path | None:
         cfg = self.services.config
@@ -301,13 +395,21 @@ class LLMControlWidget(QWidget):
 
     @staticmethod
     def _set_text(view: QPlainTextEdit, text: str, *, follow_end: bool = False) -> None:
-        if text == view.toPlainText():
+        # QPlainTextEdit.toPlainText() copies the whole QTextDocument. Doing that
+        # every poll becomes very expensive for multi-kilobyte prompts/logs. Keep a
+        # Python-side cache instead and repaint only when the payload truly changes.
+        if view.property("ah_last_plain_text") == text:
             return
-        view.setPlainText(text)
-        if follow_end:
-            cursor = view.textCursor()
-            cursor.movePosition(QTextCursor.MoveOperation.End)
-            view.setTextCursor(cursor)
+        view.setProperty("ah_last_plain_text", text)
+        view.setUpdatesEnabled(False)
+        try:
+            view.setPlainText(text)
+            if follow_end:
+                cursor = view.textCursor()
+                cursor.movePosition(QTextCursor.MoveOperation.End)
+                view.setTextCursor(cursor)
+        finally:
+            view.setUpdatesEnabled(True)
 
     @staticmethod
     def _pretty(value) -> str:
@@ -317,7 +419,7 @@ class LLMControlWidget(QWidget):
             return str(obj)
         return json.dumps(value, ensure_ascii=False, indent=2, default=encode)
 
-    def _refresh_parser_diagnostics(self) -> None:
+    def _refresh_parser_diagnostics(self, *, force: bool = False) -> None:
         parser = self.services.perception
         if parser is None or not hasattr(parser, "diagnostics"):
             self._set_text(self.parser_raw_view, "")
@@ -333,6 +435,15 @@ class LLMControlWidget(QWidget):
                 self._set_text(self.parser_decoded_view, text)
             return
         diag = history[-1]
+        render_key = (
+            diag.sequence,
+            len(diag.attempts),
+            diag.final_error,
+            diag.decoded is not None,
+        )
+        if not force and render_key == self._last_parser_render_key:
+            return
+        self._last_parser_render_key = render_key
         raw_parts = [f"SOURCE:\n{diag.source_text}"]
         for index, attempt in enumerate(diag.attempts, start=1):
             retry = f" retry={attempt.retry_index}" if attempt.retry_index else ""
@@ -360,50 +471,169 @@ class LLMControlWidget(QWidget):
             decoded = {"status": "OK", "perception": asdict(diag.decoded)}
         self._set_text(self.parser_decoded_view, self._pretty(decoded))
 
-    def _refresh_request_diagnostics(self) -> None:
+    @staticmethod
+    def _extract_context_section(rendered: str, heading: str) -> str:
+        lines = rendered.splitlines()
+        try:
+            start = lines.index(heading) + 1
+        except ValueError:
+            return ""
+        out: list[str] = []
+        for line in lines[start:]:
+            if line.startswith("# "):
+                break
+            out.append(line)
+        return "\n".join(out).strip()
+
+    def _refresh_request_diagnostics(self, *, force: bool = False) -> None:
         backend = self.services.llm
         if backend is None or not hasattr(backend, "request_diagnostics"):
             return
+
+        current = self.tabs.currentWidget()
+        active = (
+            backend.active_request_diagnostic()
+            if hasattr(backend, "active_request_diagnostic")
+            else None
+        )
+        if (
+            active is not None
+            and active.role.startswith("agent")
+            and (not self._turn_scope_initialized or active.sequence > self._turn_request_floor)
+            and current in {self.agent_context_view, self.agent_memory_view}
+        ):
+            active_key = (active.sequence, active.role, len(active.prompt))
+            if force or active_key != self._last_active_request_key:
+                self._last_active_request_key = active_key
+                if current is self.agent_context_view:
+                    self._set_text(
+                        self.agent_context_view,
+                        f"REQUEST #{active.sequence} (IN FLIGHT)\nROLE: {active.role}\n\n"
+                        "MODEL-VISIBLE AGENTCONTEXT (exact logical user message before chat-template)\n"
+                        "=====================================================================\n"
+                        + active.prompt,
+                    )
+                elif current is self.agent_memory_view and self._turn_memory_trace_text is None:
+                    active_memory = self._extract_context_section(active.prompt, "# ACTIVE MEMORY")
+                    inference = self._extract_context_section(active.prompt, "# INFERENCE RESULTS")
+                    self._set_text(
+                        self.agent_memory_view,
+                        "MODEL-VISIBLE MEMORY PAYLOAD (LIVE; this part IS being sent to Agent LLM)\n"
+                        "==================================================================\n"
+                        "# ACTIVE MEMORY\n" + (active_memory or "<EMPTY>")
+                        + "\n\n# INFERENCE RESULTS\n" + (inference or "<EMPTY>")
+                        + "\n\nDEBUG EXPLANATION (NOT sent to Agent LLM)\n"
+                          "=========================================\n"
+                          "The exact x/t trace is attached when the turn returns; "
+                          "the semantic payload above is already the live request.",
+                    )
+
         records = backend.request_diagnostics()
         if self._turn_scope_initialized:
             records = tuple(r for r in records if r.sequence > self._turn_request_floor)
         if not records:
             if self._turn_scope_initialized and not self._turn_active:
                 text = f"SOURCE:\n{self._turn_source_text}\n\nNo LLM requests were recorded for this turn."
-                self._set_text(self.agent_raw_view, text)
-                self._set_text(self.requests_view, text)
+                if current is self.agent_raw_view:
+                    self._set_text(self.agent_raw_view, text)
+                elif current is self.agent_context_view:
+                    self._set_text(self.agent_context_view, text)
+                elif current is self.agent_memory_view and self._turn_memory_trace_text is None:
+                    self._set_text(self.agent_memory_view, text)
+                elif current is self.agent_final_prompt_view:
+                    self._set_text(self.agent_final_prompt_view, text)
+                elif current is self.requests_view:
+                    self._set_text(self.requests_view, text)
             return
 
-        agent = next((record for record in reversed(records) if record.role == "agent"), None)
+        agent = next(
+            (record for record in reversed(records) if record.role.startswith("agent")),
+            None,
+        )
         if agent is not None:
-            text = (
-                f"REQUEST #{agent.sequence}\nROLE: {agent.role}\n\n"
-                f"RAW RESPONSE:\n{agent.response_text}"
-            )
-            if agent.error:
-                text += f"\n\nERROR:\n{agent.error}"
-            self._set_text(self.agent_raw_view, text)
-        elif self._turn_scope_initialized:
+            if current is self.agent_raw_view:
+                text = (
+                    f"REQUEST #{agent.sequence}\nROLE: {agent.role}\n\n"
+                    f"RAW RESPONSE:\n{agent.response_text}"
+                )
+                if agent.error:
+                    text += f"\n\nERROR:\n{agent.error}"
+                self._set_text(self.agent_raw_view, text)
+            elif current is self.agent_context_view:
+                self._set_text(
+                    self.agent_context_view,
+                    f"REQUEST #{agent.sequence}\nROLE: {agent.role}\n\n"
+                    "MODEL-VISIBLE AGENTCONTEXT (exact logical user message before chat-template)\n"
+                    "=====================================================================\n"
+                    + agent.prompt,
+                )
+            elif current is self.agent_memory_view and self._turn_memory_trace_text is None:
+                active_memory = self._extract_context_section(agent.prompt, "# ACTIVE MEMORY")
+                inference = self._extract_context_section(agent.prompt, "# INFERENCE RESULTS")
+                fallback = (
+                    "MODEL-VISIBLE MEMORY PAYLOAD (this part IS sent to Agent LLM)\n"
+                    "============================================================\n"
+                    "# ACTIVE MEMORY\n" + (active_memory or "<EMPTY>")
+                    + "\n\n# INFERENCE RESULTS\n" + (inference or "<EMPTY>")
+                    + "\n\nDEBUG EXPLANATION (NOT sent to Agent LLM)\n"
+                      "=========================================\n"
+                      "Projection-time x/t trace is not available for this request."
+                )
+                self._set_text(self.agent_memory_view, fallback)
+            elif current is self.agent_final_prompt_view:
+                if agent.rendered_prompt:
+                    token_line = (
+                        f"INPUT TOKENS: {agent.input_tokens}\n"
+                        if agent.input_tokens is not None
+                        else ""
+                    )
+                    final_prompt = (
+                        f"REQUEST #{agent.sequence}\nROLE: {agent.role}\n"
+                        + token_line
+                        + "\nEXACT CHAT-TEMPLATE INPUT SENT TO MODEL:\n"
+                        + agent.rendered_prompt
+                    )
+                else:
+                    final_prompt = (
+                        f"REQUEST #{agent.sequence}\nROLE: {agent.role}\n\n"
+                        f"SYSTEM MESSAGE:\n{agent.system}\n\n"
+                        f"USER / AGENTCONTEXT MESSAGE:\n{agent.prompt}"
+                    )
+                self._set_text(self.agent_final_prompt_view, final_prompt)
+        elif self._turn_scope_initialized and current in {
+            self.agent_raw_view, self.agent_context_view, self.agent_memory_view, self.agent_final_prompt_view
+        }:
             state = "Waiting for agent generation…" if self._turn_active else "No agent response was produced for this turn."
-            self._set_text(
-                self.agent_raw_view,
-                f"SOURCE:\n{self._turn_source_text}\n\n{state}",
-            )
+            base = f"SOURCE:\n{self._turn_source_text}\n\n{state}"
+            if current is self.agent_raw_view:
+                self._set_text(self.agent_raw_view, base)
+            elif current is self.agent_context_view:
+                self._set_text(self.agent_context_view, base)
+            elif current is self.agent_memory_view and self._turn_memory_trace_text is None:
+                self._set_text(self.agent_memory_view, base)
+            elif current is self.agent_final_prompt_view:
+                self._set_text(self.agent_final_prompt_view, base)
 
-        chunks: list[str] = []
-        for record in records[-12:]:
-            response_preview = record.response_text
-            if len(response_preview) > 1200:
-                response_preview = response_preview[:1200] + "\n… <truncated in Requests tab>"
-            chunks.append(
-                f"#{record.sequence} {record.role} req={record.req_id}\n"
-                f"PROMPT:\n{record.prompt}\n\n"
-                f"RESPONSE:\n{response_preview}"
-                + (f"\nERROR: {record.error}" if record.error else "")
-            )
-        self._set_text(self.requests_view, "\n\n==============================\n\n".join(chunks))
+        if current is self.requests_view:
+            chunks: list[str] = []
+            for record in records[-12:]:
+                prompt_preview = record.prompt
+                if len(prompt_preview) > 4000:
+                    prompt_preview = prompt_preview[:4000] + "\n… <truncated in Requests tab; exact Agent prompt has its own tabs>"
+                response_preview = record.response_text
+                if len(response_preview) > 1200:
+                    response_preview = response_preview[:1200] + "\n… <truncated in Requests tab>"
+                chunks.append(
+                    f"#{record.sequence} {record.role} req={record.req_id}\n"
+                    f"PROMPT:\n{prompt_preview}\n\n"
+                    f"RESPONSE:\n{response_preview}"
+                    + (f"\nERROR: {record.error}" if record.error else "")
+                )
+            self._set_text(self.requests_view, "\n\n==============================\n\n".join(chunks))
 
-    def refresh_status(self) -> None:
+    def refresh_status(self, *, force: bool = False) -> None:
+        if not force and not self.isVisible():
+            return
         backend = self.services.llm
         cfg = self.services.config
         self.model_label.setText(str(cfg.paths.llm_model_dir or "<not configured>"))
@@ -467,6 +697,16 @@ class LLMControlWidget(QWidget):
         self.start_button.setEnabled(not status.running)
         self.stop_button.setEnabled(status.running)
         self.restart_button.setEnabled(True)
-        self._set_text(self.log_view, "\n".join(status.recent_log), follow_end=True)
-        self._refresh_parser_diagnostics()
-        self._refresh_request_diagnostics()
+        current = self.tabs.currentWidget()
+        if current is self.log_view:
+            self._set_text(self.log_view, "\n".join(status.recent_log), follow_end=True)
+        if current in {self.parser_raw_view, self.parser_decoded_view}:
+            self._refresh_parser_diagnostics(force=force)
+        elif current in {
+            self.agent_raw_view,
+            self.agent_context_view,
+            self.agent_memory_view,
+            self.agent_final_prompt_view,
+            self.requests_view,
+        }:
+            self._refresh_request_diagnostics(force=force)

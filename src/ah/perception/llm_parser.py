@@ -194,6 +194,52 @@ class LLMPerceptionService:
         explicit = set(filled_roles)
         return TemplateCandidate(tuple(role for role in ActantRole if role in explicit))
 
+    def resolve_template_sense(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        filled_roles: tuple[ActantRole, ...],
+        role_bindings: tuple[tuple[ActantRole, str], ...],
+        options: tuple[tuple[str, str], ...],
+    ) -> str | None:
+        """Resolve one bounded lexical-sense choice without exposing canonical UIDs."""
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            raise PerceptionParseError(
+                "Template sense resolution requires an adaptive perception protocol"
+            )
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_acts=self.settings.max_acts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            resolved = parser.resolve_template_sense(
+                source_text, predicate, filled_roles, role_bindings, options
+            )
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(source_text, attempts, None, str(exc))
+            raise PerceptionParseError(str(exc)) from exc
+        return resolved.choice_label
+
     def interpret_clarification_answer(
         self,
         answer_text: str,
@@ -578,21 +624,29 @@ class LLMPerceptionService:
                 except ValueError as exc:
                     raise PerceptionParseError(f"unknown query mode: {parts[1]!r}") from exc
                 predicate = self._span_predicate(source_text, tokens, parts[2], parts[3])
-                requested = None if parts[4] in {"", "-", "_"} else ActantRole(parts[4].upper())
-                if mode is QueryMode.FILL_ROLE and requested is None:
-                    raise PerceptionParseError("FILL_ROLE requires requested role")
+                requested = () if parts[4] in {"", "-", "_"} else tuple(
+                    ActantRole(item.strip().upper()) for item in parts[4].split(",") if item.strip()
+                )
+                if mode is QueryMode.FILL_ROLE and not requested:
+                    raise PerceptionParseError("FILL_ROLE requires requested role(s)")
                 queries.append(QueryCandidate(
                     predicate=predicate,
                     actants=self._span_actants(source_text, tokens, parts[5:]),
-                    requested_role=requested,
+                    requested_roles=requested,
                     query_mode=mode,
                 ))
             elif kind == "C":
                 if len(parts) < 3:
                     raise PerceptionParseError("C span record has too few fields")
+                negated = False
+                role_start = 3
+                if len(parts) >= 4 and parts[3].casefold() in {"0", "1", "true", "false", "yes", "no"}:
+                    negated = self._compact_bool(parts[3])
+                    role_start = 4
                 commands.append(CommandCandidate(
                     predicate=self._span_predicate(source_text, tokens, parts[1], parts[2]),
-                    actants=self._span_actants(source_text, tokens, parts[3:]),
+                    actants=self._span_actants(source_text, tokens, parts[role_start:]),
+                    negated=negated,
                 ))
             else:
                 raise PerceptionParseError(f"unexpected span protocol record: {line!r}")
@@ -642,21 +696,29 @@ class LLMPerceptionService:
                     raise PerceptionParseError("Q line requires Q|MODE|surface|lemma|ROLE_OR_-|ROLE=value...")
                 mode = QueryMode(parts[1].upper())
                 predicate = self._line_predicate(parts[2], parts[3])
-                requested = None if parts[4] in {"", "-", "_"} else ActantRole(parts[4].upper())
-                if mode is QueryMode.FILL_ROLE and requested is None:
-                    raise PerceptionParseError("FILL_ROLE Q line requires requested role")
+                requested = () if parts[4] in {"", "-", "_"} else tuple(
+                    ActantRole(item.strip().upper()) for item in parts[4].split(",") if item.strip()
+                )
+                if mode is QueryMode.FILL_ROLE and not requested:
+                    raise PerceptionParseError("FILL_ROLE Q line requires requested role(s)")
                 queries.append(QueryCandidate(
                     predicate=predicate,
                     actants=self._line_actants(parts[5:]),
-                    requested_role=requested,
+                    requested_roles=requested,
                     query_mode=mode,
                 ))
             elif kind == "C":
                 if len(parts) < 3:
-                    raise PerceptionParseError("C line requires C|surface|lemma|ROLE=value...")
+                    raise PerceptionParseError("C line requires C|surface|lemma|[0/1]|ROLE=value...")
+                negated = False
+                role_start = 3
+                if len(parts) >= 4 and parts[3].casefold() in {"0", "1", "true", "false", "yes", "no"}:
+                    negated = self._compact_bool(parts[3])
+                    role_start = 4
                 commands.append(CommandCandidate(
                     predicate=self._line_predicate(parts[1], parts[2]),
-                    actants=self._line_actants(parts[3:]),
+                    actants=self._line_actants(parts[role_start:]),
+                    negated=negated,
                 ))
             elif kind == "NONE" and len(parts) == 1:
                 if len(lines) != 1:
@@ -815,6 +877,7 @@ class LLMPerceptionService:
             predicate=cls._compact_predicate(raw),
             actants=cls._compact_actants(raw.get("r", [])),
             negated=cls._compact_bool(raw.get("neg", False)),
+            quoted=bool(raw.get("quoted", False)),
         )
 
     @classmethod
@@ -822,15 +885,21 @@ class LLMPerceptionService:
         if not isinstance(raw, dict):
             raise PerceptionParseError("compact query must be an object")
         mode = QueryMode(str(raw.get("m") or "EXISTS").upper())
-        role_raw = raw.get("role")
-        requested_role = None if role_raw in (None, "", "null") else ActantRole(str(role_raw).upper())
-        if mode is QueryMode.FILL_ROLE and requested_role is None:
-            raise PerceptionParseError("FILL_ROLE compact query requires 'role'")
+        role_raw = raw.get("roles", raw.get("role"))
+        if role_raw in (None, "", "null"):
+            requested_roles = ()
+        elif isinstance(role_raw, (list, tuple)):
+            requested_roles = tuple(ActantRole(str(item).upper()) for item in role_raw)
+        else:
+            requested_roles = (ActantRole(str(role_raw).upper()),)
+        if mode is QueryMode.FILL_ROLE and not requested_roles:
+            raise PerceptionParseError("FILL_ROLE compact query requires 'role'/'roles'")
         return QueryCandidate(
             predicate=cls._compact_predicate(raw),
             actants=cls._compact_actants(raw.get("r", [])),
-            requested_role=requested_role,
+            requested_roles=requested_roles,
             query_mode=mode,
+            quoted=bool(raw.get("quoted", False)),
         )
 
     @classmethod
@@ -840,6 +909,8 @@ class LLMPerceptionService:
         return CommandCandidate(
             predicate=cls._compact_predicate(raw),
             actants=cls._compact_actants(raw.get("r", [])),
+            negated=cls._compact_bool(raw.get("neg", False)),
+            quoted=bool(raw.get("quoted", False)),
         )
 
     @classmethod
@@ -969,17 +1040,25 @@ class LLMPerceptionService:
             evidence=cls._evidence(raw.get("evidence")),
             alternatives=tuple(cls._assertion(v) for v in raw.get("alternatives", [])),
             negated=bool(raw.get("negated", False)),
+            quoted=bool(raw.get("quoted", False)),
         )
 
     @classmethod
     def _query(cls, raw: dict[str, Any]) -> QueryCandidate:
         mode = QueryMode(str(raw.get("query_mode", "EXISTS")).upper())
-        role_raw = raw.get("requested_role")
+        roles_raw = raw.get("requested_roles")
+        if roles_raw is None:
+            role_raw = raw.get("requested_role")
+            requested_roles = () if role_raw is None else (ActantRole(str(role_raw).upper()),)
+        else:
+            requested_roles = tuple(ActantRole(str(item).upper()) for item in roles_raw)
         return QueryCandidate(
             predicate=cls._predicate(raw.get("predicate") or {}),
             actants=tuple(cls._actant(v) for v in raw.get("actants", [])),
-            requested_role=(None if role_raw is None else ActantRole(str(role_raw).upper())),
+            requested_roles=requested_roles,
             query_mode=mode,
+            local_id=(None if raw.get("local_id") is None else str(raw.get("local_id"))),
+            quoted=bool(raw.get("quoted", False)),
         )
 
     @classmethod
@@ -987,6 +1066,9 @@ class LLMPerceptionService:
         return CommandCandidate(
             predicate=cls._predicate(raw.get("predicate") or {}),
             actants=tuple(cls._actant(v) for v in raw.get("actants", [])),
+            local_id=(None if raw.get("local_id") is None else str(raw.get("local_id"))),
+            negated=bool(raw.get("negated", False)),
+            quoted=bool(raw.get("quoted", False)),
         )
 
     @staticmethod
@@ -1006,8 +1088,8 @@ _SPAN_SYSTEM_PROMPT = """Parse only the current user utterance. The user provide
 Return only short records separated by |. No explanations, JSON, or markdown.
 
 Assertion: A, then A1/A2..., predicate token number, base predicate form, 0 or 1 for negation, then roles.
-Query: Q, then EXISTS or FILL_ROLE, predicate token number, base predicate form, requested role or -, then roles.
-Command: C, then predicate token number, base predicate form, then roles.
+Query: Q, then EXISTS or FILL_ROLE, predicate token number, base predicate form, comma-separated requested roles or -, then roles.
+Command: C, then predicate token number, base predicate form, 0 or 1 for negation, then roles.
 Write a role as ROLE=N or ROLE=N-M, where N is only a TOKENS index. If one argument contains and/or, give its full continuous token range once. A nested fact may be ROLE=@A2. For implicit I/you/we, $SELF/$USER/$WE are allowed. If there are no acts, return NONE.
 
 Do not copy TEXT or TOKENS. Do not invent words or UIDs.
@@ -1017,8 +1099,8 @@ _SPAN_REPAIR_SYSTEM_PROMPT = """The previous answer was malformed. Parse only TE
 
 _LINE_SYSTEM_PROMPT = """You are a semantic parser. Return only line_v1 records. No JSON, markdown, or explanations.
 A|ID|surface|lemma|0/1|ROLE=value...
-Q|EXISTS/FILL_ROLE|surface|lemma|ROLE_OR_-|ROLE=value...
-C|surface|lemma|ROLE=value...
+Q|EXISTS/FILL_ROLE|surface|lemma|ROLE[,ROLE...]_OR_-|ROLE=value...
+C|surface|lemma|0/1|ROLE=value...
 If there are no acts: NONE
 
 Copy surface and ROLE values from SOURCE exactly. Use the base predicate form for lemma. If the predicate is implicit, surface=_. @A2 refers to assertion A2. Do not turn a question into an assertion. Do not emit UIDs or C/P/H/L. Do not add facts.
@@ -1029,8 +1111,8 @@ _LINE_REPAIR_SYSTEM_PROMPT = """Repair only the line_v1 format of the previous p
 _DEFAULT_SYSTEM_PROMPT = """You are a semantic parser. Return only JSON, without markdown.
 Format: {"a":[{"id":"A1","p":"predicate surface","n":"base form","neg":false,"r":[["SUBJECT","text"],["OBJECT","text"]]}],"q":[],"c":[]}
 Use @A2 instead of text for a nested assertion.
-Query: {"m":"EXISTS","p":"predicate","n":"base form","role":null,"r":[]}. For a missing role use m="FILL_ROLE" and role="OBJECT".
-Command: {"p":"predicate","n":"base form","r":[]}.
+Query: {"m":"EXISTS","p":"predicate","n":"base form","roles":[],"r":[]}. For missing roles use m="FILL_ROLE" and roles=["SUBJECT","OBJECT",...].
+Command: {"p":"predicate","n":"base form","neg":false,"r":[]}.
 Allowed roles: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, HOW-TO.
 Do not emit UIDs or C/P/H/L. Do not invent facts. Keep pronouns, deictic words, dates, and places as source text. If there are no acts, return {"a":[],"q":[],"c":[]}."""
 

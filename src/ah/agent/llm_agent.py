@@ -41,10 +41,13 @@ class LLMAgentSettings:
     )
     repair_attempts: int = 1
     sanitize_context_echo: bool = True
+    context_max_tokens: int | None = None
 
     def __post_init__(self) -> None:
         if self.repair_attempts < 0 or self.repair_attempts > 2:
             raise ValueError("agent repair_attempts must be in [0, 2]")
+        if self.context_max_tokens is not None and self.context_max_tokens <= 0:
+            raise ValueError("agent context_max_tokens must be > 0 when set")
 
 
 class LLMAgent:
@@ -80,6 +83,8 @@ class LLMAgent:
     def respond(self, context: AgentContext) -> str:
         generation = self.settings.generation
         override = self._generation_override(generation)
+        if self.settings.context_max_tokens is not None:
+            override["max_input_tokens"] = self.settings.context_max_tokens
         response = self.backend.generate(
             context.rendered,
             system=self._system_prompt(),

@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Decide only which TARGET relation fits this sentence better. Return only A or B.

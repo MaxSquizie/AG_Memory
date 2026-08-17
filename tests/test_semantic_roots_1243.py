@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from legacy_semantic_fixture import legacy_semantic_answer
+
 from pathlib import Path
 import unittest
 
@@ -22,6 +24,9 @@ class RecordingBackend:
         self.calls.append((role, prompt))
         values = self.answers.get(role)
         if not values:
+            fallback = legacy_semantic_answer(role, prompt)
+            if fallback is not None:
+                return LLMResponse(str(fallback), {})
             raise AssertionError(f"unexpected LLM probe: {role}\n{prompt}")
         return LLMResponse(values.pop(0), {})
 
@@ -40,28 +45,34 @@ def make_parser(backend: RecordingBackend) -> AdaptivePerceptionParser:
 
 
 class SemanticRoots1243Tests(unittest.TestCase):
-    def test_content_addressee_is_runtime_cue_not_canonical_role_label(self):
+    def test_addressee_is_runtime_cue_not_canonical_role_label(self):
         backend = RecordingBackend({
             "perception_frame_relation": ["CONTENT_LINK"],
-            "perception_content_addressee": ["CONTENT_ADDRESSEE"],
             "perception_control_subject": ["SECOND"],
         })
         result = make_parser(backend).parse("Иван попросил Марию прочитать книгу.").perception
         parent = result.assertions[0]
         self.assertIn(ActantRole.RECIPIENT, {a.role for a in parent.actants})
 
-        prompt = next(prompt for role, prompt in backend.calls if role == "perception_content_addressee")
-        self.assertIn("CHOICES:\nCONTENT_ADDRESSEE\nNOT_CONTENT_ADDRESSEE", prompt)
+        prompt = next(
+            prompt
+            for role, prompt in backend.calls
+            if role == "perception_role_cue" and "TARGET:\nМарию\n" in prompt
+        )
+        self.assertIn("RECEIVER_OR_ADDRESSEE:", prompt)
         self.assertNotIn("CHOICES:\nRECIPIENT", prompt)
+        self.assertFalse(any(role == "perception_content_addressee" for role, _ in backend.calls))
 
-    def test_old_canonical_recipient_label_is_rejected_by_cue_protocol(self):
+    def test_canonical_recipient_label_is_rejected_by_runtime_cue_protocol(self):
         backend = RecordingBackend({
-            "perception_frame_relation": ["CONTENT_LINK"],
-            "perception_content_addressee": ["RECIPIENT"],
+            # First role cue is Иван; the second is Марию.  Returning the canonical
+            # AH label for the second decision must be rejected: the LLM boundary
+            # accepts only UID-free runtime semantic cues.
+            "perception_role_cue": ["ACTOR_OR_EXPERIENCER", "RECIPIENT"],
         })
         with self.assertRaisesRegex(
             AdaptiveParseError,
-            "content_addressee expected exactly one of: CONTENT_ADDRESSEE, NOT_CONTENT_ADDRESSEE",
+            "role_cue expected exactly one of:",
         ):
             make_parser(backend).parse("Иван попросил Марию прочитать книгу.")
 

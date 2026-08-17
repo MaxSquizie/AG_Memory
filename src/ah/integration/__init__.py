@@ -11,6 +11,7 @@ from .contracts import (
     RefutationRequest,
     SeedReason,
     TemplateRequest,
+    TemplateSenseOption,
 )
 from .correction import RefutationCommit, SemanticCorrectionService
 from .errors import (
@@ -41,5 +42,6 @@ __all__ = [
     "SemanticCorrectionService",
     "SeedReason",
     "TemplateRequest",
+    "TemplateSenseOption",
     "TemplateResolutionError",
 ]

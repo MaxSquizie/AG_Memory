@@ -28,14 +28,17 @@ class AcceptanceCanvasRenderTests(unittest.TestCase):
                 calls.add(func.id)
         return calls
 
-    def test_acceptance_does_not_disable_live_canvas_updates(self) -> None:
+    def test_acceptance_pauses_and_restores_live_canvas_updates(self) -> None:
         suspend_calls = self._method_calls("_suspend_acceptance_status_polling")
         resume_calls = self._method_calls("_resume_acceptance_status_polling")
-        self.assertNotIn("set_live_updates_enabled", suspend_calls)
-        self.assertNotIn("set_live_updates_enabled", resume_calls)
+        source = MAIN_WINDOW.read_text(encoding="utf-8")
+
+        self.assertIn("set_live_updates_enabled", suspend_calls)
+        self.assertIn("set_live_updates_enabled", resume_calls)
         self.assertIn("stop", suspend_calls)
-        self.assertIn("refresh", resume_calls)
         self.assertIn("start", resume_calls)
+        self.assertIn("self.canvas.set_live_updates_enabled(False)", source)
+        self.assertIn("self.canvas.set_live_updates_enabled(True)", source)
 
 
 if __name__ == "__main__":

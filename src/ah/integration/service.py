@@ -7,13 +7,16 @@ from ah.config import IntegrationSettings
 from ah.agent import InteractionContext
 from ah.core import AHCore
 from ah.core.signatures import hypernode_signature
-from ah.model import ActantRole, Domain, FunctionSymbol, Group, Hypernode, Property, Ref, RefKind, SemanticEntity
+from ah.model import ActantRole, Domain, FunctionSymbol, Group, Hypernode, Property, Ref, RefKind, SemanticEntity, Template
 from ah.perception import (
     ActantCandidate,
     AssertionCandidate,
     AssertionStatus,
     PerceptionResult,
+    PropositionExprCandidate,
+    PropositionOperator,
     StructuralClarificationSpec,
+    TemplateSelection,
 )
 
 from .candidate_validator import CandidateValidator
@@ -30,6 +33,7 @@ from .contracts import (
     RefutationRequest,
     SeedReason,
     TemplateRequest,
+    TemplateSenseOption,
 )
 from .correction import SemanticCorrectionService
 from .domain_router import DomainRouter
@@ -102,17 +106,119 @@ class IntegrationService:
         self.config = config
         self.validator = CandidateValidator()
 
-    def template_requests(self, result: PerceptionResult) -> tuple[TemplateRequest, ...]:
-        """Return only predicates that need a Perception-layer T proposal.
+    @staticmethod
+    def _predicate_occurrence_key(predicate, source_context: str) -> tuple[object, ...]:
+        evidence = predicate.evidence
+        return (
+            predicate.lookup_form.casefold(),
+            None if evidence is None else evidence.start,
+            None if evidence is None else evidence.end,
+            (predicate.sense_hint or "").casefold(),
+            source_context,
+        )
 
-        This is a deterministic read-only preflight. It never creates S/T and it
-        never asks an LLM. For each unknown predicate it also preserves a minimal
-        *noncanonical* textual view of already observed role bindings. Perception
-        receives only the explicit schema of the current semantic act; it does not
-        need to predict absent future valency. Canonical refs/UIDs are deliberately
-        not exposed through this request.
+    @staticmethod
+    def _is_structural_predicate_sense(predicate) -> bool:
+        hint = (predicate.sense_hint or "").strip().upper()
+        return hint == "IMPLICIT" or hint.startswith("STRUCTURAL_")
+
+    def _predicate_symbol_candidates(self, predicate) -> tuple:
+        """Return lexical S candidates without collapsing a homographic surface.
+
+        A semantic/morphological ``normalized_hint`` is stronger than the observed
+        surface for lexical identity.  If that normalized lexeme is not known yet,
+        we deliberately do *not* fall back to a different S merely because it shares
+        the surface wordform: Integration may need to create a new lexical S for the
+        newly resolved paradigm.
         """
-        grouped: dict[str, dict[str, object]] = {}
+        lookup = predicate.lookup_form.strip()
+        matches = self.core.store.find_symbols_by_form(lookup)
+        if matches:
+            return matches
+        surface = predicate.surface.strip()
+        if not surface:
+            return ()
+        if predicate.normalized_hint is not None and surface.casefold() != lookup.casefold():
+            return ()
+        return self.core.store.find_symbols_by_form(surface)
+
+    def _template_ref_label(self, ref: Ref) -> str:
+        """Return a UID-free semantic label for one canonical reference."""
+        try:
+            if ref.kind is RefKind.M:
+                entity = self.core.store.get_element_any_domain(ref.uid)
+                if isinstance(entity, SemanticEntity):
+                    name = entity.properties.get("name")
+                    if name is not None and isinstance(name.value, str) and name.value.strip():
+                        return name.value.strip()
+                    aliases = entity.properties.get("aliases")
+                    if aliases is not None:
+                        raw = aliases.value
+                        if isinstance(raw, str) and raw.strip():
+                            return raw.strip()
+                        if isinstance(raw, (tuple, list, set, frozenset)) and raw:
+                            return str(next(iter(raw)))
+                return "entity"
+            if ref.kind is RefKind.G:
+                element = self.core.store.get_element_any_domain(ref.uid)
+                if isinstance(element, FunctionSymbol):
+                    return element.function_id
+                return "functional expression"
+            if ref.kind is RefKind.K:
+                element = self.core.store.get_element_any_domain(ref.uid)
+                if isinstance(element, Group):
+                    name = element.properties.get("name")
+                    if name is not None and isinstance(name.value, str) and name.value.strip():
+                        return name.value.strip()
+                return "group"
+            if ref.kind is RefKind.N:
+                element = self.core.store.get_element_any_domain(ref.uid)
+                if isinstance(element, Hypernode):
+                    template = self.core.store.get_template(element.template.uid)
+                    symbol = self.core.store.get_symbol(template.predicate.uid)
+                    form = sorted(symbol.forms, key=lambda item: (len(item), item.casefold()))[0]
+                    return f"{form} situation"
+                return "situation"
+            if ref.kind is RefKind.S:
+                symbol = self.core.store.get_symbol(ref.uid)
+                return sorted(symbol.forms, key=lambda item: (len(item), item.casefold()))[0]
+            if ref.kind is RefKind.T:
+                template = self.core.store.get_template(ref.uid)
+                symbol = self.core.store.get_symbol(template.predicate.uid)
+                return sorted(symbol.forms, key=lambda item: (len(item), item.casefold()))[0]
+        except (KeyError, ValueError):
+            pass
+        return ref.kind.value.lower()
+
+    def _template_sense_description(self, template: Template) -> str:
+        roles = ", ".join(role.value for role in template.roles) or "no explicit roles"
+        examples: list[str] = []
+        for element in self.core.store.all_elements():
+            if not isinstance(element, Hypernode) or element.template.uid != template.uid:
+                continue
+            bindings = ", ".join(
+                f"{role.value}={self._template_ref_label(ref)}"
+                for role, ref in element.actants.items()
+            )
+            if bindings:
+                examples.append(bindings)
+            if len(examples) >= 2:
+                break
+        if examples:
+            return f"roles: {roles}; observed uses: " + " | ".join(examples)
+        return f"roles: {roles}; no observed fact example yet"
+
+    def template_requests(self, result: PerceptionResult) -> tuple[TemplateRequest, ...]:
+        """Return runtime schema/sense decisions required before integration.
+
+        Unknown predicates still request only an explicit ``TemplateCandidate``.
+        Known lexical predicates additionally receive a bounded sense-resolution
+        request. Existing T are exposed to Perception only through local labels and
+        UID-free usage summaries; the orchestrator maps the chosen label back to a
+        canonical T. This is what prevents a new sense with the same role set from
+        being silently collapsed into an old T.
+        """
+        grouped: dict[tuple[object, ...], dict[str, object]] = {}
 
         def binding_text(actant: ActantCandidate) -> str | None:
             if actant.lookup_text:
@@ -133,21 +239,20 @@ class IntegrationService:
             extra_roles: tuple[ActantRole, ...] = (),
             source_context: str | None = None,
         ) -> None:
-            key = predicate.lookup_form.casefold()
+            context_text = source_context or result.source_text
+            key = self._predicate_occurrence_key(predicate, context_text)
             entry = grouped.get(key)
             if entry is None:
                 entry = {
                     "predicate": predicate,
                     "roles": [],
                     "has_candidate": predicate.template_candidate is not None,
-                    "source_context": (source_context or result.source_text),
+                    "source_context": context_text,
                     "bindings": [],
                 }
                 grouped[key] = entry
             else:
                 entry["has_candidate"] = bool(entry["has_candidate"]) or predicate.template_candidate is not None
-                if source_context and entry["source_context"] == result.source_text:
-                    entry["source_context"] = source_context
 
             roles = entry["roles"]
             bindings = entry["bindings"]
@@ -172,8 +277,10 @@ class IntegrationService:
                     source_context=(variant.evidence.text if variant.evidence is not None else result.source_text),
                 )
         for query in result.queries:
-            extra = (query.requested_role,) if query.requested_role is not None else ()
-            add(query.predicate, query.actants, extra_roles=extra, source_context=result.source_text)
+            add(
+                query.predicate, query.actants,
+                extra_roles=query.requested_roles, source_context=result.source_text
+            )
         for command in result.commands:
             add(command.predicate, command.actants, source_context=result.source_text)
 
@@ -185,10 +292,41 @@ class IntegrationService:
             source_context = str(entry["source_context"])
             bindings = entry["bindings"]
             assert isinstance(roles, list) and isinstance(bindings, list)
-            symbol = self.core.store.find_symbol_by_form(predicate.lookup_form)
-            if symbol is None and predicate.surface.strip():
-                symbol = self.core.store.find_symbol_by_form(predicate.surface.strip())
-            if symbol is not None and self.core.store.find_templates_by_predicate(symbol.uid):
+
+            if predicate.template_selection is not None:
+                continue
+
+            symbols = self._predicate_symbol_candidates(predicate)
+            existing = tuple(
+                template
+                for symbol in symbols
+                for template in self.core.store.find_templates_by_predicate(symbol.uid)
+            )
+
+            if existing and not self._is_structural_predicate_sense(predicate):
+                options = tuple(
+                    TemplateSenseOption(
+                        label=f"C{index}",
+                        template_uid=template.uid,
+                        description=self._template_sense_description(template),
+                    )
+                    for index, template in enumerate(existing, start=1)
+                )
+                requests.append(
+                    TemplateRequest(
+                        predicate,
+                        tuple(roles),
+                        source_context,
+                        tuple(bindings),
+                        options,
+                    )
+                )
+                continue
+
+            if existing:
+                # Synthetic/implicit predicates are structural machinery, not a
+                # lexical polysemy decision. Their existing T follows the ordinary
+                # role-compatible resolver path.
                 continue
             if has_candidate:
                 continue
@@ -258,8 +396,19 @@ class IntegrationService:
         entity_local_refs: dict[str, Ref] = {}
         entity_anchors = self._entity_anchors(result)
         experience_ref: Ref | None = None
+        resolved_queries = []
+        resolved_commands = []
 
         with self.core.transaction() as tx:
+            addressee_ref = context.self_ref if speaker_ref == context.user_ref else context.user_ref
+            local_domain_overrides = self._local_assertion_domain_overrides(
+                tx,
+                ordered,
+                context,
+                forced_domain=forced_domain,
+                speaker_ref=speaker_ref,
+                addressee_ref=addressee_ref,
+            )
             # Predicate/T resolution precedes actant/entity resolution for every
             # semantic act, not only assertions. Query/Command candidates do not
             # create N facts here, but an unknown predicate can still register the
@@ -267,20 +416,107 @@ class IntegrationService:
             # handling.
             for query in result.queries:
                 query_roles = [actant.role for actant in query.actants]
-                if query.requested_role is not None and query.requested_role not in query_roles:
-                    query_roles.append(query.requested_role)
-                TemplateResolver(tx, template_domain=Domain.C).resolve(
+                for requested_role in query.requested_roles:
+                    if requested_role not in query_roles:
+                        query_roles.append(requested_role)
+                resolution = TemplateResolver(tx, template_domain=Domain.C).resolve(
                     query.predicate, tuple(query_roles)
                 )
+                resolved_queries.append(
+                    replace(
+                        query,
+                        predicate=replace(
+                            query.predicate,
+                            template_selection=TemplateSelection(
+                                existing_template_uid=resolution.template.uid
+                            ),
+                        ),
+                    )
+                )
             for command in result.commands:
-                TemplateResolver(tx, template_domain=Domain.C).resolve(
+                resolution = TemplateResolver(tx, template_domain=Domain.C).resolve(
                     command.predicate, tuple(actant.role for actant in command.actants)
+                )
+                resolved_commands.append(
+                    replace(
+                        command,
+                        predicate=replace(
+                            command.predicate,
+                            template_selection=TemplateSelection(
+                                existing_template_uid=resolution.template.uid
+                            ),
+                        ),
+                    )
                 )
 
             for candidate in ordered:
+                # Quoted proposition content is canonicalized so a matrix speech
+                # predicate may reference it, but it is never an ordinary asserted
+                # world fact. Quotation is orthogonal to conditional status.
+                if candidate.quoted:
+                    integrated = self._integrate_assertion(
+                        tx,
+                        candidate,
+                        context,
+                        local_refs,
+                        entity_local_refs,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
+                        entity_anchors=entity_anchors,
+                        speaker_ref=speaker_ref,
+                        addressee_ref=addressee_ref,
+                        count_occurrence=False,
+                        semantic_scope="QUOTED",
+                    )
+                    proposition_ref = integrated.ref
+                    created = integrated.created
+                    if candidate.negated:
+                        false_g, false_created = tx.ensure_function(
+                            integrated.domain, "FALSE", (proposition_ref,)
+                        )
+                        proposition_ref = tx.ref(false_g.uid)
+                        created = created or false_created
+                    final = IntegratedAssertion(
+                        local_id=integrated.local_id,
+                        ref=proposition_ref,
+                        domain=integrated.domain,
+                        created=created,
+                        ambiguous=integrated.ambiguous,
+                        semantic_scope="QUOTED",
+                    )
+                    assertions.append(final)
+                    local_refs[candidate.local_id] = final.ref
+                    continue
+
+                # Embedded proposition content must exist canonically for matrix
+                # references, but mention alone does not assert it as a world fact.
+                if candidate.status is AssertionStatus.EMBEDDED:
+                    integrated = self._integrate_assertion(
+                        tx, candidate, context, local_refs, entity_local_refs,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
+                        entity_anchors=entity_anchors, speaker_ref=speaker_ref,
+                        addressee_ref=addressee_ref, count_occurrence=False,
+                        semantic_scope="EMBEDDED",
+                    )
+                    proposition_ref = integrated.ref
+                    created = integrated.created
+                    if candidate.negated:
+                        false_g, false_created = tx.ensure_function(
+                            integrated.domain, "FALSE", (proposition_ref,)
+                        )
+                        proposition_ref = tx.ref(false_g.uid)
+                        created = created or false_created
+                    final = IntegratedAssertion(
+                        local_id=integrated.local_id, ref=proposition_ref,
+                        domain=integrated.domain, created=created,
+                        ambiguous=integrated.ambiguous, semantic_scope="EMBEDDED",
+                    )
+                    assertions.append(final)
+                    local_refs[candidate.local_id] = final.ref
+                    continue
+
                 # Conditional branches are propositions under a semantic operator,
-                # not ordinary world assertions. Skip the asserted-fact path here;
-                # they are canonicalized below as scoped N operands of g_IF.
+                # not ordinary world assertions. Skip them here; they are
+                # canonicalized below as scoped operands of g_IF.
                 if candidate.status is not AssertionStatus.ASSERTED:
                     continue
                 integrated = self._integrate_assertion(
@@ -289,10 +525,10 @@ class IntegrationService:
                     context,
                     local_refs,
                     entity_local_refs,
-                    forced_domain,
+                    local_domain_overrides.get(candidate.local_id, forced_domain),
                     entity_anchors=entity_anchors,
                     speaker_ref=speaker_ref,
-                    addressee_ref=(context.self_ref if speaker_ref == context.user_ref else context.user_ref),
+                    addressee_ref=addressee_ref,
                     count_occurrence=not candidate.negated,
                 )
 
@@ -336,16 +572,19 @@ class IntegrationService:
                     if local_id in conditional_local_refs:
                         continue
                     candidate = conditional_assertions_by_id[local_id]
+                    if candidate.quoted and local_id in local_refs:
+                        conditional_local_refs[local_id] = local_refs[local_id]
+                        continue
                     integrated = self._integrate_assertion(
                         tx,
                         candidate,
                         context,
                         {**local_refs, **conditional_local_refs},
                         entity_local_refs,
-                        forced_domain,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
                         entity_anchors=entity_anchors,
                         speaker_ref=speaker_ref,
-                        addressee_ref=(context.self_ref if speaker_ref == context.user_ref else context.user_ref),
+                        addressee_ref=addressee_ref,
                         count_occurrence=False,
                         semantic_scope="CONDITIONAL",
                     )
@@ -360,15 +599,26 @@ class IntegrationService:
                 antecedent_members = tuple(conditional_local_refs[item] for item in conditional.antecedent_refs)
                 consequent_members = tuple(conditional_local_refs[item] for item in conditional.consequent_refs)
 
-                def compose_and(members: tuple[Ref, ...]) -> Ref:
-                    if len(members) == 1:
-                        return members[0]
-                    domain = DomainRouter(tx).route_external(members) if forced_domain is None else forced_domain
-                    conjunction, _ = tx.ensure_function(domain, "AND", members)
-                    return tx.ref(conjunction.uid)
+                def materialize_expr(expr: PropositionExprCandidate | None, fallback: tuple[str, ...]) -> Ref:
+                    if expr is None:
+                        expr = (
+                            PropositionExprCandidate.ref_expr(fallback[0])
+                            if len(fallback) == 1
+                            else PropositionExprCandidate(
+                                PropositionOperator.AND,
+                                members=tuple(PropositionExprCandidate.ref_expr(ref) for ref in fallback),
+                            )
+                        )
+                    if expr.operator is PropositionOperator.REF:
+                        assert expr.ref is not None
+                        return conditional_local_refs[expr.ref]
+                    members = tuple(materialize_expr(member, member.leaf_refs()) for member in expr.members)
+                    domain = forced_domain if forced_domain is not None else DomainRouter(tx).route_external(members)
+                    function, _ = tx.ensure_function(domain, expr.operator.value, members)
+                    return tx.ref(function.uid)
 
-                antecedent_ref = compose_and(antecedent_members)
-                consequent_ref = compose_and(consequent_members)
+                antecedent_ref = materialize_expr(conditional.antecedent_expr, conditional.antecedent_refs)
+                consequent_ref = materialize_expr(conditional.consequent_expr, conditional.consequent_refs)
                 conditional_domain = (
                     forced_domain
                     if forced_domain is not None
@@ -387,19 +637,29 @@ class IntegrationService:
                         member_refs=antecedent_members + consequent_members,
                     )
                 )
-                seeds.append(
-                    ActivationSeedRequest(
-                        conditional_ref,
-                        SeedReason.NEW_FACT if created else SeedReason.REACTIVATED_FACT,
-                    )
+                quoted_conditional = all(
+                    conditional_assertions_by_id[item].quoted
+                    for item in endpoint_ids
                 )
+                if not quoted_conditional:
+                    seeds.append(
+                        ActivationSeedRequest(
+                            conditional_ref,
+                            SeedReason.NEW_FACT if created else SeedReason.REACTIVATED_FACT,
+                        )
+                    )
 
             # Directional situation relations are materialized only after all local
-            # assertion references exist. L is a relation/channel, not an excitation
-            # node, so relation creation does not add activation seeds.
+            # assertion references exist. L has no semantic_scope field, therefore
+            # a relation touching quoted proposition content must never be emitted
+            # as an ordinary canonical world relation. The quoted proposition N
+            # remains available to its matrix speech-content structure.
+            quoted_assertion_ids = {item.local_id for item in ordered if item.quoted}
             for relation in result.relations:
-                # Relations wholly or partly inside a non-asserted conditional
-                # branch must not leak into canonical world knowledge either.
+                if relation.source_ref in quoted_assertion_ids or relation.target_ref in quoted_assertion_ids:
+                    continue
+                # Relations wholly or partly inside another non-asserted branch
+                # must not leak into canonical world knowledge either.
                 if relation.source_ref not in local_refs or relation.target_ref not in local_refs:
                     continue
                 source = local_refs[relation.source_ref]
@@ -444,6 +704,61 @@ class IntegrationService:
                 experience = mapper.attach_content(existing_experience_ref, semantic_refs)
                 experience_ref = experience.event_ref
 
+            # External language recognition has a second, post-semantic stage.
+            # TextSensory can stimulate already-known surface candidates before
+            # Perception, but an S created during this very turn does not exist yet
+            # at that point (and homographs are intentionally unresolved). After
+            # canonical integration we now know which predicate S actually
+            # participated in the user's semantic acts, so stimulate those lexical
+            # nodes strongly exactly once. Agent self-utterance integration is H-only
+            # and must not feed this external sensory pathway.
+            if forced_domain is None:
+                resolved_symbols: dict[str, Ref] = {}
+                visited: set[str] = set()
+
+                def collect_predicate_symbols(ref: Ref) -> None:
+                    if ref.uid in visited or not tx.store.has_uid(ref.uid):
+                        return
+                    visited.add(ref.uid)
+                    kind = tx.store.kind_of(ref.uid)
+                    if kind is RefKind.S:
+                        resolved_symbols[ref.uid] = tx.ref(ref.uid)
+                        return
+                    if kind is RefKind.T:
+                        template = tx.store.get_template(ref.uid)
+                        resolved_symbols[template.predicate.uid] = template.predicate
+                        return
+                    if kind is RefKind.N:
+                        node = tx.store.get_hypernode(ref.uid)
+                        template = tx.store.get_template(node.template.uid)
+                        resolved_symbols[template.predicate.uid] = template.predicate
+                        return
+                    if kind is RefKind.G:
+                        element = tx.store.get_element_any_domain(ref.uid)
+                        if isinstance(element, FunctionSymbol):
+                            for operand in element.operands:
+                                collect_predicate_symbols(operand)
+                        return
+                    if kind is RefKind.K:
+                        element = tx.store.get_element_any_domain(ref.uid)
+                        if isinstance(element, Group):
+                            for member in element.members:
+                                collect_predicate_symbols(member)
+
+                for item in assertions:
+                    collect_predicate_symbols(item.ref)
+                for item in conditionals:
+                    collect_predicate_symbols(item.ref)
+                for semantic_act in (*resolved_queries, *resolved_commands):
+                    selection = semantic_act.predicate.template_selection
+                    if selection is not None and selection.existing_template_uid:
+                        collect_predicate_symbols(tx.ref(selection.existing_template_uid))
+
+                seeds.extend(
+                    ActivationSeedRequest(ref, SeedReason.RESOLVED_SYMBOL)
+                    for ref in sorted(resolved_symbols.values(), key=lambda item: item.uid)
+                )
+
         assert experience_ref is not None
         context.last_experience_ref = experience_ref
         clarifications = self._clarification_requests(tuple(assertions))
@@ -452,13 +767,74 @@ class IntegrationService:
             experience_ref=experience_ref,
             activation_seeds=tuple(seeds),
             refutations=tuple(refutations),
-            unresolved_queries=result.queries,
-            unresolved_commands=result.commands,
+            unresolved_queries=tuple(item for item in resolved_queries if not item.quoted),
+            unresolved_commands=tuple(item for item in resolved_commands if not item.quoted),
             clarification_required=bool(clarifications),
             clarifications=clarifications,
             relations=tuple(relations),
             conditionals=tuple(conditionals),
         )
+
+    @staticmethod
+    def _local_assertion_domain_overrides(
+        core: AHCore,
+        ordered: tuple[AssertionCandidate, ...] | list[AssertionCandidate],
+        context: InteractionContext,
+        *,
+        forced_domain: Domain | None,
+        speaker_ref: Ref,
+        addressee_ref: Ref | None,
+    ) -> dict[str, Domain]:
+        """Propagate personalized provenance through local proposition content.
+
+        Dependency ordering may integrate a nested candidate before its enclosing
+        assertion.  Domain choice therefore cannot rely only on already-integrated
+        candidate_refs.  Seed P from direct deictic provenance, then propagate that
+        requirement through local candidate_ref containment before any N is built.
+        LLM output is not involved and no canonical UID is exposed to Perception.
+        """
+        if forced_domain is not None:
+            return {item.local_id: forced_domain for item in ordered}
+
+        resolver = EntityResolver(core)
+        by_id = {item.local_id: item for item in ordered}
+        personalized: set[str] = set()
+        for candidate in ordered:
+            variants = (candidate, *candidate.alternatives)
+            for variant in variants:
+                for actant in variant.actants:
+                    if actant.candidate_ref is not None or actant.composition is not None or actant.proposition is not None:
+                        continue
+                    resolved = resolver.deixis.resolve(
+                        actant,
+                        context,
+                        first_person_ref=speaker_ref,
+                        second_person_ref=addressee_ref,
+                    )
+                    if (
+                        resolved is not None
+                        and core.store.domain_of(resolved.uid) is Domain.P
+                    ):
+                        personalized.add(candidate.local_id)
+                        break
+                if candidate.local_id in personalized:
+                    break
+
+        queue = list(personalized)
+        while queue:
+            parent_id = queue.pop()
+            parent = by_id[parent_id]
+            for variant in (parent, *parent.alternatives):
+                for actant in variant.actants:
+                    child_ids = (() if actant.candidate_ref is None else (actant.candidate_ref,))
+                    if actant.proposition is not None:
+                        child_ids = (*child_ids, *actant.proposition.leaf_refs())
+                    for child_id in child_ids:
+                        if child_id not in by_id or child_id in personalized:
+                            continue
+                        personalized.add(child_id)
+                        queue.append(child_id)
+        return {local_id: Domain.P for local_id in personalized}
 
     def clarification_request(self, ambiguous_ref: Ref) -> ClarificationRequest:
         """Describe one canonical ``k_AMBIGUOUS`` without exposing internal UIDs.
@@ -868,7 +1244,7 @@ class IntegrationService:
         for assertion in result.assertions:
             for variant in (assertion, *assertion.alternatives):
                 for actant in variant.actants:
-                    if actant.entity_ref is None or actant.candidate_ref is not None or actant.composition is not None:
+                    if actant.entity_ref is None or actant.candidate_ref is not None or actant.composition is not None or actant.proposition is not None:
                         continue
                     grouped.setdefault(actant.entity_ref, []).append(actant)
 
@@ -999,6 +1375,8 @@ class IntegrationService:
                     return ("candidate_ref", actant.candidate_ref)
                 if actant.composition is not None:
                     return ("composition", repr(actant.composition))
+                if actant.proposition is not None:
+                    return ("proposition", repr(actant.proposition))
                 return ("mention", (actant.lookup_text or "").casefold())
 
             for role in role_maps[0]:
@@ -1030,6 +1408,12 @@ class IntegrationService:
                 ref = local_refs.get(actant.candidate_ref)
                 if ref is not None:
                     provenance_refs.append(ref)
+                continue
+            if actant.proposition is not None:
+                for local_id in actant.proposition.leaf_refs():
+                    ref = local_refs.get(local_id)
+                    if ref is not None:
+                        provenance_refs.append(ref)
                 continue
             if actant.entity_ref is not None and actant.entity_ref in entity_local_refs:
                 provenance_refs.append(entity_local_refs[actant.entity_ref])
@@ -1102,6 +1486,25 @@ class IntegrationService:
                     ),
                     members=tuple(option_members),
                 )
+                continue
+
+            if actant.proposition is not None:
+                def resolve_expr(expr: PropositionExprCandidate) -> Ref:
+                    if expr.operator is PropositionOperator.REF:
+                        assert expr.ref is not None
+                        try:
+                            return local_refs[expr.ref]
+                        except KeyError as exc:
+                            raise CandidateValidationError(
+                                f"proposition ref not integrated yet: {expr.ref}"
+                            ) from exc
+                    members = tuple(resolve_expr(member) for member in expr.members)
+                    domain = forced_domain if forced_domain is not None else DomainRouter(core).route_external(members)
+                    function, _ = core.ensure_function(domain, expr.operator.value, members)
+                    return core.ref(function.uid)
+                ref = resolve_expr(actant.proposition)
+                staged[actant.role] = ref
+                existing_refs.append(ref)
                 continue
 
             if actant.candidate_ref is not None:
@@ -1178,6 +1581,24 @@ class IntegrationService:
         ambiguous = False
 
         for role, item in staged.items():
+            coref_id = staged_corefs.get(role)
+            # A turn-local entity_ref is an identity commitment, not merely a
+            # similarity hint. Several roles inside the *same* assertion may be
+            # bound to the same previously unseen participant (for example
+            # reflexive/coreferential structures). Staging happens before any new
+            # entity is committed, so each occurrence can legitimately hold an
+            # equivalent NewEntityPlan. Once the first occurrence materializes,
+            # every later occurrence must reuse that canonical ref instead of
+            # creating a second M and then reporting a false inconsistency.
+            if coref_id is not None and coref_id in entity_local_refs:
+                prior = entity_local_refs[coref_id]
+                if isinstance(item, Ref) and item != prior:
+                    raise CandidateValidationError(
+                        f"entity_ref {coref_id!r} resolved inconsistently inside one perception result"
+                    )
+                actants[role] = prior
+                continue
+
             if isinstance(item, Ref):
                 actants[role] = item
             elif isinstance(item, NewEntityPlan):
@@ -1201,8 +1622,15 @@ class IntegrationService:
                 ambiguous = True
             elif isinstance(item, _ReferenceAlternativesPlan):
                 member_refs: list[Ref] = []
-                for coref_id, member in item.members:
-                    if isinstance(member, Ref):
+                for member_coref_id, member in item.members:
+                    prior = entity_local_refs.get(member_coref_id) if member_coref_id is not None else None
+                    if prior is not None:
+                        if isinstance(member, Ref) and member != prior:
+                            raise CandidateValidationError(
+                                f"entity_ref {member_coref_id!r} resolved inconsistently inside one perception result"
+                            )
+                        ref = prior
+                    elif isinstance(member, Ref):
                         ref = member
                     elif isinstance(member, NewEntityPlan):
                         entity = core.add_entity(
@@ -1224,13 +1652,13 @@ class IntegrationService:
                         ref = core.ref(group.uid)
                     else:
                         raise AssertionError(f"Unhandled alternative member: {member!r}")
-                    if coref_id is not None:
-                        prior = entity_local_refs.get(coref_id)
+                    if member_coref_id is not None:
+                        prior = entity_local_refs.get(member_coref_id)
                         if prior is not None and prior != ref:
                             raise CandidateValidationError(
-                                f"entity_ref {coref_id!r} resolved inconsistently inside one perception result"
+                                f"entity_ref {member_coref_id!r} resolved inconsistently inside one perception result"
                             )
-                        entity_local_refs[coref_id] = ref
+                        entity_local_refs[member_coref_id] = ref
                     if ref not in member_refs:
                         member_refs.append(ref)
                 if not member_refs:
@@ -1282,7 +1710,6 @@ class IntegrationService:
             else:
                 raise AssertionError(f"Unhandled staged actant: {item!r}")
 
-            coref_id = staged_corefs.get(role)
             if coref_id is not None:
                 resolved = actants[role]
                 prior = entity_local_refs.get(coref_id)
@@ -1307,4 +1734,5 @@ class IntegrationService:
             domain=domain,
             created=created,
             ambiguous=ambiguous,
+            semantic_scope=semantic_scope,
         )

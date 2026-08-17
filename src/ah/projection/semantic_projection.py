@@ -6,6 +6,7 @@ from ah.config import ContextSettings
 from ah.core import AHCore
 from ah.model import (
     AbstractSymbol,
+    ActantRole,
     FunctionSymbol,
     Group,
     Hypernode,
@@ -120,6 +121,29 @@ class SemanticProjector:
             return self._label(ref, semantic)
 
         if isinstance(obj, Hypernode):
+            # H dialogue events own their raw utterance text.  For ACTIVE operator/
+            # AgentContext projection the utterance itself is the most useful
+            # human-readable semantics; the generic VYSKAZAT template is only a
+            # structural carrier and must not hide every turn behind the same label.
+            if mode is ProjectionMode.ACTIVE and bool(obj.meta.get("event_instance", False)):
+                text_prop = obj.properties.get("text")
+                if text_prop is not None and isinstance(text_prop.value, str):
+                    speaker = "реплика"
+                    subject_ref = obj.actants.get(ActantRole.SUBJECT)
+                    if subject_ref is not None and subject_ref.kind is RefKind.M:
+                        try:
+                            subject = self.core.store.get_element_any_domain(subject_ref.uid)
+                            if isinstance(subject, SemanticEntity):
+                                identity_role = str(subject.meta.get("identity_role", "")).upper()
+                                if identity_role == "USER":
+                                    speaker = "реплика пользователя"
+                                elif identity_role == "SELF":
+                                    speaker = "реплика агента"
+                        except Exception:
+                            pass
+                    semantic = f"{speaker}: {text_prop.value}"
+                    return self._label(ref, semantic)
+
             template = self.core.store.get_template(obj.template.uid)
             predicate = self._render(template.predicate, ProjectionMode.DEPENDENCY, child_state)
             role_chunks: list[str] = []

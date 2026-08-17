@@ -204,145 +204,6 @@ def _serialize_context(context: InteractionContext | None) -> dict[str, Any] | N
 
 
 
-def _repair_duplicate_symbol_payload(raw: dict[str, Any]) -> tuple[str, ...]:
-    """Repair legacy persisted S duplicates produced by the pre-0.7.5 GUI.
-
-    Canonical S is global (not C/P/H scoped) and one case-folded wordform may belong
-    to only one S. Older manual GUI code could insert a second S and fail only while
-    indexing, leaving the canonical record in memory and later on disk. This migration
-    merges overlapping S components and rewrites every serialized S reference before
-    indexes are rebuilt. It is intentionally narrow: m/N/domain dedup is not changed.
-    """
-    canonical = raw.get("canonical")
-    if not isinstance(canonical, dict):
-        return ()
-    symbols = canonical.get("symbols")
-    if not isinstance(symbols, list) or len(symbols) < 2:
-        return ()
-
-    parent: dict[str, str] = {}
-    by_uid: dict[str, dict[str, Any]] = {}
-
-    def find(uid: str) -> str:
-        parent.setdefault(uid, uid)
-        while parent[uid] != uid:
-            parent[uid] = parent[parent[uid]]
-            uid = parent[uid]
-        return uid
-
-    def union(a: str, b: str) -> None:
-        ra, rb = find(a), find(b)
-        if ra == rb:
-            return
-        # Stable root makes the repaired file deterministic.
-        if ra < rb:
-            parent[rb] = ra
-        else:
-            parent[ra] = rb
-
-    form_owner: dict[str, str] = {}
-    for item in symbols:
-        if not isinstance(item, dict) or "uid" not in item:
-            continue
-        uid = str(item["uid"])
-        by_uid[uid] = item
-        find(uid)
-        for value in item.get("forms", []):
-            key = str(value).casefold()
-            previous = form_owner.get(key)
-            if previous is not None and previous != uid:
-                union(previous, uid)
-            else:
-                form_owner[key] = uid
-
-    components: dict[str, list[str]] = {}
-    for uid in by_uid:
-        components.setdefault(find(uid), []).append(uid)
-    duplicate_components = [sorted(values) for values in components.values() if len(values) > 1]
-    if not duplicate_components:
-        return ()
-
-    remap: dict[str, str] = {}
-    merged_forms: dict[str, set[str]] = {}
-    for component in duplicate_components:
-        keep = component[0]
-        merged_forms.setdefault(keep, set()).update(str(v) for v in by_uid[keep].get("forms", []))
-        for uid in component[1:]:
-            remap[uid] = keep
-            merged_forms[keep].update(str(v) for v in by_uid[uid].get("forms", []))
-
-    new_symbols: list[dict[str, Any]] = []
-    for item in symbols:
-        uid = str(item.get("uid", "")) if isinstance(item, dict) else ""
-        if uid in remap:
-            continue
-        if uid in merged_forms:
-            item = dict(item)
-            item["forms"] = sorted(merged_forms[uid])
-        new_symbols.append(item)
-    canonical["symbols"] = new_symbols
-
-    def rewrite_refs(value: Any) -> Any:
-        if isinstance(value, list):
-            return [rewrite_refs(v) for v in value]
-        if not isinstance(value, dict):
-            return value
-        out = {k: rewrite_refs(v) for k, v in value.items()}
-        if out.get("kind") == RefKind.S.value and str(out.get("uid")) in remap:
-            out["uid"] = remap[str(out["uid"])]
-        return out
-
-    canonical["elements"] = rewrite_refs(canonical.get("elements", []))
-    canonical["links"] = rewrite_refs(canonical.get("links", []))
-    raw["interaction_context"] = rewrite_refs(raw.get("interaction_context"))
-
-    # Runtime records are keyed directly by UID rather than serialized Ref objects.
-    states = raw.get("runtime_states")
-    if isinstance(states, dict):
-        for old_uid, keep_uid in remap.items():
-            old = states.pop(old_uid, None)
-            if not isinstance(old, dict):
-                continue
-            current = states.get(keep_uid)
-            if not isinstance(current, dict):
-                states[keep_uid] = old
-                continue
-            # Preserve the more excited state while retaining an activation event from
-            # either legacy duplicate. This avoids inventing additive excitation.
-            if float(old.get("excitation", 0.0)) > float(current.get("excitation", 0.0)):
-                chosen = dict(old)
-            else:
-                chosen = dict(current)
-            chosen["activation_event"] = bool(old.get("activation_event", False)) or bool(
-                current.get("activation_event", False)
-            )
-            states[keep_uid] = chosen
-
-    ignition = raw.get("ignition")
-    if isinstance(ignition, dict):
-        incoming = ignition.get("incoming")
-        if isinstance(incoming, dict):
-            for old_uid, keep_uid in remap.items():
-                if old_uid in incoming:
-                    incoming[keep_uid] = float(incoming.get(keep_uid, 0.0)) + float(incoming.pop(old_uid))
-        reasons = ignition.get("seed_reasons")
-        if isinstance(reasons, dict):
-            for old_uid, keep_uid in remap.items():
-                old_reasons = reasons.pop(old_uid, None)
-                if old_reasons is None:
-                    continue
-                merged = list(reasons.get(keep_uid, []))
-                for reason in old_reasons:
-                    if reason not in merged:
-                        merged.append(reason)
-                reasons[keep_uid] = merged
-
-    return tuple(
-        f"merged duplicate S {', '.join(component[1:])} -> {component[0]}"
-        for component in duplicate_components
-    )
-
-
 def _parse_context(core: AHCore, raw: dict[str, Any] | None) -> InteractionContext | None:
     if raw is None:
         return None
@@ -423,6 +284,16 @@ class JsonPersistence:
                 ],
             },
             "interaction_context": _serialize_context(context),
+            # Diagnostic insertion chronology is persisted separately from
+            # canonical AH. It never participates in identity/inference and is
+            # optional for backward compatibility with older schema-1 files.
+            "store_metadata": {
+                "creation_sequence": {
+                    uid: int(seq)
+                    for uid, seq in sorted(core.store.creation_items(), key=lambda item: item[1])
+                },
+                "next_creation_sequence": int(core.store._state.next_creation_sequence),
+            },
         }
 
         if self.settings.save_runtime_state:
@@ -437,6 +308,8 @@ class JsonPersistence:
                 "incoming": snap.incoming,
                 "seed_reasons": {k: list(v) for k, v in snap.seed_reasons.items()},
                 "pending_refutations": list(snap.pending_refutations),
+                "pacemaker_incoming": dict(snap.pacemaker_incoming),
+                "pacemaker_only_excitation": list(snap.pacemaker_only_excitation),
                 "pacemaker": {
                     "phase": snap.pacemaker.phase,
                     "cursor": snap.pacemaker.cursor,
@@ -485,15 +358,6 @@ class JsonPersistence:
         version = int(raw.get("schema_version", 0))
         if version != SCHEMA_VERSION:
             raise PersistenceError(f"Unsupported persistence schema {version}; expected {SCHEMA_VERSION}")
-
-        repairs = _repair_duplicate_symbol_payload(raw)
-        if repairs:
-            import warnings
-            warnings.warn(
-                "Persistence compatibility repair: " + "; ".join(repairs),
-                RuntimeWarning,
-                stacklevel=2,
-            )
 
         store = AHStore()
         canonical = raw.get("canonical") or {}
@@ -550,6 +414,17 @@ class JsonPersistence:
             store._state.links[link.uid] = link
 
         store.rebuild_indexes()
+        metadata = raw.get("store_metadata") or {}
+        creation_raw = metadata.get("creation_sequence") or {}
+        if creation_raw:
+            store._restore_creation_sequence(
+                {str(uid): int(seq) for uid, seq in creation_raw.items()},
+                next_sequence=(
+                    None
+                    if metadata.get("next_creation_sequence") is None
+                    else int(metadata.get("next_creation_sequence"))
+                ),
+            )
         core = AHCore(store, uid_generator or UuidUidGenerator())
         self._validate_loaded_core(core)
 
@@ -560,6 +435,11 @@ class JsonPersistence:
                 for uid, _ in core.store.runtime_items()
             }
             core.store._replace_runtime_states(states)
+
+        if not (raw.get("store_metadata") or {}).get("creation_sequence"):
+            # Pre-v0.31 files did not persist insertion chronology. Reconstruct the
+            # best possible order now that runtime first-excitation ticks are known.
+            core.store._rebuild_legacy_creation_sequence()
 
         ign_raw = raw.get("ignition")
         ignition_snapshot = None
@@ -576,6 +456,13 @@ class JsonPersistence:
                     phase=float(pac_raw.get("phase", 0.0)),
                     cursor=int(pac_raw.get("cursor", 0)),
                     pulse_count=int(pac_raw.get("pulse_count", 0)),
+                ),
+                pacemaker_incoming={
+                    str(k): float(v)
+                    for k, v in (ign_raw.get("pacemaker_incoming") or {}).items()
+                },
+                pacemaker_only_excitation=tuple(
+                    str(x) for x in (ign_raw.get("pacemaker_only_excitation") or [])
                 ),
             )
             self._last_saved_tick = ignition_snapshot.tick_index

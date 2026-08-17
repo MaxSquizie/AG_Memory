@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Different optional roles/circumstances do not by themselves create a new sense; select an existing option when predicate meaning is unchanged and let valency expand. Use NEW only for a distinct predicate meaning and UNCLEAR when text does not decide safely. Return only the label. Do not explain.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from copy import deepcopy
 import json
 from pathlib import Path
 import re
@@ -17,6 +18,9 @@ class SemanticOracleCase:
     grade: str
     expectation: Mapping[str, Any]
     note: str | None = None
+    family: str = "uncategorized"
+    tags: tuple[str, ...] = ()
+    scenario_id: str = "legacy-sequential"
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +30,8 @@ class SemanticCaseVerdict:
     status: str
     checks: tuple[dict[str, Any], ...]
     note: str | None = None
+    family: str = "uncategorized"
+    tags: tuple[str, ...] = ()
 
     @property
     def failures(self) -> tuple[dict[str, Any], ...]:
@@ -39,6 +45,7 @@ class SemanticOracleReport:
     failed: int
     gaps: int
     cases: tuple[SemanticCaseVerdict, ...]
+    family_counts: Mapping[str, Mapping[str, int]]
 
 
 class SemanticOracleError(RuntimeError):
@@ -73,7 +80,19 @@ def load_semantic_oracle(path: str | Path) -> tuple[SemanticOracleCase, ...]:
         if not isinstance(expectation, dict):
             raise SemanticOracleError(f"Oracle case #{index} expect must be an object")
         note = item.get("note")
-        result.append(SemanticOracleCase(index, text, grade, expectation, str(note) if note else None))
+        family = str(item.get("family") or "uncategorized").strip() or "uncategorized"
+        raw_tags = item.get("tags", [])
+        if raw_tags is None:
+            raw_tags = []
+        if not isinstance(raw_tags, list) or any(not isinstance(tag, str) for tag in raw_tags):
+            raise SemanticOracleError(f"Oracle case #{index} tags must be a list of strings")
+        tags = tuple(dict.fromkeys(tag.strip() for tag in raw_tags if tag.strip()))
+        scenario_id = str(item.get("scenario") or "legacy-sequential").strip() or "legacy-sequential"
+        result.append(
+            SemanticOracleCase(
+                index, text, grade, expectation, str(note) if note else None, family, tags, scenario_id
+            )
+        )
     return tuple(result)
 
 
@@ -332,9 +351,21 @@ def _match_queries(
         expected_mode = str(expected.get("mode", "EXISTS")).upper()
         actual_mode = str(actual.get("query_mode", "EXISTS")).upper()
         _check(checks, f"{prefix}.mode", actual_mode == expected_mode, expected=expected_mode, actual=actual_mode)
-        expected_requested = expected.get("requested_role")
-        actual_requested = actual.get("requested_role")
-        _check(checks, f"{prefix}.requested_role", str(actual_requested or "") == str(expected_requested or ""), expected=expected_requested, actual=actual_requested)
+        expected_requested_roles = expected.get("requested_roles")
+        if expected_requested_roles is None:
+            scalar = expected.get("requested_role")
+            expected_requested_roles = [] if scalar in (None, "") else [scalar]
+        actual_requested_roles = actual.get("requested_roles")
+        if actual_requested_roles is None:
+            scalar = actual.get("requested_role")
+            actual_requested_roles = [] if scalar in (None, "") else [scalar]
+        expected_requested_roles = [str(item) for item in expected_requested_roles]
+        actual_requested_roles = [str(item) for item in actual_requested_roles]
+        _check(
+            checks, f"{prefix}.requested_roles",
+            actual_requested_roles == expected_requested_roles,
+            expected=expected_requested_roles, actual=actual_requested_roles,
+        )
         expected_roles = expected.get("roles", {}) or {}
         actual_roles = _role_map(actual)
         _check(checks, f"{prefix}.role_set", set(actual_roles) == set(expected_roles), expected=sorted(expected_roles), actual=sorted(actual_roles))
@@ -613,13 +644,27 @@ def _match_canonical_assertions(
     expected_by_key = {str(item.get("key") or f"a{i + 1}"): item for i, item in enumerate(expected_assertions)}
     expected_ref_map = _canonical_assertion_ref_map(record, expected_key_to_local)
     for key, expected in expected_by_key.items():
-        if str(expected.get("status", "ASSERTED")).upper() == "CONDITIONAL":
+        expected_status = str(expected.get("status", "ASSERTED")).upper()
+        if expected_status == "CONDITIONAL":
             continue
         prefix = f"canonical.assertions.{key}"
         ref = expected_ref_map.get(key)
         _check(checks, f"{prefix}.integrated", ref is not None, expected=True, actual=ref is not None)
         if ref is None:
             continue
+        if expected_status == "EMBEDDED":
+            scoped_node = _scoped_member_node(snapshot, ref)
+            scoped_ok = bool(
+                scoped_node is not None
+                and scoped_node.get("meta", {}).get("semantic_scope") == "EMBEDDED"
+            )
+            _check(
+                checks, f"{prefix}.scoped", scoped_ok,
+                expected="semantic_scope=EMBEDDED", actual=(
+                    scoped_node.get("meta", {}).get("semantic_scope")
+                    if scoped_node is not None else None
+                ),
+            )
         predicate_forms = _canonical_assertion_predicate_forms(snapshot, ref)
         expected_predicate = str(expected.get("predicate", ""))
         predicate_ok = any(_norm(form) == _norm(expected_predicate) for form in predicate_forms)
@@ -816,10 +861,57 @@ def _match_integration(
     expected_cp_additions = integration_expectation.get("cp_semantic_addition_count")
     if expected_cp_additions is not None:
         added = (record.get("ah_diff", {}) or {}).get("added", {}) or {}
+
+        def ref_domain(ref: Any) -> str | None:
+            if not isinstance(ref, dict):
+                return None
+            uid = ref.get("uid")
+            if uid is None:
+                return None
+            target = snapshot.get(str(uid))
+            if not isinstance(target, dict):
+                return None
+            domain = target.get("domain")
+            return str(domain) if domain is not None else None
+
+        # H experiences use canonical T wrappers even though the experiences
+        # themselves live in H.  In a scenario-isolated acceptance run that
+        # infrastructure T may be created on the first turn of every scenario.
+        # It is not a C/P interpretation of the user's sentence and therefore
+        # must not make a safe H-only clarification look like a world-semantic
+        # write.  Detect these wrappers structurally rather than by predicate
+        # spelling: an added T is H infrastructure when an added H event_instance
+        # N points to it as its template.
+        h_experience_template_uids = {
+            str((item.get("template") or {}).get("uid"))
+            for item in added.values()
+            if isinstance(item, dict)
+            and item.get("kind") == "N"
+            and item.get("domain") == "H"
+            and bool((item.get("meta") or {}).get("event_instance"))
+            and isinstance(item.get("template"), dict)
+            and (item.get("template") or {}).get("uid")
+        }
+
+        def is_cp_semantic_addition(uid: str, item: Mapping[str, Any]) -> bool:
+            if item.get("kind") == "T" and uid in h_experience_template_uids:
+                return False
+            if item.get("domain") in {"C", "P"}:
+                return True
+            if item.get("kind") != "L":
+                return False
+            # Links are domainless canonical objects. Count them as C/P semantic
+            # additions only when they actually touch C/P semantics. H→H FOLLOW
+            # links belong to experience chronology and must not make a safe
+            # structural-clarification turn look like a world-semantic write.
+            return any(
+                ref_domain(item.get(endpoint)) in {"C", "P"}
+                for endpoint in ("source", "target")
+            )
+
         semantic_added = [
             uid for uid, item in added.items()
-            if isinstance(item, dict)
-            and (item.get("domain") in {"C", "P"} or item.get("kind") == "L")
+            if isinstance(item, dict) and is_cp_semantic_addition(str(uid), item)
         ]
         _check(
             checks, "integration.cp_semantic_addition_count",
@@ -887,7 +979,8 @@ def _match_integration(
         if index >= len(actual_query_outcomes):
             break
         item = actual_query_outcomes[index]
-        outcome = item.get("outcome", {}) if isinstance(item, dict) else {}
+        raw_outcome = item.get("outcome") if isinstance(item, dict) else None
+        outcome = raw_outcome if isinstance(raw_outcome, dict) else {}
         expected_status = str(expected.get("status", "PROVED"))
         actual_status = str(outcome.get("status", ""))
         _check(checks, f"inference.q{index + 1}.status", actual_status == expected_status, expected=expected_status, actual=actual_status)
@@ -901,6 +994,30 @@ def _match_integration(
             value_ref = conclusion.get("value") if isinstance(conclusion, dict) else None
             actual_value = _resolve_ref_value(snapshot, value_ref) if isinstance(value_ref, dict) else None
             _check(checks, f"inference.q{index + 1}.value", not isinstance(actual_value, dict) and _norm(actual_value) == _norm(expected_value), expected=expected_value, actual=actual_value)
+        expected_bindings = expected.get("bindings")
+        if isinstance(expected_bindings, dict):
+            actual_bindings_raw = conclusion.get("bindings", []) if isinstance(conclusion, dict) else []
+            actual_bindings: dict[str, Any] = {}
+            for pair in actual_bindings_raw or []:
+                if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+                    continue
+                role, value_ref = pair
+                actual_bindings[str(role)] = (
+                    _resolve_ref_value(snapshot, value_ref) if isinstance(value_ref, dict) else None
+                )
+            _check(
+                checks, f"inference.q{index + 1}.binding_roles",
+                set(actual_bindings) == set(str(role) for role in expected_bindings),
+                expected=sorted(str(role) for role in expected_bindings),
+                actual=sorted(actual_bindings),
+            )
+            for role, expected_binding in expected_bindings.items():
+                actual_binding = actual_bindings.get(str(role))
+                _check(
+                    checks, f"inference.q{index + 1}.bindings.{role}",
+                    not isinstance(actual_binding, dict) and _norm(actual_binding) == _norm(expected_binding),
+                    expected=expected_binding, actual=actual_binding,
+                )
 
 
 def _update_required_template_roles(
@@ -909,7 +1026,7 @@ def _update_required_template_roles(
     expected_queries: Sequence[Mapping[str, Any]],
 ) -> None:
     for item in expected_assertions:
-        if str(item.get("status", "ASSERTED")).upper() not in {"ASSERTED", "CONDITIONAL"}:
+        if str(item.get("status", "ASSERTED")).upper() not in {"ASSERTED", "EMBEDDED", "CONDITIONAL"}:
             continue
         predicate = str(item.get("predicate", ""))
         if not predicate:
@@ -921,9 +1038,13 @@ def _update_required_template_roles(
             continue
         roles = requirements.setdefault(predicate, set())
         roles.update(str(role) for role in (item.get("roles", {}) or {}))
-        requested = item.get("requested_role")
-        if requested:
-            roles.add(str(requested))
+        requested_many = item.get("requested_roles")
+        if requested_many is not None:
+            roles.update(str(requested) for requested in requested_many)
+        else:
+            requested = item.get("requested_role")
+            if requested:
+                roles.add(str(requested))
 
 
 def _check_template_coverage(
@@ -1005,16 +1126,30 @@ def evaluate_semantic_case(
         status = "GAP"
     else:
         status = "PASS"
-    return SemanticCaseVerdict(oracle_case.index, oracle_case.text, status, tuple(checks), oracle_case.note)
+    return SemanticCaseVerdict(
+        oracle_case.index, oracle_case.text, status, tuple(checks), oracle_case.note,
+        oracle_case.family, oracle_case.tags,
+    )
 
 
 def summarize_semantic_verdicts(verdicts: Sequence[SemanticCaseVerdict]) -> SemanticOracleReport:
+    family_counts: dict[str, dict[str, int]] = {}
+    for item in verdicts:
+        bucket = family_counts.setdefault(item.family, {"total": 0, "passed": 0, "failed": 0, "gaps": 0})
+        bucket["total"] += 1
+        if item.status == "PASS":
+            bucket["passed"] += 1
+        elif item.status == "FAIL":
+            bucket["failed"] += 1
+        elif item.status == "GAP":
+            bucket["gaps"] += 1
     return SemanticOracleReport(
         total=len(verdicts),
         passed=sum(item.status == "PASS" for item in verdicts),
         failed=sum(item.status == "FAIL" for item in verdicts),
         gaps=sum(item.status == "GAP" for item in verdicts),
         cases=tuple(verdicts),
+        family_counts=family_counts,
     )
 
 
@@ -1040,10 +1175,16 @@ def evaluate_acceptance_bundle(
     initial_path = root / "initial_ah.json"
     if not initial_path.is_file():
         raise FileNotFoundError(f"Acceptance bundle has no initial_ah.json: {root}")
-    snapshot: dict[str, dict[str, Any]] = json.loads(initial_path.read_text(encoding="utf-8"))
+    initial_snapshot: dict[str, dict[str, Any]] = json.loads(initial_path.read_text(encoding="utf-8"))
+    snapshot: dict[str, dict[str, Any]] = deepcopy(initial_snapshot)
     required_template_roles: dict[str, set[str]] = {}
     verdicts: list[SemanticCaseVerdict] = []
+    active_scenario: str | None = None
     for case in oracle:
+        if active_scenario != case.scenario_id:
+            snapshot = deepcopy(initial_snapshot)
+            required_template_roles = {}
+            active_scenario = case.scenario_id
         turn_path = root / f"turn_{case.index:03d}.json"
         if not turn_path.is_file():
             raise FileNotFoundError(f"Acceptance bundle missing {turn_path.name}")
@@ -1063,12 +1204,15 @@ def evaluate_acceptance_bundle(
             "passed": report.passed,
             "failed": report.failed,
             "gaps": report.gaps,
+            "families": report.family_counts,
             "cases": [
                 {
                     "index": item.index,
                     "text": item.text,
                     "status": item.status,
                     "note": item.note,
+                    "family": item.family,
+                    "tags": list(item.tags),
                     "checks": list(item.checks),
                 }
                 for item in report.cases
@@ -1078,7 +1222,14 @@ def evaluate_acceptance_bundle(
         lines = [
             f"Semantic oracle: PASS {report.passed}/{report.total} | FAIL {report.failed} | GAP {report.gaps}",
             "",
+            "Families:",
         ]
+        for family, counts in report.family_counts.items():
+            lines.append(
+                f"  {family}: PASS {counts['passed']}/{counts['total']} | "
+                f"FAIL {counts['failed']} | GAP {counts['gaps']}"
+            )
+        lines.append("")
         for item in report.cases:
             line = f"{item.index:03d} {item.status}: {item.text}"
             if item.failures:

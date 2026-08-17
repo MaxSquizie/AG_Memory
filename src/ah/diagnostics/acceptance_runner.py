@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields, is_dataclass
+from copy import deepcopy
 from datetime import datetime
 from enum import Enum
 import json
@@ -44,6 +45,44 @@ class AcceptanceRunResult:
     semantic_failed: int = 0
     semantic_gaps: int = 0
     oracle_file: Path | None = None
+
+
+@dataclass(slots=True)
+class _AcceptanceRuntimeState:
+    store: Any
+    context: Any
+    ignition: Any
+
+
+def _capture_runtime_state(services: "RuntimeServices") -> _AcceptanceRuntimeState:
+    """Capture the mutable cognitive state without touching the loaded LLM backend."""
+    return _AcceptanceRuntimeState(
+        store=services.core.store.clone(),
+        context=deepcopy(services.context),
+        ignition=services.ignition.export_snapshot(include_pending=True),
+    )
+
+
+def _restore_context(target: Any, source: Any) -> None:
+    """Restore InteractionContext in place so existing closures keep the same object."""
+    if is_dataclass(source) and not isinstance(source, type):
+        for field in fields(source):
+            setattr(target, field.name, deepcopy(getattr(source, field.name)))
+        return
+    if hasattr(target, "__dict__") and hasattr(source, "__dict__"):
+        target.__dict__.clear()
+        target.__dict__.update(deepcopy(source.__dict__))
+        return
+    raise TypeError(f"Unsupported acceptance context type: {type(target).__name__}")
+
+
+def _restore_runtime_state(services: "RuntimeServices", state: _AcceptanceRuntimeState) -> None:
+    services.core.store.replace_from(state.store)
+    _restore_context(services.context, state.context)
+    restore = getattr(services.ignition, "restore_snapshot", None)
+    if restore is None:
+        raise TypeError("Acceptance isolation requires ignition.restore_snapshot()")
+    restore(state.ignition)
 
 
 def load_acceptance_cases(path: str | Path) -> tuple[AcceptanceCase, ...]:
@@ -240,8 +279,10 @@ def run_acceptance_suite(
 
     This is diagnostics only: it does not repair, retry or reinterpret failed turns.
     Every request uses the normal sensory/perception/integration/inference/projection
-    path in one live AH/context session.  The diagnostic suite intentionally stops
-    at AgentContext: generated agent prose is irrelevant to parser/T/N acceptance
+    path. Oracle scenario IDs define the only intentional memory continuity: AH,
+    InteractionContext and Ignition state are restored to the run baseline between
+    scenarios, and the user's pre-run live state is restored when diagnostics end.
+    The diagnostic suite intentionally stops at AgentContext: generated agent prose is irrelevant to parser/T/N acceptance
     and would add large, growing generation caches plus unrelated H utterances.
     Failures are recorded and the suite proceeds to the next independent user turn.
     """
@@ -266,154 +307,230 @@ def run_acceptance_suite(
     morphology = build_morphology(services.config.llm.perception_morphology_backend)
     candidate_builder = LinguisticCandidateBuilder(morphology)
 
+    clock = getattr(services, "clock", None)
+    clock_was_running = bool(clock is not None and getattr(clock, "running", False))
+    if clock_was_running:
+        clock.stop()
+
     with services.operation_lock:
-        initial_ah = canonical_ah_snapshot(services)
-        initial_runtime = _runtime_summary(services)
-    _write_json(output_dir / "config.json", services.config)
-    _write_json(output_dir / "initial_context.json", services.context)
-    _dump_json(output_dir / "initial_ah.json", initial_ah)
-    _dump_json(output_dir / "initial_runtime.json", initial_runtime)
-    del initial_ah, initial_runtime
+        live_state = _capture_runtime_state(services)
+        baseline_state = _capture_runtime_state(services)
 
-    manifest_cases: list[dict[str, Any]] = []
-    succeeded = 0
-    failed = 0
-    semantic_passed = 0
-    semantic_failed = 0
-    semantic_gaps = 0
-    required_template_roles: dict[str, set[str]] = {}
-
-    for case in cases:
-        parser_floor, request_floor = _diagnostic_floors(services)
+    try:
         with services.operation_lock:
-            before = canonical_ah_snapshot(services)
+            initial_ah = canonical_ah_snapshot(services)
+            initial_runtime = _runtime_summary(services)
+        _write_json(output_dir / "config.json", services.config)
+        _write_json(output_dir / "initial_context.json", services.context)
+        _dump_json(output_dir / "initial_ah.json", initial_ah)
+        _dump_json(output_dir / "initial_runtime.json", initial_runtime)
+        del initial_ah, initial_runtime
 
-        record: dict[str, Any] = {
-            "index": case.index,
-            "input": case.text,
-            "status": "ERROR",
-        }
-        error_text: str | None = None
-        try:
-            linguistic_graph = candidate_builder.build(case.text)
-            record["linguistic_candidate_graph"] = _jsonable(linguistic_graph)
-            orchestrator = services.create_orchestrator()
-            turn = orchestrator.handle_user_text(case.text, generate_response=False)
-            record["perception_result"] = _jsonable(turn.perception)
-            record["integration_commit"] = _jsonable(turn.integration)
-            record["queries"] = _jsonable(turn.queries)
-            record["agent_context"] = _jsonable(turn.agent_context)
-            record["agent_response"] = None
-            record["agent_generation_skipped"] = True
-            record["response_perception"] = _jsonable(turn.response_perception)
-            record["response_integration"] = _jsonable(turn.response_integration)
-            record["status"] = "OK"
-            succeeded += 1
-        except Exception as exc:  # diagnostics boundary: preserve the real failure verbatim
-            error_text = f"{type(exc).__name__}: {exc}"
-            record["error"] = error_text
-            record["traceback"] = traceback.format_exc()
-            failed += 1
+        manifest_cases: list[dict[str, Any]] = []
+        succeeded = 0
+        failed = 0
+        semantic_passed = 0
+        semantic_failed = 0
+        semantic_gaps = 0
+        required_template_roles: dict[str, set[str]] = {}
 
-        with services.operation_lock:
-            after = canonical_ah_snapshot(services)
-            runtime_after = _runtime_summary(services)
-        record["parser_diagnostics"] = _parser_diagnostics_since(services, parser_floor)
-        record["llm_requests"] = _request_diagnostics_since(services, request_floor)
-        record["ah_diff"] = diff_canonical_ah(before, after)
-        record["runtime_after"] = runtime_after
-        record["interaction_context_after"] = _jsonable(services.context)
+        active_scenario: str | None = None
+        for case in cases:
+            oracle_case = oracle_cases[case.index - 1]
+            if active_scenario != oracle_case.scenario_id:
+                with services.operation_lock:
+                    _restore_runtime_state(services, baseline_state)
+                required_template_roles = {}
+                active_scenario = oracle_case.scenario_id
 
-        semantic_verdict = evaluate_semantic_case(
-            record,
-            oracle_cases[case.index - 1],
-            after,
-            required_template_roles,
-        )
-        record["semantic_status"] = semantic_verdict.status
-        record["semantic_checks"] = list(semantic_verdict.checks)
-        record["semantic_note"] = semantic_verdict.note
-        if semantic_verdict.status == "PASS":
-            semantic_passed += 1
-        elif semantic_verdict.status == "GAP":
-            semantic_gaps += 1
-        else:
-            semantic_failed += 1
+            parser_floor, request_floor = _diagnostic_floors(services)
+            with services.operation_lock:
+                before = canonical_ah_snapshot(services)
 
-        filename = f"turn_{case.index:03d}.json"
-        # record is already normalized field-by-field above. Writing it directly
-        # avoids recursively cloning the complete diagnostic payload a second time.
-        _dump_json(output_dir / filename, record)
-        manifest_cases.append(
-            {
+            record: dict[str, Any] = {
                 "index": case.index,
                 "input": case.text,
-                "status": record["status"],
-                "semantic_status": record["semantic_status"],
-                "semantic_failures": [
-                    item["name"] for item in record["semantic_checks"] if not item.get("ok", False)
-                ],
-                "error": error_text,
-                "file": filename,
+                "status": "ERROR",
+                "scenario_id": oracle_case.scenario_id,
             }
+            error_text: str | None = None
+            try:
+                linguistic_graph = candidate_builder.build(case.text)
+                record["linguistic_candidate_graph"] = _jsonable(linguistic_graph)
+                orchestrator = services.create_orchestrator()
+                turn = orchestrator.handle_user_text(case.text, generate_response=False)
+                record["perception_result"] = _jsonable(turn.perception)
+                record["integration_commit"] = _jsonable(turn.integration)
+                record["queries"] = _jsonable(turn.queries)
+                record["agent_context"] = _jsonable(turn.agent_context)
+                record["agent_context_diagnostic"] = _jsonable(getattr(turn, "agent_context_diagnostic", None))
+                record["agent_response"] = None
+                record["agent_generation_skipped"] = True
+                record["response_perception"] = _jsonable(turn.response_perception)
+                record["response_integration"] = _jsonable(turn.response_integration)
+                record["status"] = "OK"
+                succeeded += 1
+            except Exception as exc:  # diagnostics boundary: preserve the real failure verbatim
+                error_text = f"{type(exc).__name__}: {exc}"
+                record["error"] = error_text
+                record["traceback"] = traceback.format_exc()
+                failed += 1
+
+            with services.operation_lock:
+                after = canonical_ah_snapshot(services)
+                runtime_after = _runtime_summary(services)
+            record["parser_diagnostics"] = _parser_diagnostics_since(services, parser_floor)
+            record["llm_requests"] = _request_diagnostics_since(services, request_floor)
+            record["ah_diff"] = diff_canonical_ah(before, after)
+            record["runtime_after"] = runtime_after
+            record["interaction_context_after"] = _jsonable(services.context)
+
+            try:
+                semantic_verdict = evaluate_semantic_case(
+                    record,
+                    oracle_case,
+                    after,
+                    required_template_roles,
+                )
+            except Exception as exc:  # diagnostics must never truncate the remaining corpus
+                evaluator_error = f"{type(exc).__name__}: {exc}"
+                record["semantic_evaluator_error"] = evaluator_error
+                record["semantic_evaluator_traceback"] = traceback.format_exc()
+                record["semantic_status"] = "FAIL"
+                record["semantic_checks"] = [
+                    {
+                        "name": "oracle.evaluation_error",
+                        "ok": False,
+                        "expected": "semantic evaluator completes",
+                        "actual": evaluator_error,
+                    }
+                ]
+                record["semantic_note"] = oracle_case.note
+                record["semantic_family"] = oracle_case.family
+                record["semantic_tags"] = list(oracle_case.tags)
+                semantic_failed += 1
+            else:
+                record["semantic_status"] = semantic_verdict.status
+                record["semantic_checks"] = list(semantic_verdict.checks)
+                record["semantic_note"] = semantic_verdict.note
+                record["semantic_family"] = semantic_verdict.family
+                record["semantic_tags"] = list(semantic_verdict.tags)
+                if semantic_verdict.status == "PASS":
+                    semantic_passed += 1
+                elif semantic_verdict.status == "GAP":
+                    semantic_gaps += 1
+                else:
+                    semantic_failed += 1
+
+            filename = f"turn_{case.index:03d}.json"
+            # record is already normalized field-by-field above. Writing it directly
+            # avoids recursively cloning the complete diagnostic payload a second time.
+            _dump_json(output_dir / filename, record)
+            manifest_cases.append(
+                {
+                    "index": case.index,
+                    "input": case.text,
+                    "status": record["status"],
+                    "semantic_status": record["semantic_status"],
+                    "semantic_family": record["semantic_family"],
+                    "semantic_tags": record["semantic_tags"],
+                    "scenario_id": oracle_case.scenario_id,
+                    "semantic_failures": [
+                        str(item.get("name", "<unnamed-check>"))
+                        for item in record["semantic_checks"]
+                        if isinstance(item, Mapping) and not item.get("ok", False)
+                    ],
+                    "error": error_text,
+                    "file": filename,
+                }
+            )
+            # Explicitly drop the two complete canonical snapshots before the next LLM
+            # turn. CPython can then release their large value graphs immediately.
+            del before, after, runtime_after, record
+
+        with services.operation_lock:
+            final_ah = canonical_ah_snapshot(services)
+            final_graph = services.graph_inspector.snapshot()
+        _write_json(output_dir / "final_context.json", services.context)
+        _dump_json(output_dir / "final_ah.json", final_ah)
+        _write_json(output_dir / "final_graph.json", final_graph)
+        del final_ah, final_graph
+
+        family_counts: dict[str, dict[str, int]] = {}
+        for item in manifest_cases:
+            bucket = family_counts.setdefault(
+                str(item["semantic_family"]),
+                {"total": 0, "passed": 0, "failed": 0, "gaps": 0},
+            )
+            bucket["total"] += 1
+            if item["semantic_status"] == "PASS":
+                bucket["passed"] += 1
+            elif item["semantic_status"] == "GAP":
+                bucket["gaps"] += 1
+            else:
+                bucket["failed"] += 1
+
+        manifest = {
+            "cases_file": str(source.resolve()),
+            "output_dir": str(output_dir.resolve()),
+            "total": len(cases),
+            "succeeded": succeeded,
+            "failed": failed,
+            "semantic_passed": semantic_passed,
+            "semantic_failed": semantic_failed,
+            "semantic_gaps": semantic_gaps,
+            "semantic_families": family_counts,
+            "oracle_file": str(oracle_source.resolve()),
+            "scenario_isolation": True,
+            "scenario_count": len({item["scenario_id"] for item in manifest_cases}),
+            "cases": manifest_cases,
+        }
+        _write_json(output_dir / "manifest.json", manifest)
+
+        summary_lines = [
+            f"Acceptance run: {output_dir.name}",
+            f"Cases: {len(cases)} | RUNTIME OK: {succeeded} | RUNTIME ERROR: {failed}",
+            f"SEMANTIC PASS: {semantic_passed} | FAIL: {semantic_failed} | GAP: {semantic_gaps}",
+            f"SCENARIOS: {len({item['scenario_id'] for item in manifest_cases})} | isolated between scenarios",
+            "",
+            "Families:",
+        ]
+        for family, counts in family_counts.items():
+            summary_lines.append(
+                f"  {family}: PASS {counts['passed']}/{counts['total']} | "
+                f"FAIL {counts['failed']} | GAP {counts['gaps']}"
+            )
+        summary_lines.append("")
+        for item in manifest_cases:
+            line = (
+                f"{item['index']:03d} {item['semantic_status']} "
+                f"(runtime={item['status']}, scenario={item['scenario_id']}): {item['input']}"
+            )
+            if item["semantic_failures"]:
+                line += " | " + ", ".join(item["semantic_failures"][:6])
+                if len(item["semantic_failures"]) > 6:
+                    line += f", ... (+{len(item['semantic_failures']) - 6})"
+            if item["error"]:
+                line += f" | runtime: {item['error']}"
+            summary_lines.append(line)
+        (output_dir / "summary.txt").write_text("\n".join(summary_lines) + "\n", encoding="utf-8", newline="\n")
+
+        runs_root.mkdir(parents=True, exist_ok=True)
+        (runs_root / "latest.txt").write_text(str(output_dir.resolve()) + "\n", encoding="utf-8", newline="\n")
+
+        return AcceptanceRunResult(
+            output_dir,
+            source,
+            len(cases),
+            succeeded,
+            failed,
+            semantic_passed,
+            semantic_failed,
+            semantic_gaps,
+            oracle_source,
         )
-        # Explicitly drop the two complete canonical snapshots before the next LLM
-        # turn. CPython can then release their large value graphs immediately.
-        del before, after, runtime_after, record
-
-    with services.operation_lock:
-        final_ah = canonical_ah_snapshot(services)
-        final_graph = services.graph_inspector.snapshot()
-    _write_json(output_dir / "final_context.json", services.context)
-    _dump_json(output_dir / "final_ah.json", final_ah)
-    _write_json(output_dir / "final_graph.json", final_graph)
-    del final_ah, final_graph
-
-    manifest = {
-        "cases_file": str(source.resolve()),
-        "output_dir": str(output_dir.resolve()),
-        "total": len(cases),
-        "succeeded": succeeded,
-        "failed": failed,
-        "semantic_passed": semantic_passed,
-        "semantic_failed": semantic_failed,
-        "semantic_gaps": semantic_gaps,
-        "oracle_file": str(oracle_source.resolve()),
-        "cases": manifest_cases,
-    }
-    _write_json(output_dir / "manifest.json", manifest)
-
-    summary_lines = [
-        f"Acceptance run: {output_dir.name}",
-        f"Cases: {len(cases)} | RUNTIME OK: {succeeded} | RUNTIME ERROR: {failed}",
-        f"SEMANTIC PASS: {semantic_passed} | FAIL: {semantic_failed} | GAP: {semantic_gaps}",
-        "",
-    ]
-    for item in manifest_cases:
-        line = (
-            f"{item['index']:03d} {item['semantic_status']} "
-            f"(runtime={item['status']}): {item['input']}"
-        )
-        if item["semantic_failures"]:
-            line += " | " + ", ".join(item["semantic_failures"][:6])
-            if len(item["semantic_failures"]) > 6:
-                line += f", ... (+{len(item['semantic_failures']) - 6})"
-        if item["error"]:
-            line += f" | runtime: {item['error']}"
-        summary_lines.append(line)
-    (output_dir / "summary.txt").write_text("\n".join(summary_lines) + "\n", encoding="utf-8", newline="\n")
-
-    runs_root.mkdir(parents=True, exist_ok=True)
-    (runs_root / "latest.txt").write_text(str(output_dir.resolve()) + "\n", encoding="utf-8", newline="\n")
-
-    return AcceptanceRunResult(
-        output_dir,
-        source,
-        len(cases),
-        succeeded,
-        failed,
-        semantic_passed,
-        semantic_failed,
-        semantic_gaps,
-        oracle_source,
-    )
+    finally:
+        with services.operation_lock:
+            _restore_runtime_state(services, live_state)
+        if clock_was_running:
+            clock.start()

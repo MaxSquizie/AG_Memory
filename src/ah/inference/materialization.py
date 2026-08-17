@@ -11,6 +11,7 @@ from .contracts import (
     ExistingRefConclusion,
     InferenceOutcome,
     LogicalStatus,
+    MultiRoleBindingConclusion,
     RoleBindingConclusion,
 )
 from .domain import domain_from_premises
@@ -47,6 +48,11 @@ class InferenceMaterializer:
         if isinstance(conclusion, RoleBindingConclusion):
             # This is retrieval from an existing N; there is nothing new to commit.
             return MaterializationResult(conclusion.value, domain, False)
+
+        if isinstance(conclusion, MultiRoleBindingConclusion):
+            # Multi-WH retrieval also refers to one already existing fact. There is
+            # no single new semantic object to materialize; return the supporting N.
+            return MaterializationResult(conclusion.fact, domain, False)
 
         if isinstance(conclusion, DerivedLinkConclusion):
             link, created = self.core.ensure_link(

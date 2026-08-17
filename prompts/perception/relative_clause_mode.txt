@@ -1,0 +1,1 @@
+Choose exactly one label from CHOICES. Decide only whether CONNECTOR introduces a nominal-relative clause or an independent subordinate situation. Return only RELATIVE or SUBORDINATE. Do not explain.

@@ -16,8 +16,62 @@ class SemanticOracle1238Tests(unittest.TestCase):
         cases = load_acceptance_cases("data/acceptance_cases.txt")
         oracle = load_semantic_oracle("data/acceptance_oracle.json")
         validate_oracle_alignment(cases, oracle)
+        self.assertEqual(len(cases), 200)
+        self.assertEqual(len(oracle), 200)
+        self.assertEqual(len({item.family for item in oracle}), 27)
+        self.assertTrue(all(item.grade == "EXACT" for item in oracle))
+        self.assertTrue(all(item.family != "uncategorized" for item in oracle))
+        self.assertEqual(len({item.scenario_id for item in oracle}), 149)
+        self.assertEqual({item.scenario_id for item in oracle[:40]}, {"regression40_frozen"})
+
+    def test_frozen_regression40_corpus_remains_available(self) -> None:
+        cases = load_acceptance_cases("data/acceptance_cases_regression40.txt")
+        oracle = load_semantic_oracle("data/acceptance_oracle_regression40.json")
+        validate_oracle_alignment(cases, oracle)
         self.assertEqual(len(cases), 40)
         self.assertEqual(len(oracle), 40)
+
+    def test_broad200_keeps_first_40_texts_and_expectations_frozen(self) -> None:
+        import json
+
+        broad = json.loads(open("data/acceptance_oracle.json", encoding="utf-8").read())
+        frozen = json.loads(open("data/acceptance_oracle_regression40.json", encoding="utf-8").read())
+        self.assertEqual(
+            [item["text"] for item in broad["cases"][:40]],
+            [item["text"] for item in frozen["cases"]],
+        )
+        self.assertEqual(
+            [item["expect"] for item in broad["cases"][:40]],
+            [item["expect"] for item in frozen["cases"]],
+        )
+
+    def test_broad200_new_pressure_is_balanced_across_sixteen_families(self) -> None:
+        from collections import Counter
+
+        oracle = load_semantic_oracle("data/acceptance_oracle.json")
+        counts = Counter(item.family for item in oracle[40:])
+        self.assertEqual(len(counts), 16)
+        self.assertEqual(set(counts.values()), {10})
+        self.assertTrue(all(item.grade == "EXACT" for item in oracle[40:]))
+        # Only deliberate T-evolution and assertion/query chains share state.
+        self.assertEqual(
+            [item.scenario_id for item in oracle[70:74]],
+            ["template_open_evolution"] * 4,
+        )
+        self.assertEqual(
+            [item.scenario_id for item in oracle[160:162]],
+            ["query_tool"] * 2,
+        )
+
+
+    def test_broad200_case_100_expects_explicit_then_follow_relation(self) -> None:
+        oracle = load_semantic_oracle("data/acceptance_oracle.json")
+        case = oracle[99]
+        self.assertEqual(case.text, "Анна взяла книгу, а затем положила её на стол.")
+        self.assertEqual(
+            case.expectation["perception"]["relations"],
+            [{"id": "FOLLOW", "source": "a1", "target": "a2"}],
+        )
 
     def test_explicit_role_coverage_rejects_an_underwide_canonical_template(self) -> None:
         oracle = SemanticOracleCase(
@@ -260,12 +314,76 @@ class SemanticOracle1238Tests(unittest.TestCase):
             },
             "queries": [],
             "ah_diff": {"added": {
-                "N_H": {"uid": "N_H", "kind": "N", "domain": "H"},
+                "T_H_EVENT": {
+                    "uid": "T_H_EVENT", "kind": "T", "domain": "C",
+                    "predicate": {"uid": "S_H_EVENT", "kind": "S"},
+                    "roles": ["SUBJECT", "OBJECT", "TIME"],
+                },
+                "N_H": {
+                    "uid": "N_H", "kind": "N", "domain": "H",
+                    "template": {"uid": "T_H_EVENT", "kind": "T"},
+                    "meta": {"event_instance": True},
+                },
                 "K_H": {"uid": "K_H", "kind": "K", "domain": "H"},
+                "L_H_FOLLOW": {
+                    "uid": "L_H_FOLLOW", "kind": "L", "domain": None,
+                    "relation_id": "FOLLOW",
+                    "source": {"uid": "N_PREV_H", "kind": "N"},
+                    "target": {"uid": "N_H", "kind": "N"},
+                },
             }},
             "interaction_context_after": {"pending_clarification_refs": []},
         }
-        verdict = evaluate_semantic_case(record, oracle, {}, {})
+        snapshot = {
+            "N_PREV_H": {"uid": "N_PREV_H", "kind": "N", "domain": "H"},
+            "T_H_EVENT": record["ah_diff"]["added"]["T_H_EVENT"],
+            "N_H": record["ah_diff"]["added"]["N_H"],
+            "K_H": {"uid": "K_H", "kind": "K", "domain": "H"},
+            "L_H_FOLLOW": record["ah_diff"]["added"]["L_H_FOLLOW"],
+        }
+        verdict = evaluate_semantic_case(record, oracle, snapshot, {})
+        self.assertEqual(verdict.status, "PASS", verdict.failures)
+
+    def test_cp_semantic_addition_count_still_counts_links_touching_cp(self) -> None:
+        oracle = SemanticOracleCase(
+            1, "A потому что B.", "EXACT",
+            {
+                "perception": {
+                    "must_parse": True, "assertions": [], "queries": [],
+                    "relations": [], "conditionals": [],
+                },
+                "integration": {
+                    "must_succeed": True,
+                    "world_assertion_count": 0,
+                    "cp_semantic_addition_count": 1,
+                },
+            },
+        )
+        link = {
+            "uid": "L_CAUSE", "kind": "L", "domain": None,
+            "relation_id": "CAUSE",
+            "source": {"uid": "N_CAUSE", "kind": "N"},
+            "target": {"uid": "N_EFFECT", "kind": "N"},
+        }
+        record = {
+            "status": "OK",
+            "perception_result": {
+                "assertions": [], "queries": [], "commands": [],
+                "relations": [], "conditionals": [],
+            },
+            "integration_commit": {
+                "assertions": [], "conditionals": [],
+                "clarification_required": False, "clarifications": [],
+            },
+            "queries": [],
+            "ah_diff": {"added": {"L_CAUSE": link}},
+        }
+        snapshot = {
+            "N_CAUSE": {"uid": "N_CAUSE", "kind": "N", "domain": "C"},
+            "N_EFFECT": {"uid": "N_EFFECT", "kind": "N", "domain": "C"},
+            "L_CAUSE": link,
+        }
+        verdict = evaluate_semantic_case(record, oracle, snapshot, {})
         self.assertEqual(verdict.status, "PASS", verdict.failures)
 
     def test_architecture_gap_is_never_counted_as_pass(self) -> None:
@@ -285,6 +403,44 @@ class SemanticOracle1238Tests(unittest.TestCase):
         record = {"status": "ERROR", "error": "RuntimeError: gap", "parser_diagnostics": []}
         verdict = evaluate_semantic_case(record, oracle, {}, {})
         self.assertEqual(verdict.status, "GAP")
+
+    def test_query_outcome_none_is_semantic_fail_not_evaluator_crash(self) -> None:
+        oracle = SemanticOracleCase(
+            1,
+            "Когда Виктор встретил Алексея?",
+            "EXACT",
+            {
+                "perception": {
+                    "must_parse": False,
+                    "assertions": [],
+                    "queries": [],
+                    "relations": [],
+                    "conditionals": [],
+                },
+                "integration": {
+                    "must_succeed": True,
+                    "query_outcomes": [
+                        {"status": "PROVED", "role": "TIME", "value": "утро"}
+                    ],
+                },
+            },
+        )
+        record = {
+            "status": "OK",
+            "perception_result": None,
+            "integration_commit": {
+                "assertions": [],
+                "clarification_required": False,
+                "clarifications": [],
+            },
+            "queries": [{"outcome": None}],
+        }
+        verdict = evaluate_semantic_case(record, oracle, {}, {})
+        self.assertEqual(verdict.status, "FAIL")
+        failures = {item["name"] for item in verdict.failures}
+        self.assertIn("inference.q1.status", failures)
+        self.assertIn("inference.q1.role", failures)
+        self.assertIn("inference.q1.value", failures)
 
 
 if __name__ == "__main__":

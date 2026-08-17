@@ -18,6 +18,7 @@ from ah.config import (
 from ah.core import AHCore, JsonPersistence
 from ah.diagnostics import GraphInspector
 from ah.gui.config_store import ApplyMode, ConfigDocument
+from ah.ignition.tuning import midpoint_from_speed, speed_from_midpoint
 from ah.gui.graph_state import (
     GraphVisualMapper,
     build_edge_focus_geometry,
@@ -50,6 +51,36 @@ class GUIFoundationTests(unittest.TestCase):
             self.assertEqual(str(cfg.paths.llm_model_dir).replace("\\", "/"), "D:/Models/Test")
             self.assertAlmostEqual(cfg.workspace.threshold, 0.51)
             self.assertEqual(cfg.gui.render_mode, "3d")
+
+    def test_ignition_tuning_speed_mapping_is_monotone(self):
+        slow = midpoint_from_speed(1)
+        medium = midpoint_from_speed(50)
+        fast = midpoint_from_speed(100)
+        self.assertGreater(slow, medium)
+        self.assertGreater(medium, fast)
+        self.assertEqual(speed_from_midpoint(slow), 1)
+        self.assertEqual(speed_from_midpoint(fast), 100)
+
+    def test_runtime_decay_tuning_is_hot_and_preserves_state(self):
+        config = load_config(PROJECT / "config/default.toml")
+        config = replace(config, llm=replace(config.llm, enabled=False))
+        services = RuntimeServices.build(config, core=AHCore())
+        entity = services.core.add_entity(
+            Domain.C, {"name": Property("name", "hot", "str")}
+        )
+        ref = services.core.ref(entity.uid)
+        services.ignition.seed(ref, 0.6)
+        services.ignition.tick()
+        before = services.core.store.runtime_state(ref.uid).excitation
+        services.tune_decay(
+            alpha=0.42,
+            midpoint_ticks=77.0,
+            reactivation_min_input=0.123,
+        )
+        self.assertAlmostEqual(services.config.ignition.decay.alpha, 0.42)
+        self.assertAlmostEqual(services.config.ignition.decay.midpoint_ticks, 77.0)
+        self.assertAlmostEqual(services.config.ignition.decay.reactivation_min_input, 0.123)
+        self.assertAlmostEqual(services.core.store.runtime_state(ref.uid).excitation, before)
 
 
     def test_graph_inspector_exports_structural_hypergraph_edges(self):
@@ -321,12 +352,11 @@ class GUIFoundationTests(unittest.TestCase):
         picked = pick_edge_key_2d(visual, projected, midpoint, tolerance_px=0.5)
         self.assertEqual(picked, key)
 
-    def test_persistence_repairs_legacy_duplicate_s_and_rewrites_refs(self):
+    def test_persistence_preserves_overlapping_symbol_forms_and_template_refs(self):
         import json
-        import warnings
 
         with tempfile.TemporaryDirectory() as td:
-            path = Path(td) / "broken.json"
+            path = Path(td) / "overlap.json"
             payload = {
                 "schema_version": 1,
                 "canonical": {
@@ -348,16 +378,15 @@ class GUIFoundationTests(unittest.TestCase):
             }
             path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
             persistence = JsonPersistence(path, PersistenceSettings(save_runtime_state=False))
-            with warnings.catch_warnings(record=True) as caught:
-                warnings.simplefilter("always")
-                bundle = persistence.load()
-            self.assertTrue(caught)
+            bundle = persistence.load()
             symbols = [uid for uid in bundle.core.store.all_uids() if bundle.core.store.kind_of(uid).value == "S"]
-            self.assertEqual(symbols, ["S-1"])
-            symbol = bundle.core.store.get_symbol("S-1")
-            self.assertEqual(symbol.forms, frozenset({"Крипл", "Kripl"}))
+            self.assertEqual(symbols, ["S-1", "S-2"])
+            self.assertEqual(
+                {item.uid for item in bundle.core.store.find_symbols_by_form("Крипл")},
+                {"S-1", "S-2"},
+            )
             template = bundle.core.store.get_template("T-1")
-            self.assertEqual(template.predicate.uid, "S-1")
+            self.assertEqual(template.predicate.uid, "S-2")
 
 
     def test_visual_mapper_uses_red_heat_for_excited_nodes_and_adjacent_links(self):

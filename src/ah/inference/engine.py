@@ -14,6 +14,8 @@ from .contracts import (
     InferenceGoal,
     InferenceOutcome,
     LogicalStatus,
+    MultiRoleBindingConclusion,
+    MultiRoleFillGoal,
     RelationGoal,
     RoleBindingConclusion,
     RoleFillGoal,
@@ -39,6 +41,8 @@ class InferenceEngine:
     def solve(self, goal: InferenceGoal, workspace_refs: tuple[Ref, ...] = ()) -> InferenceOutcome:
         if isinstance(goal, RoleFillGoal):
             return self._role_fill(goal)
+        if isinstance(goal, MultiRoleFillGoal):
+            return self._multi_role_fill(goal)
         if isinstance(goal, ExistsGoal):
             return self._exists(goal)
         if isinstance(goal, RelationGoal):
@@ -91,6 +95,49 @@ class InferenceEngine:
                 RoleBindingConclusion(goal.requested_role, value, fact_ref),
                 premises,
                 (fact_ref, value),
+                domain_from_premises(self.core, premises),
+                1,
+            )
+        return InferenceOutcome(
+            LogicalStatus.UNKNOWN,
+            StopReason.SEARCH_EXHAUSTED,
+            None,
+            (),
+            (),
+            None,
+            len(matches),
+        )
+
+    def _multi_role_fill(self, goal: MultiRoleFillGoal) -> InferenceOutcome:
+        """Bind every requested WH role from one canonical fact.
+
+        Running one RoleFillGoal per WH slot would allow answers to be assembled
+        from different N instances. A multi-WH query denotes one predicate
+        realization, so all bindings are taken atomically from the same match.
+        """
+        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles)
+        for node in matches:
+            if self._false_wrapper(node.uid) is not None:
+                continue
+            bindings: list[tuple] = []
+            missing = False
+            for role in goal.requested_roles:
+                value = node.actants.get(role)
+                if value is None:
+                    missing = True
+                    break
+                bindings.append((role, value))
+            if missing:
+                continue
+            fact_ref = self.core.ref(node.uid)
+            premises = (fact_ref,)
+            trace = (fact_ref, *(value for _role, value in bindings))
+            return InferenceOutcome(
+                LogicalStatus.PROVED,
+                StopReason.GOAL_SATISFIED,
+                MultiRoleBindingConclusion(tuple(bindings), fact_ref),
+                premises,
+                trace,
                 domain_from_premises(self.core, premises),
                 1,
             )

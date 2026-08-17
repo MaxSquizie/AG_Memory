@@ -28,12 +28,13 @@ class Morphology(Protocol):
 
 
 def material_analyses(analyses: tuple[MorphInfo, ...]) -> tuple[MorphInfo, ...]:
-    """Return morphology readings strong enough to drive canonical identity.
+    """Return morphology readings strong enough to remain runtime candidates.
 
     Dictionary analysers intentionally expose rare parses.  Those are useful for
-    ambiguity handling but must not split one observed lexical item into several
-    canonical identities.  Keep only readings that are competitive with the best
-    parse.  Scoreless test morphologies preserve every reading.
+    ambiguity handling but must not let negligible readings explode the candidate
+    lattice. Keep only readings that are competitive with the best parse. This
+    filtering is not authority to choose or mutate canonical lexical identity.
+    Scoreless test morphologies preserve every reading.
     """
     if not analyses:
         return ()

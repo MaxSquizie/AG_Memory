@@ -100,6 +100,92 @@ class CorrectionPacemakerDiagnosticsTests(unittest.TestCase):
         self.assertGreaterEqual(engine.tick_index, 2)
         self.assertFalse(clock.running)
 
+    def test_graph_inspector_holds_runtime_lock_for_whole_snapshot(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        entity = core.add_entity(Domain.C, {"name": Property("name", "A", "str")})
+        engine = self._engine(core, pacemaker=False)
+        engine.seed(core.ref(entity.uid), 0.5)
+        engine.tick()
+
+        class Guard:
+            def __init__(self):
+                self.active = False
+                self.entries = 0
+
+            def __enter__(self):
+                self.assertFalse(self.active)
+                self.active = True
+                self.entries += 1
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                self.active = False
+                return False
+
+            def assertFalse(self, value):
+                if value:
+                    raise AssertionError("runtime lock entered recursively in test guard")
+
+        guard = Guard()
+        original_all_uids = core.store.all_uids
+        original_runtime_items = core.store.runtime_items
+
+        def guarded_all_uids():
+            self.assertTrue(guard.active)
+            return original_all_uids()
+
+        def guarded_runtime_items():
+            self.assertTrue(guard.active)
+            return original_runtime_items()
+
+        core.store.all_uids = guarded_all_uids  # type: ignore[method-assign]
+        core.store.runtime_items = guarded_runtime_items  # type: ignore[method-assign]
+        try:
+            snapshot = GraphInspector(core, engine, runtime_lock=guard).snapshot()
+        finally:
+            core.store.all_uids = original_all_uids  # type: ignore[method-assign]
+            core.store.runtime_items = original_runtime_items  # type: ignore[method-assign]
+
+        self.assertEqual(guard.entries, 1)
+        self.assertIn(entity.uid, {node.uid for node in snapshot.nodes})
+
+    def test_runtime_diagnostics_holds_runtime_lock_for_summary(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        core.add_entity(Domain.C, {"name": Property("name", "A", "str")})
+        engine = self._engine(core, pacemaker=False)
+
+        class Guard:
+            def __init__(self):
+                self.active = False
+                self.entries = 0
+
+            def __enter__(self):
+                if self.active:
+                    raise AssertionError("runtime lock entered recursively in test guard")
+                self.active = True
+                self.entries += 1
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                self.active = False
+                return False
+
+        guard = Guard()
+        original_all_uids = core.store.all_uids
+
+        def guarded_all_uids():
+            self.assertTrue(guard.active)
+            return original_all_uids()
+
+        core.store.all_uids = guarded_all_uids  # type: ignore[method-assign]
+        try:
+            summary = RuntimeDiagnostics(core, engine, runtime_lock=guard).summary()
+        finally:
+            core.store.all_uids = original_all_uids  # type: ignore[method-assign]
+
+        self.assertEqual(guard.entries, 1)
+        self.assertGreaterEqual(summary.elements_by_kind["M"], 1)
+
     def test_graph_diagnostics_are_read_only_and_gui_ready(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
         a = core.add_entity(Domain.C, {"name": Property("name", "A", "str")})
