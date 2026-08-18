@@ -9,8 +9,10 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPlainTextEdit,
     QPushButton,
     QSlider,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -33,6 +35,8 @@ class IgnitionTuningWidget(QWidget):
     mechanism_changed = Signal(bool, float, float)        # pacemaker, pulse, workspace t
     mechanism_committed = Signal(bool, float, float)
     corpus_import_requested = Signal(str, str, bool)      # path, domain, cold_save
+    raw_text_import_requested = Signal(str, bool, bool)   # text, parse_semantics, cold_save
+    memory_import_requested = Signal(str, bool)           # path, cold_restore
 
     def __init__(
         self,
@@ -165,22 +169,68 @@ class IgnitionTuningWidget(QWidget):
         path_row.addWidget(self.corpus_browse)
         self.corpus_domain = QComboBox()
         self.corpus_domain.addItems(["C", "P", "H"])
+        self.corpus_import = QPushButton("Загрузить в память")
+        self.corpus_import.clicked.connect(self._request_corpus_import)
+        structure_tab = QWidget()
+        structure_layout = QVBoxLayout(structure_tab)
+        structure_layout.addLayout(path_row)
+        domain_row = QHBoxLayout()
+        domain_row.addWidget(QLabel("Домен"))
+        domain_row.addWidget(self.corpus_domain)
+        domain_row.addStretch(1)
+        structure_layout.addLayout(domain_row)
+        structure_layout.addWidget(self.corpus_import)
+        structure_layout.addStretch(1)
+
+        self.raw_text = QPlainTextEdit()
+        self.raw_text.setPlaceholderText(
+            "Текст или абзацы (пустая строка между ними). "
+            "С разбором — факты в память; без LLM остаётся только опыт в H."
+        )
+        self.raw_text.setMinimumHeight(90)
+        self.text_parse_semantics = QCheckBox("Разбирать в факты (нужен LLM)")
+        self.text_parse_semantics.setChecked(True)
+        self.text_parse_semantics.setToolTip(
+            "Каждый абзац идёт через Perception в факты C/P и H-опыт. "
+            "Без LLM абзац пишется только как опыт пользователя."
+        )
+        self.raw_text_import = QPushButton("Загрузить текст")
+        self.raw_text_import.clicked.connect(self._request_raw_text_import)
+        text_tab = QWidget()
+        text_layout = QVBoxLayout(text_tab)
+        text_layout.addWidget(self.raw_text)
+        text_layout.addWidget(self.text_parse_semantics)
+        text_layout.addWidget(self.raw_text_import)
+
+        memory_hint = QLabel(
+            "Заменяет текущую каноническую память снимком persistence JSON. "
+            "Граф, контекст диалога и (если галочка снята) подсветка берутся из файла."
+        )
+        memory_hint.setWordWrap(True)
+        self.memory_import = QPushButton("Импорт снимка…")
+        self.memory_import.clicked.connect(self._request_memory_import)
+        memory_tab = QWidget()
+        memory_layout = QVBoxLayout(memory_tab)
+        memory_layout.addWidget(memory_hint)
+        memory_layout.addWidget(self.memory_import)
+        memory_layout.addStretch(1)
+
+        tabs = QTabWidget()
+        tabs.addTab(structure_tab, "Структура")
+        tabs.addTab(text_tab, "Текст")
+        tabs.addTab(memory_tab, "Память AG")
+
         self.corpus_cold_save = QCheckBox("Сохранить без подсветки")
         self.corpus_cold_save.setChecked(True)
         self.corpus_cold_save.setToolTip(
-            "Пишет канонику в JSON и не сохраняет текущие уровни возбуждения."
+            "Пишет канонику в JSON и не сохраняет текущие уровни возбуждения. "
+            "Для снимка AG то же: загрузить граф, не восстанавливая x."
         )
-        self.corpus_import = QPushButton("Загрузить в память")
-        self.corpus_import.clicked.connect(self._request_corpus_import)
+
         corpus_box = QGroupBox("Холодная загрузка памяти")
         corpus_layout = QVBoxLayout(corpus_box)
-        corpus_layout.addLayout(path_row)
-        corpus_opts = QHBoxLayout()
-        corpus_opts.addWidget(QLabel("Домен"))
-        corpus_opts.addWidget(self.corpus_domain)
-        corpus_opts.addWidget(self.corpus_cold_save, 1)
-        corpus_layout.addLayout(corpus_opts)
-        corpus_layout.addWidget(self.corpus_import)
+        corpus_layout.addWidget(tabs)
+        corpus_layout.addWidget(self.corpus_cold_save)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -347,3 +397,24 @@ class IgnitionTuningWidget(QWidget):
             self.corpus_domain.currentText(),
             self.corpus_cold_save.isChecked(),
         )
+
+    def _request_raw_text_import(self) -> None:
+        text = self.raw_text.toPlainText().strip()
+        if not text:
+            return
+        self.raw_text_import_requested.emit(
+            text,
+            self.text_parse_semantics.isChecked(),
+            self.corpus_cold_save.isChecked(),
+        )
+
+    def _request_memory_import(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Импорт памяти AG",
+            "",
+            "AH persistence (*.json);;Все файлы (*)",
+        )
+        if not path:
+            return
+        self.memory_import_requested.emit(path, self.corpus_cold_save.isChecked())

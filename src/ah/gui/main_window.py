@@ -8,7 +8,9 @@ from typing import Callable
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal, Slot
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
+    QCheckBox,
     QDockWidget,
+    QFileDialog,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -86,6 +88,7 @@ class MainWindow(QMainWindow):
         self._acceptance_status_suspended = False
         self._full_canvas_mode = False
         self._dock_visibility_before_full_canvas: dict[QDockWidget, bool] = {}
+        self._session_turns: list[dict[str, str]] = []
 
         self.setWindowTitle("AH Agent — Cognitive Runtime")
         self.resize(1580, 980)
@@ -192,10 +195,24 @@ class MainWindow(QMainWindow):
             "Диагностика не пишет в AH."
         )
         self.hidden_valency_button.clicked.connect(self._run_hidden_valency_diagnostic)
+        self.export_dialogue_button = QPushButton("Экспорт диалога")
+        self.export_dialogue_button.setToolTip("Сохранить текущую GUI-сессию как ah_dialogue_v1 JSON.")
+        self.export_dialogue_button.clicked.connect(self._export_dialogue)
+        self.import_dialogue_button = QPushButton("Импорт диалога")
+        self.import_dialogue_button.setToolTip("Холодная загрузка ah_dialogue_v1 JSON в память.")
+        self.import_dialogue_button.clicked.connect(self._browse_import_dialogue)
+        self.dialogue_parse_semantics = QCheckBox("Разбирать реплики (нужен LLM)")
+        self.dialogue_parse_semantics.setChecked(True)
+        self.dialogue_parse_semantics.setToolTip(
+            "User-реплики из JSON идут через Perception в факты. Без LLM — только H-опыт."
+        )
         chat_buttons = QHBoxLayout()
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
         chat_buttons.addWidget(self.hidden_valency_button)
+        chat_buttons.addWidget(self.export_dialogue_button)
+        chat_buttons.addWidget(self.import_dialogue_button)
+        chat_buttons.addWidget(self.dialogue_parse_semantics)
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
         layout.addLayout(chat_buttons)
@@ -288,6 +305,8 @@ class MainWindow(QMainWindow):
         self.ignition_tuning.mechanism_changed.connect(self._tune_ignition_mechanism_live)
         self.ignition_tuning.mechanism_committed.connect(self._commit_ignition_mechanism)
         self.ignition_tuning.corpus_import_requested.connect(self._import_corpus)
+        self.ignition_tuning.raw_text_import_requested.connect(self._import_raw_text)
+        self.ignition_tuning.memory_import_requested.connect(self._import_memory)
         self.manual_seed_button = QPushButton()
         self.manual_seed_button.setToolTip(
             "Передать тестовый импульс выбранному excitable узлу. Величина берётся из "
@@ -446,6 +465,7 @@ class MainWindow(QMainWindow):
         self._last_turn = None
         self._selected_uid = None
         self._selected_edge_key = None
+        self._session_turns.clear()
         self.chat_history.clear()
         self.canvas.refresh()
         self.llm_panel.refresh_status()
@@ -472,6 +492,7 @@ class MainWindow(QMainWindow):
             return
 
         self.chat_input.clear()
+        self._session_turns.append({"speaker": "user", "text": text})
         self.chat_history.append(f"<b>{self.services.config.identity.user_name}:</b> {self._html(text)}")
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
@@ -704,6 +725,8 @@ class MainWindow(QMainWindow):
         self.chat_history.append(
             f"<b>{self.services.config.identity.agent_name}:</b> {self._html(result.response_text)}"
         )
+        if result.response_text:
+            self._session_turns.append({"speaker": "agent", "text": str(result.response_text)})
         for tick in (*result.ticks_after_input, *result.ticks_after_response):
             self.canvas.push_tick(tick)
         trace_payload = []
@@ -820,10 +843,20 @@ class MainWindow(QMainWindow):
             4500,
         )
 
+    def _memory_busy(self) -> bool:
+        if (
+            self._chat_worker is not None
+            or self._acceptance_worker is not None
+            or self._hidden_valency_worker is not None
+            or self._llm_operation_worker is not None
+        ):
+            QMessageBox.information(self, "Память", "Дождитесь окончания текущего хода.")
+            return True
+        return False
+
     @Slot(str, str, bool)
     def _import_corpus(self, path: str, domain: str, cold_save: bool) -> None:
-        if self._chat_worker is not None:
-            QMessageBox.information(self, "Память", "Дождитесь окончания текущего хода.")
+        if self._memory_busy():
             return
         source = Path(path)
         if not source.is_file():
@@ -856,6 +889,172 @@ class MainWindow(QMainWindow):
             f"Холодная загрузка: фактов +{created}, повторно {reused}",
             6000,
         )
+
+    @Slot(str, bool, bool)
+    def _import_raw_text(self, text: str, parse_semantics: bool, cold_save: bool) -> None:
+        if self._memory_busy():
+            return
+        if not str(text).strip():
+            return
+
+        def work():
+            return self.services.import_raw_text(
+                text,
+                save=True,
+                cold_save=bool(cold_save),
+                parse_user_semantics=bool(parse_semantics),
+            )
+
+        worker = FunctionWorker(work)
+        worker.signals.error.connect(lambda message: QMessageBox.critical(self, "Память", message))
+        worker.signals.result.connect(self._raw_text_imported)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _raw_text_imported(self, result) -> None:
+        payload = result.as_dict() if hasattr(result, "as_dict") else {}
+        processed = int(payload.get("turns_processed", 0))
+        errors = payload.get("errors") or []
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        extra = f"; ошибки {len(errors)}" if errors else ""
+        self.statusBar().showMessage(
+            f"Холодная загрузка текста: фрагментов {processed}{extra}",
+            6000,
+        )
+        if errors:
+            QMessageBox.warning(self, "Память", "\n".join(str(item) for item in errors[:12]))
+
+    def _browse_import_dialogue(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Импорт диалога",
+            "",
+            "Диалог JSON (*.json);;Все файлы (*)",
+        )
+        if not path:
+            return
+        parse_semantics = self.dialogue_parse_semantics.isChecked()
+        cold_save = True
+        if hasattr(self, "ignition_tuning"):
+            cold_save = self.ignition_tuning.corpus_cold_save.isChecked()
+        self._import_dialogue(path, parse_semantics, cold_save)
+
+    @Slot(str, bool, bool)
+    def _import_dialogue(self, path: str, parse_semantics: bool, cold_save: bool) -> None:
+        if self._memory_busy():
+            return
+        source = Path(path)
+        if not source.is_file():
+            QMessageBox.warning(self, "Диалог", f"Файл не найден: {path}")
+            return
+
+        def work():
+            return self.services.import_dialogue(
+                source,
+                save=True,
+                cold_save=bool(cold_save),
+                parse_user_semantics=bool(parse_semantics),
+            )
+
+        worker = FunctionWorker(work)
+        worker.signals.error.connect(lambda message: QMessageBox.critical(self, "Диалог", message))
+        worker.signals.result.connect(lambda result, p=str(source): self._dialogue_imported(result, p))
+        self.thread_pool.start(worker)
+
+    def _dialogue_imported(self, result, path: str) -> None:
+        payload = result.as_dict() if hasattr(result, "as_dict") else {}
+        processed = int(payload.get("turns_processed", 0))
+        created = int(payload.get("facts_created", 0))
+        errors = payload.get("errors") or []
+        try:
+            from ah.corpus import load_dialogue_file
+
+            for turn in load_dialogue_file(path):
+                name = (
+                    self.services.config.identity.user_name
+                    if turn.speaker == "user"
+                    else self.services.config.identity.agent_name
+                )
+                self._session_turns.append({"speaker": turn.speaker, "text": turn.text})
+                self.chat_history.append(f"<b>{name}:</b> {self._html(turn.text)}")
+        except Exception:
+            pass
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        extra = f"; ошибки {len(errors)}" if errors else ""
+        self.statusBar().showMessage(
+            f"Импорт диалога: реплик {processed}, фактов +{created}{extra}",
+            6000,
+        )
+        if errors:
+            QMessageBox.warning(self, "Диалог", "\n".join(str(item) for item in errors[:12]))
+
+    @Slot()
+    def _export_dialogue(self) -> None:
+        if not self._session_turns:
+            QMessageBox.information(self, "Диалог", "В этой сессии ещё нет реплик для экспорта.")
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Экспорт диалога",
+            "dialogue.json",
+            "Диалог JSON (*.json);;Все файлы (*)",
+        )
+        if not path:
+            return
+        try:
+            from ah.corpus import dump_dialogue_payload
+
+            payload = dump_dialogue_payload(self._session_turns)
+            Path(path).write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, "Диалог", f"{type(exc).__name__}: {exc}")
+            return
+        self.statusBar().showMessage(f"Диалог сохранён: {path}", 5000)
+
+    @Slot(str, bool)
+    def _import_memory(self, path: str, cold_restore: bool) -> None:
+        if self._memory_busy():
+            return
+        source = Path(path)
+        if not source.is_file():
+            QMessageBox.warning(self, "Память AG", f"Файл не найден: {path}")
+            return
+        answer = QMessageBox.question(
+            self,
+            "Импорт памяти AG",
+            "Заменить текущую память снимком из файла?\n\n"
+            f"{source}\n\n"
+            "Текущий граф, контекст диалога и подсветка будут потеряны.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        def work():
+            return self.services.import_memory(
+                source, save=True, cold_restore=bool(cold_restore)
+            )
+
+        worker = FunctionWorker(work)
+        worker.signals.error.connect(lambda message: QMessageBox.critical(self, "Память AG", message))
+        worker.signals.result.connect(self._memory_imported)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _memory_imported(self, result) -> None:
+        del result
+        self._session_turns.clear()
+        self.chat_history.clear()
+        self.chat_history.append("<i>Память AG заменена снимком.</i>")
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        self.statusBar().showMessage("Память AG загружена", 6000)
 
     def _refresh_manual_seed_button(self) -> None:
         amount = float(self.services.config.ignition.seeds.reactivated_fact)

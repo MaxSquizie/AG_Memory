@@ -363,6 +363,16 @@ ah-gui --config config/default.toml
 
 или `run_gui.bat`.
 
+### Холодная загрузка памяти
+
+Панель **Ignition** умеет заполнить канонику без подсветки (`x = 0`):
+
+- структура JSON / `.ahm` / `.prj`;
+- текст (абзацы → при работающем LLM факты в C/P и H-опыт; без LLM только опыт);
+- полный снимок AG-памяти (persistence JSON).
+
+Импорт/экспорт диалога `ah_dialogue_v1` — в доке **Диалог**. CLI: `import-text`, `import-dialogue`, `import-memory`, `import-corpus`. Подробности: `docs/RUN.md`.
+
 ## Центральный config
 
 Главный файл:

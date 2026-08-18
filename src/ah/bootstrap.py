@@ -310,6 +310,23 @@ class RuntimeServices:
         self.ignition.reconfigure(ignition, workspace, self.config.lifecycle)
         self.clock.set_interval(ignition.tick_interval_seconds)
 
+    def _persist_import(self, *, save: bool, cold_save: bool) -> None:
+        if not save:
+            return
+        if cold_save:
+            JsonPersistence(
+                self.persistence.path,
+                PersistenceSettings(
+                    enabled=True,
+                    load_on_start=True,
+                    autosave_every_ticks=self.config.persistence.autosave_every_ticks,
+                    save_runtime_state=False,
+                    save_pending_impulses=False,
+                ),
+            ).save(self.core, context=self.context)
+            return
+        self.save()
+
     def import_corpus(
         self,
         path: str | Path,
@@ -324,20 +341,64 @@ class RuntimeServices:
         source = Path(path)
         with self.operation_lock:
             result = import_corpus_file(self.core, source, default_domain=domain)
-            if save:
-                if cold_save:
-                    JsonPersistence(
-                        self.persistence.path,
-                        PersistenceSettings(
-                            enabled=True,
-                            load_on_start=True,
-                            autosave_every_ticks=self.config.persistence.autosave_every_ticks,
-                            save_runtime_state=False,
-                            save_pending_impulses=False,
-                        ),
-                    ).save(self.core, context=self.context)
-                else:
-                    self.save()
+            self._persist_import(save=save, cold_save=cold_save)
+        return result
+
+    def import_raw_text(
+        self,
+        text: str,
+        *,
+        save: bool = True,
+        cold_save: bool = True,
+        parse_user_semantics: bool = True,
+    ):
+        """Cold-load prose chunks as USER turns. Perception creates C/P facts when available."""
+        from ah.corpus import import_raw_experience, split_raw_experience_text
+
+        chunks = split_raw_experience_text(text)
+        with self.operation_lock:
+            result = import_raw_experience(
+                self, chunks, parse_user_semantics=parse_user_semantics
+            )
+            self._persist_import(save=save, cold_save=cold_save)
+        return result
+
+    def import_dialogue(
+        self,
+        source: str | Path | dict,
+        *,
+        save: bool = True,
+        cold_save: bool = True,
+        parse_user_semantics: bool = True,
+    ):
+        """Cold-load ah_dialogue_v1 turns without Ignition seeds."""
+        from ah.corpus import import_dialogue_cold, load_dialogue_file, parse_dialogue_json
+
+        turns = (
+            parse_dialogue_json(source)
+            if isinstance(source, dict)
+            else load_dialogue_file(Path(source))
+        )
+        with self.operation_lock:
+            result = import_dialogue_cold(
+                self, turns, parse_user_semantics=parse_user_semantics
+            )
+            self._persist_import(save=save, cold_save=cold_save)
+        return result
+
+    def import_memory(
+        self,
+        path: str | Path,
+        *,
+        save: bool = True,
+        cold_restore: bool = True,
+    ):
+        """Replace live AH with a persistence snapshot."""
+        from ah.corpus import import_memory_snapshot
+
+        with self.operation_lock:
+            result = import_memory_snapshot(self, path, cold_restore=cold_restore)
+            self._persist_import(save=save, cold_save=cold_restore)
         return result
 
     def create_orchestrator(self) -> AgentOrchestrator:

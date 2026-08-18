@@ -137,9 +137,35 @@ tail -f logs/latest.log
 ```bash
 ah-agent --config config/ollama.toml summary
 ah-agent --config config/ollama.toml import-corpus data/corpus/example.json --cold-save
+ah-agent --config config/ollama.toml import-text notes.txt --cold-save
+ah-agent --config config/ollama.toml import-dialogue dialogue.json --cold-save
+ah-agent --config config/ollama.toml import-memory snapshot.json --cold-restore
 ```
 
-`import-corpus` пишет сущности/факты/связи в канонику **без** Ignition seed. Тот же импорт есть в GUI-панели **Ignition** («Холодная загрузка памяти»). Поддерживаются `.json`, минимальное подмножество `.ahm` и `.prj`. `--cold-save` сохраняет граф без leftover excitation. Пример: `data/corpus/example.json`.
+Холодная загрузка пишет канонику **без** Ignition seed.
+
+В GUI панель **Ignition** → «Холодная загрузка памяти»:
+
+- **Структура** — `.json` / `.ahm` / `.prj` факты и связи (`import-corpus`).
+- **Текст** — проза, абзацы через пустую строку. С галочкой «Разбирать в факты» (нужен LLM) каждый абзац идёт через Perception в C/P + H. Без LLM остаётся только H-опыт. `--no-semantics` отключает разбор.
+- **Память AG** — полный persistence-снимок вместо текущей памяти.
+
+Импорт и экспорт диалога `ah_dialogue_v1` живут только в доке **Диалог** (не в Ignition). User-реплики при включённом разборе идут через Perception; агентские пишутся в H.
+
+`--cold-save` / «Сохранить без подсветки» сохраняет граф без leftover excitation. Пример структуры: `data/corpus/example.json`.
+
+Формат диалога:
+
+```json
+{
+  "format": "ah_dialogue_v1",
+  "exported_at": "2026-08-18T17:00:00+03:00",
+  "turns": [
+    {"speaker": "user", "text": "Иван подарил книгу Марии."},
+    {"speaker": "agent", "text": "Запомнил."}
+  ]
+}
+```
 
 ## Тесты
 

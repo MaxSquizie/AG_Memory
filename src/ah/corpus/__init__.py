@@ -7,17 +7,39 @@ from .loader import (
     import_json_payload,
     max_excitation,
 )
+from .memory_import import (
+    DIALOGUE_FORMAT,
+    DialogueTurn,
+    MemoryImportResult,
+    dump_dialogue_payload,
+    import_dialogue_cold,
+    import_memory_snapshot,
+    import_raw_experience,
+    load_dialogue_file,
+    parse_dialogue_json,
+    split_raw_experience_text,
+)
 
 __all__ = [
     "ColdCorpusWriter",
     "CorpusError",
     "CorpusImportResult",
+    "DIALOGUE_FORMAT",
+    "DialogueTurn",
+    "MemoryImportResult",
+    "dump_dialogue_payload",
     "import_ahm_file",
     "import_corpus_file",
+    "import_dialogue_cold",
     "import_json_file",
     "import_json_payload",
+    "import_memory_snapshot",
+    "import_raw_experience",
+    "load_dialogue_file",
     "max_excitation",
     "parse_ahm_text",
+    "parse_dialogue_json",
+    "split_raw_experience_text",
 ]
 
 

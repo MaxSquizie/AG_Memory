@@ -65,6 +65,52 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="save canonical graph only, dropping leftover excitation",
     )
+
+    text = sub.add_parser(
+        "import-text",
+        help="cold-load prose as USER turns; Perception writes facts when available",
+    )
+    text.add_argument("path", help="UTF-8 text file; blank lines split chunks")
+    text.add_argument(
+        "--no-semantics",
+        action="store_true",
+        help="record chunks as raw H-experience even if Perception is available",
+    )
+    text.add_argument("--no-save", action="store_true", help="do not persist after import")
+    text.add_argument(
+        "--cold-save",
+        action="store_true",
+        help="save canonical graph only, dropping leftover excitation",
+    )
+
+    dialogue = sub.add_parser(
+        "import-dialogue",
+        help="cold-load ah_dialogue_v1 JSON without lighting Ignition",
+    )
+    dialogue.add_argument("path", help="dialogue JSON with format=ah_dialogue_v1")
+    dialogue.add_argument(
+        "--no-semantics",
+        action="store_true",
+        help="record USER turns as raw H-experience even if Perception is available",
+    )
+    dialogue.add_argument("--no-save", action="store_true", help="do not persist after import")
+    dialogue.add_argument(
+        "--cold-save",
+        action="store_true",
+        help="save canonical graph only, dropping leftover excitation",
+    )
+
+    memory = sub.add_parser(
+        "import-memory",
+        help="replace live AH with a persistence snapshot",
+    )
+    memory.add_argument("path", help="AH persistence JSON (schema_version=1)")
+    memory.add_argument("--no-save", action="store_true", help="do not persist after import")
+    memory.add_argument(
+        "--cold-restore",
+        action="store_true",
+        help="restore canonical graph only, dropping leftover excitation",
+    )
     return parser
 
 
@@ -137,6 +183,75 @@ def main(argv: list[str] | None = None) -> int:
                     **result.as_dict(),
                     "saved": saved,
                     "cold_save": bool(args.cold_save) and saved,
+                    "max_excitation": max_excitation(services.core),
+                    "persistence_file": str(services.persistence.path),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if args.command == "import-text":
+        from ah.corpus import max_excitation
+
+        text = Path(args.path).read_text(encoding="utf-8-sig")
+        result = services.import_raw_text(
+            text,
+            save=not args.no_save,
+            cold_save=bool(args.cold_save),
+            parse_user_semantics=not args.no_semantics,
+        )
+        print(
+            json.dumps(
+                {
+                    **result.as_dict(),
+                    "saved": not args.no_save,
+                    "cold_save": bool(args.cold_save) and not args.no_save,
+                    "max_excitation": max_excitation(services.core),
+                    "persistence_file": str(services.persistence.path),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if args.command == "import-dialogue":
+        from ah.corpus import max_excitation
+
+        result = services.import_dialogue(
+            Path(args.path),
+            save=not args.no_save,
+            cold_save=bool(args.cold_save),
+            parse_user_semantics=not args.no_semantics,
+        )
+        print(
+            json.dumps(
+                {
+                    **result.as_dict(),
+                    "saved": not args.no_save,
+                    "cold_save": bool(args.cold_save) and not args.no_save,
+                    "max_excitation": max_excitation(services.core),
+                    "persistence_file": str(services.persistence.path),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if args.command == "import-memory":
+        from ah.corpus import max_excitation
+
+        result = services.import_memory(
+            Path(args.path),
+            save=not args.no_save,
+            cold_restore=bool(args.cold_restore),
+        )
+        print(
+            json.dumps(
+                {
+                    **result.as_dict(),
+                    "saved": not args.no_save,
+                    "cold_restore": bool(args.cold_restore),
                     "max_excitation": max_excitation(services.core),
                     "persistence_file": str(services.persistence.path),
                 },
