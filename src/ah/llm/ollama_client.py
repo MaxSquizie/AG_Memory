@@ -57,19 +57,30 @@ class OllamaClient:
         model: str,
         messages: list[dict[str, str]],
         options: dict[str, Any] | None = None,
+        think: bool | None = None,
     ) -> str:
         body: dict[str, Any] = {
             "model": model,
             "messages": messages,
             "stream": False,
         }
+        if think is not None:
+            body["think"] = think
         if options:
             body["options"] = options
         data = self._request("POST", "/api/chat", body)
         message = data.get("message")
         if not isinstance(message, dict):
             raise OllamaClientError("Ollama chat response missing message")
-        return str(message.get("content") or "").strip()
+        content = str(message.get("content") or "").strip()
+        if content:
+            return content
+        # Thinking-capable models may leave ``content`` empty and place the full
+        # trace in ``thinking`` when thinking mode is enabled server-side.
+        thinking = str(message.get("thinking") or "").strip()
+        if thinking:
+            return thinking
+        return ""
 
     def generate(
         self,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
 from pathlib import Path
 from threading import RLock
 
@@ -12,6 +12,7 @@ from ah.core import AHCore, JsonPersistence
 from ah.diagnostics import GraphInspector, RuntimeDiagnostics
 from ah.dsl import DSLInterpreter
 from ah.ignition import IgnitionClock, IgnitionEngine
+from ah.ignition.engine import IgnitionSnapshot
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.integration.correction import RefutationCommit, SemanticCorrectionService
 from ah.integration.contracts import IntegrationCommit
@@ -398,3 +399,39 @@ class RuntimeServices:
 
     def save(self) -> None:
         self.persistence.save(self.core, ignition=self.ignition, context=self.context)
+
+    def reset_memory(self, *, persist: bool = True) -> None:
+        """Clear canonical AH, runtime excitation, interaction state and Ignition queue.
+
+        Identity entities (SELF/USER) are recreated like on a fresh start. When
+        ``persist`` is true and persistence is enabled, writes a cold snapshot
+        without leftover excitation or pending impulses.
+        """
+        from ah.diagnostics.session_log import emit
+
+        with self.operation_lock:
+            if self.clock.running:
+                self.clock.stop()
+            self.core.store.replace_from(AHCore().store)
+            fresh_context = InteractionContext()
+            self._ensure_identity_context(self.core, fresh_context, self.config)
+            for field in fields(InteractionContext):
+                setattr(self.context, field.name, getattr(fresh_context, field.name))
+            self.ignition.restore_snapshot(IgnitionSnapshot(0, {}, {}))
+            self.projector = ContextProjector(self.core, self.config.context)
+            if persist and self.config.persistence.enabled:
+                JsonPersistence(
+                    self.persistence.path,
+                    PersistenceSettings(
+                        enabled=True,
+                        load_on_start=True,
+                        autosave_every_ticks=self.config.persistence.autosave_every_ticks,
+                        save_runtime_state=False,
+                        save_pending_impulses=False,
+                    ),
+                ).save(self.core, context=self.context)
+        emit(
+            "memory_reset",
+            persist=persist,
+            persistence_file=str(self.persistence.path),
+        )

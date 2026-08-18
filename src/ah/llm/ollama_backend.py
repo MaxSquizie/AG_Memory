@@ -354,10 +354,17 @@ class OllamaBackend:
             if system.strip():
                 messages.append({"role": "system", "content": system.strip()})
             messages.append({"role": "user", "content": prompt})
+            # Perception probes require one exact protocol token. Thinking models
+            # (Gemma 4, Qwen3, …) otherwise return empty ``content`` and only fill
+            # ``thinking``, which breaks role_cue/template_sense validation.
+            think = bool(self.config.llm.enable_thinking)
+            if role.startswith("perception_"):
+                think = False
             response_text = self._client.chat(
                 model=self.config.llm.ollama_model,
                 messages=messages,
                 options=self._generation_options(defaults),
+                think=think,
             )
             response_meta = {"text": response_text, "ok": True}
             self._record_request(

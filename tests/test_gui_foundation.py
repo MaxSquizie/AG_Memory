@@ -105,6 +105,37 @@ class GUIFoundationTests(unittest.TestCase):
         self.assertAlmostEqual(services.config.workspace.threshold, 0.5)
         self.assertAlmostEqual(services.core.store.runtime_state(ref.uid).excitation, before)
 
+    def test_reset_memory_clears_graph_and_persists_cold_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            persistence_file = root / "ah_memory.json"
+            config = load_config(PROJECT / "config/default.toml")
+            config = replace(
+                config,
+                llm=replace(config.llm, enabled=False),
+                paths=replace(config.paths, persistence_file=persistence_file),
+                persistence=replace(config.persistence, enabled=True, load_on_start=False),
+            )
+            services = RuntimeServices.build(config, core=AHCore())
+            entity = services.core.add_entity(Domain.C, {"name": Property("name", "fact", "str")})
+            ref = services.core.ref(entity.uid)
+            services.ignition.seed(ref, 0.8)
+            services.ignition.tick()
+            self.assertGreater(len(list(services.core.store.elements(Domain.C))), 0)
+            self.assertGreater(services.ignition.tick_index, 0)
+
+            services.reset_memory(persist=True)
+
+            self.assertEqual(len(list(services.core.store.elements(Domain.C))), 0)
+            self.assertEqual(len(list(services.core.store.elements(Domain.P))), 2)
+            self.assertEqual(services.ignition.tick_index, 0)
+            self.assertIsNotNone(services.context.self_ref)
+            self.assertIsNotNone(services.context.user_ref)
+            self.assertTrue(persistence_file.is_file())
+            reloaded = JsonPersistence(persistence_file, config.persistence).load()
+            self.assertEqual(len(list(reloaded.core.store.elements(Domain.C))), 0)
+            self.assertEqual(len(list(reloaded.core.store.elements(Domain.P))), 2)
+
 
     def test_graph_inspector_exports_structural_hypergraph_edges(self):
         core = AHCore()

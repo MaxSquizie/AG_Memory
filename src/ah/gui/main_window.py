@@ -147,6 +147,14 @@ class MainWindow(QMainWindow):
         self.action_save.triggered.connect(self._save_memory)
         bar.addAction(self.action_save)
 
+        self.action_clear_memory = QAction("Очистить память", self)
+        self.action_clear_memory.setToolTip(
+            "Удалить все узлы, факты, возбуждение и контекст диалога. "
+            "Останутся только базовые сущности SELF/USER; файл persistence перезаписывается."
+        )
+        self.action_clear_memory.triggered.connect(self._clear_memory)
+        bar.addAction(self.action_clear_memory)
+
         bar.addSeparator()
         reset_camera = QAction("Сброс камеры", self)
         reset_camera.triggered.connect(self.canvas.reset_camera)
@@ -403,6 +411,46 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Persistence", str(exc))
         else:
             self.statusBar().showMessage("AH сохранена", 2500)
+
+    def _clear_memory(self) -> None:
+        if (
+            self._chat_worker is not None
+            or self._acceptance_worker is not None
+            or self._hidden_valency_worker is not None
+        ):
+            self.statusBar().showMessage("Дождитесь окончания текущего cognitive run", 2500)
+            return
+        if self._llm_operation_worker is not None:
+            self.statusBar().showMessage("Дождитесь завершения операции LLM", 2500)
+            return
+
+        persistence_path = self.services.persistence.path
+        answer = QMessageBox.question(
+            self,
+            "Очистить память",
+            "Удалить все узлы, факты, возбуждение и контекст диалога?\n\n"
+            "Останутся только базовые сущности SELF/USER. "
+            f"Файл persistence будет перезаписан:\n{persistence_path}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            self.services.reset_memory(persist=True)
+        except Exception as exc:
+            QMessageBox.critical(self, "Память", str(exc))
+            return
+
+        self._last_turn = None
+        self._selected_uid = None
+        self._selected_edge_key = None
+        self.chat_history.clear()
+        self.canvas.refresh()
+        self.llm_panel.refresh_status()
+        self._refresh_status(force=True)
+        self.statusBar().showMessage("Память очищена", 4000)
 
     # ---------- chat ----------
     def _send_chat(self) -> None:

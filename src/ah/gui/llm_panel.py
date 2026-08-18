@@ -24,6 +24,11 @@ from PySide6.QtWidgets import (
 )
 
 from ah.bootstrap import RuntimeServices
+from ah.gui.perception_timeline import (
+    format_parser_decoded_history,
+    format_parser_raw_history,
+    pretty_json,
+)
 from ah.llm import OllamaBackend, OllamaClient, OllamaClientError
 from ah.projection.contracts import AgentContext, AgentContextDiagnostic
 
@@ -130,6 +135,7 @@ class LLMControlWidget(QWidget):
         "content_addressee",
         "control_subject",
         "template_hidden_valency",
+        "template_sense",
         "clarification_answer",
         "query_mode",
         "requested_role",
@@ -203,7 +209,7 @@ class LLMControlWidget(QWidget):
         info.addRow("History buffer", self.history_label)
         info.addRow("Perception", self.perception_cfg_label)
         info.addRow("Agent", self.agent_cfg_label)
-        info.addRow("Stage", self.stage_label)
+        info.addRow("Live LLM role", self.stage_label)
         root.addLayout(info)
 
         buttons = QHBoxLayout()
@@ -351,6 +357,9 @@ class LLMControlWidget(QWidget):
     def finish_turn(self) -> None:
         """Freeze diagnostics on the just-finished turn until the next submit."""
         self._turn_active = False
+        # Always materialize the full perception timeline when a turn ends, even if
+        # the operator stayed on another tab while probes were running.
+        self._refresh_parser_diagnostics(force=True)
         self.refresh_status()
 
     @staticmethod
@@ -492,11 +501,7 @@ class LLMControlWidget(QWidget):
 
     @staticmethod
     def _pretty(value) -> str:
-        def encode(obj):
-            if isinstance(obj, Enum):
-                return obj.value
-            return str(obj)
-        return json.dumps(value, ensure_ascii=False, indent=2, default=encode)
+        return pretty_json(value)
 
     def _refresh_parser_diagnostics(self, *, force: bool = False) -> None:
         parser = self.services.perception
@@ -513,42 +518,31 @@ class LLMControlWidget(QWidget):
                 self._set_text(self.parser_raw_view, text)
                 self._set_text(self.parser_decoded_view, text)
             return
-        diag = history[-1]
-        render_key = (
-            diag.sequence,
-            len(diag.attempts),
-            diag.final_error,
-            diag.decoded is not None,
+        render_key = tuple(
+            (
+                diag.sequence,
+                len(diag.attempts),
+                diag.final_error,
+                diag.decoded is not None,
+                tuple(
+                    (attempt.role, attempt.raw_text, attempt.error, attempt.normalized_answer)
+                    for attempt in diag.attempts
+                ),
+            )
+            for diag in history
         )
         if not force and render_key == self._last_parser_render_key:
             return
         self._last_parser_render_key = render_key
-        raw_parts = [f"SOURCE:\n{diag.source_text}"]
-        for index, attempt in enumerate(diag.attempts, start=1):
-            retry = f" retry={attempt.retry_index}" if attempt.retry_index else ""
-            raw_parts.append(f"\n--- PROBE {index}: {attempt.role}{retry} ---")
-            if attempt.prompt:
-                raw_parts.append(f"\nINPUT:\n{attempt.prompt}")
-            raw_parts.append(f"\nRAW:\n{attempt.raw_text}")
-            if attempt.normalized_answer is not None:
-                raw_parts.append(f"\nACCEPTED: {attempt.normalized_answer}")
-            if attempt.error:
-                raw_parts.append(f"\nVALIDATION ERROR: {attempt.error}")
-        if diag.final_error:
-            raw_parts.append(f"\nFINAL ERROR: {diag.final_error}")
-        self._set_text(self.parser_raw_view, "\n".join(raw_parts))
-
-        if diag.decoded is None:
-            decoded = {"status": "INVALID", "error": diag.final_error}
-        elif diag.final_error:
-            decoded = {
-                "status": "INVALID",
-                "error": diag.final_error,
-                "perception": asdict(diag.decoded),
-            }
-        else:
-            decoded = {"status": "OK", "perception": asdict(diag.decoded)}
-        self._set_text(self.parser_decoded_view, self._pretty(decoded))
+        turn_source = self._turn_source_text if self._turn_scope_initialized else ""
+        self._set_text(
+            self.parser_raw_view,
+            format_parser_raw_history(history, turn_source_text=turn_source),
+        )
+        self._set_text(
+            self.parser_decoded_view,
+            self._pretty(format_parser_decoded_history(history)),
+        )
 
     @staticmethod
     def _extract_context_section(rendered: str, heading: str) -> str:
@@ -694,16 +688,26 @@ class LLMControlWidget(QWidget):
                 self._set_text(self.agent_final_prompt_view, base)
 
         if current is self.requests_view:
-            chunks: list[str] = []
-            for record in records[-12:]:
+            chunks: list[str] = [
+                "LLM REQUEST TIMELINE (chronological; perception probes + agent calls)",
+            ]
+            perception_step = 0
+            for record in records:
                 prompt_preview = record.prompt
                 if len(prompt_preview) > 4000:
                     prompt_preview = prompt_preview[:4000] + "\n… <truncated in Requests tab; exact Agent prompt has its own tabs>"
                 response_preview = record.response_text
                 if len(response_preview) > 1200:
                     response_preview = response_preview[:1200] + "\n… <truncated in Requests tab>"
+                role_line = f"#{record.sequence} {record.role} req={record.req_id}"
+                if record.role.startswith("perception_"):
+                    perception_step += 1
+                    role_line = (
+                        f"#{record.sequence} perception step {perception_step}: "
+                        f"{record.role.removeprefix('perception_')} req={record.req_id}"
+                    )
                 chunks.append(
-                    f"#{record.sequence} {record.role} req={record.req_id}\n"
+                    f"{role_line}\n"
                     f"PROMPT:\n{prompt_preview}\n\n"
                     f"RESPONSE:\n{response_preview}"
                     + (f"\nERROR: {record.error}" if record.error else "")
@@ -790,6 +794,7 @@ class LLMControlWidget(QWidget):
                 self.placement_label.setText(status.placement_summary + quant)
         self.stage_label.setText(
             status.current_stage
+            + " (live; not pipeline order)"
             + (f" | last role={status.last_role}" if status.last_role else "")
             + f" | requests={status.request_count}"
         )

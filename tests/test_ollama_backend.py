@@ -102,6 +102,22 @@ class OllamaBackendTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "not available"):
                 backend.start()
 
+    def test_perception_roles_disable_thinking(self) -> None:
+        cfg = load_config(PROJECT / "config/ollama.toml")
+        backend = OllamaBackend(cfg)
+        backend._running = True
+        backend._ready = True
+        captured: dict[str, object] = {}
+
+        def fake_chat(**kwargs):
+            captured.update(kwargs)
+            return "ACTOR_OR_EXPERIENCER"
+
+        with patch.object(backend._client, "chat", side_effect=fake_chat):
+            response = backend.generate("probe", system="sys", role="perception_role_cue")
+        self.assertEqual(response.text, "ACTOR_OR_EXPERIENCER")
+        self.assertIs(captured.get("think"), False)
+
 
 class OllamaClientTests(unittest.TestCase):
     def test_list_models_parses_tags(self) -> None:
@@ -120,6 +136,49 @@ class OllamaClientTests(unittest.TestCase):
 
         with patch("urllib.request.urlopen", return_value=FakeResp()):
             self.assertEqual(client.list_models(), ["llama3:latest", "qwen2.5:7b"])
+
+    def test_chat_passes_think_flag(self) -> None:
+        client = OllamaClient("http://127.0.0.1:11434")
+        captured: dict[str, object] = {}
+
+        def fake_request(method, path, body=None):
+            captured["body"] = body
+            return {
+                "message": {
+                    "role": "assistant",
+                    "content": "ACTOR_OR_EXPERIENCER",
+                }
+            }
+
+        with patch.object(client, "_request", side_effect=fake_request):
+            text = client.chat(
+                model="gemma4:9b",
+                messages=[{"role": "user", "content": "probe"}],
+                think=False,
+            )
+        self.assertEqual(text, "ACTOR_OR_EXPERIENCER")
+        self.assertIs(captured["body"]["think"], False)
+
+    def test_chat_falls_back_to_thinking_when_content_empty(self) -> None:
+        client = OllamaClient("http://127.0.0.1:11434")
+
+        def fake_request(method, path, body=None):
+            return {
+                "message": {
+                    "role": "assistant",
+                    "content": "",
+                    "thinking": "AFFECTED_OR_CONTENT",
+                }
+            }
+
+        with patch.object(client, "_request", side_effect=fake_request):
+            self.assertEqual(
+                client.chat(
+                    model="gemma4:9b",
+                    messages=[{"role": "user", "content": "probe"}],
+                ),
+                "AFFECTED_OR_CONTENT",
+            )
 
 
 if __name__ == "__main__":
