@@ -48,6 +48,17 @@ class GUIRuntimeControlsV029Tests(unittest.TestCase):
         self.assertEqual(len(signal_calls["tuning_changed"].args), 4)
         self.assertEqual(len(signal_calls["tuning_committed"].args), 4)
 
+    def test_ignition_panel_exposes_pacemaker_and_cold_load(self) -> None:
+        source = TUNING.read_text(encoding="utf-8")
+        self.assertIn("Фоновый метроном (pacemaker)", source)
+        self.assertIn("Порог Workspace", source)
+        self.assertIn("Холодная загрузка памяти", source)
+        self.assertIn("corpus_import_requested", source)
+        main = MAIN.read_text(encoding="utf-8")
+        self.assertIn('QDockWidget("Ignition"', main)
+        self.assertIn("def _import_corpus", main)
+        self.assertIn("tune_ignition_mechanism", main)
+
 
 if __name__ == "__main__":
     unittest.main()

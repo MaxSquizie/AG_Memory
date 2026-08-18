@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
     QTextBrowser,
     QToolBar,
     QVBoxLayout,
@@ -263,7 +264,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 
     def _build_runtime_dock(self) -> None:
-        dock = QDockWidget("Runtime / Trace", self)
+        dock = QDockWidget("Ignition", self)
         self.runtime_dock = dock
         body = QWidget()
         layout = QVBoxLayout(body)
@@ -271,9 +272,14 @@ class MainWindow(QMainWindow):
             self.services.config.ignition.decay,
             self.services.config.ignition.tick_interval_seconds,
             self.services.config.ignition.seeds.resolved_symbol,
+            ignition=self.services.config.ignition,
+            workspace=self.services.config.workspace,
         )
         self.ignition_tuning.tuning_changed.connect(self._tune_ignition_decay_live)
         self.ignition_tuning.tuning_committed.connect(self._commit_ignition_decay_tuning)
+        self.ignition_tuning.mechanism_changed.connect(self._tune_ignition_mechanism_live)
+        self.ignition_tuning.mechanism_committed.connect(self._commit_ignition_mechanism)
+        self.ignition_tuning.corpus_import_requested.connect(self._import_corpus)
         self.manual_seed_button = QPushButton()
         self.manual_seed_button.setToolTip(
             "Передать тестовый импульс выбранному excitable узлу. Величина берётся из "
@@ -284,7 +290,8 @@ class MainWindow(QMainWindow):
         self.runtime_label = QLabel()
         self.visual_legend = QLabel(
             "Красный = excitation x; движущийся красный хвост = source → target; "
-            "w не затухает визуально и показывается отдельно в инспекторе."
+            "w не затухает визуально и показывается отдельно в инспекторе. "
+            "Метроном и порог Workspace меняются в блоке «Механизм Ignition»."
         )
         self.visual_legend.setWordWrap(True)
         self.trace_view = QPlainTextEdit()
@@ -294,7 +301,10 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.runtime_label)
         layout.addWidget(self.visual_legend)
         layout.addWidget(self.trace_view, 1)
-        dock.setWidget(body)
+        scroller = QScrollArea()
+        scroller.setWidgetResizable(True)
+        scroller.setWidget(body)
+        dock.setWidget(scroller)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 
     # ---------- runtime controls ----------
@@ -726,6 +736,79 @@ class MainWindow(QMainWindow):
             4500,
         )
 
+    @Slot(bool, float, float)
+    def _tune_ignition_mechanism_live(
+        self,
+        pacemaker_enabled: bool,
+        pacemaker_pulse: float,
+        workspace_threshold: float,
+    ) -> None:
+        try:
+            self.services.tune_ignition_mechanism(
+                pacemaker_enabled=pacemaker_enabled,
+                pacemaker_pulse=pacemaker_pulse,
+                workspace_threshold=workspace_threshold,
+            )
+        except Exception as exc:
+            self.statusBar().showMessage(f"Ignition mechanism error: {exc}", 4000)
+
+    @Slot(bool, float, float)
+    def _commit_ignition_mechanism(
+        self,
+        pacemaker_enabled: bool,
+        pacemaker_pulse: float,
+        workspace_threshold: float,
+    ) -> None:
+        self.config_editor.set_external_values(
+            {
+                "ignition.pacemaker.enabled": bool(pacemaker_enabled),
+                "ignition.seeds.pacemaker": round(float(pacemaker_pulse), 4),
+                "workspace.threshold": round(float(workspace_threshold), 4),
+            },
+            save=False,
+        )
+        self.statusBar().showMessage(
+            "Механизм Ignition применён live; для сохранения нажмите «Сохранить / применить» в конфиге",
+            4500,
+        )
+
+    @Slot(str, str, bool)
+    def _import_corpus(self, path: str, domain: str, cold_save: bool) -> None:
+        if self._chat_worker is not None:
+            QMessageBox.information(self, "Память", "Дождитесь окончания текущего хода.")
+            return
+        source = Path(path)
+        if not source.is_file():
+            QMessageBox.warning(self, "Память", f"Файл не найден: {path}")
+            return
+
+        def work():
+            from ah.model import Domain
+
+            return self.services.import_corpus(
+                source,
+                domain=Domain(domain),
+                save=True,
+                cold_save=bool(cold_save),
+            )
+
+        worker = FunctionWorker(work)
+        worker.signals.error.connect(lambda message: QMessageBox.critical(self, "Память", message))
+        worker.signals.result.connect(self._corpus_imported)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _corpus_imported(self, result) -> None:
+        payload = result.as_dict() if hasattr(result, "as_dict") else {}
+        created = int(payload.get("facts_created", 0))
+        reused = int(payload.get("facts_reused", 0))
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        self.statusBar().showMessage(
+            f"Холодная загрузка: фактов +{created}, повторно {reused}",
+            6000,
+        )
+
     def _refresh_manual_seed_button(self) -> None:
         amount = float(self.services.config.ignition.seeds.reactivated_fact)
         self.manual_seed_button.setText(f"Импульс выбранному узлу  +{amount:.2f} x")
@@ -820,6 +903,11 @@ class MainWindow(QMainWindow):
                     new_config.ignition.decay,
                     new_config.ignition.seeds.resolved_symbol,
                     new_config.ignition.tick_interval_seconds,
+                )
+                self.ignition_tuning.set_mechanism(
+                    pacemaker_enabled=new_config.ignition.pacemaker.enabled,
+                    pacemaker_pulse=new_config.ignition.seeds.pacemaker,
+                    workspace_threshold=new_config.workspace.threshold,
                 )
             if hasattr(self, "manual_seed_button"):
                 self._refresh_manual_seed_button()

@@ -44,6 +44,27 @@ def build_parser() -> argparse.ArgumentParser:
     refute = sub.add_parser("refute", help="create/reuse FALSE(N) and schedule h_N refutation")
     refute.add_argument("uid")
     refute.add_argument("--tick", action="store_true", help="apply one ignition tick immediately")
+
+    corpus = sub.add_parser(
+        "import-corpus",
+        help="cold-load facts from JSON/.ahm/.prj without lighting Ignition",
+    )
+    corpus.add_argument("path", help="corpus file: .json, .ahm, or .prj")
+    corpus.add_argument(
+        "--domain",
+        default="C",
+        help="default domain for unnamed modules (C, P, or H)",
+    )
+    corpus.add_argument(
+        "--no-save",
+        action="store_true",
+        help="write into the loaded memory but do not persist",
+    )
+    corpus.add_argument(
+        "--cold-save",
+        action="store_true",
+        help="save canonical graph only, dropping leftover excitation",
+    )
     return parser
 
 
@@ -82,6 +103,47 @@ def main(argv: list[str] | None = None) -> int:
         if args.tick:
             services.ignition.tick()
         print(json.dumps(_jsonable(commit), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "import-corpus":
+        from ah.config import PersistenceSettings
+        from ah.core.persistence import JsonPersistence
+        from ah.corpus import import_corpus_file, max_excitation
+        from ah.model import Domain
+
+        try:
+            domain = Domain(str(args.domain).strip().upper())
+        except ValueError as exc:
+            raise SystemExit(f"Invalid domain: {args.domain}") from exc
+        result = import_corpus_file(services.core, Path(args.path), default_domain=domain)
+        saved = False
+        if not args.no_save:
+            if args.cold_save:
+                JsonPersistence(
+                    services.persistence.path,
+                    PersistenceSettings(
+                        enabled=True,
+                        load_on_start=True,
+                        autosave_every_ticks=services.config.persistence.autosave_every_ticks,
+                        save_runtime_state=False,
+                        save_pending_impulses=False,
+                    ),
+                ).save(services.core, context=services.context)
+            else:
+                services.save()
+            saved = True
+        print(
+            json.dumps(
+                {
+                    **result.as_dict(),
+                    "saved": saved,
+                    "cold_save": bool(args.cold_save) and saved,
+                    "max_excitation": max_excitation(services.core),
+                    "persistence_file": str(services.persistence.path),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return 0
     raise AssertionError(args.command)
 

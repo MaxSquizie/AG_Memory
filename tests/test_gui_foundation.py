@@ -84,6 +84,27 @@ class GUIFoundationTests(unittest.TestCase):
         self.assertAlmostEqual(services.config.ignition.decay.reactivation_min_input, 0.123)
         self.assertAlmostEqual(services.core.store.runtime_state(ref.uid).excitation, before)
 
+    def test_ignition_mechanism_tuning_is_hot_and_preserves_state(self):
+        config = load_config(PROJECT / "config/default.toml")
+        config = replace(config, llm=replace(config.llm, enabled=False))
+        services = RuntimeServices.build(config, core=AHCore())
+        entity = services.core.add_entity(
+            Domain.C, {"name": Property("name", "hot-mech", "str")}
+        )
+        ref = services.core.ref(entity.uid)
+        services.ignition.seed(ref, 0.6)
+        services.ignition.tick()
+        before = services.core.store.runtime_state(ref.uid).excitation
+        services.tune_ignition_mechanism(
+            pacemaker_enabled=False,
+            pacemaker_pulse=0.02,
+            workspace_threshold=0.5,
+        )
+        self.assertFalse(services.config.ignition.pacemaker.enabled)
+        self.assertAlmostEqual(services.config.ignition.seeds.pacemaker, 0.02)
+        self.assertAlmostEqual(services.config.workspace.threshold, 0.5)
+        self.assertAlmostEqual(services.core.store.runtime_state(ref.uid).excitation, before)
+
 
     def test_graph_inspector_exports_structural_hypergraph_edges(self):
         core = AHCore()

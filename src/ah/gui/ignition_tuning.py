@@ -1,9 +1,21 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QTimer, Qt, Signal
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QSlider, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
 
-from ah.config import DecaySettings
+from ah.config import DecaySettings, IgnitionSettings, WorkspaceSettings
 from ah.ignition.tuning import midpoint_from_speed, speed_from_midpoint
 
 
@@ -18,6 +30,9 @@ class IgnitionTuningWidget(QWidget):
 
     tuning_changed = Signal(float, float, float, float)   # alpha, midpoint, min_input, resolved_S
     tuning_committed = Signal(float, float, float, float) # persist after drag/idle
+    mechanism_changed = Signal(bool, float, float)        # pacemaker, pulse, workspace t
+    mechanism_committed = Signal(bool, float, float)
+    corpus_import_requested = Signal(str, str, bool)      # path, domain, cold_save
 
     def __init__(
         self,
@@ -25,17 +40,23 @@ class IgnitionTuningWidget(QWidget):
         tick_interval_seconds: float,
         resolved_symbol_seed: float = 0.95,
         parent: QWidget | None = None,
+        *,
+        ignition: IgnitionSettings | None = None,
+        workspace: WorkspaceSettings | None = None,
     ) -> None:
         super().__init__(parent)
         self._tick_interval_seconds = max(1e-6, float(tick_interval_seconds))
         self._syncing = False
+        ignition = ignition or IgnitionSettings()
+        workspace = workspace or WorkspaceSettings()
 
         self.floor_title = QLabel("Плавающий низ")
         self.floor_slider = QSlider(Qt.Orientation.Horizontal)
         self.floor_slider.setRange(0, 90)
         self.floor_slider.setToolTip(
             "Нижняя граница текущей decay-эпохи: x_floor = alpha × x_start. "
-            "Она меняется при сильной реактивации или новом prompt."
+            "Она меняется при сильной реактивации или новом prompt. "
+            "0% — подсветка гаснет полностью; факты в графе остаются."
         )
         self.floor_value = QLabel()
         self.floor_value.setMinimumWidth(112)
@@ -92,17 +113,89 @@ class IgnitionTuningWidget(QWidget):
         symbol_row.addWidget(self.symbol_slider, 1)
         symbol_row.addWidget(self.symbol_value)
 
+        decay_box = QGroupBox("Затухание")
+        decay_layout = QVBoxLayout(decay_box)
+        decay_layout.addLayout(floor_row)
+        decay_layout.addLayout(speed_row)
+        decay_layout.addLayout(reactivation_row)
+        decay_layout.addLayout(symbol_row)
+
+        self.pacemaker_enabled = QCheckBox("Фоновый метроном (pacemaker)")
+        self.pacemaker_enabled.setToolTip(
+            "Пока включён, Ignition периодически слабо подсвечивает случайные узлы. "
+            "Выключите, если граф не должен мерцать сам по себе."
+        )
+        self.pacemaker_title = QLabel("Сила метронома")
+        self.pacemaker_slider = QSlider(Qt.Orientation.Horizontal)
+        self.pacemaker_slider.setRange(0, 500)
+        self.pacemaker_slider.setToolTip("Величина фонового импульса ν. Не записывает факты в память.")
+        self.pacemaker_value = QLabel()
+        self.pacemaker_value.setMinimumWidth(112)
+        pacemaker_row = QHBoxLayout()
+        pacemaker_row.addWidget(self.pacemaker_title)
+        pacemaker_row.addWidget(self.pacemaker_slider, 1)
+        pacemaker_row.addWidget(self.pacemaker_value)
+
+        self.threshold_title = QLabel("Порог Workspace")
+        self.threshold_slider = QSlider(Qt.Orientation.Horizontal)
+        self.threshold_slider.setRange(0, 100)
+        self.threshold_slider.setToolTip(
+            "В контекст LLM попадает только то, у чего x выше этого порога. "
+            "Сами факты в графе не удаляются."
+        )
+        self.threshold_value = QLabel()
+        self.threshold_value.setMinimumWidth(112)
+        threshold_row = QHBoxLayout()
+        threshold_row.addWidget(self.threshold_title)
+        threshold_row.addWidget(self.threshold_slider, 1)
+        threshold_row.addWidget(self.threshold_value)
+
+        mechanism_box = QGroupBox("Механизм Ignition")
+        mechanism_layout = QVBoxLayout(mechanism_box)
+        mechanism_layout.addWidget(self.pacemaker_enabled)
+        mechanism_layout.addLayout(pacemaker_row)
+        mechanism_layout.addLayout(threshold_row)
+
+        self.corpus_path = QLineEdit()
+        self.corpus_path.setPlaceholderText("JSON / .ahm / .prj — факты без подсветки")
+        self.corpus_browse = QPushButton("Файл…")
+        self.corpus_browse.clicked.connect(self._browse_corpus)
+        path_row = QHBoxLayout()
+        path_row.addWidget(self.corpus_path, 1)
+        path_row.addWidget(self.corpus_browse)
+        self.corpus_domain = QComboBox()
+        self.corpus_domain.addItems(["C", "P", "H"])
+        self.corpus_cold_save = QCheckBox("Сохранить без подсветки")
+        self.corpus_cold_save.setChecked(True)
+        self.corpus_cold_save.setToolTip(
+            "Пишет канонику в JSON и не сохраняет текущие уровни возбуждения."
+        )
+        self.corpus_import = QPushButton("Загрузить в память")
+        self.corpus_import.clicked.connect(self._request_corpus_import)
+        corpus_box = QGroupBox("Холодная загрузка памяти")
+        corpus_layout = QVBoxLayout(corpus_box)
+        corpus_layout.addLayout(path_row)
+        corpus_opts = QHBoxLayout()
+        corpus_opts.addWidget(QLabel("Домен"))
+        corpus_opts.addWidget(self.corpus_domain)
+        corpus_opts.addWidget(self.corpus_cold_save, 1)
+        corpus_layout.addLayout(corpus_opts)
+        corpus_layout.addWidget(self.corpus_import)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addLayout(floor_row)
-        layout.addLayout(speed_row)
-        layout.addLayout(reactivation_row)
-        layout.addLayout(symbol_row)
+        layout.addWidget(mechanism_box)
+        layout.addWidget(decay_box)
+        layout.addWidget(corpus_box)
 
         self._commit_timer = QTimer(self)
         self._commit_timer.setSingleShot(True)
         self._commit_timer.setInterval(450)
         self._commit_timer.timeout.connect(self._emit_commit)
+        self._mechanism_timer = QTimer(self)
+        self._mechanism_timer.setSingleShot(True)
+        self._mechanism_timer.setInterval(450)
+        self._mechanism_timer.timeout.connect(self._emit_mechanism_commit)
 
         self.floor_slider.valueChanged.connect(self._changed)
         self.speed_slider.valueChanged.connect(self._changed)
@@ -113,7 +206,18 @@ class IgnitionTuningWidget(QWidget):
         self.reactivation_slider.sliderReleased.connect(self._emit_commit)
         self.symbol_slider.sliderReleased.connect(self._emit_commit)
 
+        self.pacemaker_enabled.toggled.connect(self._mechanism_changed)
+        self.pacemaker_slider.valueChanged.connect(self._mechanism_changed)
+        self.threshold_slider.valueChanged.connect(self._mechanism_changed)
+        self.pacemaker_slider.sliderReleased.connect(self._emit_mechanism_commit)
+        self.threshold_slider.sliderReleased.connect(self._emit_mechanism_commit)
+
         self.set_parameters(decay, resolved_symbol_seed, tick_interval_seconds)
+        self.set_mechanism(
+            pacemaker_enabled=ignition.pacemaker.enabled,
+            pacemaker_pulse=ignition.seeds.pacemaker,
+            workspace_threshold=workspace.threshold,
+        )
 
     @staticmethod
     def midpoint_from_speed(value: int) -> float:
@@ -149,6 +253,29 @@ class IgnitionTuningWidget(QWidget):
         finally:
             self._syncing = False
 
+    def set_mechanism(
+        self,
+        *,
+        pacemaker_enabled: bool,
+        pacemaker_pulse: float,
+        workspace_threshold: float,
+    ) -> None:
+        self._syncing = True
+        try:
+            self.pacemaker_enabled.setChecked(bool(pacemaker_enabled))
+            self.pacemaker_slider.setValue(round(max(0.0, float(pacemaker_pulse)) * 1000.0))
+            self.threshold_slider.setValue(round(max(0.0, min(1.0, float(workspace_threshold))) * 100.0))
+            self._refresh_mechanism_labels()
+        finally:
+            self._syncing = False
+
+    def mechanism_values(self) -> tuple[bool, float, float]:
+        return (
+            self.pacemaker_enabled.isChecked(),
+            self.pacemaker_slider.value() / 1000.0,
+            self.threshold_slider.value() / 100.0,
+        )
+
     def set_decay(self, decay: DecaySettings, tick_interval_seconds: float | None = None) -> None:
         # Compatibility for callers that only update decay. Preserve current S seed.
         self.set_parameters(decay, self.symbol_slider.value() / 1000.0, tick_interval_seconds)
@@ -160,6 +287,13 @@ class IgnitionTuningWidget(QWidget):
         self.speed_value.setText(f"середина ≈ {seconds:.2f} с")
         self.reactivation_value.setText(f"Δx ≥ {min_input:.3f}")
         self.symbol_value.setText(f"+{resolved_symbol:.3f} x")
+        if hasattr(self, "pacemaker_value"):
+            self._refresh_mechanism_labels()
+
+    def _refresh_mechanism_labels(self) -> None:
+        enabled, pulse, threshold = self.mechanism_values()
+        self.pacemaker_value.setText("выкл" if not enabled else f"+{pulse:.3f} x")
+        self.threshold_value.setText(f"x > {threshold:.2f}")
 
     def _changed(self, _value: int) -> None:
         self._refresh_labels()
@@ -169,9 +303,47 @@ class IgnitionTuningWidget(QWidget):
         self.tuning_changed.emit(alpha, midpoint, min_input, resolved_symbol)
         self._commit_timer.start()
 
+    def _mechanism_changed(self, _value=None) -> None:
+        self._refresh_mechanism_labels()
+        if self._syncing:
+            return
+        enabled, pulse, threshold = self.mechanism_values()
+        self.mechanism_changed.emit(enabled, pulse, threshold)
+        self._mechanism_timer.start()
+
     def _emit_commit(self) -> None:
         if self._syncing:
             return
         self._commit_timer.stop()
         alpha, midpoint, min_input, resolved_symbol = self.values()
         self.tuning_committed.emit(alpha, midpoint, min_input, resolved_symbol)
+
+    def _emit_mechanism_commit(self) -> None:
+        if self._syncing:
+            return
+        self._mechanism_timer.stop()
+        enabled, pulse, threshold = self.mechanism_values()
+        self.mechanism_committed.emit(enabled, pulse, threshold)
+
+    def _browse_corpus(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Холодная загрузка памяти",
+            "",
+            "Корпус (*.json *.ahm *.prj);;JSON (*.json);;AHM (*.ahm);;PRJ (*.prj)",
+        )
+        if path:
+            self.corpus_path.setText(path)
+
+    def _request_corpus_import(self) -> None:
+        path = self.corpus_path.text().strip()
+        if not path:
+            self._browse_corpus()
+            path = self.corpus_path.text().strip()
+        if not path:
+            return
+        self.corpus_import_requested.emit(
+            path,
+            self.corpus_domain.currentText(),
+            self.corpus_cold_save.isChecked(),
+        )

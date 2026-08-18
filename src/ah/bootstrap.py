@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from pathlib import Path
 from threading import RLock
 
 from ah.agent.interaction_context import InteractionContext
 from ah.agent.llm_agent import LLMAgent, LLMAgentSettings
 from ah.agent.orchestrator import AgentOrchestrator
-from ah.config import AppConfig
+from ah.config import AppConfig, PersistenceSettings
 from ah.core import AHCore, JsonPersistence
 from ah.diagnostics import GraphInspector, RuntimeDiagnostics
 from ah.dsl import DSLInterpreter
@@ -281,6 +282,62 @@ class RuntimeServices:
         self.config = replace(self.config, ignition=ignition)
         self.ignition.reconfigure_decay(decay)
         self.ignition.reconfigure_seed_levels(seeds)
+
+    def tune_ignition_mechanism(
+        self,
+        *,
+        pacemaker_enabled: bool | None = None,
+        pacemaker_pulse: float | None = None,
+        workspace_threshold: float | None = None,
+    ) -> None:
+        """Hot-swap pacemaker and Workspace threshold without resetting AH/x."""
+        ignition = self.config.ignition
+        workspace = self.config.workspace
+        if pacemaker_enabled is not None:
+            ignition = replace(
+                ignition,
+                pacemaker=replace(ignition.pacemaker, enabled=bool(pacemaker_enabled)),
+            )
+        if pacemaker_pulse is not None:
+            ignition = replace(
+                ignition,
+                seeds=replace(ignition.seeds, pacemaker=max(0.0, float(pacemaker_pulse))),
+            )
+        if workspace_threshold is not None:
+            workspace = replace(workspace, threshold=max(0.0, float(workspace_threshold)))
+        self.config = replace(self.config, ignition=ignition, workspace=workspace)
+        self.ignition.reconfigure(ignition, workspace, self.config.lifecycle)
+        self.clock.set_interval(ignition.tick_interval_seconds)
+
+    def import_corpus(
+        self,
+        path: str | Path,
+        *,
+        domain: Domain = Domain.C,
+        save: bool = True,
+        cold_save: bool = True,
+    ):
+        """Write canonical facts without Ignition seeds. Optional cold persist."""
+        from ah.corpus import import_corpus_file
+
+        source = Path(path)
+        with self.operation_lock:
+            result = import_corpus_file(self.core, source, default_domain=domain)
+            if save:
+                if cold_save:
+                    JsonPersistence(
+                        self.persistence.path,
+                        PersistenceSettings(
+                            enabled=True,
+                            load_on_start=True,
+                            autosave_every_ticks=self.config.persistence.autosave_every_ticks,
+                            save_runtime_state=False,
+                            save_pending_impulses=False,
+                        ),
+                    ).save(self.core, context=self.context)
+                else:
+                    self.save()
+        return result
 
     def create_orchestrator(self) -> AgentOrchestrator:
         if self.perception is None or self.agent is None:

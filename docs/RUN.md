@@ -39,6 +39,8 @@ uv pip install -e ".[llm-vision]"
 | Ollama (рекомендуется для первого запуска) | `config/ollama.toml` | `ollama` | нет |
 | Локальный HF/PyTorch | `config/default.toml` | `builtin_process` | да |
 
+Ignition (`alpha`, pacemaker, порог Workspace) одинаков в обоих файлах и меняется в GUI-панели **Ignition**.
+
 ### Ollama
 
 ```bash
@@ -134,7 +136,10 @@ tail -f logs/latest.log
 
 ```bash
 ah-agent --config config/ollama.toml summary
+ah-agent --config config/ollama.toml import-corpus data/corpus/example.json --cold-save
 ```
+
+`import-corpus` пишет сущности/факты/связи в канонику **без** Ignition seed. Тот же импорт есть в GUI-панели **Ignition** («Холодная загрузка памяти»). Поддерживаются `.json`, минимальное подмножество `.ahm` и `.prj`. `--cold-save` сохраняет граф без leftover excitation. Пример: `data/corpus/example.json`.
 
 ## Тесты
 

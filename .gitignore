@@ -9,5 +9,6 @@ __pycache__/
 !/logs/.gitkeep
 
 data/ah_memory.json
-
+data/acceptance_runs/*
+data/corpus/*
 /personal_docs/
