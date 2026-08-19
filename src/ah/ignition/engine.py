@@ -97,6 +97,11 @@ class IgnitionEngine:
         self._seed_reasons: dict[str, list[SeedReason]] = defaultdict(list)
         self._pending_refutations: set[str] = set()
         self._lock = RLock()
+        self._active_uids: set[str] = {
+            uid
+            for uid, state in self.core.store.runtime_items()
+            if state.excitation > self.settings.activation.epsilon
+        }
 
     def reconfigure(
         self,
@@ -131,6 +136,11 @@ class IgnitionEngine:
                 enabled=lifecycle.gc_enabled,
                 orphan_cleanup=lifecycle.orphan_cleanup,
             )
+            self._active_uids = {
+                uid
+                for uid, state in self.core.store.runtime_items()
+                if state.excitation > self.settings.activation.epsilon
+            }
 
     def reconfigure_decay(self, decay: DecaySettings) -> None:
         """Hot-swap only g/floor parameters without resetting AH or runtime x.
@@ -196,18 +206,44 @@ class IgnitionEngine:
                 self._pending_refutations.add(request.target.uid)
 
     def begin_prompt_epoch(self) -> None:
-        """Start a fresh decay epoch from current x without changing excitation."""
+        """Start a fresh decay epoch from current x without changing excitation.
+
+        Only currently excited UIDs can change here; cold runtime records are left
+        untouched. This is semantically identical to the previous full-store copy
+        but keeps prompt handling proportional to the active cognitive set.
+        """
         with self._lock:
-            new_states = {uid: deepcopy(state) for uid, state in self.core.store.runtime_items()}
-            for state in new_states.values():
-                if state.excitation > 0:
-                    state.decay_age = 0
-                    state.decay_origin_excitation = state.excitation
-            self.core.store._replace_runtime_states(new_states)
+            updates: dict[str, RuntimeState] = {}
+            eps = self.settings.activation.epsilon
+            for uid in tuple(self._active_uids):
+                if not self.core.store.has_uid(uid):
+                    self._active_uids.discard(uid)
+                    continue
+                state = self.core.store.runtime_state(uid)
+                if state.excitation <= eps:
+                    self._active_uids.discard(uid)
+                    continue
+                updated = deepcopy(state)
+                updated.decay_age = 0
+                updated.decay_origin_excitation = updated.excitation
+                updates[uid] = updated
+            if updates:
+                self.core.store._update_runtime_states(updates)
+
+    def _workspace_refs_locked(self) -> tuple[Ref, ...]:
+        threshold = self.workspace_settings.threshold
+        refs = [
+            self.core.ref(uid)
+            for uid in self._active_uids
+            if self.core.store.has_uid(uid)
+            and self.core.store.runtime_state(uid).excitation > threshold
+        ]
+        refs.sort(key=lambda ref: ref.uid)
+        return tuple(refs)
 
     def workspace_refs(self) -> tuple[Ref, ...]:
         with self._lock:
-            return WorkspaceView(self.core, self.workspace_settings.threshold).refs()
+            return self._workspace_refs_locked()
 
     def export_snapshot(self, *, include_pending: bool = True) -> IgnitionSnapshot:
         with self._lock:
@@ -267,6 +303,11 @@ class IgnitionEngine:
                 if self.core.store.has_uid(uid) and self.core.store.kind_of(uid) is RefKind.N
             }
             self.pacemaker.restore(snapshot.pacemaker)
+            self._active_uids = {
+                uid
+                for uid, state in self.core.store.runtime_items()
+                if state.excitation > self.settings.activation.epsilon
+            }
 
     def tick(self, *, include_pacemaker: bool = True) -> TickResult:
         """Execute one synchronous cognitive tick.
@@ -281,14 +322,13 @@ class IgnitionEngine:
 
     def _tick_locked(self, *, include_pacemaker: bool = True) -> TickResult:
         tick = self.tick_index
-        snapshot = {uid: deepcopy(state) for uid, state in self.core.store.runtime_items()}
         incoming = dict(self._incoming)
         pacemaker_incoming = dict(self._pacemaker_incoming)
         seed_reasons_mut = {uid: list(values) for uid, values in self._seed_reasons.items()}
 
         # Pacemaker is an internal stimulus scheduled on the same tick clock. It is
         # explicitly marked so h_N does not mistake it for external confirmation.
-        workspace_before = WorkspaceView(self.core, self.workspace_settings.threshold).refs()
+        workspace_before = self._workspace_refs_locked()
         if include_pacemaker:
             for pulse in self.pacemaker.pulses_for_tick(workspace_before):
                 incoming[pulse.ref.uid] = incoming.get(pulse.ref.uid, 0.0) + pulse.amount
@@ -304,16 +344,31 @@ class IgnitionEngine:
         self._seed_reasons = defaultdict(list)
         self._pending_refutations = set()
 
+        eps = self.settings.activation.epsilon
+
+        # Sparse synchronous snapshot. Only a node with retained x>epsilon or an
+        # incoming packet can change on this tick. Cold untouched AH records are
+        # mathematically invariant and therefore need not be copied/visited.
+        affected_uids = {
+            uid
+            for uid in (*self._active_uids, *incoming.keys())
+            if self.core.store.has_uid(uid)
+            and self.core.store.kind_of(uid) is not RefKind.L
+        }
+        snapshot = {
+            uid: deepcopy(self.core.store.runtime_state(uid))
+            for uid in sorted(affected_uids)
+        }
         next_states = {uid: deepcopy(state) for uid, state in snapshot.items()}
         outputs: dict[str, float] = {}
         activation_uids: set[str] = set()
         pacemaker_only_activation_uids: set[str] = set()
         output_pacemaker_only: set[str] = set()
         next_pacemaker_only_excitation: set[str] = set()
-        eps = self.settings.activation.epsilon
 
         # PHASE 1/2 — collect z and compute f(x,z), output, activation event.
-        for uid, before in snapshot.items():
+        for uid in sorted(snapshot):
+            before = snapshot[uid]
             z = float(incoming.get(uid, 0.0))
             pacemaker_z = min(z, float(pacemaker_incoming.get(uid, 0.0)))
             semantic_z = max(0.0, z - pacemaker_z)
@@ -332,21 +387,13 @@ class IgnitionEngine:
             x_after_f = self.activation.clamp(x_raw)
             # x is retained cognitive activation. output is the *new input packet*
             # available for onward propagation, measured before storage clamp.
-            # Therefore a strongly mentioned already-high S can still transmit the
-            # new mention instead of being muted merely because x is near x_max.
-            # With z=0 the packet is exactly zero, so retained floor x is never
-            # re-emitted forever.
             input_gain = max(0.0, x_raw - before.excitation)
             output = min(self.settings.x_max, input_gain)
-            # Reactivation strength is likewise measured before clamp so x_max
-            # saturation cannot hide a strong incoming stimulus.
             activation_event = z > eps and input_gain > eps
             first_excitation = before.first_excitation_tick is None and activation_event
             input_is_pacemaker_only = (
                 z > eps and semantic_z <= eps and pacemaker_z >= z - eps
             )
-            # output is Δx, so its provenance comes from this tick's input, not
-            # from the retained baseline excitation that existed beforehand.
             output_is_pacemaker_only = output > eps and input_is_pacemaker_only
             excitation_is_pacemaker_only = (
                 input_is_pacemaker_only
@@ -389,9 +436,6 @@ class IgnitionEngine:
                 expected_loss * self.settings.decay.reactivation_reset_ratio,
                 self.settings.decay.reactivation_min_input,
             )
-            # Pure pacemaker background may make a node excitable/visible but must
-            # not redefine the retained context floor. Only a sufficiently strong
-            # non-background input or begin_prompt_epoch may rebase the epoch.
             reset_epoch = (
                 activation_event
                 and not input_is_pacemaker_only
@@ -418,15 +462,23 @@ class IgnitionEngine:
                 next_pacemaker_only_excitation.add(uid)
 
         # PHASE 3 — this tick's f output propagates only into next tick's buffer.
+        # Traverse adjacency only from UIDs that actually emitted a new packet.
         scheduled: dict[str, float] = defaultdict(float)
         scheduled_pacemaker: dict[str, float] = defaultdict(float)
         propagations: list[PropagationEvent] = []
-        for link in self.core.store.links():
-            source_output = outputs.get(link.source.uid, 0.0)
-            if source_output > eps and link.weight > 0:
+
+        for uid in sorted(outputs):
+            source_output = outputs[uid]
+            if source_output <= eps or not self.core.store.has_uid(uid):
+                continue
+            source_ref = self.core.ref(uid)
+
+            for link in self.core.store.outgoing_links(uid):
+                if link.weight <= 0:
+                    continue
                 amount = source_output * link.weight
                 scheduled[link.target.uid] += amount
-                if link.source.uid in output_pacemaker_only:
+                if uid in output_pacemaker_only:
                     scheduled_pacemaker[link.target.uid] += amount
                 propagations.append(
                     PropagationEvent(
@@ -439,13 +491,8 @@ class IgnitionEngine:
                     )
                 )
 
-        # Lexical retrieval path. Canonical references point T->S and N->T, but
-        # excitation intentionally travels in the retrieval direction S->T->N.
-        # It is feed-forward only: there is no N->T->S return path, so a strong
-        # lexical seed cannot form a structural positive-feedback cycle.
-        for uid, source_output in outputs.items():
-            if source_output <= eps or not self.core.store.has_uid(uid):
-                continue
+            # Lexical retrieval path. Canonical references point T->S and N->T,
+            # while excitation intentionally travels S->T->N.
             kind = self.core.store.kind_of(uid)
             if kind is RefKind.S:
                 for template in self.core.store.find_templates_by_predicate(uid):
@@ -455,7 +502,7 @@ class IgnitionEngine:
                         scheduled_pacemaker[template.uid] += amount
                     propagations.append(
                         PropagationEvent(
-                            source=self.core.ref(uid),
+                            source=source_ref,
                             target=self.core.ref(template.uid),
                             via_uid=uid,
                             via_kind="S",
@@ -465,17 +512,9 @@ class IgnitionEngine:
                     )
             elif kind is RefKind.T:
                 for node in self.core.store.find_hypernodes_by_template(uid):
-                    # Scoped proposition content is not independently asserted and
-                    # must not become a standalone lexical recall root.
-                    if node.meta.get("semantic_scope"):
-                        continue
-                    if node.weight <= 0:
+                    if node.meta.get("semantic_scope") or node.weight <= 0:
                         continue
                     amount = source_output * node.weight
-
-                    # Explicitly refuted N is historical evidence, not the current
-                    # semantic representative.  Lexical recall wakes FALSE(N) rather
-                    # than resurrecting N as a positive standalone root.
                     false_wrappers = tuple(
                         parent
                         for parent in self.core.store.function_parents(node.uid)
@@ -491,7 +530,7 @@ class IgnitionEngine:
                             scheduled_pacemaker[target.uid] += amount
                         propagations.append(
                             PropagationEvent(
-                                source=self.core.ref(uid),
+                                source=source_ref,
                                 target=target_ref,
                                 via_uid=uid,
                                 via_kind="T",
@@ -503,42 +542,41 @@ class IgnitionEngine:
                                 amount=amount,
                             )
                         )
-
-        for domain in Domain:
-            for element in self.core.store.elements(domain):
-                if not isinstance(element, Hypernode):
-                    continue
-                source_output = outputs.get(element.uid, 0.0)
-                if source_output <= eps or element.weight <= 0:
-                    continue
-                impulse = source_output * element.weight
-                for role, ref in element.actants.items():
-                    scheduled[ref.uid] += impulse
-                    if element.uid in output_pacemaker_only:
-                        scheduled_pacemaker[ref.uid] += impulse
-                    propagations.append(
-                        PropagationEvent(
-                            source=self.core.ref(element.uid),
-                            target=ref,
-                            via_uid=element.uid,
-                            via_kind="N",
-                            relation=role.value,
-                            amount=impulse,
+            elif kind is RefKind.N:
+                element = self.core.store.get_hypernode(uid)
+                if element.weight > 0:
+                    impulse = source_output * element.weight
+                    for role, ref in element.actants.items():
+                        scheduled[ref.uid] += impulse
+                        if uid in output_pacemaker_only:
+                            scheduled_pacemaker[ref.uid] += impulse
+                        propagations.append(
+                            PropagationEvent(
+                                source=source_ref,
+                                target=ref,
+                                via_uid=uid,
+                                via_kind="N",
+                                relation=role.value,
+                                amount=impulse,
+                            )
                         )
-                    )
 
-        # PHASE 4 — h uses association-relevant activation events from this tick
-        # and old weights. Pure pacemaker stimulation is excitability noise, not
-        # associative experience; otherwise a background ν pulse would slowly
-        # depress arbitrary incident links even while the agent experiences nothing.
+        # PHASE 4 — h_L needs only links incident to a same-tick activation event;
+        # links whose endpoints both lack events are unchanged by definition.
         link_updates: list[Link] = []
         plasticity = self.settings.plasticity
         plasticity_activation_uids = set(activation_uids)
         if plasticity.ignore_pacemaker_only_events:
             plasticity_activation_uids.difference_update(pacemaker_only_activation_uids)
 
-        if plasticity.enabled:
-            for link in self.core.store.links():
+        if plasticity.enabled and plasticity_activation_uids:
+            incident: dict[str, Link] = {}
+            for uid in plasticity_activation_uids:
+                for link in self.core.store.outgoing_links(uid):
+                    incident[link.uid] = link
+                for link in self.core.store.incoming_links(uid):
+                    incident[link.uid] = link
+            for link in sorted(incident.values(), key=lambda item: item.uid):
                 a = link.source.uid in plasticity_activation_uids
                 b = link.target.uid in plasticity_activation_uids
                 new_weight = self.plasticity_policy.link_weight(
@@ -565,10 +603,6 @@ class IgnitionEngine:
                 if new_weight != node.weight:
                     pending_by_uid[uid] = (domain, replace(node, weight=new_weight))
 
-            # Explicit FALSE(N) is a semantic refutation event. It has priority over
-            # same-tick confirmation: confirmation for the refuted N is ignored on
-            # this tick, then the strong h_N correction is applied to the old weight.
-            # N_old is preserved and w is still association strength, not truth.
             for uid in refutations:
                 if not self.core.store.has_uid(uid) or self.core.store.kind_of(uid) is not RefKind.N:
                     continue
@@ -583,13 +617,20 @@ class IgnitionEngine:
                     pending_by_uid.pop(uid, None)
             hypernode_updates.extend(pending_by_uid.values())
 
-        # Begin simultaneous commit: runtime and weights become the current state.
-        self.core.store._replace_runtime_states(next_states)
+        # Begin simultaneous commit. Untouched cold UIDs are invariant and need no
+        # replacement; every affected state is committed together before lifecycle.
+        if next_states:
+            self.core.store._update_runtime_states(next_states)
         for link in link_updates:
             self.core.store._replace_link(link)
         for domain, node in hypernode_updates:
-            # Preserve lifecycle/meta changes only happen after this point.
             self.core.store._replace_hypernode(domain, node)
+
+        self._active_uids = {
+            uid
+            for uid, state in next_states.items()
+            if state.excitation > eps and self.core.store.has_uid(uid)
+        }
 
         # PHASE 6 — lifecycle + GC decisions on committed activation events.
         lifecycle_result = self.lifecycle.tick(
@@ -598,6 +639,10 @@ class IgnitionEngine:
             seed_reasons=seed_reasons,
         )
         gc_result = self.gc.collect(lifecycle_result.expired_candidates)
+
+        self._active_uids = {
+            uid for uid in self._active_uids if self.core.store.has_uid(uid)
+        }
 
         # Swap next incoming buffer, dropping impulses whose target was GC'd.
         for uid, amount in scheduled.items():
@@ -610,12 +655,13 @@ class IgnitionEngine:
                         self._seed_reasons[uid].append(SeedReason.PACEMAKER)
 
         self._pacemaker_only_excitation = {
-            uid for uid in next_pacemaker_only_excitation
-            if self.core.store.has_uid(uid)
+            uid
+            for uid in next_pacemaker_only_excitation
+            if self.core.store.has_uid(uid) and uid in self._active_uids
         }
 
         # PHASE 7 — Workspace is exactly committed x > t after GC.
-        workspace = WorkspaceView(self.core, self.workspace_settings.threshold).refs()
+        workspace = self._workspace_refs_locked()
         activation_refs = tuple(
             sorted(
                 (self.core.ref(uid) for uid in activation_uids if self.core.store.has_uid(uid)),
@@ -627,10 +673,13 @@ class IgnitionEngine:
             activation_events=activation_refs,
             workspace=workspace,
             incoming_consumed=incoming,
-            outgoing_scheduled={uid: amount for uid, amount in scheduled.items() if self.core.store.has_uid(uid)},
+            outgoing_scheduled={
+                uid: amount for uid, amount in scheduled.items() if self.core.store.has_uid(uid)
+            },
             lifecycle=lifecycle_result,
             gc=gc_result,
             propagations=tuple(propagations),
         )
         self.tick_index += 1
         return result
+

@@ -49,9 +49,17 @@ class GraphCanvasWidget(QWidget):
     edge_selected = Signal(str)
     edge_hovered = Signal(str)
 
-    def __init__(self, services: RuntimeServices, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        services: RuntimeServices,
+        parent: QWidget | None = None,
+        *,
+        auto_refresh: bool = True,
+    ) -> None:
         super().__init__(parent)
         self.services = services
+        self._auto_refresh = bool(auto_refresh)
+        self._clock_listener_registered = False
         self.settings = services.config.gui
         self.mapper = GraphVisualMapper()
         self.visual: VisualGraph | None = None
@@ -63,6 +71,8 @@ class GraphCanvasWidget(QWidget):
         self._selected_edge_key: str | None = None
         self._hover_uid: str | None = None
         self._hover_edge_key: str | None = None
+        self._proof_node_uids: tuple[str, ...] = ()
+        self._proof_link_uids: tuple[str, ...] = ()
         self._last_hover_pick = 0.0
         self._live_updates_enabled = True
 
@@ -155,6 +165,20 @@ class GraphCanvasWidget(QWidget):
         self.hover_markers.update_gl_state(depth_test=True, blend=True)
         self.hover_markers.scaling = False
 
+        self.proof_lines = scene.visuals.Line(
+            pos=placeholder_segment.copy(),
+            color=(0.98, 0.72, 0.12, 0.0),
+            connect="segments",
+            width=max(2.0, self.settings.focus_line_width * 1.35),
+            method="gl",
+            parent=self.view.scene,
+        )
+        self.proof_lines.visible = False
+        self.proof_markers = Markers(parent=self.view.scene)
+        self._prime_markers(self.proof_markers, placeholder_point)
+        self.proof_markers.update_gl_state(depth_test=True, blend=True)
+        self.proof_markers.scaling = False
+
         self.labels = scene.visuals.Text(
             text="",
             pos=(0.0, 0.0, 0.0),
@@ -176,7 +200,11 @@ class GraphCanvasWidget(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh)
         self._restart_timer()
-        self.services.clock.add_listener(self._on_tick_from_clock)
+        if self._auto_refresh:
+            self.services.clock.add_listener(self._on_tick_from_clock)
+            self._clock_listener_registered = True
+        else:
+            self.timer.stop()
 
     @staticmethod
     def _prime_markers(markers: Markers, placeholder_point: np.ndarray) -> None:
@@ -191,13 +219,16 @@ class GraphCanvasWidget(QWidget):
         markers.visible = False
 
     def closeEvent(self, event) -> None:  # noqa: N802
-        self.services.clock.remove_listener(self._on_tick_from_clock)
+        if self._clock_listener_registered:
+            self.services.clock.remove_listener(self._on_tick_from_clock)
+            self._clock_listener_registered = False
         super().closeEvent(event)
 
     def set_settings(self, settings: GUISettings) -> None:
         self.settings = settings
         self.selection_lines.width = settings.focus_line_width
         self.hover_lines.width = settings.focus_line_width
+        self.proof_lines.width = max(2.0, settings.focus_line_width * 1.35)
         self.flow_lines.width = settings.propagation_edge_width
         self._restart_timer()
         self.refresh()
@@ -240,6 +271,33 @@ class GraphCanvasWidget(QWidget):
         self._update_focus_layers()
         self.canvas.update()
 
+    def set_proof_highlight(
+        self, node_uids: tuple[str, ...] | list[str], link_uids: tuple[str, ...] | list[str] = ()
+    ) -> tuple[int, int]:
+        """Highlight an already-canonical proof without modifying AH/runtime state.
+
+        Returns the number of requested proof nodes/links that are present in the
+        current live canvas. M2-only sandbox UIDs therefore fail closed rather than
+        being fabricated into live memory.
+        """
+        self._proof_node_uids = tuple(dict.fromkeys(str(uid) for uid in node_uids if uid))
+        self._proof_link_uids = tuple(dict.fromkeys(str(uid) for uid in link_uids if uid))
+        self._update_proof_layer()
+        self.canvas.update()
+        if self.visual is None:
+            return (0, 0)
+        node_hits = sum(uid in self.visual.node_index for uid in self._proof_node_uids)
+        link_uid_set = {edge.uid for edge in self.visual.edges if edge.uid is not None}
+        link_hits = sum(uid in link_uid_set for uid in self._proof_link_uids)
+        return node_hits, link_hits
+
+    def clear_proof_highlight(self) -> None:
+        self._proof_node_uids = ()
+        self._proof_link_uids = ()
+        self.proof_lines.visible = False
+        self.proof_markers.visible = False
+        self.canvas.update()
+
     @property
     def current_snapshot(self):
         """Most recent canvas snapshot for read-only dock diagnostics.
@@ -272,7 +330,7 @@ class GraphCanvasWidget(QWidget):
         return self.visual.edge_index.get(key)
 
     def _restart_timer(self) -> None:
-        if not self._live_updates_enabled:
+        if not self._auto_refresh or not self._live_updates_enabled:
             self.timer.stop()
             return
         interval_ms = max(1, round(1000 / max(1, self.settings.refresh_hz)))
@@ -390,6 +448,7 @@ class GraphCanvasWidget(QWidget):
             self._set_hover_target(None, None)
 
         self._update_focus_layers()
+        self._update_proof_layer()
         self._update_flows(visual)
         self.canvas.update()
 
@@ -468,6 +527,55 @@ class GraphCanvasWidget(QWidget):
             self.pulse_markers.visible = True
         else:
             self.pulse_markers.visible = False
+
+    def _update_proof_layer(self) -> None:
+        if self.visual is None or not self._proof_node_uids:
+            self.proof_lines.visible = False
+            self.proof_markers.visible = False
+            return
+
+        index = self.visual.node_index
+        node_indices = [index[uid] for uid in self._proof_node_uids if uid in index]
+        if node_indices:
+            positions = self.visual.positions[node_indices]
+            sizes = self.visual.sizes[node_indices].astype(np.float32, copy=True)
+            sizes *= max(1.45, self.settings.focus_node_scale)
+            edge = np.tile(np.asarray((1.0, 0.76, 0.10, 1.0), dtype=np.float32), (len(positions), 1))
+            face = edge.copy()
+            face[:, 3] = 0.08
+            self.proof_markers.set_data(
+                pos=positions,
+                face_color=face,
+                edge_color=edge,
+                size=sizes,
+                edge_width=3.1,
+                symbol="disc",
+            )
+            self.proof_markers.visible = True
+        else:
+            self.proof_markers.visible = False
+
+        link_uids = set(self._proof_link_uids)
+        segments: list[np.ndarray] = []
+        if link_uids:
+            for edge in self.visual.edges:
+                if edge.uid not in link_uids:
+                    continue
+                si = index.get(edge.source_uid)
+                ti = index.get(edge.target_uid)
+                if si is None or ti is None:
+                    continue
+                segments.extend((self.visual.positions[si], self.visual.positions[ti]))
+        if segments:
+            self.proof_lines.set_data(
+                pos=np.asarray(segments, dtype=np.float32),
+                color=(1.0, 0.72, 0.08, 0.96),
+                width=max(2.0, self.settings.focus_line_width * 1.35),
+                connect="segments",
+            )
+            self.proof_lines.visible = True
+        else:
+            self.proof_lines.visible = False
 
     def _update_focus_layers(self) -> None:
         if self.visual is None or self._snapshot is None:
@@ -678,6 +786,8 @@ class GraphCanvasWidget(QWidget):
             self.selection_markers,
             self.hover_lines,
             self.hover_markers,
+            self.proof_lines,
+            self.proof_markers,
             self.pulse_markers,
             self.labels,
         )

@@ -13,6 +13,7 @@ from typing import Any, Mapping, TYPE_CHECKING
 from ah.model import AbstractSymbol, Domain, FunctionSymbol, Group, Hypernode, Link, SemanticEntity, Template
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import build_morphology
+from ah.diagnostics.inference_proof import ProofChainSnapshot, ProofSnapshotBuilder
 from ah.diagnostics.semantic_oracle import (
     DEFAULT_ORACLE_FILENAME,
     evaluate_semantic_case,
@@ -45,6 +46,7 @@ class AcceptanceRunResult:
     semantic_failed: int = 0
     semantic_gaps: int = 0
     oracle_file: Path | None = None
+    proofs: tuple[ProofChainSnapshot, ...] = ()
 
 
 @dataclass(slots=True)
@@ -332,6 +334,7 @@ def run_acceptance_suite(
         semantic_passed = 0
         semantic_failed = 0
         semantic_gaps = 0
+        proofs: list[ProofChainSnapshot] = []
         required_template_roles: dict[str, set[str]] = {}
 
         active_scenario: str | None = None
@@ -362,6 +365,20 @@ def run_acceptance_suite(
                 record["perception_result"] = _jsonable(turn.perception)
                 record["integration_commit"] = _jsonable(turn.integration)
                 record["queries"] = _jsonable(turn.queries)
+                proof_builder = ProofSnapshotBuilder(services.core)
+                case_proofs = []
+                for query_index, query_execution in enumerate(turn.queries, 1):
+                    if query_execution.outcome is None:
+                        continue
+                    proof = proof_builder.build(
+                        query_execution.outcome,
+                        chain_id=f"acceptance:{timestamp}:{case.index}:{query_index}",
+                        source="ACCEPTANCE",
+                        title=f"Acceptance {case.index} · Query {query_index}",
+                    )
+                    proofs.append(proof)
+                    case_proofs.append(proof)
+                record["proofs"] = _jsonable(case_proofs)
                 record["agent_context"] = _jsonable(turn.agent_context)
                 record["agent_context_diagnostic"] = _jsonable(getattr(turn, "agent_context_diagnostic", None))
                 record["agent_response"] = None
@@ -528,6 +545,7 @@ def run_acceptance_suite(
             semantic_failed,
             semantic_gaps,
             oracle_source,
+            tuple(proofs),
         )
     finally:
         with services.operation_lock:

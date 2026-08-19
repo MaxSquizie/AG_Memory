@@ -16,6 +16,7 @@ class LogicalStatus(str, Enum):
 class StopReason(str, Enum):
     GOAL_SATISFIED = "GOAL_SATISFIED"
     SEARCH_EXHAUSTED = "SEARCH_EXHAUSTED"
+    DEPTH_EXHAUSTED = "DEPTH_EXHAUSTED"
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
 
 
@@ -57,7 +58,60 @@ class CauseEntailmentGoal:
     effect: Ref
 
 
-InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal
+@dataclass(frozen=True, slots=True)
+class AllOfGoal:
+    """Conjunctive proof target for typed rule composition.
+
+    Every child goal keeps its own inference semantics. The conjunction is proved
+    only when all children are proved. This allows one proof to compose CAUSE,
+    FOLLOW, IS-A and future rule families without treating an arbitrary mixed graph
+    path as a valid inference rule. Child order is the intended dependency/audit
+    order and is preserved in the proof trace.
+    """
+
+    goals: tuple["InferenceGoal", ...]
+
+    def __post_init__(self) -> None:
+        if len(self.goals) < 2:
+            raise ValueError("AllOfGoal requires at least two child goals")
+
+
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | AllOfGoal
+
+
+@dataclass(frozen=True, slots=True)
+class GoalSpec:
+    """Explicit runtime inference target.
+
+    The goal exists before search starts and is the semantic stop condition. Search
+    is therefore not an instruction to walk a graph until an endpoint: every rule
+    application is evaluated against this target and successful proof stops at the
+    first goal-satisfying derivation.
+    """
+
+    target: InferenceGoal
+
+
+@dataclass(frozen=True, slots=True)
+class InferenceQuery:
+    """Goal-directed bounded inference request.
+
+    ``premise_refs`` are explicit starting propositions for rule systems that need
+    them (notably multi-step CAUSE/MP). For backwards compatibility, callers may
+    still pass a bare InferenceGoal to InferenceEngine.solve(); the engine wraps it
+    in GoalSpec with no explicit premises.
+    """
+
+    goal: GoalSpec
+    premise_refs: tuple[Ref, ...] = ()
+    max_depth: int | None = None
+    max_expanded_states: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.max_depth is not None and self.max_depth < 1:
+            raise ValueError("InferenceQuery.max_depth must be >= 1")
+        if self.max_expanded_states is not None and self.max_expanded_states < 1:
+            raise ValueError("InferenceQuery.max_expanded_states must be >= 1")
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +150,18 @@ SemanticConclusion = ExistingRefConclusion | RoleBindingConclusion | MultiRoleBi
 
 
 @dataclass(frozen=True, slots=True)
+class CompositeConclusion:
+    conclusions: tuple["SemanticConclusion", ...]
+
+    def __post_init__(self) -> None:
+        if len(self.conclusions) < 2:
+            raise ValueError("CompositeConclusion requires at least two conclusions")
+
+
+SemanticConclusion = SemanticConclusion | CompositeConclusion
+
+
+@dataclass(frozen=True, slots=True)
 class InferenceOutcome:
     status: LogicalStatus
     stop_reason: StopReason
@@ -105,3 +171,5 @@ class InferenceOutcome:
     conclusion_domain: Domain | None
     expanded_states: int
     diagnostics: tuple[str, ...] = ()
+    goal_spec: GoalSpec | None = None
+    logical_depth: int = 0

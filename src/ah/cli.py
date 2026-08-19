@@ -14,6 +14,8 @@ from ah.config import load_config
 def _jsonable(value: Any) -> Any:
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
+    if isinstance(value, Path):
+        return str(value)
     if isinstance(value, Enum):
         return value.value
     if is_dataclass(value):
@@ -43,12 +45,37 @@ def build_parser() -> argparse.ArgumentParser:
     refute = sub.add_parser("refute", help="create/reuse FALSE(N) and schedule h_N refutation")
     refute.add_argument("uid")
     refute.add_argument("--tick", action="store_true", help="apply one ignition tick immediately")
+
+    sub.add_parser(
+        "m2-acceptance",
+        help=(
+            "run attention-driven M2 on a dirty/live-AH snapshot with >=150k UIDs "
+            "(no LLM, no live AH mutation)"
+        ),
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     cfg = load_config(Path(args.config))
+    if args.command == "m2-acceptance":
+        from ah.diagnostics import run_m2_attention_acceptance
+
+        services = RuntimeServices.build(cfg)
+        result = run_m2_attention_acceptance(
+            data_dir=cfg.paths.data_dir,
+            inference_settings=cfg.inference,
+            ignition_settings=cfg.ignition,
+            workspace_settings=cfg.workspace,
+            lifecycle_settings=cfg.lifecycle,
+            base_core=services.core,
+            base_ignition=services.ignition,
+            runtime_lock=services.operation_lock,
+        )
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0 if result.failed == 0 else 1
+
     services = RuntimeServices.build(cfg)
 
     if args.command == "dsl":

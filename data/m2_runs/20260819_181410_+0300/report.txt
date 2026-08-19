@@ -1,0 +1,644 @@
+M2 attention-driven goal-directed acceptance
+PASS 32/32; FAIL 0
+base=live-AH-snapshot; AH=153355 UIDs; stress padding=149832
+Workspace initial=4; final=388
+elapsed=18.704s
+
+Cold Workspace is a purity control only. Runtime correctness does not require it.
+Every proof proposition is focused through QUERY_RECALL + a normal Ignition tick.
+
+[PASS] cause_alpha CAUSE depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=4->6, path_cold=True, x_changed=True, tail_inactive=True, 202.33ms
+    goal: доказать достижимость «Система активировала тревогу» по CAUSE из явной посылки
+    conclusion: Система активировала тревогу
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» уже установлено. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому следует «Система активировала тревогу».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=6->10, path_cold=True, x_changed=True, tail_inactive=True, 300.12ms
+    goal: доказать достижимость «Охрана получила сигнал» по CAUSE из явной посылки
+    conclusion: Охрана получила сигнал
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» уже установлено. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому следует «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» уже установлено. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому следует «Охрана получила сигнал».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=10->15, path_cold=True, x_changed=True, tail_inactive=True, 407.44ms
+    goal: доказать достижимость «Охранник начал проверку помещения» по CAUSE из явной посылки
+    conclusion: Охранник начал проверку помещения
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» уже установлено. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому следует «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» уже установлено. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому следует «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» уже установлено. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому следует «Охранник начал проверку помещения».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=15->20, path_cold=True, x_changed=True, tail_inactive=True, 517.97ms
+    goal: доказать достижимость «Пожар подтверждён» по CAUSE из явной посылки
+    conclusion: Пожар подтверждён
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» уже установлено. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому следует «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» уже установлено. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому следует «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» уже установлено. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому следует «Охранник начал проверку помещения».
+    step 4 [CAUSE / MP]: «Охранник начал проверку помещения» уже установлено. Каноническое правило «Охранник начал проверку помещения CAUSE Пожар подтверждён» разрешает modus ponens, поэтому следует «Пожар подтверждён».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=20->25, path_cold=True, x_changed=True, tail_inactive=True, 719.90ms
+    goal: доказать достижимость «Началась эвакуация» по CAUSE из явной посылки
+    conclusion: Началась эвакуация
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» уже установлено. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому следует «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» уже установлено. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому следует «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» уже установлено. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому следует «Охранник начал проверку помещения».
+    step 4 [CAUSE / MP]: «Охранник начал проверку помещения» уже установлено. Каноническое правило «Охранник начал проверку помещения CAUSE Пожар подтверждён» разрешает modus ponens, поэтому следует «Пожар подтверждён».
+    step 5 [CAUSE / MP]: «Пожар подтверждён» уже установлено. Каноническое правило «Пожар подтверждён CAUSE Началась эвакуация» разрешает modus ponens, поэтому следует «Началась эвакуация».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=25->32, path_cold=True, x_changed=True, tail_inactive=True, 725.82ms
+    goal: доказать достижимость «Люди покинули опасную зону» по CAUSE из явной посылки
+    conclusion: Люди покинули опасную зону
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» уже установлено. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому следует «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» уже установлено. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому следует «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» уже установлено. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому следует «Охранник начал проверку помещения».
+    step 4 [CAUSE / MP]: «Охранник начал проверку помещения» уже установлено. Каноническое правило «Охранник начал проверку помещения CAUSE Пожар подтверждён» разрешает modus ponens, поэтому следует «Пожар подтверждён».
+    step 5 [CAUSE / MP]: «Пожар подтверждён» уже установлено. Каноническое правило «Пожар подтверждён CAUSE Началась эвакуация» разрешает modus ponens, поэтому следует «Началась эвакуация».
+    step 6 [CAUSE / MP]: «Началась эвакуация» уже установлено. Каноническое правило «Началась эвакуация CAUSE Люди покинули опасную зону» разрешает modus ponens, поэтому следует «Люди покинули опасную зону».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=32->35, path_cold=True, x_changed=True, tail_inactive=True, 199.77ms
+    goal: доказать достижимость «Запрос прошёл валидацию» по CAUSE из явной посылки
+    conclusion: Запрос прошёл валидацию
+    step 1 [CAUSE / MP]: «Сервис получил запрос» уже установлено. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому следует «Запрос прошёл валидацию».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=35->38, path_cold=True, x_changed=True, tail_inactive=True, 307.86ms
+    goal: доказать достижимость «Задача поставлена в очередь» по CAUSE из явной посылки
+    conclusion: Задача поставлена в очередь
+    step 1 [CAUSE / MP]: «Сервис получил запрос» уже установлено. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому следует «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» уже установлено. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому следует «Задача поставлена в очередь».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=38->43, path_cold=True, x_changed=True, tail_inactive=True, 412.96ms
+    goal: доказать достижимость «Воркер взял задачу» по CAUSE из явной посылки
+    conclusion: Воркер взял задачу
+    step 1 [CAUSE / MP]: «Сервис получил запрос» уже установлено. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому следует «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» уже установлено. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому следует «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» уже установлено. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому следует «Воркер взял задачу».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=43->47, path_cold=True, x_changed=True, tail_inactive=True, 515.22ms
+    goal: доказать достижимость «Данные обработаны» по CAUSE из явной посылки
+    conclusion: Данные обработаны
+    step 1 [CAUSE / MP]: «Сервис получил запрос» уже установлено. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому следует «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» уже установлено. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому следует «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» уже установлено. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому следует «Воркер взял задачу».
+    step 4 [CAUSE / MP]: «Воркер взял задачу» уже установлено. Каноническое правило «Воркер взял задачу CAUSE Данные обработаны» разрешает modus ponens, поэтому следует «Данные обработаны».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=47->52, path_cold=True, x_changed=True, tail_inactive=True, 619.09ms
+    goal: доказать достижимость «Результат сохранён» по CAUSE из явной посылки
+    conclusion: Результат сохранён
+    step 1 [CAUSE / MP]: «Сервис получил запрос» уже установлено. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому следует «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» уже установлено. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому следует «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» уже установлено. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому следует «Воркер взял задачу».
+    step 4 [CAUSE / MP]: «Воркер взял задачу» уже установлено. Каноническое правило «Воркер взял задачу CAUSE Данные обработаны» разрешает modus ponens, поэтому следует «Данные обработаны».
+    step 5 [CAUSE / MP]: «Данные обработаны» уже установлено. Каноническое правило «Данные обработаны CAUSE Результат сохранён» разрешает modus ponens, поэтому следует «Результат сохранён».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=52->59, path_cold=True, x_changed=True, tail_inactive=True, 721.83ms
+    goal: доказать достижимость «Клиент получил уведомление» по CAUSE из явной посылки
+    conclusion: Клиент получил уведомление
+    step 1 [CAUSE / MP]: «Сервис получил запрос» уже установлено. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому следует «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» уже установлено. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому следует «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» уже установлено. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому следует «Воркер взял задачу».
+    step 4 [CAUSE / MP]: «Воркер взял задачу» уже установлено. Каноническое правило «Воркер взял задачу CAUSE Данные обработаны» разрешает modus ponens, поэтому следует «Данные обработаны».
+    step 5 [CAUSE / MP]: «Данные обработаны» уже установлено. Каноническое правило «Данные обработаны CAUSE Результат сохранён» разрешает modus ponens, поэтому следует «Результат сохранён».
+    step 6 [CAUSE / MP]: «Результат сохранён» уже установлено. Каноническое правило «Результат сохранён CAUSE Клиент получил уведомление» разрешает modus ponens, поэтому следует «Клиент получил уведомление».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=59->62, path_cold=True, x_changed=True, tail_inactive=True, 212.46ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь включил свет»
+    conclusion: Пользователь вошёл в комнату() --FOLLOW--> Пользователь включил свет
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=62->65, path_cold=True, x_changed=True, tail_inactive=True, 306.69ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=65->70, path_cold=True, x_changed=True, tail_inactive=True, 423.27ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь взял документ»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь взял документ
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=70->74, path_cold=True, x_changed=True, tail_inactive=True, 531.26ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    step 4 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь взял документ». Вместе с «Пользователь взял документ FOLLOW Пользователь прочитал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=74->79, path_cold=True, x_changed=True, tail_inactive=True, 647.71ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    step 4 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь взял документ». Вместе с «Пользователь взял документ FOLLOW Пользователь прочитал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ».
+    step 5 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь прочитал документ». Вместе с «Пользователь прочитал документ FOLLOW Пользователь сделал заметку» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=79->86, path_cold=True, x_changed=True, tail_inactive=True, 739.20ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь убрал документ»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь убрал документ
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    step 4 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь взял документ». Вместе с «Пользователь взял документ FOLLOW Пользователь прочитал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ».
+    step 5 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь прочитал документ». Вместе с «Пользователь прочитал документ FOLLOW Пользователь сделал заметку» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку».
+    step 6 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Пользователь вошёл в комнату» до «Пользователь сделал заметку». Вместе с «Пользователь сделал заметку FOLLOW Пользователь убрал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь убрал документ».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=86->89, path_cold=True, x_changed=True, tail_inactive=True, 214.64ms
+    goal: доказать «овчарка IS-A собака»
+    conclusion: овчарка --IS-A--> собака
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «овчарка IS-A собака».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=89->92, path_cold=True, x_changed=True, tail_inactive=True, 322.15ms
+    goal: доказать «овчарка IS-A псовое»
+    conclusion: овчарка IS-A псовое
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=92->97, path_cold=True, x_changed=True, tail_inactive=True, 417.06ms
+    goal: доказать «овчарка IS-A хищное млекопитающее»
+    conclusion: овчарка IS-A хищное млекопитающее
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=97->101, path_cold=True, x_changed=True, tail_inactive=True, 529.63ms
+    goal: доказать «овчарка IS-A млекопитающее»
+    conclusion: овчарка IS-A млекопитающее
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    step 4 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «хищное млекопитающее». Вместе с «хищное млекопитающее IS-A млекопитающее» по транзитивности получаем «овчарка IS-A млекопитающее».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=101->106, path_cold=True, x_changed=True, tail_inactive=True, 633.14ms
+    goal: доказать «овчарка IS-A позвоночное»
+    conclusion: овчарка IS-A позвоночное
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    step 4 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «хищное млекопитающее». Вместе с «хищное млекопитающее IS-A млекопитающее» по транзитивности получаем «овчарка IS-A млекопитающее».
+    step 5 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «млекопитающее». Вместе с «млекопитающее IS-A позвоночное» по транзитивности получаем «овчарка IS-A позвоночное».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=106->113, path_cold=True, x_changed=True, tail_inactive=True, 746.91ms
+    goal: доказать «овчарка IS-A животное»
+    conclusion: овчарка IS-A животное
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    step 4 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «хищное млекопитающее». Вместе с «хищное млекопитающее IS-A млекопитающее» по транзитивности получаем «овчарка IS-A млекопитающее».
+    step 5 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «млекопитающее». Вместе с «млекопитающее IS-A позвоночное» по транзитивности получаем «овчарка IS-A позвоночное».
+    step 6 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «овчарка» до «позвоночное». Вместе с «позвоночное IS-A животное» по транзитивности получаем «овчарка IS-A животное».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cross_left CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=113->117, path_cold=True, x_changed=True, tail_inactive=True, 318.04ms
+    goal: доказать достижимость «Левая цепь: событие 3» по CAUSE из явной посылки
+    conclusion: Левая цепь: событие 3
+    step 1 [CAUSE / MP]: «Левая цепь: событие 1» уже установлено. Каноническое правило «Левая цепь: событие 1 CAUSE Левая цепь: событие 2» разрешает modus ponens, поэтому следует «Левая цепь: событие 2».
+    step 2 [CAUSE / MP]: «Левая цепь: событие 2» уже установлено. Каноническое правило «Левая цепь: событие 2 CAUSE Левая цепь: событие 3» разрешает modus ponens, поэтому следует «Левая цепь: событие 3».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] cross_left CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=117->123, path_cold=True, x_changed=True, tail_inactive=True, 629.82ms
+    goal: доказать достижимость «Левая цепь B: событие 6» по CAUSE из явной посылки
+    conclusion: Левая цепь B: событие 6
+    step 1 [CAUSE / MP]: «Левая цепь B: событие 1» уже установлено. Каноническое правило «Левая цепь B: событие 1 CAUSE Левая цепь B: событие 2» разрешает modus ponens, поэтому следует «Левая цепь B: событие 2».
+    step 2 [CAUSE / MP]: «Левая цепь B: событие 2» уже установлено. Каноническое правило «Левая цепь B: событие 2 CAUSE Левая цепь B: событие 3» разрешает modus ponens, поэтому следует «Левая цепь B: событие 3».
+    step 3 [CAUSE / MP]: «Левая цепь B: событие 3» уже установлено. Каноническое правило «Левая цепь B: событие 3 CAUSE Левая цепь B: событие 4» разрешает modus ponens, поэтому следует «Левая цепь B: событие 4».
+    step 4 [CAUSE / MP]: «Левая цепь B: событие 4» уже установлено. Каноническое правило «Левая цепь B: событие 4 CAUSE Левая цепь B: событие 5» разрешает modus ponens, поэтому следует «Левая цепь B: событие 5».
+    step 5 [CAUSE / MP]: «Левая цепь B: событие 5» уже установлено. Каноническое правило «Левая цепь B: событие 5 CAUSE Левая цепь B: событие 6» разрешает modus ponens, поэтому следует «Левая цепь B: событие 6».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] cross_right CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=123->127, path_cold=True, x_changed=True, tail_inactive=True, 425.76ms
+    goal: доказать достижимость «Правая цепь: событие 4» по CAUSE из явной посылки
+    conclusion: Правая цепь: событие 4
+    step 1 [CAUSE / MP]: «Правая цепь: событие 1» уже установлено. Каноническое правило «Правая цепь: событие 1 CAUSE Правая цепь: событие 2» разрешает modus ponens, поэтому следует «Правая цепь: событие 2».
+    step 2 [CAUSE / MP]: «Правая цепь: событие 2» уже установлено. Каноническое правило «Правая цепь: событие 2 CAUSE Правая цепь: событие 3» разрешает modus ponens, поэтому следует «Правая цепь: событие 3».
+    step 3 [CAUSE / MP]: «Правая цепь: событие 3» уже установлено. Каноническое правило «Правая цепь: событие 3 CAUSE Правая цепь: событие 4» разрешает modus ponens, поэтому следует «Правая цепь: событие 4».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] cross_right CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=127->133, path_cold=True, x_changed=True, tail_inactive=True, 740.76ms
+    goal: доказать достижимость «Правая цепь B: событие 7» по CAUSE из явной посылки
+    conclusion: Правая цепь B: событие 7
+    step 1 [CAUSE / MP]: «Правая цепь B: событие 1» уже установлено. Каноническое правило «Правая цепь B: событие 1 CAUSE Правая цепь B: событие 2» разрешает modus ponens, поэтому следует «Правая цепь B: событие 2».
+    step 2 [CAUSE / MP]: «Правая цепь B: событие 2» уже установлено. Каноническое правило «Правая цепь B: событие 2 CAUSE Правая цепь B: событие 3» разрешает modus ponens, поэтому следует «Правая цепь B: событие 3».
+    step 3 [CAUSE / MP]: «Правая цепь B: событие 3» уже установлено. Каноническое правило «Правая цепь B: событие 3 CAUSE Правая цепь B: событие 4» разрешает modus ponens, поэтому следует «Правая цепь B: событие 4».
+    step 4 [CAUSE / MP]: «Правая цепь B: событие 4» уже установлено. Каноническое правило «Правая цепь B: событие 4 CAUSE Правая цепь B: событие 5» разрешает modus ponens, поэтому следует «Правая цепь B: событие 5».
+    step 5 [CAUSE / MP]: «Правая цепь B: событие 5» уже установлено. Каноническое правило «Правая цепь B: событие 5 CAUSE Правая цепь B: событие 6» разрешает modus ponens, поэтому следует «Правая цепь B: событие 6».
+    step 6 [CAUSE / MP]: «Правая цепь B: событие 6» уже установлено. Каноническое правило «Правая цепь B: событие 6 CAUSE Правая цепь B: событие 7» разрешает modus ponens, поэтому следует «Правая цепь B: событие 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] branch_cause_cold CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=133->260, path_cold=True, x_changed=True, tail_inactive=True, 766.07ms
+    goal: доказать достижимость «Холодная CAUSE-магистраль: состояние 7» по CAUSE из явной посылки
+    conclusion: Холодная CAUSE-магистраль: состояние 7
+    step 1 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 1» уже установлено. Каноническое правило «Холодная CAUSE-магистраль: состояние 1 CAUSE Холодная CAUSE-магистраль: состояние 2» разрешает modus ponens, поэтому следует «Холодная CAUSE-магистраль: состояние 2».
+    step 2 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 2» уже установлено. Каноническое правило «Холодная CAUSE-магистраль: состояние 2 CAUSE Холодная CAUSE-магистраль: состояние 3» разрешает modus ponens, поэтому следует «Холодная CAUSE-магистраль: состояние 3».
+    step 3 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 3» уже установлено. Каноническое правило «Холодная CAUSE-магистраль: состояние 3 CAUSE Холодная CAUSE-магистраль: состояние 4» разрешает modus ponens, поэтому следует «Холодная CAUSE-магистраль: состояние 4».
+    step 4 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 4» уже установлено. Каноническое правило «Холодная CAUSE-магистраль: состояние 4 CAUSE Холодная CAUSE-магистраль: состояние 5» разрешает modus ponens, поэтому следует «Холодная CAUSE-магистраль: состояние 5».
+    step 5 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 5» уже установлено. Каноническое правило «Холодная CAUSE-магистраль: состояние 5 CAUSE Холодная CAUSE-магистраль: состояние 6» разрешает modus ponens, поэтому следует «Холодная CAUSE-магистраль: состояние 6».
+    step 6 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 6» уже установлено. Каноническое правило «Холодная CAUSE-магистраль: состояние 6 CAUSE Холодная CAUSE-магистраль: состояние 7» разрешает modus ponens, поэтому следует «Холодная CAUSE-магистраль: состояние 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] branch_cause_warm CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=266->272, path_cold=True, x_changed=True, tail_inactive=True, 778.18ms
+    goal: доказать достижимость «Тёплая CAUSE-магистраль: состояние 7» по CAUSE из явной посылки
+    conclusion: Тёплая CAUSE-магистраль: состояние 7
+    step 1 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 1» уже установлено. Каноническое правило «Тёплая CAUSE-магистраль: состояние 1 CAUSE Тёплая CAUSE-магистраль: состояние 2» разрешает modus ponens, поэтому следует «Тёплая CAUSE-магистраль: состояние 2».
+    step 2 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 2» уже установлено. Каноническое правило «Тёплая CAUSE-магистраль: состояние 2 CAUSE Тёплая CAUSE-магистраль: состояние 3» разрешает modus ponens, поэтому следует «Тёплая CAUSE-магистраль: состояние 3».
+    step 3 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 3» уже установлено. Каноническое правило «Тёплая CAUSE-магистраль: состояние 3 CAUSE Тёплая CAUSE-магистраль: состояние 4» разрешает modus ponens, поэтому следует «Тёплая CAUSE-магистраль: состояние 4».
+    step 4 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 4» уже установлено. Каноническое правило «Тёплая CAUSE-магистраль: состояние 4 CAUSE Тёплая CAUSE-магистраль: состояние 5» разрешает modus ponens, поэтому следует «Тёплая CAUSE-магистраль: состояние 5».
+    step 5 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 5» уже установлено. Каноническое правило «Тёплая CAUSE-магистраль: состояние 5 CAUSE Тёплая CAUSE-магистраль: состояние 6» разрешает modus ponens, поэтому следует «Тёплая CAUSE-магистраль: состояние 6».
+    step 6 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 6» уже установлено. Каноническое правило «Тёплая CAUSE-магистраль: состояние 6 CAUSE Тёплая CAUSE-магистраль: состояние 7» разрешает modus ponens, поэтому следует «Тёплая CAUSE-магистраль: состояние 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] branch_follow_warm FOLLOW depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=279->260, path_cold=True, x_changed=True, tail_inactive=True, 710.81ms
+    goal: доказать «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 6»
+    conclusion: Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 6
+    step 1 [FOLLOW / DIRECT]: Использовано прямое отношение «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 2».
+    step 2 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Тёплый FOLLOW-эпизод: событие 1» до «Тёплый FOLLOW-эпизод: событие 2». Вместе с «Тёплый FOLLOW-эпизод: событие 2 FOLLOW Тёплый FOLLOW-эпизод: событие 3» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 3».
+    step 3 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Тёплый FOLLOW-эпизод: событие 1» до «Тёплый FOLLOW-эпизод: событие 3». Вместе с «Тёплый FOLLOW-эпизод: событие 3 FOLLOW Тёплый FOLLOW-эпизод: событие 4» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 4».
+    step 4 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Тёплый FOLLOW-эпизод: событие 1» до «Тёплый FOLLOW-эпизод: событие 4». Вместе с «Тёплый FOLLOW-эпизод: событие 4 FOLLOW Тёплый FOLLOW-эпизод: событие 5» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 5».
+    step 5 [FOLLOW / TRANSITIVITY]: Ранее установлена цепочка от «Тёплый FOLLOW-эпизод: событие 1» до «Тёплый FOLLOW-эпизод: событие 5». Вместе с «Тёплый FOLLOW-эпизод: событие 5 FOLLOW Тёплый FOLLOW-эпизод: событие 6» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 6».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] branch_isa_cold IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=260->388, path_cold=True, x_changed=True, tail_inactive=True, 851.85ms
+    goal: доказать «локальный тип A IS-A тип G»
+    conclusion: локальный тип A IS-A тип G
+    step 1 [IS-A / DIRECT]: Использовано прямое отношение «локальный тип A IS-A тип B».
+    step 2 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «локальный тип A» до «тип B». Вместе с «тип B IS-A тип C» по транзитивности получаем «локальный тип A IS-A тип C».
+    step 3 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «локальный тип A» до «тип C». Вместе с «тип C IS-A тип D» по транзитивности получаем «локальный тип A IS-A тип D».
+    step 4 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «локальный тип A» до «тип D». Вместе с «тип D IS-A тип E» по транзитивности получаем «локальный тип A IS-A тип E».
+    step 5 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «локальный тип A» до «тип E». Вместе с «тип E IS-A тип F» по транзитивности получаем «локальный тип A IS-A тип F».
+    step 6 [IS-A / TRANSITIVITY]: Ранее установлена цепочка от «локальный тип A» до «тип F». Вместе с «тип F IS-A тип G» по транзитивности получаем «локальный тип A IS-A тип G».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192

@@ -10,7 +10,12 @@ from ah.agent.interaction_context import InteractionContext
 from ah.config import OrchestratorSettings
 from ah.core.persistence import JsonPersistence
 from ah.ignition import IgnitionEngine, TickResult
-from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
+from ah.inference import (
+    IgnitionInferenceAttention,
+    InferenceEngine,
+    InferenceMaterializer,
+    QueryGoalBuilder,
+)
 from ah.inference.contracts import InferenceOutcome
 from ah.inference.materialization import MaterializationResult
 from ah.integration import IntegrationError, IntegrationService
@@ -124,6 +129,7 @@ class AgentOrchestrator:
         self.ignition = ignition
         self.query_builder = query_builder
         self.inference = inference
+        self.inference_attention = IgnitionInferenceAttention(ignition)
         self.materializer = materializer
         self.projector = projector
         self.agent = agent
@@ -630,7 +636,15 @@ class AgentOrchestrator:
                 if built.goal is None:
                     query_results.append(QueryExecution(None, None, built.diagnostics))
                     continue
-                outcome = self.inference.solve(built.goal, workspace)
+                outcome = self.inference.solve(
+                    built.goal,
+                    workspace,
+                    attention=self.inference_attention,
+                )
+                # Inference attention is real Ignition activity. Re-freeze Workspace
+                # after each proof because the next query and AgentContext must see
+                # the state that actually exists after the attention shift.
+                workspace = self.ignition.workspace_refs()
                 inference_outcomes.append(outcome)
                 materialized = (
                     self.materializer.materialize(outcome)

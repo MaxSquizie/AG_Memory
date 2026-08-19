@@ -9,12 +9,12 @@ from ah.perception import QueryCandidate, QueryMode
 
 from ah.integration.entity_resolver import EntityResolver, ExistingEntity
 
-from .contracts import ExistsGoal, InferenceGoal, MultiRoleFillGoal, RoleFillGoal
+from .contracts import ExistsGoal, GoalSpec, InferenceQuery, MultiRoleFillGoal, RoleFillGoal
 
 
 @dataclass(frozen=True, slots=True)
 class QueryBuildResult:
-    goal: InferenceGoal | None
+    goal: InferenceQuery | None
     diagnostics: tuple[str, ...] = ()
     # Runtime attention anchors discovered while resolving the query. This may
     # include the resolved referent and canonical supporting facts used by a
@@ -110,6 +110,6 @@ class QueryGoalBuilder:
             if not query.requested_roles:
                 return QueryBuildResult(None, ("requested_roles_missing",))
             if len(query.requested_roles) == 1:
-                return QueryBuildResult(RoleFillGoal(tref, known, query.requested_roles[0]), attention_refs=tuple(attention_refs))
-            return QueryBuildResult(MultiRoleFillGoal(tref, known, query.requested_roles), attention_refs=tuple(attention_refs))
-        return QueryBuildResult(ExistsGoal(tref, known), attention_refs=tuple(attention_refs))
+                return QueryBuildResult(InferenceQuery(GoalSpec(RoleFillGoal(tref, known, query.requested_roles[0]))), attention_refs=tuple(attention_refs))
+            return QueryBuildResult(InferenceQuery(GoalSpec(MultiRoleFillGoal(tref, known, query.requested_roles))), attention_refs=tuple(attention_refs))
+        return QueryBuildResult(InferenceQuery(GoalSpec(ExistsGoal(tref, known))), attention_refs=tuple(attention_refs))

@@ -1,0 +1,41 @@
+M2 attention-driven goal-directed acceptance
+PASS 32/32; FAIL 0
+base=live-AH-snapshot; AH=153682 UIDs; stress padding=149832
+Workspace initial=4; final=388
+elapsed=18.672s
+
+Cold Workspace is a purity control only. Runtime correctness does not require it.
+Every proof proposition is focused through QUERY_RECALL + a normal Ignition tick.
+
+[PASS] cause_alpha CAUSE depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=4->6, path_cold=True, x_changed=True, tail_inactive=True, 206.92ms
+[PASS] cause_alpha CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=6->10, path_cold=True, x_changed=True, tail_inactive=True, 306.17ms
+[PASS] cause_alpha CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=10->15, path_cold=True, x_changed=True, tail_inactive=True, 521.56ms
+[PASS] cause_alpha CAUSE depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=15->20, path_cold=True, x_changed=True, tail_inactive=True, 520.87ms
+[PASS] cause_alpha CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=20->25, path_cold=True, x_changed=True, tail_inactive=True, 614.08ms
+[PASS] cause_alpha CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=25->32, path_cold=True, x_changed=True, tail_inactive=True, 716.18ms
+[PASS] cause_beta CAUSE depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=32->35, path_cold=True, x_changed=True, tail_inactive=True, 205.37ms
+[PASS] cause_beta CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=35->38, path_cold=True, x_changed=True, tail_inactive=True, 313.84ms
+[PASS] cause_beta CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=38->43, path_cold=True, x_changed=True, tail_inactive=True, 415.05ms
+[PASS] cause_beta CAUSE depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=43->47, path_cold=True, x_changed=True, tail_inactive=True, 516.48ms
+[PASS] cause_beta CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=47->52, path_cold=True, x_changed=True, tail_inactive=True, 620.54ms
+[PASS] cause_beta CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=52->59, path_cold=True, x_changed=True, tail_inactive=True, 744.11ms
+[PASS] follow_episode FOLLOW depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=59->62, path_cold=True, x_changed=True, tail_inactive=True, 209.74ms
+[PASS] follow_episode FOLLOW depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=62->65, path_cold=True, x_changed=True, tail_inactive=True, 308.94ms
+[PASS] follow_episode FOLLOW depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=65->70, path_cold=True, x_changed=True, tail_inactive=True, 421.10ms
+[PASS] follow_episode FOLLOW depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=70->74, path_cold=True, x_changed=True, tail_inactive=True, 518.38ms
+[PASS] follow_episode FOLLOW depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=74->79, path_cold=True, x_changed=True, tail_inactive=True, 633.23ms
+[PASS] follow_episode FOLLOW depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=79->86, path_cold=True, x_changed=True, tail_inactive=True, 720.92ms
+[PASS] isa_concepts IS-A depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=86->89, path_cold=True, x_changed=True, tail_inactive=True, 210.85ms
+[PASS] isa_concepts IS-A depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=89->92, path_cold=True, x_changed=True, tail_inactive=True, 313.65ms
+[PASS] isa_concepts IS-A depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=92->97, path_cold=True, x_changed=True, tail_inactive=True, 419.63ms
+[PASS] isa_concepts IS-A depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=97->101, path_cold=True, x_changed=True, tail_inactive=True, 516.83ms
+[PASS] isa_concepts IS-A depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=101->106, path_cold=True, x_changed=True, tail_inactive=True, 626.57ms
+[PASS] isa_concepts IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=106->113, path_cold=True, x_changed=True, tail_inactive=True, 752.96ms
+[PASS] cross_left CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=113->117, path_cold=True, x_changed=True, tail_inactive=True, 325.11ms
+[PASS] cross_left CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=117->123, path_cold=True, x_changed=True, tail_inactive=True, 649.85ms
+[PASS] cross_right CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=123->127, path_cold=True, x_changed=True, tail_inactive=True, 424.73ms
+[PASS] cross_right CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=127->133, path_cold=True, x_changed=True, tail_inactive=True, 746.88ms
+[PASS] branch_cause_cold CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=133->260, path_cold=True, x_changed=True, tail_inactive=True, 855.12ms
+[PASS] branch_cause_warm CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=266->272, path_cold=True, x_changed=True, tail_inactive=True, 803.71ms
+[PASS] branch_follow_warm FOLLOW depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=279->260, path_cold=True, x_changed=True, tail_inactive=True, 692.59ms
+[PASS] branch_isa_cold IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=260->388, path_cold=True, x_changed=True, tail_inactive=True, 839.00ms

@@ -1,10 +1,15 @@
+from .attention import AttentionFocusEvent, IgnitionInferenceAttention, InferenceAttention
 from .contracts import (
+    AllOfGoal,
     CauseEntailmentGoal,
+    CompositeConclusion,
     DerivedLinkConclusion,
     ExistingRefConclusion,
     ExistsGoal,
+    GoalSpec,
     InferenceGoal,
     InferenceOutcome,
+    InferenceQuery,
     LogicalStatus,
     MultiRoleBindingConclusion,
     MultiRoleFillGoal,
@@ -18,14 +23,21 @@ from .materialization import InferenceMaterializer, MaterializationResult
 from .query_builder import QueryBuildResult, QueryGoalBuilder
 
 __all__ = [
+    "AttentionFocusEvent",
+    "AllOfGoal",
     "CauseEntailmentGoal",
+    "CompositeConclusion",
     "DerivedLinkConclusion",
     "ExistingRefConclusion",
     "ExistsGoal",
+    "GoalSpec",
     "InferenceEngine",
+    "InferenceAttention",
     "InferenceGoal",
     "InferenceMaterializer",
+    "IgnitionInferenceAttention",
     "InferenceOutcome",
+    "InferenceQuery",
     "LogicalStatus",
     "MaterializationResult",
     "MultiRoleBindingConclusion",

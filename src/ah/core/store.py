@@ -284,6 +284,18 @@ class AHStore:
             raise ValueError(f"Runtime replacement UID mismatch: missing={missing}, extra={extra}")
         self._state.runtime = states
 
+    def _update_runtime_states(self, states: dict[str, RuntimeState]) -> None:
+        """Replace only the runtime states touched by one sparse Ignition tick.
+
+        Canonical/runtime membership is unchanged; this is equivalent to a full
+        synchronous replacement for UIDs whose state changed, while cold untouched
+        UIDs keep their existing RuntimeState object.
+        """
+        unknown = set(states) - set(self._state.runtime)
+        if unknown:
+            raise ValueError(f"Runtime update contains unknown UIDs: {unknown}")
+        self._state.runtime.update(states)
+
     def _replace_link(self, link: Link) -> None:
         if link.uid not in self._state.links:
             raise KeyError(link.uid)
@@ -542,7 +554,7 @@ class AHStore:
             if symbol.uid in self._state.uid_kind:
                 raise ValueError(f"Duplicate UID during index rebuild: {symbol.uid}")
             self._state.uid_kind[symbol.uid] = RefKind.S
-            new_runtime[symbol.uid] = deepcopy(old_runtime.get(symbol.uid, RuntimeState()))
+            new_runtime[symbol.uid] = old_runtime.get(symbol.uid, RuntimeState())
             self._index_symbol(symbol)
 
         type_to_kind = {
@@ -560,7 +572,7 @@ class AHStore:
                 kind = type_to_kind[type(element)]
                 self._state.uid_kind[element.uid] = kind
                 self._state.uid_domain[element.uid] = domain
-                new_runtime[element.uid] = deepcopy(old_runtime.get(element.uid, RuntimeState()))
+                new_runtime[element.uid] = old_runtime.get(element.uid, RuntimeState())
 
         for domain in Domain:
             for element in self._state.domains[domain].values():
@@ -591,22 +603,25 @@ class AHStore:
 
     # ---------- reference inspection / GC support ----------
     def structural_referrers(self, uid: str) -> tuple[Ref, ...]:
-        """Return non-L canonical structures that contain a direct ref to uid."""
-        out: list[Ref] = []
-        for domain in Domain:
-            for element in self._state.domains[domain].values():
-                hit = False
-                if isinstance(element, Template):
-                    hit = element.predicate.uid == uid
-                elif isinstance(element, Hypernode):
-                    hit = element.template.uid == uid or any(ref.uid == uid for ref in element.actants.values())
-                elif isinstance(element, FunctionSymbol):
-                    hit = any(ref.uid == uid for ref in element.operands)
-                elif isinstance(element, Group):
-                    hit = any(ref.uid == uid for ref in element.members)
-                if hit:
-                    out.append(Ref(element.uid, self._state.uid_kind[element.uid]))
-        return tuple(out)
+        """Return non-L canonical structures that contain a direct ref to ``uid``.
+
+        Every canonical direct-reference shape already owns a rebuildable reverse
+        index. GC therefore must not scan all C/P/H records merely to decide whether
+        one expired N is still referenced. Canonical truth remains in the records;
+        these indexes are only the deterministic retrieval path and are rebuilt by
+        :meth:`rebuild_indexes`.
+        """
+        referrer_uids: set[str] = set()
+        referrer_uids.update(self._state.template_by_predicate.get(uid, ()))
+        referrer_uids.update(self._state.hypernodes_by_template.get(uid, ()))
+        referrer_uids.update(self._state.actant_hypernodes.get(uid, ()))
+        referrer_uids.update(self._state.function_parents.get(uid, ()))
+        referrer_uids.update(self._state.group_memberships.get(uid, ()))
+        return tuple(
+            Ref(ref_uid, self._state.uid_kind[ref_uid])
+            for ref_uid in sorted(referrer_uids)
+            if ref_uid in self._state.uid_kind and self._state.uid_kind[ref_uid] is not RefKind.L
+        )
 
     def has_any_link(self, uid: str) -> bool:
         return bool(self._state.outgoing_links.get(uid) or self._state.incoming_links.get(uid))

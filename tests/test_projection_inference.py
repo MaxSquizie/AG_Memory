@@ -7,11 +7,14 @@ from ah.core import AHCore, SequentialUidGenerator
 from ah.inference import (
     CauseEntailmentGoal,
     ExistsGoal,
+    GoalSpec,
     InferenceEngine,
+    InferenceQuery,
     InferenceMaterializer,
     LogicalStatus,
     RelationGoal,
     RoleFillGoal,
+    StopReason,
 )
 from ah.model import ActantRole, Domain, Property, RefKind
 from ah.projection import ContextProjector, SemanticProjector
@@ -253,6 +256,128 @@ class ProjectionInferenceTests(unittest.TestCase):
         self.assertEqual(self.core.store.kind_of(link.uid), RefKind.L)
         with self.assertRaises(KeyError):
             self.core.store.runtime_state(link.uid)
+
+
+    def test_goal_directed_isa_depth_six_stops_at_goal_not_chain_end(self) -> None:
+        nodes = [self.entity(Domain.C, name) for name in "ABCDEFGHI"]
+        links = [
+            self.core.add_link("IS-A", nodes[index], nodes[index + 1], 0.4)
+            for index in range(len(nodes) - 1)
+        ]
+        query = InferenceQuery(
+            GoalSpec(RelationGoal("IS-A", nodes[0], nodes[6])),
+            max_depth=6,
+        )
+
+        outcome = InferenceEngine(self.core, self.inference_settings).solve(query)
+
+        self.assertIs(outcome.status, LogicalStatus.PROVED)
+        self.assertIs(outcome.stop_reason, StopReason.GOAL_SATISFIED)
+        self.assertEqual(outcome.logical_depth, 6)
+        self.assertEqual(outcome.uid_trace[-1], nodes[6])
+        self.assertNotIn(nodes[7], outcome.uid_trace)
+        self.assertNotIn(nodes[8], outcome.uid_trace)
+        self.assertNotIn(links[6].uid, {ref.uid for ref in outcome.uid_trace})
+        self.assertEqual(outcome.goal_spec, query.goal)
+
+    def test_goal_directed_relation_reports_depth_limit_instead_of_false_exhaustion(self) -> None:
+        nodes = [self.entity(Domain.C, name) for name in "ABCDEFG"]
+        for index in range(len(nodes) - 1):
+            self.core.add_link("FOLLOW", nodes[index], nodes[index + 1], 0.4)
+        query = InferenceQuery(
+            GoalSpec(RelationGoal("FOLLOW", nodes[0], nodes[6])),
+            max_depth=5,
+        )
+
+        outcome = InferenceEngine(self.core, self.inference_settings).solve(query)
+
+        self.assertIs(outcome.status, LogicalStatus.UNKNOWN)
+        self.assertIs(outcome.stop_reason, StopReason.DEPTH_EXHAUSTED)
+        self.assertEqual(outcome.logical_depth, 5)
+        self.assertEqual(outcome.uid_trace[-1], nodes[5])
+        self.assertNotIn(nodes[6], outcome.uid_trace)
+
+    def test_cause_mp_can_prove_six_hops_from_explicit_premise_and_stops_at_goal(self) -> None:
+        nodes = [self.entity(Domain.C, name) for name in "ABCDEFGHI"]
+        links = [
+            self.core.add_link("CAUSE", nodes[index], nodes[index + 1], 0.4)
+            for index in range(len(nodes) - 1)
+        ]
+        query = InferenceQuery(
+            GoalSpec(CauseEntailmentGoal(nodes[6])),
+            premise_refs=(nodes[0],),
+            max_depth=6,
+        )
+
+        outcome = InferenceEngine(self.core, self.inference_settings).solve(query)
+
+        self.assertIs(outcome.status, LogicalStatus.PROVED)
+        self.assertIs(outcome.stop_reason, StopReason.GOAL_SATISFIED)
+        self.assertEqual(outcome.logical_depth, 6)
+        self.assertEqual(
+            tuple(ref.uid for ref in outcome.uid_trace),
+            tuple(
+                item
+                for index in range(6)
+                for item in (nodes[index].uid, links[index].uid)
+            ) + (nodes[6].uid,),
+        )
+        self.assertNotIn(nodes[7], outcome.uid_trace)
+        self.assertNotIn(nodes[8], outcome.uid_trace)
+        self.assertNotIn(links[6].uid, {ref.uid for ref in outcome.uid_trace})
+
+    def test_cause_mp_depth_five_does_not_reach_six_hop_goal(self) -> None:
+        nodes = [self.entity(Domain.C, name) for name in "ABCDEFG"]
+        for index in range(len(nodes) - 1):
+            self.core.add_link("CAUSE", nodes[index], nodes[index + 1], 0.4)
+        query = InferenceQuery(
+            GoalSpec(CauseEntailmentGoal(nodes[6])),
+            premise_refs=(nodes[0],),
+            max_depth=5,
+        )
+
+        outcome = InferenceEngine(self.core, self.inference_settings).solve(query)
+
+        self.assertIs(outcome.status, LogicalStatus.UNKNOWN)
+        self.assertIs(outcome.stop_reason, StopReason.DEPTH_EXHAUSTED)
+        self.assertEqual(outcome.logical_depth, 5)
+        self.assertEqual(outcome.uid_trace[-1], nodes[5])
+        self.assertNotIn(nodes[6], outcome.uid_trace)
+
+    def test_cause_explicit_premises_do_not_treat_intermediate_nodes_as_free_truth(self) -> None:
+        a = self.entity(Domain.C, "A")
+        b = self.entity(Domain.C, "B")
+        c = self.entity(Domain.C, "C")
+        unrelated = self.entity(Domain.C, "X")
+        self.core.add_link("CAUSE", a, b, 0.4)
+        self.core.add_link("CAUSE", b, c, 0.4)
+
+        outcome = InferenceEngine(self.core, self.inference_settings).solve(
+            InferenceQuery(
+                GoalSpec(CauseEntailmentGoal(c)),
+                premise_refs=(unrelated,),
+                max_depth=6,
+            )
+        )
+
+        self.assertIs(outcome.status, LogicalStatus.UNKNOWN)
+        self.assertIs(outcome.stop_reason, StopReason.SEARCH_EXHAUSTED)
+
+    def test_goal_directed_search_honours_expansion_budget(self) -> None:
+        nodes = [self.entity(Domain.C, name) for name in "ABCDEFG"]
+        for index in range(len(nodes) - 1):
+            self.core.add_link("IS-A", nodes[index], nodes[index + 1], 0.4)
+        query = InferenceQuery(
+            GoalSpec(RelationGoal("IS-A", nodes[0], nodes[6])),
+            max_depth=6,
+            max_expanded_states=3,
+        )
+
+        outcome = InferenceEngine(self.core, self.inference_settings).solve(query)
+
+        self.assertIs(outcome.status, LogicalStatus.UNKNOWN)
+        self.assertIs(outcome.stop_reason, StopReason.BUDGET_EXHAUSTED)
+        self.assertEqual(outcome.expanded_states, 3)
 
 
 if __name__ == "__main__":

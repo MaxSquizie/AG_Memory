@@ -17,6 +17,16 @@ from .hidden_valency_diagnostic import (
 from .graph_dump import GraphInspector, GraphSnapshot, LinkDiagnostic, NodeDiagnostic, StructuralEdgeDiagnostic
 from .summary import RuntimeDiagnostics, RuntimeSummary
 from .trace_view import TraceView
+from .inference_proof import (
+    ProofCheck, ProofChainSnapshot, ProofEdgeSnapshot, ProofNodeSnapshot,
+    ProofSnapshotBuilder, ProofStepSnapshot,
+)
+from .m2_acceptance import (
+    M2AcceptanceCaseResult,
+    M2AcceptanceRunResult,
+    run_m2_attention_acceptance,
+    run_m2_cold_workspace_acceptance,
+)
 from .propagation_audit import (
     FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
 )
@@ -45,6 +55,16 @@ __all__ = [
     "RuntimeDiagnostics",
     "RuntimeSummary",
     "TraceView",
+    "ProofCheck",
+    "ProofChainSnapshot",
+    "ProofEdgeSnapshot",
+    "ProofNodeSnapshot",
+    "ProofSnapshotBuilder",
+    "ProofStepSnapshot",
+    "M2AcceptanceCaseResult",
+    "M2AcceptanceRunResult",
+    "run_m2_attention_acceptance",
+    "run_m2_cold_workspace_acceptance",
     "FanoutAudit",
     "PropagationAudit",
     "PropagationEdgeAudit",

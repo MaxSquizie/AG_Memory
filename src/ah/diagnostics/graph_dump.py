@@ -73,14 +73,15 @@ class GraphInspector:
         self.runtime_lock = runtime_lock
         self.semantic = SemanticProjector(core, ContextSettings(include_structural_uids=False))
 
-    def snapshot(self) -> GraphSnapshot:
+    def snapshot(self, *, exclude_meta_flag: str | None = None) -> GraphSnapshot:
         lock = self.runtime_lock or nullcontext()
         with lock:
-            return self._snapshot_locked()
+            return self._snapshot_locked(exclude_meta_flag=exclude_meta_flag)
 
-    def _snapshot_locked(self) -> GraphSnapshot:
+    def _snapshot_locked(self, *, exclude_meta_flag: str | None = None) -> GraphSnapshot:
         workspace = self.ignition.workspace_refs() if self.ignition is not None else ()
         workspace_uids = {ref.uid for ref in workspace}
+        hidden_uids: set[str] = set()
         nodes: list[NodeDiagnostic] = []
 
         for uid in sorted(self.core.store.all_uids()):
@@ -88,6 +89,14 @@ class GraphInspector:
             if kind is RefKind.L:
                 continue
             domain = self.core.store.domain_of(uid)
+            if exclude_meta_flag and domain is not None:
+                try:
+                    element_for_filter = self.core.store.get_element_any_domain(uid)
+                    if bool(getattr(element_for_filter, "meta", {}).get(exclude_meta_flag)):
+                        hidden_uids.add(uid)
+                        continue
+                except Exception:
+                    pass
             runtime = self.core.store.runtime_state(uid)
             semantic = self._semantic(uid)
             lifecycle = None
@@ -117,6 +126,7 @@ class GraphInspector:
         links = tuple(
             LinkDiagnostic(link.uid, link.relation_id, link.source.uid, link.target.uid, link.weight)
             for link in sorted(self.core.store.links(), key=lambda x: x.uid)
+            if link.source.uid not in hidden_uids and link.target.uid not in hidden_uids
         )
         structural: list[StructuralEdgeDiagnostic] = []
         for domain in Domain:
@@ -143,6 +153,7 @@ class GraphInspector:
             tick = snap.tick_index
             incoming = dict(snap.incoming)
             refutations = snap.pending_refutations
+        workspace_uids.difference_update(hidden_uids)
         workspace_semantics: dict[str, str] = {}
         for uid in sorted(workspace_uids):
             try:
@@ -201,6 +212,18 @@ class GraphInspector:
         return "\n".join(lines)
 
     def _semantic(self, uid: str) -> str:
+        # M2 stress padding deliberately contains tens/hundreds of thousands of
+        # semantically empty cold entities. Running the full SemanticProjector for
+        # each one makes freezing the test canvas needlessly expensive; the marker
+        # is diagnostic-only and has no cognitive semantics.
+        try:
+            domain = self.core.store.domain_of(uid)
+            if domain is not None:
+                element = self.core.store.get_element_any_domain(uid)
+                if isinstance(element, SemanticEntity) and element.meta.get("m2_stress_noise"):
+                    return "M2 cold noise"
+        except Exception:
+            pass
         ref = self.core.ref(uid)
         try:
             # Minimal projection is sufficient for inspection labels and avoids Pr dumps.

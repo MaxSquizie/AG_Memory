@@ -28,17 +28,21 @@ from ah.diagnostics import (
     load_semantic_oracle,
     run_acceptance_suite,
     run_hidden_valency_diagnostic,
+    run_m2_attention_acceptance,
     validate_oracle_alignment,
+    ProofSnapshotBuilder,
 )
 
 from .config_editor import ConfigEditor
 from .config_store import ApplyMode, ConfigDocument
 from .graph_canvas import GraphCanvasWidget
+from .canvas_browser import CanvasBrowserWidget
 from .ignition_tuning import IgnitionTuningWidget
 from .node_manager import NodeManagerWidget
 from .link_manager import LinkManagerWidget
 from .llm_panel import LLMControlWidget
 from .workspace_viewer import WorkspaceViewerWidget
+from .inference_explorer import InferenceExplorerWidget
 from .all_nodes_viewer import AllNodesViewerWidget
 
 
@@ -73,9 +77,11 @@ class MainWindow(QMainWindow):
         self.config_path = Path(config_path)
         self.thread_pool = QThreadPool.globalInstance()
         self._last_turn = None
+        self._turn_sequence = 0
         self._chat_worker: FunctionWorker | None = None
         self._acceptance_worker: FunctionWorker | None = None
         self._hidden_valency_worker: FunctionWorker | None = None
+        self._m2_acceptance_worker: FunctionWorker | None = None
         self._llm_operation_worker: FunctionWorker | None = None
         self._llm_operation_clears_restart = False
         self._selected_uid: str | None = None
@@ -90,9 +96,12 @@ class MainWindow(QMainWindow):
         self.resize(1580, 980)
 
         self.canvas = GraphCanvasWidget(services)
-        self.canvas.node_selected.connect(self._select_node)
-        self.canvas.edge_selected.connect(self._select_edge)
-        self.setCentralWidget(self.canvas)
+        self.canvas_browser = CanvasBrowserWidget(self.canvas, services.config, self)
+        self.canvas_browser.live_node_selected.connect(self._select_node)
+        self.canvas_browser.live_edge_selected.connect(self._select_edge)
+        self.canvas_browser.sandbox_node_selected.connect(self._select_sandbox_node)
+        self.canvas_browser.sandbox_edge_selected.connect(self._select_sandbox_edge)
+        self.setCentralWidget(self.canvas_browser)
 
         self._build_toolbar()
         self._build_chat_dock()
@@ -103,6 +112,7 @@ class MainWindow(QMainWindow):
         self._build_link_manager_dock()
         self._build_workspace_dock()
         self._build_all_nodes_dock()
+        self._build_inference_dock()
         self._build_runtime_dock()
 
         # Runtime status includes a full GraphInspector snapshot. During acceptance
@@ -146,8 +156,15 @@ class MainWindow(QMainWindow):
         bar.addAction(self.action_save)
 
         bar.addSeparator()
+        self.action_inference_explorer = QAction("Логический вывод", self)
+        self.action_inference_explorer.setToolTip(
+            "Все live/M2 proof-цепочки: отдельный canvas, семантика шагов, UID trace и проверки."
+        )
+        self.action_inference_explorer.triggered.connect(self._show_inference_explorer)
+        bar.addAction(self.action_inference_explorer)
+
         reset_camera = QAction("Сброс камеры", self)
-        reset_camera.triggered.connect(self.canvas.reset_camera)
+        reset_camera.triggered.connect(lambda: self.canvas_browser.active_canvas.reset_camera())
         bar.addAction(reset_camera)
 
         self.action_full_canvas = QAction("Полный canvas", self)
@@ -182,10 +199,19 @@ class MainWindow(QMainWindow):
             "Диагностика не пишет в AH."
         )
         self.hidden_valency_button.clicked.connect(self._run_hidden_valency_diagnostic)
+        self.m2_acceptance_button = QPushButton("M2: inference attention")
+        self.m2_acceptance_button.setToolTip(
+            "M2 на snapshot текущей AH без LLM: чистые CAUSE/FOLLOW/IS-A depth 1..6 + "
+            "смешанные typed proofs (CAUSE→FOLLOW→IS-A) с общей depth до 6, cold/warm/branches. "
+            "После прогона полный M2 sandbox доступен в Canvas Browser, а каждый proof — "
+            "в dock-виджете «Логический вывод»."
+        )
+        self.m2_acceptance_button.clicked.connect(self._run_m2_acceptance)
         chat_buttons = QHBoxLayout()
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
         chat_buttons.addWidget(self.hidden_valency_button)
+        chat_buttons.addWidget(self.m2_acceptance_button)
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
         layout.addLayout(chat_buttons)
@@ -259,6 +285,18 @@ class MainWindow(QMainWindow):
         dock.setWidget(self.all_nodes_view)
         dock.visibilityChanged.connect(lambda visible: self._refresh_status(force=True) if visible else None)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+
+    def _build_inference_dock(self) -> None:
+        dock = QDockWidget("Логический вывод", self)
+        self.inference_dock = dock
+        self.inference_explorer = InferenceExplorerWidget(self)
+        self.inference_explorer.overlay_requested.connect(self._show_proof_on_main_canvas)
+        self.inference_explorer.clear_overlay_requested.connect(
+            self.canvas_browser.clear_proof_highlights
+        )
+        dock.setWidget(self.inference_explorer)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        dock.hide()
 
     def _build_runtime_dock(self) -> None:
         dock = QDockWidget("Runtime / Trace", self)
@@ -400,7 +438,7 @@ class MainWindow(QMainWindow):
         # delivered. The previous implementation kept the worker only in a local
         # variable and re-enabled the button through a lambda, which is fragile
         # across worker-thread/UI-thread boundaries.
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2000)
             return
 
@@ -431,7 +469,7 @@ class MainWindow(QMainWindow):
         self.thread_pool.start(worker)
 
     def _run_acceptance_cases(self) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -455,6 +493,7 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
+        self.m2_acceptance_button.setEnabled(False)
         self.action_llm.setEnabled(False)
         self.action_ignition.setEnabled(False)
         self.action_tick.setEnabled(False)
@@ -480,6 +519,8 @@ class MainWindow(QMainWindow):
 
     @Slot(object)
     def _acceptance_finished(self, result) -> None:
+        if getattr(result, "proofs", ()):
+            self.inference_explorer.add_chains(result.proofs, select_last=False)
         self.chat_history.append(
             f"<b>Acceptance:</b> semantic PASS {result.semantic_passed}/{result.total}, "
             f"FAIL {result.semantic_failed}, GAP {result.semantic_gaps}; "
@@ -514,6 +555,7 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
+        self.m2_acceptance_button.setEnabled(True)
         self.action_llm.setEnabled(True)
         self.action_ignition.setEnabled(True)
         self.action_tick.setEnabled(True)
@@ -521,8 +563,99 @@ class MainWindow(QMainWindow):
         self.chat_input.setFocus()
         self._resume_acceptance_status_polling()
 
+    def _run_m2_acceptance(self) -> None:
+        if (
+            self._chat_worker is not None
+            or self._acceptance_worker is not None
+            or self._hidden_valency_worker is not None
+            or self._m2_acceptance_worker is not None
+        ):
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+
+        # The runner snapshots the *current* AH/runtime under operation_lock, pads
+        # the sandbox to >=150k UIDs when necessary, and executes real Ignition
+        # attention during proof. Live memory is never polluted by M2 fixtures.
+        self.m2_acceptance_button.setEnabled(False)
+        self.acceptance_button.setEnabled(False)
+        self.hidden_valency_button.setEnabled(False)
+        self.send_button.setEnabled(False)
+        self.chat_history.append(
+            "<b>M2 acceptance:</b> запускаю attention-driven suite на snapshot текущей AH: "
+            "pure + mixed CAUSE/FOLLOW/IS-A, общая logical depth до 6, cold/warm/branches, >=150k UIDs."
+        )
+        self.statusBar().showMessage("M2 inference/attention acceptance — выполняется")
+
+        worker = FunctionWorker(
+            lambda: run_m2_attention_acceptance(
+                data_dir=self.services.config.paths.data_dir,
+                inference_settings=self.services.config.inference,
+                ignition_settings=self.services.config.ignition,
+                workspace_settings=self.services.config.workspace,
+                lifecycle_settings=self.services.config.lifecycle,
+                base_core=self.services.core,
+                base_ignition=self.services.ignition,
+                runtime_lock=self.services.operation_lock,
+            )
+        )
+        self._m2_acceptance_worker = worker
+        worker.signals.result.connect(self._m2_acceptance_finished)
+        worker.signals.error.connect(self._m2_acceptance_error)
+        worker.signals.finished.connect(self._m2_acceptance_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _m2_acceptance_finished(self, result) -> None:
+        self.canvas_browser.set_sandbox_snapshot(
+            result.sandbox_snapshot,
+            total_uids=result.ah_uids,
+            hidden_stress_uids=result.cold_uids_added,
+        )
+        self.canvas_browser.show_sandbox()
+        proofs = [case.proof for case in result.cases if case.proof is not None]
+        self.inference_explorer.add_chains(proofs, select_last=True)
+        self._show_inference_explorer()
+        self.chat_history.append(
+            f"<b>M2 acceptance:</b> PASS {result.passed}/{result.total}, "
+            f"FAIL {result.failed}. Результаты: {self._html(str(result.output_dir))}"
+        )
+        self.statusBar().showMessage(
+            f"M2 acceptance: PASS {result.passed}/{result.total}; FAIL {result.failed}",
+            10000,
+        )
+        QMessageBox.information(
+            self,
+            "M2 inference attention acceptance",
+            f"Прогон завершён.\n\n"
+            f"PASS: {result.passed}/{result.total}\n"
+            f"FAIL: {result.failed}\n"
+            f"Sandbox AH: {result.ah_uids} UIDs\n"
+            f"Workspace: {result.initial_workspace_count} -> {result.final_workspace_count}\n\n"
+            f"Холодный Workspace — только purity control первого case.\n"
+            f"Live AH не изменялась. LLM не использовалась.\n\n"
+            f"Все {result.total} cases загружены в dock-виджет «Логический вывод»: "
+            f"proof-canvas, формальная Goal/Stop диагностика, семантика, UID trace и проверки.\n"
+            f"Тестовый sandbox доступен через Canvas: «Обычный AH / M2 sandbox». "
+            f"Синтетический stress-noise учитывается в размере AH, но скрыт из рендера canvas.\n\n"
+            f"Результаты:\n{result.output_dir}",
+        )
+
+    @Slot(str)
+    def _m2_acceptance_error(self, message: str) -> None:
+        self.chat_history.append(f"<b>M2 ACCEPTANCE ERROR:</b> {self._html(message)}")
+        QMessageBox.critical(self, "M2 inference attention acceptance", message)
+
+    @Slot()
+    def _m2_acceptance_worker_finished(self) -> None:
+        self._m2_acceptance_worker = None
+        self.m2_acceptance_button.setEnabled(True)
+        self.acceptance_button.setEnabled(True)
+        self.hidden_valency_button.setEnabled(True)
+        self.send_button.setEnabled(True)
+        self._refresh_status()
+
     def _run_hidden_valency_diagnostic(self) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -536,6 +669,7 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
+        self.m2_acceptance_button.setEnabled(False)
         self.action_llm.setEnabled(False)
         self.action_ignition.setEnabled(False)
         self.action_tick.setEnabled(False)
@@ -595,6 +729,7 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
+        self.m2_acceptance_button.setEnabled(True)
         self.action_llm.setEnabled(True)
         self.action_ignition.setEnabled(True)
         self.action_tick.setEnabled(True)
@@ -635,6 +770,7 @@ class MainWindow(QMainWindow):
 
     def _turn_finished(self, result) -> None:
         self._last_turn = result
+        self._turn_sequence += 1
         parser_failures = [d for d in result.perception.diagnostics if str(d).startswith("PARSER_FAILURE:")]
         if parser_failures:
             self.chat_history.append(
@@ -647,10 +783,18 @@ class MainWindow(QMainWindow):
         for tick in (*result.ticks_after_input, *result.ticks_after_response):
             self.canvas.push_tick(tick)
         trace_payload = []
+        proof_builder = ProofSnapshotBuilder(self.services.core)
         for i, q in enumerate(result.queries, 1):
             if q.outcome is None:
                 trace_payload.append({"query": i, "diagnostics": q.diagnostics})
                 continue
+            proof = proof_builder.build(
+                q.outcome,
+                chain_id=f"live:turn:{self._turn_sequence}:query:{i}",
+                source="LIVE",
+                title=f"Turn {self._turn_sequence} · Query {i}",
+            )
+            self.inference_explorer.add_chain(proof, select=False)
             trace_payload.append(
                 {
                     "query": i,
@@ -671,6 +815,82 @@ class MainWindow(QMainWindow):
         # Do not wait for the 1 s status poll to expose the just-finished parser
         # and agent diagnostics in the LLM tabs.
         self.llm_panel.refresh_status()
+
+    def _show_inference_explorer(self) -> None:
+        self.inference_dock.show()
+        self.inference_dock.raise_()
+
+    @Slot(object)
+    def _show_proof_on_main_canvas(self, chain) -> None:
+        if chain.source == "M2":
+            if not self.canvas_browser.show_sandbox():
+                QMessageBox.information(
+                    self,
+                    "Логический вывод",
+                    "Для этой M2-цепочки полный sandbox canvas уже недоступен. "
+                    "Proof-canvas и frozen семантика цепочки остаются доступны в виджете вывода.",
+                )
+                return
+            canvas = self.canvas_browser.sandbox_canvas
+            assert canvas is not None
+        else:
+            self.canvas_browser.show_live()
+            canvas = self.canvas
+
+        self.canvas_browser.clear_proof_highlights()
+        node_hits, link_hits = canvas.set_proof_highlight(chain.node_uids, chain.edge_uids)
+        if node_hits == 0:
+            QMessageBox.information(
+                self,
+                "Логический вывод",
+                "UID выбранной цепочки отсутствуют в соответствующем canvas snapshot. "
+                "Семантический proof и UID trace всё равно доступны в виджете «Логический вывод».",
+            )
+            return
+        self.statusBar().showMessage(
+            f"Proof overlay [{chain.source}]: {node_hits}/{len(chain.node_uids)} узлов, "
+            f"{link_hits}/{len(chain.edge_uids)} canonical links",
+            6000,
+        )
+
+    def _select_sandbox_node(self, uid: str) -> None:
+        canvas = self.canvas_browser.sandbox_canvas
+        snapshot = None if canvas is None else canvas.current_snapshot
+        if snapshot is None or not uid:
+            self.node_inspector.setPlainText("M2 SANDBOX — узел не выбран")
+            return
+        node = next((item for item in snapshot.nodes if item.uid == uid), None)
+        if node is None:
+            self.node_inspector.setPlainText(f"M2 SANDBOX — UID не найден: {uid}")
+            return
+        outgoing = [link for link in snapshot.links if link.source_uid == uid]
+        incoming = [link for link in snapshot.links if link.target_uid == uid]
+        payload = {
+            "canvas": "M2 SANDBOX (read-only frozen snapshot)",
+            "node": asdict(node),
+            "outgoing_links": [asdict(link) for link in outgoing[:100]],
+            "incoming_links": [asdict(link) for link in incoming[:100]],
+        }
+        self.node_inspector.setPlainText(json.dumps(payload, ensure_ascii=False, indent=2))
+
+    def _select_sandbox_edge(self, key: str) -> None:
+        canvas = self.canvas_browser.sandbox_canvas
+        if canvas is None:
+            return
+        edge = canvas.edge_descriptor(key)
+        if edge is None:
+            self.node_inspector.setPlainText("M2 SANDBOX — связь не выбрана")
+            return
+        self.node_inspector.setPlainText(
+            json.dumps(
+                {
+                    "canvas": "M2 SANDBOX (read-only frozen snapshot)",
+                    "edge": asdict(edge),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
 
     def _turn_error(self, message: str) -> None:
         self.chat_history.append(f"<b>ERROR:</b> {self._html(message)}")
@@ -785,7 +1005,7 @@ class MainWindow(QMainWindow):
                 if previous.get(dock, True):
                     dock.show()
             self._dock_visibility_before_full_canvas = {}
-        self.canvas.refresh()
+        self.canvas_browser.active_canvas.refresh()
 
     # ---------- config ----------
     def _config_saved(self, new_config: AppConfig, changed_paths: tuple[str, ...]) -> None:
@@ -794,7 +1014,7 @@ class MainWindow(QMainWindow):
             # apply_config only swaps hot-safe policy holders. Persistence/identity
             # require process/runtime restart and are intentionally left untouched.
             self.services.apply_config(new_config)
-            self.canvas.set_settings(new_config.gui)
+            self.canvas_browser.set_config(new_config)
             if hasattr(self, "ignition_tuning"):
                 self.ignition_tuning.set_parameters(
                     new_config.ignition.decay,

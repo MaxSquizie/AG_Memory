@@ -17,8 +17,11 @@ class TraceView:
         lines = [
             f"status={outcome.status.value}",
             f"stop={outcome.stop_reason.value}",
+            f"logical_depth={outcome.logical_depth}",
             f"expanded={outcome.expanded_states}",
         ]
+        if outcome.goal_spec is not None:
+            lines.append(f"goal={outcome.goal_spec.target!r}")
         if outcome.conclusion_domain is not None:
             lines.append(f"domain={outcome.conclusion_domain.value}")
         lines.append("trace:")

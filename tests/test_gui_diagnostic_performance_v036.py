@@ -40,11 +40,11 @@ class GUIDiagnosticPerformanceV036Tests(unittest.TestCase):
     def test_live_tables_avoid_resize_to_contents(self) -> None:
         self.assertNotIn("ResizeMode.ResizeToContents", WORKSPACE.read_text(encoding="utf-8"))
 
-    def test_architecture_records_diagnostic_gui_boundary(self) -> None:
+    def test_architecture_reference_is_the_user_v04_specification(self) -> None:
         source = ARCH.read_text(encoding="utf-8")
-        self.assertIn("спецификация v0.37", source)
-        self.assertIn("Производительность диагностического GUI", source)
-        self.assertIn("Hidden docks and inactive diagnostic tabs are lazy", source)
+        self.assertIn("спецификация v0.4", source)
+        self.assertIn("Diagnostics / UID Trace", source)
+        self.assertNotIn("спецификация v0.40", source)
 
 
 if __name__ == "__main__":

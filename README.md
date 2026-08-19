@@ -1,8 +1,37 @@
-# AH Agent MVP — v0.12.58
+# AH Agent MVP — v0.12.60
 
 Накопительный исполняемый проект АГ-памяти для текстового LLM-агента.
 
 `docs/reference/Архитектура_v3.md` — архитектурный источник для реализации. Код строится так, чтобы каноническая память, runtime-динамика, inference и LLM boundary оставались отдельными слоями.
+
+## v0.12.60 — Proof Explorer / transparent M2
+
+Этот срез добавляет runtime-only визуализацию логического вывода, не превращая trace в семантическую память.
+
+- отдельное окно `Логический вывод — Proof Explorer` хранит session-history live, acceptance и M2 inference outcomes;
+- выбранная цепочка имеет собственный proof-canvas: только реально использованные propositions и canonical links;
+- вкладка `Семантика / логика` показывает Goal, правило и человеческое объяснение каждого шага, а затем итоговое заключение;
+- вкладка `UID trace` показывает точный canonical trace рядом с зафиксированной семантикой;
+- вкладка `Проверки M2` раскрывает каждую acceptance-инварианту отдельно вместо одного агрегата 32/32;
+- live/acceptance proof можно подсветить поверх основного canvas без изменения AH; M2 sandbox не материализуется в live memory и отображается в собственном proof-canvas;
+- M2 `result.json` теперь содержит полный замороженный ProofSnapshot каждого case, а `report.txt` — семантические шаги и PASS/FAIL каждой проверки;
+- ordinary GUI turns и general acceptance suite используют тот же `ProofSnapshotBuilder`, то есть viewer не является отдельной тестовой логикой.
+
+GUI toolbar: `Логический вывод`. После M2-прогона окно открывается автоматически и получает все 32 cases.
+
+## v0.12.59 — M2 inference attention on arbitrary AH
+
+Этот срез исправляет границу между M2 inference и Ignition. Холодный Workspace теперь используется только как контроль чистоты первого acceptance-case: он доказывает, что Goal не был заранее доступен как активный контекст. Сам inference не требует холодной памяти и работает при произвольном текущем Workspace.
+
+- `CAUSE / FOLLOW / IS-A` proof search переносит фокус через `QUERY_RECALL` и обычный synchronous Ignition tick перед расширением текущей proposition;
+- rule-driven proof и `GOAL_SATISFIED` остаются логическими критериями: excitation влияет на доступ/приоритет, но не делает proposition истинной;
+- sparse Ignition tick обрабатывает активный/incoming frontier вместо deep-copy полного runtime-state на каждом шаге;
+- inference использует локальные canonical indexes для role lookup, `FALSE(...)` и adjacency, а bounded reverse-goal reachability только отсекает структурно мёртвые ветви до расходования proof budget;
+- M2 operator runner работает на snapshot текущей AH без мутации live memory, дополняет sandbox до минимум `150000` canonical UIDs и прогоняет 32 cold/warm/branched cases;
+- acceptance проверяет exact proof UID trace, exact attention sequence, реальное изменение `x`, отсутствие tail-after-Goal и отсутствие утечки в независимые/ложные ветви;
+- архитектурный reference восстановлен ровно из пользовательской спецификации v0.4 без отдельной «чистой AH» как runtime-требования.
+
+GUI: `M2: inference attention`. CLI остаётся `ah-agent --config config/default.toml m2-acceptance`.
 
 ## v0.12.58 — structural ambiguity boundaries, not corpus patches
 
