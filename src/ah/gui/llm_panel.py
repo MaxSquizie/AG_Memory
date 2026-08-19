@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from ah.bootstrap import RuntimeServices
+from ah.gui.perception_timeline import format_parser_decoded_history, format_parser_raw_history, pretty_json
 from ah.projection.contracts import AgentContext, AgentContextDiagnostic
 
 
@@ -413,11 +414,7 @@ class LLMControlWidget(QWidget):
 
     @staticmethod
     def _pretty(value) -> str:
-        def encode(obj):
-            if isinstance(obj, Enum):
-                return obj.value
-            return str(obj)
-        return json.dumps(value, ensure_ascii=False, indent=2, default=encode)
+        return pretty_json(value)
 
     def _refresh_parser_diagnostics(self, *, force: bool = False) -> None:
         parser = self.services.perception
@@ -434,42 +431,12 @@ class LLMControlWidget(QWidget):
                 self._set_text(self.parser_raw_view, text)
                 self._set_text(self.parser_decoded_view, text)
             return
-        diag = history[-1]
-        render_key = (
-            diag.sequence,
-            len(diag.attempts),
-            diag.final_error,
-            diag.decoded is not None,
-        )
+        render_key = tuple((d.sequence, len(d.attempts), d.final_error, d.decoded is not None, tuple((a.role, a.raw_text, a.error, a.normalized_answer) for a in d.attempts)) for d in history)
         if not force and render_key == self._last_parser_render_key:
             return
         self._last_parser_render_key = render_key
-        raw_parts = [f"SOURCE:\n{diag.source_text}"]
-        for index, attempt in enumerate(diag.attempts, start=1):
-            retry = f" retry={attempt.retry_index}" if attempt.retry_index else ""
-            raw_parts.append(f"\n--- PROBE {index}: {attempt.role}{retry} ---")
-            if attempt.prompt:
-                raw_parts.append(f"\nINPUT:\n{attempt.prompt}")
-            raw_parts.append(f"\nRAW:\n{attempt.raw_text}")
-            if attempt.normalized_answer is not None:
-                raw_parts.append(f"\nACCEPTED: {attempt.normalized_answer}")
-            if attempt.error:
-                raw_parts.append(f"\nVALIDATION ERROR: {attempt.error}")
-        if diag.final_error:
-            raw_parts.append(f"\nFINAL ERROR: {diag.final_error}")
-        self._set_text(self.parser_raw_view, "\n".join(raw_parts))
-
-        if diag.decoded is None:
-            decoded = {"status": "INVALID", "error": diag.final_error}
-        elif diag.final_error:
-            decoded = {
-                "status": "INVALID",
-                "error": diag.final_error,
-                "perception": asdict(diag.decoded),
-            }
-        else:
-            decoded = {"status": "OK", "perception": asdict(diag.decoded)}
-        self._set_text(self.parser_decoded_view, self._pretty(decoded))
+        self._set_text(self.parser_raw_view, format_parser_raw_history(history, turn_source_text=self._turn_source_text if self._turn_scope_initialized else ""))
+        self._set_text(self.parser_decoded_view, pretty_json(format_parser_decoded_history(history)))
 
     @staticmethod
     def _extract_context_section(rendered: str, heading: str) -> str:

@@ -1,0 +1,811 @@
+M2 attention-driven goal-directed acceptance
+PASS 40/40; FAIL 0
+base=live-AH-snapshot; AH=153502 UIDs; stress padding=149998
+Workspace initial=0; final=248
+elapsed=11.162s
+
+Cold Workspace is a purity control only. Runtime correctness does not require it.
+Every proof proposition is focused through QUERY_RECALL + a normal Ignition tick.
+
+[PASS] cause_alpha CAUSE depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=0->2, path_cold=True, x_changed=True, tail_inactive=True, 17.30ms
+    goal: доказать установленность «Система активировала тревогу» из явной посылки через CAUSE/MP
+    conclusion: Система активировала тревогу
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» установлено в текущем proof-state. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому устанавливается «Система активировала тревогу».
+    checks:
+      [PASS] Workspace globally cold before purity case — workspace_before=0
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=True
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=2->6, path_cold=True, x_changed=True, tail_inactive=True, 15.94ms
+    goal: доказать установленность «Охрана получила сигнал» из явной посылки через CAUSE/MP
+    conclusion: Охрана получила сигнал
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» установлено в текущем proof-state. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому устанавливается «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» установлено в текущем proof-state. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому устанавливается «Охрана получила сигнал».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=6->11, path_cold=True, x_changed=True, tail_inactive=True, 25.67ms
+    goal: доказать установленность «Охранник начал проверку помещения» из явной посылки через CAUSE/MP
+    conclusion: Охранник начал проверку помещения
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» установлено в текущем proof-state. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому устанавливается «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» установлено в текущем proof-state. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому устанавливается «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» установлено в текущем proof-state. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому устанавливается «Охранник начал проверку помещения».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=11->16, path_cold=True, x_changed=True, tail_inactive=True, 37.39ms
+    goal: доказать установленность «Пожар подтверждён» из явной посылки через CAUSE/MP
+    conclusion: Пожар подтверждён
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» установлено в текущем proof-state. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому устанавливается «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» установлено в текущем proof-state. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому устанавливается «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» установлено в текущем proof-state. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому устанавливается «Охранник начал проверку помещения».
+    step 4 [CAUSE / MP]: «Охранник начал проверку помещения» установлено в текущем proof-state. Каноническое правило «Охранник начал проверку помещения CAUSE Пожар подтверждён» разрешает modus ponens, поэтому устанавливается «Пожар подтверждён».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=16->21, path_cold=True, x_changed=True, tail_inactive=True, 39.74ms
+    goal: доказать установленность «Началась эвакуация» из явной посылки через CAUSE/MP
+    conclusion: Началась эвакуация
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» установлено в текущем proof-state. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому устанавливается «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» установлено в текущем proof-state. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому устанавливается «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» установлено в текущем proof-state. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому устанавливается «Охранник начал проверку помещения».
+    step 4 [CAUSE / MP]: «Охранник начал проверку помещения» установлено в текущем proof-state. Каноническое правило «Охранник начал проверку помещения CAUSE Пожар подтверждён» разрешает modus ponens, поэтому устанавливается «Пожар подтверждён».
+    step 5 [CAUSE / MP]: «Пожар подтверждён» установлено в текущем proof-state. Каноническое правило «Пожар подтверждён CAUSE Началась эвакуация» разрешает modus ponens, поэтому устанавливается «Началась эвакуация».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_alpha CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=21->28, path_cold=True, x_changed=True, tail_inactive=True, 46.52ms
+    goal: доказать установленность «Люди покинули опасную зону» из явной посылки через CAUSE/MP
+    conclusion: Люди покинули опасную зону
+    step 1 [CAUSE / MP]: «Датчик обнаружил дым» установлено в текущем proof-state. Каноническое правило «Датчик обнаружил дым CAUSE Система активировала тревогу» разрешает modus ponens, поэтому устанавливается «Система активировала тревогу».
+    step 2 [CAUSE / MP]: «Система активировала тревогу» установлено в текущем proof-state. Каноническое правило «Система активировала тревогу CAUSE Охрана получила сигнал» разрешает modus ponens, поэтому устанавливается «Охрана получила сигнал».
+    step 3 [CAUSE / MP]: «Охрана получила сигнал» установлено в текущем proof-state. Каноническое правило «Охрана получила сигнал CAUSE Охранник начал проверку помещения» разрешает modus ponens, поэтому устанавливается «Охранник начал проверку помещения».
+    step 4 [CAUSE / MP]: «Охранник начал проверку помещения» установлено в текущем proof-state. Каноническое правило «Охранник начал проверку помещения CAUSE Пожар подтверждён» разрешает modus ponens, поэтому устанавливается «Пожар подтверждён».
+    step 5 [CAUSE / MP]: «Пожар подтверждён» установлено в текущем proof-state. Каноническое правило «Пожар подтверждён CAUSE Началась эвакуация» разрешает modus ponens, поэтому устанавливается «Началась эвакуация».
+    step 6 [CAUSE / MP]: «Началась эвакуация» установлено в текущем proof-state. Каноническое правило «Началась эвакуация CAUSE Люди покинули опасную зону» разрешает modus ponens, поэтому устанавливается «Люди покинули опасную зону».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=28->31, path_cold=True, x_changed=True, tail_inactive=True, 14.43ms
+    goal: доказать установленность «Запрос прошёл валидацию» из явной посылки через CAUSE/MP
+    conclusion: Запрос прошёл валидацию
+    step 1 [CAUSE / MP]: «Сервис получил запрос» установлено в текущем proof-state. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому устанавливается «Запрос прошёл валидацию».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=31->34, path_cold=True, x_changed=True, tail_inactive=True, 22.05ms
+    goal: доказать установленность «Задача поставлена в очередь» из явной посылки через CAUSE/MP
+    conclusion: Задача поставлена в очередь
+    step 1 [CAUSE / MP]: «Сервис получил запрос» установлено в текущем proof-state. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому устанавливается «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» установлено в текущем proof-state. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому устанавливается «Задача поставлена в очередь».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=34->39, path_cold=True, x_changed=True, tail_inactive=True, 29.92ms
+    goal: доказать установленность «Воркер взял задачу» из явной посылки через CAUSE/MP
+    conclusion: Воркер взял задачу
+    step 1 [CAUSE / MP]: «Сервис получил запрос» установлено в текущем proof-state. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому устанавливается «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» установлено в текущем proof-state. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому устанавливается «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» установлено в текущем proof-state. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому устанавливается «Воркер взял задачу».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=39->43, path_cold=True, x_changed=True, tail_inactive=True, 37.60ms
+    goal: доказать установленность «Данные обработаны» из явной посылки через CAUSE/MP
+    conclusion: Данные обработаны
+    step 1 [CAUSE / MP]: «Сервис получил запрос» установлено в текущем proof-state. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому устанавливается «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» установлено в текущем proof-state. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому устанавливается «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» установлено в текущем proof-state. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому устанавливается «Воркер взял задачу».
+    step 4 [CAUSE / MP]: «Воркер взял задачу» установлено в текущем proof-state. Каноническое правило «Воркер взял задачу CAUSE Данные обработаны» разрешает modus ponens, поэтому устанавливается «Данные обработаны».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=43->48, path_cold=True, x_changed=True, tail_inactive=True, 40.10ms
+    goal: доказать установленность «Результат сохранён» из явной посылки через CAUSE/MP
+    conclusion: Результат сохранён
+    step 1 [CAUSE / MP]: «Сервис получил запрос» установлено в текущем proof-state. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому устанавливается «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» установлено в текущем proof-state. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому устанавливается «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» установлено в текущем proof-state. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому устанавливается «Воркер взял задачу».
+    step 4 [CAUSE / MP]: «Воркер взял задачу» установлено в текущем proof-state. Каноническое правило «Воркер взял задачу CAUSE Данные обработаны» разрешает modus ponens, поэтому устанавливается «Данные обработаны».
+    step 5 [CAUSE / MP]: «Данные обработаны» установлено в текущем proof-state. Каноническое правило «Данные обработаны CAUSE Результат сохранён» разрешает modus ponens, поэтому устанавливается «Результат сохранён».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cause_beta CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=48->55, path_cold=True, x_changed=True, tail_inactive=True, 59.06ms
+    goal: доказать установленность «Клиент получил уведомление» из явной посылки через CAUSE/MP
+    conclusion: Клиент получил уведомление
+    step 1 [CAUSE / MP]: «Сервис получил запрос» установлено в текущем proof-state. Каноническое правило «Сервис получил запрос CAUSE Запрос прошёл валидацию» разрешает modus ponens, поэтому устанавливается «Запрос прошёл валидацию».
+    step 2 [CAUSE / MP]: «Запрос прошёл валидацию» установлено в текущем proof-state. Каноническое правило «Запрос прошёл валидацию CAUSE Задача поставлена в очередь» разрешает modus ponens, поэтому устанавливается «Задача поставлена в очередь».
+    step 3 [CAUSE / MP]: «Задача поставлена в очередь» установлено в текущем proof-state. Каноническое правило «Задача поставлена в очередь CAUSE Воркер взял задачу» разрешает modus ponens, поэтому устанавливается «Воркер взял задачу».
+    step 4 [CAUSE / MP]: «Воркер взял задачу» установлено в текущем proof-state. Каноническое правило «Воркер взял задачу CAUSE Данные обработаны» разрешает modus ponens, поэтому устанавливается «Данные обработаны».
+    step 5 [CAUSE / MP]: «Данные обработаны» установлено в текущем proof-state. Каноническое правило «Данные обработаны CAUSE Результат сохранён» разрешает modus ponens, поэтому устанавливается «Результат сохранён».
+    step 6 [CAUSE / MP]: «Результат сохранён» установлено в текущем proof-state. Каноническое правило «Результат сохранён CAUSE Клиент получил уведомление» разрешает modus ponens, поэтому устанавливается «Клиент получил уведомление».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=55->58, path_cold=True, x_changed=True, tail_inactive=True, 15.12ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь включил свет»
+    conclusion: Пользователь вошёл в комнату() --FOLLOW--> Пользователь включил свет
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=58->61, path_cold=True, x_changed=True, tail_inactive=True, 24.54ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=61->66, path_cold=True, x_changed=True, tail_inactive=True, 30.58ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь взял документ»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь взял документ
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=66->70, path_cold=True, x_changed=True, tail_inactive=True, 36.22ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    step 4 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь взял документ». Вместе с «Пользователь взял документ FOLLOW Пользователь прочитал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=70->75, path_cold=True, x_changed=True, tail_inactive=True, 49.73ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    step 4 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь взял документ». Вместе с «Пользователь взял документ FOLLOW Пользователь прочитал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ».
+    step 5 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ». Вместе с «Пользователь прочитал документ FOLLOW Пользователь сделал заметку» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] follow_episode FOLLOW depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=75->82, path_cold=True, x_changed=True, tail_inactive=True, 55.19ms
+    goal: доказать «Пользователь вошёл в комнату FOLLOW Пользователь убрал документ»
+    conclusion: Пользователь вошёл в комнату FOLLOW Пользователь убрал документ
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Пользователь вошёл в комнату FOLLOW Пользователь включил свет».
+    step 2 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь включил свет». Вместе с «Пользователь включил свет FOLLOW Пользователь открыл шкаф» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф».
+    step 3 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь открыл шкаф». Вместе с «Пользователь открыл шкаф FOLLOW Пользователь взял документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь взял документ».
+    step 4 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь взял документ». Вместе с «Пользователь взял документ FOLLOW Пользователь прочитал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ».
+    step 5 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь прочитал документ». Вместе с «Пользователь прочитал документ FOLLOW Пользователь сделал заметку» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку».
+    step 6 [FOLLOW / TRANSITIVITY]: Уже доказано «Пользователь вошёл в комнату FOLLOW Пользователь сделал заметку». Вместе с «Пользователь сделал заметку FOLLOW Пользователь убрал документ» по транзитивности получаем «Пользователь вошёл в комнату FOLLOW Пользователь убрал документ».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=1 => PROVED/GOAL_SATISFIED, logical_depth=1, workspace=82->85, path_cold=True, x_changed=True, tail_inactive=True, 21.65ms
+    goal: доказать «овчарка IS-A собака»
+    conclusion: овчарка --IS-A--> собака
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «овчарка IS-A собака».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=1; actual=1
+      [PASS] exact UID trace — expected 3 UIDs; actual 3
+      [PASS] attention follows proof — expected 2 focuses; actual 2
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=2
+      [PASS] tail after Goal stayed inactive — tail nodes=7
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=85->88, path_cold=True, x_changed=True, tail_inactive=True, 30.48ms
+    goal: доказать «овчарка IS-A псовое»
+    conclusion: овчарка IS-A псовое
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=88->93, path_cold=True, x_changed=True, tail_inactive=True, 48.28ms
+    goal: доказать «овчарка IS-A хищное млекопитающее»
+    conclusion: овчарка IS-A хищное млекопитающее
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=93->97, path_cold=True, x_changed=True, tail_inactive=True, 59.13ms
+    goal: доказать «овчарка IS-A млекопитающее»
+    conclusion: овчарка IS-A млекопитающее
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    step 4 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A хищное млекопитающее». Вместе с «хищное млекопитающее IS-A млекопитающее» по транзитивности получаем «овчарка IS-A млекопитающее».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=4; actual=4
+      [PASS] exact UID trace — expected 9 UIDs; actual 9
+      [PASS] attention follows proof — expected 5 focuses; actual 5
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] tail after Goal stayed inactive — tail nodes=4
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=97->102, path_cold=True, x_changed=True, tail_inactive=True, 58.71ms
+    goal: доказать «овчарка IS-A позвоночное»
+    conclusion: овчарка IS-A позвоночное
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    step 4 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A хищное млекопитающее». Вместе с «хищное млекопитающее IS-A млекопитающее» по транзитивности получаем «овчарка IS-A млекопитающее».
+    step 5 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A млекопитающее». Вместе с «млекопитающее IS-A позвоночное» по транзитивности получаем «овчарка IS-A позвоночное».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] isa_concepts IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=102->109, path_cold=True, x_changed=True, tail_inactive=True, 66.18ms
+    goal: доказать «овчарка IS-A животное»
+    conclusion: овчарка IS-A животное
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «овчарка IS-A собака».
+    step 2 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A собака». Вместе с «собака IS-A псовое» по транзитивности получаем «овчарка IS-A псовое».
+    step 3 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A псовое». Вместе с «псовое IS-A хищное млекопитающее» по транзитивности получаем «овчарка IS-A хищное млекопитающее».
+    step 4 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A хищное млекопитающее». Вместе с «хищное млекопитающее IS-A млекопитающее» по транзитивности получаем «овчарка IS-A млекопитающее».
+    step 5 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A млекопитающее». Вместе с «млекопитающее IS-A позвоночное» по транзитивности получаем «овчарка IS-A позвоночное».
+    step 6 [IS-A / TRANSITIVITY]: Уже доказано «овчарка IS-A позвоночное». Вместе с «позвоночное IS-A животное» по транзитивности получаем «овчарка IS-A животное».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] cross_left CAUSE depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=109->113, path_cold=True, x_changed=True, tail_inactive=True, 30.72ms
+    goal: доказать установленность «Левая цепь: событие 3» из явной посылки через CAUSE/MP
+    conclusion: Левая цепь: событие 3
+    step 1 [CAUSE / MP]: «Левая цепь: событие 1» установлено в текущем proof-state. Каноническое правило «Левая цепь: событие 1 CAUSE Левая цепь: событие 2» разрешает modus ponens, поэтому устанавливается «Левая цепь: событие 2».
+    step 2 [CAUSE / MP]: «Левая цепь: событие 2» установлено в текущем proof-state. Каноническое правило «Левая цепь: событие 2 CAUSE Левая цепь: событие 3» разрешает modus ponens, поэтому устанавливается «Левая цепь: событие 3».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=2; actual=2
+      [PASS] exact UID trace — expected 5 UIDs; actual 5
+      [PASS] attention follows proof — expected 3 focuses; actual 3
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] tail after Goal stayed inactive — tail nodes=6
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] cross_left CAUSE depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=113->119, path_cold=True, x_changed=True, tail_inactive=True, 62.78ms
+    goal: доказать установленность «Левая цепь B: событие 6» из явной посылки через CAUSE/MP
+    conclusion: Левая цепь B: событие 6
+    step 1 [CAUSE / MP]: «Левая цепь B: событие 1» установлено в текущем proof-state. Каноническое правило «Левая цепь B: событие 1 CAUSE Левая цепь B: событие 2» разрешает modus ponens, поэтому устанавливается «Левая цепь B: событие 2».
+    step 2 [CAUSE / MP]: «Левая цепь B: событие 2» установлено в текущем proof-state. Каноническое правило «Левая цепь B: событие 2 CAUSE Левая цепь B: событие 3» разрешает modus ponens, поэтому устанавливается «Левая цепь B: событие 3».
+    step 3 [CAUSE / MP]: «Левая цепь B: событие 3» установлено в текущем proof-state. Каноническое правило «Левая цепь B: событие 3 CAUSE Левая цепь B: событие 4» разрешает modus ponens, поэтому устанавливается «Левая цепь B: событие 4».
+    step 4 [CAUSE / MP]: «Левая цепь B: событие 4» установлено в текущем proof-state. Каноническое правило «Левая цепь B: событие 4 CAUSE Левая цепь B: событие 5» разрешает modus ponens, поэтому устанавливается «Левая цепь B: событие 5».
+    step 5 [CAUSE / MP]: «Левая цепь B: событие 5» установлено в текущем proof-state. Каноническое правило «Левая цепь B: событие 5 CAUSE Левая цепь B: событие 6» разрешает modus ponens, поэтому устанавливается «Левая цепь B: событие 6».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] cross_right CAUSE depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=119->123, path_cold=True, x_changed=True, tail_inactive=True, 40.29ms
+    goal: доказать установленность «Правая цепь: событие 4» из явной посылки через CAUSE/MP
+    conclusion: Правая цепь: событие 4
+    step 1 [CAUSE / MP]: «Правая цепь: событие 1» установлено в текущем proof-state. Каноническое правило «Правая цепь: событие 1 CAUSE Правая цепь: событие 2» разрешает modus ponens, поэтому устанавливается «Правая цепь: событие 2».
+    step 2 [CAUSE / MP]: «Правая цепь: событие 2» установлено в текущем proof-state. Каноническое правило «Правая цепь: событие 2 CAUSE Правая цепь: событие 3» разрешает modus ponens, поэтому устанавливается «Правая цепь: событие 3».
+    step 3 [CAUSE / MP]: «Правая цепь: событие 3» установлено в текущем proof-state. Каноническое правило «Правая цепь: событие 3 CAUSE Правая цепь: событие 4» разрешает modus ponens, поэтому устанавливается «Правая цепь: событие 4».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=3; actual=3
+      [PASS] exact UID trace — expected 7 UIDs; actual 7
+      [PASS] attention follows proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] tail after Goal stayed inactive — tail nodes=5
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] cross_right CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=123->129, path_cold=True, x_changed=True, tail_inactive=True, 75.13ms
+    goal: доказать установленность «Правая цепь B: событие 7» из явной посылки через CAUSE/MP
+    conclusion: Правая цепь B: событие 7
+    step 1 [CAUSE / MP]: «Правая цепь B: событие 1» установлено в текущем proof-state. Каноническое правило «Правая цепь B: событие 1 CAUSE Правая цепь B: событие 2» разрешает modus ponens, поэтому устанавливается «Правая цепь B: событие 2».
+    step 2 [CAUSE / MP]: «Правая цепь B: событие 2» установлено в текущем proof-state. Каноническое правило «Правая цепь B: событие 2 CAUSE Правая цепь B: событие 3» разрешает modus ponens, поэтому устанавливается «Правая цепь B: событие 3».
+    step 3 [CAUSE / MP]: «Правая цепь B: событие 3» установлено в текущем proof-state. Каноническое правило «Правая цепь B: событие 3 CAUSE Правая цепь B: событие 4» разрешает modus ponens, поэтому устанавливается «Правая цепь B: событие 4».
+    step 4 [CAUSE / MP]: «Правая цепь B: событие 4» установлено в текущем proof-state. Каноническое правило «Правая цепь B: событие 4 CAUSE Правая цепь B: событие 5» разрешает modus ponens, поэтому устанавливается «Правая цепь B: событие 5».
+    step 5 [CAUSE / MP]: «Правая цепь B: событие 5» установлено в текущем proof-state. Каноническое правило «Правая цепь B: событие 5 CAUSE Правая цепь B: событие 6» разрешает modus ponens, поэтому устанавливается «Правая цепь B: событие 6».
+    step 6 [CAUSE / MP]: «Правая цепь B: событие 6» установлено в текущем proof-state. Каноническое правило «Правая цепь B: событие 6 CAUSE Правая цепь B: событие 7» разрешает modus ponens, поэтому устанавливается «Правая цепь B: событие 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=17
+      [PASS] foreign branch absent from attention — foreign refs=17
+[PASS] branch_cause_cold CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=129->256, path_cold=True, x_changed=True, tail_inactive=True, 99.30ms
+    goal: доказать установленность «Холодная CAUSE-магистраль: состояние 7» из явной посылки через CAUSE/MP
+    conclusion: Холодная CAUSE-магистраль: состояние 7
+    step 1 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 1» установлено в текущем proof-state. Каноническое правило «Холодная CAUSE-магистраль: состояние 1 CAUSE Холодная CAUSE-магистраль: состояние 2» разрешает modus ponens, поэтому устанавливается «Холодная CAUSE-магистраль: состояние 2».
+    step 2 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 2» установлено в текущем proof-state. Каноническое правило «Холодная CAUSE-магистраль: состояние 2 CAUSE Холодная CAUSE-магистраль: состояние 3» разрешает modus ponens, поэтому устанавливается «Холодная CAUSE-магистраль: состояние 3».
+    step 3 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 3» установлено в текущем proof-state. Каноническое правило «Холодная CAUSE-магистраль: состояние 3 CAUSE Холодная CAUSE-магистраль: состояние 4» разрешает modus ponens, поэтому устанавливается «Холодная CAUSE-магистраль: состояние 4».
+    step 4 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 4» установлено в текущем proof-state. Каноническое правило «Холодная CAUSE-магистраль: состояние 4 CAUSE Холодная CAUSE-магистраль: состояние 5» разрешает modus ponens, поэтому устанавливается «Холодная CAUSE-магистраль: состояние 5».
+    step 5 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 5» установлено в текущем proof-state. Каноническое правило «Холодная CAUSE-магистраль: состояние 5 CAUSE Холодная CAUSE-магистраль: состояние 6» разрешает modus ponens, поэтому устанавливается «Холодная CAUSE-магистраль: состояние 6».
+    step 6 [CAUSE / MP]: «Холодная CAUSE-магистраль: состояние 6» установлено в текущем proof-state. Каноническое правило «Холодная CAUSE-магистраль: состояние 6 CAUSE Холодная CAUSE-магистраль: состояние 7» разрешает modus ponens, поэтому устанавливается «Холодная CAUSE-магистраль: состояние 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] branch_cause_warm CAUSE depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=262->268, path_cold=True, x_changed=True, tail_inactive=True, 115.62ms
+    goal: доказать установленность «Тёплая CAUSE-магистраль: состояние 7» из явной посылки через CAUSE/MP
+    conclusion: Тёплая CAUSE-магистраль: состояние 7
+    step 1 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 1» установлено в текущем proof-state. Каноническое правило «Тёплая CAUSE-магистраль: состояние 1 CAUSE Тёплая CAUSE-магистраль: состояние 2» разрешает modus ponens, поэтому устанавливается «Тёплая CAUSE-магистраль: состояние 2».
+    step 2 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 2» установлено в текущем proof-state. Каноническое правило «Тёплая CAUSE-магистраль: состояние 2 CAUSE Тёплая CAUSE-магистраль: состояние 3» разрешает modus ponens, поэтому устанавливается «Тёплая CAUSE-магистраль: состояние 3».
+    step 3 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 3» установлено в текущем proof-state. Каноническое правило «Тёплая CAUSE-магистраль: состояние 3 CAUSE Тёплая CAUSE-магистраль: состояние 4» разрешает modus ponens, поэтому устанавливается «Тёплая CAUSE-магистраль: состояние 4».
+    step 4 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 4» установлено в текущем proof-state. Каноническое правило «Тёплая CAUSE-магистраль: состояние 4 CAUSE Тёплая CAUSE-магистраль: состояние 5» разрешает modus ponens, поэтому устанавливается «Тёплая CAUSE-магистраль: состояние 5».
+    step 5 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 5» установлено в текущем proof-state. Каноническое правило «Тёплая CAUSE-магистраль: состояние 5 CAUSE Тёплая CAUSE-магистраль: состояние 6» разрешает modus ponens, поэтому устанавливается «Тёплая CAUSE-магистраль: состояние 6».
+    step 6 [CAUSE / MP]: «Тёплая CAUSE-магистраль: состояние 6» установлено в текущем proof-state. Каноническое правило «Тёплая CAUSE-магистраль: состояние 6 CAUSE Тёплая CAUSE-магистраль: состояние 7» разрешает modus ponens, поэтому устанавливается «Тёплая CAUSE-магистраль: состояние 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] branch_follow_warm FOLLOW depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=275->256, path_cold=True, x_changed=True, tail_inactive=True, 127.54ms
+    goal: доказать «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 6»
+    conclusion: Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 6
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 2».
+    step 2 [FOLLOW / TRANSITIVITY]: Уже доказано «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 2». Вместе с «Тёплый FOLLOW-эпизод: событие 2 FOLLOW Тёплый FOLLOW-эпизод: событие 3» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 3».
+    step 3 [FOLLOW / TRANSITIVITY]: Уже доказано «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 3». Вместе с «Тёплый FOLLOW-эпизод: событие 3 FOLLOW Тёплый FOLLOW-эпизод: событие 4» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 4».
+    step 4 [FOLLOW / TRANSITIVITY]: Уже доказано «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 4». Вместе с «Тёплый FOLLOW-эпизод: событие 4 FOLLOW Тёплый FOLLOW-эпизод: событие 5» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 5».
+    step 5 [FOLLOW / TRANSITIVITY]: Уже доказано «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 5». Вместе с «Тёплый FOLLOW-эпизод: событие 5 FOLLOW Тёплый FOLLOW-эпизод: событие 6» по транзитивности получаем «Тёплый FOLLOW-эпизод: событие 1 FOLLOW Тёплый FOLLOW-эпизод: событие 6».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=5; actual=5
+      [PASS] exact UID trace — expected 11 UIDs; actual 11
+      [PASS] attention follows proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] tail after Goal stayed inactive — tail nodes=3
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] branch_isa_cold IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=256->384, path_cold=True, x_changed=True, tail_inactive=True, 174.33ms
+    goal: доказать «локальный тип A IS-A тип G»
+    conclusion: локальный тип A IS-A тип G
+    step 1 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «локальный тип A IS-A тип B».
+    step 2 [IS-A / TRANSITIVITY]: Уже доказано «локальный тип A IS-A тип B». Вместе с «тип B IS-A тип C» по транзитивности получаем «локальный тип A IS-A тип C».
+    step 3 [IS-A / TRANSITIVITY]: Уже доказано «локальный тип A IS-A тип C». Вместе с «тип C IS-A тип D» по транзитивности получаем «локальный тип A IS-A тип D».
+    step 4 [IS-A / TRANSITIVITY]: Уже доказано «локальный тип A IS-A тип D». Вместе с «тип D IS-A тип E» по транзитивности получаем «локальный тип A IS-A тип E».
+    step 5 [IS-A / TRANSITIVITY]: Уже доказано «локальный тип A IS-A тип E». Вместе с «тип E IS-A тип F» по транзитивности получаем «локальный тип A IS-A тип F».
+    step 6 [IS-A / TRANSITIVITY]: Уже доказано «локальный тип A IS-A тип F». Вместе с «тип F IS-A тип G» по транзитивности получаем «локальный тип A IS-A тип G».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] logical depth — expected=6; actual=6
+      [PASS] exact UID trace — expected 13 UIDs; actual 13
+      [PASS] attention follows proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on proof path — QUERY_RECALL must execute real Ignition attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] tail after Goal stayed inactive — tail nodes=2
+      [PASS] trace stops at Goal — no canonical UID beyond Goal in proof trace
+      [PASS] foreign branch absent from trace — foreign refs=192
+      [PASS] foreign branch absent from attention — foreign refs=192
+[PASS] mixed_cf_d2 CAUSE→FOLLOW depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=384->315, path_cold=True, x_changed=True, tail_inactive=False, 113.99ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод CAUSE → FOLLOW: состояние 2» из явной посылки через CAUSE/MP; доказать «Смешанный вывод CAUSE → FOLLOW: состояние 2 FOLLOW Смешанный вывод CAUSE → FOLLOW: состояние 3» }
+    conclusion: ALL-OF: Смешанный вывод CAUSE → FOLLOW: состояние 2 AND Смешанный вывод CAUSE → FOLLOW: состояние 2 --FOLLOW--> Смешанный вывод CAUSE → FOLLOW: состояние 3
+    step 1 [CAUSE / MP]: «Смешанный вывод CAUSE → FOLLOW: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод CAUSE → FOLLOW: состояние 1 CAUSE Смешанный вывод CAUSE → FOLLOW: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод CAUSE → FOLLOW: состояние 2».
+    step 2 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод CAUSE → FOLLOW: состояние 2 FOLLOW Смешанный вывод CAUSE → FOLLOW: состояние 3».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→FOLLOW
+      [PASS] global logical depth — expected=2; actual=2
+      [PASS] exact UID trace — connected mixed path; expected 5 UIDs; actual 5
+      [PASS] attention follows mixed proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_ci_d2 CAUSE→IS-A depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=315->247, path_cold=True, x_changed=True, tail_inactive=False, 111.75ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод CAUSE → IS-A: состояние 2» из явной посылки через CAUSE/MP; доказать «Смешанный вывод CAUSE → IS-A: состояние 2 IS-A Смешанный вывод CAUSE → IS-A: состояние 3» }
+    conclusion: ALL-OF: Смешанный вывод CAUSE → IS-A: состояние 2 AND Смешанный вывод CAUSE → IS-A: состояние 2 --IS-A--> Смешанный вывод CAUSE → IS-A: состояние 3
+    step 1 [CAUSE / MP]: «Смешанный вывод CAUSE → IS-A: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод CAUSE → IS-A: состояние 1 CAUSE Смешанный вывод CAUSE → IS-A: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод CAUSE → IS-A: состояние 2».
+    step 2 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод CAUSE → IS-A: состояние 2 IS-A Смешанный вывод CAUSE → IS-A: состояние 3».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→IS-A
+      [PASS] global logical depth — expected=2; actual=2
+      [PASS] exact UID trace — connected mixed path; expected 5 UIDs; actual 5
+      [PASS] attention follows mixed proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_fi_d2 FOLLOW→IS-A depth=2 => PROVED/GOAL_SATISFIED, logical_depth=2, workspace=247->178, path_cold=True, x_changed=True, tail_inactive=False, 112.65ms
+    goal: ALL-OF { доказать «Смешанный вывод FOLLOW → IS-A: состояние 1 FOLLOW Смешанный вывод FOLLOW → IS-A: состояние 2»; доказать «Смешанный вывод FOLLOW → IS-A: состояние 2 IS-A Смешанный вывод FOLLOW → IS-A: состояние 3» }
+    conclusion: ALL-OF: Смешанный вывод FOLLOW → IS-A: состояние 1 --FOLLOW--> Смешанный вывод FOLLOW → IS-A: состояние 2 AND Смешанный вывод FOLLOW → IS-A: состояние 2 --IS-A--> Смешанный вывод FOLLOW → IS-A: состояние 3
+    step 1 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод FOLLOW → IS-A: состояние 1 FOLLOW Смешанный вывод FOLLOW → IS-A: состояние 2».
+    step 2 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод FOLLOW → IS-A: состояние 2 IS-A Смешанный вывод FOLLOW → IS-A: состояние 3».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — FOLLOW→IS-A
+      [PASS] global logical depth — expected=2; actual=2
+      [PASS] exact UID trace — connected mixed path; expected 5 UIDs; actual 5
+      [PASS] attention follows mixed proof — expected 4 focuses; actual 4
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=3
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_cfi_d3 CAUSE→FOLLOW→IS-A depth=3 => PROVED/GOAL_SATISFIED, logical_depth=3, workspace=178->183, path_cold=True, x_changed=True, tail_inactive=False, 171.97ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2» из явной посылки через CAUSE/MP; доказать «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2 FOLLOW Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 3»; доказать «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 3 IS-A Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 4» }
+    conclusion: ALL-OF: Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2 AND Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2 --FOLLOW--> Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 3 AND Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 3 --IS-A--> Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 4
+    step 1 [CAUSE / MP]: «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 1 CAUSE Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2».
+    step 2 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 2 FOLLOW Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 3».
+    step 3 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 3 IS-A Смешанный вывод CAUSE → FOLLOW → IS-A: состояние 4».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→FOLLOW→IS-A
+      [PASS] global logical depth — expected=3; actual=3
+      [PASS] exact UID trace — connected mixed path; expected 7 UIDs; actual 7
+      [PASS] attention follows mixed proof — expected 6 focuses; actual 6
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=4
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_cfi_d4 CAUSE→FOLLOW→IS-A depth=4 => PROVED/GOAL_SATISFIED, logical_depth=4, workspace=183->188, path_cold=True, x_changed=True, tail_inactive=False, 190.62ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод C/F/IS-A depth 4: состояние 2» из явной посылки через CAUSE/MP; доказать «Смешанный вывод C/F/IS-A depth 4: состояние 2 FOLLOW Смешанный вывод C/F/IS-A depth 4: состояние 3»; доказать «Смешанный вывод C/F/IS-A depth 4: состояние 3 IS-A Смешанный вывод C/F/IS-A depth 4: состояние 5» }
+    conclusion: ALL-OF: Смешанный вывод C/F/IS-A depth 4: состояние 2 AND Смешанный вывод C/F/IS-A depth 4: состояние 2 --FOLLOW--> Смешанный вывод C/F/IS-A depth 4: состояние 3 AND Смешанный вывод C/F/IS-A depth 4: состояние 3 IS-A Смешанный вывод C/F/IS-A depth 4: состояние 5
+    step 1 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 4: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 4: состояние 1 CAUSE Смешанный вывод C/F/IS-A depth 4: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 4: состояние 2».
+    step 2 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 4: состояние 2 FOLLOW Смешанный вывод C/F/IS-A depth 4: состояние 3».
+    step 3 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 4: состояние 3 IS-A Смешанный вывод C/F/IS-A depth 4: состояние 4».
+    step 4 [IS-A / TRANSITIVITY]: Уже доказано «Смешанный вывод C/F/IS-A depth 4: состояние 3 IS-A Смешанный вывод C/F/IS-A depth 4: состояние 4». Вместе с «Смешанный вывод C/F/IS-A depth 4: состояние 4 IS-A Смешанный вывод C/F/IS-A depth 4: состояние 5» по транзитивности получаем «Смешанный вывод C/F/IS-A depth 4: состояние 3 IS-A Смешанный вывод C/F/IS-A depth 4: состояние 5».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→FOLLOW→IS-A
+      [PASS] global logical depth — expected=4; actual=4
+      [PASS] exact UID trace — connected mixed path; expected 9 UIDs; actual 9
+      [PASS] attention follows mixed proof — expected 7 focuses; actual 7
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=5
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_cfi_d5 CAUSE→FOLLOW→IS-A depth=5 => PROVED/GOAL_SATISFIED, logical_depth=5, workspace=188->193, path_cold=True, x_changed=True, tail_inactive=False, 219.85ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод C/F/IS-A depth 5: состояние 3» из явной посылки через CAUSE/MP; доказать «Смешанный вывод C/F/IS-A depth 5: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 5: состояние 4»; доказать «Смешанный вывод C/F/IS-A depth 5: состояние 4 IS-A Смешанный вывод C/F/IS-A depth 5: состояние 6» }
+    conclusion: ALL-OF: Смешанный вывод C/F/IS-A depth 5: состояние 3 AND Смешанный вывод C/F/IS-A depth 5: состояние 3 --FOLLOW--> Смешанный вывод C/F/IS-A depth 5: состояние 4 AND Смешанный вывод C/F/IS-A depth 5: состояние 4 IS-A Смешанный вывод C/F/IS-A depth 5: состояние 6
+    step 1 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 5: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 5: состояние 1 CAUSE Смешанный вывод C/F/IS-A depth 5: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 5: состояние 2».
+    step 2 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 5: состояние 2» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 5: состояние 2 CAUSE Смешанный вывод C/F/IS-A depth 5: состояние 3» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 5: состояние 3».
+    step 3 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 5: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 5: состояние 4».
+    step 4 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 5: состояние 4 IS-A Смешанный вывод C/F/IS-A depth 5: состояние 5».
+    step 5 [IS-A / TRANSITIVITY]: Уже доказано «Смешанный вывод C/F/IS-A depth 5: состояние 4 IS-A Смешанный вывод C/F/IS-A depth 5: состояние 5». Вместе с «Смешанный вывод C/F/IS-A depth 5: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 5: состояние 6» по транзитивности получаем «Смешанный вывод C/F/IS-A depth 5: состояние 4 IS-A Смешанный вывод C/F/IS-A depth 5: состояние 6».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→FOLLOW→IS-A
+      [PASS] global logical depth — expected=5; actual=5
+      [PASS] exact UID trace — connected mixed path; expected 11 UIDs; actual 11
+      [PASS] attention follows mixed proof — expected 8 focuses; actual 8
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=6
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_cfi_d6_cold CAUSE→FOLLOW→IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=193->191, path_cold=True, x_changed=True, tail_inactive=False, 2312.35ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод C/F/IS-A depth 6 cold: состояние 3» из явной посылки через CAUSE/MP; доказать «Смешанный вывод C/F/IS-A depth 6 cold: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 cold: состояние 5»; доказать «Смешанный вывод C/F/IS-A depth 6 cold: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 cold: состояние 7» }
+    conclusion: ALL-OF: Смешанный вывод C/F/IS-A depth 6 cold: состояние 3 AND Смешанный вывод C/F/IS-A depth 6 cold: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 cold: состояние 5 AND Смешанный вывод C/F/IS-A depth 6 cold: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 cold: состояние 7
+    step 1 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 6 cold: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 6 cold: состояние 1 CAUSE Смешанный вывод C/F/IS-A depth 6 cold: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 6 cold: состояние 2».
+    step 2 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 6 cold: состояние 2» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 6 cold: состояние 2 CAUSE Смешанный вывод C/F/IS-A depth 6 cold: состояние 3» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 6 cold: состояние 3».
+    step 3 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 6 cold: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 cold: состояние 4».
+    step 4 [FOLLOW / TRANSITIVITY]: Уже доказано «Смешанный вывод C/F/IS-A depth 6 cold: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 cold: состояние 4». Вместе с «Смешанный вывод C/F/IS-A depth 6 cold: состояние 4 FOLLOW Смешанный вывод C/F/IS-A depth 6 cold: состояние 5» по транзитивности получаем «Смешанный вывод C/F/IS-A depth 6 cold: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 cold: состояние 5».
+    step 5 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 6 cold: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 cold: состояние 6».
+    step 6 [IS-A / TRANSITIVITY]: Уже доказано «Смешанный вывод C/F/IS-A depth 6 cold: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 cold: состояние 6». Вместе с «Смешанный вывод C/F/IS-A depth 6 cold: состояние 6 IS-A Смешанный вывод C/F/IS-A depth 6 cold: состояние 7» по транзитивности получаем «Смешанный вывод C/F/IS-A depth 6 cold: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 cold: состояние 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→FOLLOW→IS-A
+      [PASS] global logical depth — expected=6; actual=6
+      [PASS] exact UID trace — connected mixed path; expected 13 UIDs; actual 13
+      [PASS] attention follows mixed proof — expected 9 focuses; actual 9
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=0
+      [PASS] foreign branch absent from attention — foreign refs=0
+[PASS] mixed_cfi_d6_warm CAUSE→FOLLOW→IS-A depth=6 => PROVED/GOAL_SATISFIED, logical_depth=6, workspace=191->248, path_cold=True, x_changed=True, tail_inactive=False, 2592.82ms
+    goal: ALL-OF { доказать установленность «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3» из явной посылки через CAUSE/MP; доказать «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5»; доказать «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 7» }
+    conclusion: ALL-OF: Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3 AND Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5 AND Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 7
+    step 1 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 1» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 1 CAUSE Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 2» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 2».
+    step 2 [CAUSE / MP]: «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 2» установлено в текущем proof-state. Каноническое правило «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 2 CAUSE Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3» разрешает modus ponens, поэтому устанавливается «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3».
+    step 3 [FOLLOW / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 4».
+    step 4 [FOLLOW / TRANSITIVITY]: Уже доказано «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 4». Вместе с «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 4 FOLLOW Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5» по транзитивности получаем «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 3 FOLLOW Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5».
+    step 5 [IS-A / DIRECT]: Для текущего подцеля использовано прямое отношение «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 6».
+    step 6 [IS-A / TRANSITIVITY]: Уже доказано «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 6». Вместе с «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 6 IS-A Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 7» по транзитивности получаем «Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 5 IS-A Смешанный вывод C/F/IS-A depth 6 warm branches: состояние 7».
+    checks:
+      [PASS] status = PROVED — PROVED
+      [PASS] stop = GOAL_SATISFIED — GOAL_SATISFIED
+      [PASS] mixed rule families — CAUSE→FOLLOW→IS-A
+      [PASS] global logical depth — expected=6; actual=6
+      [PASS] exact UID trace — connected mixed path; expected 13 UIDs; actual 13
+      [PASS] attention follows mixed proof — expected 9 focuses; actual 9
+      [PASS] proof path cold before query — purity_control=False
+      [PASS] Ignition changed x on mixed path — all rule families use normal QUERY_RECALL attention
+      [PASS] used propositions excited — used nodes=7
+      [PASS] activation beyond Goal is not proof — tail_inactive=False; ordinary Ignition spreading may continue, but proof/attention must stop
+      [PASS] trace stops at Goal — no canonical UID beyond composite Goal
+      [PASS] foreign branch absent from trace — foreign refs=72
+      [PASS] foreign branch absent from attention — foreign refs=72

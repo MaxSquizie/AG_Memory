@@ -18,7 +18,7 @@ from ah.inference import (
 )
 from ah.inference.contracts import InferenceOutcome
 from ah.inference.materialization import MaterializationResult
-from ah.integration import IntegrationError, IntegrationService
+from ah.integration import IntegrationError, IntegrationService, TemplateCompletionService
 from ah.integration.contracts import (
     ActivationSeedRequest, ClarificationRequest, ClarificationResolutionCommit,
     IntegrationCommit, SeedReason,
@@ -160,140 +160,14 @@ class AgentOrchestrator:
             return failed_turn
 
     @staticmethod
-    def _apply_template_resolutions(
-        result: PerceptionResult,
-        candidates: dict[PredicateCandidate, TemplateCandidate],
-        selections: dict[PredicateCandidate, TemplateSelection],
-    ) -> PerceptionResult:
-        """Attach occurrence-local schema/sense decisions.
-
-        Keys are full frozen ``PredicateCandidate`` values, including evidence
-        spans. Two uses of the same surface predicate in one turn can therefore
-        select different lexical senses without a lookup-form-wide overwrite.
-        """
-
-        def resolve_predicate(predicate: PredicateCandidate) -> PredicateCandidate:
-            candidate = candidates.get(predicate, predicate.template_candidate)
-            selection = selections.get(predicate, predicate.template_selection)
-            if candidate is predicate.template_candidate and selection is predicate.template_selection:
-                return predicate
-            return replace(
-                predicate,
-                template_candidate=candidate,
-                template_selection=selection,
-            )
-
-        def resolve_assertion(assertion):
-            alternatives = tuple(resolve_assertion(item) for item in assertion.alternatives)
-            return replace(
-                assertion,
-                predicate=resolve_predicate(assertion.predicate),
-                alternatives=alternatives,
-            )
-
-        return replace(
-            result,
-            assertions=tuple(resolve_assertion(item) for item in result.assertions),
-            queries=tuple(
-                replace(item, predicate=resolve_predicate(item.predicate))
-                for item in result.queries
-            ),
-            commands=tuple(
-                replace(item, predicate=resolve_predicate(item.predicate))
-                for item in result.commands
-            ),
-        )
+    def _apply_template_resolutions(result, candidates, selections):
+        return TemplateCompletionService.apply_resolutions(result, candidates, selections)
 
     def _complete_dynamic_templates(self, result: PerceptionResult, lock) -> PerceptionResult:
-        """Complete explicit T schemas and lexical-sense choices before writes.
-
-        Unknown predicates need only the explicit roles already present in the
-        semantic act. Known lexical predicates are compared against UID-free
-        observed-use profiles. Perception returns a local label (Cn / NEW /
-        UNCLEAR); deterministic orchestration maps Cn to a canonical T and never
-        exposes that UID to the model.
-        """
+        # Public reusable implementation; lock protects the canonical T snapshot.
         with lock:
-            requests = self.integration.template_requests(result)
-        if not requests:
-            return result
-
-        proposer = getattr(self.perception, "propose_template_candidate", None)
-        sense_resolver = getattr(self.perception, "resolve_template_sense", None)
-        candidate_mapping: dict[PredicateCandidate, TemplateCandidate] = {}
-        selection_mapping: dict[PredicateCandidate, TemplateSelection] = {}
-
-        for request in requests:
-            predicate = request.predicate
-            if request.sense_options:
-                if sense_resolver is None:
-                    raise PerceptionParseError(
-                        f"Predicate {predicate.lookup_form!r} requires lexical-sense resolution"
-                    )
-                decision = sense_resolver(
-                    request.source_context,
-                    predicate,
-                    request.filled_roles,
-                    request.role_bindings,
-                    tuple((option.label, option.description) for option in request.sense_options),
-                )
-                if decision is None:
-                    raise PerceptionParseError(
-                        f"Lexical sense is explicitly ambiguous for predicate {predicate.lookup_form!r}"
-                    )
-                if decision == "NEW":
-                    candidate = predicate.template_candidate
-                    if candidate is None:
-                        if proposer is None:
-                            raise PerceptionParseError(
-                                f"New lexical sense for {predicate.lookup_form!r} requires TemplateCandidate proposal"
-                            )
-                        candidate = proposer(
-                            request.source_context, predicate,
-                            request.filled_roles, request.role_bindings,
-                        )
-                    if not isinstance(candidate, TemplateCandidate):
-                        raise PerceptionParseError(
-                            "Perception template proposer returned an invalid result"
-                        )
-                    candidate_mapping[predicate] = candidate
-                    selection_mapping[predicate] = TemplateSelection(create_new=True)
-                    continue
-
-                option = next(
-                    (item for item in request.sense_options if item.label == decision),
-                    None,
-                )
-                if option is None:
-                    raise PerceptionParseError(
-                        f"Template sense resolver returned invalid local label {decision!r}"
-                    )
-                selection_mapping[predicate] = TemplateSelection(
-                    existing_template_uid=option.template_uid
-                )
-                continue
-
-            if predicate.template_candidate is not None:
-                continue
-            if proposer is None:
-                raise PerceptionParseError(
-                    f"Unknown predicate {predicate.lookup_form!r} requires TemplateCandidate proposal"
-                )
-            candidate = proposer(
-                request.source_context,
-                predicate,
-                request.filled_roles,
-                request.role_bindings,
-            )
-            if not isinstance(candidate, TemplateCandidate):
-                raise PerceptionParseError(
-                    "Perception template proposer returned an invalid result"
-                )
-            candidate_mapping[predicate] = candidate
-
-        return self._apply_template_resolutions(
-            result, candidate_mapping, selection_mapping
-        )
+            service = TemplateCompletionService(self.integration, self.perception)
+            return service.complete(result)
 
     @staticmethod
     def _normalize_clarification_text(text: str) -> str:

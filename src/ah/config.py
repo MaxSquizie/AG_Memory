@@ -70,6 +70,8 @@ class LLMRoleSettings:
 class LLMConfig:
     enabled: bool = True
     backend: str = "builtin_process"
+    ollama_base_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = ""
     loader_type: str = "auto"
     device_map: str = "auto"
     dtype: str = "auto"
@@ -133,6 +135,10 @@ class LLMConfig:
             raise ValueError("llm.perception.morphology_backend must be auto, pymorphy3, or none")
         if self.agent_repair_attempts < 0 or self.agent_repair_attempts > 2:
             raise ValueError("llm.agent.repair_attempts must be in [0, 2]")
+        if self.backend not in {"builtin_process", "ollama"}:
+            raise ValueError("llm.backend must be builtin_process or ollama")
+        if not str(self.ollama_base_url).strip():
+            raise ValueError("llm.ollama_base_url must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -471,6 +477,8 @@ def load_config(path: str | Path) -> AppConfig:
     llm = LLMConfig(
         enabled=bool(llm_raw.get("enabled", True)),
         backend=str(llm_raw.get("backend", "builtin_process")),
+        ollama_base_url=str(llm_raw.get("ollama_base_url", "http://127.0.0.1:11434")),
+        ollama_model=str(llm_raw.get("ollama_model", "")),
         loader_type=str(llm_raw.get("loader_type", "auto")),
         device_map=str(llm_raw.get("device_map", "auto")),
         dtype=str(llm_raw.get("dtype", "auto")),

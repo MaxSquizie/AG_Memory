@@ -264,6 +264,16 @@ class LocalLLMProcessBackend:
             state = "ERROR" if error else "OK"
             detail = f": {error}" if error else ""
             self._recent_log.append(f"[request #{sequence}] role={role} {state}{detail}")
+        try:
+            from ah.diagnostics.session_log import log_llm_request
+            log_llm_request(
+                sequence=sequence, req_id=req_id, role=role, prompt=prompt,
+                system=system, response_text=response_text, error=error,
+                choice_winner=choice_winner, choice_margin=choice_margin,
+                choice_outputs=choice_outputs,
+            )
+        except Exception:
+            pass
 
     def build_command(self) -> list[str]:
         cfg = self.config

@@ -1,21 +1,23 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
+from pathlib import Path
 from threading import RLock
 
 from ah.agent.interaction_context import InteractionContext
 from ah.agent.llm_agent import LLMAgent, LLMAgentSettings
 from ah.agent.orchestrator import AgentOrchestrator
-from ah.config import AppConfig
+from ah.config import AppConfig, PersistenceSettings
 from ah.core import AHCore, JsonPersistence
 from ah.diagnostics import GraphInspector, RuntimeDiagnostics
 from ah.dsl import DSLInterpreter
 from ah.ignition import IgnitionClock, IgnitionEngine
+from ah.ignition.engine import IgnitionSnapshot
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.integration.correction import RefutationCommit, SemanticCorrectionService
 from ah.integration.contracts import IntegrationCommit
 from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
-from ah.llm import LocalLLMProcessBackend
+from ah.llm import LLMBackend, build_llm_backend
 from ah.model import Domain, Property, SemanticEntity
 from ah.perception import (
     LLMPerceptionService,
@@ -46,7 +48,7 @@ class RuntimeServices:
     correction: SemanticCorrectionService
     graph_inspector: GraphInspector
     diagnostics: RuntimeDiagnostics
-    llm: LocalLLMProcessBackend | None
+    llm: LLMBackend | None
     perception: LLMPerceptionService | None
     agent: LLMAgent | None
 
@@ -94,7 +96,7 @@ class RuntimeServices:
         graph_inspector = GraphInspector(core, ignition, runtime_lock=operation_lock)
         diagnostics = RuntimeDiagnostics(core, ignition, runtime_lock=operation_lock)
 
-        llm = LocalLLMProcessBackend(config) if config.llm.enabled else None
+        llm = build_llm_backend(config)
         perception = (
             LLMPerceptionService(
                 llm,
@@ -208,7 +210,10 @@ class RuntimeServices:
             self.agent = None
         else:
             if self.llm is None:
-                self.llm = LocalLLMProcessBackend(new_config)
+                self.llm = build_llm_backend(new_config)
+            elif type(self.llm).__name__ != ("OllamaBackend" if new_config.llm.backend == "ollama" else "LocalLLMProcessBackend"):
+                self.llm.stop()
+                self.llm = build_llm_backend(new_config)
             else:
                 self.llm.config = new_config
             self.perception = LLMPerceptionService(
@@ -271,6 +276,97 @@ class RuntimeServices:
         self.config = replace(self.config, ignition=ignition)
         self.ignition.reconfigure_decay(decay)
         self.ignition.reconfigure_seed_levels(seeds)
+
+
+    def tune_ignition_mechanism(
+        self,
+        *,
+        pacemaker_enabled: bool | None = None,
+        pacemaker_pulse: float | None = None,
+        workspace_threshold: float | None = None,
+    ) -> None:
+        """Hot-swap pacemaker amplitude/enabled state and Workspace threshold.
+
+        Note that architectural pacemaker frequency is ``ignition.nu``; pulse
+        amplitude is a separate seed parameter and is intentionally named so.
+        """
+        ignition = self.config.ignition
+        workspace = self.config.workspace
+        if pacemaker_enabled is not None:
+            ignition = replace(ignition, pacemaker=replace(ignition.pacemaker, enabled=bool(pacemaker_enabled)))
+        if pacemaker_pulse is not None:
+            ignition = replace(ignition, seeds=replace(ignition.seeds, pacemaker=max(0.0, float(pacemaker_pulse))))
+        if workspace_threshold is not None:
+            workspace = replace(workspace, threshold=max(0.0, float(workspace_threshold)))
+        self.config = replace(self.config, ignition=ignition, workspace=workspace)
+        self.ignition.reconfigure(ignition, workspace, self.config.lifecycle)
+        self.clock.set_interval(ignition.tick_interval_seconds)
+
+    def import_corpus(self, path: str | Path, *, domain: Domain = Domain.C, save: bool = True, cold_save: bool = True):
+        from ah.corpus import import_corpus_file
+        with self.operation_lock:
+            result = import_corpus_file(self.core, Path(path), default_domain=domain)
+            if save:
+                self._save_import_result(cold_save=cold_save)
+        return result
+
+    def import_raw_text(self, text: str, *, save: bool = True, parse_user_semantics: bool = True, cold_save: bool = True, strict: bool = True):
+        from ah.corpus import import_raw_experience, split_raw_experience_text
+        with self.operation_lock:
+            result = import_raw_experience(self, split_raw_experience_text(text), parse_user_semantics=parse_user_semantics, strict=strict)
+            if save:
+                self._save_import_result(cold_save=cold_save)
+        return result
+
+    def import_dialogue(self, source, *, save: bool = True, parse_user_semantics: bool = True, cold_save: bool = True, strict: bool = True):
+        from ah.corpus import import_dialogue_cold, load_dialogue_file, parse_dialogue_json
+        turns = load_dialogue_file(source) if isinstance(source, (str, Path)) else parse_dialogue_json(source)
+        with self.operation_lock:
+            result = import_dialogue_cold(self, turns, parse_user_semantics=parse_user_semantics, strict=strict)
+            if save:
+                self._save_import_result(cold_save=cold_save)
+        return result
+
+    def import_memory(self, path: str | Path, *, save: bool = True, cold_restore: bool = True):
+        from ah.corpus import import_memory_snapshot
+        with self.operation_lock:
+            result = import_memory_snapshot(self, path, cold_restore=cold_restore)
+            if save:
+                self._save_import_result(cold_save=cold_restore)
+        return result
+
+    def _save_import_result(self, *, cold_save: bool) -> None:
+        if cold_save:
+            JsonPersistence(
+                self.persistence.path,
+                PersistenceSettings(
+                    enabled=True,
+                    load_on_start=True,
+                    autosave_every_ticks=self.config.persistence.autosave_every_ticks,
+                    save_runtime_state=False,
+                    save_pending_impulses=False,
+                ),
+            ).save(self.core, context=self.context)
+        else:
+            self.save()
+
+    def reset_memory(self, *, persist: bool = True) -> None:
+        """Reset canonical AH/runtime/context while preserving service wiring."""
+        with self.operation_lock:
+            was_running = self.clock.running
+            if was_running:
+                self.clock.stop()
+            self.core.store.replace_from(AHCore().store)
+            fresh_context = InteractionContext()
+            self._ensure_identity_context(self.core, fresh_context, self.config)
+            for item in fields(InteractionContext):
+                setattr(self.context, item.name, getattr(fresh_context, item.name))
+            self.ignition.restore_snapshot(IgnitionSnapshot(0, {}, {}))
+            self.projector = ContextProjector(self.core, self.config.context)
+            if persist and self.config.persistence.enabled:
+                self._save_import_result(cold_save=True)
+            if was_running:
+                self.clock.start()
 
     def create_orchestrator(self) -> AgentOrchestrator:
         if self.perception is None or self.agent is None:

@@ -46,6 +46,33 @@ def build_parser() -> argparse.ArgumentParser:
     refute.add_argument("uid")
     refute.add_argument("--tick", action="store_true", help="apply one ignition tick immediately")
 
+    corpus = sub.add_parser("import-corpus", help="cold-load structured JSON/.ahm/.prj into canonical AH")
+    corpus.add_argument("path")
+    corpus.add_argument("--domain", default="C")
+    corpus.add_argument("--no-save", action="store_true")
+    corpus.add_argument("--hot-save", action="store_true", help="persist current runtime x/queue too")
+
+    raw = sub.add_parser("import-text", help="load raw text paragraphs as USER experience; strict semantic parse by default")
+    raw.add_argument("path")
+    raw.add_argument("--no-semantics", action="store_true")
+    raw.add_argument("--best-effort", action="store_true", help="explicitly allow failed semantic chunks to fall back to H-only")
+    raw.add_argument("--no-save", action="store_true")
+    raw.add_argument("--hot-save", action="store_true")
+
+    dialogue = sub.add_parser("import-dialogue", help="load ah_dialogue_v1 JSON")
+    dialogue.add_argument("path")
+    dialogue.add_argument("--no-semantics", action="store_true")
+    dialogue.add_argument("--best-effort", action="store_true")
+    dialogue.add_argument("--no-save", action="store_true")
+    dialogue.add_argument("--hot-save", action="store_true")
+
+    memory = sub.add_parser("import-memory", help="replace live AH from persistence snapshot")
+    memory.add_argument("path")
+    memory.add_argument("--hot-restore", action="store_true", help="restore saved runtime excitation/pending impulses")
+    memory.add_argument("--no-save", action="store_true")
+
+    sub.add_parser("reset-memory", help="clear AH/runtime/context and recreate SELF/USER")
+
     sub.add_parser(
         "m2-acceptance",
         help=(
@@ -77,6 +104,33 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result.failed == 0 else 1
 
     services = RuntimeServices.build(cfg)
+
+    if args.command == "import-corpus":
+        from ah.model import Domain
+        try:
+            domain = Domain(str(args.domain).strip().upper())
+        except ValueError as exc:
+            raise SystemExit(f"Invalid domain: {args.domain}") from exc
+        result = services.import_corpus(args.path, domain=domain, save=not args.no_save, cold_save=not args.hot_save)
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "import-text":
+        text = Path(args.path).read_text(encoding="utf-8-sig")
+        result = services.import_raw_text(text, save=not args.no_save, parse_user_semantics=not args.no_semantics, cold_save=not args.hot_save, strict=not args.best_effort)
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0 if not getattr(result, "errors", ()) else (0 if args.best_effort else 1)
+    if args.command == "import-dialogue":
+        result = services.import_dialogue(args.path, save=not args.no_save, parse_user_semantics=not args.no_semantics, cold_save=not args.hot_save, strict=not args.best_effort)
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0 if not getattr(result, "errors", ()) else (0 if args.best_effort else 1)
+    if args.command == "import-memory":
+        result = services.import_memory(args.path, save=not args.no_save, cold_restore=not args.hot_restore)
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "reset-memory":
+        services.reset_memory(persist=True)
+        print(json.dumps(_jsonable(services.diagnostics.summary()), ensure_ascii=False, indent=2))
+        return 0
 
     if args.command == "dsl":
         result = services.dsl.execute(args.expression)

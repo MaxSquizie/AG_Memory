@@ -21,6 +21,7 @@ from .errors import (
     TemplateResolutionError,
 )
 from .service import IntegrationConfig, IntegrationService
+from .template_completion import TemplateCompletionService
 
 __all__ = [
     "ActivationSeedRequest",
@@ -37,6 +38,7 @@ __all__ = [
     "IntegrationConfig",
     "IntegrationError",
     "IntegrationService",
+    "TemplateCompletionService",
     "RefutationRequest",
     "RefutationCommit",
     "SemanticCorrectionService",

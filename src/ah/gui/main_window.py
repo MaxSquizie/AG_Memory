@@ -155,6 +155,11 @@ class MainWindow(QMainWindow):
         self.action_save.triggered.connect(self._save_memory)
         bar.addAction(self.action_save)
 
+        self.action_clear_memory = QAction("Очистить память", self)
+        self.action_clear_memory.setToolTip("Полностью очистить canonical AH/runtime/context; SELF/USER будут созданы заново.")
+        self.action_clear_memory.triggered.connect(self._clear_memory)
+        bar.addAction(self.action_clear_memory)
+
         bar.addSeparator()
         self.action_inference_explorer = QAction("Логический вывод", self)
         self.action_inference_explorer.setToolTip(
@@ -307,9 +312,16 @@ class MainWindow(QMainWindow):
             self.services.config.ignition.decay,
             self.services.config.ignition.tick_interval_seconds,
             self.services.config.ignition.seeds.resolved_symbol,
+            ignition=self.services.config.ignition,
+            workspace=self.services.config.workspace,
         )
         self.ignition_tuning.tuning_changed.connect(self._tune_ignition_decay_live)
         self.ignition_tuning.tuning_committed.connect(self._commit_ignition_decay_tuning)
+        self.ignition_tuning.mechanism_changed.connect(self._tune_ignition_mechanism_live)
+        self.ignition_tuning.mechanism_committed.connect(self._commit_ignition_mechanism_tuning)
+        self.ignition_tuning.corpus_import_requested.connect(self._import_corpus_from_gui)
+        self.ignition_tuning.raw_text_import_requested.connect(self._import_raw_text_from_gui)
+        self.ignition_tuning.memory_import_requested.connect(self._import_memory_from_gui)
         self.manual_seed_button = QPushButton()
         self.manual_seed_button.setToolTip(
             "Передать тестовый импульс выбранному excitable узлу. Величина берётся из "
@@ -429,6 +441,26 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Persistence", str(exc))
         else:
             self.statusBar().showMessage("AH сохранена", 2500)
+
+    def _clear_memory(self) -> None:
+        if any(worker is not None for worker in (self._chat_worker, self._acceptance_worker, self._hidden_valency_worker, self._m2_acceptance_worker, self._llm_operation_worker)):
+            self.statusBar().showMessage("Дождитесь окончания текущего cognitive run", 2500)
+            return
+        answer = QMessageBox.question(
+            self, "Очистить память",
+            "Удалить все canonical узлы/связи, runtime excitation и контекст диалога?\nSELF/USER будут созданы заново.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            self.services.reset_memory(persist=True)
+        except Exception as exc:
+            QMessageBox.critical(self, "Память", str(exc)); return
+        self._last_turn = None; self._selected_uid = None; self._selected_edge_key = None
+        self.chat_history.clear(); self.canvas_browser.live_canvas.refresh(); self._refresh_status(force=True)
+        self.statusBar().showMessage("Память очищена", 4000)
 
     # ---------- chat ----------
     def _send_chat(self) -> None:
@@ -944,6 +976,56 @@ class MainWindow(QMainWindow):
             4500,
         )
 
+    @Slot(bool, float, float)
+    def _tune_ignition_mechanism_live(self, enabled: bool, pulse: float, threshold: float) -> None:
+        try:
+            self.services.tune_ignition_mechanism(pacemaker_enabled=enabled, pacemaker_pulse=pulse, workspace_threshold=threshold)
+        except Exception as exc:
+            self.statusBar().showMessage(f"Ignition mechanism tuning error: {exc}", 4000)
+
+    @Slot(bool, float, float)
+    def _commit_ignition_mechanism_tuning(self, enabled: bool, pulse: float, threshold: float) -> None:
+        self.config_editor.set_external_values({
+            "ignition.pacemaker.enabled": bool(enabled),
+            "ignition.seeds.pacemaker": round(float(pulse), 4),
+            "workspace.threshold": round(float(threshold), 4),
+        }, save=False)
+        self.statusBar().showMessage("Pacemaker/Workspace параметры применены live", 3000)
+
+    @Slot(str, str, bool)
+    def _import_corpus_from_gui(self, path: str, domain: str, cold_save: bool) -> None:
+        if not path:
+            QMessageBox.information(self, "Импорт", "Укажите путь к JSON/.ahm/.prj"); return
+        try:
+            from ah.model import Domain
+            result = self.services.import_corpus(path, domain=Domain(domain), save=True, cold_save=cold_save)
+        except Exception as exc:
+            QMessageBox.critical(self, "Импорт структуры", f"{type(exc).__name__}: {exc}"); return
+        self.canvas_browser.live_canvas.refresh(); self._refresh_status(force=True)
+        QMessageBox.information(self, "Импорт структуры", json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+
+    @Slot(str, bool, bool, bool)
+    def _import_raw_text_from_gui(self, text: str, parse_semantics: bool, cold_save: bool, strict: bool) -> None:
+        if not text.strip():
+            QMessageBox.information(self, "Импорт", "Введите текст"); return
+        try:
+            result = self.services.import_raw_text(text, save=True, parse_user_semantics=parse_semantics, cold_save=cold_save, strict=strict)
+        except Exception as exc:
+            QMessageBox.critical(self, "Импорт текста", f"{type(exc).__name__}: {exc}"); return
+        self.canvas_browser.live_canvas.refresh(); self._refresh_status(force=True)
+        QMessageBox.information(self, "Импорт текста", json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+
+    @Slot(str, bool)
+    def _import_memory_from_gui(self, path: str, cold_restore: bool) -> None:
+        if not path:
+            QMessageBox.information(self, "Импорт", "Укажите persistence JSON"); return
+        try:
+            result = self.services.import_memory(path, save=True, cold_restore=cold_restore)
+        except Exception as exc:
+            QMessageBox.critical(self, "Импорт памяти", f"{type(exc).__name__}: {exc}"); return
+        self.canvas_browser.live_canvas.refresh(); self._refresh_status(force=True)
+        QMessageBox.information(self, "Импорт памяти", json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+
     def _refresh_manual_seed_button(self) -> None:
         amount = float(self.services.config.ignition.seeds.reactivated_fact)
         self.manual_seed_button.setText(f"Импульс выбранному узлу  +{amount:.2f} x")
@@ -1020,6 +1102,11 @@ class MainWindow(QMainWindow):
                     new_config.ignition.decay,
                     new_config.ignition.seeds.resolved_symbol,
                     new_config.ignition.tick_interval_seconds,
+                )
+                self.ignition_tuning.set_mechanism(
+                    pacemaker_enabled=new_config.ignition.pacemaker.enabled,
+                    pacemaker_pulse=new_config.ignition.seeds.pacemaker,
+                    workspace_threshold=new_config.workspace.threshold,
                 )
             if hasattr(self, "manual_seed_button"):
                 self._refresh_manual_seed_button()
