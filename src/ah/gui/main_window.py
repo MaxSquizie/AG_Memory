@@ -6,15 +6,18 @@ from pathlib import Path
 from typing import Callable
 
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal, Slot
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QGuiApplication
 from PySide6.QtWidgets import (
     QDockWidget,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
+    QSizePolicy,
     QTextBrowser,
     QToolBar,
     QVBoxLayout,
@@ -93,7 +96,7 @@ class MainWindow(QMainWindow):
         self._dock_visibility_before_full_canvas: dict[QDockWidget, bool] = {}
 
         self.setWindowTitle("AH Agent — Cognitive Runtime")
-        self.resize(1580, 980)
+        self._fit_initial_window_to_screen()
 
         self.canvas = GraphCanvasWidget(services)
         self.canvas_browser = CanvasBrowserWidget(self.canvas, services.config, self)
@@ -133,6 +136,23 @@ class MainWindow(QMainWindow):
 
         self._refresh_status()
         self.llm_panel.refresh_status()
+
+    def _fit_initial_window_to_screen(self) -> None:
+        """Keep the initial window inside the usable desktop geometry.
+
+        The old fixed 1580x980 startup size placed the bottom dock below the
+        taskbar on common 1366x768/1600x900 screens. This is only an initial
+        geometry policy: the user can still resize/maximize the window later.
+        """
+        screen = QGuiApplication.primaryScreen()
+        if screen is None:
+            self.resize(1580, 980)
+            return
+        available = screen.availableGeometry()
+        margin = 24
+        width = min(1580, max(1, available.width() - margin))
+        height = min(980, max(1, available.height() - margin))
+        self.resize(width, height)
 
     # ---------- UI construction ----------
     def _build_toolbar(self) -> None:
@@ -183,13 +203,27 @@ class MainWindow(QMainWindow):
 
     def _build_chat_dock(self) -> None:
         dock = QDockWidget("Диалог", self)
+        self.chat_dock = dock
+
         body = QWidget()
+        body.setMinimumSize(0, 0)
         layout = QVBoxLayout(body)
+        layout.setContentsMargins(4, 4, 4, 4)
+
         self.chat_history = QTextBrowser()
+        self.chat_history.setMinimumHeight(48)
+        self.chat_history.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+
         self.chat_input = QPlainTextEdit()
         self.chat_input.setPlaceholderText("Сообщение пользователю/агенту…")
         self.chat_input.setMaximumBlockCount(1000)
-        self.chat_input.setFixedHeight(90)
+        self.chat_input.setMinimumHeight(48)
+        self.chat_input.setMaximumHeight(90)
+        self.chat_input.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         self.send_button = QPushButton("Отправить")
         self.send_button.clicked.connect(self._send_chat)
         self.acceptance_button = QPushButton("Прогнать acceptance-файл")
@@ -220,7 +254,23 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
         layout.addLayout(chat_buttons)
-        dock.setWidget(body)
+
+        # A dock may be squeezed to a very small height by other panels. Keep the
+        # controls reachable instead of letting the bottom rows disappear below
+        # the viewport. QTextBrowser/QPlainTextEdit retain their own text scrolling;
+        # this scroll area is for the dialog *layout* itself.
+        self.chat_scroll = QScrollArea()
+        self.chat_scroll.setWidgetResizable(True)
+        self.chat_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.chat_scroll.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        self.chat_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.chat_scroll.setWidget(body)
+        self.chat_scroll.setMinimumSize(0, 0)
+        dock.setWidget(self.chat_scroll)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
 
     def _build_config_dock(self) -> None:
