@@ -260,6 +260,32 @@ class CommandCandidate:
     quoted: bool = False
 
 
+@dataclass(frozen=True, slots=True)
+class ActRelationCandidate:
+    """Runtime-only typed structural relation inside one semantic act.
+
+    The relation type is a bounded Perception decision; endpoint roles are local
+    semantic roles, never canonical UIDs. Deterministic Integration/Inference later
+    resolves those roles to canonical refs. This keeps relation typing out of
+    lexical marker tables and out of the LLM agent.
+    """
+
+    relation_id: str
+    act_ref: str
+    source_role: ActantRole
+    target_role: ActantRole
+
+    def __post_init__(self) -> None:
+        if not self.relation_id.strip() or not self.act_ref.strip():
+            raise ValueError("ActRelationCandidate relation_id/act_ref must be non-empty")
+        if self.source_role is self.target_role:
+            raise ValueError("ActRelationCandidate endpoints must use different roles")
+
+    @property
+    def canonical_relation_id(self) -> str:
+        return self.relation_id.strip().upper()
+
+
 class ActDependencyKind(str, Enum):
     SUBORDINATE = "SUBORDINATE"
     NONFINITE = "NONFINITE"
@@ -312,6 +338,38 @@ class SituationRelationCandidate:
         return self.relation_id.strip().upper()
 
 
+
+
+class SituationRelationHintKind(str, Enum):
+    CAUSAL_CANDIDATE = "CAUSAL_CANDIDATE"
+    TEMPORAL_CANDIDATE = "TEMPORAL_CANDIDATE"
+    SIMULTANEOUS_CANDIDATE = "SIMULTANEOUS_CANDIDATE"
+
+
+@dataclass(frozen=True, slots=True)
+class SituationRelationHintCandidate:
+    """Runtime-only non-canonical relation hypothesis between situations.
+
+    Hints are deliberately weaker than ``SituationRelationCandidate``. They are
+    useful for document diagnostics and later bounded reasoning, but Integration
+    must never materialize them as canonical ``L`` merely because two narrated
+    events are adjacent. This keeps narrative plausibility separate from asserted
+    CAUSE/FOLLOW truth.
+    """
+
+    kind: SituationRelationHintKind
+    source_ref: str
+    target_ref: str
+    evidence: EvidenceSpan | None = None
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.source_ref.strip() or not self.target_ref.strip():
+            raise ValueError("SituationRelationHintCandidate endpoints must be non-empty")
+        if self.source_ref == self.target_ref:
+            raise ValueError("SituationRelationHintCandidate cannot be self-referential")
+        if self.reason is not None and not self.reason.strip():
+            raise ValueError("SituationRelationHintCandidate.reason must be non-empty when provided")
 
 
 @dataclass(frozen=True, slots=True)
@@ -379,8 +437,10 @@ class PerceptionResult:
     commands: tuple[CommandCandidate, ...] = ()
     diagnostics: tuple[str, ...] = ()
     relations: tuple[SituationRelationCandidate, ...] = ()
+    act_relations: tuple[ActRelationCandidate, ...] = ()
     conditionals: tuple[ConditionalCandidate, ...] = ()
     act_dependencies: tuple[ActDependencyCandidate, ...] = ()
+    relation_hints: tuple[SituationRelationHintCandidate, ...] = ()
 
     @property
     def acts_count(self) -> int:

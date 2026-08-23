@@ -1,0 +1,11 @@
+{
+  "temperature_drop": "N_eff7e489f62f404da9014eda62b50c9e",
+  "water_freeze": "N_be435885ba824d3c844b024db9a47de1",
+  "ice_expand": "N_6e0f334c3b134a79ab2eb373b7de4538",
+  "tube_crack": "N_69ac510858184ce7865cb76e3ecd4b71",
+  "fluid_leak": "N_f8680dd603ce408db8e65f56e59340a0",
+  "pressure_drop": "N_4d8d92d6819849929665903b8e99eb1f",
+  "pump_stop": "N_b220f33261a34112b1b336990e13fdbc",
+  "filter_check": "N_423db3dbecdb4bd585e02aa1121ec50a",
+  "lamp_blink": "N_df7d749f0e2d43c9935500024d8c104e"
+}

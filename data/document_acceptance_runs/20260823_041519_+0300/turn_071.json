@@ -1,0 +1,2247 @@
+{
+  "index": 71,
+  "input": "Но торжество его было недолгим.",
+  "status": "ERROR",
+  "scenario_id": "belyaev_amphibian_mutiny",
+  "linguistic_candidate_graph": {
+    "text": "Но торжество его было недолгим.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Но",
+        "start": 0,
+        "end": 2,
+        "analyses": [
+          {
+            "normal_form": "но",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.999185
+          },
+          {
+            "normal_form": "но",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000814
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "торжество",
+        "start": 3,
+        "end": 12,
+        "analyses": [
+          {
+            "normal_form": "торжество",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "neut",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.625
+          },
+          {
+            "normal_form": "торжество",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "neut",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.375
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "его",
+        "start": 13,
+        "end": 16,
+        "analyses": [
+          {
+            "normal_form": "он",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "masc",
+              "3per",
+              "Anph",
+              "accs",
+              "NPRO"
+            ],
+            "score": 0.23913
+          },
+          {
+            "normal_form": "оно",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "3per",
+              "neut",
+              "Anph",
+              "accs",
+              "NPRO"
+            ],
+            "score": 0.065217
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "gent"
+            ],
+            "score": 0.043478
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "gent"
+            ],
+            "score": 0.043478
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "nomn",
+              "plur"
+            ],
+            "score": 0.043478
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "datv",
+              "plur"
+            ],
+            "score": 0.043478
+          },
+          {
+            "normal_form": "он",
+            "pos": "NPRO",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "masc",
+              "3per",
+              "Anph",
+              "gent",
+              "NPRO"
+            ],
+            "score": 0.043478
+          },
+          {
+            "normal_form": "оно",
+            "pos": "NPRO",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "3per",
+              "neut",
+              "Anph",
+              "gent",
+              "NPRO"
+            ],
+            "score": 0.043478
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "gent"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "datv"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "ablt"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "loct"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "datv"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "ablt"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "loct"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "datv"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "ablt"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "loct"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "gent",
+              "plur"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "accs",
+              "plur"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "ablt",
+              "plur"
+            ],
+            "score": 0.021739
+          },
+          {
+            "normal_form": "его",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "loct",
+              "plur"
+            ],
+            "score": 0.021739
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "было",
+        "start": 17,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "быть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "neut",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "neut",
+              "impf",
+              "past"
+            ],
+            "score": 0.96544
+          },
+          {
+            "normal_form": "было",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.034559
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "недолгим",
+        "start": 22,
+        "end": 30,
+        "analyses": [
+          {
+            "normal_form": "недолгий",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "ADJF",
+              "sing",
+              "masc"
+            ],
+            "score": 0.3333333333333333
+          },
+          {
+            "normal_form": "недолгий",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "ADJF",
+              "sing",
+              "neut"
+            ],
+            "score": 0.3333333333333333
+          },
+          {
+            "normal_form": "недолгий",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "datv",
+              "ADJF"
+            ],
+            "score": 0.3333333333333333
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": ".",
+        "start": 30,
+        "end": 31,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 5,
+          "text": "Но торжество его было недолгим",
+          "evidence": {
+            "text": "Но торжество его было недолгим",
+            "start": 0,
+            "end": 30
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 4,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "быть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "но",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 4,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "быть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: no canonical roles remain available",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 904, in parse\n    actants, _selected_spans = self._extract_actants(\n                               ~~~~~~~~~~~~~~~~~~~~~^\n        text,\n        ^^^^^\n    ...<5 lines>...\n        requested_spans=requested_spans,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 4702, in _extract_actants\n    role = self._classify_role(\n        text,\n    ...<5 lines>...\n        allowed_roles=filtered_allowed,\n    )\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 6604, in _classify_role\n    raise AdaptiveParseError(\"no canonical roles remain available\")\nah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 382, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 981, in parse\n    raise AdaptiveParseError(str(exc), traces) from exc\nah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 365, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 437, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 160, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 411, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: no canonical roles remain available\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 71,
+      "source_text": "Но торжество его было недолгим.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим.\nTOKENS:\n[1] Но\n[2] торжество\n[3] его\n[4] было\n[5] недолгим\n[6] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[4] token 4: было; morphology=VERB",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим.\nTOKENS:\n[1] Но\n[2] торжество\n[3] его\n[4] было\n[5] недолгим\n[6] .\nPREDICATE_START: [4] было\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[4] end at token 4: было",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим\nTARGET:\nбыло\nRUSSIAN_LEMMA:\nбыть",
+          "normalized_answer": "быть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим\nPREDICATE:\nбыло\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_deterministic",
+          "raw_text": "<deterministic:pymorphy3>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим.\nTOKENS:\n[1] Но\n[2] торжество\n[3] его\n[4] было\n[5] недолгим\n[6] .\nPREDICATE:\nбыло\nTARGET:\nнедолгим",
+          "normalized_answer": "STATE:5",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_deterministic",
+          "raw_text": "<deterministic:pymorphy3>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим.\nTOKENS:\n[1] Но\n[2] торжество\n[3] его\n[4] было\n[5] недолгим\n[6] .\nPREDICATE:\nбыло\nTARGET:\nторжество",
+          "normalized_answer": "SUBJECT:2",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nНо торжество его было недолгим.\nPREDICATE:\nбыло\nALREADY_SELECTED:\nнедолгим | торжество\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] его",
+          "normalized_answer": "3",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "no canonical roles remain available"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "L_671e2999d2b04d7f879c2e0f01c425a0": {
+        "uid": "L_671e2999d2b04d7f879c2e0f01c425a0",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.2,
+        "source": {
+          "uid": "N_b23f94cc7c9744afa5482fb39284c9a1",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_26785de0eb9140e08353f97929404eb7",
+          "kind": "N"
+        }
+      },
+      "N_26785de0eb9140e08353f97929404eb7": {
+        "uid": "N_26785de0eb9140e08353f97929404eb7",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_151df4c092e441baa520ab1082193dce",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Но торжество его было недолгим.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "dedup_exempt": true
+        }
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 93,
+    "workspace_uids": [
+      "G_6be045604a1a40b8b890f855956b31bb",
+      "G_b2c1f0f38559434a9402c5495b57ff38",
+      "G_bedc0f06c021454fa9887cba9c07ad43",
+      "G_cfa2e87a7ab246ac98ced39611fe23ed",
+      "G_e089693ce0074d0b98858b74f4fc16b9",
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_0fe5caf1039046cab065e67af9437286",
+      "M_12fb270efa194e1fa79d043558e51066",
+      "M_13c049b551ca488fbbf693e81a849178",
+      "M_16a976e4aa1e47bfb6e71ce21f15d30e",
+      "M_19099975e87643268bdadee16b9d0136",
+      "M_20eb82e2ec524d90898e8307548ca135",
+      "M_2f367018a0bf427a9069bf51cf3224af",
+      "M_3abb4398cbf2427c9977ec2804e1b47b",
+      "M_4b53f189f38c46fcac34f2a0a2ecd85b",
+      "M_51024625693941ba8683f56ccaf5fd4c",
+      "M_5cbdd852a1c54704bc0add51249c1122",
+      "M_5d001579687849c083ee770141a97a80",
+      "M_68ae2986fcd14cafafbb5048799ee1a2",
+      "M_6e64ac2407dc4c5bbdd80a2a0207ae9d",
+      "M_74716d6a2a2344d78518c48ff9b38e8d",
+      "M_7e51ee6e0b93452c8b556443f8d3196d",
+      "M_8c086408d608403aa3a1b840f372d636",
+      "M_8ca73192563249ee8e4ab964fb9def65",
+      "M_9fba1a5708bb4f2eabc95ee62e951e75",
+      "M_a1608de587d24958aea42c0e02386506",
+      "M_a1a466af1119486a9d00f7a290877588",
+      "M_a837e71268d5468c949717b536c9934c",
+      "M_b394cd47a1f44911bc23d86007e68f6a",
+      "M_b72fe2f8d07641d38c09fb30063548e7",
+      "M_b7c619e470dc4ef29a61f20eda3004d6",
+      "M_c97dc817ebc94b67a2950e5f4dbb9657",
+      "M_cda2f521bc5d487dabee0e3ad3e718fd",
+      "M_d0f5d65d891f44198eb4d77a21483f50",
+      "M_e174267d944147a8825ee23daf45a216",
+      "M_e22b251552f54fb28b8e995c6ba55ff0",
+      "M_e3fa4067c4bc4eb9911d0a8c01d050e5",
+      "M_ee68dc59afb547bf8e6afc9db5f6617c",
+      "M_f0ad68cf2cd9404f90b738870d64c1c1",
+      "M_f9d61a7740234766af29ef58a1afeb96",
+      "M_fe274efc16b045cdac9c95d819e117e3",
+      "N_022dcf7bfde74fd18cf6363194de7ec7",
+      "N_06c1feb41d854b4e83385bb8845c7747",
+      "N_09da9a483aeb4d1188069868e6886362",
+      "N_11b7a0d7ca1c4e17b87806611018b562",
+      "N_12bf714b6c8f4e6da083fb1589372b39",
+      "N_16befc93b416427c8a94fa0cb8d14ffd",
+      "N_1e0736b1836946349c1d5678f2688abd",
+      "N_2208b352d5f04e9f8814b17cba4d20a4",
+      "N_2240e0221dd348c3b64c6dbcaa71878f",
+      "N_26cba9ed2f19483fa7a1738213176fb2",
+      "N_275a4cc2057b4924b3e9ea141fdb0d7d",
+      "N_33ac21545fd340cc8c6483c5a9c3c4a0",
+      "N_36f75df10c52473daf82496c8e7d6673",
+      "N_3b1171efb0404cfd91025df7a6f3fe14",
+      "N_3b6cf6496ac7480fb45da5142e1e8e51",
+      "N_412843e7a52e462881e45f058b466d8d",
+      "N_467cacef74244724a80129c67c021b03",
+      "N_4d494ba531f34e3a9ce39fe30f2e52f8",
+      "N_5155a84babda4258a59e7afcf1a2c227",
+      "N_5557156280e74513be753bb5bec1ddb3",
+      "N_5721cd28591f49498b96c5a0dfdbcdb8",
+      "N_5c125eb6690a4ad9a9ea49a6c45f5ac0",
+      "N_5cf870c358544fc7b1d53e908c341e90",
+      "N_600ade4d86f54d81a9fe49d45d3dc117",
+      "N_633e677c4d65438ba35886e9e315ee90",
+      "N_63ae16a33e384aa5afc2ad4eefffefbe",
+      "N_695d25cfb64e49d1a9d6dfea6aa5185f",
+      "N_6bc5981a6ff849238a4216d32d2fcbcc",
+      "N_6c6cb54d9606434fac4a8e25284586ac",
+      "N_7081062d21364c07bdded4ff1a1dd261",
+      "N_747fb04a6423445d8a2c0b85b7826d16",
+      "N_789b505e7ab94ac28163c66590dd9cbb",
+      "N_78a62955ea394500aa318c780f10a229",
+      "N_7d21760c9e4d420da84c31d2b6b9dce2",
+      "N_7e9de1949f56447280bcaeaf0f5aadd6",
+      "N_8549072205b94a2e9ae5e9d289531085",
+      "N_87bdc34553b040e09b156b9f5db4c440",
+      "N_89499bd7827a4126a647459a17905a1e",
+      "N_8d7aaf2a9c7d49ad986f160ea0131e0a",
+      "N_8f430741dcab4a3cb7c6b6620cac26af",
+      "N_9043cd05bdbd4204bf933afb8a418182",
+      "N_9221263a0dd8447f8eb1c382ca60947e",
+      "N_92a20382a8e04c039ed1d670f3286f42",
+      "N_931c86f8e1484ba890c9de5fce3620b9",
+      "N_948d43403fdc4acfb4d0ad241ed60ec7",
+      "N_959ce005adb7436bb628e413ef59e479",
+      "N_99ef4342108b488eb99119374e6b9054",
+      "N_9d6082a7aac947f0b8547560859618b7",
+      "N_9e974d2b43b4431c923e513ba5fa64d7",
+      "N_9efe780d74ed49e2a4612463ccc0753b",
+      "N_9f14b36459b940dbaaf47c5ccf9d8197",
+      "N_a3d37b227958418abafdd65cae8c44f6",
+      "N_a5f3ae892a384a729935db738b094b37",
+      "N_a74331a7e65644e1ab5c1fdf164447fb",
+      "N_a80988e0b86e4610a51d7390e2e1c6f5",
+      "N_a9ad9a46bae54154909175425d579b5e",
+      "N_ab3b147e769845bb9b6781496d089abc",
+      "N_acad05fc00884f218f4d9b7fc2ca762e",
+      "N_acc986de2243455fabfb3b73cba54946",
+      "N_ada80f46315247d08a7acd732289f0bb",
+      "N_b09ca7dc2e5a4dff8635ffd3c5d501e3",
+      "N_b0cfd3586599491f8cb464b962a1998c",
+      "N_b138a5186b56423a97373bc70f94ff5e",
+      "N_b23f94cc7c9744afa5482fb39284c9a1",
+      "N_b3e20036713d4fd8b4ae3760217fd710",
+      "N_b4b1026de2034fd3b0b86d746bb11749",
+      "N_bdbe2ef7db214c7687f3fe68e7adb34d",
+      "N_be70ea0972d54bcfb5d2920522510bc2",
+      "N_bfba201030a049e5b006969e2694136e",
+      "N_c83e8b3260af4f289449dbe1d442ada0",
+      "N_c8cd517a678240429ab883b8b3d89204",
+      "N_cdc9dea0a8bf40eb86c87b3f889df9b0",
+      "N_cf09be0ca14c4cdf85c4b008197f7b4f",
+      "N_d6f2704cb22f4c7386144a24ab3cbc64",
+      "N_db9613ef50be43999fffaaf29eddfe12",
+      "N_dd91a6d6427d4ad18c041935b898fe8c",
+      "N_dfba4d3415974b668bdbba237edc052f",
+      "N_e06abbace6114874a305bf0065d9590e",
+      "N_e594b0d0781844d1a76368f2e6c718b5",
+      "N_e59ac613e2d346ac8515a35174bd68fa",
+      "N_e9fd9ffe4cc94e209e257f2f941abfa2",
+      "N_ea272c9d242a4a33ad55d97c5765f8bd",
+      "N_eea00a7d87eb4ef89679a0af58824e93",
+      "N_eebdb91f3855433caac66629c0c84c29",
+      "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+      "N_f7fcd0b114734833a29dd7de943e1f29",
+      "N_f7fce0d5136d43eb9c9165e3148f9ed5",
+      "N_fa33c4c3e2a7452f93f59011d25fcd93",
+      "N_fb4c8f25d84245169b425e747ef0605e",
+      "N_ff2796e91a924a1c94ea195917381b19",
+      "N_ffc420547e344bebb6a505717481caa6",
+      "S_04cc7550b9284e75a57d5aa8f55f70b2",
+      "S_0b35d2e9a5f9492baaf8200af3959c26",
+      "S_1727c54a75d349f4b708d35beafe5889",
+      "S_19cd15ba23f54fd3bf8c302556212c3e",
+      "S_1eaedb211e6347e2b9bd8310e9ffd5c0",
+      "S_1fcdd8bc3b7a467abeb676ac1a980df6",
+      "S_2a0fbde624684c07ac1061ea2eed943f",
+      "S_2db81ea1ed0a49859e8fd2be767e926b",
+      "S_2ea57814b4a64a238de422eae2b230fa",
+      "S_304c8f3a2f514d48af6ae6368aa95b74",
+      "S_3f3d64715ea4437fa4f7602597502075",
+      "S_406c0fd2dfa74cbda9953c50fb97c8ed",
+      "S_41171726e5b44c0f80b8d5fad020165d",
+      "S_414e8c1d160747038c5ee0dbb474b604",
+      "S_426f3b9b7d6d452d822e7705ca82ecbf",
+      "S_432f5912143942c9a8a7e69428fdaba0",
+      "S_44a37895b2b34130aaf6f07a0bd7a13d",
+      "S_47693087a92d4410a627a11544a706f1",
+      "S_4abd0cf4fd204543afd02e0c55b88a2c",
+      "S_4b63aab58ab14a21a538ca7f13048225",
+      "S_552152c0cfe7447c80bdad96e1837100",
+      "S_6c52e9d5cf4f43eb96833e89a1754198",
+      "S_6ebc09b5a1ae4c67baa74308f049b329",
+      "S_722657c545334643847bb579bc7e94d5",
+      "S_747026640db040328b913a821e4f5e10",
+      "S_749aba5bb91a4f72993ad81b33290e85",
+      "S_74bd5cc01d8c4be9a4dde74ce51702d9",
+      "S_7cdbd1f11b4f463b871abb9764cc97eb",
+      "S_812f1f0250e14866b3dad263251c1022",
+      "S_84738cdc9d554bd197c57fbaff89a89e",
+      "S_84c64a78994a48d98c7f610fefecf50c",
+      "S_87023e270d8e41baba45c30734caa803",
+      "S_896ec2d093d345c5b498c6a39590c24a",
+      "S_8a3c2fc41be744018317f85bd6bc3073",
+      "S_8b445667d0bd48aa8c7e8de992251df2",
+      "S_8c803facd7c14c7190e491d0b46eb802",
+      "S_8f779be783a04c2d8aea9e1d1ada9fa1",
+      "S_90162ef65d8248ab926b5c5b5c03bd6c",
+      "S_954b6344662041dfbd831c7a55e09b9d",
+      "S_9969dea924a445c7bfde3dd1f7c0af80",
+      "S_9a97cb082ddc435a8286ae547640d85c",
+      "S_9bf39af166c14a0ba5efd19b2216949c",
+      "S_9d15933386184a55aab98dd3a303ac90",
+      "S_a0d47da381a54a9ea57cfe60d118323f",
+      "S_ac39c686db80439698741869969f9c46",
+      "S_ad7209900aa5476783d1c4a4ebe74eff",
+      "S_bd1601e3266046f894b521b5d2cac7e9",
+      "S_c3b1baad7c984650a96e3e31899c6d24",
+      "S_c587eda3bbe949e69218ea4be9a8892e",
+      "S_ca4a582aa37b4a159221664372664a33",
+      "S_caac8de249e240eea30b988d7019dc47",
+      "S_dfcf714b07ff493480462095a1062390",
+      "S_e503e7418703476b9af412a124a7fb72",
+      "S_e63f2a2ebf65475c8e202fb930cef7e6",
+      "S_e6ca481a12244eab9cbbc34c46920540",
+      "S_e7f072b124f043cebc4817cba19ef984",
+      "S_ed3536bf35b24b9b930793d8b389aced",
+      "S_f445effc1bae464980dd288a48463e3b",
+      "S_f6d30402dbda4a6e94e004a5ec7396ba",
+      "T_084a3f846a64449ab6b5d2dc1a6d5e1a",
+      "T_0d02c4e5dff84311ab0623e91c409c0e",
+      "T_0d1c4818401f464988f621c521520f6a",
+      "T_111998cba6174d0d952f714f07f7e492",
+      "T_15fa0d0f7ffe4282a4f9ba0ad25943ae",
+      "T_160bc8bbbca6444ebd8b0ec0be5f5d11",
+      "T_16cc9cc6b99c483ebcf80f7ba1fe34e9",
+      "T_19857228956842fcb6ba6673563d9e80",
+      "T_2e02f24936ef4e43995629bade2b438d",
+      "T_38d0e7ed71774571b55c43052a66d91c",
+      "T_38d8c11afd7e4daaaa5dddc93c3bd7b0",
+      "T_3f36e9f922764215973bf0d01544fd89",
+      "T_42704220b6be4ff39be911399f613a63",
+      "T_433fa389ad0c4240af678bdb7e2fa498",
+      "T_478583ba9b5b4e2a886476b101fc17d0",
+      "T_47e54cfd20684061b2f03e9a72531324",
+      "T_4d26fd7d4eb043a38754b46cad86ec0a",
+      "T_4e5aaf2336534d7c852b4ca30c67c07f",
+      "T_524f25f56d1841879ea3f118d4b19831",
+      "T_5602400c23654fde9e2911e1f77404e7",
+      "T_611904dcafa247b28e785a9bb9468399",
+      "T_66a6c234b8724179a54374d05e6448b5",
+      "T_6828ab794a9f4380a33281008ac52a20",
+      "T_682af0c164064852838218d5cf73634b",
+      "T_6ae0434e3402437292659a35864659e0",
+      "T_6eb09497422e413fb214644ba44d11c8",
+      "T_769df81ca85d4ca8a019eef04c7d5512",
+      "T_7809f8850a454f418402cf9ed5ff9e53",
+      "T_7c8be50f69e54337b15dd4cc1dcc2f16",
+      "T_7fa75a690ebb41b78e966d708392adf6",
+      "T_878d7878081e4ce9b6db3305e3f171dc",
+      "T_8d23ddc0c3344cf39c0fe706fef0a65d",
+      "T_91e0ccab55824258af43e23272299f11",
+      "T_91ea84d86ebb49b28290a305e680a727",
+      "T_95b148f2f59e40b3b69004f398bf8284",
+      "T_a85366f4328d475db1dda7ad56a4a30b",
+      "T_ac9f6d5b89574c3cacbb95f5da5e50cf",
+      "T_ad8101dd41f7483f8a1d66a023de88c9",
+      "T_b02990d880bd45b1ab3ed2967f7816cf",
+      "T_b0d41017858548e986b6eae904c399b4",
+      "T_b261bf99dac34bcdbc3c95c8c8443041",
+      "T_b3e61339aa89472488fb7d8b29b69094",
+      "T_b4e66238289d4eb1a6951ffa8f7135e3",
+      "T_b59a5a032a114cfaaf59b97abefeb900",
+      "T_b97ab6482a5d4631a25c6b557b2ee9ee",
+      "T_bc846ec13a6344c385a5a8952283f45b",
+      "T_c6fa5fa1481748719cef8047f973edf6",
+      "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+      "T_d50b91914a4b4d8b9510cdc937e39904",
+      "T_d67819dafe4742fe9ca483b61cebc659",
+      "T_d68de73c2d1f465da076f0a54da92f21",
+      "T_d6c5c17c92e04a9aaac4193475963b12",
+      "T_d74b0e635fd146af93a973f7b3dc072e",
+      "T_daa4c56903334bda98ee90084f618396",
+      "T_e7131facdb0c4c72b9791ba3fd4d2fd0",
+      "T_e782afe6725d4642a64eff7ae692521b",
+      "T_eb121215eec448e18c71e8b79206d6ff",
+      "T_f394adaf9482431299d38099c281f5a8",
+      "T_f58110066d314f699c0fb4b52ed59c73"
+    ],
+    "workspace": {
+      "G_6be045604a1a40b8b890f855956b31bb": {
+        "semantic": "(палуба) AND (теперь)",
+        "excitation": 0.40024002723310403
+      },
+      "G_b2c1f0f38559434a9402c5495b57ff38": {
+        "semantic": "NOT (были(SUBJECT=Они, STATE=вооружены))",
+        "excitation": 0.9893152444804425
+      },
+      "G_bedc0f06c021454fa9887cba9c07ad43": {
+        "semantic": "NOT (убавляя(SUBJECT=лодка, HOW-TO=ход))",
+        "excitation": 0.8395726596919945
+      },
+      "G_cfa2e87a7ab246ac98ced39611fe23ed": {
+        "semantic": "NOT (вооружены(OBJECT=Они))",
+        "excitation": 0.9787446529613976
+      },
+      "G_e089693ce0074d0b98858b74f4fc16b9": {
+        "semantic": "NOT (погрузилась(SUBJECT=дверь, LOCATION=вода, CAUSE=Только))",
+        "excitation": 0.7787556241098924
+      },
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.9975387117187637
+      },
+      "M_0fe5caf1039046cab065e67af9437286": {
+        "semantic": "шхуна",
+        "excitation": 0.4543338461505415
+      },
+      "M_12fb270efa194e1fa79d043558e51066": {
+        "semantic": "дверь",
+        "excitation": 0.8518791058167368
+      },
+      "M_13c049b551ca488fbbf693e81a849178": {
+        "semantic": "два",
+        "excitation": 0.35870589857239765
+      },
+      "M_16a976e4aa1e47bfb6e71ce21f15d30e": {
+        "semantic": "спина",
+        "excitation": 0.35870589857239765
+      },
+      "M_19099975e87643268bdadee16b9d0136": {
+        "semantic": "мостик",
+        "excitation": 0.42856553129611186
+      },
+      "M_20eb82e2ec524d90898e8307548ca135": {
+        "semantic": "Зурита",
+        "excitation": 1.0
+      },
+      "M_2f367018a0bf427a9069bf51cf3224af": {
+        "semantic": "штурман",
+        "excitation": 0.9421119122441286
+      },
+      "M_3abb4398cbf2427c9977ec2804e1b47b": {
+        "semantic": "лодка",
+        "excitation": 0.9940975169044439
+      },
+      "M_4b53f189f38c46fcac34f2a0a2ecd85b": {
+        "semantic": "вооружены",
+        "excitation": 0.8537392329818576
+      },
+      "M_51024625693941ba8683f56ccaf5fd4c": {
+        "semantic": "этих непрошеных свидетелей",
+        "excitation": 0.5785724527968831
+      },
+      "M_5cbdd852a1c54704bc0add51249c1122": {
+        "semantic": "помощь",
+        "excitation": 0.43057478900760643
+      },
+      "M_5d001579687849c083ee770141a97a80": {
+        "semantic": "люк",
+        "excitation": 0.8633553581446124
+      },
+      "M_68ae2986fcd14cafafbb5048799ee1a2": {
+        "semantic": "вооруженные матросы",
+        "excitation": 0.4543338461505415
+      },
+      "M_6e64ac2407dc4c5bbdd80a2a0207ae9d": {
+        "semantic": "легко",
+        "excitation": 0.43516829052935413
+      },
+      "M_74716d6a2a2344d78518c48ff9b38e8d": {
+        "semantic": "матрос",
+        "excitation": 0.9940975169044439
+      },
+      "M_7e51ee6e0b93452c8b556443f8d3196d": {
+        "semantic": "несколько матросов",
+        "excitation": 0.7556084831967049
+      },
+      "M_8c086408d608403aa3a1b840f372d636": {
+        "semantic": "Они",
+        "excitation": 0.8537392329818576
+      },
+      "M_8ca73192563249ee8e4ab964fb9def65": {
+        "semantic": "глаз",
+        "excitation": 0.5785724527968831
+      },
+      "M_9fba1a5708bb4f2eabc95ee62e951e75": {
+        "semantic": "человек",
+        "excitation": 0.9729676291924271
+      },
+      "M_a1608de587d24958aea42c0e02386506": {
+        "semantic": "вооруженная",
+        "excitation": 0.5655739075908051
+      },
+      "M_a1a466af1119486a9d00f7a290877588": {
+        "semantic": "теперь",
+        "excitation": 0.40024002723310403
+      },
+      "M_a837e71268d5468c949717b536c9934c": {
+        "semantic": "всей силы",
+        "excitation": 0.7027829383600014
+      },
+      "M_b394cd47a1f44911bc23d86007e68f6a": {
+        "semantic": "много",
+        "excitation": 0.8537392329818576
+      },
+      "M_b72fe2f8d07641d38c09fb30063548e7": {
+        "semantic": "так",
+        "excitation": 0.43516829052935413
+      },
+      "M_b7c619e470dc4ef29a61f20eda3004d6": {
+        "semantic": "уже",
+        "excitation": 0.4543338461505415
+      },
+      "M_c97dc817ebc94b67a2950e5f4dbb9657": {
+        "semantic": "море",
+        "excitation": 0.35947403926741195
+      },
+      "M_cda2f521bc5d487dabee0e3ad3e718fd": {
+        "semantic": "оглушенный",
+        "excitation": 0.6423351629609422
+      },
+      "M_d0f5d65d891f44198eb4d77a21483f50": {
+        "semantic": "борт",
+        "excitation": 0.8093525094120184
+      },
+      "M_e174267d944147a8825ee23daf45a216": {
+        "semantic": "в",
+        "excitation": 0.35870589857239765
+      },
+      "M_e22b251552f54fb28b8e995c6ba55ff0": {
+        "semantic": "военная",
+        "excitation": 0.40456268056730255
+      },
+      "M_e3fa4067c4bc4eb9911d0a8c01d050e5": {
+        "semantic": "палуба",
+        "excitation": 0.9729676291924271
+      },
+      "M_ee68dc59afb547bf8e6afc9db5f6617c": {
+        "semantic": "Медуза",
+        "excitation": 0.9616367179893215
+      },
+      "M_f0ad68cf2cd9404f90b738870d64c1c1": {
+        "semantic": "подводной лодке",
+        "excitation": 0.3875472175021839
+      },
+      "M_f9d61a7740234766af29ef58a1afeb96": {
+        "semantic": "мачта",
+        "excitation": 0.819751983591612
+      },
+      "M_fe274efc16b045cdac9c95d819e117e3": {
+        "semantic": "фок",
+        "excitation": 0.819751983591612
+      },
+      "N_022dcf7bfde74fd18cf6363194de7ec7": {
+        "semantic": "— на помощь!(RECIPIENT=помощь)",
+        "excitation": 0.9078462647185236
+      },
+      "N_06c1feb41d854b4e83385bb8845c7747": {
+        "semantic": "убивать()",
+        "excitation": 0.9893152444804425
+      },
+      "N_09da9a483aeb4d1188069868e6886362": {
+        "semantic": "направились(SUBJECT=несколько матросов, LOCATION=люк)",
+        "excitation": 0.8511782514611653
+      },
+      "N_11b7a0d7ca1c4e17b87806611018b562": {
+        "semantic": "вырвался(SUBJECT=Зурита, SOURCE=толпа)",
+        "excitation": 0.7644824689438522
+      },
+      "N_12bf714b6c8f4e6da083fb1589372b39": {
+        "semantic": "ударил(SUBJECT=Зурита, OBJECT=Зурита, AUXILLIARY=голова, TOOL=свободной ногой)",
+        "excitation": 0.7980474711597989
+      },
+      "N_16befc93b416427c8a94fa0cb8d14ffd": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_aef8278d398c449b8c9ae3e834c53997[NOT (были(SUBJECT=Они, STATE=вооружены)); NOT (вооружены(OBJECT=Они)); были(SUBJECT=Они, STATE=вооружены, AMOUNT=много)])",
+        "excitation": 0.36793459791305316
+      },
+      "N_1e0736b1836946349c1d5678f2688abd": {
+        "semantic": "бранясь(HOW-TO=отчаянно)",
+        "excitation": 0.8066665055574966
+      },
+      "N_2208b352d5f04e9f8814b17cba4d20a4": {
+        "semantic": "продолжала(SUBJECT=лодка, OBJECT=Идем(SUBJECT=лодка, LOCATION=Медуза))",
+        "excitation": 0.9477057292908292
+      },
+      "N_2240e0221dd348c3b64c6dbcaa71878f": {
+        "semantic": "стоял(SUBJECT=Зурита, AUXILLIARY=фок, LOCATION=борт, HOW-TO=мачта)",
+        "excitation": 0.8885496773042323
+      },
+      "N_26cba9ed2f19483fa7a1738213176fb2": {
+        "semantic": "отражать(SUBJECT=Зурита, OBJECT=нападение, AUXILLIARY=новых врагов, HOW-TO=кулак)",
+        "excitation": 0.38935955002034073
+      },
+      "N_275a4cc2057b4924b3e9ea141fdb0d7d": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_efd42dfad1f24a6a91294da4227fd01d[подняться(SUBJECT=Зурита, LOCATION=марс); успел(SUBJECT=Зурита, OBJECT=подняться(SUBJECT=Зурита, LOCATION=марс)); уселся(LOCATION=там); бранясь(HOW-TO=отчаянно)])",
+        "excitation": 0.4009525850723461
+      },
+      "N_33ac21545fd340cc8c6483c5a9c3c4a0": {
+        "semantic": "Нельзя(OBJECT=Зурита, AUXILLIARY=этих непрошеных свидетелей, HOW-TO=глаз)",
+        "excitation": 0.9893152444804425
+      },
+      "N_36f75df10c52473daf82496c8e7d6673": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_3ffbede78e224b11872405688c1e816e[приближалась(SUBJECT=лодка, LOCATION=Медуза); были(SUBJECT=лодка, STATE=вооруженная); вероятно(SUBJECT=лодка, STATE=военная)])",
+        "excitation": 0.48648381459621354
+      },
+      "N_3b1171efb0404cfd91025df7a6f3fe14": {
+        "semantic": "точно(SUBJECT=штурман, HOW-TO=ища(SUBJECT=штурман, OBJECT=неожиданной помощи))",
+        "excitation": 0.8696632455520925
+      },
+      "N_3b6cf6496ac7480fb45da5142e1e8e51": {
+        "semantic": "уселся(LOCATION=там)",
+        "excitation": 0.8066665055574966
+      },
+      "N_412843e7a52e462881e45f058b466d8d": {
+        "semantic": "ища(SUBJECT=штурман, OBJECT=неожиданной помощи)",
+        "excitation": 0.35947403926741195
+      },
+      "N_467cacef74244724a80129c67c021b03": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.45611736123687113
+      },
+      "N_4d494ba531f34e3a9ce39fe30f2e52f8": {
+        "semantic": "отбежав(SUBJECT=Зурита, AMOUNT=несколько шагов)",
+        "excitation": 0.7644824689438522
+      },
+      "N_5155a84babda4258a59e7afcf1a2c227": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_71f84ac111ee4dd18d47bcae9eafd638[Идем(SUBJECT=дверь); взломаем(OBJECT=дверь)])",
+        "excitation": 0.41855661780449693
+      },
+      "N_5557156280e74513be753bb5bec1ddb3": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=показались(SUBJECT=шхуна, OBJECT=вооруженные матросы, SOURCE=люк, TIME=уже))",
+        "excitation": 0.4761434322883079
+      },
+      "N_5721cd28591f49498b96c5a0dfdbcdb8": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=— на помощь!(RECIPIENT=помощь))",
+        "excitation": 0.45124385874382944
+      },
+      "N_5c125eb6690a4ad9a9ea49a6c45f5ac0": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3924301987306086
+      },
+      "N_5cf870c358544fc7b1d53e908c341e90": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_581c89fba9374a3bb86c657ad77a2eda[убивать(OBJECT=Зурита, AUXILLIARY=этих непрошеных свидетелей, HOW-TO=глаз); были(OBJECT=убивать(OBJECT=Зурита, AUXILLIARY=этих непрошеных свидетелей, HOW-TO=глаз)); Нельзя(OBJECT=Зурита, AUXILLIARY=этих непрошеных свидетелей, HOW-TO=глаз)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_600ade4d86f54d81a9fe49d45d3dc117": {
+        "semantic": "начал(SUBJECT=Зурита, OBJECT=отражать(SUBJECT=Зурита, OBJECT=нападение, AUXILLIARY=новых врагов, HOW-TO=кулак))",
+        "excitation": 0.7848603974612172
+      },
+      "N_633e677c4d65438ba35886e9e315ee90": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=направились(SUBJECT=несколько матросов, LOCATION=люк))",
+        "excitation": 0.4230770931103056
+      },
+      "N_63ae16a33e384aa5afc2ad4eefffefbe": {
+        "semantic": "ухватил(SUBJECT=матрос, OBJECT=матрос, HOW-TO=нога)",
+        "excitation": 0.7980474711597989
+      },
+      "N_695d25cfb64e49d1a9d6dfea6aa5185f": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_c559c8118541468db9168250b13d6080[выпустили(SUBJECT=матрос, OBJECT=свою жертву, HOW-TO=стон); упал(LOCATION=палуба)])",
+        "excitation": 0.38408895866816184
+      },
+      "N_6bc5981a6ff849238a4216d32d2fcbcc": {
+        "semantic": "шумели(SUBJECT=матрос)",
+        "excitation": 0.8241848403633754
+      },
+      "N_6c6cb54d9606434fac4a8e25284586ac": {
+        "semantic": "были(OBJECT=убивать(OBJECT=Зурита, AUXILLIARY=этих непрошеных свидетелей, HOW-TO=глаз))",
+        "excitation": 0.9893152444804425
+      },
+      "N_7081062d21364c07bdded4ff1a1dd261": {
+        "semantic": "поступить(HOW-TO=дальше)",
+        "excitation": 0.8241848403633754
+      },
+      "N_747fb04a6423445d8a2c0b85b7826d16": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.4464224284334498
+      },
+      "N_789b505e7ab94ac28163c66590dd9cbb": {
+        "semantic": "заметят(OBJECT=штурман)",
+        "excitation": 0.9375797252688727
+      },
+      "N_78a62955ea394500aa318c780f10a229": {
+        "semantic": "убивать(OBJECT=Зурита, AUXILLIARY=этих непрошеных свидетелей, HOW-TO=глаз)",
+        "excitation": 0.4168847993519881
+      },
+      "N_7d21760c9e4d420da84c31d2b6b9dce2": {
+        "semantic": "стоял(SUBJECT=человек, LOCATION=мостик)",
+        "excitation": 0.8885496773042323
+      },
+      "N_7e9de1949f56447280bcaeaf0f5aadd6": {
+        "semantic": "взломаем(OBJECT=дверь)",
+        "excitation": 0.8420836199407382
+      },
+      "N_8549072205b94a2e9ae5e9d289531085": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=вцепились(SUBJECT=матрос, OBJECT=спина, AUXILLIARY=Зурита, AMOUNT=два, HOW-TO=в))",
+        "excitation": 0.3759250145579746
+      },
+      "N_87bdc34553b040e09b156b9f5db4c440": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_53669ff5b45d48f6bb3bcef824264e29[есть(OBJECT=ружьё, LOCATION=капитанской каюте); кричал(SUBJECT=штурман); перекричать(OBJECT=других); стараясь(SUBJECT=штурман, PURPOSE=перекричать(OBJECT=других))])",
+        "excitation": 0.41408444267216293
+      },
+      "N_89499bd7827a4126a647459a17905a1e": {
+        "semantic": "думал(SUBJECT=Зурита)",
+        "excitation": 0.8790557412352547
+      },
+      "N_8d7aaf2a9c7d49ad986f160ea0131e0a": {
+        "semantic": "торжествовал(SUBJECT=Зурита)",
+        "excitation": 1.0
+      },
+      "N_8f430741dcab4a3cb7c6b6620cac26af": {
+        "semantic": "стараясь(SUBJECT=штурман, PURPOSE=перекричать(OBJECT=других))",
+        "excitation": 0.8330861623346475
+      },
+      "N_9043cd05bdbd4204bf933afb8a418182": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_e4c5146c9acf4af38b3749d5e1d29110[одолеть(SUBJECT=Зурита, OBJECT=Зурита, AMOUNT=легко, HOW-TO=так); оказалось(SUBJECT=Зурита, OBJECT=одолеть(SUBJECT=Зурита, OBJECT=Зурита, AMOUNT=легко, HOW-TO=так), STATE=легко, HOW-TO=так)])",
+        "excitation": 0.37190834768373654
+      },
+      "N_9221263a0dd8447f8eb1c382ca60947e": {
+        "semantic": "были(SUBJECT=матрос, STATE=оглушенный)",
+        "excitation": 0.9893152444804425
+      },
+      "N_92a20382a8e04c039ed1d670f3286f42": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_6552afa697c4499dad8202d172e73386[убивать(); закричал(SUBJECT=Зурита, HOW-TO=всей силы)])",
+        "excitation": 0.46104349830008917
+      },
+      "N_931c86f8e1484ba890c9de5fce3620b9": {
+        "semantic": "высыпали(SUBJECT=человек, LOCATION=палуба)",
+        "excitation": 0.9682870056284307
+      },
+      "N_948d43403fdc4acfb4d0ad241ed60ec7": {
+        "semantic": "выпрямился(SUBJECT=Зурита)",
+        "excitation": 0.7810846952070183
+      },
+      "N_959ce005adb7436bb628e413ef59e479": {
+        "semantic": "вероятно(SUBJECT=лодка, STATE=военная)",
+        "excitation": 0.9787446529613976
+      },
+      "N_99ef4342108b488eb99119374e6b9054": {
+        "semantic": "упал(SUBJECT=матрос, LOCATION=палуба)",
+        "excitation": 0.7980474711597989
+      },
+      "N_9d6082a7aac947f0b8547560859618b7": {
+        "semantic": "опрокинулся(OBJECT=край, AUXILLIARY=борт, LOCATION=назад, HOW-TO=всей силы)",
+        "excitation": 0.7644824689438522
+      },
+      "N_9e974d2b43b4431c923e513ba5fa64d7": {
+        "semantic": "закричал(SUBJECT=Зурита, HOW-TO=всей силы)",
+        "excitation": 0.9275619151242809
+      },
+      "N_9efe780d74ed49e2a4612463ccc0753b": {
+        "semantic": "показались(SUBJECT=шхуна, OBJECT=вооруженные матросы, SOURCE=люк, TIME=уже)",
+        "excitation": 0.9579410957005264
+      },
+      "N_9f14b36459b940dbaaf47c5ccf9d8197": {
+        "semantic": "отступал(SUBJECT=матрос, SOURCE=мачта, LOCATION=фок, HOW-TO=медленно)",
+        "excitation": 0.7895205290374553
+      },
+      "N_a3d37b227958418abafdd65cae8c44f6": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.40966005163775854
+      },
+      "N_a5f3ae892a384a729935db738b094b37": {
+        "semantic": "упал(LOCATION=палуба)",
+        "excitation": 0.7980474711597989
+      },
+      "N_a74331a7e65644e1ab5c1fdf164447fb": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_71ce6ee9ee8e4a138867b7d4631c5d09[выпрямился(SUBJECT=Зурита); отражать(SUBJECT=Зурита, OBJECT=нападение, AUXILLIARY=новых врагов, HOW-TO=кулак); начал(SUBJECT=Зурита, OBJECT=отражать(SUBJECT=Зурита, OBJECT=нападение, AUXILLIARY=новых врагов, HOW-TO=кулак))])",
+        "excitation": 0.3882371779986807
+      },
+      "N_a80988e0b86e4610a51d7390e2e1c6f5": {
+        "semantic": "были(SUBJECT=лодка, STATE=вооруженная)",
+        "excitation": 0.9893152444804425
+      },
+      "N_a9ad9a46bae54154909175425d579b5e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_da86233f42584055b87d5b837f77b7ce[ухватил(SUBJECT=матрос, OBJECT=матрос, HOW-TO=нога); ударил(SUBJECT=Зурита, OBJECT=Зурита, AUXILLIARY=голова, TOOL=свободной ногой); упал(SUBJECT=матрос, LOCATION=палуба); были(SUBJECT=матрос, STATE=оглушенный)])",
+        "excitation": 0.3966685047259134
+      },
+      "N_ab3b147e769845bb9b6781496d089abc": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_66624c5f3e5a43feafbd9c722f0bd07c[отступал(SUBJECT=матрос, SOURCE=мачта, LOCATION=фок, HOW-TO=медленно); подниматься(HOW-TO=ванта); стал(OBJECT=подниматься(HOW-TO=ванта), STATE=обезьяна, AMOUNT=ловкость, HOW-TO=вдруг)])",
+        "excitation": 0.472546374846924
+      },
+      "N_acad05fc00884f218f4d9b7fc2ca762e": {
+        "semantic": "приближалась(SUBJECT=лодка, LOCATION=Медуза)",
+        "excitation": 0.9787446529613976
+      },
+      "N_acc986de2243455fabfb3b73cba54946": {
+        "semantic": "успел(SUBJECT=Зурита, OBJECT=подняться(SUBJECT=Зурита, LOCATION=марс))",
+        "excitation": 0.8066665055574966
+      },
+      "N_ada80f46315247d08a7acd732289f0bb": {
+        "semantic": "взглянул(SUBJECT=штурман, OBJECT=море)",
+        "excitation": 0.8696632455520925
+      },
+      "N_b09ca7dc2e5a4dff8635ffd3c5d501e3": {
+        "semantic": "Идем(SUBJECT=лодка, LOCATION=Медуза)",
+        "excitation": 0.3917327865555247
+      },
+      "N_b0cfd3586599491f8cb464b962a1998c": {
+        "semantic": "набросились(SUBJECT=несколько матросов, OBJECT=Педро, TIME=сразу, CAUSE=штурман, HOW-TO=знак)",
+        "excitation": 0.7323291739439173
+      },
+      "N_b138a5186b56423a97373bc70f94ff5e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=набросились(SUBJECT=несколько матросов, OBJECT=Педро, TIME=сразу, CAUSE=штурман, HOW-TO=знак))",
+        "excitation": 0.3640033066871654
+      },
+      "N_b23f94cc7c9744afa5482fb39284c9a1": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=торжествовал(SUBJECT=Зурита))",
+        "excitation": 0.49704875845222196
+      },
+      "N_b3e20036713d4fd8b4ae3760217fd710": {
+        "semantic": "есть(OBJECT=ружьё, LOCATION=капитанской каюте)",
+        "excitation": 0.8330861623346475
+      },
+      "N_b4b1026de2034fd3b0b86d746bb11749": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.40528293413987976
+      },
+      "N_bdbe2ef7db214c7687f3fe68e7adb34d": {
+        "semantic": "остановились(SUBJECT=человек, LOCATION=(палуба) AND (теперь))",
+        "excitation": 0.9682870056284307
+      },
+      "N_be70ea0972d54bcfb5d2920522510bc2": {
+        "semantic": "очевидно(LOCATION=подводной лодке)",
+        "excitation": 0.9375797252688727
+      },
+      "N_bfba201030a049e5b006969e2694136e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_c38b530e0ebc4e8ca374ddc0fcff6074[взглянул(SUBJECT=штурман, OBJECT=море); ища(SUBJECT=штурман, OBJECT=неожиданной помощи); точно(SUBJECT=штурман, HOW-TO=ища(SUBJECT=штурман, OBJECT=неожиданной помощи))])",
+        "excitation": 0.4322650364731976
+      },
+      "N_c83e8b3260af4f289449dbe1d442ada0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_fa0ef822f79a43bcaa7c79a8f0aeed2b[шумели(SUBJECT=матрос); обсуждая(SUBJECT=матрос); поступить(HOW-TO=дальше)])",
+        "excitation": 0.4932937703245298
+      },
+      "N_c8cd517a678240429ab883b8b3d89204": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_6f58ca98a5214222adc069f2f3fe778e[очевидно(LOCATION=подводной лодке); заметят(OBJECT=штурман)])",
+        "excitation": 0.4660228383948687
+      },
+      "N_cdc9dea0a8bf40eb86c87b3f889df9b0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_7b25bfd7e3fe45809acc8216bcf62399[NOT (погрузилась(SUBJECT=дверь, LOCATION=вода, CAUSE=Только)); думал(SUBJECT=Зурита)])",
+        "excitation": 0.5261352789844793
+      },
+      "N_cf09be0ca14c4cdf85c4b008197f7b4f": {
+        "semantic": "кричал(SUBJECT=штурман)",
+        "excitation": 0.8330861623346475
+      },
+      "N_d6f2704cb22f4c7386144a24ab3cbc64": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=стоял(SUBJECT=Зурита, AUXILLIARY=фок, LOCATION=борт, HOW-TO=мачта))",
+        "excitation": 0.36011402034690254
+      },
+      "N_db9613ef50be43999fffaaf29eddfe12": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_533b0efdd7c946af9e5ee2653f951c6c[Пропал(); думал(SUBJECT=Зурита); подстрелят(SUBJECT=Зурита)])",
+        "excitation": 0.4276463902388288
+      },
+      "N_dd91a6d6427d4ad18c041935b898fe8c": {
+        "semantic": "вцепились(SUBJECT=матрос, OBJECT=спина, AUXILLIARY=Зурита, AMOUNT=два, HOW-TO=в)",
+        "excitation": 0.7563141606641994
+      },
+      "N_dfba4d3415974b668bdbba237edc052f": {
+        "semantic": "Пропал()",
+        "excitation": 0.8603711063890234
+      },
+      "N_e06abbace6114874a305bf0065d9590e": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.4369335647912812
+      },
+      "N_e594b0d0781844d1a76368f2e6c718b5": {
+        "semantic": "Идем(SUBJECT=дверь)",
+        "excitation": 0.9477057292908292
+      },
+      "N_e59ac613e2d346ac8515a35174bd68fa": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_563571ee56ce4f0d94aadb0d91227fc2[высыпали(SUBJECT=человек, LOCATION=палуба); остановились(SUBJECT=человек, LOCATION=(палуба) AND (теперь)); нерешительно(SUBJECT=человек, TIME=теперь)])",
+        "excitation": 0.48128585397303125
+      },
+      "N_e9fd9ffe4cc94e209e257f2f941abfa2": {
+        "semantic": "нерешительно(SUBJECT=человек, TIME=теперь)",
+        "excitation": 0.9682870056284307
+      },
+      "N_ea272c9d242a4a33ad55d97c5765f8bd": {
+        "semantic": "оказалось(SUBJECT=Зурита, OBJECT=одолеть(SUBJECT=Зурита, OBJECT=Зурита, AMOUNT=легко, HOW-TO=так), STATE=легко, HOW-TO=так)",
+        "excitation": 0.7482331287615229
+      },
+      "N_eea00a7d87eb4ef89679a0af58824e93": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=стоял(SUBJECT=человек, LOCATION=мостик))",
+        "excitation": 0.44165251392719124
+      },
+      "N_eebdb91f3855433caac66629c0c84c29": {
+        "semantic": "стал(OBJECT=подниматься(HOW-TO=ванта), STATE=обезьяна, AMOUNT=ловкость, HOW-TO=вдруг)",
+        "excitation": 0.7895205290374553
+      },
+      "N_eff1a0a4e4be4218bda133de6ff8cb3b": {
+        "semantic": "были(SUBJECT=Они, STATE=вооружены, AMOUNT=много)",
+        "excitation": 0.9893152444804425
+      },
+      "N_f7fcd0b114734833a29dd7de943e1f29": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_139c7dc3499f4feb962d66a91c064c41[вырвался(SUBJECT=Зурита, SOURCE=толпа); отбежав(SUBJECT=Зурита, AMOUNT=несколько шагов); опрокинулся(OBJECT=край, AUXILLIARY=борт, LOCATION=назад, HOW-TO=всей силы)])",
+        "excitation": 0.3799850620470311
+      },
+      "N_f7fce0d5136d43eb9c9165e3148f9ed5": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_13705aac8b334bb0bd5f41aee0fab956[NOT (убавляя(SUBJECT=лодка, HOW-TO=ход)); Идем(SUBJECT=лодка, LOCATION=Медуза); продолжала(SUBJECT=лодка, OBJECT=Идем(SUBJECT=лодка, LOCATION=Медуза)); прямо(SUBJECT=лодка, LOCATION=Медуза)])",
+        "excitation": 0.4710559561220643
+      },
+      "N_fa33c4c3e2a7452f93f59011d25fcd93": {
+        "semantic": "выпустили(SUBJECT=матрос, OBJECT=свою жертву, HOW-TO=стон)",
+        "excitation": 0.7727389961986633
+      },
+      "N_fb4c8f25d84245169b425e747ef0605e": {
+        "semantic": "подстрелят(SUBJECT=Зурита)",
+        "excitation": 0.8603711063890234
+      },
+      "N_ff2796e91a924a1c94ea195917381b19": {
+        "semantic": "прямо(SUBJECT=лодка, LOCATION=Медуза)",
+        "excitation": 0.9477057292908292
+      },
+      "N_ffc420547e344bebb6a505717481caa6": {
+        "semantic": "обсуждая(SUBJECT=матрос)",
+        "excitation": 0.8241848403633754
+      },
+      "S_04cc7550b9284e75a57d5aa8f55f70b2": {
+        "semantic": "начал",
+        "excitation": 0.7376506381974938
+      },
+      "S_0b35d2e9a5f9492baaf8200af3959c26": {
+        "semantic": "высыпали",
+        "excitation": 0.9144431225487593
+      },
+      "S_1727c54a75d349f4b708d35beafe5889": {
+        "semantic": "приближалась",
+        "excitation": 0.9243192477328055
+      },
+      "S_19cd15ba23f54fd3bf8c302556212c3e": {
+        "semantic": "есть",
+        "excitation": 0.7867604410771099
+      },
+      "S_1eaedb211e6347e2b9bd8310e9ffd5c0": {
+        "semantic": "ища",
+        "excitation": 0.8213035692990754
+      },
+      "S_1fcdd8bc3b7a467abeb676ac1a980df6": {
+        "semantic": "заметят",
+        "excitation": 0.9320456767897374
+      },
+      "S_2a0fbde624684c07ac1061ea2eed943f": {
+        "semantic": "ухватил",
+        "excitation": 0.7536701589792361
+      },
+      "S_2db81ea1ed0a49859e8fd2be767e926b": {
+        "semantic": "взломаем",
+        "excitation": 0.7952575738285443
+      },
+      "S_2ea57814b4a64a238de422eae2b230fa": {
+        "semantic": "Скорей",
+        "excitation": 0.866622986350055
+      },
+      "S_304c8f3a2f514d48af6ae6368aa95b74": {
+        "semantic": "пройти",
+        "excitation": 0.8482026140235546
+      },
+      "S_3f3d64715ea4437fa4f7602597502075": {
+        "semantic": "думал",
+        "excitation": 0.8738671295825624
+      },
+      "S_406c0fd2dfa74cbda9953c50fb97c8ed": {
+        "semantic": "стоял",
+        "excitation": 0.8833050278543825
+      },
+      "S_41171726e5b44c0f80b8d5fad020165d": {
+        "semantic": "ударил",
+        "excitation": 0.7536701589792361
+      },
+      "S_414e8c1d160747038c5ee0dbb474b604": {
+        "semantic": "показались",
+        "excitation": 0.904672521347785
+      },
+      "S_426f3b9b7d6d452d822e7705ca82ecbf": {
+        "semantic": "погрузилась",
+        "excitation": 0.8301737731034342
+      },
+      "S_432f5912143942c9a8a7e69428fdaba0": {
+        "semantic": "отступал",
+        "excitation": 0.7456173775881568
+      },
+      "S_44a37895b2b34130aaf6f07a0bd7a13d": {
+        "semantic": "Пропал",
+        "excitation": 0.8125281414537748
+      },
+      "S_47693087a92d4410a627a11544a706f1": {
+        "semantic": "взглянул",
+        "excitation": 0.8213035692990754
+      },
+      "S_4abd0cf4fd204543afd02e0c55b88a2c": {
+        "semantic": "подстрелят",
+        "excitation": 0.8125281414537748
+      },
+      "S_4b63aab58ab14a21a538ca7f13048225": {
+        "semantic": "продолжала",
+        "excitation": 0.8950063166319221
+      },
+      "S_552152c0cfe7447c80bdad96e1837100": {
+        "semantic": "опрокинулся",
+        "excitation": 0.7219716178893595
+      },
+      "S_6c52e9d5cf4f43eb96833e89a1754198": {
+        "semantic": "прямо",
+        "excitation": 0.8950063166319221
+      },
+      "S_6ebc09b5a1ae4c67baa74308f049b329": {
+        "semantic": "бранясь",
+        "excitation": 0.761809911637458
+      },
+      "S_722657c545334643847bb579bc7e94d5": {
+        "semantic": "вероятно",
+        "excitation": 0.9243192477328055
+      },
+      "S_747026640db040328b913a821e4f5e10": {
+        "semantic": "вырвался",
+        "excitation": 0.7219716178893595
+      },
+      "S_749aba5bb91a4f72993ad81b33290e85": {
+        "semantic": "вцепились",
+        "excitation": 0.7142575276601524
+      },
+      "S_74bd5cc01d8c4be9a4dde74ce51702d9": {
+        "semantic": "отражать",
+        "excitation": 0.7376506381974938
+      },
+      "S_7cdbd1f11b4f463b871abb9764cc97eb": {
+        "semantic": "вооружены",
+        "excitation": 0.9729676291924271
+      },
+      "S_812f1f0250e14866b3dad263251c1022": {
+        "semantic": "закричал",
+        "excitation": 0.8759826467701692
+      },
+      "S_84738cdc9d554bd197c57fbaff89a89e": {
+        "semantic": "убивать",
+        "excitation": 0.9834758279737207
+      },
+      "S_84c64a78994a48d98c7f610fefecf50c": {
+        "semantic": "набросились",
+        "excitation": 0.691606282705615
+      },
+      "S_87023e270d8e41baba45c30734caa803": {
+        "semantic": "уселся",
+        "excitation": 0.761809911637458
+      },
+      "S_896ec2d093d345c5b498c6a39590c24a": {
+        "semantic": "стараясь",
+        "excitation": 0.7867604410771099
+      },
+      "S_8a3c2fc41be744018317f85bd6bc3073": {
+        "semantic": "отбежав",
+        "excitation": 0.7219716178893595
+      },
+      "S_8b445667d0bd48aa8c7e8de992251df2": {
+        "semantic": "торжествовал",
+        "excitation": 0.9443926410592216
+      },
+      "S_8c803facd7c14c7190e491d0b46eb802": {
+        "semantic": "направились",
+        "excitation": 0.8038464769095808
+      },
+      "S_8f779be783a04c2d8aea9e1d1ada9fa1": {
+        "semantic": "— на помощь!",
+        "excitation": 0.8573633316132757
+      },
+      "S_90162ef65d8248ab926b5c5b5c03bd6c": {
+        "semantic": "подниматься",
+        "excitation": 0.7456173775881568
+      },
+      "S_954b6344662041dfbd831c7a55e09b9d": {
+        "semantic": "обсуждая",
+        "excitation": 0.7783540981117416
+      },
+      "S_9969dea924a445c7bfde3dd1f7c0af80": {
+        "semantic": "кричал",
+        "excitation": 0.7867604410771099
+      },
+      "S_9a97cb082ddc435a8286ae547640d85c": {
+        "semantic": "очевидно",
+        "excitation": 0.8854433929502501
+      },
+      "S_9bf39af166c14a0ba5efd19b2216949c": {
+        "semantic": "успел",
+        "excitation": 0.761809911637458
+      },
+      "S_9d15933386184a55aab98dd3a303ac90": {
+        "semantic": "Идем",
+        "excitation": 0.9421119122441286
+      },
+      "S_a0d47da381a54a9ea57cfe60d118323f": {
+        "semantic": "поступить",
+        "excitation": 0.7783540981117416
+      },
+      "S_ac39c686db80439698741869969f9c46": {
+        "semantic": "упал",
+        "excitation": 0.7933370094518268
+      },
+      "S_ad7209900aa5476783d1c4a4ebe74eff": {
+        "semantic": "были",
+        "excitation": 0.9834758279737207
+      },
+      "S_bd1601e3266046f894b521b5d2cac7e9": {
+        "semantic": "стал",
+        "excitation": 0.7456173775881568
+      },
+      "S_c3b1baad7c984650a96e3e31899c6d24": {
+        "semantic": "выпрямился",
+        "excitation": 0.7376506381974938
+      },
+      "S_c587eda3bbe949e69218ea4be9a8892e": {
+        "semantic": "остановились",
+        "excitation": 0.9144431225487593
+      },
+      "S_ca4a582aa37b4a159221664372664a33": {
+        "semantic": "Нельзя",
+        "excitation": 0.9343020365750345
+      },
+      "S_caac8de249e240eea30b988d7019dc47": {
+        "semantic": "выпустили",
+        "excitation": 0.729769021469508
+      },
+      "S_dfcf714b07ff493480462095a1062390": {
+        "semantic": "точно",
+        "excitation": 0.8213035692990754
+      },
+      "S_e503e7418703476b9af412a124a7fb72": {
+        "semantic": "нерешительно",
+        "excitation": 0.9144431225487593
+      },
+      "S_e63f2a2ebf65475c8e202fb930cef7e6": {
+        "semantic": "убавляя",
+        "excitation": 0.8950063166319221
+      },
+      "S_e6ca481a12244eab9cbbc34c46920540": {
+        "semantic": "шумели",
+        "excitation": 0.7783540981117416
+      },
+      "S_e7f072b124f043cebc4817cba19ef984": {
+        "semantic": "оказалось",
+        "excitation": 0.7066258605991
+      },
+      "S_ed3536bf35b24b9b930793d8b389aced": {
+        "semantic": "подняться",
+        "excitation": 0.8193201032755171
+      },
+      "S_f445effc1bae464980dd288a48463e3b": {
+        "semantic": "одолеть",
+        "excitation": 0.7066258605991
+      },
+      "S_f6d30402dbda4a6e94e004a5ec7396ba": {
+        "semantic": "перекричать",
+        "excitation": 0.7867604410771099
+      },
+      "T_084a3f846a64449ab6b5d2dc1a6d5e1a": {
+        "semantic": "оказалось",
+        "excitation": 0.7090719357635662
+      },
+      "T_0d02c4e5dff84311ab0623e91c409c0e": {
+        "semantic": "приближалась",
+        "excitation": 0.927518896205904
+      },
+      "T_0d1c4818401f464988f621c521520f6a": {
+        "semantic": "вероятно",
+        "excitation": 0.927518896205904
+      },
+      "T_111998cba6174d0d952f714f07f7e492": {
+        "semantic": "стараясь",
+        "excitation": 0.7894839122697319
+      },
+      "T_15fa0d0f7ffe4282a4f9ba0ad25943ae": {
+        "semantic": "взломаем",
+        "excitation": 0.7980104589253998
+      },
+      "T_160bc8bbbca6444ebd8b0ec0be5f5d11": {
+        "semantic": "отражать",
+        "excitation": 0.7402041095700499
+      },
+      "T_16cc9cc6b99c483ebcf80f7ba1fe34e9": {
+        "semantic": "начал",
+        "excitation": 0.7402041095700499
+      },
+      "T_19857228956842fcb6ba6673563d9e80": {
+        "semantic": "— на помощь!",
+        "excitation": 0.8603312036787073
+      },
+      "T_2e02f24936ef4e43995629bade2b438d": {
+        "semantic": "шумели",
+        "excitation": 0.781048469680506
+      },
+      "T_38d0e7ed71774571b55c43052a66d91c": {
+        "semantic": "погрузилась",
+        "excitation": 0.8330475250587592
+      },
+      "T_38d8c11afd7e4daaaa5dddc93c3bd7b0": {
+        "semantic": "опрокинулся",
+        "excitation": 0.7244708143417389
+      },
+      "T_3f36e9f922764215973bf0d01544fd89": {
+        "semantic": "подстрелят",
+        "excitation": 0.8153408108139863
+      },
+      "T_42704220b6be4ff39be911399f613a63": {
+        "semantic": "ухватил",
+        "excitation": 0.7562790839576052
+      },
+      "T_433fa389ad0c4240af678bdb7e2fa498": {
+        "semantic": "ударил",
+        "excitation": 0.7562790839576052
+      },
+      "T_478583ba9b5b4e2a886476b101fc17d0": {
+        "semantic": "одолеть",
+        "excitation": 0.7090719357635662
+      },
+      "T_47e54cfd20684061b2f03e9a72531324": {
+        "semantic": "обсуждая",
+        "excitation": 0.781048469680506
+      },
+      "T_4d26fd7d4eb043a38754b46cad86ec0a": {
+        "semantic": "нерешительно",
+        "excitation": 0.917608583560174
+      },
+      "T_4e5aaf2336534d7c852b4ca30c67c07f": {
+        "semantic": "набросились",
+        "excitation": 0.694000365693578
+      },
+      "T_524f25f56d1841879ea3f118d4b19831": {
+        "semantic": "ища",
+        "excitation": 0.8241466159173338
+      },
+      "T_5602400c23654fde9e2911e1f77404e7": {
+        "semantic": "Нельзя",
+        "excitation": 0.9375362417396166
+      },
+      "T_611904dcafa247b28e785a9bb9468399": {
+        "semantic": "вырвался",
+        "excitation": 0.7244708143417389
+      },
+      "T_66a6c234b8724179a54374d05e6448b5": {
+        "semantic": "уселся",
+        "excitation": 0.7644470134034774
+      },
+      "T_6828ab794a9f4380a33281008ac52a20": {
+        "semantic": "продолжала",
+        "excitation": 0.8981044946710021
+      },
+      "T_682af0c164064852838218d5cf73634b": {
+        "semantic": "прямо",
+        "excitation": 0.8981044946710021
+      },
+      "T_6ae0434e3402437292659a35864659e0": {
+        "semantic": "Пропал",
+        "excitation": 0.8153408108139863
+      },
+      "T_6eb09497422e413fb214644ba44d11c8": {
+        "semantic": "торжествовал",
+        "excitation": 0.9476617761328255
+      },
+      "T_769df81ca85d4ca8a019eef04c7d5512": {
+        "semantic": "стал",
+        "excitation": 0.7481984268409632
+      },
+      "T_7809f8850a454f418402cf9ed5ff9e53": {
+        "semantic": "поступить",
+        "excitation": 0.781048469680506
+      },
+      "T_7c8be50f69e54337b15dd4cc1dcc2f16": {
+        "semantic": "заметят",
+        "excitation": 0.9352720712783436
+      },
+      "T_7fa75a690ebb41b78e966d708392adf6": {
+        "semantic": "направились",
+        "excitation": 0.8066290935853211
+      },
+      "T_878d7878081e4ce9b6db3305e3f171dc": {
+        "semantic": "взглянул",
+        "excitation": 0.8241466159173338
+      },
+      "T_8d23ddc0c3344cf39c0fe706fef0a65d": {
+        "semantic": "успел",
+        "excitation": 0.7644470134034774
+      },
+      "T_91e0ccab55824258af43e23272299f11": {
+        "semantic": "вцепились",
+        "excitation": 0.7167300208094427
+      },
+      "T_91ea84d86ebb49b28290a305e680a727": {
+        "semantic": "бранясь",
+        "excitation": 0.7644470134034774
+      },
+      "T_95b148f2f59e40b3b69004f398bf8284": {
+        "semantic": "кричал",
+        "excitation": 0.7894839122697319
+      },
+      "T_a85366f4328d475db1dda7ad56a4a30b": {
+        "semantic": "остановились",
+        "excitation": 0.917608583560174
+      },
+      "T_ac9f6d5b89574c3cacbb95f5da5e50cf": {
+        "semantic": "стоял",
+        "excitation": 0.8863627003961869
+      },
+      "T_ad8101dd41f7483f8a1d66a023de88c9": {
+        "semantic": "высыпали",
+        "excitation": 0.917608583560174
+      },
+      "T_b02990d880bd45b1ab3ed2967f7816cf": {
+        "semantic": "думал",
+        "excitation": 0.8768921316407987
+      },
+      "T_b0d41017858548e986b6eae904c399b4": {
+        "semantic": "показались",
+        "excitation": 0.907804160182186
+      },
+      "T_b261bf99dac34bcdbc3c95c8c8443041": {
+        "semantic": "очевидно",
+        "excitation": 0.8885084677144266
+      },
+      "T_b3e61339aa89472488fb7d8b29b69094": {
+        "semantic": "подняться",
+        "excitation": 0.8221562838742162
+      },
+      "T_b4e66238289d4eb1a6951ffa8f7135e3": {
+        "semantic": "пройти",
+        "excitation": 0.8511387751015537
+      },
+      "T_b59a5a032a114cfaaf59b97abefeb900": {
+        "semantic": "выпустили",
+        "excitation": 0.7322952096247222
+      },
+      "T_b97ab6482a5d4631a25c6b557b2ee9ee": {
+        "semantic": "точно",
+        "excitation": 0.8241466159173338
+      },
+      "T_bc846ec13a6344c385a5a8952283f45b": {
+        "semantic": "Скорей",
+        "excitation": 0.8696229118864196
+      },
+      "T_c6fa5fa1481748719cef8047f973edf6": {
+        "semantic": "есть",
+        "excitation": 0.7894839122697319
+      },
+      "T_d4b1e86df4e749f2bbf88bc380c9fbcf": {
+        "semantic": "были",
+        "excitation": 0.9868802544627543
+      },
+      "T_d50b91914a4b4d8b9510cdc937e39904": {
+        "semantic": "выпрямился",
+        "excitation": 0.7402041095700499
+      },
+      "T_d67819dafe4742fe9ca483b61cebc659": {
+        "semantic": "вооружены",
+        "excitation": 0.976335680216741
+      },
+      "T_d68de73c2d1f465da076f0a54da92f21": {
+        "semantic": "отступал",
+        "excitation": 0.7481984268409632
+      },
+      "T_d6c5c17c92e04a9aaac4193475963b12": {
+        "semantic": "убавляя",
+        "excitation": 0.8981044946710021
+      },
+      "T_d74b0e635fd146af93a973f7b3dc072e": {
+        "semantic": "подниматься",
+        "excitation": 0.7481984268409632
+      },
+      "T_daa4c56903334bda98ee90084f618396": {
+        "semantic": "перекричать",
+        "excitation": 0.7894839122697319
+      },
+      "T_e7131facdb0c4c72b9791ba3fd4d2fd0": {
+        "semantic": "убивать",
+        "excitation": 0.9868802544627543
+      },
+      "T_e782afe6725d4642a64eff7ae692521b": {
+        "semantic": "Идем",
+        "excitation": 0.9453731522852651
+      },
+      "T_eb121215eec448e18c71e8b79206d6ff": {
+        "semantic": "отбежав",
+        "excitation": 0.7244708143417389
+      },
+      "T_f394adaf9482431299d38099c281f5a8": {
+        "semantic": "упал",
+        "excitation": 0.7960832462711629
+      },
+      "T_f58110066d314f699c0fb4b52ed59c73": {
+        "semantic": "закричал",
+        "excitation": 0.8790149719598412
+      }
+    },
+    "pending_incoming": {
+      "M_20eb82e2ec524d90898e8307548ca135": 0.15200000000000005,
+      "S_ad7209900aa5476783d1c4a4ebe74eff": 0.85,
+      "N_26785de0eb9140e08353f97929404eb7": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_2f367018a0bf427a9069bf51cf3224af",
+        "kind": "M"
+      },
+      "они": {
+        "uid": "M_9fba1a5708bb4f2eabc95ee62e951e75",
+        "kind": "M"
+      },
+      "она": {
+        "uid": "M_3abb4398cbf2427c9977ec2804e1b47b",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_26785de0eb9140e08353f97929404eb7",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    }
+  ],
+  "semantic_note": "А. Р. Беляев — «Человек-амфибия»: мятеж на «Медузе», paragraph 35",
+  "semantic_family": "document.monolith.public-domain-literary",
+  "semantic_tags": [
+    "document",
+    "monolith",
+    "literary",
+    "public-domain",
+    "graph-graded",
+    "belyaev"
+  ]
+}

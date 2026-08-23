@@ -1,0 +1,2792 @@
+{
+  "index": 86,
+  "input": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+  "status": "OK",
+  "scenario_id": "old_observatory_monolith",
+  "linguistic_candidate_graph": {
+    "text": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "За",
+        "start": 0,
+        "end": 2,
+        "analyses": [
+          {
+            "normal_form": "за",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "окнами",
+        "start": 3,
+        "end": 9,
+        "analyses": [
+          {
+            "normal_form": "окно",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "neut",
+              "ablt",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "усиливался",
+        "start": 10,
+        "end": 20,
+        "analyses": [
+          {
+            "normal_form": "усиливаться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "masc",
+              "intr",
+              "VERB",
+              "impf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "ветер",
+        "start": 21,
+        "end": 26,
+        "analyses": [
+          {
+            "normal_form": "ветер",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.826086
+          },
+          {
+            "normal_form": "ветер",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.173913
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": ";",
+        "start": 26,
+        "end": 27,
+        "analyses": []
+      },
+      {
+        "index": 6,
+        "text": "рама",
+        "start": 28,
+        "end": 32,
+        "analyses": [
+          {
+            "normal_form": "рама",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.857142
+          },
+          {
+            "normal_form": "рам",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "gent",
+              "Geox",
+              "NOUN"
+            ],
+            "score": 0.142857
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "в",
+        "start": 33,
+        "end": 34,
+        "analyses": [
+          {
+            "normal_form": "в",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.999327
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "gent",
+              "NOUN"
+            ],
+            "score": 0.000249
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "loct",
+              "NOUN"
+            ],
+            "score": 5.7e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "datv",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "accs",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "ablt",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "nomn",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "gent",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "datv",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "accs",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "ablt",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "loct",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": "дальней",
+        "start": 35,
+        "end": 42,
+        "analyses": [
+          {
+            "normal_form": "дальний",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "ADJF",
+              "sing",
+              "gent"
+            ],
+            "score": 0.2
+          },
+          {
+            "normal_form": "дальний",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "datv",
+              "sing",
+              "ADJF"
+            ],
+            "score": 0.2
+          },
+          {
+            "normal_form": "дальний",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "ADJF",
+              "femn",
+              "sing"
+            ],
+            "score": 0.2
+          },
+          {
+            "normal_form": "дальний",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "ADJF",
+              "femn",
+              "sing"
+            ],
+            "score": 0.2
+          },
+          {
+            "normal_form": "дальний",
+            "pos": "COMP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "V-ej",
+              "COMP"
+            ],
+            "score": 0.2
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "text": "комнате",
+        "start": 43,
+        "end": 50,
+        "analyses": [
+          {
+            "normal_form": "комната",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "loct",
+              "NOUN"
+            ],
+            "score": 0.818181
+          },
+          {
+            "normal_form": "комната",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "datv",
+              "NOUN"
+            ],
+            "score": 0.181818
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "то",
+        "start": 51,
+        "end": 53,
+        "analyses": [
+          {
+            "normal_form": "то",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.813852
+          },
+          {
+            "normal_form": "то",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.170995
+          },
+          {
+            "normal_form": "тот",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "ADJF",
+              "Subx",
+              "neut",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.012987
+          },
+          {
+            "normal_form": "тот",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "ADJF",
+              "Subx",
+              "neut",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.002164
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": "дрожала",
+        "start": 54,
+        "end": 61,
+        "analyses": [
+          {
+            "normal_form": "дрожать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "impf",
+              "femn",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "text": ",",
+        "start": 61,
+        "end": 62,
+        "analyses": []
+      },
+      {
+        "index": 13,
+        "text": "то",
+        "start": 63,
+        "end": 65,
+        "analyses": [
+          {
+            "normal_form": "то",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.813852
+          },
+          {
+            "normal_form": "то",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.170995
+          },
+          {
+            "normal_form": "тот",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "ADJF",
+              "Subx",
+              "neut",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.012987
+          },
+          {
+            "normal_form": "тот",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "ADJF",
+              "Subx",
+              "neut",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.002164
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "text": "снова",
+        "start": 66,
+        "end": 71,
+        "analyses": [
+          {
+            "normal_form": "снова",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "text": "замирала",
+        "start": 72,
+        "end": 80,
+        "analyses": [
+          {
+            "normal_form": "замирать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "impf",
+              "femn",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "text": ".",
+        "start": 80,
+        "end": 81,
+        "analyses": []
+      },
+      {
+        "index": 17,
+        "text": "Поскольку",
+        "start": 82,
+        "end": 91,
+        "analyses": [
+          {
+            "normal_form": "поскольку",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 18,
+        "text": "защёлка",
+        "start": 92,
+        "end": 99,
+        "analyses": [
+          {
+            "normal_form": "защёлка",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 19,
+        "text": "давно",
+        "start": 100,
+        "end": 105,
+        "analyses": [
+          {
+            "normal_form": "давно",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 20,
+        "text": "не",
+        "start": 106,
+        "end": 108,
+        "analyses": [
+          {
+            "normal_form": "не",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 21,
+        "text": "держалась",
+        "start": 109,
+        "end": 118,
+        "analyses": [
+          {
+            "normal_form": "держаться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "impf",
+              "femn",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 22,
+        "text": "в",
+        "start": 119,
+        "end": 120,
+        "analyses": [
+          {
+            "normal_form": "в",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.999327
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "gent",
+              "NOUN"
+            ],
+            "score": 0.000249
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "loct",
+              "NOUN"
+            ],
+            "score": 5.7e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "datv",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "accs",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "ablt",
+              "NOUN"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "nomn",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "gent",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "datv",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "accs",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "ablt",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "masc",
+              "Fixd",
+              "loct",
+              "NOUN",
+              "plur"
+            ],
+            "score": 1.9e-05
+          }
+        ]
+      },
+      {
+        "index": 23,
+        "text": "пазу",
+        "start": 121,
+        "end": 125,
+        "analyses": [
+          {
+            "normal_form": "паз",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "datv",
+              "NOUN"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "паз",
+            "pos": "NOUN",
+            "case": "loc2",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "loc2",
+              "NOUN"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 24,
+        "text": ",",
+        "start": 125,
+        "end": 126,
+        "analyses": []
+      },
+      {
+        "index": 25,
+        "text": "очередной",
+        "start": 127,
+        "end": 136,
+        "analyses": [
+          {
+            "normal_form": "очередной",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "ADJF",
+              "sing",
+              "gent"
+            ],
+            "score": 0.482758
+          },
+          {
+            "normal_form": "очередной",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "ADJF",
+              "femn",
+              "sing"
+            ],
+            "score": 0.206896
+          },
+          {
+            "normal_form": "очередной",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "ADJF",
+              "femn",
+              "sing"
+            ],
+            "score": 0.103448
+          },
+          {
+            "normal_form": "очередной",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADJF",
+              "sing",
+              "nomn",
+              "masc"
+            ],
+            "score": 0.068965
+          },
+          {
+            "normal_form": "очередной",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "ADJF",
+              "accs"
+            ],
+            "score": 0.068965
+          },
+          {
+            "normal_form": "очередной",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "datv",
+              "sing",
+              "ADJF"
+            ],
+            "score": 0.068965
+          }
+        ]
+      },
+      {
+        "index": 26,
+        "text": "порыв",
+        "start": 137,
+        "end": 142,
+        "analyses": [
+          {
+            "normal_form": "порыв",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.3333333333333333
+          },
+          {
+            "normal_form": "порыв",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.3333333333333333
+          },
+          {
+            "normal_form": "порыть",
+            "pos": "GRND",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "GRND",
+              "past",
+              "tran",
+              "perf"
+            ],
+            "score": 0.3333333333333333
+          }
+        ]
+      },
+      {
+        "index": 27,
+        "text": "распахнул",
+        "start": 143,
+        "end": 152,
+        "analyses": [
+          {
+            "normal_form": "распахнуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "indc",
+              "tran",
+              "sing",
+              "masc",
+              "VERB",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 28,
+        "text": "створку",
+        "start": 153,
+        "end": 160,
+        "analyses": [
+          {
+            "normal_form": "створка",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "accs",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 29,
+        "text": ".",
+        "start": 160,
+        "end": 161,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 4,
+          "text": "За окнами усиливался ветер",
+          "evidence": {
+            "text": "За окнами усиливался ветер",
+            "start": 0,
+            "end": 26
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 3,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "усиливаться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "за",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 6,
+          "end_index": 11,
+          "text": "рама в дальней комнате то дрожала",
+          "evidence": {
+            "text": "рама в дальней комнате то дрожала",
+            "start": 28,
+            "end": 61
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 11,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "дрожать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "рама",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 13,
+          "end_index": 15,
+          "text": "то снова замирала",
+          "evidence": {
+            "text": "то снова замирала",
+            "start": 63,
+            "end": 80
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 15,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "замирать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "то",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL4",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 17,
+          "end_index": 23,
+          "text": "Поскольку защёлка давно не держалась в пазу",
+          "evidence": {
+            "text": "Поскольку защёлка давно не держалась в пазу",
+            "start": 82,
+            "end": 125
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 21,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "держаться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "поскольку",
+        "parent_clause_id": "CL3",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 17,
+          "end_index": 17,
+          "text": "Поскольку",
+          "evidence": {
+            "text": "Поскольку",
+            "start": 82,
+            "end": 91
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL5",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 25,
+          "end_index": 28,
+          "text": "очередной порыв распахнул створку",
+          "evidence": {
+            "text": "очередной порыв распахнул створку",
+            "start": 127,
+            "end": 160
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 27,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "распахнуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "очередной",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 3,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "усиливаться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 11,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "дрожать"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 15,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "замирать"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 21,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "держаться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 27,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "распахнуть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 15,
+          "child_token_index": 21,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL3",
+          "child_clause_id": "CL4"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+    "assertions": [],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [
+      "STRUCTURAL_CLARIFICATION_REQUIRED"
+    ],
+    "relations": [],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [],
+    "relation_hints": []
+  },
+  "integration_commit": {
+    "assertions": [],
+    "experience_ref": {
+      "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": true,
+    "clarifications": [
+      {
+        "ambiguous_ref": {
+          "uid": "K_bd374f0ad33f4055be971c341fa99e84",
+          "kind": "K"
+        },
+        "mention": "в дальней комнате",
+        "options": [
+          {
+            "index": 1,
+            "ref": {
+              "uid": "K_5637da9ea4914db9acbf43728976aac6",
+              "kind": "K"
+            },
+            "label": "«в дальней комнате» относится к действию «дрожала»"
+          },
+          {
+            "index": 2,
+            "ref": {
+              "uid": "K_57f808bd635248bfb8592cfe89a0f0a7",
+              "kind": "K"
+            },
+            "label": "«в дальней комнате» описывает «рама»"
+          }
+        ],
+        "uses": [],
+        "kind": "STRUCTURAL",
+        "source_text": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку."
+      }
+    ],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_d6542d75d5ab431dad7b16bbf865947d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «К сумеркам Алексей добрался до старой обсерватории на холме, куда не возвращался со студенческих лет. Отперев ржавую калитку, он толкнул её плечом и услышал, как в тишине протяжно звякнула цепь.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Дорожка заросла мокрой травой, а на ступенях темнели листья, принесённые ветром. Входная дверь сначала не поддалась; Алексей нажал сильнее, и разбухшая створка медленно отошла от косяка.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d450f1c3bf41451d9fc4afb98d1a1f3f",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «В вестибюле пахло сырой штукатуркой и старой бумагой. На стене висели остановившиеся часы, под ними стоял накрытый серым чехлом стол.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Алексей снял чехол, подняв облачко пыли, и поставил на стол керосиновую лампу. Зажёгши фитиль, он увидел на подоконнике пачку писем, перетянутую выцветшей лентой.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\n\n# ACTIVE MEMORY\n- Ранее пользователь сказал: «К сумеркам Алексей добрался до старой обсерватории на холме, куда не возвращался со студенческих лет. Отперев ржавую калитку, он толкнул её плечом и услышал, как в тишине протяжно звякнула цепь.»\n- Ранее пользователь сказал: «Дорожка заросла мокрой травой, а на ступенях темнели листья, принесённые ветром. Входная дверь сначала не поддалась; Алексей нажал сильнее, и разбухшая створка медленно отошла от косяка.»\n- Пользователь ранее сказал: «В вестибюле пахло сырой штукатуркой и старой бумагой. На стене висели остановившиеся часы, под ними стоял накрытый серым чехлом стол.»\n- Ранее пользователь сказал: «Алексей снял чехол, подняв облачко пыли, и поставил на стол керосиновую лампу. Зажёгши фитиль, он увидел на подоконнике пачку писем, перетянутую выцветшей лентой.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_068677832fea49ea9ac9dd3bcd04e1a4",
+        "kind": "M"
+      },
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_197699acf1e4437e87eb0f17ad23e8b2",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7cebbe5d1252408e8abf9bd8018a8421",
+        "kind": "M"
+      },
+      {
+        "uid": "M_82a227b881734795bc6ac735c7e766ad",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9a13682b6a464da49bbe2029de8bfff8",
+        "kind": "M"
+      },
+      {
+        "uid": "M_a2ef02910c8a4bfb9d472c369581c83e",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+        "kind": "M"
+      },
+      {
+        "uid": "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1066dbbe55ec406496b3d3b62b28ca8b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_76970bb661894032b9ba544f4eca7aa3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+        "kind": "N"
+      },
+      {
+        "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d450f1c3bf41451d9fc4afb98d1a1f3f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6542d75d5ab431dad7b16bbf865947d",
+        "kind": "N"
+      },
+      {
+        "uid": "S_0f55b9f6fd4e41e4a949d1af39ca85f2",
+        "kind": "S"
+      },
+      {
+        "uid": "S_a175150daf7a40ceb1e7309dbf951565",
+        "kind": "S"
+      },
+      {
+        "uid": "S_e7da7f066c0d48f7b44760f08b6e5aee",
+        "kind": "S"
+      },
+      {
+        "uid": "T_4e24c5fde9604064971fccc9c6de68b6",
+        "kind": "T"
+      },
+      {
+        "uid": "T_73ace0acfb1545c38166f7bd965daf5d",
+        "kind": "T"
+      },
+      {
+        "uid": "T_9b96c191176e4069b516cf4458fecd83",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 6,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_068677832fea49ea9ac9dd3bcd04e1a4",
+          "kind": "M"
+        },
+        "semantic": "[M_068677832fea49ea9ac9dd3bcd04e1a4] остановившиеся часы",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8178640384335052,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.8429641264984107,
+        "output": 0.030000000000000027,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_197699acf1e4437e87eb0f17ad23e8b2",
+          "kind": "M"
+        },
+        "semantic": "[M_197699acf1e4437e87eb0f17ad23e8b2] сырой штукатуркой",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_7cebbe5d1252408e8abf9bd8018a8421",
+          "kind": "M"
+        },
+        "semantic": "[M_7cebbe5d1252408e8abf9bd8018a8421] накрытый серым чехлом",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_82a227b881734795bc6ac735c7e766ad",
+          "kind": "M"
+        },
+        "semantic": "[M_82a227b881734795bc6ac735c7e766ad] вестибюль",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_9a13682b6a464da49bbe2029de8bfff8",
+          "kind": "M"
+        },
+        "semantic": "[M_9a13682b6a464da49bbe2029de8bfff8] стена",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_a2ef02910c8a4bfb9d472c369581c83e",
+          "kind": "M"
+        },
+        "semantic": "[M_a2ef02910c8a4bfb9d472c369581c83e] старой бумагой",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+          "kind": "M"
+        },
+        "semantic": "[M_b4c2450b658b402d83e6e222e417e8ba] стол",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+          "kind": "N"
+        },
+        "semantic": "[N_03a710d58baa48a4b4ac5ec8336bfa8e] реплика пользователя: Дорожка заросла мокрой травой, а на ступенях темнели листья, принесённые ветром. Входная дверь сначала не поддалась; Алексей нажал сильнее, и разбухшая створка медленно отошла от косяка.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5921281526776526,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+          "kind": "N"
+        },
+        "semantic": "[N_0fba167a5c2946039fb1c769bedcc0fa] реплика пользователя: За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5985232270312583,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "N_1066dbbe55ec406496b3d3b62b28ca8b",
+          "kind": "N"
+        },
+        "semantic": "[N_1066dbbe55ec406496b3d3b62b28ca8b] [S_e7da7f066c0d48f7b44760f08b6e5aee] висели(SUBJECT=[M_068677832fea49ea9ac9dd3bcd04e1a4] остановившиеся часы, LOCATION=[M_9a13682b6a464da49bbe2029de8bfff8] стена)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "N_76970bb661894032b9ba544f4eca7aa3",
+          "kind": "N"
+        },
+        "semantic": "[N_76970bb661894032b9ba544f4eca7aa3] [S_a175150daf7a40ceb1e7309dbf951565] стоял(SUBJECT=[M_b4c2450b658b402d83e6e222e417e8ba] стол, LOCATION=[M_068677832fea49ea9ac9dd3bcd04e1a4] остановившиеся часы, STATE=[M_7cebbe5d1252408e8abf9bd8018a8421] накрытый серым чехлом)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+          "kind": "N"
+        },
+        "semantic": "[N_7d6c8ac09b684273b1c7f264f5b7c5de] реплика пользователя: Алексей снял чехол, подняв облачко пыли, и поставил на стол керосиновую лампу. Зажёгши фитиль, он увидел на подоконнике пачку писем, перетянутую выцветшей лентой.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+          "kind": "N"
+        },
+        "semantic": "[N_bbbac47bcbf34bd091c23b8be0fcba90] реплика пользователя: В вестибюле пахло сырой штукатуркой и старой бумагой. На стене висели остановившиеся часы, под ними стоял накрытый серым чехлом стол.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6132675497205313,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_d450f1c3bf41451d9fc4afb98d1a1f3f",
+          "kind": "N"
+        },
+        "semantic": "[N_d450f1c3bf41451d9fc4afb98d1a1f3f] [S_0f55b9f6fd4e41e4a949d1af39ca85f2] пахло(SUBJECT=[M_197699acf1e4437e87eb0f17ad23e8b2] сырой штукатуркой, OBJECT=[M_a2ef02910c8a4bfb9d472c369581c83e] старой бумагой, LOCATION=[M_82a227b881734795bc6ac735c7e766ad] вестибюль)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "N_d6542d75d5ab431dad7b16bbf865947d",
+          "kind": "N"
+        },
+        "semantic": "[N_d6542d75d5ab431dad7b16bbf865947d] реплика пользователя: К сумеркам Алексей добрался до старой обсерватории на холме, куда не возвращался со студенческих лет. Отперев ржавую калитку, он толкнул её плечом и услышал, как в тишине протяжно звякнула цепь.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "S_0f55b9f6fd4e41e4a949d1af39ca85f2",
+          "kind": "S"
+        },
+        "semantic": "[S_0f55b9f6fd4e41e4a949d1af39ca85f2] пахло",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "S_a175150daf7a40ceb1e7309dbf951565",
+          "kind": "S"
+        },
+        "semantic": "[S_a175150daf7a40ceb1e7309dbf951565] стоял",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "S_e7da7f066c0d48f7b44760f08b6e5aee",
+          "kind": "S"
+        },
+        "semantic": "[S_e7da7f066c0d48f7b44760f08b6e5aee] висели",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "T_4e24c5fde9604064971fccc9c6de68b6",
+          "kind": "T"
+        },
+        "semantic": "[T_4e24c5fde9604064971fccc9c6de68b6] predicate=[S_a175150daf7a40ceb1e7309dbf951565] стоял; roles=[SUBJECT, LOCATION, STATE]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "T_73ace0acfb1545c38166f7bd965daf5d",
+          "kind": "T"
+        },
+        "semantic": "[T_73ace0acfb1545c38166f7bd965daf5d] predicate=[S_e7da7f066c0d48f7b44760f08b6e5aee] висели; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "T_9b96c191176e4069b516cf4458fecd83",
+          "kind": "T"
+        },
+        "semantic": "[T_9b96c191176e4069b516cf4458fecd83] predicate=[S_0f55b9f6fd4e41e4a949d1af39ca85f2] пахло; roles=[SUBJECT, OBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 86,
+      "source_text": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nTOKENS:\n[1] За\n[2] окнами\n[3] усиливался\n[4] ветер\n[5] ;\n[6] рама\n[7] в\n[8] дальней\n[9] комнате\n[10] то\n[11] дрожала\n[12] ,\n[13] то\n[14] снова\n[15] замирала\n[16] .\n[17] Поскольку\n[18] защёлка\n[19] давно\n[20] не\n[21] держалась\n[22] в\n[23] пазу\n[24] ,\n[25] очередной\n[26] порыв\n[27] распахнул\n[28] створку\n[29] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[3] token 3: усиливался; morphology=VERB",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nTOKENS:\n[1] За\n[2] окнами\n[3] усиливался\n[4] ветер\n[5] ;\n[6] рама\n[7] в\n[8] дальней\n[9] комнате\n[10] то\n[11] дрожала\n[12] ,\n[13] то\n[14] снова\n[15] замирала\n[16] .\n[17] Поскольку\n[18] защёлка\n[19] давно\n[20] не\n[21] держалась\n[22] в\n[23] пазу\n[24] ,\n[25] очередной\n[26] порыв\n[27] распахнул\n[28] створку\n[29] .\nPREDICATE_START: [3] усиливался\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[3] end at token 3: усиливался",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер\nTARGET:\nусиливался\nRUSSIAN_LEMMA:\nусиливаться",
+          "normalized_answer": "усиливаться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер\nPREDICATE:\nусиливался\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] За окнами\n[2] ветер",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nQUESTION_WORD:\nветер",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nALREADY_SELECTED:\nветер\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] За окнами",
+          "normalized_answer": "1-2",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "PLACE",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nTARGET:\nЗа окнами\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "PLACE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nALREADY_SELECTED:\nветер | За окнами\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nрама в дальней комнате то дрожала\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nTOKENS:\n[1] За\n[2] окнами\n[3] усиливался\n[4] ветер\n[5] ;\n[6] рама\n[7] в\n[8] дальней\n[9] комнате\n[10] то\n[11] дрожала\n[12] ,\n[13] то\n[14] снова\n[15] замирала\n[16] .\n[17] Поскольку\n[18] защёлка\n[19] давно\n[20] не\n[21] держалась\n[22] в\n[23] пазу\n[24] ,\n[25] очередной\n[26] порыв\n[27] распахнул\n[28] створку\n[29] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[11] token 11: дрожала; morphology=VERB",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nTOKENS:\n[1] За\n[2] окнами\n[3] усиливался\n[4] ветер\n[5] ;\n[6] рама\n[7] в\n[8] дальней\n[9] комнате\n[10] то\n[11] дрожала\n[12] ,\n[13] то\n[14] снова\n[15] замирала\n[16] .\n[17] Поскольку\n[18] защёлка\n[19] давно\n[20] не\n[21] держалась\n[22] в\n[23] пазу\n[24] ,\n[25] очередной\n[26] порыв\n[27] распахнул\n[28] створку\n[29] .\nPREDICATE_START: [11] дрожала\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[11] end at token 11: дрожала",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nрама в дальней комнате то дрожала\nTARGET:\nдрожала\nRUSSIAN_LEMMA:\nдрожать",
+          "normalized_answer": "дрожать",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nрама в дальней комнате то дрожала\nPREDICATE:\nдрожала\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nдрожала\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] рама\n[2] в дальней комнате",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nдрожала\nQUESTION_WORD:\nрама",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nдрожала\nALREADY_SELECTED:\nрама\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] в дальней комнате",
+          "normalized_answer": "7-9",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "structural clarification required: в дальней комнате"
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 460,
+      "req_id": "733e7fe2ba9e4d81a3ce22d9a48857b8",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nTARGET:\nЗа окнами\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "PLACE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nЗа окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.\nPREDICATE:\nусиливался\nTARGET:\nЗа окнами\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 1008,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_5637da9ea4914db9acbf43728976aac6": {
+        "uid": "K_5637da9ea4914db9acbf43728976aac6",
+        "kind": "K",
+        "domain": "H",
+        "members": [],
+        "properties": {},
+        "meta": {
+          "TYPE": "STRUCTURAL_CLARIFICATION_OPTION",
+          "label": "«в дальней комнате» относится к действию «дрожала»",
+          "resolution_key": "ATTACH:PRED:7-9",
+          "gc_auto_created": true
+        }
+      },
+      "K_57f808bd635248bfb8592cfe89a0f0a7": {
+        "uid": "K_57f808bd635248bfb8592cfe89a0f0a7",
+        "kind": "K",
+        "domain": "H",
+        "members": [],
+        "properties": {},
+        "meta": {
+          "TYPE": "STRUCTURAL_CLARIFICATION_OPTION",
+          "label": "«в дальней комнате» описывает «рама»",
+          "resolution_key": "ATTACH:NOM:7-9:6",
+          "gc_auto_created": true
+        }
+      },
+      "K_bd374f0ad33f4055be971c341fa99e84": {
+        "uid": "K_bd374f0ad33f4055be971c341fa99e84",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "K_5637da9ea4914db9acbf43728976aac6",
+            "kind": "K"
+          },
+          {
+            "uid": "K_57f808bd635248bfb8592cfe89a0f0a7",
+            "kind": "K"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "TYPE": "STRUCTURAL_CLARIFICATION",
+          "ambiguity_type": "MODIFIER_ATTACHMENT",
+          "mention": "в дальней комнате",
+          "source_text": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+          "experience_uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+          "gc_auto_created": true
+        }
+      },
+      "L_7e8f2452512e4b49809a30c2b0145709": {
+        "uid": "L_7e8f2452512e4b49809a30c2b0145709",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.21300000000000002,
+        "source": {
+          "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+          "kind": "N"
+        }
+      },
+      "N_0fba167a5c2946039fb1c769bedcc0fa": {
+        "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_15513883c291439fa41322f7bbd23f6b": {
+        "before": {
+          "uid": "L_15513883c291439fa41322f7bbd23f6b",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.2,
+          "source": {
+            "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_15513883c291439fa41322f7bbd23f6b",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.198,
+          "source": {
+            "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+            "kind": "N"
+          }
+        }
+      },
+      "N_7d6c8ac09b684273b1c7f264f5b7c5de": {
+        "before": {
+          "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+          "kind": "N",
+          "domain": "H",
+          "weight": 0.3,
+          "template": {
+            "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+              "kind": "M"
+            }
+          },
+          "properties": {
+            "text": {
+              "name": "text",
+              "value": "Алексей снял чехол, подняв облачко пыли, и поставил на стол керосиновую лампу. Зажёгши фитиль, он увидел на подоконнике пачку писем, перетянутую выцветшей лентой.",
+              "type_name": "str",
+              "unit": null
+            }
+          },
+          "meta": {
+            "occurrence_count": 1,
+            "event_instance": true,
+            "speech_act_kinds": [],
+            "dedup_exempt": true
+          }
+        },
+        "after": {
+          "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+          "kind": "N",
+          "domain": "H",
+          "weight": 0.3,
+          "template": {
+            "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+              "kind": "M"
+            }
+          },
+          "properties": {
+            "text": {
+              "name": "text",
+              "value": "Алексей снял чехол, подняв облачко пыли, и поставил на стол керосиновую лампу. Зажёгши фитиль, он увидел на подоконнике пачку писем, перетянутую выцветшей лентой.",
+              "type_name": "str",
+              "unit": null
+            }
+          },
+          "meta": {
+            "occurrence_count": 1,
+            "event_instance": true,
+            "speech_act_kinds": [],
+            "dedup_exempt": true,
+            "lifecycle_state": "NEW",
+            "created_tick": 3,
+            "expires_tick": 203,
+            "last_qualifying_tick": 3,
+            "qualifying_reactivations": 0
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 6,
+    "workspace_uids": [
+      "M_068677832fea49ea9ac9dd3bcd04e1a4",
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_197699acf1e4437e87eb0f17ad23e8b2",
+      "M_7cebbe5d1252408e8abf9bd8018a8421",
+      "M_82a227b881734795bc6ac735c7e766ad",
+      "M_9a13682b6a464da49bbe2029de8bfff8",
+      "M_a2ef02910c8a4bfb9d472c369581c83e",
+      "M_b4c2450b658b402d83e6e222e417e8ba",
+      "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+      "N_0fba167a5c2946039fb1c769bedcc0fa",
+      "N_1066dbbe55ec406496b3d3b62b28ca8b",
+      "N_76970bb661894032b9ba544f4eca7aa3",
+      "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+      "N_bbbac47bcbf34bd091c23b8be0fcba90",
+      "N_d450f1c3bf41451d9fc4afb98d1a1f3f",
+      "N_d6542d75d5ab431dad7b16bbf865947d",
+      "S_0f55b9f6fd4e41e4a949d1af39ca85f2",
+      "S_a175150daf7a40ceb1e7309dbf951565",
+      "S_e7da7f066c0d48f7b44760f08b6e5aee",
+      "T_4e24c5fde9604064971fccc9c6de68b6",
+      "T_73ace0acfb1545c38166f7bd965daf5d",
+      "T_9b96c191176e4069b516cf4458fecd83"
+    ],
+    "workspace": {
+      "M_068677832fea49ea9ac9dd3bcd04e1a4": {
+        "semantic": "остановившиеся часы",
+        "excitation": 0.8178640384335052
+      },
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.8429641264984107
+      },
+      "M_197699acf1e4437e87eb0f17ad23e8b2": {
+        "semantic": "сырой штукатуркой",
+        "excitation": 0.4089320192167526
+      },
+      "M_7cebbe5d1252408e8abf9bd8018a8421": {
+        "semantic": "накрытый серым чехлом",
+        "excitation": 0.4089320192167526
+      },
+      "M_82a227b881734795bc6ac735c7e766ad": {
+        "semantic": "вестибюль",
+        "excitation": 0.4089320192167526
+      },
+      "M_9a13682b6a464da49bbe2029de8bfff8": {
+        "semantic": "стена",
+        "excitation": 0.4089320192167526
+      },
+      "M_a2ef02910c8a4bfb9d472c369581c83e": {
+        "semantic": "старой бумагой",
+        "excitation": 0.4089320192167526
+      },
+      "M_b4c2450b658b402d83e6e222e417e8ba": {
+        "semantic": "стол",
+        "excitation": 0.4089320192167526
+      },
+      "N_03a710d58baa48a4b4ac5ec8336bfa8e": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5921281526776526
+      },
+      "N_0fba167a5c2946039fb1c769bedcc0fa": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5985232270312583
+      },
+      "N_1066dbbe55ec406496b3d3b62b28ca8b": {
+        "semantic": "висели(SUBJECT=остановившиеся часы, LOCATION=стена)",
+        "excitation": 0.9893152444804425
+      },
+      "N_76970bb661894032b9ba544f4eca7aa3": {
+        "semantic": "стоял(SUBJECT=стол, LOCATION=остановившиеся часы, STATE=накрытый серым чехлом)",
+        "excitation": 0.9893152444804425
+      },
+      "N_7d6c8ac09b684273b1c7f264f5b7c5de": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.49704875845222196
+      },
+      "N_bbbac47bcbf34bd091c23b8be0fcba90": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_0eef0e31f1c045ce9cc753f785b4c839[пахло(SUBJECT=сырой штукатуркой, OBJECT=старой бумагой, LOCATION=вестибюль); висели(SUBJECT=остановившиеся часы, LOCATION=стена); стоял(SUBJECT=стол, LOCATION=остановившиеся часы, STATE=накрытый серым чехлом)])",
+        "excitation": 0.6132675497205313
+      },
+      "N_d450f1c3bf41451d9fc4afb98d1a1f3f": {
+        "semantic": "пахло(SUBJECT=сырой штукатуркой, OBJECT=старой бумагой, LOCATION=вестибюль)",
+        "excitation": 0.9893152444804425
+      },
+      "N_d6542d75d5ab431dad7b16bbf865947d": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.49173791398686034
+      },
+      "S_0f55b9f6fd4e41e4a949d1af39ca85f2": {
+        "semantic": "пахло",
+        "excitation": 0.9343020365750345
+      },
+      "S_a175150daf7a40ceb1e7309dbf951565": {
+        "semantic": "стоял",
+        "excitation": 0.9343020365750345
+      },
+      "S_e7da7f066c0d48f7b44760f08b6e5aee": {
+        "semantic": "висели",
+        "excitation": 0.9343020365750345
+      },
+      "T_4e24c5fde9604064971fccc9c6de68b6": {
+        "semantic": "стоял",
+        "excitation": 0.9375362417396166
+      },
+      "T_73ace0acfb1545c38166f7bd965daf5d": {
+        "semantic": "висели",
+        "excitation": 0.9375362417396166
+      },
+      "T_9b96c191176e4069b516cf4458fecd83": {
+        "semantic": "пахло",
+        "excitation": 0.9375362417396166
+      }
+    },
+    "pending_incoming": {},
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "она": {
+        "uid": "M_197699acf1e4437e87eb0f17ad23e8b2",
+        "kind": "M"
+      },
+      "они": {
+        "uid": "M_068677832fea49ea9ac9dd3bcd04e1a4",
+        "kind": "M"
+      },
+      "он": {
+        "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "semantic_note": "Старая обсерватория — литературный монолит для нормализации событий, paragraph 5",
+  "semantic_family": "document.monolith.literary.event-normalization",
+  "semantic_tags": [
+    "document",
+    "monolith",
+    "literary",
+    "event-normalization",
+    "graph-graded"
+  ]
+}

@@ -19,6 +19,11 @@ logs_dir = "../logs"
 [llm]
 enabled = true
 backend = "ollama"
+# External LM Studio backend (used only when backend = "lmstudio").
+lmstudio_base_url = "http://127.0.0.1:1234"
+lmstudio_model = ""              # exact LM Studio model key; empty/auto = select the sole loaded LLM
+lmstudio_api_key = ""            # optional; LM Studio auth is disabled by default
+
 ollama_base_url = "http://127.0.0.1:11434"
 ollama_model = "qwen2.5:7b"       # builtin_process; внешний backend можно добавить без изменения AH Core
 loader_type = "causal_lm"        # text-only; image_text_to_text only for future vision input
@@ -73,6 +78,7 @@ initial_hypernode_weight = 0.40
 experience_hypernode_weight = 0.30
 follow_link_weight = 0.20
 cause_link_weight = 0.20
+is_a_link_weight = 0.20
 initial_inferred_link_weight = 0.25
 
 [ignition]

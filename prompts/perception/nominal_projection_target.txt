@@ -1,0 +1,1 @@
+The clause is already known to express a naming/labeling relation. Choose exactly one supplied C-label for the complement noun that names the kind of thing SUBJECT labels. Do not choose nested owner/location/source/material/associated nouns. Return NONE if no supplied candidate is the naming target.

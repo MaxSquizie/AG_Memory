@@ -81,6 +81,7 @@ class ExperienceMapper:
         speaker_ref: Ref,
         semantic_refs: tuple[Ref, ...],
         context: InteractionContext,
+        speech_act_kinds: tuple[str, ...] = (),
     ) -> ExperienceResult:
         if not self.core.store.has_uid(speaker_ref.uid):
             raise IntegrationError(f"Unknown speaker ref: {speaker_ref.uid}")
@@ -118,7 +119,13 @@ class ExperienceMapper:
             actants,
             weight=self.event_weight,
             properties={"text": Property("text", source_text, "str")},
-            meta={"event_instance": True},
+            meta={
+                "event_instance": True,
+                # Dialogue history remains ordinary H experience, but its pragmatic
+                # type matters to projection: a past question/command is not
+                # evidence that its proposition was asserted.
+                "speech_act_kinds": tuple(dict.fromkeys(speech_act_kinds)),
+            },
             deduplicate=False,
         )
         event_ref = self.core.ref(event.uid)

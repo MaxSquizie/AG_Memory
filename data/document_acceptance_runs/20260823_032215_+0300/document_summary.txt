@@ -1,0 +1,16 @@
+Document acceptance: PASS 3/4
+Paragraph semantic: PASS 36/36 | FAIL 0 | GAP 0
+Runtime errors: 1
+
+cooling_station PASS: Сбой охлаждающего контура | paragraphs 7/7 | graph 18/18 | M2 questions 1
+greenhouse_control PASS: Сбой управления теплицей | paragraphs 7/7 | graph 18/18 | M2 questions 1
+archive_leak PASS: Протечка в архиве | paragraphs 7/7 | graph 19/19 | M2 questions 2
+house_by_pier_monolith FAIL: Дом у пристани — художественный монолит | paragraphs 15/15 | graph 38/56 | M2 questions 3
+  FAIL fact.branch_break: expected={'id': 'branch_break', 'predicate': 'сломаться', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': 'ветка'}} actual=[]
+  FAIL fact.branch_fall: expected={'id': 'branch_fall', 'predicate': 'упасть', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': {'same_as': 'branch_break.SUBJECT'}, 'LOCATION': 'желоб'}} actual=[]
+  FAIL fact.plaster_fall: expected={'id': 'plaster_fall', 'predicate': 'упасть', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': 'кусок штукатурки'}} actual=[]
+  FAIL fact.frighten_cat: expected={'id': 'frighten_cat', 'predicate': 'испугать', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': 'падение штукатурки', 'OBJECT': 'кот'}} actual=[]
+  FAIL fact.cat_rush: expected={'id': 'cat_rush', 'predicate': 'броситься', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': 'кот', 'LOCATION': 'дверь'}} actual=[]
+  FAIL fact.cat_hit_table: expected={'id': 'cat_hit_table', 'predicate': 'задеть', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': {'same_as': 'cat_rush.SUBJECT'}, 'OBJECT': 'стол'}} actual=[]
+  FAIL fact.glass_break: expected={'id': 'glass_break', 'predicate': 'разбиться', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': 'стекло лампы'}} actual=[]
+  FAIL fact.pavel_come: expected={'id': 'pavel_come', 'predicate': 'прийти', 'domain': 'C', 'exact_roles': False, 'roles': {'SUBJECT': {'same_as': 'noise_wake.OBJECT'}, 'LOCATION': 'чердак'}} actual=[]

@@ -75,6 +75,7 @@ class ContextProjector:
         current_input: str,
         workspace_refs: tuple[Ref, ...],
         inference_results: tuple[InferenceOutcome, ...] = (),
+        unresolved_goal_diagnostics: tuple[tuple[str, ...], ...] = (),
     ) -> AgentContext:
         # Exact cognitive roots are retained for the operator diagnostic snapshot.
         seen: set[str] = set()
@@ -89,6 +90,9 @@ class ContextProjector:
             block
             for outcome in inference_results
             if (block := self._inference_block(outcome)) is not None
+        ) + tuple(
+            self._unresolved_goal_block(diagnostics)
+            for diagnostics in unresolved_goal_diagnostics
         )
         rendered = self._render_context(current_input, workspace_blocks, inference_blocks)
         return AgentContext(
@@ -230,8 +234,29 @@ class ContextProjector:
                     return None  # CURRENT INPUT already contains it verbatim.
                 if text in source_texts_used:
                     return None
-                prefix = "Ранее пользователь сказал" if speaker == "USER" else "Ранее агент ответил"
+                kinds = self._event_speech_act_kinds(obj)
+                if speaker == "USER":
+                    if kinds and "ASSERTION" not in kinds:
+                        if kinds == ("QUERY",):
+                            prefix = "Контекст диалога — ранее пользователь задал вопрос (НЕ ФАКТ)"
+                        elif kinds == ("COMMAND",):
+                            prefix = "Контекст диалога — ранее пользователь сформулировал запрос/команду (НЕ ФАКТ)"
+                        else:
+                            joined = "/".join(kinds)
+                            prefix = f"Контекст диалога — неутверждающий ход пользователя [{joined}] (НЕ ФАКТ)"
+                    else:
+                        prefix = "Ранее пользователь сказал"
+                else:
+                    prefix = "Ранее агент ответил"
                 return ProjectionBlock(ref, ProjectionMode.ACTIVE, f'{prefix}: «{text}»')
+
+            # Scoped proposition content may be needed internally as a target or an
+            # operand, but mentioning it under QUERY/COMMAND/quotation does not make
+            # it model-visible factual evidence. Deterministic inference results are
+            # projected separately below.
+            scope = str(obj.meta.get("semantic_scope") or "").upper()
+            if scope in {"EMBEDDED", "QUOTED", "CONDITIONAL"}:
+                return None
 
             source = self._source_user_utterance(ref)
             if source is not None:
@@ -293,6 +318,12 @@ class ContextProjector:
                 continue
             if self._event_speaker(element) != "USER":
                 continue
+            kinds = self._event_speech_act_kinds(element)
+            # New-format H events explicitly preserve pragmatic type. Only a turn
+            # containing a top-level ASSERTION can be provenance for a canonical
+            # world fact. Legacy events without the metadata retain old behaviour.
+            if kinds and "ASSERTION" not in kinds:
+                continue
             object_ref = element.actants.get(ActantRole.OBJECT)
             if object_ref is None or not self._ref_contains(object_ref, content_ref.uid):
                 continue
@@ -316,6 +347,19 @@ class ContextProjector:
             return False
         group = self.core.store.get_element_any_domain(ref.uid)
         return isinstance(group, Group) and any(member.uid == target_uid for member in group.members)
+
+    @staticmethod
+    def _event_speech_act_kinds(event: Hypernode) -> tuple[str, ...]:
+        raw = event.meta.get("speech_act_kinds")
+        if raw is None:
+            return ()
+        if isinstance(raw, str):
+            values = (raw,)
+        elif isinstance(raw, (list, tuple, set, frozenset)):
+            values = tuple(str(item) for item in raw)
+        else:
+            return ()
+        return tuple(dict.fromkeys(item.strip().upper() for item in values if item.strip()))
 
     def _event_speaker(self, event: Hypernode) -> str:
         subject_ref = event.actants.get(ActantRole.SUBJECT)
@@ -364,7 +408,36 @@ class ContextProjector:
             base += " (" + "; ".join(extras) + ")"
         return base + "."
 
+
+    @staticmethod
+    def _unresolved_goal_block(diagnostics: tuple[str, ...]) -> ProjectionBlock:
+        detail = ", ".join(diagnostics) if diagnostics else "no compiler diagnostic"
+        return ProjectionBlock(
+            None,
+            ProjectionMode.INFERENCE,
+            "Логический вывод: UNRESOLVED. Формальная GoalSpec для текущей "
+            "эпистемической цели не построена; ACTIVE MEMORY не является "
+            f"доказательством этой цели. Диагностика: {detail}.",
+        )
+
     def _inference_block(self, outcome: InferenceOutcome) -> ProjectionBlock | None:
+        # Logical status is semantic result, not debug telemetry.  UNKNOWN and
+        # DISPROVED must reach the response model; otherwise the model can invent a
+        # proof after the deterministic reasoner explicitly failed or refuted it.
+        if outcome.status is LogicalStatus.UNKNOWN:
+            return ProjectionBlock(
+                None,
+                ProjectionMode.INFERENCE,
+                "Логический вывод: UNKNOWN. Цель не доказана и не опровергнута.",
+            )
+        if outcome.status is LogicalStatus.DISPROVED:
+            evidence = None
+            if isinstance(outcome.conclusion, ExistingRefConclusion):
+                evidence = self.model_semantic.inference_text_for_ref(outcome.conclusion.ref)
+            text = "Логический вывод: DISPROVED. Цель явно опровергнута памятью."
+            if evidence:
+                text += f" Основание: {evidence}"
+            return ProjectionBlock(None, ProjectionMode.INFERENCE, text)
         if outcome.status is not LogicalStatus.PROVED or outcome.conclusion is None:
             return None
         c = outcome.conclusion

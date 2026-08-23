@@ -1,0 +1,27 @@
+{
+  "self_ref": {
+    "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+    "kind": "M"
+  },
+  "user_ref": {
+    "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+    "kind": "M"
+  },
+  "now_ref": null,
+  "active_location_ref": null,
+  "pronoun_refs": {
+    "они": {
+      "uid": "M_842f7bcad62246c986ec89f0c7506fa5",
+      "kind": "M"
+    },
+    "он": {
+      "uid": "M_d48b8506fa3d41ea8c16882480c2e32e",
+      "kind": "M"
+    }
+  },
+  "last_experience_ref": {
+    "uid": "N_14d17831e8e5402f98c68ea6c80d2dcf",
+    "kind": "N"
+  },
+  "pending_clarification_refs": []
+}

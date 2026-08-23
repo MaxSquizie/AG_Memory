@@ -1,0 +1,198 @@
+# Центральный runtime-конфиг AH Agent MVP.
+# Пути можно задавать абсолютными или относительно этого файла.
+
+[paths]
+project_dir = ".."
+# Главное: укажи здесь локальную папку с моделью Hugging Face / Qwen.
+# На Windows удобнее использовать прямые слэши.
+llm_model_dir = ""
+tokenizer_dir = ""
+adapter_dir = ""
+system_prompt_path = "../prompts/agent.txt" # legacy alias for generic backend calls
+agent_prompt_path = "../prompts/agent.txt"
+perception_prompt_path = "../prompts/perception.txt" # legacy protocols only
+perception_prompt_dir = "../prompts/perception"
+data_dir = "../data"
+persistence_file = "../data/ah_memory.json"
+logs_dir = "../logs"
+
+[llm]
+enabled = true
+backend = "lmstudio"
+# LM Studio owns model loading/offload. AH only attaches to its local server.
+lmstudio_base_url = "http://127.0.0.1:1234"
+lmstudio_model = "qwen3.8-27b-nvfp4-q5k-no-mtp"  # exact key returned by LM Studio /v1/models
+lmstudio_api_key = ""            # optional; local LM Studio auth is disabled by default
+
+# Generic per-request generation defaults. The LM Studio backend maps these to
+# /v1/chat/completions and always sends stream=false.
+max_new_tokens = 256
+temperature = 0.2
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+no_repeat_ngram_size = 0          # kept for config compatibility; LM Studio transport ignores it
+enable_thinking = false           # protocol probes remain non-thinking by prompt/role contract
+strip_thinking = true             # additionally removes Qwen-style <think>...</think> blocks
+startup_timeout_seconds = 600.0
+request_timeout_seconds = 240.0
+history_messages = 0              # mandatory: every mechanical call is stateless
+
+[llm.perception]
+protocol = "adaptive_v3"           # weak-model discrete probes; Python owns choices/spans/roles
+probe_retry_attempts = 1           # retry same probe from scratch; never show the bad answer
+ground_actants = true
+max_acts = 4
+max_actants_per_act = 8
+predicate_symbol_language = "en"   # compatibility for adaptive_v1/v2; adaptive_v3 uses deterministic lexical S
+morphology_backend = "pymorphy3"    # deterministic Russian POS/lemma narrowing before LLM probes
+max_new_tokens = 24                # hard upper bound; individual probes use smaller limits
+temperature = 0.0
+top_p = 1.0
+top_k = 0
+repetition_penalty = 1.0
+no_repeat_ngram_size = 0
+use_cache = false                 # tiny stateless probes: no KV cache between generated tokens
+
+[llm.agent]
+max_new_tokens = 384
+temperature = 0.2
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+no_repeat_ngram_size = 0
+use_cache = true                  # useful for normal interactive multi-token responses
+repair_attempts = 1
+sanitize_context_echo = true      # never commit CURRENT INPUT / ACTIVE MEMORY echo into H
+
+[integration]
+initial_hypernode_weight = 0.40
+experience_hypernode_weight = 0.30
+follow_link_weight = 0.20
+cause_link_weight = 0.20
+is_a_link_weight = 0.20
+initial_inferred_link_weight = 0.25
+
+[ignition]
+tick_interval_seconds = 1.0
+nu = 1.0
+x_max = 1.0
+
+[ignition.activation]
+# f(x,z). Options:
+#   additive_clamp:      x_raw = x + gain*z
+#   saturating_additive: x_raw = x + gain*z*(1 - x/x_max)
+kind = "additive_clamp"
+gain = 1.0
+epsilon = 1e-9
+
+[ignition.decay]
+# g / epoch D(age). Options:
+#   sigmoid_epoch:      slow -> steep middle -> slow tail
+#   exponential_epoch:  half-life controlled exponential
+kind = "sigmoid_epoch"
+# Relative retained floor for each decay epoch: x_floor = alpha * x_start.
+# Ticks alone never decay below this floor.
+alpha = 0.60
+# Controls when the upper part rolls down the sigmoid hill. Lower = faster.
+midpoint_ticks = 12.0
+steepness = 0.35
+half_life_ticks = 12.0
+reactivation_reset_ratio = 1.0
+# Tiny late inputs must not silently rebase the floating floor.
+reactivation_min_input = 0.05
+
+[ignition.plasticity]
+enabled = true
+# h_L / h_N function IDs. Current MVP implementations are additive and hot-swappable.
+link_kind = "additive_hebb"
+hypernode_kind = "additive_confirmation_refutation"
+link_hebb_increment = 0.015
+link_async_decrement = 0.002
+link_weight_floor = 0.02
+ignore_pacemaker_only_events = true # ν сам по себе не является опытом для h_L
+hypernode_confirmation_increment = 0.01
+hypernode_refutation_decrement = 0.15
+
+[ignition.seeds]
+new_fact = 0.65
+reactivated_fact = 0.55
+experience = 0.50
+# Pre-semantic surface candidate seed. Homographs may all receive this before disambiguation.
+sensory_symbol = 0.85
+# Strong seed for the canonical S actually resolved in the external prompt.
+# Intentionally stronger than N/H seeds; newly created S receives it too.
+resolved_symbol = 0.95
+# Runtime attention seed for a referent/supporting fact resolved from a query.
+query_recall = 0.80
+correction = 0.65
+pacemaker = 0.08
+
+[ignition.pacemaker]
+enabled = true
+target_policy = "round_robin"   # round_robin | random | workspace | active
+include_symbols = true
+domains = ["C", "P", "H"]
+random_seed = 0
+
+[workspace]
+threshold = 0.35
+
+[lifecycle]
+initial_lifetime_ticks = 200
+reinforced_lifetime_ticks = 1000
+min_spacing_1_ticks = 20
+min_spacing_2_ticks = 50
+gc_enabled = true
+orphan_cleanup = true
+
+[inference]
+max_depth = 6
+max_expanded_states = 5000
+
+[context]
+max_tokens = 8192
+include_structural_uids = true
+include_mt = false
+max_dependency_depth = 8
+overflow_policy = "error"          # never silently drop active roots to fit budget
+
+[persistence]
+enabled = true
+load_on_start = true
+autosave_every_ticks = 200
+save_runtime_state = true
+save_pending_impulses = true
+
+[identity]
+agent_name = "АГент"
+user_name = "Пользователь"
+
+[orchestrator]
+ticks_after_input = 3
+ticks_after_response = 1
+auto_materialize_inference = true
+parse_agent_response_to_h = false      # false: ответ всё равно пишется в H как событие, но без второго LLM-parser вызова
+
+[gui]
+refresh_hz = 30
+render_mode = "2.5d"              # 2.5d | 3d
+show_labels = true
+max_labels = 120
+node_size_min = 7.0
+node_size_max = 24.0
+domain_z_spacing = 5.0
+excitation_gamma = 0.7
+propagation_duration_seconds = 0.90
+show_structural_edges = true
+show_relation_edges = true
+hover_enabled = true
+hover_pick_hz = 30
+focus_line_width = 3.0
+focus_node_scale = 1.35
+focus_neighbor_scale = 1.18
+edge_pick_radius_px = 8.0
+propagation_cycles_per_second = 1.25
+propagation_tail_points = 4
+propagation_tail_spacing = 0.055
+propagation_edge_width = 2.4

@@ -1,0 +1,1 @@
+Choose exactly one supplied label for the dictionary sense TARGET uses as the nominal predicate in this sentence. Use the whole sentence and its complements. Return only the label.

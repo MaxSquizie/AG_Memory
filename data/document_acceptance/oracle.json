@@ -1,0 +1,4386 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "id": "cooling_station",
+      "title": "Сбой охлаждающего контура",
+      "file": "texts/01_cooling_station.md",
+      "paragraphs": [
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "entity",
+            "baseline"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "дежурить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Виктор",
+                    "LOCATION": "станция"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "опуститься",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "температура"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "замёрзнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вода"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "опуститься",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "температура"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "проверить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Виктор",
+                    "OBJECT": "фильтр"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "расшириться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "лёд"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "замёрзнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вода"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "мигнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "лампа"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "треснуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "трубка"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "расшириться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "лёд"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "записать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Виктор",
+                    "OBJECT": "параметр"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "вытечь",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "жидкость"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "треснуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "трубка"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "работать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "датчик"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "упасть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "давление"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "вытечь",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "жидкость"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "открыть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Виктор",
+                    "OBJECT": "шкаф"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.station",
+          "tags": [
+            "document",
+            "cause",
+            "goal",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "остановить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "автоматика",
+                    "OBJECT": "насос"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "упасть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "давление"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "перекрыть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Виктор",
+                    "OBJECT": "клапан"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        }
+      ],
+      "final": {
+        "facts": [
+          {
+            "id": "temperature_drop",
+            "predicate": "опуститься",
+            "roles": {
+              "SUBJECT": "температура"
+            }
+          },
+          {
+            "id": "water_freeze",
+            "predicate": "замёрзнуть",
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          {
+            "id": "ice_expand",
+            "predicate": "расшириться",
+            "roles": {
+              "SUBJECT": "лёд"
+            }
+          },
+          {
+            "id": "tube_crack",
+            "predicate": "треснуть",
+            "roles": {
+              "SUBJECT": "трубка"
+            }
+          },
+          {
+            "id": "fluid_leak",
+            "predicate": "вытечь",
+            "roles": {
+              "SUBJECT": "жидкость"
+            }
+          },
+          {
+            "id": "pressure_drop",
+            "predicate": "упасть",
+            "roles": {
+              "SUBJECT": "давление"
+            }
+          },
+          {
+            "id": "pump_stop",
+            "predicate": "остановить",
+            "roles": {
+              "SUBJECT": "автоматика",
+              "OBJECT": "насос"
+            }
+          },
+          {
+            "id": "filter_check",
+            "predicate": "проверить",
+            "roles": {
+              "SUBJECT": "Виктор",
+              "OBJECT": "фильтр"
+            }
+          },
+          {
+            "id": "lamp_blink",
+            "predicate": "мигнуть",
+            "roles": {
+              "SUBJECT": "лампа"
+            }
+          }
+        ],
+        "links": [
+          {
+            "relation": "CAUSE",
+            "source": "temperature_drop",
+            "target": "water_freeze"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "water_freeze",
+            "target": "ice_expand"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "ice_expand",
+            "target": "tube_crack"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "tube_crack",
+            "target": "fluid_leak"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "fluid_leak",
+            "target": "pressure_drop"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "pressure_drop",
+            "target": "pump_stop"
+          }
+        ],
+        "forbidden_links": [
+          {
+            "relation": "CAUSE",
+            "source": "filter_check",
+            "target": "pump_stop"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "lamp_blink",
+            "target": "pressure_drop"
+          }
+        ],
+        "min_cause_depth": 6
+      },
+      "m2_questions": [
+        {
+          "text": "Почему автоматика остановила насос?",
+          "path": [
+            "temperature_drop",
+            "water_freeze",
+            "ice_expand",
+            "tube_crack",
+            "fluid_leak",
+            "pressure_drop",
+            "pump_stop"
+          ],
+          "relations": [
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "greenhouse_control",
+      "title": "Сбой управления теплицей",
+      "file": "texts/02_greenhouse_control.md",
+      "paragraphs": [
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "entity",
+            "baseline"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "осмотреть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Анна",
+                    "OBJECT": "теплица"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "обесточиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "коммутатор"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "cross-paragraph-coreference",
+            "cause"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "проверить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": {
+                      "canonical_name": "Анна"
+                    },
+                    "OBJECT": "щиток"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "отключиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "контроллер"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "обесточиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "коммутатор"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a3",
+                  "target": "a2"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "пропустить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "таймер",
+                    "OBJECT": "команда"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "отключиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "контроллер"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "работать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вентилятор"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "задержаться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "полив"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "пропустить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "таймер",
+                    "OBJECT": "команда"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "измерить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Анна",
+                    "OBJECT": "влажность"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "высохнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "почва"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "задержаться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "полив"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "записать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Анна",
+                    "OBJECT": "результат"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "увянуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "рассада"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "высохнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "почва"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "работать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "освещение"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.greenhouse",
+          "tags": [
+            "document",
+            "cause",
+            "goal",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "снизиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "урожай"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "увянуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "рассада"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "вызвать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Анна",
+                    "OBJECT": "техник"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        }
+      ],
+      "final": {
+        "facts": [
+          {
+            "id": "switch_off",
+            "predicate": "обесточиться",
+            "roles": {
+              "SUBJECT": "коммутатор"
+            }
+          },
+          {
+            "id": "controller_off",
+            "predicate": "отключиться",
+            "roles": {
+              "SUBJECT": "контроллер"
+            }
+          },
+          {
+            "id": "timer_miss",
+            "predicate": "пропустить",
+            "roles": {
+              "SUBJECT": "таймер",
+              "OBJECT": "команда"
+            }
+          },
+          {
+            "id": "watering_delay",
+            "predicate": "задержаться",
+            "roles": {
+              "SUBJECT": "полив"
+            }
+          },
+          {
+            "id": "soil_dry",
+            "predicate": "высохнуть",
+            "roles": {
+              "SUBJECT": "почва"
+            }
+          },
+          {
+            "id": "seedling_wilt",
+            "predicate": "увянуть",
+            "roles": {
+              "SUBJECT": "рассада"
+            }
+          },
+          {
+            "id": "yield_drop",
+            "predicate": "снизиться",
+            "roles": {
+              "SUBJECT": "урожай"
+            }
+          },
+          {
+            "id": "anna_check",
+            "predicate": "проверить",
+            "roles": {
+              "SUBJECT": "Анна",
+              "OBJECT": "щиток"
+            }
+          },
+          {
+            "id": "fan_work",
+            "predicate": "работать",
+            "roles": {
+              "SUBJECT": "вентилятор"
+            }
+          }
+        ],
+        "links": [
+          {
+            "relation": "CAUSE",
+            "source": "switch_off",
+            "target": "controller_off"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "controller_off",
+            "target": "timer_miss"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "timer_miss",
+            "target": "watering_delay"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "watering_delay",
+            "target": "soil_dry"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "soil_dry",
+            "target": "seedling_wilt"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "seedling_wilt",
+            "target": "yield_drop"
+          }
+        ],
+        "forbidden_links": [
+          {
+            "relation": "CAUSE",
+            "source": "anna_check",
+            "target": "controller_off"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "fan_work",
+            "target": "yield_drop"
+          }
+        ],
+        "min_cause_depth": 6
+      },
+      "m2_questions": [
+        {
+          "text": "Почему урожай снизился?",
+          "path": [
+            "switch_off",
+            "controller_off",
+            "timer_miss",
+            "watering_delay",
+            "soil_dry",
+            "seedling_wilt",
+            "yield_drop"
+          ],
+          "relations": [
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "archive_leak",
+      "title": "Протечка в архиве",
+      "file": "texts/03_archive_leak.md",
+      "paragraphs": [
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "entity",
+            "baseline"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "открыть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Марина",
+                    "OBJECT": "архив"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "засориться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "водосток"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "скопиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вода"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "засориться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "водосток"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "проверить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Марина",
+                    "OBJECT": "окно"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "намокнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "перекрытие"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "скопиться",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вода"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "осмотреть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "реставратор",
+                    "OBJECT": "альбом"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "проникнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вода",
+                    "LOCATION": "зал"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "намокнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "перекрытие"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "гореть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "свет"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "сработать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "датчик"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "проникнуть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "вода",
+                    "LOCATION": "зал"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "позвонить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Марина",
+                    "RECIPIENT": "сотрудник"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "cause",
+            "dedup-bridge",
+            "distractor"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "перенести",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "сотрудник",
+                    "OBJECT": "коробка"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "сработать",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "датчик"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "закрыть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "реставратор",
+                    "OBJECT": "шкаф"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "CAUSE",
+                  "source": "a2",
+                  "target": "a1"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        },
+        {
+          "family": "document.causal.archive",
+          "tags": [
+            "document",
+            "follow",
+            "mixed-proof-preflight"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "assertions": [
+                {
+                  "key": "a1",
+                  "predicate": "перенести",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "сотрудник",
+                    "OBJECT": "коробка"
+                  }
+                },
+                {
+                  "key": "a2",
+                  "predicate": "закрыть",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "Марина",
+                    "OBJECT": "зал"
+                  }
+                },
+                {
+                  "key": "a3",
+                  "predicate": "проверить",
+                  "status": "ASSERTED",
+                  "negated": false,
+                  "roles": {
+                    "SUBJECT": "охрана",
+                    "OBJECT": "дверь"
+                  }
+                }
+              ],
+              "queries": [],
+              "relations": [
+                {
+                  "id": "FOLLOW",
+                  "source": "a1",
+                  "target": "a2"
+                },
+                {
+                  "id": "FOLLOW",
+                  "source": "a2",
+                  "target": "a3"
+                }
+              ],
+              "conditionals": []
+            },
+            "integration": {}
+          }
+        }
+      ],
+      "final": {
+        "facts": [
+          {
+            "id": "drain_clog",
+            "predicate": "засориться",
+            "roles": {
+              "SUBJECT": "водосток"
+            }
+          },
+          {
+            "id": "water_pool",
+            "predicate": "скопиться",
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          {
+            "id": "ceiling_wet",
+            "predicate": "намокнуть",
+            "roles": {
+              "SUBJECT": "перекрытие"
+            }
+          },
+          {
+            "id": "water_enter",
+            "predicate": "проникнуть",
+            "roles": {
+              "SUBJECT": "вода",
+              "LOCATION": "зал"
+            }
+          },
+          {
+            "id": "sensor_trigger",
+            "predicate": "сработать",
+            "roles": {
+              "SUBJECT": "датчик"
+            }
+          },
+          {
+            "id": "boxes_move",
+            "predicate": "перенести",
+            "roles": {
+              "SUBJECT": "сотрудник",
+              "OBJECT": "коробка"
+            }
+          },
+          {
+            "id": "hall_close",
+            "predicate": "закрыть",
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "зал"
+            }
+          },
+          {
+            "id": "door_check",
+            "predicate": "проверить",
+            "roles": {
+              "SUBJECT": "охрана",
+              "OBJECT": "дверь"
+            }
+          },
+          {
+            "id": "album_inspect",
+            "predicate": "осмотреть",
+            "roles": {
+              "SUBJECT": "реставратор",
+              "OBJECT": "альбом"
+            }
+          }
+        ],
+        "links": [
+          {
+            "relation": "CAUSE",
+            "source": "drain_clog",
+            "target": "water_pool"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "water_pool",
+            "target": "ceiling_wet"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "ceiling_wet",
+            "target": "water_enter"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "water_enter",
+            "target": "sensor_trigger"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "sensor_trigger",
+            "target": "boxes_move"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "boxes_move",
+            "target": "hall_close"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "hall_close",
+            "target": "door_check"
+          }
+        ],
+        "forbidden_links": [
+          {
+            "relation": "CAUSE",
+            "source": "album_inspect",
+            "target": "sensor_trigger"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "album_inspect",
+            "target": "boxes_move"
+          }
+        ],
+        "min_cause_depth": 5
+      },
+      "m2_questions": [
+        {
+          "text": "Какая цепочка событий привела от засорения водостока к проверке двери?",
+          "path": [
+            "drain_clog",
+            "water_pool",
+            "ceiling_wet",
+            "water_enter",
+            "sensor_trigger",
+            "boxes_move",
+            "hall_close",
+            "door_check"
+          ],
+          "relations": [
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "FOLLOW",
+            "FOLLOW"
+          ]
+        },
+        {
+          "text": "Почему сотрудники перенесли коробки?",
+          "path": [
+            "drain_clog",
+            "water_pool",
+            "ceiling_wet",
+            "water_enter",
+            "sensor_trigger",
+            "boxes_move"
+          ],
+          "relations": [
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "house_by_pier_monolith",
+      "title": "Дом у пристани — художественный монолит",
+      "file": "texts/04_house_by_pier_monolith.md",
+      "ingest": {
+        "mode": "monolith",
+        "sentences_per_window": 2
+      },
+      "units": [
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        }
+      ],
+      "final": {
+        "facts": [
+          {
+            "id": "wind_rise",
+            "predicate": "усилиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветер"
+            }
+          },
+          {
+            "id": "branch_break",
+            "predicate": "сломаться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветка"
+            }
+          },
+          {
+            "id": "branch_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "branch_break.SUBJECT"
+              },
+              "LOCATION": "желоб"
+            }
+          },
+          {
+            "id": "branch_touch",
+            "predicate": "задеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветка",
+              "OBJECT": "желоб"
+            }
+          },
+          {
+            "id": "gutter_shift",
+            "predicate": "сдвинуться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "желоб"
+            }
+          },
+          {
+            "id": "water_go",
+            "predicate": "пойти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          {
+            "id": "beam_wet",
+            "predicate": "намокнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "балка"
+            }
+          },
+          {
+            "id": "beam_swell",
+            "predicate": "разбухнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "beam_wet.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "frame_warp",
+            "predicate": "перекоситься",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "рама"
+            }
+          },
+          {
+            "id": "window_jam",
+            "predicate": "заклиниться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "окно"
+            }
+          },
+          {
+            "id": "marina_climb",
+            "predicate": "подняться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "LOCATION": "чердак"
+            }
+          },
+          {
+            "id": "marina_notice",
+            "predicate": "заметить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "marina_climb.SUBJECT"
+              },
+              "OBJECT": "пятно"
+            }
+          },
+          {
+            "id": "water_flow",
+            "predicate": "стекать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          {
+            "id": "plaster_detach",
+            "predicate": "отслоиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "штукатурка"
+            }
+          },
+          {
+            "id": "plaster_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "кусок штукатурки"
+            }
+          },
+          {
+            "id": "frighten_cat",
+            "predicate": "испугать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "падение штукатурки",
+              "OBJECT": "кот"
+            }
+          },
+          {
+            "id": "cat_rush",
+            "predicate": "броситься",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "кот",
+              "LOCATION": "дверь"
+            }
+          },
+          {
+            "id": "cat_hit_table",
+            "predicate": "задеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "cat_rush.SUBJECT"
+              },
+              "OBJECT": "стол"
+            }
+          },
+          {
+            "id": "lamp_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "лампа",
+              "SOURCE": "стол"
+            }
+          },
+          {
+            "id": "glass_break",
+            "predicate": "разбиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "стекло лампы"
+            }
+          },
+          {
+            "id": "noise_wake",
+            "predicate": "разбудить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "шум",
+              "OBJECT": "Павел"
+            }
+          },
+          {
+            "id": "pavel_come",
+            "predicate": "прийти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "noise_wake.OBJECT"
+              },
+              "LOCATION": "чердак"
+            }
+          },
+          {
+            "id": "pavel_put_basin",
+            "predicate": "поставить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Павел",
+              "OBJECT": "таз"
+            }
+          },
+          {
+            "id": "rain_weaken",
+            "predicate": "ослабнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "дождь"
+            }
+          },
+          {
+            "id": "water_drip",
+            "predicate": "капать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          {
+            "id": "marina_remove_box",
+            "predicate": "снять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "коробка"
+            }
+          },
+          {
+            "id": "water_seep",
+            "predicate": "просочиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода",
+              "LOCATION": "коробка"
+            }
+          },
+          {
+            "id": "paper_wet",
+            "predicate": "намокнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "бумага"
+            }
+          },
+          {
+            "id": "marina_put_letters",
+            "predicate": "положить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "письма"
+            }
+          },
+          {
+            "id": "stove_heat",
+            "predicate": "греть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "печь"
+            }
+          },
+          {
+            "id": "paper_curl",
+            "predicate": "коробиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "бумага"
+            }
+          },
+          {
+            "id": "marina_move_letters",
+            "predicate": "отодвинуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "письма"
+            }
+          },
+          {
+            "id": "curl_stop",
+            "predicate": "прекратиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "коробление"
+            }
+          },
+          {
+            "id": "rain_stop",
+            "predicate": "прекратиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "дождь"
+            }
+          },
+          {
+            "id": "frame_dry",
+            "predicate": "подсохнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "рама"
+            }
+          },
+          {
+            "id": "marina_open_window",
+            "predicate": "открыть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "окно"
+            }
+          }
+        ],
+        "links": [
+          {
+            "relation": "CAUSE",
+            "source": "wind_rise",
+            "target": "branch_break"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "branch_touch",
+            "target": "gutter_shift"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "gutter_shift",
+            "target": "water_go"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "water_go",
+            "target": "beam_wet"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "beam_wet",
+            "target": "beam_swell"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "beam_swell",
+            "target": "frame_warp"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "frame_warp",
+            "target": "window_jam"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "water_flow",
+            "target": "plaster_detach"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "plaster_detach",
+            "target": "plaster_fall"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "frighten_cat",
+            "target": "cat_rush"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "cat_hit_table",
+            "target": "lamp_fall"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "rain_weaken",
+            "target": "water_drip"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "water_seep",
+            "target": "paper_wet"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "stove_heat",
+            "target": "paper_curl"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "marina_move_letters",
+            "target": "curl_stop"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "frame_dry",
+            "target": "marina_open_window"
+          }
+        ],
+        "forbidden_links": [
+          {
+            "relation": "CAUSE",
+            "source": "wind_rise",
+            "target": "paper_wet"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "noise_wake",
+            "target": "rain_weaken"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "marina_move_letters",
+            "target": "curl_stop"
+          }
+        ],
+        "min_cause_depth": 6
+      },
+      "m2_questions": [
+        {
+          "text": "Какая причинная цепочка привела от удара ветки по желобу к заклинившему окну?",
+          "path": [
+            "branch_touch",
+            "gutter_shift",
+            "water_go",
+            "beam_wet",
+            "beam_swell",
+            "frame_warp",
+            "window_jam"
+          ],
+          "relations": [
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE",
+            "CAUSE"
+          ]
+        },
+        {
+          "text": "Что произошло после того, как дождь ослаб?",
+          "path": [
+            "rain_weaken",
+            "water_drip"
+          ],
+          "relations": [
+            "FOLLOW"
+          ]
+        },
+        {
+          "text": "Что произошло после того, как Марина отодвинула письма?",
+          "path": [
+            "marina_move_letters",
+            "curl_stop"
+          ],
+          "relations": [
+            "FOLLOW"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "belyaev_amphibian_mutiny",
+      "title": "А. Р. Беляев — «Человек-амфибия»: мятеж на «Медузе»",
+      "file": "texts/05_belyaev_amphibian_monolith.md",
+      "source": {
+        "author": "Александр Романович Беляев",
+        "work": "Человек-амфибия",
+        "publication_year": 1928,
+        "section": "Покинутая «Медуза»",
+        "source_name": "Викитека",
+        "source_url": "https://ru.wikisource.org/wiki/Человек-амфибия_(Беляев)",
+        "public_domain": true,
+        "note": "Непрерывный фрагмент из главы; текст не переписывался под acceptance."
+      },
+      "ingest": {
+        "mode": "monolith",
+        "sentences_per_window": 1
+      },
+      "units": [
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.public-domain-literary",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "public-domain",
+            "graph-graded",
+            "belyaev"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        }
+      ],
+      "final": {
+        "facts": [
+          {
+            "id": "zurita_stand",
+            "predicate": "стоять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Зурита"
+            }
+          },
+          {
+            "id": "sailors_attack",
+            "predicate": "наброситься",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "матросы",
+              "OBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_break_free",
+            "predicate": "вырваться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "sailors_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              },
+              "LOCATION": "палуба"
+            }
+          },
+          {
+            "id": "zurita_retreat",
+            "predicate": "отступать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_climb",
+            "predicate": "подниматься",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "sailor_grab",
+            "predicate": "ухватить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "матрос",
+              "OBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_hit",
+            "predicate": "ударить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "sailor_grab.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "grabber_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailor_grab.SUBJECT"
+              },
+              "LOCATION": "палуба"
+            }
+          },
+          {
+            "id": "zurita_sit",
+            "predicate": "усесться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_draw_revolver",
+            "predicate": "вынуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              },
+              "OBJECT": "револьвер"
+            }
+          },
+          {
+            "id": "sailors_discuss",
+            "predicate": "обсуждать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "sailors_head_hatch",
+            "predicate": "направиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              },
+              "LOCATION": "люк"
+            }
+          },
+          {
+            "id": "zurita_look_sea",
+            "predicate": "взглянуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_see_submarine",
+            "predicate": "увидеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              },
+              "OBJECT": "подводная лодка"
+            }
+          },
+          {
+            "id": "submarine_approach",
+            "predicate": "приближаться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_see_submarine.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_cry_help",
+            "predicate": "закричать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "submarine_continue",
+            "predicate": "идти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_see_submarine.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "sailors_stop",
+            "predicate": "остановиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_triumph",
+            "predicate": "торжествовать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "zurita_descend",
+            "predicate": "слезать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "zurita_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "sailors_understand_escape",
+            "predicate": "понять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "sailors_lower_boats",
+            "predicate": "спускать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              },
+              "OBJECT": "шлюпки"
+            }
+          },
+          {
+            "id": "sailors_jump_water",
+            "predicate": "бросаться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              },
+              "LOCATION": "вода"
+            }
+          },
+          {
+            "id": "sailors_swim_shore",
+            "predicate": "плыть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "sailors_attack.SUBJECT"
+              },
+              "LOCATION": "берег"
+            }
+          }
+        ],
+        "links": [
+          {
+            "relation": "CAUSE",
+            "source": "sailors_attack",
+            "target": "zurita_break_free"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "sailor_grab",
+            "target": "zurita_hit"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "zurita_hit",
+            "target": "grabber_fall"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "sailors_discuss",
+            "target": "sailors_head_hatch"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "zurita_see_submarine",
+            "target": "zurita_cry_help"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "submarine_approach",
+            "target": "sailors_stop"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "sailors_understand_escape",
+            "target": "sailors_lower_boats"
+          }
+        ],
+        "forbidden_links": [
+          {
+            "relation": "CAUSE",
+            "source": "sailors_discuss",
+            "target": "submarine_approach"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "zurita_triumph",
+            "target": "submarine_approach"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "zurita_cry_help",
+            "target": "sailors_stop"
+          }
+        ],
+        "min_cause_depth": 2
+      },
+      "m2_questions": [
+        {
+          "text": "Какая причинная цепочка привела от попытки матроса схватить Зурита к падению матроса на палубу?",
+          "path": [
+            "sailor_grab",
+            "zurita_hit",
+            "grabber_fall"
+          ],
+          "relations": [
+            "CAUSE",
+            "CAUSE"
+          ]
+        },
+        {
+          "text": "Почему Зурита закричал о помощи?",
+          "path": [
+            "zurita_see_submarine",
+            "zurita_cry_help"
+          ],
+          "relations": [
+            "CAUSE"
+          ]
+        },
+        {
+          "text": "Почему вооружённые матросы остановились на палубе?",
+          "path": [
+            "submarine_approach",
+            "sailors_stop"
+          ],
+          "relations": [
+            "CAUSE"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "old_observatory_monolith",
+      "title": "Старая обсерватория — литературный монолит для нормализации событий",
+      "file": "texts/06_old_observatory_monolith.md",
+      "ingest": {
+        "mode": "monolith",
+        "sentences_per_window": 2
+      },
+      "units": [
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        },
+        {
+          "family": "document.monolith.literary.event-normalization",
+          "tags": [
+            "document",
+            "monolith",
+            "literary",
+            "event-normalization",
+            "graph-graded"
+          ],
+          "expect": {
+            "perception": {
+              "must_parse": true,
+              "unchecked": true
+            }
+          }
+        }
+      ],
+      "final": {
+        "facts": [
+          {
+            "id": "alexei_arrive",
+            "predicate": "добраться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Алексей",
+              "LOCATION": "обсерватория"
+            }
+          },
+          {
+            "id": "unlock_gate",
+            "predicate": "отпереть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "калитка"
+            }
+          },
+          {
+            "id": "push_gate",
+            "predicate": "толкнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "unlock_gate.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "door_move",
+            "predicate": "отойти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "створка"
+            }
+          },
+          {
+            "id": "remove_cover",
+            "predicate": "снять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "чехол"
+            }
+          },
+          {
+            "id": "put_lamp",
+            "predicate": "поставить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "лампа",
+              "LOCATION": "стол"
+            }
+          },
+          {
+            "id": "light_wick",
+            "predicate": "зажечь",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "фитиль"
+            }
+          },
+          {
+            "id": "see_letters",
+            "predicate": "увидеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "wind_intensify",
+            "predicate": "усилиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветер"
+            }
+          },
+          {
+            "id": "gust_open",
+            "predicate": "распахнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "порыв",
+              "OBJECT": "створка"
+            }
+          },
+          {
+            "id": "air_pass",
+            "predicate": "пройти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "воздух",
+              "LOCATION": "комната"
+            }
+          },
+          {
+            "id": "sway_flame",
+            "predicate": "качнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "air_pass.SUBJECT"
+              },
+              "OBJECT": "пламя"
+            }
+          },
+          {
+            "id": "raise_curtain",
+            "predicate": "поднять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "air_pass.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "curtain_touch",
+            "predicate": "коснуться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "занавеска",
+              "OBJECT": "стекло"
+            }
+          },
+          {
+            "id": "point_appear",
+            "predicate": "появиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "точка",
+              "LOCATION": "ткань"
+            }
+          },
+          {
+            "id": "point_grow",
+            "predicate": "разрастись",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "point_appear.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "see_smoke",
+            "predicate": "увидеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "дым"
+            }
+          },
+          {
+            "id": "tear_curtain",
+            "predicate": "сорвать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "curtain_touch.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "throw_curtain",
+            "predicate": "бросить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "curtain_touch.SUBJECT"
+              },
+              "LOCATION": "пол"
+            }
+          },
+          {
+            "id": "move_lamp",
+            "predicate": "отодвинуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "put_lamp.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "vera_stand",
+            "predicate": "стоять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Вера",
+              "LOCATION": "двери"
+            }
+          },
+          {
+            "id": "remove_coat",
+            "predicate": "снять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": "плащ"
+            }
+          },
+          {
+            "id": "hang_coat",
+            "predicate": "повесить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "remove_coat.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "untie_ribbon",
+            "predicate": "развязать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "лента"
+            }
+          },
+          {
+            "id": "pass_envelope",
+            "predicate": "передать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "конверт",
+              "RECIPIENT": {
+                "same_as": "vera_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "recognize_sign",
+            "predicate": "узнать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": "знак"
+            }
+          },
+          {
+            "id": "close_eyes",
+            "predicate": "закрыть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": "глаза"
+            }
+          },
+          {
+            "id": "lime_fall",
+            "predicate": "осыпаться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "известка",
+              "SOURCE": "потолок"
+            }
+          },
+          {
+            "id": "vera_flinch",
+            "predicate": "вздрогнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "close_window",
+            "predicate": "закрыть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "окно"
+            }
+          },
+          {
+            "id": "move_chair",
+            "predicate": "придвинуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "стул",
+              "LOCATION": "стена"
+            }
+          },
+          {
+            "id": "collect_letters",
+            "predicate": "собрать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": "письма"
+            }
+          },
+          {
+            "id": "carry_letters",
+            "predicate": "унести",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "collect_letters.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "put_letters",
+            "predicate": "положить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "collect_letters.OBJECT"
+              },
+              "LOCATION": "ящик"
+            }
+          },
+          {
+            "id": "rain_intensify",
+            "predicate": "усилиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "дождь"
+            }
+          },
+          {
+            "id": "water_seep",
+            "predicate": "просачиваться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода",
+              "LOCATION": "вестибюль"
+            }
+          },
+          {
+            "id": "notice_water",
+            "predicate": "заметить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "water_seep.SUBJECT"
+              }
+            }
+          },
+          {
+            "id": "bring_basin",
+            "predicate": "принести",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": "таз",
+              "SOURCE": "кухня"
+            }
+          },
+          {
+            "id": "put_basin",
+            "predicate": "поставить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "vera_stand.SUBJECT"
+              },
+              "OBJECT": {
+                "same_as": "bring_basin.OBJECT"
+              }
+            }
+          },
+          {
+            "id": "move_journals",
+            "predicate": "перенести",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": "журналы",
+              "LOCATION": "скамья"
+            }
+          }
+        ],
+        "links": [
+          {
+            "relation": "FOLLOW",
+            "source": "unlock_gate",
+            "target": "push_gate"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "remove_cover",
+            "target": "put_lamp"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "light_wick",
+            "target": "see_letters"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "air_pass",
+            "target": "sway_flame"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "sway_flame",
+            "target": "raise_curtain"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "curtain_touch",
+            "target": "point_appear"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "see_smoke",
+            "target": "tear_curtain"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "tear_curtain",
+            "target": "throw_curtain"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "remove_coat",
+            "target": "hang_coat"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "untie_ribbon",
+            "target": "pass_envelope"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "recognize_sign",
+            "target": "close_eyes"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "close_window",
+            "target": "move_chair"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "collect_letters",
+            "target": "carry_letters"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "carry_letters",
+            "target": "put_letters"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "notice_water",
+            "target": "bring_basin"
+          },
+          {
+            "relation": "FOLLOW",
+            "source": "bring_basin",
+            "target": "put_basin"
+          }
+        ],
+        "forbidden_links": [
+          {
+            "relation": "CAUSE",
+            "source": "remove_cover",
+            "target": "put_lamp"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "recognize_sign",
+            "target": "close_eyes"
+          },
+          {
+            "relation": "CAUSE",
+            "source": "close_window",
+            "target": "move_chair"
+          }
+        ],
+        "forbidden_facts": [
+          {
+            "id": "imagined_walk_as_world",
+            "predicate": "пройти",
+            "domain": "C",
+            "semantic_scope": "ASSERTED",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "кто-то"
+            }
+          },
+          {
+            "id": "imagined_stop_as_world",
+            "predicate": "остановиться",
+            "domain": "C",
+            "semantic_scope": "ASSERTED",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "кто-то"
+            }
+          }
+        ]
+      },
+      "m2_questions": [
+        {
+          "text": "Какая последовательность действий привела от отпирания калитки к тому, что Алексей толкнул её?",
+          "path": [
+            "unlock_gate",
+            "push_gate"
+          ],
+          "relations": [
+            "FOLLOW"
+          ]
+        },
+        {
+          "text": "Какая последовательность событий связана с занавеской после того, как Алексей увидел дым?",
+          "path": [
+            "see_smoke",
+            "tear_curtain",
+            "throw_curtain"
+          ],
+          "relations": [
+            "FOLLOW",
+            "FOLLOW"
+          ]
+        },
+        {
+          "text": "Как Вера убрала письма в ящик?",
+          "path": [
+            "collect_letters",
+            "carry_letters",
+            "put_letters"
+          ],
+          "relations": [
+            "FOLLOW",
+            "FOLLOW"
+          ]
+        },
+        {
+          "text": "Что Вера сделала после того, как заметила воду?",
+          "path": [
+            "notice_water",
+            "bring_basin",
+            "put_basin"
+          ],
+          "relations": [
+            "FOLLOW",
+            "FOLLOW"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -19,14 +19,18 @@ from ah.config import (
 )
 from ah.core import AHCore, JsonPersistence, SequentialUidGenerator
 from ah.ignition import IgnitionEngine
-from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
+from ah.inference import InferenceEngine, InferenceMaterializer, LogicalStatus, QueryGoalBuilder
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.integration.contracts import ClarificationOption, ClarificationRequest
 from ah.llm import LLMResponse
 from ah.model import ActantRole, Domain, Group, Hypernode, Property, RefKind
 from ah.perception import (
+    ActDependencyCandidate,
+    ActDependencyKind,
     ActantCandidate,
     AssertionCandidate,
+    AssertionStatus,
+    CommandCandidate,
     LLMPerceptionService,
     LLMPerceptionSettings,
     PerceptionClarificationRequired,
@@ -55,6 +59,13 @@ class StaticPerception:
     def interpret_clarification_answer(self, answer_text, option_labels):
         self.answer_calls += 1
         return None
+
+
+class SenseStaticPerception(StaticPerception):
+    def resolve_template_sense(self, source_text, predicate, filled_roles, role_bindings, options):
+        if len(options) != 1:
+            return None
+        return options[0][0]
 
 
 class StructuralPerception:
@@ -434,6 +445,53 @@ class Clarification1221Tests(unittest.TestCase):
         self.assertEqual(second_turn.response_text, "Принято.")
         self.assertEqual(core.store.hypernodes_for_actant(ambiguous_ref.uid), ())
 
+    def test_pending_clarification_does_not_hijack_unrelated_new_request(self):
+        core, context, integration = self._runtime()
+        core.add_entity(Domain.C, properties={"name": Property("name", "Анна", "str")})
+        core.add_entity(Domain.C, properties={"name": Property("name", "Мария", "str")})
+        ambiguous = PerceptionResult(
+            "Она улыбнулась.",
+            assertions=(
+                AssertionCandidate(
+                    "A1",
+                    PredicateCandidate(
+                        "улыбнулась", "улыбнуться",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+                    ),
+                    (ActantCandidate(ActantRole.SUBJECT, mention="она"),),
+                    alternatives=(
+                        AssertionCandidate(
+                            "A1", PredicateCandidate("улыбнулась", "улыбнуться"),
+                            (ActantCandidate(ActantRole.SUBJECT, mention="Анна"),),
+                        ),
+                        AssertionCandidate(
+                            "A1", PredicateCandidate("улыбнулась", "улыбнуться"),
+                            (ActantCandidate(ActantRole.SUBJECT, mention="Мария"),),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        perception = StaticPerception(ambiguous)
+        orchestrator, agent = self._orchestrator(core, context, integration, perception)
+
+        first = orchestrator.handle_user_text("Она улыбнулась.")
+        self.assertIsNotNone(first.clarification_request)
+        self.assertEqual(len(context.pending_clarification_refs), 1)
+        pending_ref = context.pending_clarification_refs[0]
+
+        # A fresh command/query is not an answer to the old referent choice.
+        perception.result = PerceptionResult(source_text="Докажи что Крипл - это ИИ")
+        second = orchestrator.handle_user_text("Докажи что Крипл - это ИИ")
+
+        self.assertIsNone(second.clarification_resolution)
+        self.assertIsNone(second.clarification_request)
+        self.assertEqual(second.response_text, "Принято.")
+        self.assertEqual(agent.clarify_calls, 1)
+        self.assertEqual(agent.respond_calls, 1)
+        self.assertEqual(perception.answer_calls, 1)
+        self.assertEqual(perception.parse_calls, 2)
+        self.assertEqual(context.pending_clarification_refs, [pending_ref])
 
     def test_orchestrator_can_use_perception_probe_to_interpret_nonliteral_clarification_answer(self):
         core, context, integration = self._runtime()
@@ -492,6 +550,131 @@ class Clarification1221Tests(unittest.TestCase):
         self.assertEqual(perception.last_answer, ("вторая", ("Анна", "Мария")))
         self.assertEqual(turn.clarification_resolution.selected_ref, core.ref(maria.uid))
         self.assertEqual(context.pending_clarification_refs, [])
+
+    def _prove_command_result(
+        self, command_surface: str = "Докажи", command_lemma: str = "доказать"
+    ) -> PerceptionResult:
+        target = AssertionCandidate(
+            "A1",
+            PredicateCandidate(
+                "это", "быть",
+                template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.STATE)),
+            ),
+            (
+                ActantCandidate(ActantRole.SUBJECT, mention="Крипл"),
+                ActantCandidate(ActantRole.STATE, mention="ИИ"),
+            ),
+        )
+        command = CommandCandidate(
+            PredicateCandidate(
+                command_surface, command_lemma, template_candidate=TemplateCandidate(())
+            ),
+            local_id="C1",
+        )
+        return PerceptionResult(
+            source_text="Докажи что Крипл - это ИИ",
+            assertions=(target,),
+            commands=(command,),
+            act_dependencies=(
+                ActDependencyCandidate("C1", "A1", ActDependencyKind.SUBORDINATE),
+            ),
+        )
+
+    def test_prove_command_runs_exists_goal_against_preexisting_fact(self):
+        core, context, integration = self._runtime()
+        prior = PerceptionResult(
+            source_text="Крипл - это ИИ",
+            assertions=(
+                AssertionCandidate(
+                    "A0",
+                    PredicateCandidate(
+                        "это", "быть",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.STATE)),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="Крипл"),
+                        ActantCandidate(ActantRole.STATE, mention="ИИ"),
+                    ),
+                ),
+            ),
+        )
+        prior_commit = integration.integrate_external(prior, context)
+        asserted_ref = prior_commit.assertions[0].ref
+
+        perception = SenseStaticPerception(self._prove_command_result())
+        orchestrator, _agent = self._orchestrator(core, context, integration, perception)
+        turn = orchestrator.handle_user_text("Докажи что Крипл - это ИИ", generate_response=False)
+
+        self.assertEqual(len(turn.queries), 1)
+        execution = turn.queries[0]
+        self.assertEqual(execution.diagnostics, ("evidence:embedded_proposition",))
+        self.assertIsNotNone(execution.outcome)
+        self.assertEqual(execution.outcome.status, LogicalStatus.PROVED)
+        self.assertIn(asserted_ref, execution.outcome.premise_refs)
+        embedded = next(item for item in turn.integration.assertions if item.local_id == "A1")
+        self.assertEqual(embedded.semantic_scope, "EMBEDDED")
+        self.assertNotEqual(embedded.ref, asserted_ref)
+        self.assertEqual(turn.perception.assertions[0].status, AssertionStatus.EMBEDDED)
+        self.assertIn("# INFERENCE RESULTS", turn.agent_context.rendered)
+        self.assertIn("Крипл", turn.agent_context.rendered)
+        self.assertIn("ИИ", turn.agent_context.rendered)
+
+    def test_embedded_evidence_is_independent_of_command_wording(self):
+        core, context, integration = self._runtime()
+        prior = PerceptionResult(
+            source_text="Крипл - это ИИ",
+            assertions=(
+                AssertionCandidate(
+                    "A0",
+                    PredicateCandidate(
+                        "это", "быть",
+                        template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.STATE)),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="Крипл"),
+                        ActantCandidate(ActantRole.STATE, mention="ИИ"),
+                    ),
+                ),
+            ),
+        )
+        integration.integrate_external(prior, context)
+
+        # The command predicate is intentionally not present in any marker list.
+        # Its only relevant property is structural: A1 is an embedded proposition
+        # under a live command root, therefore A1 becomes an evidence target.
+        perception = SenseStaticPerception(
+            self._prove_command_result("Обоснуй", "обосновать")
+        )
+        orchestrator, _agent = self._orchestrator(core, context, integration, perception)
+        turn = orchestrator.handle_user_text("Обоснуй что Крипл - это ИИ", generate_response=False)
+
+        self.assertEqual(len(turn.queries), 1)
+        execution = turn.queries[0]
+        self.assertEqual(execution.diagnostics, ("evidence:embedded_proposition",))
+        self.assertIsNotNone(execution.outcome)
+        self.assertEqual(execution.outcome.status, LogicalStatus.PROVED)
+
+    def test_prove_command_does_not_prove_target_from_its_own_mention(self):
+        core, context, integration = self._runtime()
+        perception = StaticPerception(self._prove_command_result())
+        orchestrator, _agent = self._orchestrator(core, context, integration, perception)
+
+        turn = orchestrator.handle_user_text("Докажи что Крипл - это ИИ", generate_response=False)
+
+        self.assertEqual(len(turn.queries), 1)
+        execution = turn.queries[0]
+        self.assertIsNotNone(execution.outcome)
+        self.assertEqual(execution.outcome.status, LogicalStatus.UNKNOWN)
+        self.assertIn("UNKNOWN", turn.agent_context.rendered)
+        self.assertIn("не доказана и не опровергнута", turn.agent_context.rendered)
+        embedded = next(item for item in turn.integration.assertions if item.local_id == "A1")
+        self.assertEqual(embedded.semantic_scope, "EMBEDDED")
+        node = core.store.get_hypernode(embedded.ref.uid)
+        ordinary = [
+            item for item in core.store.find_hypernodes_by_template(node.template.uid)
+            if not item.meta.get("semantic_scope") and dict(item.actants) == dict(node.actants)
+        ]
+        self.assertEqual(ordinary, [])
 
     def test_diagnostic_turn_does_not_arm_pending_clarification(self):
         core, context, integration = self._runtime()
@@ -569,6 +752,33 @@ class Clarification1221Tests(unittest.TestCase):
         self.assertNotIn(a.uid, prompt)
         self.assertNotIn(m.uid, prompt)
         self.assertNotIn(k.uid, prompt)
+
+    def test_llm_agent_rejects_opaque_number_only_clarification(self):
+        backend = ChoiceBackend("Which option do you mean? [1] or [2]?")
+        agent = LLMAgent(
+            backend,
+            LLMAgentSettings(generation=LLMRoleSettings(max_new_tokens=32, temperature=0.0)),
+        )
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        a = core.add_entity(Domain.C, properties={"name": Property("name", "Анна", "str")})
+        m = core.add_entity(Domain.C, properties={"name": Property("name", "Мария", "str")})
+        k = core.add_group(
+            Domain.C, (core.ref(a.uid), core.ref(m.uid)),
+            meta={"TYPE": "AMBIGUOUS_REFERENCE", "mention": "она"},
+        )
+        request = ClarificationRequest(
+            core.ref(k.uid), "она",
+            (
+                ClarificationOption(1, core.ref(a.uid), "Анна"),
+                ClarificationOption(2, core.ref(m.uid), "Мария"),
+            ),
+        )
+
+        text = agent.clarify(request)
+
+        self.assertEqual(text, "Уточните, кого или что означает «она»: Анна, Мария?")
+        self.assertNotIn("[1]", text)
+        self.assertNotIn("[2]", text)
 
     def test_pending_structural_clarification_survives_persistence_roundtrip(self):
         with TemporaryDirectory() as td:

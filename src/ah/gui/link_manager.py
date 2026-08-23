@@ -4,11 +4,13 @@ from typing import Callable
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QFormLayout,
     QHBoxLayout,
     QLineEdit,
+    QLabel,
     QMessageBox,
     QPushButton,
     QVBoxLayout,
@@ -33,6 +35,7 @@ class LinkManagerWidget(QWidget):
         self.services = services
         self._selected_uid = selected_uid
         self.manager = ManualLinkManager(services)
+        self._canvas_pick_mode = False
 
         root = QVBoxLayout(self)
         form = QFormLayout()
@@ -83,7 +86,41 @@ class LinkManagerWidget(QWidget):
         buttons.addWidget(create)
         buttons.addWidget(clear)
         root.addLayout(buttons)
+
+        self.canvas_pick = QCheckBox("Выбирать источник и цель кликами на Canvas")
+        self.canvas_pick.setToolTip(
+            "Включите режим и последовательно кликните два узла: первый станет источником, второй — целью."
+        )
+        self.canvas_pick.toggled.connect(self._set_canvas_pick_mode)
+        root.addWidget(self.canvas_pick)
+        self.pick_status = QLabel("Готово: выберите источник и цель")
+        self.pick_status.setWordWrap(True)
+        root.addWidget(self.pick_status)
         root.addStretch(1)
+
+    def _set_canvas_pick_mode(self, enabled: bool) -> None:
+        self._canvas_pick_mode = bool(enabled)
+        if enabled:
+            self.pick_status.setText("Режим выбора включён: кликните источник, затем цель")
+        else:
+            self.pick_status.setText("Режим выбора выключен")
+
+    def on_canvas_selection(self, uid: str) -> None:
+        """Capture sequential canvas selections without losing the first endpoint."""
+        if not self._canvas_pick_mode or not uid:
+            return
+        if not self.source.text():
+            self.source.setText(uid)
+            self.pick_status.setText(f"Источник: {uid} · теперь выберите цель")
+            return
+        if not self.target.text() and uid != self.source.text():
+            self.target.setText(uid)
+            self.pick_status.setText(
+                f"Готово: {self.source.text()} → {uid} · нажмите «Связать»"
+            )
+            return
+        if uid == self.source.text():
+            self.pick_status.setText("Источник и цель должны быть разными узлами")
 
     def _capture(self, target: QLineEdit) -> None:
         uid = self._selected_uid()

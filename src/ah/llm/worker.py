@@ -382,7 +382,13 @@ def _render_prompt_for_diagnostics(runtime: dict[str, Any], system: str, user: s
     return (f"[SYSTEM]\n{system}\n\n" if system else "") + f"[USER]\n{user}\n\n[ASSISTANT]\n"
 
 
-def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str, Any]:
+def _encode_prompt(
+    runtime: dict[str, Any],
+    system: str,
+    user: str,
+    *,
+    enable_thinking: bool | None = None,
+) -> dict[str, Any]:
     """Apply the checkpoint chat template and tokenize it exactly once.
 
     Hugging Face chat templates already insert the model's special tokens. The
@@ -393,6 +399,7 @@ def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str,
     for older/custom tokenizers.
     """
     tok = runtime["tokenizer"]
+    think = runtime["enable_thinking"] if enable_thinking is None else bool(enable_thinking)
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
@@ -408,7 +415,7 @@ def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str,
         try:
             encoded = tok.apply_chat_template(
                 messages,
-                enable_thinking=runtime["enable_thinking"],
+                enable_thinking=think,
                 **kwargs,
             )
             if isinstance(encoded, dict) or hasattr(encoded, "items"):
@@ -430,7 +437,7 @@ def _encode_prompt(runtime: dict[str, Any], system: str, user: str) -> dict[str,
                 messages,
                 tokenize=False,
                 add_generation_prompt=True,
-                enable_thinking=runtime["enable_thinking"],
+                enable_thinking=think,
             )
         except TypeError:
             rendered = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
@@ -578,8 +585,13 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
         if role.startswith("agent")
         else None
     )
-    inputs = _encode_prompt(runtime, system_text, prompt_text)
     override = request.get("override") or {}
+    request_enable_thinking = bool(
+        override.get("enable_thinking", runtime["enable_thinking"])
+    )
+    inputs = _encode_prompt(
+        runtime, system_text, prompt_text, enable_thinking=request_enable_thinking
+    )
     max_new = int(override.get("max_new_tokens", defaults.max_new_tokens))
     temperature = float(override.get("temperature", defaults.temperature))
     top_p = float(override.get("top_p", defaults.top_p))
@@ -619,7 +631,8 @@ def generate(runtime: dict[str, Any], request: dict[str, Any], defaults: argpars
                     override.get("choice_calibration_system", request.get("system") or "")
                 )
                 calibration_inputs = _encode_prompt(
-                    runtime, calibration_system, str(calibration_prompt)
+                    runtime, calibration_system, str(calibration_prompt),
+                    enable_thinking=request_enable_thinking,
                 )
                 calibration_ids = calibration_inputs["input_ids"]
                 if calibration_ids.shape[-1] > budget:

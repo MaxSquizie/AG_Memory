@@ -34,18 +34,22 @@ def main() -> None:
     from ah.config import load_config
     from ah.diagnostics.session_log import start_session
     from ah.gui.main_window import MainWindow
+    from ah.gui.theme import apply_theme
 
     args = parse_args()
     config_path = Path(args.config).expanduser().resolve()
     config = load_config(config_path)
     start_session(config.paths.logs_dir, extra={
         "entry": "gui", "config": str(config_path),
-        "backend": config.llm.backend, "ollama_model": config.llm.ollama_model,
+        "backend": config.llm.backend,
+        "ollama_model": config.llm.ollama_model,
+        "lmstudio_model": config.llm.lmstudio_model,
     })
     services = RuntimeServices.build(config)
 
     app = QApplication.instance() or QApplication(sys.argv)
     app.setApplicationName("AH Agent")
+    apply_theme(app)
     window = MainWindow(services, config_path)
     window.show()
     raise SystemExit(app.exec())

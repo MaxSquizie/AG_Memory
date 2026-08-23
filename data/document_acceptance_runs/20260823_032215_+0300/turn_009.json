@@ -1,0 +1,2403 @@
+{
+  "index": 9,
+  "input": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+  "status": "OK",
+  "scenario_id": "greenhouse_control",
+  "linguistic_candidate_graph": {
+    "text": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Она",
+        "start": 0,
+        "end": 3,
+        "analyses": [
+          {
+            "normal_form": "она",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Anph",
+              "3per",
+              "femn",
+              "NPRO",
+              "sing",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "проверила",
+        "start": 4,
+        "end": 13,
+        "analyses": [
+          {
+            "normal_form": "проверить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "indc",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing",
+              "tran"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "щиток",
+        "start": 14,
+        "end": 19,
+        "analyses": [
+          {
+            "normal_form": "щиток",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "щиток",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "inan",
+              "sing"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": ".",
+        "start": 19,
+        "end": 20,
+        "analyses": []
+      },
+      {
+        "index": 5,
+        "text": "Контроллер",
+        "start": 21,
+        "end": 31,
+        "analyses": [
+          {
+            "normal_form": "контроллер",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "контроллер",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "inan",
+              "sing"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "отключился",
+        "start": 32,
+        "end": 42,
+        "analyses": [
+          {
+            "normal_form": "отключиться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "masc",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": ",",
+        "start": 42,
+        "end": 43,
+        "analyses": []
+      },
+      {
+        "index": 8,
+        "text": "потому",
+        "start": 44,
+        "end": 50,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "text": "что",
+        "start": 51,
+        "end": 54,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "neut",
+              "NPRO",
+              "accs"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "nomn",
+              "neut",
+              "NPRO"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "коммутатор",
+        "start": 55,
+        "end": 65,
+        "analyses": [
+          {
+            "normal_form": "коммутатор",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "коммутатор",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "inan",
+              "sing"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": "обесточился",
+        "start": 66,
+        "end": 77,
+        "analyses": [
+          {
+            "normal_form": "обесточиться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "masc",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "обесточиться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "masc",
+              "past",
+              "VERB",
+              "intr",
+              "impf"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "text": ".",
+        "start": 77,
+        "end": 78,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 3,
+          "text": "Она проверила щиток",
+          "evidence": {
+            "text": "Она проверила щиток",
+            "start": 0,
+            "end": 19
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "проверить"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "она",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 5,
+          "end_index": 6,
+          "text": "Контроллер отключился",
+          "evidence": {
+            "text": "Контроллер отключился",
+            "start": 21,
+            "end": 42
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 6,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "отключиться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "контроллер",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 8,
+          "end_index": 11,
+          "text": "потому что коммутатор обесточился",
+          "evidence": {
+            "text": "потому что коммутатор обесточился",
+            "start": 44,
+            "end": 77
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 11,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "обесточиться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL2",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 8,
+          "end_index": 9,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 44,
+            "end": 54
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "проверить"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 6,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "отключиться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 11,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "обесточиться"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 6,
+          "child_token_index": 11,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL2",
+          "child_clause_id": "CL3"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "проверила",
+          "normalized_hint": "проверить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "проверила",
+            "start": 4,
+            "end": 13
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "OBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Она",
+            "normalized_hint": "Она",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Она",
+              "start": 0,
+              "end": 3
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "щиток",
+            "normalized_hint": "щиток",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "щиток",
+              "start": 14,
+              "end": 19
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Она проверила щиток",
+          "start": 0,
+          "end": 19
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "отключился",
+          "normalized_hint": "отключиться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "отключился",
+            "start": 32,
+            "end": 42
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Контроллер",
+            "normalized_hint": "Контроллер",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Контроллер",
+              "start": 21,
+              "end": 31
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Контроллер отключился",
+          "start": 21,
+          "end": 42
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "обесточился",
+          "normalized_hint": "обесточиться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "обесточился",
+            "start": 66,
+            "end": 77
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "коммутатор",
+            "normalized_hint": "коммутатор",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "коммутатор",
+              "start": 55,
+              "end": 65
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что коммутатор обесточился",
+          "start": 44,
+          "end": 77
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A3",
+        "target_ref": "A2",
+        "evidence": {
+          "text": "потому что",
+          "start": 44,
+          "end": 54
+        }
+      }
+    ],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [
+      {
+        "parent_ref": "A2",
+        "child_ref": "A3",
+        "kind": "SUBORDINATE"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": false,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N"
+        },
+        "reason": "REACTIVATED_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_f6177b2df9bc4c69866783a4d4760f71",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_6a7edf401b4048f8811ec2e4e40ee210",
+          "kind": "L"
+        },
+        "created": true
+      }
+    ],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_4f402ca8cf4c4761a1f2f644cc472e19",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Анна осмотрела теплицу. Коммутатор обесточился.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Анна осмотрела теплицу. Коммутатор обесточился.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_7380e5228e2c467dae95726981e7b99c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_932d7eb90a4d45d6a1879a5ab2546d04",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b14d1b6210df4cd985701960ca67958a",
+        "kind": "M"
+      },
+      {
+        "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+        "kind": "N"
+      },
+      {
+        "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4d8279e5238a49baae750863dcce117e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4f402ca8cf4c4761a1f2f644cc472e19",
+        "kind": "N"
+      },
+      {
+        "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+        "kind": "N"
+      },
+      {
+        "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+        "kind": "S"
+      },
+      {
+        "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_670b9ce1d9c345c4acaabe111fb3d424",
+        "kind": "S"
+      },
+      {
+        "uid": "S_f6177b2df9bc4c69866783a4d4760f71",
+        "kind": "S"
+      },
+      {
+        "uid": "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+        "kind": "T"
+      },
+      {
+        "uid": "T_1f3cc4e8e60a450486beae951f89d180",
+        "kind": "T"
+      },
+      {
+        "uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e6a7a986270f4c5281f4ee511d3ca5d5",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 6,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_7380e5228e2c467dae95726981e7b99c",
+          "kind": "M"
+        },
+        "semantic": "[M_7380e5228e2c467dae95726981e7b99c] Коммутатор",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.6298061059175383,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_932d7eb90a4d45d6a1879a5ab2546d04",
+          "kind": "M"
+        },
+        "semantic": "[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.6697076543862888,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_b14d1b6210df4cd985701960ca67958a",
+          "kind": "M"
+        },
+        "semantic": "[M_b14d1b6210df4cd985701960ca67958a] теплица",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+          "kind": "N"
+        },
+        "semantic": "[N_1b9eadaf589c48ddb104b54b1da8384c] реплика пользователя: Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+          "kind": "N"
+        },
+        "semantic": "[N_23cd4fe1bae04cdb96ae1f731e728fa6] [S_5d54c9161d7f43cebea1e1b25db0e2c5] отключился(SUBJECT=[M_e6453107f19548369db17a28d42e4aa8] Контроллер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N"
+        },
+        "semantic": "[N_25767f4b45e54463b424baeebff1e2c3] [S_f6177b2df9bc4c69866783a4d4760f71] обесточился(SUBJECT=[M_7380e5228e2c467dae95726981e7b99c] Коммутатор)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.4099999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "N_4d8279e5238a49baae750863dcce117e",
+          "kind": "N"
+        },
+        "semantic": "[N_4d8279e5238a49baae750863dcce117e] реплика пользователя: Анна осмотрела теплицу. Коммутатор обесточился.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "N_4f402ca8cf4c4761a1f2f644cc472e19",
+          "kind": "N"
+        },
+        "semantic": "[N_4f402ca8cf4c4761a1f2f644cc472e19] [S_670b9ce1d9c345c4acaabe111fb3d424] осмотрела(SUBJECT=[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна, OBJECT=[M_b14d1b6210df4cd985701960ca67958a] теплица)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+          "kind": "N"
+        },
+        "semantic": "[N_82a84c1b097a4ce48e1848c2b71feb45] [S_5d3dad853f51461aaab6a7dfee029237] проверила(SUBJECT=[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна, OBJECT=[M_ea3c672bdcbc405aa2f7526282ee6f1e] щиток)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+          "kind": "S"
+        },
+        "semantic": "[S_5d3dad853f51461aaab6a7dfee029237] проверила",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+          "kind": "S"
+        },
+        "semantic": "[S_5d54c9161d7f43cebea1e1b25db0e2c5] отключился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "S_670b9ce1d9c345c4acaabe111fb3d424",
+          "kind": "S"
+        },
+        "semantic": "[S_670b9ce1d9c345c4acaabe111fb3d424] осмотрела",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "S_f6177b2df9bc4c69866783a4d4760f71",
+          "kind": "S"
+        },
+        "semantic": "[S_f6177b2df9bc4c69866783a4d4760f71] обесточился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+          "kind": "T"
+        },
+        "semantic": "[T_02d2aa5e99ef4dc1b874a4ec9f9320e5] predicate=[S_5d3dad853f51461aaab6a7dfee029237] проверила; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "T_1f3cc4e8e60a450486beae951f89d180",
+          "kind": "T"
+        },
+        "semantic": "[T_1f3cc4e8e60a450486beae951f89d180] predicate=[S_5d54c9161d7f43cebea1e1b25db0e2c5] отключился; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+          "kind": "T"
+        },
+        "semantic": "[T_cb9a4d3af31e4bb3b4373c70ec450c68] predicate=[S_f6177b2df9bc4c69866783a4d4760f71] обесточился; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "T_e6a7a986270f4c5281f4ee511d3ca5d5",
+          "kind": "T"
+        },
+        "semantic": "[T_e6a7a986270f4c5281f4ee511d3ca5d5] predicate=[S_670b9ce1d9c345c4acaabe111fb3d424] осмотрела; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 9,
+      "source_text": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nTOKENS:\n[1] Она\n[2] проверила\n[3] щиток\n[4] .\n[5] Контроллер\n[6] отключился\n[7] ,\n[8] потому\n[9] что\n[10] коммутатор\n[11] обесточился\n[12] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: проверила; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nTOKENS:\n[1] Она\n[2] проверила\n[3] щиток\n[4] .\n[5] Контроллер\n[6] отключился\n[7] ,\n[8] потому\n[9] что\n[10] коммутатор\n[11] обесточился\n[12] .\nPREDICATE_START: [2] проверила\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: проверила",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток\nTARGET:\nпроверила\nRUSSIAN_LEMMA:\nпроверить",
+          "normalized_answer": "проверить",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток\nPREDICATE:\nпроверила\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Она\n[2] щиток",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "ACTOR_OR_EXPERIENCER",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nTARGET:\nОна\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "ACTOR_OR_EXPERIENCER",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nALREADY_SELECTED:\nОна\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] щиток",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "AFFECTED_OR_CONTENT",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nTARGET:\nщиток\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "AFFECTED_OR_CONTENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nALREADY_SELECTED:\nОна | щиток\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКонтроллер отключился\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nTOKENS:\n[1] Она\n[2] проверила\n[3] щиток\n[4] .\n[5] Контроллер\n[6] отключился\n[7] ,\n[8] потому\n[9] что\n[10] коммутатор\n[11] обесточился\n[12] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[6] token 6: отключился; morphology=VERB",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nTOKENS:\n[1] Она\n[2] проверила\n[3] щиток\n[4] .\n[5] Контроллер\n[6] отключился\n[7] ,\n[8] потому\n[9] что\n[10] коммутатор\n[11] обесточился\n[12] .\nPREDICATE_START: [6] отключился\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[6] end at token 6: отключился",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКонтроллер отключился\nTARGET:\nотключился\nRUSSIAN_LEMMA:\nотключиться",
+          "normalized_answer": "отключиться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКонтроллер отключился\nPREDICATE:\nотключился\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nотключился\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Контроллер",
+          "normalized_answer": "5",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nотключился\nQUESTION_WORD:\nКонтроллер",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nотключился\nALREADY_SELECTED:\nКонтроллер\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что коммутатор обесточился\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nTOKENS:\n[1] Она\n[2] проверила\n[3] щиток\n[4] .\n[5] Контроллер\n[6] отключился\n[7] ,\n[8] потому\n[9] что\n[10] коммутатор\n[11] обесточился\n[12] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[11] token 11: обесточился; morphology=VERB",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nTOKENS:\n[1] Она\n[2] проверила\n[3] щиток\n[4] .\n[5] Контроллер\n[6] отключился\n[7] ,\n[8] потому\n[9] что\n[10] коммутатор\n[11] обесточился\n[12] .\nPREDICATE_START: [11] обесточился\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[11] end at token 11: обесточился",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что коммутатор обесточился\nTARGET:\nобесточился\nRUSSIAN_LEMMA:\nобесточиться",
+          "normalized_answer": "обесточиться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что коммутатор обесточился\nPREDICATE:\nобесточился\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nобесточился\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] коммутатор",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nобесточился\nQUESTION_WORD:\nкоммутатор",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nобесточился\nALREADY_SELECTED:\nкоммутатор\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "проверила",
+              "normalized_hint": "проверить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "проверила",
+                "start": 4,
+                "end": 13
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Она",
+                "normalized_hint": "Она",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Она",
+                  "start": 0,
+                  "end": 3
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "щиток",
+                "normalized_hint": "щиток",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "щиток",
+                  "start": 14,
+                  "end": 19
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Она проверила щиток",
+              "start": 0,
+              "end": 19
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "отключился",
+              "normalized_hint": "отключиться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "отключился",
+                "start": 32,
+                "end": 42
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Контроллер",
+                "normalized_hint": "Контроллер",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Контроллер",
+                  "start": 21,
+                  "end": 31
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Контроллер отключился",
+              "start": 21,
+              "end": 42
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "обесточился",
+              "normalized_hint": "обесточиться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "обесточился",
+                "start": 66,
+                "end": 77
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "коммутатор",
+                "normalized_hint": "коммутатор",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "коммутатор",
+                  "start": 55,
+                  "end": 65
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что коммутатор обесточился",
+              "start": 44,
+              "end": 77
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A3",
+            "target_ref": "A2",
+            "evidence": {
+              "text": "потому что",
+              "start": 44,
+              "end": 54
+            }
+          }
+        ],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [
+          {
+            "parent_ref": "A2",
+            "child_ref": "A3",
+            "kind": "SUBORDINATE"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 22,
+      "req_id": "4576cd7cd558450294e9cf99aceea255",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nTARGET:\nОна\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nTARGET:\nОна\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 1045,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 23,
+      "req_id": "46d02502fa074655a4f0bedaf84718bc",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nTARGET:\nщиток\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nTARGET:\nщиток\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 986,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 24,
+      "req_id": "1b6bff9baef74ee585e6297c5f648d14",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nSEMANTIC ARGUMENTS:\nSUBJECT = Она\nOBJECT = щиток\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='Она' IS-A OBJECT='щиток'\nR2: OBJECT='щиток' IS-A SUBJECT='Она'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОна проверила щиток. Контроллер отключился, потому что коммутатор обесточился.\nPREDICATE:\nпроверила\nSEMANTIC ARGUMENTS:\nSUBJECT = Она\nOBJECT = щиток\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='Она' IS-A OBJECT='щиток'\nR2: OBJECT='щиток' IS-A SUBJECT='Она'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 322,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_3e639f6da4e9473f9d0232d3f44c65ed": {
+        "uid": "K_3e639f6da4e9473f9d0232d3f44c65ed",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+            "kind": "N"
+          },
+          {
+            "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+            "kind": "N"
+          },
+          {
+            "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_6a7edf401b4048f8811ec2e4e40ee210": {
+        "uid": "L_6a7edf401b4048f8811ec2e4e40ee210",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.22800000000000004,
+        "source": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+          "kind": "N"
+        }
+      },
+      "L_a271b1fb994a41d0aa97ef4db62dab2b": {
+        "uid": "L_a271b1fb994a41d0aa97ef4db62dab2b",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_4d8279e5238a49baae750863dcce117e",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+          "kind": "N"
+        }
+      },
+      "M_e6453107f19548369db17a28d42e4aa8": {
+        "uid": "M_e6453107f19548369db17a28d42e4aa8",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Контроллер",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_ea3c672bdcbc405aa2f7526282ee6f1e": {
+        "uid": "M_ea3c672bdcbc405aa2f7526282ee6f1e",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "щиток",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_1b9eadaf589c48ddb104b54b1da8384c": {
+        "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_46e8d8306e8041b59e9b0bc83a71d6be",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_3e639f6da4e9473f9d0232d3f44c65ed",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_23cd4fe1bae04cdb96ae1f731e728fa6": {
+        "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_1f3cc4e8e60a450486beae951f89d180",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_e6453107f19548369db17a28d42e4aa8",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_82a84c1b097a4ce48e1848c2b71feb45": {
+        "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_932d7eb90a4d45d6a1879a5ab2546d04",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "M_ea3c672bdcbc405aa2f7526282ee6f1e",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_5d3dad853f51461aaab6a7dfee029237": {
+        "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "проверила",
+          "проверить"
+        ]
+      },
+      "S_5d54c9161d7f43cebea1e1b25db0e2c5": {
+        "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "отключился",
+          "отключиться"
+        ]
+      },
+      "T_02d2aa5e99ef4dc1b874a4ec9f9320e5": {
+        "uid": "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT"
+        ]
+      },
+      "T_1f3cc4e8e60a450486beae951f89d180": {
+        "uid": "T_1f3cc4e8e60a450486beae951f89d180",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "N_25767f4b45e54463b424baeebff1e2c3": {
+        "before": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.4,
+          "template": {
+            "uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_7380e5228e2c467dae95726981e7b99c",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 1,
+            "lifecycle_state": "NEW",
+            "created_tick": 0,
+            "expires_tick": 200,
+            "last_qualifying_tick": 0,
+            "qualifying_reactivations": 0
+          }
+        },
+        "after": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.41000000000000003,
+          "template": {
+            "uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_7380e5228e2c467dae95726981e7b99c",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 2,
+            "lifecycle_state": "NEW",
+            "created_tick": 0,
+            "expires_tick": 200,
+            "last_qualifying_tick": 0,
+            "qualifying_reactivations": 0
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 6,
+    "workspace_uids": [
+      "M_7380e5228e2c467dae95726981e7b99c",
+      "M_932d7eb90a4d45d6a1879a5ab2546d04",
+      "M_b14d1b6210df4cd985701960ca67958a",
+      "N_1b9eadaf589c48ddb104b54b1da8384c",
+      "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+      "N_25767f4b45e54463b424baeebff1e2c3",
+      "N_4d8279e5238a49baae750863dcce117e",
+      "N_4f402ca8cf4c4761a1f2f644cc472e19",
+      "N_82a84c1b097a4ce48e1848c2b71feb45",
+      "S_5d3dad853f51461aaab6a7dfee029237",
+      "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+      "S_670b9ce1d9c345c4acaabe111fb3d424",
+      "S_f6177b2df9bc4c69866783a4d4760f71",
+      "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+      "T_1f3cc4e8e60a450486beae951f89d180",
+      "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+      "T_e6a7a986270f4c5281f4ee511d3ca5d5"
+    ],
+    "workspace": {
+      "M_7380e5228e2c467dae95726981e7b99c": {
+        "semantic": "Коммутатор",
+        "excitation": 0.6298061059175383
+      },
+      "M_932d7eb90a4d45d6a1879a5ab2546d04": {
+        "semantic": "Анна",
+        "excitation": 0.6697076543862888
+      },
+      "M_b14d1b6210df4cd985701960ca67958a": {
+        "semantic": "теплица",
+        "excitation": 0.4089320192167526
+      },
+      "N_1b9eadaf589c48ddb104b54b1da8384c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_3e639f6da4e9473f9d0232d3f44c65ed[проверила(SUBJECT=Анна, OBJECT=щиток); отключился(SUBJECT=Контроллер); обесточился(SUBJECT=Коммутатор)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_23cd4fe1bae04cdb96ae1f731e728fa6": {
+        "semantic": "отключился(SUBJECT=Контроллер)",
+        "excitation": 1.0
+      },
+      "N_25767f4b45e54463b424baeebff1e2c3": {
+        "semantic": "обесточился(SUBJECT=Коммутатор)",
+        "excitation": 1.0
+      },
+      "N_4d8279e5238a49baae750863dcce117e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_68c2fea1d8fa43a591911ac0023952d9[осмотрела(SUBJECT=Анна, OBJECT=теплица); обесточился(SUBJECT=Коммутатор)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_4f402ca8cf4c4761a1f2f644cc472e19": {
+        "semantic": "осмотрела(SUBJECT=Анна, OBJECT=теплица)",
+        "excitation": 0.9893152444804425
+      },
+      "N_82a84c1b097a4ce48e1848c2b71feb45": {
+        "semantic": "проверила(SUBJECT=Анна, OBJECT=щиток)",
+        "excitation": 1.0
+      },
+      "S_5d3dad853f51461aaab6a7dfee029237": {
+        "semantic": "проверила",
+        "excitation": 0.9443926410592216
+      },
+      "S_5d54c9161d7f43cebea1e1b25db0e2c5": {
+        "semantic": "отключился",
+        "excitation": 0.9443926410592216
+      },
+      "S_670b9ce1d9c345c4acaabe111fb3d424": {
+        "semantic": "осмотрела",
+        "excitation": 0.9343020365750345
+      },
+      "S_f6177b2df9bc4c69866783a4d4760f71": {
+        "semantic": "обесточился",
+        "excitation": 0.9940975169044439
+      },
+      "T_02d2aa5e99ef4dc1b874a4ec9f9320e5": {
+        "semantic": "проверила",
+        "excitation": 0.9476617761328255
+      },
+      "T_1f3cc4e8e60a450486beae951f89d180": {
+        "semantic": "отключился",
+        "excitation": 0.9476617761328255
+      },
+      "T_cb9a4d3af31e4bb3b4373c70ec450c68": {
+        "semantic": "обесточился",
+        "excitation": 0.9975387117187637
+      },
+      "T_e6a7a986270f4c5281f4ee511d3ca5d5": {
+        "semantic": "осмотрела",
+        "excitation": 0.9375362417396166
+      }
+    },
+    "pending_incoming": {
+      "M_e6453107f19548369db17a28d42e4aa8": 0.15200000000000005,
+      "N_23cd4fe1bae04cdb96ae1f731e728fa6": 0.08732999999999999,
+      "M_7380e5228e2c467dae95726981e7b99c": 0.16809999999999997,
+      "M_932d7eb90a4d45d6a1879a5ab2546d04": 0.15200000000000005,
+      "M_ea3c672bdcbc405aa2f7526282ee6f1e": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "она": {
+        "uid": "M_932d7eb90a4d45d6a1879a5ab2546d04",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 3,
+      "actual": 3
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "проверить",
+      "actual": "проверить"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "canonical_name": "Анна"
+      },
+      "actual": "Она"
+    },
+    {
+      "name": "perception.assertions.a1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "щиток"
+      },
+      "actual": "щиток"
+    },
+    {
+      "name": "perception.assertions.a2.predicate",
+      "ok": true,
+      "expected": "отключиться",
+      "actual": "отключиться"
+    },
+    {
+      "name": "perception.assertions.a2.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "контроллер"
+      },
+      "actual": "Контроллер"
+    },
+    {
+      "name": "perception.assertions.a3.predicate",
+      "ok": true,
+      "expected": "обесточиться",
+      "actual": "обесточиться"
+    },
+    {
+      "name": "perception.assertions.a3.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "коммутатор"
+      },
+      "actual": "коммутатор"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [
+        [
+          "CAUSE",
+          "A3",
+          "A2"
+        ]
+      ],
+      "actual": [
+        [
+          "CAUSE",
+          "A3",
+          "A2"
+        ]
+      ]
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "проверить",
+      "actual": [
+        "проверила",
+        "проверить"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "canonical_name": "Анна"
+      },
+      "actual": "Анна"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "щиток"
+      },
+      "actual": "щиток"
+    },
+    {
+      "name": "canonical.assertions.a2.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a2.predicate",
+      "ok": true,
+      "expected": "отключиться",
+      "actual": [
+        "отключился",
+        "отключиться"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "контроллер"
+      },
+      "actual": "Контроллер"
+    },
+    {
+      "name": "canonical.assertions.a3.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a3.predicate",
+      "ok": true,
+      "expected": "обесточиться",
+      "actual": [
+        "обесточился",
+        "обесточиться"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "коммутатор"
+      },
+      "actual": "Коммутатор"
+    },
+    {
+      "name": "templates.обесточиться.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.отключиться.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.проверить.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "OBJECT",
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": "Сбой управления теплицей, paragraph 2",
+  "semantic_family": "document.causal.greenhouse",
+  "semantic_tags": [
+    "document",
+    "cross-paragraph-coreference",
+    "cause"
+  ]
+}

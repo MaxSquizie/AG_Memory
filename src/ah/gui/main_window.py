@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 from typing import Callable
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal, Slot
-from PySide6.QtGui import QAction, QGuiApplication
+from PySide6.QtCore import QObject, QRunnable, QProcess, QThreadPool, QTimer, Qt, Signal, Slot
+from PySide6.QtGui import QAction, QGuiApplication, QResizeEvent
 from PySide6.QtWidgets import (
     QDockWidget,
     QFrame,
@@ -20,7 +20,9 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QTextBrowser,
     QToolBar,
+    QToolButton,
     QVBoxLayout,
+    QTabWidget,
     QWidget,
 )
 
@@ -30,6 +32,8 @@ from ah.diagnostics import (
     load_acceptance_cases,
     load_semantic_oracle,
     run_acceptance_suite,
+    load_document_specs,
+    run_document_acceptance,
     run_hidden_valency_diagnostic,
     run_m2_attention_acceptance,
     validate_oracle_alignment,
@@ -47,6 +51,8 @@ from .llm_panel import LLMControlWidget
 from .workspace_viewer import WorkspaceViewerWidget
 from .inference_explorer import InferenceExplorerWidget
 from .all_nodes_viewer import AllNodesViewerWidget
+from .diagnostics_panel import DiagnosticsPanel
+from .node_inspector import NodeInspectorWidget
 
 
 class WorkerSignals(QObject):
@@ -83,6 +89,7 @@ class MainWindow(QMainWindow):
         self._turn_sequence = 0
         self._chat_worker: FunctionWorker | None = None
         self._acceptance_worker: FunctionWorker | None = None
+        self._document_acceptance_worker: FunctionWorker | None = None
         self._hidden_valency_worker: FunctionWorker | None = None
         self._m2_acceptance_worker: FunctionWorker | None = None
         self._llm_operation_worker: FunctionWorker | None = None
@@ -94,6 +101,10 @@ class MainWindow(QMainWindow):
         self._acceptance_status_suspended = False
         self._full_canvas_mode = False
         self._dock_visibility_before_full_canvas: dict[QDockWidget, bool] = {}
+        self._workspace_mode = "graph"
+        self._workspace_mode_actions: dict[str, QAction] = {}
+        self._monitor_layout_class: str | None = None
+        self.setDockNestingEnabled(True)
 
         self.setWindowTitle("AH Agent — Cognitive Runtime")
         self._fit_initial_window_to_screen()
@@ -117,6 +128,7 @@ class MainWindow(QMainWindow):
         self._build_all_nodes_dock()
         self._build_inference_dock()
         self._build_runtime_dock()
+        self._build_workspace_mode_menu()
 
         # Runtime status includes a full GraphInspector snapshot. During acceptance
         # it is suspended to avoid duplicating the snapshot already rebuilt by the
@@ -201,6 +213,196 @@ class MainWindow(QMainWindow):
         self.action_full_canvas.toggled.connect(self._toggle_full_canvas)
         bar.addAction(self.action_full_canvas)
 
+    def _build_workspace_mode_menu(self) -> None:
+        """Workspace presets. MONITOR intentionally merges old INSPECT/RUNTIME modes."""
+        bar = self.findChild(QToolBar)
+        if bar is None:
+            return
+        bar.addSeparator()
+        button = QToolButton(self)
+        button.setText("Режим: GRAPH")
+        button.setToolTip(
+            "GRAPH — только Canvas; MONITOR — инспектор и runtime одновременно; "
+            "EDIT — создание узлов/связей."
+        )
+        button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu = button.menu()
+        if menu is None:
+            from PySide6.QtWidgets import QMenu
+            menu = QMenu(button)
+            button.setMenu(menu)
+        modes = (
+            ("graph", "GRAPH", "Только граф: максимум места для Canvas"),
+            (
+                "monitor",
+                "MONITOR",
+                "Граф + Inspector + Workspace + Runtime/Trace + LLM + диалог одновременно",
+            ),
+            ("edit", "EDIT", "Граф + создание узлов и связей + Inspector"),
+        )
+        for key, title, tip in modes:
+            action = QAction(title, self)
+            action.setCheckable(True)
+            action.setToolTip(tip)
+            action.triggered.connect(lambda checked, mode=key: self._set_workspace_mode(mode))
+            menu.addAction(action)
+            self._workspace_mode_actions[key] = action
+        self._workspace_mode_button = button
+        bar.addWidget(button)
+        self._set_workspace_mode("graph")
+
+    def _set_workspace_mode(self, mode: str) -> None:
+        if mode not in self._workspace_mode_actions:
+            return
+        self._workspace_mode = mode
+        for key, action in self._workspace_mode_actions.items():
+            action.setChecked(key == mode)
+        self._workspace_mode_button.setText(f"Режим: {mode.upper()}")
+
+        all_docks = (
+            self.inspector_dock, self.node_dock, self.link_dock,
+            self.workspace_dock, self.all_nodes_dock, self.inference_dock,
+            self.llm_dock, self.config_dock, self.runtime_dock, self.chat_dock,
+        )
+        for dock in all_docks:
+            dock.hide()
+        self.llm_panel.set_monitor_compact(mode == "monitor")
+
+        if mode == "monitor":
+            # Rebuild only when entering MONITOR or crossing a responsive breakpoint.
+            self._monitor_layout_class = None
+            self._arrange_monitor_workspace(force=True)
+        elif mode == "edit":
+            self.node_dock.show()
+            self.link_dock.show()
+            self.inspector_dock.show()
+
+        self.statusBar().showMessage({
+            "graph": "Режим GRAPH: только Canvas",
+            "monitor": "Режим MONITOR: Inspector и Runtime видны одновременно",
+            "edit": "Режим EDIT: создание узлов и связей",
+        }[mode], 2500)
+
+    def _monitor_layout_for_width(self, width: int) -> str:
+        """Return a responsive MONITOR layout class for the current window width."""
+        if width >= 2300:
+            return "wide"
+        if width >= 1600:
+            return "normal"
+        return "compact"
+
+    def _arrange_monitor_workspace(self, *, force: bool = False) -> None:
+        """Arrange monitoring docks so Inspector and Runtime remain concurrently visible.
+
+        Wide screens show auxiliary All Nodes and Config as separate panes. On normal
+        and compact screens those two *controls* become tabs, while the information
+        that must be watched live remains simultaneous: Inspector, Workspace,
+        Runtime/Trace, LLM status/diagnostics and Dialog.
+        """
+        if self._workspace_mode != "monitor":
+            return
+        layout_class = self._monitor_layout_for_width(self.width())
+        if not force and layout_class == self._monitor_layout_class:
+            return
+        self._monitor_layout_class = layout_class
+
+        monitor_docks = (
+            self.inspector_dock, self.workspace_dock, self.all_nodes_dock,
+            self.runtime_dock, self.llm_dock, self.config_dock, self.chat_dock,
+        )
+        # removeDockWidget keeps each dock/widget alive but clears old split/tab
+        # relationships, which makes breakpoint transitions deterministic.
+        for dock in monitor_docks:
+            self.removeDockWidget(dock)
+
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.inspector_dock)
+        self.splitDockWidget(self.inspector_dock, self.workspace_dock, Qt.Orientation.Vertical)
+
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.runtime_dock)
+        self.splitDockWidget(self.runtime_dock, self.llm_dock, Qt.Orientation.Vertical)
+
+        if layout_class == "wide":
+            self.splitDockWidget(self.workspace_dock, self.all_nodes_dock, Qt.Orientation.Vertical)
+            self.splitDockWidget(self.llm_dock, self.config_dock, Qt.Orientation.Vertical)
+        else:
+            # These are auxiliary browse/config surfaces, not live-monitoring facts.
+            # Keep them one click away without stealing permanent Canvas width/height.
+            self.tabifyDockWidget(self.workspace_dock, self.all_nodes_dock)
+            self.tabifyDockWidget(self.llm_dock, self.config_dock)
+
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.chat_dock)
+
+        for dock in monitor_docks:
+            dock.show()
+        if layout_class != "wide":
+            # show() may activate the last tabified dock; explicitly return to the
+            # two live-monitoring surfaces after every responsive rebuild.
+            self.workspace_dock.raise_()
+            self.llm_dock.raise_()
+
+        # Keep Canvas useful on 1366/1440/1600-class desktops. Widths are hints;
+        # the user can still drag every splitter.
+        if layout_class == "compact":
+            side_width = max(250, min(330, self.width() // 4))
+            self.resizeDocks(
+                [self.inspector_dock, self.workspace_dock],
+                [side_width, side_width],
+                Qt.Orientation.Horizontal,
+            )
+            self.resizeDocks(
+                [self.runtime_dock, self.llm_dock],
+                [max(300, side_width + 40), max(300, side_width + 40)],
+                Qt.Orientation.Horizontal,
+            )
+            self.resizeDocks(
+                [self.inspector_dock, self.workspace_dock], [340, 260], Qt.Orientation.Vertical
+            )
+            self.resizeDocks(
+                [self.runtime_dock, self.llm_dock], [340, 260], Qt.Orientation.Vertical
+            )
+            self.resizeDocks([self.chat_dock], [170], Qt.Orientation.Vertical)
+        elif layout_class == "normal":
+            self.resizeDocks(
+                [self.inspector_dock, self.workspace_dock], [320, 320], Qt.Orientation.Horizontal
+            )
+            self.resizeDocks(
+                [self.runtime_dock, self.llm_dock], [400, 400], Qt.Orientation.Horizontal
+            )
+            self.resizeDocks(
+                [self.inspector_dock, self.workspace_dock], [460, 360], Qt.Orientation.Vertical
+            )
+            self.resizeDocks(
+                [self.runtime_dock, self.llm_dock], [460, 360], Qt.Orientation.Vertical
+            )
+            self.resizeDocks([self.chat_dock], [200], Qt.Orientation.Vertical)
+        else:
+            self.resizeDocks(
+                [self.inspector_dock, self.workspace_dock, self.all_nodes_dock],
+                [360, 360, 360],
+                Qt.Orientation.Horizontal,
+            )
+            self.resizeDocks(
+                [self.runtime_dock, self.llm_dock, self.config_dock],
+                [440, 440, 440],
+                Qt.Orientation.Horizontal,
+            )
+            self.resizeDocks(
+                [self.inspector_dock, self.workspace_dock, self.all_nodes_dock],
+                [460, 330, 330],
+                Qt.Orientation.Vertical,
+            )
+            self.resizeDocks(
+                [self.runtime_dock, self.llm_dock, self.config_dock],
+                [460, 330, 330],
+                Qt.Orientation.Vertical,
+            )
+            self.resizeDocks([self.chat_dock], [220], Qt.Orientation.Vertical)
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+        if self._workspace_mode == "monitor":
+            self._arrange_monitor_workspace()
+
     def _build_chat_dock(self) -> None:
         dock = QDockWidget("Диалог", self)
         self.chat_dock = dock
@@ -232,6 +434,12 @@ class MainWindow(QMainWindow):
             + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_oracle.json")
         )
         self.acceptance_button.clicked.connect(self._run_acceptance_cases)
+        self.document_acceptance_button = QPushButton("Document acceptance")
+        self.document_acceptance_button.setToolTip(
+            "3 вручную написанных многоабзацных текста: причинные цепочки, distractors, "
+            "cross-paragraph identity и готовые oracle paths для следующего этапа M2."
+        )
+        self.document_acceptance_button.clicked.connect(self._run_document_acceptance)
         self.hidden_valency_button = QPushButton("Hidden-valency preflight")
         self.hidden_valency_button.setToolTip(
             "12 LLM-вызовов: 6 semantic cases × 2 порядка binary labels. "
@@ -249,6 +457,7 @@ class MainWindow(QMainWindow):
         chat_buttons = QHBoxLayout()
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
+        chat_buttons.addWidget(self.document_acceptance_button)
         chat_buttons.addWidget(self.hidden_valency_button)
         chat_buttons.addWidget(self.m2_acceptance_button)
         layout.addWidget(self.chat_history, 1)
@@ -275,6 +484,7 @@ class MainWindow(QMainWindow):
 
     def _build_config_dock(self) -> None:
         dock = QDockWidget("Конфигурация", self)
+        self.config_dock = dock
         self.config_editor = ConfigEditor(self.config_path)
         self.config_editor.config_saved.connect(self._config_saved)
         dock.setWidget(self.config_editor)
@@ -297,14 +507,13 @@ class MainWindow(QMainWindow):
     def _build_inspector_dock(self) -> None:
         dock = QDockWidget("Узел / Связь", self)
         self.inspector_dock = dock
-        self.node_inspector = QPlainTextEdit()
-        self.node_inspector.setReadOnly(True)
-        self.node_inspector.setPlaceholderText("Выберите узел или связь на canvas")
+        self.node_inspector = NodeInspectorWidget(self.services, self)
         dock.setWidget(self.node_inspector)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
 
     def _build_node_manager_dock(self) -> None:
         dock = QDockWidget("Добавление узла", self)
+        self.node_dock = dock
         self.node_manager = NodeManagerWidget(
             self.services,
             selected_uid=lambda: self._selected_uid,
@@ -315,6 +524,7 @@ class MainWindow(QMainWindow):
 
     def _build_link_manager_dock(self) -> None:
         dock = QDockWidget("Связи", self)
+        self.link_dock = dock
         self.link_manager = LinkManagerWidget(
             self.services,
             selected_uid=lambda: self._selected_uid,
@@ -356,8 +566,9 @@ class MainWindow(QMainWindow):
     def _build_runtime_dock(self) -> None:
         dock = QDockWidget("Runtime / Trace", self)
         self.runtime_dock = dock
-        body = QWidget()
-        layout = QVBoxLayout(body)
+
+        runtime_body = QWidget()
+        layout = QVBoxLayout(runtime_body)
         self.ignition_tuning = IgnitionTuningWidget(
             self.services.config.ignition.decay,
             self.services.config.ignition.tick_interval_seconds,
@@ -380,6 +591,8 @@ class MainWindow(QMainWindow):
         self.manual_seed_button.clicked.connect(self._seed_selected_node)
         self._refresh_manual_seed_button()
         self.runtime_label = QLabel()
+        self.runtime_label.setWordWrap(True)
+        self.runtime_label.setMinimumWidth(0)
         self.visual_legend = QLabel(
             "Красный = excitation x; движущийся красный хвост = source → target; "
             "w не затухает визуально и показывается отдельно в инспекторе."
@@ -392,7 +605,15 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.runtime_label)
         layout.addWidget(self.visual_legend)
         layout.addWidget(self.trace_view, 1)
-        dock.setWidget(body)
+
+        self.diagnostics_panel = DiagnosticsPanel(self.services, self)
+        self.diagnostics_panel.save_requested.connect(self._save_memory)
+        self.diagnostics_panel.reload_requested.connect(self._reload_from_disk)
+
+        tabs = QTabWidget()
+        tabs.addTab(runtime_body, "Runtime")
+        tabs.addTab(self.diagnostics_panel, "Diagnostics")
+        dock.setWidget(tabs)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 
     # ---------- runtime controls ----------
@@ -480,8 +701,43 @@ class MainWindow(QMainWindow):
             with self.services.operation_lock:
                 result = self.services.ignition.tick()
             self.canvas.push_tick(result)
+            self.diagnostics_panel.record_tick(result)
         except Exception as exc:
             QMessageBox.critical(self, "Tick", str(exc))
+
+    def _reload_from_disk(self) -> None:
+        if any(
+            worker is not None
+            for worker in (
+                self._chat_worker,
+                self._acceptance_worker,
+                self._document_acceptance_worker,
+                self._hidden_valency_worker,
+                self._m2_acceptance_worker,
+                self._llm_operation_worker,
+            )
+        ):
+            self.statusBar().showMessage("Дождитесь окончания текущей операции перед Reload Memory", 3000)
+            return
+        answer = QMessageBox.question(
+            self,
+            "Reload Memory",
+            "Перезапустить GUI и заново загрузить сохранённую память с диска? "
+            "Несохранённые изменения будут потеряны.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            self.services.stop(save=False)
+        except Exception:
+            pass
+        QProcess.startDetached(
+            sys.executable,
+            ["-m", "ah.gui.app", "--config", str(self.config_path)],
+        )
+        self.close()
 
     def _save_memory(self) -> None:
         try:
@@ -493,7 +749,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("AH сохранена", 2500)
 
     def _clear_memory(self) -> None:
-        if any(worker is not None for worker in (self._chat_worker, self._acceptance_worker, self._hidden_valency_worker, self._m2_acceptance_worker, self._llm_operation_worker)):
+        if any(worker is not None for worker in (self._chat_worker, self._acceptance_worker, self._document_acceptance_worker, self._hidden_valency_worker, self._m2_acceptance_worker, self._llm_operation_worker)):
             self.statusBar().showMessage("Дождитесь окончания текущего cognitive run", 2500)
             return
         answer = QMessageBox.question(
@@ -520,7 +776,7 @@ class MainWindow(QMainWindow):
         # delivered. The previous implementation kept the worker only in a local
         # variable and re-enabled the button through a lambda, which is fragile
         # across worker-thread/UI-thread boundaries.
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2000)
             return
 
@@ -551,7 +807,7 @@ class MainWindow(QMainWindow):
         self.thread_pool.start(worker)
 
     def _run_acceptance_cases(self) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -574,6 +830,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
         self.action_llm.setEnabled(False)
@@ -636,6 +893,99 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.document_acceptance_button.setEnabled(True)
+        self.hidden_valency_button.setEnabled(True)
+        self.m2_acceptance_button.setEnabled(True)
+        self.action_llm.setEnabled(True)
+        self.action_ignition.setEnabled(True)
+        self.action_tick.setEnabled(True)
+        self.action_save.setEnabled(True)
+        self.chat_input.setFocus()
+        self._resume_acceptance_status_polling()
+
+    def _run_document_acceptance(self) -> None:
+        if (
+            self._chat_worker is not None
+            or self._acceptance_worker is not None
+            or self._document_acceptance_worker is not None
+            or self._hidden_valency_worker is not None
+            or self._m2_acceptance_worker is not None
+        ):
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+        if self._llm_operation_worker is not None:
+            self.statusBar().showMessage("Дождитесь завершения операции LLM", 2500)
+            return
+        if self.services.llm is None or not self.services.llm.is_running:
+            QMessageBox.warning(self, "Document acceptance", "Сначала запустите локальную LLM.")
+            return
+        try:
+            specs = load_document_specs(self.services.config.paths.data_dir)
+        except Exception as exc:
+            QMessageBox.critical(self, "Document acceptance", f"{type(exc).__name__}: {exc}")
+            return
+
+        self.send_button.setEnabled(False)
+        self.chat_input.setEnabled(False)
+        self.acceptance_button.setEnabled(False)
+        self.document_acceptance_button.setEnabled(False)
+        self.hidden_valency_button.setEnabled(False)
+        self.m2_acceptance_button.setEnabled(False)
+        self.action_llm.setEnabled(False)
+        self.action_ignition.setEnabled(False)
+        self.action_tick.setEnabled(False)
+        self.action_save.setEnabled(False)
+        paragraph_count = sum(len(item.paragraphs) for item in specs)
+        self.chat_history.append(
+            f"<b>Document acceptance:</b> запускаю {len(specs)} текста / {paragraph_count} абзацев. "
+            "Каждый текст идёт как единый scenario с общей AH между абзацами."
+        )
+        self.statusBar().showMessage(f"Document acceptance: 0/{paragraph_count} абзацев — выполняется")
+        self._suspend_acceptance_status_polling()
+
+        worker = FunctionWorker(lambda: run_document_acceptance(self.services))
+        self._document_acceptance_worker = worker
+        worker.signals.result.connect(self._document_acceptance_finished)
+        worker.signals.error.connect(self._document_acceptance_error)
+        worker.signals.finished.connect(self._document_acceptance_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _document_acceptance_finished(self, result) -> None:
+        self.chat_history.append(
+            f"<b>Document acceptance:</b> documents PASS {result.passed_documents}/{result.total_documents}; "
+            f"paragraph semantic {result.paragraph_semantic_passed}/{result.total_paragraphs}; "
+            f"runtime ERROR {result.runtime_errors}. Результаты: {self._html(str(result.output_dir))}"
+        )
+        self.statusBar().showMessage(
+            f"Document PASS {result.passed_documents}/{result.total_documents}; "
+            f"paragraphs {result.paragraph_semantic_passed}/{result.total_paragraphs}",
+            10000,
+        )
+        QMessageBox.information(
+            self,
+            "Document acceptance",
+            f"Прогон завершён.\n\n"
+            f"DOCUMENT PASS: {result.passed_documents}/{result.total_documents}\n"
+            f"DOCUMENT FAIL: {result.failed_documents}\n\n"
+            f"Paragraph semantic PASS: {result.paragraph_semantic_passed}/{result.total_paragraphs}\n"
+            f"Paragraph semantic FAIL/GAP: {result.paragraph_semantic_failed}\n"
+            f"Runtime ERROR: {result.runtime_errors}\n\n"
+            f"Результаты:\n{result.output_dir}",
+        )
+
+    @Slot(str)
+    def _document_acceptance_error(self, message: str) -> None:
+        self.chat_history.append(f"<b>DOCUMENT ACCEPTANCE ERROR:</b> {self._html(message)}")
+        QMessageBox.critical(self, "Document acceptance", message)
+
+    @Slot()
+    def _document_acceptance_worker_finished(self) -> None:
+        self._document_acceptance_worker = None
+        self.send_button.setEnabled(True)
+        self.chat_input.setEnabled(True)
+        self.acceptance_button.setEnabled(True)
+        self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
         self.action_llm.setEnabled(True)
@@ -649,6 +999,7 @@ class MainWindow(QMainWindow):
         if (
             self._chat_worker is not None
             or self._acceptance_worker is not None
+            or self._document_acceptance_worker is not None
             or self._hidden_valency_worker is not None
             or self._m2_acceptance_worker is not None
         ):
@@ -660,6 +1011,7 @@ class MainWindow(QMainWindow):
         # attention during proof. Live memory is never polluted by M2 fixtures.
         self.m2_acceptance_button.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.send_button.setEnabled(False)
         self.chat_history.append(
@@ -732,12 +1084,13 @@ class MainWindow(QMainWindow):
         self._m2_acceptance_worker = None
         self.m2_acceptance_button.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.send_button.setEnabled(True)
         self._refresh_status()
 
     def _run_hidden_valency_diagnostic(self) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
+        if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -750,6 +1103,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
         self.action_llm.setEnabled(False)
@@ -810,6 +1164,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
         self.action_llm.setEnabled(True)
@@ -864,11 +1219,29 @@ class MainWindow(QMainWindow):
         )
         for tick in (*result.ticks_after_input, *result.ticks_after_response):
             self.canvas.push_tick(tick)
+            self.diagnostics_panel.record_tick(tick)
         trace_payload = []
         proof_builder = ProofSnapshotBuilder(self.services.core)
         for i, q in enumerate(result.queries, 1):
             if q.outcome is None:
-                trace_payload.append({"query": i, "diagnostics": q.diagnostics})
+                # Preserve the current provenance contract inside the audited GUI:
+                # an epistemic target that could not be compiled is still a visible
+                # logical outcome. Never let the UI collapse it into "no chains".
+                proof = proof_builder.build_unresolved(
+                    chain_id=f"live:turn:{self._turn_sequence}:query:{i}",
+                    source="LIVE",
+                    title=f"Turn {self._turn_sequence} · Query {i}",
+                    diagnostics=q.diagnostics,
+                )
+                self.inference_explorer.add_chain(proof, select=False)
+                trace_payload.append(
+                    {
+                        "query": i,
+                        "status": "UNRESOLVED",
+                        "stop_reason": "GOAL_NOT_COMPILED",
+                        "diagnostics": q.diagnostics,
+                    }
+                )
                 continue
             proof = proof_builder.build(
                 q.outcome,
@@ -939,21 +1312,26 @@ class MainWindow(QMainWindow):
         canvas = self.canvas_browser.sandbox_canvas
         snapshot = None if canvas is None else canvas.current_snapshot
         if snapshot is None or not uid:
-            self.node_inspector.setPlainText("M2 SANDBOX — узел не выбран")
+            self.node_inspector.set_raw_payload(
+                {"canvas": "M2 SANDBOX", "status": "node not selected"}
+            )
             return
         node = next((item for item in snapshot.nodes if item.uid == uid), None)
         if node is None:
-            self.node_inspector.setPlainText(f"M2 SANDBOX — UID не найден: {uid}")
+            self.node_inspector.set_raw_payload(
+                {"canvas": "M2 SANDBOX", "uid": uid, "status": "not found"}
+            )
             return
         outgoing = [link for link in snapshot.links if link.source_uid == uid]
         incoming = [link for link in snapshot.links if link.target_uid == uid]
-        payload = {
-            "canvas": "M2 SANDBOX (read-only frozen snapshot)",
-            "node": asdict(node),
-            "outgoing_links": [asdict(link) for link in outgoing[:100]],
-            "incoming_links": [asdict(link) for link in incoming[:100]],
-        }
-        self.node_inspector.setPlainText(json.dumps(payload, ensure_ascii=False, indent=2))
+        self.node_inspector.set_raw_payload(
+            {
+                "canvas": "M2 SANDBOX (read-only frozen snapshot)",
+                "node": asdict(node),
+                "outgoing_links": [asdict(link) for link in outgoing[:100]],
+                "incoming_links": [asdict(link) for link in incoming[:100]],
+            }
+        )
 
     def _select_sandbox_edge(self, key: str) -> None:
         canvas = self.canvas_browser.sandbox_canvas
@@ -961,17 +1339,15 @@ class MainWindow(QMainWindow):
             return
         edge = canvas.edge_descriptor(key)
         if edge is None:
-            self.node_inspector.setPlainText("M2 SANDBOX — связь не выбрана")
-            return
-        self.node_inspector.setPlainText(
-            json.dumps(
-                {
-                    "canvas": "M2 SANDBOX (read-only frozen snapshot)",
-                    "edge": asdict(edge),
-                },
-                ensure_ascii=False,
-                indent=2,
+            self.node_inspector.set_raw_payload(
+                {"canvas": "M2 SANDBOX", "status": "edge not selected"}
             )
+            return
+        self.node_inspector.set_raw_payload(
+            {
+                "canvas": "M2 SANDBOX (read-only frozen snapshot)",
+                "edge": asdict(edge),
+            }
         )
 
     def _turn_error(self, message: str) -> None:
@@ -1107,6 +1483,7 @@ class MainWindow(QMainWindow):
 
         if tick is not None:
             self.canvas.push_tick(tick)
+            self.diagnostics_panel.record_tick(tick)
         else:
             # Continuous clock consumes the queued impulse on its next tick. Keep
             # the graph live; no synthetic immediate x mutation is performed here.
@@ -1185,22 +1562,26 @@ class MainWindow(QMainWindow):
         if self._selected_uid is not None:
             self._selected_edge_key = None
             self.canvas.set_selected_uid(self._selected_uid)
-        elif self._selected_edge_key is None:
+            self.link_manager.on_canvas_selection(self._selected_uid)
+            self.node_inspector.set_node(self._selected_uid, snapshot=self._status_snapshot())
+        else:
             self.canvas.set_selected_uid(None)
+            self.node_inspector.clear_selection()
         if hasattr(self, "workspace_view"):
             self.workspace_view.set_selected_uid(self._selected_uid)
         if hasattr(self, "all_nodes_view"):
             self.all_nodes_view.set_selected_uid(self._selected_uid)
-        self._refresh_inspector()
 
     def _select_edge(self, key: str) -> None:
         self._selected_edge_key = key or None
         if self._selected_edge_key is not None:
             self._selected_uid = None
             self.canvas.set_selected_edge_key(self._selected_edge_key)
-        elif self._selected_uid is None:
+            edge = self.canvas.edge_descriptor(self._selected_edge_key)
+            self.node_inspector.set_edge(edge)
+        else:
             self.canvas.set_selected_edge_key(None)
-        self._refresh_inspector()
+            self.node_inspector.clear_selection()
 
     def _node_created(self, uid: str) -> None:
         self.canvas.refresh()
@@ -1219,40 +1600,12 @@ class MainWindow(QMainWindow):
 
     def _refresh_inspector(self, snapshot=None) -> None:
         if self._selected_uid:
-            snap = snapshot if snapshot is not None else self._status_snapshot()
-            node = next((n for n in snap.nodes if n.uid == self._selected_uid), None)
-            if node is None:
-                self.node_inspector.setPlainText("Узел больше не существует (GC).")
-                return
-            payload = {"selection": "node", **asdict(node)}
-            payload["pending_incoming"] = snap.pending_incoming.get(node.uid, 0.0)
-            self.node_inspector.setPlainText(json.dumps(payload, ensure_ascii=False, indent=2))
+            self.node_inspector.set_node(self._selected_uid, snapshot=snapshot)
             return
-
         if self._selected_edge_key:
-            edge = self.canvas.edge_descriptor(self._selected_edge_key)
-            if edge is None:
-                self.node_inspector.setPlainText("Связь больше не отображается.")
-                return
-            payload = {
-                "selection": "canonical_link" if edge.canonical_link else "structural_edge",
-                "key": edge.key,
-                "uid": edge.uid,
-                "edge_kind": edge.edge_kind,
-                "relation_id": edge.relation_id,
-                "source_uid": edge.source_uid,
-                "target_uid": edge.target_uid,
-            }
-            if edge.canonical_link and edge.uid:
-                snap = snapshot if snapshot is not None else self._status_snapshot()
-                link = next((item for item in snap.links if item.uid == edge.uid), None)
-                if link is not None:
-                    payload["weight"] = link.weight
-            self.node_inspector.setPlainText(json.dumps(payload, ensure_ascii=False, indent=2))
+            self.node_inspector.set_edge(self.canvas.edge_descriptor(self._selected_edge_key), snapshot=snapshot)
             return
-
-        self.node_inspector.clear()
-        self.node_inspector.setPlaceholderText("Выберите узел или связь на canvas")
+        self.node_inspector.clear_selection()
 
     def _refresh_llm_status_if_visible(self) -> None:
         if hasattr(self, "llm_dock") and self.llm_dock.isVisible():
@@ -1303,6 +1656,9 @@ class MainWindow(QMainWindow):
             semantics = self.services.graph_inspector.active_semantics(missing) if missing else {}
             self.all_nodes_view.refresh(snap, semantics, force=force)
             self.all_nodes_view.set_selected_uid(self._selected_uid)
+
+        if hasattr(self, "diagnostics_panel") and self.runtime_dock.isVisible():
+            self.diagnostics_panel.refresh()
 
         if hasattr(self, "runtime_dock") and self.runtime_dock.isVisible():
             self.runtime_label.setText(

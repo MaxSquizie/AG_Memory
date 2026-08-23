@@ -1,0 +1,3097 @@
+{
+  "index": 13,
+  "input": "Рассада увяла, потому что почва высохла. Освещение работало.",
+  "status": "OK",
+  "scenario_id": "greenhouse_control",
+  "linguistic_candidate_graph": {
+    "text": "Рассада увяла, потому что почва высохла. Освещение работало.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Рассада",
+        "start": 0,
+        "end": 7,
+        "analyses": [
+          {
+            "normal_form": "рассада",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "femn",
+              "sing",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "увяла",
+        "start": 8,
+        "end": 13,
+        "analyses": [
+          {
+            "normal_form": "увялый",
+            "pos": "ADJS",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "femn",
+              "ADJS"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "увянуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": ",",
+        "start": 13,
+        "end": 14,
+        "analyses": []
+      },
+      {
+        "index": 4,
+        "text": "потому",
+        "start": 15,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "что",
+        "start": 22,
+        "end": 25,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "neut",
+              "NPRO",
+              "accs"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "nomn",
+              "neut",
+              "NPRO"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "почва",
+        "start": 26,
+        "end": 31,
+        "analyses": [
+          {
+            "normal_form": "почва",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "femn",
+              "sing",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "высохла",
+        "start": 32,
+        "end": 39,
+        "analyses": [
+          {
+            "normal_form": "высохнуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": ".",
+        "start": 39,
+        "end": 40,
+        "analyses": []
+      },
+      {
+        "index": 9,
+        "text": "Освещение",
+        "start": 41,
+        "end": 50,
+        "analyses": [
+          {
+            "normal_form": "освещение",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "accs",
+              "inan",
+              "neut",
+              "sing"
+            ],
+            "score": 0.666666
+          },
+          {
+            "normal_form": "освещение",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "neut",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.333333
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "работало",
+        "start": 51,
+        "end": 59,
+        "analyses": [
+          {
+            "normal_form": "работать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "neut",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "past",
+              "neut",
+              "VERB",
+              "intr",
+              "impf"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": ".",
+        "start": 59,
+        "end": 60,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 2,
+          "text": "Рассада увяла",
+          "evidence": {
+            "text": "Рассада увяла",
+            "start": 0,
+            "end": 13
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "увянуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "рассада",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 4,
+          "end_index": 7,
+          "text": "потому что почва высохла",
+          "evidence": {
+            "text": "потому что почва высохла",
+            "start": 15,
+            "end": 39
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 7,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "высохнуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL1",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 4,
+          "end_index": 5,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 15,
+            "end": 25
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 9,
+          "end_index": 10,
+          "text": "Освещение работало",
+          "evidence": {
+            "text": "Освещение работало",
+            "start": 41,
+            "end": 59
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 10,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "работать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "освещение",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "увянуть"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 7,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "высохнуть"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 10,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "работать"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 2,
+          "child_token_index": 7,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL1",
+          "child_clause_id": "CL2"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Рассада увяла, потому что почва высохла. Освещение работало.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "увяла",
+          "normalized_hint": "увянуть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "увяла",
+            "start": 8,
+            "end": 13
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Рассада",
+            "normalized_hint": "Рассада",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Рассада",
+              "start": 0,
+              "end": 7
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Рассада увяла",
+          "start": 0,
+          "end": 13
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "высохла",
+          "normalized_hint": "высохнуть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "высохла",
+            "start": 32,
+            "end": 39
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_5ddf316e654649429dfaa4e0191620a5",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "почва",
+            "normalized_hint": "почва",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "почва",
+              "start": 26,
+              "end": 31
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что почва высохла",
+          "start": 15,
+          "end": 39
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "работало",
+          "normalized_hint": "работать",
+          "sense_hint": null,
+          "evidence": {
+            "text": "работало",
+            "start": 51,
+            "end": 59
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_992be906ae3a4457b2ced3a3380c1493",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Освещение",
+            "normalized_hint": "Освещение",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Освещение",
+              "start": 41,
+              "end": 50
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Освещение работало",
+          "start": 41,
+          "end": 59
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A2",
+        "target_ref": "A1",
+        "evidence": {
+          "text": "потому что",
+          "start": 15,
+          "end": 25
+        }
+      }
+    ],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [
+      {
+        "parent_ref": "A1",
+        "child_ref": "A2",
+        "kind": "SUBORDINATE"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": false,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_1609706379394ef885ebd6fda0e7d5b8",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N"
+        },
+        "reason": "REACTIVATED_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_1609706379394ef885ebd6fda0e7d5b8",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_25f0c181840f4169885502a41c805135",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_9d5b3bf1820f47b98e0568c0f0aff9c5",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_ae25d77c314d40c0b01bba340940c73a",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_1de15028c5054fbb9c34207bb9de45ee",
+          "kind": "L"
+        },
+        "created": true
+      }
+    ],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Рассада увяла, потому что почва высохла. Освещение работало.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_4f402ca8cf4c4761a1f2f644cc472e19",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Анна осмотрела теплицу. Коммутатор обесточился.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_baa5997808f34aa9a9bbec707640cfb9",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Таймер пропустил команду, потому что контроллер отключился. Вентилятор работал.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_fc1292b16f354e3b922bb4efdd81ecdf",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Полив задержался, потому что таймер пропустил команду. Анна измерила влажность.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Почва высохла, потому что полив задержался. Анна записала результат.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nРассада увяла, потому что почва высохла. Освещение работало.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Анна осмотрела теплицу. Коммутатор обесточился.»\n- Пользователь ранее сказал: «Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.»\n- Пользователь ранее сказал: «Таймер пропустил команду, потому что контроллер отключился. Вентилятор работал.»\n- Пользователь ранее сказал: «Полив задержался, потому что таймер пропустил команду. Анна измерила влажность.»\n- Пользователь ранее сказал: «Почва высохла, потому что полив задержался. Анна записала результат.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_1f455b0ee99e4f8ebf2c27f029a0e3c6",
+        "kind": "M"
+      },
+      {
+        "uid": "M_35013c59b08448bda4c94515af6f7ff5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_527fa29597cf4929ba6103bfb9224faf",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7380e5228e2c467dae95726981e7b99c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_932d7eb90a4d45d6a1879a5ab2546d04",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9aa8a3c404c4460fa4ef7513a7b044a9",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9b1a141d6a1241609b3f5cec8da93f23",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b14d1b6210df4cd985701960ca67958a",
+        "kind": "M"
+      },
+      {
+        "uid": "M_bfbbeda124df41809381b4a12e275b76",
+        "kind": "M"
+      },
+      {
+        "uid": "M_e6453107f19548369db17a28d42e4aa8",
+        "kind": "M"
+      },
+      {
+        "uid": "M_ea3c672bdcbc405aa2f7526282ee6f1e",
+        "kind": "M"
+      },
+      {
+        "uid": "M_f2f7daae0f9b4a9e8612e2062312999e",
+        "kind": "M"
+      },
+      {
+        "uid": "N_1609706379394ef885ebd6fda0e7d5b8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+        "kind": "N"
+      },
+      {
+        "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_40d6f71aa9f649a08ecc47dba560d99e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4d8279e5238a49baae750863dcce117e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4f402ca8cf4c4761a1f2f644cc472e19",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6b0599f0773d4e9283d282e583d4f4f5",
+        "kind": "N"
+      },
+      {
+        "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+        "kind": "N"
+      },
+      {
+        "uid": "N_830470529dc84b6e80a56328038d8fab",
+        "kind": "N"
+      },
+      {
+        "uid": "N_84e4d38421dc4212a2b58efccdc77955",
+        "kind": "N"
+      },
+      {
+        "uid": "N_baa5997808f34aa9a9bbec707640cfb9",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c700c96bda0245f1921226e4a92fc262",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d4c23667da0b485d92d5f0333d3ff622",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_fc1292b16f354e3b922bb4efdd81ecdf",
+        "kind": "N"
+      },
+      {
+        "uid": "S_11b169bbc5064bd2870ff7a9f480351e",
+        "kind": "S"
+      },
+      {
+        "uid": "S_25f0c181840f4169885502a41c805135",
+        "kind": "S"
+      },
+      {
+        "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+        "kind": "S"
+      },
+      {
+        "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_670b9ce1d9c345c4acaabe111fb3d424",
+        "kind": "S"
+      },
+      {
+        "uid": "S_9d5b3bf1820f47b98e0568c0f0aff9c5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ae25d77c314d40c0b01bba340940c73a",
+        "kind": "S"
+      },
+      {
+        "uid": "S_e080e73fa02f48e6988b796cd2f4c1b9",
+        "kind": "S"
+      },
+      {
+        "uid": "S_e4c16791c9cd4f64b95cd69bc4382e5c",
+        "kind": "S"
+      },
+      {
+        "uid": "S_f6177b2df9bc4c69866783a4d4760f71",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ffc1791e4eea48c0b46d92fb8b6d2192",
+        "kind": "S"
+      },
+      {
+        "uid": "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+        "kind": "T"
+      },
+      {
+        "uid": "T_09e165d5f177471889153e6ecb304a5d",
+        "kind": "T"
+      },
+      {
+        "uid": "T_1f3cc4e8e60a450486beae951f89d180",
+        "kind": "T"
+      },
+      {
+        "uid": "T_3ce9aea8989d402b95a383e265be5aaa",
+        "kind": "T"
+      },
+      {
+        "uid": "T_5ddf316e654649429dfaa4e0191620a5",
+        "kind": "T"
+      },
+      {
+        "uid": "T_72b137434f7f412da2700d1c7624c8f6",
+        "kind": "T"
+      },
+      {
+        "uid": "T_855ffcab95dd4b948915b0e58f8a17b8",
+        "kind": "T"
+      },
+      {
+        "uid": "T_8588cf6727b84fc28e1586be68f3db9a",
+        "kind": "T"
+      },
+      {
+        "uid": "T_992be906ae3a4457b2ced3a3380c1493",
+        "kind": "T"
+      },
+      {
+        "uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e6a7a986270f4c5281f4ee511d3ca5d5",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 18,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.8868219725961186,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_1f455b0ee99e4f8ebf2c27f029a0e3c6",
+          "kind": "M"
+        },
+        "semantic": "[M_1f455b0ee99e4f8ebf2c27f029a0e3c6] Вентилятор",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40024002723310403,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_35013c59b08448bda4c94515af6f7ff5",
+          "kind": "M"
+        },
+        "semantic": "[M_35013c59b08448bda4c94515af6f7ff5] Таймер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8696398736756072,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_527fa29597cf4929ba6103bfb9224faf",
+          "kind": "M"
+        },
+        "semantic": "[M_527fa29597cf4929ba6103bfb9224faf] влажность",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40456268056730255,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_7380e5228e2c467dae95726981e7b99c",
+          "kind": "M"
+        },
+        "semantic": "[M_7380e5228e2c467dae95726981e7b99c] Коммутатор",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.7680418431536368,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_932d7eb90a4d45d6a1879a5ab2546d04",
+          "kind": "M"
+        },
+        "semantic": "[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_9aa8a3c404c4460fa4ef7513a7b044a9",
+          "kind": "M"
+        },
+        "semantic": "[M_9aa8a3c404c4460fa4ef7513a7b044a9] Почва",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.7161513958551962,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_9b1a141d6a1241609b3f5cec8da93f23",
+          "kind": "M"
+        },
+        "semantic": "[M_9b1a141d6a1241609b3f5cec8da93f23] результат",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "M_b14d1b6210df4cd985701960ca67958a",
+          "kind": "M"
+        },
+        "semantic": "[M_b14d1b6210df4cd985701960ca67958a] теплица",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3917327865555247,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "M_bfbbeda124df41809381b4a12e275b76",
+          "kind": "M"
+        },
+        "semantic": "[M_bfbbeda124df41809381b4a12e275b76] команда",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8696398736756072,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "M_e6453107f19548369db17a28d42e4aa8",
+          "kind": "M"
+        },
+        "semantic": "[M_e6453107f19548369db17a28d42e4aa8] Контроллер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8526832958304833,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "M_ea3c672bdcbc405aa2f7526282ee6f1e",
+          "kind": "M"
+        },
+        "semantic": "[M_ea3c672bdcbc405aa2f7526282ee6f1e] щиток",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3959635603929772,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "M_f2f7daae0f9b4a9e8612e2062312999e",
+          "kind": "M"
+        },
+        "semantic": "[M_f2f7daae0f9b4a9e8612e2062312999e] Полив",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8790321169389389,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_1609706379394ef885ebd6fda0e7d5b8",
+          "kind": "N"
+        },
+        "semantic": "[N_1609706379394ef885ebd6fda0e7d5b8] [S_9d5b3bf1820f47b98e0568c0f0aff9c5] работал(SUBJECT=[M_fa04253b04cd4124a79f71f1fb18f1e7] Освещение)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.40000000000000013,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_1b9eadaf589c48ddb104b54b1da8384c",
+          "kind": "N"
+        },
+        "semantic": "[N_1b9eadaf589c48ddb104b54b1da8384c] реплика пользователя: Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4761434322883079,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+          "kind": "N"
+        },
+        "semantic": "[N_23cd4fe1bae04cdb96ae1f731e728fa6] [S_5d54c9161d7f43cebea1e1b25db0e2c5] отключился(SUBJECT=[M_e6453107f19548369db17a28d42e4aa8] Контроллер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9682870056284307,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+          "kind": "N"
+        },
+        "semantic": "[N_25767f4b45e54463b424baeebff1e2c3] [S_f6177b2df9bc4c69866783a4d4760f71] обесточился(SUBJECT=[M_7380e5228e2c467dae95726981e7b99c] Коммутатор)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9579410957005264,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "N_40d6f71aa9f649a08ecc47dba560d99e",
+          "kind": "N"
+        },
+        "semantic": "[N_40d6f71aa9f649a08ecc47dba560d99e] [S_9d5b3bf1820f47b98e0568c0f0aff9c5] работал(SUBJECT=[M_1f455b0ee99e4f8ebf2c27f029a0e3c6] Вентилятор)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.40000000000000013,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "N_4d8279e5238a49baae750863dcce117e",
+          "kind": "N"
+        },
+        "semantic": "[N_4d8279e5238a49baae750863dcce117e] реплика пользователя: Анна осмотрела теплицу. Коммутатор обесточился.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4710559561220643,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "N_4f402ca8cf4c4761a1f2f644cc472e19",
+          "kind": "N"
+        },
+        "semantic": "[N_4f402ca8cf4c4761a1f2f644cc472e19] [S_670b9ce1d9c345c4acaabe111fb3d424] осмотрела(SUBJECT=[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна, OBJECT=[M_b14d1b6210df4cd985701960ca67958a] теплица)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9477057292908292,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N"
+        },
+        "semantic": "[N_5781fcfd9fd147c69858c21c10e55e03] [S_ae25d77c314d40c0b01bba340940c73a] высохла(SUBJECT=[M_9aa8a3c404c4460fa4ef7513a7b044a9] Почва)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.4099999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "N_6b0599f0773d4e9283d282e583d4f4f5",
+          "kind": "N"
+        },
+        "semantic": "[N_6b0599f0773d4e9283d282e583d4f4f5] [S_e4c16791c9cd4f64b95cd69bc4382e5c] записала(SUBJECT=[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна, OBJECT=[M_9b1a141d6a1241609b3f5cec8da93f23] результат)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+          "kind": "N"
+        },
+        "semantic": "[N_82a84c1b097a4ce48e1848c2b71feb45] [S_5d3dad853f51461aaab6a7dfee029237] проверила(SUBJECT=[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна, OBJECT=[M_ea3c672bdcbc405aa2f7526282ee6f1e] щиток)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9579410957005264,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "N_830470529dc84b6e80a56328038d8fab",
+          "kind": "N"
+        },
+        "semantic": "[N_830470529dc84b6e80a56328038d8fab] [S_11b169bbc5064bd2870ff7a9f480351e] измерила(SUBJECT=[M_932d7eb90a4d45d6a1879a5ab2546d04] Анна, OBJECT=[M_527fa29597cf4929ba6103bfb9224faf] влажность)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "N_84e4d38421dc4212a2b58efccdc77955",
+          "kind": "N"
+        },
+        "semantic": "[N_84e4d38421dc4212a2b58efccdc77955] реплика пользователя: Таймер пропустил команду, потому что контроллер отключился. Вентилятор работал.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48128585397303125,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "N_baa5997808f34aa9a9bbec707640cfb9",
+          "kind": "N"
+        },
+        "semantic": "[N_baa5997808f34aa9a9bbec707640cfb9] [S_ffc1791e4eea48c0b46d92fb8b6d2192] пропустил(SUBJECT=[M_35013c59b08448bda4c94515af6f7ff5] Таймер, OBJECT=[M_bfbbeda124df41809381b4a12e275b76] команда)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "N_c700c96bda0245f1921226e4a92fc262",
+          "kind": "N"
+        },
+        "semantic": "[N_c700c96bda0245f1921226e4a92fc262] реплика пользователя: Полив задержался, потому что таймер пропустил команду. Анна измерила влажность.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48648381459621354,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 28,
+        "root": {
+          "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+          "kind": "N"
+        },
+        "semantic": "[N_ccf1553f70c64ca588f70e61469f99c2] [S_25f0c181840f4169885502a41c805135] увяла(SUBJECT=[M_0fa9250ef11b4cabb760025f85c49411] Рассада)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3799999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 29,
+        "root": {
+          "uid": "N_d4c23667da0b485d92d5f0333d3ff622",
+          "kind": "N"
+        },
+        "semantic": "[N_d4c23667da0b485d92d5f0333d3ff622] реплика пользователя: Почва высохла, потому что полив задержался. Анна записала результат.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 30,
+        "root": {
+          "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+          "kind": "N"
+        },
+        "semantic": "[N_e7aec676aa0d4bf4b08161777cbdd4d1] реплика пользователя: Рассада увяла, потому что почва высохла. Освещение работало.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 31,
+        "root": {
+          "uid": "N_fc1292b16f354e3b922bb4efdd81ecdf",
+          "kind": "N"
+        },
+        "semantic": "[N_fc1292b16f354e3b922bb4efdd81ecdf] [S_e080e73fa02f48e6988b796cd2f4c1b9] задержался(SUBJECT=[M_f2f7daae0f9b4a9e8612e2062312999e] Полив)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 32,
+        "root": {
+          "uid": "S_11b169bbc5064bd2870ff7a9f480351e",
+          "kind": "S"
+        },
+        "semantic": "[S_11b169bbc5064bd2870ff7a9f480351e] измерила",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 33,
+        "root": {
+          "uid": "S_25f0c181840f4169885502a41c805135",
+          "kind": "S"
+        },
+        "semantic": "[S_25f0c181840f4169885502a41c805135] увяла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 34,
+        "root": {
+          "uid": "S_5d3dad853f51461aaab6a7dfee029237",
+          "kind": "S"
+        },
+        "semantic": "[S_5d3dad853f51461aaab6a7dfee029237] проверила",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.904672521347785,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 35,
+        "root": {
+          "uid": "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+          "kind": "S"
+        },
+        "semantic": "[S_5d54c9161d7f43cebea1e1b25db0e2c5] отключился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9625717079460625,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 36,
+        "root": {
+          "uid": "S_670b9ce1d9c345c4acaabe111fb3d424",
+          "kind": "S"
+        },
+        "semantic": "[S_670b9ce1d9c345c4acaabe111fb3d424] осмотрела",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.8950063166319221,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 37,
+        "root": {
+          "uid": "S_9d5b3bf1820f47b98e0568c0f0aff9c5",
+          "kind": "S"
+        },
+        "semantic": "[S_9d5b3bf1820f47b98e0568c0f0aff9c5] работал",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 38,
+        "root": {
+          "uid": "S_ae25d77c314d40c0b01bba340940c73a",
+          "kind": "S"
+        },
+        "semantic": "[S_ae25d77c314d40c0b01bba340940c73a] высохла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 39,
+        "root": {
+          "uid": "S_e080e73fa02f48e6988b796cd2f4c1b9",
+          "kind": "S"
+        },
+        "semantic": "[S_e080e73fa02f48e6988b796cd2f4c1b9] задержался",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 40,
+        "root": {
+          "uid": "S_e4c16791c9cd4f64b95cd69bc4382e5c",
+          "kind": "S"
+        },
+        "semantic": "[S_e4c16791c9cd4f64b95cd69bc4382e5c] записала",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 41,
+        "root": {
+          "uid": "S_f6177b2df9bc4c69866783a4d4760f71",
+          "kind": "S"
+        },
+        "semantic": "[S_f6177b2df9bc4c69866783a4d4760f71] обесточился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9522868645766158,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 42,
+        "root": {
+          "uid": "S_ffc1791e4eea48c0b46d92fb8b6d2192",
+          "kind": "S"
+        },
+        "semantic": "[S_ffc1791e4eea48c0b46d92fb8b6d2192] пропустил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9729676291924271,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 43,
+        "root": {
+          "uid": "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+          "kind": "T"
+        },
+        "semantic": "[T_02d2aa5e99ef4dc1b874a4ec9f9320e5] predicate=[S_5d3dad853f51461aaab6a7dfee029237] проверила; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.907804160182186,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 44,
+        "root": {
+          "uid": "T_09e165d5f177471889153e6ecb304a5d",
+          "kind": "T"
+        },
+        "semantic": "[T_09e165d5f177471889153e6ecb304a5d] predicate=[S_e4c16791c9cd4f64b95cd69bc4382e5c] записала; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 45,
+        "root": {
+          "uid": "T_1f3cc4e8e60a450486beae951f89d180",
+          "kind": "T"
+        },
+        "semantic": "[T_1f3cc4e8e60a450486beae951f89d180] predicate=[S_5d54c9161d7f43cebea1e1b25db0e2c5] отключился; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9659037721686041,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 46,
+        "root": {
+          "uid": "T_3ce9aea8989d402b95a383e265be5aaa",
+          "kind": "T"
+        },
+        "semantic": "[T_3ce9aea8989d402b95a383e265be5aaa] predicate=[S_e080e73fa02f48e6988b796cd2f4c1b9] задержался; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9868802544627543,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 47,
+        "root": {
+          "uid": "T_5ddf316e654649429dfaa4e0191620a5",
+          "kind": "T"
+        },
+        "semantic": "[T_5ddf316e654649429dfaa4e0191620a5] predicate=[S_ae25d77c314d40c0b01bba340940c73a] высохла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 48,
+        "root": {
+          "uid": "T_72b137434f7f412da2700d1c7624c8f6",
+          "kind": "T"
+        },
+        "semantic": "[T_72b137434f7f412da2700d1c7624c8f6] predicate=[S_ffc1791e4eea48c0b46d92fb8b6d2192] пропустил; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.976335680216741,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 49,
+        "root": {
+          "uid": "T_855ffcab95dd4b948915b0e58f8a17b8",
+          "kind": "T"
+        },
+        "semantic": "[T_855ffcab95dd4b948915b0e58f8a17b8] predicate=[S_11b169bbc5064bd2870ff7a9f480351e] измерила; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 50,
+        "root": {
+          "uid": "T_8588cf6727b84fc28e1586be68f3db9a",
+          "kind": "T"
+        },
+        "semantic": "[T_8588cf6727b84fc28e1586be68f3db9a] predicate=[S_25f0c181840f4169885502a41c805135] увяла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 51,
+        "root": {
+          "uid": "T_992be906ae3a4457b2ced3a3380c1493",
+          "kind": "T"
+        },
+        "semantic": "[T_992be906ae3a4457b2ced3a3380c1493] predicate=[S_9d5b3bf1820f47b98e0568c0f0aff9c5] работал; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 52,
+        "root": {
+          "uid": "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+          "kind": "T"
+        },
+        "semantic": "[T_cb9a4d3af31e4bb3b4373c70ec450c68] predicate=[S_f6177b2df9bc4c69866783a4d4760f71] обесточился; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9555833265075641,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 53,
+        "root": {
+          "uid": "T_e6a7a986270f4c5281f4ee511d3ca5d5",
+          "kind": "T"
+        },
+        "semantic": "[T_e6a7a986270f4c5281f4ee511d3ca5d5] predicate=[S_670b9ce1d9c345c4acaabe111fb3d424] осмотрела; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.8981044946710021,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 13,
+      "source_text": "Рассада увяла, потому что почва высохла. Освещение работало.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nTOKENS:\n[1] Рассада\n[2] увяла\n[3] ,\n[4] потому\n[5] что\n[6] почва\n[7] высохла\n[8] .\n[9] Освещение\n[10] работало\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: увяла; morphology=ADJS",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nTOKENS:\n[1] Рассада\n[2] увяла\n[3] ,\n[4] потому\n[5] что\n[6] почва\n[7] высохла\n[8] .\n[9] Освещение\n[10] работало\n[11] .\nPREDICATE_START: [2] увяла\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: увяла",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла\nTARGET:\nувяла\nRUSSIAN_LEMMA:\nувянуть",
+          "normalized_answer": "увянуть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла\nPREDICATE:\nувяла\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nувяла\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Рассада",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nувяла\nQUESTION_WORD:\nРассада",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nувяла\nALREADY_SELECTED:\nРассада\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что почва высохла\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nTOKENS:\n[1] Рассада\n[2] увяла\n[3] ,\n[4] потому\n[5] что\n[6] почва\n[7] высохла\n[8] .\n[9] Освещение\n[10] работало\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[7] token 7: высохла; morphology=VERB",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nTOKENS:\n[1] Рассада\n[2] увяла\n[3] ,\n[4] потому\n[5] что\n[6] почва\n[7] высохла\n[8] .\n[9] Освещение\n[10] работало\n[11] .\nPREDICATE_START: [7] высохла\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[7] end at token 7: высохла",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что почва высохла\nTARGET:\nвысохла\nRUSSIAN_LEMMA:\nвысохнуть",
+          "normalized_answer": "высохнуть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что почва высохла\nPREDICATE:\nвысохла\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nвысохла\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] почва",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nвысохла\nQUESTION_WORD:\nпочва",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nвысохла\nALREADY_SELECTED:\nпочва\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОсвещение работало\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nTOKENS:\n[1] Рассада\n[2] увяла\n[3] ,\n[4] потому\n[5] что\n[6] почва\n[7] высохла\n[8] .\n[9] Освещение\n[10] работало\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[10] token 10: работало; morphology=VERB",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nTOKENS:\n[1] Рассада\n[2] увяла\n[3] ,\n[4] потому\n[5] что\n[6] почва\n[7] высохла\n[8] .\n[9] Освещение\n[10] работало\n[11] .\nPREDICATE_START: [10] работало\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[10] end at token 10: работало",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОсвещение работало\nTARGET:\nработало\nRUSSIAN_LEMMA:\nработать",
+          "normalized_answer": "работать",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОсвещение работало\nPREDICATE:\nработало\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nработало\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Освещение",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nработало\nQUESTION_WORD:\nОсвещение",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРассада увяла, потому что почва высохла. Освещение работало.\nPREDICATE:\nработало\nALREADY_SELECTED:\nОсвещение\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Рассада увяла, потому что почва высохла. Освещение работало.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "увяла",
+              "normalized_hint": "увянуть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "увяла",
+                "start": 8,
+                "end": 13
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Рассада",
+                "normalized_hint": "Рассада",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Рассада",
+                  "start": 0,
+                  "end": 7
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Рассада увяла",
+              "start": 0,
+              "end": 13
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "высохла",
+              "normalized_hint": "высохнуть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "высохла",
+                "start": 32,
+                "end": 39
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "почва",
+                "normalized_hint": "почва",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "почва",
+                  "start": 26,
+                  "end": 31
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что почва высохла",
+              "start": 15,
+              "end": 39
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "работало",
+              "normalized_hint": "работать",
+              "sense_hint": null,
+              "evidence": {
+                "text": "работало",
+                "start": 51,
+                "end": 59
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Освещение",
+                "normalized_hint": "Освещение",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Освещение",
+                  "start": 41,
+                  "end": 50
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Освещение работало",
+              "start": 41,
+              "end": 59
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A2",
+            "target_ref": "A1",
+            "evidence": {
+              "text": "потому что",
+              "start": 15,
+              "end": 25
+            }
+          }
+        ],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [
+          {
+            "parent_ref": "A1",
+            "child_ref": "A2",
+            "kind": "SUBORDINATE"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "K_298a3be429404181a4f14093487e549a": {
+        "uid": "K_298a3be429404181a4f14093487e549a",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+            "kind": "N"
+          },
+          {
+            "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+            "kind": "N"
+          },
+          {
+            "uid": "N_1609706379394ef885ebd6fda0e7d5b8",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_1de15028c5054fbb9c34207bb9de45ee": {
+        "uid": "L_1de15028c5054fbb9c34207bb9de45ee",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.22800000000000004,
+        "source": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+          "kind": "N"
+        }
+      },
+      "L_94b14dd680b243799bd924721c96b642": {
+        "uid": "L_94b14dd680b243799bd924721c96b642",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_d4c23667da0b485d92d5f0333d3ff622",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+          "kind": "N"
+        }
+      },
+      "M_0fa9250ef11b4cabb760025f85c49411": {
+        "uid": "M_0fa9250ef11b4cabb760025f85c49411",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Рассада",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_fa04253b04cd4124a79f71f1fb18f1e7": {
+        "uid": "M_fa04253b04cd4124a79f71f1fb18f1e7",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Освещение",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_1609706379394ef885ebd6fda0e7d5b8": {
+        "uid": "N_1609706379394ef885ebd6fda0e7d5b8",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_992be906ae3a4457b2ced3a3380c1493",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_fa04253b04cd4124a79f71f1fb18f1e7",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_ccf1553f70c64ca588f70e61469f99c2": {
+        "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_8588cf6727b84fc28e1586be68f3db9a",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0fa9250ef11b4cabb760025f85c49411",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_e7aec676aa0d4bf4b08161777cbdd4d1": {
+        "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_46e8d8306e8041b59e9b0bc83a71d6be",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_298a3be429404181a4f14093487e549a",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Рассада увяла, потому что почва высохла. Освещение работало.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_25f0c181840f4169885502a41c805135": {
+        "uid": "S_25f0c181840f4169885502a41c805135",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "увяла",
+          "увянуть"
+        ]
+      },
+      "T_8588cf6727b84fc28e1586be68f3db9a": {
+        "uid": "T_8588cf6727b84fc28e1586be68f3db9a",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_25f0c181840f4169885502a41c805135",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_6de2cddc5a654db3b4ed1a5c1b9df53b": {
+        "before": {
+          "uid": "L_6de2cddc5a654db3b4ed1a5c1b9df53b",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22800000000000004,
+          "source": {
+            "uid": "N_fc1292b16f354e3b922bb4efdd81ecdf",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_6de2cddc5a654db3b4ed1a5c1b9df53b",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22400000000000003,
+          "source": {
+            "uid": "N_fc1292b16f354e3b922bb4efdd81ecdf",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+            "kind": "N"
+          }
+        }
+      },
+      "N_5781fcfd9fd147c69858c21c10e55e03": {
+        "before": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.4,
+          "template": {
+            "uid": "T_5ddf316e654649429dfaa4e0191620a5",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_9aa8a3c404c4460fa4ef7513a7b044a9",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 1,
+            "lifecycle_state": "NEW",
+            "created_tick": 12,
+            "expires_tick": 212,
+            "last_qualifying_tick": 12,
+            "qualifying_reactivations": 0
+          }
+        },
+        "after": {
+          "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.41000000000000003,
+          "template": {
+            "uid": "T_5ddf316e654649429dfaa4e0191620a5",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_9aa8a3c404c4460fa4ef7513a7b044a9",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 2,
+            "lifecycle_state": "NEW",
+            "created_tick": 12,
+            "expires_tick": 212,
+            "last_qualifying_tick": 12,
+            "qualifying_reactivations": 0
+          }
+        }
+      },
+      "S_9d5b3bf1820f47b98e0568c0f0aff9c5": {
+        "before": {
+          "uid": "S_9d5b3bf1820f47b98e0568c0f0aff9c5",
+          "kind": "S",
+          "domain": null,
+          "forms": [
+            "работал",
+            "работать"
+          ]
+        },
+        "after": {
+          "uid": "S_9d5b3bf1820f47b98e0568c0f0aff9c5",
+          "kind": "S",
+          "domain": null,
+          "forms": [
+            "работал",
+            "работало",
+            "работать"
+          ]
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 18,
+    "workspace_uids": [
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_1f455b0ee99e4f8ebf2c27f029a0e3c6",
+      "M_35013c59b08448bda4c94515af6f7ff5",
+      "M_527fa29597cf4929ba6103bfb9224faf",
+      "M_7380e5228e2c467dae95726981e7b99c",
+      "M_932d7eb90a4d45d6a1879a5ab2546d04",
+      "M_9aa8a3c404c4460fa4ef7513a7b044a9",
+      "M_9b1a141d6a1241609b3f5cec8da93f23",
+      "M_b14d1b6210df4cd985701960ca67958a",
+      "M_bfbbeda124df41809381b4a12e275b76",
+      "M_e6453107f19548369db17a28d42e4aa8",
+      "M_ea3c672bdcbc405aa2f7526282ee6f1e",
+      "M_f2f7daae0f9b4a9e8612e2062312999e",
+      "N_1609706379394ef885ebd6fda0e7d5b8",
+      "N_1b9eadaf589c48ddb104b54b1da8384c",
+      "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+      "N_25767f4b45e54463b424baeebff1e2c3",
+      "N_40d6f71aa9f649a08ecc47dba560d99e",
+      "N_4d8279e5238a49baae750863dcce117e",
+      "N_4f402ca8cf4c4761a1f2f644cc472e19",
+      "N_5781fcfd9fd147c69858c21c10e55e03",
+      "N_6b0599f0773d4e9283d282e583d4f4f5",
+      "N_82a84c1b097a4ce48e1848c2b71feb45",
+      "N_830470529dc84b6e80a56328038d8fab",
+      "N_84e4d38421dc4212a2b58efccdc77955",
+      "N_baa5997808f34aa9a9bbec707640cfb9",
+      "N_c700c96bda0245f1921226e4a92fc262",
+      "N_ccf1553f70c64ca588f70e61469f99c2",
+      "N_d4c23667da0b485d92d5f0333d3ff622",
+      "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+      "N_fc1292b16f354e3b922bb4efdd81ecdf",
+      "S_11b169bbc5064bd2870ff7a9f480351e",
+      "S_25f0c181840f4169885502a41c805135",
+      "S_5d3dad853f51461aaab6a7dfee029237",
+      "S_5d54c9161d7f43cebea1e1b25db0e2c5",
+      "S_670b9ce1d9c345c4acaabe111fb3d424",
+      "S_9d5b3bf1820f47b98e0568c0f0aff9c5",
+      "S_ae25d77c314d40c0b01bba340940c73a",
+      "S_e080e73fa02f48e6988b796cd2f4c1b9",
+      "S_e4c16791c9cd4f64b95cd69bc4382e5c",
+      "S_f6177b2df9bc4c69866783a4d4760f71",
+      "S_ffc1791e4eea48c0b46d92fb8b6d2192",
+      "T_02d2aa5e99ef4dc1b874a4ec9f9320e5",
+      "T_09e165d5f177471889153e6ecb304a5d",
+      "T_1f3cc4e8e60a450486beae951f89d180",
+      "T_3ce9aea8989d402b95a383e265be5aaa",
+      "T_5ddf316e654649429dfaa4e0191620a5",
+      "T_72b137434f7f412da2700d1c7624c8f6",
+      "T_855ffcab95dd4b948915b0e58f8a17b8",
+      "T_8588cf6727b84fc28e1586be68f3db9a",
+      "T_992be906ae3a4457b2ced3a3380c1493",
+      "T_cb9a4d3af31e4bb3b4373c70ec450c68",
+      "T_e6a7a986270f4c5281f4ee511d3ca5d5"
+    ],
+    "workspace": {
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.8868219725961186
+      },
+      "M_1f455b0ee99e4f8ebf2c27f029a0e3c6": {
+        "semantic": "Вентилятор",
+        "excitation": 0.40024002723310403
+      },
+      "M_35013c59b08448bda4c94515af6f7ff5": {
+        "semantic": "Таймер",
+        "excitation": 0.8696398736756072
+      },
+      "M_527fa29597cf4929ba6103bfb9224faf": {
+        "semantic": "влажность",
+        "excitation": 0.40456268056730255
+      },
+      "M_7380e5228e2c467dae95726981e7b99c": {
+        "semantic": "Коммутатор",
+        "excitation": 0.7680418431536368
+      },
+      "M_932d7eb90a4d45d6a1879a5ab2546d04": {
+        "semantic": "Анна",
+        "excitation": 0.9940975169044439
+      },
+      "M_9aa8a3c404c4460fa4ef7513a7b044a9": {
+        "semantic": "Почва",
+        "excitation": 0.7161513958551962
+      },
+      "M_9b1a141d6a1241609b3f5cec8da93f23": {
+        "semantic": "результат",
+        "excitation": 0.4089320192167526
+      },
+      "M_b14d1b6210df4cd985701960ca67958a": {
+        "semantic": "теплица",
+        "excitation": 0.3917327865555247
+      },
+      "M_bfbbeda124df41809381b4a12e275b76": {
+        "semantic": "команда",
+        "excitation": 0.8696398736756072
+      },
+      "M_e6453107f19548369db17a28d42e4aa8": {
+        "semantic": "Контроллер",
+        "excitation": 0.8526832958304833
+      },
+      "M_ea3c672bdcbc405aa2f7526282ee6f1e": {
+        "semantic": "щиток",
+        "excitation": 0.3959635603929772
+      },
+      "M_f2f7daae0f9b4a9e8612e2062312999e": {
+        "semantic": "Полив",
+        "excitation": 0.8790321169389389
+      },
+      "N_1609706379394ef885ebd6fda0e7d5b8": {
+        "semantic": "работал(SUBJECT=Освещение)",
+        "excitation": 1.0
+      },
+      "N_1b9eadaf589c48ddb104b54b1da8384c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_3e639f6da4e9473f9d0232d3f44c65ed[проверила(SUBJECT=Анна, OBJECT=щиток); отключился(SUBJECT=Контроллер); обесточился(SUBJECT=Коммутатор)])",
+        "excitation": 0.4761434322883079
+      },
+      "N_23cd4fe1bae04cdb96ae1f731e728fa6": {
+        "semantic": "отключился(SUBJECT=Контроллер)",
+        "excitation": 0.9682870056284307
+      },
+      "N_25767f4b45e54463b424baeebff1e2c3": {
+        "semantic": "обесточился(SUBJECT=Коммутатор)",
+        "excitation": 0.9579410957005264
+      },
+      "N_40d6f71aa9f649a08ecc47dba560d99e": {
+        "semantic": "работал(SUBJECT=Вентилятор)",
+        "excitation": 1.0
+      },
+      "N_4d8279e5238a49baae750863dcce117e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_68c2fea1d8fa43a591911ac0023952d9[осмотрела(SUBJECT=Анна, OBJECT=теплица); обесточился(SUBJECT=Коммутатор)])",
+        "excitation": 0.4710559561220643
+      },
+      "N_4f402ca8cf4c4761a1f2f644cc472e19": {
+        "semantic": "осмотрела(SUBJECT=Анна, OBJECT=теплица)",
+        "excitation": 0.9477057292908292
+      },
+      "N_5781fcfd9fd147c69858c21c10e55e03": {
+        "semantic": "высохла(SUBJECT=Почва)",
+        "excitation": 1.0
+      },
+      "N_6b0599f0773d4e9283d282e583d4f4f5": {
+        "semantic": "записала(SUBJECT=Анна, OBJECT=результат)",
+        "excitation": 0.9893152444804425
+      },
+      "N_82a84c1b097a4ce48e1848c2b71feb45": {
+        "semantic": "проверила(SUBJECT=Анна, OBJECT=щиток)",
+        "excitation": 0.9579410957005264
+      },
+      "N_830470529dc84b6e80a56328038d8fab": {
+        "semantic": "измерила(SUBJECT=Анна, OBJECT=влажность)",
+        "excitation": 0.9787446529613976
+      },
+      "N_84e4d38421dc4212a2b58efccdc77955": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_e8864f9b5826459f9dd51dc649537bfd[пропустил(SUBJECT=Таймер, OBJECT=команда); отключился(SUBJECT=Контроллер); работал(SUBJECT=Вентилятор)])",
+        "excitation": 0.48128585397303125
+      },
+      "N_baa5997808f34aa9a9bbec707640cfb9": {
+        "semantic": "пропустил(SUBJECT=Таймер, OBJECT=команда)",
+        "excitation": 0.9787446529613976
+      },
+      "N_c700c96bda0245f1921226e4a92fc262": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_49a08f4a791f4c7eba0032d901e0102e[задержался(SUBJECT=Полив); пропустил(SUBJECT=Таймер, OBJECT=команда); измерила(SUBJECT=Анна, OBJECT=влажность)])",
+        "excitation": 0.48648381459621354
+      },
+      "N_ccf1553f70c64ca588f70e61469f99c2": {
+        "semantic": "увяла(SUBJECT=Рассада)",
+        "excitation": 1.0
+      },
+      "N_d4c23667da0b485d92d5f0333d3ff622": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_e500cc13028b42a6a0fe3e6af68729db[высохла(SUBJECT=Почва); задержался(SUBJECT=Полив); записала(SUBJECT=Анна, OBJECT=результат)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_e7aec676aa0d4bf4b08161777cbdd4d1": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_298a3be429404181a4f14093487e549a[увяла(SUBJECT=Рассада); высохла(SUBJECT=Почва); работал(SUBJECT=Освещение)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_fc1292b16f354e3b922bb4efdd81ecdf": {
+        "semantic": "задержался(SUBJECT=Полив)",
+        "excitation": 0.9893152444804425
+      },
+      "S_11b169bbc5064bd2870ff7a9f480351e": {
+        "semantic": "измерила",
+        "excitation": 0.9243192477328055
+      },
+      "S_25f0c181840f4169885502a41c805135": {
+        "semantic": "увяла",
+        "excitation": 0.9443926410592216
+      },
+      "S_5d3dad853f51461aaab6a7dfee029237": {
+        "semantic": "проверила",
+        "excitation": 0.904672521347785
+      },
+      "S_5d54c9161d7f43cebea1e1b25db0e2c5": {
+        "semantic": "отключился",
+        "excitation": 0.9625717079460625
+      },
+      "S_670b9ce1d9c345c4acaabe111fb3d424": {
+        "semantic": "осмотрела",
+        "excitation": 0.8950063166319221
+      },
+      "S_9d5b3bf1820f47b98e0568c0f0aff9c5": {
+        "semantic": "работал",
+        "excitation": 0.9940975169044439
+      },
+      "S_ae25d77c314d40c0b01bba340940c73a": {
+        "semantic": "высохла",
+        "excitation": 0.9940975169044439
+      },
+      "S_e080e73fa02f48e6988b796cd2f4c1b9": {
+        "semantic": "задержался",
+        "excitation": 0.9834758279737207
+      },
+      "S_e4c16791c9cd4f64b95cd69bc4382e5c": {
+        "semantic": "записала",
+        "excitation": 0.9343020365750345
+      },
+      "S_f6177b2df9bc4c69866783a4d4760f71": {
+        "semantic": "обесточился",
+        "excitation": 0.9522868645766158
+      },
+      "S_ffc1791e4eea48c0b46d92fb8b6d2192": {
+        "semantic": "пропустил",
+        "excitation": 0.9729676291924271
+      },
+      "T_02d2aa5e99ef4dc1b874a4ec9f9320e5": {
+        "semantic": "проверила",
+        "excitation": 0.907804160182186
+      },
+      "T_09e165d5f177471889153e6ecb304a5d": {
+        "semantic": "записала",
+        "excitation": 0.9375362417396166
+      },
+      "T_1f3cc4e8e60a450486beae951f89d180": {
+        "semantic": "отключился",
+        "excitation": 0.9659037721686041
+      },
+      "T_3ce9aea8989d402b95a383e265be5aaa": {
+        "semantic": "задержался",
+        "excitation": 0.9868802544627543
+      },
+      "T_5ddf316e654649429dfaa4e0191620a5": {
+        "semantic": "высохла",
+        "excitation": 0.9975387117187637
+      },
+      "T_72b137434f7f412da2700d1c7624c8f6": {
+        "semantic": "пропустил",
+        "excitation": 0.976335680216741
+      },
+      "T_855ffcab95dd4b948915b0e58f8a17b8": {
+        "semantic": "измерила",
+        "excitation": 0.927518896205904
+      },
+      "T_8588cf6727b84fc28e1586be68f3db9a": {
+        "semantic": "увяла",
+        "excitation": 0.9476617761328255
+      },
+      "T_992be906ae3a4457b2ced3a3380c1493": {
+        "semantic": "работал",
+        "excitation": 0.9975387117187637
+      },
+      "T_cb9a4d3af31e4bb3b4373c70ec450c68": {
+        "semantic": "обесточился",
+        "excitation": 0.9555833265075641
+      },
+      "T_e6a7a986270f4c5281f4ee511d3ca5d5": {
+        "semantic": "осмотрела",
+        "excitation": 0.8981044946710021
+      }
+    },
+    "pending_incoming": {
+      "M_fa04253b04cd4124a79f71f1fb18f1e7": 0.16000000000000006,
+      "M_1f455b0ee99e4f8ebf2c27f029a0e3c6": 0.16000000000000006,
+      "N_ccf1553f70c64ca588f70e61469f99c2": 0.08732999999999999,
+      "M_9aa8a3c404c4460fa4ef7513a7b044a9": 0.16809999999999997,
+      "M_0fa9250ef11b4cabb760025f85c49411": 0.15199999999999997
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_35013c59b08448bda4c94515af6f7ff5",
+        "kind": "M"
+      },
+      "оно": {
+        "uid": "M_fa04253b04cd4124a79f71f1fb18f1e7",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_e7aec676aa0d4bf4b08161777cbdd4d1",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 3,
+      "actual": 3
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "увянуть",
+      "actual": "увянуть"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "рассада"
+      },
+      "actual": "Рассада"
+    },
+    {
+      "name": "perception.assertions.a2.predicate",
+      "ok": true,
+      "expected": "высохнуть",
+      "actual": "высохнуть"
+    },
+    {
+      "name": "perception.assertions.a2.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "почва"
+      },
+      "actual": "почва"
+    },
+    {
+      "name": "perception.assertions.a3.predicate",
+      "ok": true,
+      "expected": "работать",
+      "actual": "работать"
+    },
+    {
+      "name": "perception.assertions.a3.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "освещение"
+      },
+      "actual": "Освещение"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [
+        [
+          "CAUSE",
+          "A2",
+          "A1"
+        ]
+      ],
+      "actual": [
+        [
+          "CAUSE",
+          "A2",
+          "A1"
+        ]
+      ]
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "увянуть",
+      "actual": [
+        "увяла",
+        "увянуть"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "рассада"
+      },
+      "actual": "Рассада"
+    },
+    {
+      "name": "canonical.assertions.a2.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a2.predicate",
+      "ok": true,
+      "expected": "высохнуть",
+      "actual": [
+        "высохла",
+        "высохнуть"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "почва"
+      },
+      "actual": "Почва"
+    },
+    {
+      "name": "canonical.assertions.a3.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a3.predicate",
+      "ok": true,
+      "expected": "работать",
+      "actual": [
+        "работал",
+        "работало",
+        "работать"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "освещение"
+      },
+      "actual": "Освещение"
+    },
+    {
+      "name": "templates.высохнуть.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.работать.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.увянуть.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": "Сбой управления теплицей, paragraph 6",
+  "semantic_family": "document.causal.greenhouse",
+  "semantic_tags": [
+    "document",
+    "cause",
+    "dedup-bridge",
+    "distractor"
+  ]
+}

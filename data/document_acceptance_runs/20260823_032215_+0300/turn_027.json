@@ -1,0 +1,3376 @@
+{
+  "index": 27,
+  "input": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+  "status": "OK",
+  "scenario_id": "house_by_pier_monolith",
+  "linguistic_candidate_graph": {
+    "text": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Марина",
+        "start": 0,
+        "end": 6,
+        "analyses": [
+          {
+            "normal_form": "марина",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "Name",
+              "femn",
+              "anim",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.833333
+          },
+          {
+            "normal_form": "марин",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "Name",
+              "anim",
+              "sing",
+              "gent"
+            ],
+            "score": 0.083333
+          },
+          {
+            "normal_form": "марин",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "Name",
+              "anim",
+              "sing"
+            ],
+            "score": 0.083333
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "поднялась",
+        "start": 7,
+        "end": 16,
+        "analyses": [
+          {
+            "normal_form": "подняться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "на",
+        "start": 17,
+        "end": 19,
+        "analyses": [
+          {
+            "normal_form": "на",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.998961
+          },
+          {
+            "normal_form": "на",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000849
+          },
+          {
+            "normal_form": "на",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000188
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "чердак",
+        "start": 20,
+        "end": 26,
+        "analyses": [
+          {
+            "normal_form": "чердак",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.666666
+          },
+          {
+            "normal_form": "чердак",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "inan",
+              "sing"
+            ],
+            "score": 0.333333
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": ".",
+        "start": 26,
+        "end": 27,
+        "analyses": []
+      },
+      {
+        "index": 6,
+        "text": "Она",
+        "start": 28,
+        "end": 31,
+        "analyses": [
+          {
+            "normal_form": "она",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Anph",
+              "3per",
+              "femn",
+              "NPRO",
+              "sing",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "заметила",
+        "start": 32,
+        "end": 40,
+        "analyses": [
+          {
+            "normal_form": "заметить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "indc",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing",
+              "tran"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": "пятно",
+        "start": 41,
+        "end": 46,
+        "analyses": [
+          {
+            "normal_form": "пятно",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "neut",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.9
+          },
+          {
+            "normal_form": "пятно",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "accs",
+              "inan",
+              "neut",
+              "sing"
+            ],
+            "score": 0.1
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "text": "на",
+        "start": 47,
+        "end": 49,
+        "analyses": [
+          {
+            "normal_form": "на",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.998961
+          },
+          {
+            "normal_form": "на",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000849
+          },
+          {
+            "normal_form": "на",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000188
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "потолке",
+        "start": 50,
+        "end": 57,
+        "analyses": [
+          {
+            "normal_form": "потолок",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "loct",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": ".",
+        "start": 57,
+        "end": 58,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 4,
+          "text": "Марина поднялась на чердак",
+          "evidence": {
+            "text": "Марина поднялась на чердак",
+            "start": 0,
+            "end": 26
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "подняться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "марина",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 6,
+          "end_index": 10,
+          "text": "Она заметила пятно на потолке",
+          "evidence": {
+            "text": "Она заметила пятно на потолке",
+            "start": 28,
+            "end": 57
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 7,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "заметить"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "она",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "подняться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 7,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "заметить"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "поднялась",
+          "normalized_hint": "подняться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "поднялась",
+            "start": 7,
+            "end": 16
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "LOCATION"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Марина",
+            "normalized_hint": "Марина",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Марина",
+              "start": 0,
+              "end": 6
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "LOCATION",
+            "mention": "чердак",
+            "normalized_hint": "чердак",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "на чердак",
+              "start": 17,
+              "end": 26
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Марина поднялась на чердак",
+          "start": 0,
+          "end": 26
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "заметила",
+          "normalized_hint": "заметить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "заметила",
+            "start": 32,
+            "end": 40
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "OBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Она",
+            "normalized_hint": "Она",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Она",
+              "start": 28,
+              "end": 31
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "пятно",
+            "normalized_hint": "пятно",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E2",
+            "evidence": {
+              "text": "пятно",
+              "start": 41,
+              "end": 46
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Она заметила пятно на потолке",
+          "start": 28,
+          "end": 57
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "на",
+          "normalized_hint": "на",
+          "sense_hint": "STRUCTURAL_NOMINAL_ATTACHMENT",
+          "evidence": {
+            "text": "на",
+            "start": 47,
+            "end": 49
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "LOCATION"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "пятно",
+            "normalized_hint": "пятно",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E2",
+            "evidence": {
+              "text": "пятно",
+              "start": 41,
+              "end": 46
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "LOCATION",
+            "mention": "потолке",
+            "normalized_hint": "потолок",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "на потолке",
+              "start": 47,
+              "end": 57
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "пятно на потолке",
+          "start": 41,
+          "end": 57
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": []
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_c072402265314d46b30e6c437d2f90e6",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_8f9b50a6fed04f72af14da493970525e",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_c072402265314d46b30e6c437d2f90e6",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_8f9b50a6fed04f72af14da493970525e",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_dac19d4aeda049cbab93e87395e7bc40",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_6ace82e521874f999b432de5fbc20cb1",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nМарина поднялась на чердак. Она заметила пятно на потолке.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.»\n- Пользователь ранее сказал: «Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.»\n- Пользователь ранее сказал: «Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.»\n- Пользователь ранее сказал: «Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.»\n- Пользователь ранее сказал: «Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_017eef0882474c8b81080e68f5300450",
+        "kind": "M"
+      },
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_13e266df7d774e43a110e86c94b2c60b",
+        "kind": "M"
+      },
+      {
+        "uid": "M_18dead80db3e452ebb5da9b76542790e",
+        "kind": "M"
+      },
+      {
+        "uid": "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+        "kind": "M"
+      },
+      {
+        "uid": "M_37150d58712843a4b23da735d23c7ac0",
+        "kind": "M"
+      },
+      {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      {
+        "uid": "M_5b7f7d4fe952425fbc60042824c5bfc4",
+        "kind": "M"
+      },
+      {
+        "uid": "M_6b6f3d9786d54e2eb7a9f1896b977913",
+        "kind": "M"
+      },
+      {
+        "uid": "M_a338db8ad36c487bb8053512807ee50c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b10f4e5522764cc28e018e36348a3cc3",
+        "kind": "M"
+      },
+      {
+        "uid": "M_cc98d84a1fb34505be7f96742558e68d",
+        "kind": "M"
+      },
+      {
+        "uid": "M_d070c1db43d048cd9079d67491b3bfb2",
+        "kind": "M"
+      },
+      {
+        "uid": "M_d16de5a7ec4e42f88c3993232d30e189",
+        "kind": "M"
+      },
+      {
+        "uid": "M_db40ce67e9674323a8e7fd069dd8c789",
+        "kind": "M"
+      },
+      {
+        "uid": "M_f83eb54b8aad4e31983960500ab95251",
+        "kind": "M"
+      },
+      {
+        "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+        "kind": "M"
+      },
+      {
+        "uid": "M_fc0ee7bfbf8e48319ac0939418ac31bd",
+        "kind": "M"
+      },
+      {
+        "uid": "M_ff88e19c1d0d4531994336f459884c76",
+        "kind": "M"
+      },
+      {
+        "uid": "N_056e65db15364396b571c8cd08c4db04",
+        "kind": "N"
+      },
+      {
+        "uid": "N_3c68e2fe158742d2a5a585ec053099f1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6ace82e521874f999b432de5fbc20cb1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+        "kind": "N"
+      },
+      {
+        "uid": "N_728675cd8c8c4b88b848cb2c65a06f7d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+        "kind": "N"
+      },
+      {
+        "uid": "N_7f86f4c99e6f48b8a0d03f005915944d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_81e4c0b9a8e44734819587c1ae1998cc",
+        "kind": "N"
+      },
+      {
+        "uid": "N_8da74d9154024de5bd0aa96c9e6dd248",
+        "kind": "N"
+      },
+      {
+        "uid": "N_8f9b50a6fed04f72af14da493970525e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_910a0429a0ee4cd5b98381fde3b84149",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9d2867eba86b4eeb874f8cffada8d8ff",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b1e53abf13074f1082d4dd5b7c888aef",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c072402265314d46b30e6c437d2f90e6",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d24138cd4e314c55bf000701a85de95d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+        "kind": "N"
+      },
+      {
+        "uid": "N_dac19d4aeda049cbab93e87395e7bc40",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ededdfb21af341e8aec46ce40d513523",
+        "kind": "N"
+      },
+      {
+        "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+        "kind": "S"
+      },
+      {
+        "uid": "S_05ffb410d9144248a81b3e8c9ac4ad17",
+        "kind": "S"
+      },
+      {
+        "uid": "S_1d1ba91f160e49d8ba0dbae02ba4c41e",
+        "kind": "S"
+      },
+      {
+        "uid": "S_22ed4106ab2044909837b566afb24581",
+        "kind": "S"
+      },
+      {
+        "uid": "S_43c1abd217e143f592d15c20127e1f86",
+        "kind": "S"
+      },
+      {
+        "uid": "S_48664f21bdeb4b2fb864830ef29aede8",
+        "kind": "S"
+      },
+      {
+        "uid": "S_6439ebd4e2614585a8099f33334f5a0b",
+        "kind": "S"
+      },
+      {
+        "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+        "kind": "S"
+      },
+      {
+        "uid": "S_6940dc13af804ed4b770a71332ea87cc",
+        "kind": "S"
+      },
+      {
+        "uid": "S_6fda1c0b57134140acac0bc74b088f7c",
+        "kind": "S"
+      },
+      {
+        "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+        "kind": "S"
+      },
+      {
+        "uid": "S_b074dc31b23e46308e6572441b26c9dd",
+        "kind": "S"
+      },
+      {
+        "uid": "S_bc58a9c7b105444195dd6770b3fe0a03",
+        "kind": "S"
+      },
+      {
+        "uid": "S_f66f93c6973d419e9f668dc357f97743",
+        "kind": "S"
+      },
+      {
+        "uid": "T_040c5464a299470e841709aa65170b19",
+        "kind": "T"
+      },
+      {
+        "uid": "T_05bb6beb5424414bacc01361fb8274cb",
+        "kind": "T"
+      },
+      {
+        "uid": "T_2791a0f1408e4cddbd3c4130c7e4d9c7",
+        "kind": "T"
+      },
+      {
+        "uid": "T_53e5310e63d849159cacadd0a6374896",
+        "kind": "T"
+      },
+      {
+        "uid": "T_68ec594eecec4d0b941da07a876455c5",
+        "kind": "T"
+      },
+      {
+        "uid": "T_6c1b8cd8afb8431e967b77c7879241a8",
+        "kind": "T"
+      },
+      {
+        "uid": "T_6f33e1d9c55b4eaa909129ef32c95d5e",
+        "kind": "T"
+      },
+      {
+        "uid": "T_7357598d22624cfdaf27d61385374447",
+        "kind": "T"
+      },
+      {
+        "uid": "T_86ae2e781896412a996bff95bda4bc3b",
+        "kind": "T"
+      },
+      {
+        "uid": "T_915a4dc3d8ce409398cc113eee8d82ef",
+        "kind": "T"
+      },
+      {
+        "uid": "T_a48181aed5d9489092719edd7a9b26ff",
+        "kind": "T"
+      },
+      {
+        "uid": "T_be53cd7031e74ae3a4c8e50b505133ee",
+        "kind": "T"
+      },
+      {
+        "uid": "T_cecb05564a284f0093771e87bad54400",
+        "kind": "T"
+      },
+      {
+        "uid": "T_dfc9cab0a17344469f247a6cca3a73d5",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 18,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_017eef0882474c8b81080e68f5300450",
+          "kind": "M"
+        },
+        "semantic": "[M_017eef0882474c8b81080e68f5300450] Рама",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.6484494812893763,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.8868219725961186,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_13e266df7d774e43a110e86c94b2c60b",
+          "kind": "M"
+        },
+        "semantic": "[M_13e266df7d774e43a110e86c94b2c60b] Окно",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5449053331532332,
+        "output": 0.009241399999999955,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_18dead80db3e452ebb5da9b76542790e",
+          "kind": "M"
+        },
+        "semantic": "[M_18dead80db3e452ebb5da9b76542790e] пятно",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5187201300937572,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+          "kind": "M"
+        },
+        "semantic": "[M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf] Жёлоб",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9729676291924271,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_37150d58712843a4b23da735d23c7ac0",
+          "kind": "M"
+        },
+        "semantic": "[M_37150d58712843a4b23da735d23c7ac0] Балка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_4f13750759294e1ba24c46453b61d578",
+          "kind": "M"
+        },
+        "semantic": "[M_4f13750759294e1ba24c46453b61d578] Марина",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9127369282682432,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_5b7f7d4fe952425fbc60042824c5bfc4",
+          "kind": "M"
+        },
+        "semantic": "[M_5b7f7d4fe952425fbc60042824c5bfc4] Дождевая вода",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.6917559220084695,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "M_6b6f3d9786d54e2eb7a9f1896b977913",
+          "kind": "M"
+        },
+        "semantic": "[M_6b6f3d9786d54e2eb7a9f1896b977913] жестяной желоб",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3959635603929772,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "M_a338db8ad36c487bb8053512807ee50c",
+          "kind": "M"
+        },
+        "semantic": "[M_a338db8ad36c487bb8053512807ee50c] Сухая ветка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8757250939500297,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "M_b10f4e5522764cc28e018e36348a3cc3",
+          "kind": "M"
+        },
+        "semantic": "[M_b10f4e5522764cc28e018e36348a3cc3] вечер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3917327865555247,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "M_cc98d84a1fb34505be7f96742558e68d",
+          "kind": "M"
+        },
+        "semantic": "[M_cc98d84a1fb34505be7f96742558e68d] бухта",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5476378654426716,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "M_d070c1db43d048cd9079d67491b3bfb2",
+          "kind": "M"
+        },
+        "semantic": "[M_d070c1db43d048cd9079d67491b3bfb2] ветер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4036641340565457,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "M_d16de5a7ec4e42f88c3993232d30e189",
+          "kind": "M"
+        },
+        "semantic": "[M_d16de5a7ec4e42f88c3993232d30e189] старый дом",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3917327865555247,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "M_db40ce67e9674323a8e7fd069dd8c789",
+          "kind": "M"
+        },
+        "semantic": "[M_db40ce67e9674323a8e7fd069dd8c789] пристань",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3917327865555247,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "M_f83eb54b8aad4e31983960500ab95251",
+          "kind": "M"
+        },
+        "semantic": "[M_f83eb54b8aad4e31983960500ab95251] край крыши",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+          "kind": "M"
+        },
+        "semantic": "[M_f8b7b8b456d84ddea05df28bd6ec22ef] вода",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.41243048719109227,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "M_fc0ee7bfbf8e48319ac0939418ac31bd",
+          "kind": "M"
+        },
+        "semantic": "[M_fc0ee7bfbf8e48319ac0939418ac31bd] ветка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40024002723310403,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "M_ff88e19c1d0d4531994336f459884c76",
+          "kind": "M"
+        },
+        "semantic": "[M_ff88e19c1d0d4531994336f459884c76] северный ветер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5476378654426716,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "N_056e65db15364396b571c8cd08c4db04",
+          "kind": "N"
+        },
+        "semantic": "[N_056e65db15364396b571c8cd08c4db04] [S_bc58a9c7b105444195dd6770b3fe0a03] пойти(SUBJECT=[M_5b7f7d4fe952425fbc60042824c5bfc4] Дождевая вода, LOCATION=[M_f83eb54b8aad4e31983960500ab95251] край крыши)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "N_3c68e2fe158742d2a5a585ec053099f1",
+          "kind": "N"
+        },
+        "semantic": "[N_3c68e2fe158742d2a5a585ec053099f1] реплика пользователя: К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4710559561220643,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "N_6ace82e521874f999b432de5fbc20cb1",
+          "kind": "N"
+        },
+        "semantic": "[N_6ace82e521874f999b432de5fbc20cb1] [S_22ed4106ab2044909837b566afb24581] сломалась(SUBJECT=[M_a338db8ad36c487bb8053512807ee50c] Сухая ветка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9625717079460625,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+          "kind": "N"
+        },
+        "semantic": "[N_6d9965e7f7e04af9b8150e6e1df84049] [S_6940dc13af804ed4b770a71332ea87cc] намокла(SUBJECT=[M_37150d58712843a4b23da735d23c7ac0] Балка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "N_728675cd8c8c4b88b848cb2c65a06f7d",
+          "kind": "N"
+        },
+        "semantic": "[N_728675cd8c8c4b88b848cb2c65a06f7d] реплика пользователя: Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48128585397303125,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+          "kind": "N"
+        },
+        "semantic": "[N_7371425f7c5d47169ba2dd0bcf51d47c] [S_659a65a458a1469e9021dfb34e4b6887] поднялась(SUBJECT=[M_4f13750759294e1ba24c46453b61d578] Марина, LOCATION=[M_18b24fe3f63c4c41911ede1578843e3a] чердак)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+          "kind": "N"
+        },
+        "semantic": "[N_756a39cc12524ba08ad883df019b2d7a] [S_43c1abd217e143f592d15c20127e1f86] сдвинулся(SUBJECT=[M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf] Жёлоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9729676291924271,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "N_7f86f4c99e6f48b8a0d03f005915944d",
+          "kind": "N"
+        },
+        "semantic": "[N_7f86f4c99e6f48b8a0d03f005915944d] [S_05ffb410d9144248a81b3e8c9ac4ad17] упала(SUBJECT=[M_a338db8ad36c487bb8053512807ee50c] Сухая ветка, LOCATION=[M_6b6f3d9786d54e2eb7a9f1896b977913] жестяной желоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9579410957005264,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 28,
+        "root": {
+          "uid": "N_81e4c0b9a8e44734819587c1ae1998cc",
+          "kind": "N"
+        },
+        "semantic": "[N_81e4c0b9a8e44734819587c1ae1998cc] [S_6439ebd4e2614585a8099f33334f5a0b] усилился(SUBJECT=[M_ff88e19c1d0d4531994336f459884c76] северный ветер, LOCATION=[M_cc98d84a1fb34505be7f96742558e68d] бухта)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9579410957005264,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 29,
+        "root": {
+          "uid": "N_8da74d9154024de5bd0aa96c9e6dd248",
+          "kind": "N"
+        },
+        "semantic": "[N_8da74d9154024de5bd0aa96c9e6dd248] реплика пользователя: Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4761434322883079,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 30,
+        "root": {
+          "uid": "N_8f9b50a6fed04f72af14da493970525e",
+          "kind": "N"
+        },
+        "semantic": "[N_8f9b50a6fed04f72af14da493970525e] реплика пользователя: Марина поднялась на чердак. Она заметила пятно на потолке.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 31,
+        "root": {
+          "uid": "N_910a0429a0ee4cd5b98381fde3b84149",
+          "kind": "N"
+        },
+        "semantic": "[N_910a0429a0ee4cd5b98381fde3b84149] [S_48664f21bdeb4b2fb864830ef29aede8] задела(SUBJECT=[M_fc0ee7bfbf8e48319ac0939418ac31bd] ветка, OBJECT=[M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf] Жёлоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9682870056284307,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 32,
+        "root": {
+          "uid": "N_9d2867eba86b4eeb874f8cffada8d8ff",
+          "kind": "N"
+        },
+        "semantic": "[N_9d2867eba86b4eeb874f8cffada8d8ff] [S_bc58a9c7b105444195dd6770b3fe0a03] пойти(SUBJECT=[M_f8b7b8b456d84ddea05df28bd6ec22ef] вода, LOCATION=[M_f83eb54b8aad4e31983960500ab95251] край крыши)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 33,
+        "root": {
+          "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+          "kind": "N"
+        },
+        "semantic": "[N_ac53de31bd994e03af6c4f7811b7b7ed] [S_6fda1c0b57134140acac0bc74b088f7c] разбухла(SUBJECT=[M_37150d58712843a4b23da735d23c7ac0] Балка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 34,
+        "root": {
+          "uid": "N_b1e53abf13074f1082d4dd5b7c888aef",
+          "kind": "N"
+        },
+        "semantic": "[N_b1e53abf13074f1082d4dd5b7c888aef] реплика пользователя: Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 35,
+        "root": {
+          "uid": "N_c072402265314d46b30e6c437d2f90e6",
+          "kind": "N"
+        },
+        "semantic": "[N_c072402265314d46b30e6c437d2f90e6] [S_0356ffdf52cd49588ce7290879acc58e] заметила(SUBJECT=[M_4f13750759294e1ba24c46453b61d578] Марина, OBJECT=[M_18dead80db3e452ebb5da9b76542790e] пятно)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 36,
+        "root": {
+          "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+          "kind": "N"
+        },
+        "semantic": "[N_c2c47ef49bda461485674457e4f6ce5e] [S_1d1ba91f160e49d8ba0dbae02ba4c41e] заклинилось(SUBJECT=[M_13e266df7d774e43a110e86c94b2c60b] Окно)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 37,
+        "root": {
+          "uid": "N_d24138cd4e314c55bf000701a85de95d",
+          "kind": "N"
+        },
+        "semantic": "[N_d24138cd4e314c55bf000701a85de95d] [S_6439ebd4e2614585a8099f33334f5a0b] усилился(SUBJECT=[M_d070c1db43d048cd9079d67491b3bfb2] ветер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9579410957005264,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 38,
+        "root": {
+          "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+          "kind": "N"
+        },
+        "semantic": "[N_d27398c8ceae4cc2b49d610c71b14acd] [S_701cef6146f84742a575e620a7ee9bb3] на(SUBJECT=[M_18dead80db3e452ebb5da9b76542790e] пятно, LOCATION=[M_182c737c9bff4396afe9ebfabab826f5] потолок)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 39,
+        "root": {
+          "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+          "kind": "N"
+        },
+        "semantic": "[N_d6e496626aed4e3f9afe8354b1fad213] [S_b074dc31b23e46308e6572441b26c9dd] перекосилась(SUBJECT=[M_017eef0882474c8b81080e68f5300450] Рама)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 40,
+        "root": {
+          "uid": "N_dac19d4aeda049cbab93e87395e7bc40",
+          "kind": "N"
+        },
+        "semantic": "[N_dac19d4aeda049cbab93e87395e7bc40] [S_f66f93c6973d419e9f668dc357f97743] войти(SUBJECT=[M_4f13750759294e1ba24c46453b61d578] Марина, AUXILLIARY=[M_db40ce67e9674323a8e7fd069dd8c789] пристань, LOCATION=[M_d16de5a7ec4e42f88c3993232d30e189] старый дом, TIME=[M_b10f4e5522764cc28e018e36348a3cc3] вечер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9477057292908292,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 41,
+        "root": {
+          "uid": "N_ededdfb21af341e8aec46ce40d513523",
+          "kind": "N"
+        },
+        "semantic": "[N_ededdfb21af341e8aec46ce40d513523] реплика пользователя: Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48648381459621354,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 42,
+        "root": {
+          "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+          "kind": "S"
+        },
+        "semantic": "[S_0356ffdf52cd49588ce7290879acc58e] заметила",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 43,
+        "root": {
+          "uid": "S_05ffb410d9144248a81b3e8c9ac4ad17",
+          "kind": "S"
+        },
+        "semantic": "[S_05ffb410d9144248a81b3e8c9ac4ad17] упала",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.904672521347785,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 44,
+        "root": {
+          "uid": "S_1d1ba91f160e49d8ba0dbae02ba4c41e",
+          "kind": "S"
+        },
+        "semantic": "[S_1d1ba91f160e49d8ba0dbae02ba4c41e] заклинилось",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 45,
+        "root": {
+          "uid": "S_22ed4106ab2044909837b566afb24581",
+          "kind": "S"
+        },
+        "semantic": "[S_22ed4106ab2044909837b566afb24581] сломалась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.904672521347785,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 46,
+        "root": {
+          "uid": "S_43c1abd217e143f592d15c20127e1f86",
+          "kind": "S"
+        },
+        "semantic": "[S_43c1abd217e143f592d15c20127e1f86] сдвинулся",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9144431225487593,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 47,
+        "root": {
+          "uid": "S_48664f21bdeb4b2fb864830ef29aede8",
+          "kind": "S"
+        },
+        "semantic": "[S_48664f21bdeb4b2fb864830ef29aede8] задела",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9144431225487593,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 48,
+        "root": {
+          "uid": "S_6439ebd4e2614585a8099f33334f5a0b",
+          "kind": "S"
+        },
+        "semantic": "[S_6439ebd4e2614585a8099f33334f5a0b] усилился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9522868645766158,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 49,
+        "root": {
+          "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+          "kind": "S"
+        },
+        "semantic": "[S_659a65a458a1469e9021dfb34e4b6887] поднялась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 50,
+        "root": {
+          "uid": "S_6940dc13af804ed4b770a71332ea87cc",
+          "kind": "S"
+        },
+        "semantic": "[S_6940dc13af804ed4b770a71332ea87cc] намокла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 51,
+        "root": {
+          "uid": "S_6fda1c0b57134140acac0bc74b088f7c",
+          "kind": "S"
+        },
+        "semantic": "[S_6fda1c0b57134140acac0bc74b088f7c] разбухла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 52,
+        "root": {
+          "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+          "kind": "S"
+        },
+        "semantic": "[S_701cef6146f84742a575e620a7ee9bb3] на",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 53,
+        "root": {
+          "uid": "S_b074dc31b23e46308e6572441b26c9dd",
+          "kind": "S"
+        },
+        "semantic": "[S_b074dc31b23e46308e6572441b26c9dd] перекосилась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 54,
+        "root": {
+          "uid": "S_bc58a9c7b105444195dd6770b3fe0a03",
+          "kind": "S"
+        },
+        "semantic": "[S_bc58a9c7b105444195dd6770b3fe0a03] пойти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9729676291924271,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 55,
+        "root": {
+          "uid": "S_f66f93c6973d419e9f668dc357f97743",
+          "kind": "S"
+        },
+        "semantic": "[S_f66f93c6973d419e9f668dc357f97743] войти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.8950063166319221,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 56,
+        "root": {
+          "uid": "T_040c5464a299470e841709aa65170b19",
+          "kind": "T"
+        },
+        "semantic": "[T_040c5464a299470e841709aa65170b19] predicate=[S_bc58a9c7b105444195dd6770b3fe0a03] пойти; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.976335680216741,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 57,
+        "root": {
+          "uid": "T_05bb6beb5424414bacc01361fb8274cb",
+          "kind": "T"
+        },
+        "semantic": "[T_05bb6beb5424414bacc01361fb8274cb] predicate=[S_05ffb410d9144248a81b3e8c9ac4ad17] упала; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.907804160182186,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 58,
+        "root": {
+          "uid": "T_2791a0f1408e4cddbd3c4130c7e4d9c7",
+          "kind": "T"
+        },
+        "semantic": "[T_2791a0f1408e4cddbd3c4130c7e4d9c7] predicate=[S_b074dc31b23e46308e6572441b26c9dd] перекосилась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 59,
+        "root": {
+          "uid": "T_53e5310e63d849159cacadd0a6374896",
+          "kind": "T"
+        },
+        "semantic": "[T_53e5310e63d849159cacadd0a6374896] predicate=[S_48664f21bdeb4b2fb864830ef29aede8] задела; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.917608583560174,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 60,
+        "root": {
+          "uid": "T_68ec594eecec4d0b941da07a876455c5",
+          "kind": "T"
+        },
+        "semantic": "[T_68ec594eecec4d0b941da07a876455c5] predicate=[S_659a65a458a1469e9021dfb34e4b6887] поднялась; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 61,
+        "root": {
+          "uid": "T_6c1b8cd8afb8431e967b77c7879241a8",
+          "kind": "T"
+        },
+        "semantic": "[T_6c1b8cd8afb8431e967b77c7879241a8] predicate=[S_6fda1c0b57134140acac0bc74b088f7c] разбухла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9868802544627543,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 62,
+        "root": {
+          "uid": "T_6f33e1d9c55b4eaa909129ef32c95d5e",
+          "kind": "T"
+        },
+        "semantic": "[T_6f33e1d9c55b4eaa909129ef32c95d5e] predicate=[S_43c1abd217e143f592d15c20127e1f86] сдвинулся; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.917608583560174,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 63,
+        "root": {
+          "uid": "T_7357598d22624cfdaf27d61385374447",
+          "kind": "T"
+        },
+        "semantic": "[T_7357598d22624cfdaf27d61385374447] predicate=[S_22ed4106ab2044909837b566afb24581] сломалась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.907804160182186,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 64,
+        "root": {
+          "uid": "T_86ae2e781896412a996bff95bda4bc3b",
+          "kind": "T"
+        },
+        "semantic": "[T_86ae2e781896412a996bff95bda4bc3b] predicate=[S_1d1ba91f160e49d8ba0dbae02ba4c41e] заклинилось; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 65,
+        "root": {
+          "uid": "T_915a4dc3d8ce409398cc113eee8d82ef",
+          "kind": "T"
+        },
+        "semantic": "[T_915a4dc3d8ce409398cc113eee8d82ef] predicate=[S_f66f93c6973d419e9f668dc357f97743] войти; roles=[SUBJECT, AUXILLIARY, LOCATION, TIME]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.8981044946710021,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 66,
+        "root": {
+          "uid": "T_a48181aed5d9489092719edd7a9b26ff",
+          "kind": "T"
+        },
+        "semantic": "[T_a48181aed5d9489092719edd7a9b26ff] predicate=[S_6940dc13af804ed4b770a71332ea87cc] намокла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 67,
+        "root": {
+          "uid": "T_be53cd7031e74ae3a4c8e50b505133ee",
+          "kind": "T"
+        },
+        "semantic": "[T_be53cd7031e74ae3a4c8e50b505133ee] predicate=[S_0356ffdf52cd49588ce7290879acc58e] заметила; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 68,
+        "root": {
+          "uid": "T_cecb05564a284f0093771e87bad54400",
+          "kind": "T"
+        },
+        "semantic": "[T_cecb05564a284f0093771e87bad54400] predicate=[S_701cef6146f84742a575e620a7ee9bb3] на; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 69,
+        "root": {
+          "uid": "T_dfc9cab0a17344469f247a6cca3a73d5",
+          "kind": "T"
+        },
+        "semantic": "[T_dfc9cab0a17344469f247a6cca3a73d5] predicate=[S_6439ebd4e2614585a8099f33334f5a0b] усилился; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9555833265075641,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 27,
+      "source_text": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nTOKENS:\n[1] Марина\n[2] поднялась\n[3] на\n[4] чердак\n[5] .\n[6] Она\n[7] заметила\n[8] пятно\n[9] на\n[10] потолке\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: поднялась; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nTOKENS:\n[1] Марина\n[2] поднялась\n[3] на\n[4] чердак\n[5] .\n[6] Она\n[7] заметила\n[8] пятно\n[9] на\n[10] потолке\n[11] .\nPREDICATE_START: [2] поднялась\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: поднялась",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак\nTARGET:\nподнялась\nRUSSIAN_LEMMA:\nподняться",
+          "normalized_answer": "подняться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак\nPREDICATE:\nподнялась\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Марина\n[2] на чердак",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nQUESTION_WORD:\nМарина",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nALREADY_SELECTED:\nМарина\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] на чердак",
+          "normalized_answer": "3-4",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "PLACE",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nTARGET:\nна чердак\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "PLACE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nALREADY_SELECTED:\nМарина | на чердак\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна заметила пятно на потолке\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nTOKENS:\n[1] Марина\n[2] поднялась\n[3] на\n[4] чердак\n[5] .\n[6] Она\n[7] заметила\n[8] пятно\n[9] на\n[10] потолке\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[7] token 7: заметила; morphology=VERB",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nTOKENS:\n[1] Марина\n[2] поднялась\n[3] на\n[4] чердак\n[5] .\n[6] Она\n[7] заметила\n[8] пятно\n[9] на\n[10] потолке\n[11] .\nPREDICATE_START: [7] заметила\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[7] end at token 7: заметила",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна заметила пятно на потолке\nTARGET:\nзаметила\nRUSSIAN_LEMMA:\nзаметить",
+          "normalized_answer": "заметить",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна заметила пятно на потолке\nPREDICATE:\nзаметила\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Она\n[2] пятно\n[3] на потолке",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "ACTOR_OR_EXPERIENCER",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nTARGET:\nОна\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "ACTOR_OR_EXPERIENCER",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nALREADY_SELECTED:\nОна\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] пятно\n[2] на потолке",
+          "normalized_answer": "8",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "AFFECTED_OR_CONTENT",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nTARGET:\nпятно\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "AFFECTED_OR_CONTENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nALREADY_SELECTED:\nОна | пятно\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] на потолке",
+          "normalized_answer": "9-10",
+          "retry_index": 0
+        },
+        {
+          "role": "modifier_attachment",
+          "raw_text": "NOMINAL_1",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nMODIFIER:\nна потолке\nPOSSIBLE READINGS:\nEVENT: «на потолке» относится к действию «заметила»\nNOMINAL_1: «на потолке» описывает «пятно»\nQUESTION:\nWhich attachment is determined by the sentence itself? Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means the modifier belongs to the predicate/event; NOMINAL_n means it describes that nominal phrase. Choose UNCLEAR only when the source text itself does not determine one reading. Return only the label.",
+          "normalized_answer": "NOMINAL_1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "PLACE",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nна\nTARGET:\nна потолке\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "PLACE",
+          "retry_index": 0
+        },
+        {
+          "role": "structural_attachment",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "ATTACHMENT: на потолке",
+          "normalized_answer": "ATTACH:NOM:9-10:8",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nALREADY_SELECTED:\nОна | пятно | на потолке\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "pronoun_binding",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "PRONOUN:\nОна\nANTECEDENT:\nМарина",
+          "normalized_answer": "E1",
+          "retry_index": 0
+        },
+        {
+          "role": "source_coreference",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE_SPAN:\n41:46",
+          "normalized_answer": "E2",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "поднялась",
+              "normalized_hint": "подняться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "поднялась",
+                "start": 7,
+                "end": 16
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Марина",
+                "normalized_hint": "Марина",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Марина",
+                  "start": 0,
+                  "end": 6
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "LOCATION",
+                "mention": "чердак",
+                "normalized_hint": "чердак",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "на чердак",
+                  "start": 17,
+                  "end": 26
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Марина поднялась на чердак",
+              "start": 0,
+              "end": 26
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "заметила",
+              "normalized_hint": "заметить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "заметила",
+                "start": 32,
+                "end": 40
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Она",
+                "normalized_hint": "Она",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Она",
+                  "start": 28,
+                  "end": 31
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "пятно",
+                "normalized_hint": "пятно",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E2",
+                "evidence": {
+                  "text": "пятно",
+                  "start": 41,
+                  "end": 46
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Она заметила пятно на потолке",
+              "start": 28,
+              "end": 57
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "на",
+              "normalized_hint": "на",
+              "sense_hint": "STRUCTURAL_NOMINAL_ATTACHMENT",
+              "evidence": {
+                "text": "на",
+                "start": 47,
+                "end": 49
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "пятно",
+                "normalized_hint": "пятно",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E2",
+                "evidence": {
+                  "text": "пятно",
+                  "start": 41,
+                  "end": 46
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "LOCATION",
+                "mention": "потолке",
+                "normalized_hint": "потолок",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "на потолке",
+                  "start": 47,
+                  "end": 57
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "пятно на потолке",
+              "start": 41,
+              "end": 57
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": []
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 91,
+      "req_id": "fa9105ed09ab4c64a349ebf5ceb10468",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nTARGET:\nна чердак\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "PLACE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nподнялась\nTARGET:\nна чердак\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 981,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 92,
+      "req_id": "7941d8562f284265912e0fcff131ad33",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nTARGET:\nОна\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nTARGET:\nОна\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 1039,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 93,
+      "req_id": "16516dd0108f40298f6f720d4d8faec7",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nTARGET:\nпятно\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nTARGET:\nпятно\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 979,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 94,
+      "req_id": "a59e62ecbe464c8490a116909654442f",
+      "role": "perception_modifier_attachment",
+      "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nMODIFIER:\nна потолке\nPOSSIBLE READINGS:\nEVENT: «на потолке» относится к действию «заметила»\nNOMINAL_1: «на потолке» описывает «пятно»\nQUESTION:\nWhich attachment is determined by the sentence itself? Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means the modifier belongs to the predicate/event; NOMINAL_n means it describes that nominal phrase. Choose UNCLEAR only when the source text itself does not determine one reading. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NOMINAL_1",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nMODIFIER:\nна потолке\nPOSSIBLE READINGS:\nEVENT: «на потолке» относится к действию «заметила»\nNOMINAL_1: «на потолке» описывает «пятно»\nQUESTION:\nWhich attachment is determined by the sentence itself? Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means the modifier belongs to the predicate/event; NOMINAL_n means it describes that nominal phrase. Choose UNCLEAR only when the source text itself does not determine one reading. Return only the label.",
+      "input_tokens": 258,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 95,
+      "req_id": "fbbfc0072a1f422da17ed2277aa16c60",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nна\nTARGET:\nна потолке\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "PLACE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nна\nTARGET:\nна потолке\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 978,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 96,
+      "req_id": "4299bb5de8324169811f792a8ffbdbdb",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nSEMANTIC ARGUMENTS:\nSUBJECT = Она\nOBJECT = пятно\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='Она' IS-A OBJECT='пятно'\nR2: OBJECT='пятно' IS-A SUBJECT='Она'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nМарина поднялась на чердак. Она заметила пятно на потолке.\nPREDICATE:\nзаметила\nSEMANTIC ARGUMENTS:\nSUBJECT = Она\nOBJECT = пятно\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='Она' IS-A OBJECT='пятно'\nR2: OBJECT='пятно' IS-A SUBJECT='Она'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 313,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_1e54a5c7f33e4089b84235c19cd38d22": {
+        "uid": "K_1e54a5c7f33e4089b84235c19cd38d22",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+            "kind": "N"
+          },
+          {
+            "uid": "N_c072402265314d46b30e6c437d2f90e6",
+            "kind": "N"
+          },
+          {
+            "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_93e0d448843e45e3bb37a784d29054fc": {
+        "uid": "L_93e0d448843e45e3bb37a784d29054fc",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_b1e53abf13074f1082d4dd5b7c888aef",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_8f9b50a6fed04f72af14da493970525e",
+          "kind": "N"
+        }
+      },
+      "M_182c737c9bff4396afe9ebfabab826f5": {
+        "uid": "M_182c737c9bff4396afe9ebfabab826f5",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "потолок",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_18b24fe3f63c4c41911ede1578843e3a": {
+        "uid": "M_18b24fe3f63c4c41911ede1578843e3a",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "чердак",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_18dead80db3e452ebb5da9b76542790e": {
+        "uid": "M_18dead80db3e452ebb5da9b76542790e",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "пятно",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_7371425f7c5d47169ba2dd0bcf51d47c": {
+        "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_68ec594eecec4d0b941da07a876455c5",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_4f13750759294e1ba24c46453b61d578",
+            "kind": "M"
+          },
+          "LOCATION": {
+            "uid": "M_18b24fe3f63c4c41911ede1578843e3a",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_8f9b50a6fed04f72af14da493970525e": {
+        "uid": "N_8f9b50a6fed04f72af14da493970525e",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_1e54a5c7f33e4089b84235c19cd38d22",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_c072402265314d46b30e6c437d2f90e6": {
+        "uid": "N_c072402265314d46b30e6c437d2f90e6",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_be53cd7031e74ae3a4c8e50b505133ee",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_4f13750759294e1ba24c46453b61d578",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "M_18dead80db3e452ebb5da9b76542790e",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_d27398c8ceae4cc2b49d610c71b14acd": {
+        "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_cecb05564a284f0093771e87bad54400",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_18dead80db3e452ebb5da9b76542790e",
+            "kind": "M"
+          },
+          "LOCATION": {
+            "uid": "M_182c737c9bff4396afe9ebfabab826f5",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 15,
+          "expires_tick": 215,
+          "last_qualifying_tick": 15,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_0356ffdf52cd49588ce7290879acc58e": {
+        "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "заметила",
+          "заметить"
+        ]
+      },
+      "S_659a65a458a1469e9021dfb34e4b6887": {
+        "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "поднялась",
+          "подняться"
+        ]
+      },
+      "S_701cef6146f84742a575e620a7ee9bb3": {
+        "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "на"
+        ]
+      },
+      "T_68ec594eecec4d0b941da07a876455c5": {
+        "uid": "T_68ec594eecec4d0b941da07a876455c5",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "LOCATION"
+        ]
+      },
+      "T_be53cd7031e74ae3a4c8e50b505133ee": {
+        "uid": "T_be53cd7031e74ae3a4c8e50b505133ee",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT"
+        ]
+      },
+      "T_cecb05564a284f0093771e87bad54400": {
+        "uid": "T_cecb05564a284f0093771e87bad54400",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "LOCATION"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_47aee3346f7b425e9c10851e7d52b393": {
+        "before": {
+          "uid": "L_47aee3346f7b425e9c10851e7d52b393",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_47aee3346f7b425e9c10851e7d52b393",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.25800000000000006,
+          "source": {
+            "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+            "kind": "N"
+          }
+        }
+      },
+      "L_92b65e659cc14ebd91f7adb3437ee302": {
+        "before": {
+          "uid": "L_92b65e659cc14ebd91f7adb3437ee302",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_92b65e659cc14ebd91f7adb3437ee302",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.24300000000000005,
+          "source": {
+            "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+            "kind": "N"
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 18,
+    "workspace_uids": [
+      "M_017eef0882474c8b81080e68f5300450",
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_13e266df7d774e43a110e86c94b2c60b",
+      "M_18dead80db3e452ebb5da9b76542790e",
+      "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+      "M_37150d58712843a4b23da735d23c7ac0",
+      "M_4f13750759294e1ba24c46453b61d578",
+      "M_5b7f7d4fe952425fbc60042824c5bfc4",
+      "M_6b6f3d9786d54e2eb7a9f1896b977913",
+      "M_a338db8ad36c487bb8053512807ee50c",
+      "M_b10f4e5522764cc28e018e36348a3cc3",
+      "M_cc98d84a1fb34505be7f96742558e68d",
+      "M_d070c1db43d048cd9079d67491b3bfb2",
+      "M_d16de5a7ec4e42f88c3993232d30e189",
+      "M_db40ce67e9674323a8e7fd069dd8c789",
+      "M_f83eb54b8aad4e31983960500ab95251",
+      "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+      "M_fc0ee7bfbf8e48319ac0939418ac31bd",
+      "M_ff88e19c1d0d4531994336f459884c76",
+      "N_056e65db15364396b571c8cd08c4db04",
+      "N_3c68e2fe158742d2a5a585ec053099f1",
+      "N_6ace82e521874f999b432de5fbc20cb1",
+      "N_6d9965e7f7e04af9b8150e6e1df84049",
+      "N_728675cd8c8c4b88b848cb2c65a06f7d",
+      "N_7371425f7c5d47169ba2dd0bcf51d47c",
+      "N_756a39cc12524ba08ad883df019b2d7a",
+      "N_7f86f4c99e6f48b8a0d03f005915944d",
+      "N_81e4c0b9a8e44734819587c1ae1998cc",
+      "N_8da74d9154024de5bd0aa96c9e6dd248",
+      "N_8f9b50a6fed04f72af14da493970525e",
+      "N_910a0429a0ee4cd5b98381fde3b84149",
+      "N_9d2867eba86b4eeb874f8cffada8d8ff",
+      "N_ac53de31bd994e03af6c4f7811b7b7ed",
+      "N_b1e53abf13074f1082d4dd5b7c888aef",
+      "N_c072402265314d46b30e6c437d2f90e6",
+      "N_c2c47ef49bda461485674457e4f6ce5e",
+      "N_d24138cd4e314c55bf000701a85de95d",
+      "N_d27398c8ceae4cc2b49d610c71b14acd",
+      "N_d6e496626aed4e3f9afe8354b1fad213",
+      "N_dac19d4aeda049cbab93e87395e7bc40",
+      "N_ededdfb21af341e8aec46ce40d513523",
+      "S_0356ffdf52cd49588ce7290879acc58e",
+      "S_05ffb410d9144248a81b3e8c9ac4ad17",
+      "S_1d1ba91f160e49d8ba0dbae02ba4c41e",
+      "S_22ed4106ab2044909837b566afb24581",
+      "S_43c1abd217e143f592d15c20127e1f86",
+      "S_48664f21bdeb4b2fb864830ef29aede8",
+      "S_6439ebd4e2614585a8099f33334f5a0b",
+      "S_659a65a458a1469e9021dfb34e4b6887",
+      "S_6940dc13af804ed4b770a71332ea87cc",
+      "S_6fda1c0b57134140acac0bc74b088f7c",
+      "S_701cef6146f84742a575e620a7ee9bb3",
+      "S_b074dc31b23e46308e6572441b26c9dd",
+      "S_bc58a9c7b105444195dd6770b3fe0a03",
+      "S_f66f93c6973d419e9f668dc357f97743",
+      "T_040c5464a299470e841709aa65170b19",
+      "T_05bb6beb5424414bacc01361fb8274cb",
+      "T_2791a0f1408e4cddbd3c4130c7e4d9c7",
+      "T_53e5310e63d849159cacadd0a6374896",
+      "T_68ec594eecec4d0b941da07a876455c5",
+      "T_6c1b8cd8afb8431e967b77c7879241a8",
+      "T_6f33e1d9c55b4eaa909129ef32c95d5e",
+      "T_7357598d22624cfdaf27d61385374447",
+      "T_86ae2e781896412a996bff95bda4bc3b",
+      "T_915a4dc3d8ce409398cc113eee8d82ef",
+      "T_a48181aed5d9489092719edd7a9b26ff",
+      "T_be53cd7031e74ae3a4c8e50b505133ee",
+      "T_cecb05564a284f0093771e87bad54400",
+      "T_dfc9cab0a17344469f247a6cca3a73d5"
+    ],
+    "workspace": {
+      "M_017eef0882474c8b81080e68f5300450": {
+        "semantic": "Рама",
+        "excitation": 0.6484494812893763
+      },
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.8868219725961186
+      },
+      "M_13e266df7d774e43a110e86c94b2c60b": {
+        "semantic": "Окно",
+        "excitation": 0.5449053331532332
+      },
+      "M_18dead80db3e452ebb5da9b76542790e": {
+        "semantic": "пятно",
+        "excitation": 0.5187201300937572
+      },
+      "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf": {
+        "semantic": "Жёлоб",
+        "excitation": 0.9729676291924271
+      },
+      "M_37150d58712843a4b23da735d23c7ac0": {
+        "semantic": "Балка",
+        "excitation": 0.9940975169044439
+      },
+      "M_4f13750759294e1ba24c46453b61d578": {
+        "semantic": "Марина",
+        "excitation": 0.9127369282682432
+      },
+      "M_5b7f7d4fe952425fbc60042824c5bfc4": {
+        "semantic": "Дождевая вода",
+        "excitation": 0.6917559220084695
+      },
+      "M_6b6f3d9786d54e2eb7a9f1896b977913": {
+        "semantic": "жестяной желоб",
+        "excitation": 0.3959635603929772
+      },
+      "M_a338db8ad36c487bb8053512807ee50c": {
+        "semantic": "Сухая ветка",
+        "excitation": 0.8757250939500297
+      },
+      "M_b10f4e5522764cc28e018e36348a3cc3": {
+        "semantic": "вечер",
+        "excitation": 0.3917327865555247
+      },
+      "M_cc98d84a1fb34505be7f96742558e68d": {
+        "semantic": "бухта",
+        "excitation": 0.5476378654426716
+      },
+      "M_d070c1db43d048cd9079d67491b3bfb2": {
+        "semantic": "ветер",
+        "excitation": 0.4036641340565457
+      },
+      "M_d16de5a7ec4e42f88c3993232d30e189": {
+        "semantic": "старый дом",
+        "excitation": 0.3917327865555247
+      },
+      "M_db40ce67e9674323a8e7fd069dd8c789": {
+        "semantic": "пристань",
+        "excitation": 0.3917327865555247
+      },
+      "M_f83eb54b8aad4e31983960500ab95251": {
+        "semantic": "край крыши",
+        "excitation": 0.9834758279737207
+      },
+      "M_f8b7b8b456d84ddea05df28bd6ec22ef": {
+        "semantic": "вода",
+        "excitation": 0.41243048719109227
+      },
+      "M_fc0ee7bfbf8e48319ac0939418ac31bd": {
+        "semantic": "ветка",
+        "excitation": 0.40024002723310403
+      },
+      "M_ff88e19c1d0d4531994336f459884c76": {
+        "semantic": "северный ветер",
+        "excitation": 0.5476378654426716
+      },
+      "N_056e65db15364396b571c8cd08c4db04": {
+        "semantic": "пойти(SUBJECT=Дождевая вода, LOCATION=край крыши)",
+        "excitation": 0.9787446529613976
+      },
+      "N_3c68e2fe158742d2a5a585ec053099f1": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_2309461859e24c7aa9b517aa12ed4e59[войти(SUBJECT=Марина, AUXILLIARY=пристань, LOCATION=старый дом, TIME=вечер); усилился(SUBJECT=северный ветер, LOCATION=бухта)])",
+        "excitation": 0.4710559561220643
+      },
+      "N_6ace82e521874f999b432de5fbc20cb1": {
+        "semantic": "сломалась(SUBJECT=Сухая ветка)",
+        "excitation": 0.9625717079460625
+      },
+      "N_6d9965e7f7e04af9b8150e6e1df84049": {
+        "semantic": "намокла(SUBJECT=Балка)",
+        "excitation": 0.9834758279737207
+      },
+      "N_728675cd8c8c4b88b848cb2c65a06f7d": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_f906b304b2b5451e985b35d090ca7b20[сдвинулся(SUBJECT=Жёлоб); задела(SUBJECT=ветка, OBJECT=Жёлоб); пойти(SUBJECT=Дождевая вода, LOCATION=край крыши); сдвинулся(SUBJECT=Жёлоб)])",
+        "excitation": 0.48128585397303125
+      },
+      "N_7371425f7c5d47169ba2dd0bcf51d47c": {
+        "semantic": "поднялась(SUBJECT=Марина, LOCATION=чердак)",
+        "excitation": 1.0
+      },
+      "N_756a39cc12524ba08ad883df019b2d7a": {
+        "semantic": "сдвинулся(SUBJECT=Жёлоб)",
+        "excitation": 0.9729676291924271
+      },
+      "N_7f86f4c99e6f48b8a0d03f005915944d": {
+        "semantic": "упала(SUBJECT=Сухая ветка, LOCATION=жестяной желоб)",
+        "excitation": 0.9579410957005264
+      },
+      "N_81e4c0b9a8e44734819587c1ae1998cc": {
+        "semantic": "усилился(SUBJECT=северный ветер, LOCATION=бухта)",
+        "excitation": 0.9579410957005264
+      },
+      "N_8da74d9154024de5bd0aa96c9e6dd248": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_dbcfc9a1718f4c838474d6e2d4b4f68b[сломалась(SUBJECT=Сухая ветка); усилился(SUBJECT=ветер); упала(SUBJECT=Сухая ветка, LOCATION=жестяной желоб)])",
+        "excitation": 0.4761434322883079
+      },
+      "N_8f9b50a6fed04f72af14da493970525e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_1e54a5c7f33e4089b84235c19cd38d22[поднялась(SUBJECT=Марина, LOCATION=чердак); заметила(SUBJECT=Марина, OBJECT=пятно); на(SUBJECT=пятно, LOCATION=потолок)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_910a0429a0ee4cd5b98381fde3b84149": {
+        "semantic": "задела(SUBJECT=ветка, OBJECT=Жёлоб)",
+        "excitation": 0.9682870056284307
+      },
+      "N_9d2867eba86b4eeb874f8cffada8d8ff": {
+        "semantic": "пойти(SUBJECT=вода, LOCATION=край крыши)",
+        "excitation": 0.9787446529613976
+      },
+      "N_ac53de31bd994e03af6c4f7811b7b7ed": {
+        "semantic": "разбухла(SUBJECT=Балка)",
+        "excitation": 0.9893152444804425
+      },
+      "N_b1e53abf13074f1082d4dd5b7c888aef": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_0265dd22e8104f93aa7895f6b55bcb8e[перекосилась(SUBJECT=Рама); разбухла(SUBJECT=Балка); заклинилось(SUBJECT=Окно); перекосилась(SUBJECT=Рама)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_c072402265314d46b30e6c437d2f90e6": {
+        "semantic": "заметила(SUBJECT=Марина, OBJECT=пятно)",
+        "excitation": 1.0
+      },
+      "N_c2c47ef49bda461485674457e4f6ce5e": {
+        "semantic": "заклинилось(SUBJECT=Окно)",
+        "excitation": 0.9940975169044439
+      },
+      "N_d24138cd4e314c55bf000701a85de95d": {
+        "semantic": "усилился(SUBJECT=ветер)",
+        "excitation": 0.9579410957005264
+      },
+      "N_d27398c8ceae4cc2b49d610c71b14acd": {
+        "semantic": "на(SUBJECT=пятно, LOCATION=потолок)",
+        "excitation": 1.0
+      },
+      "N_d6e496626aed4e3f9afe8354b1fad213": {
+        "semantic": "перекосилась(SUBJECT=Рама)",
+        "excitation": 0.9940975169044439
+      },
+      "N_dac19d4aeda049cbab93e87395e7bc40": {
+        "semantic": "войти(SUBJECT=Марина, AUXILLIARY=пристань, LOCATION=старый дом, TIME=вечер)",
+        "excitation": 0.9477057292908292
+      },
+      "N_ededdfb21af341e8aec46ce40d513523": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_a39caa9dd74347708aea1ee575a389b0[намокла(SUBJECT=Балка); пойти(SUBJECT=вода, LOCATION=край крыши); разбухла(SUBJECT=Балка); намокла(SUBJECT=Балка)])",
+        "excitation": 0.48648381459621354
+      },
+      "S_0356ffdf52cd49588ce7290879acc58e": {
+        "semantic": "заметила",
+        "excitation": 0.9443926410592216
+      },
+      "S_05ffb410d9144248a81b3e8c9ac4ad17": {
+        "semantic": "упала",
+        "excitation": 0.904672521347785
+      },
+      "S_1d1ba91f160e49d8ba0dbae02ba4c41e": {
+        "semantic": "заклинилось",
+        "excitation": 0.9343020365750345
+      },
+      "S_22ed4106ab2044909837b566afb24581": {
+        "semantic": "сломалась",
+        "excitation": 0.904672521347785
+      },
+      "S_43c1abd217e143f592d15c20127e1f86": {
+        "semantic": "сдвинулся",
+        "excitation": 0.9144431225487593
+      },
+      "S_48664f21bdeb4b2fb864830ef29aede8": {
+        "semantic": "задела",
+        "excitation": 0.9144431225487593
+      },
+      "S_6439ebd4e2614585a8099f33334f5a0b": {
+        "semantic": "усилился",
+        "excitation": 0.9522868645766158
+      },
+      "S_659a65a458a1469e9021dfb34e4b6887": {
+        "semantic": "поднялась",
+        "excitation": 0.9443926410592216
+      },
+      "S_6940dc13af804ed4b770a71332ea87cc": {
+        "semantic": "намокла",
+        "excitation": 0.9243192477328055
+      },
+      "S_6fda1c0b57134140acac0bc74b088f7c": {
+        "semantic": "разбухла",
+        "excitation": 0.9834758279737207
+      },
+      "S_701cef6146f84742a575e620a7ee9bb3": {
+        "semantic": "на",
+        "excitation": 0.9443926410592216
+      },
+      "S_b074dc31b23e46308e6572441b26c9dd": {
+        "semantic": "перекосилась",
+        "excitation": 0.9343020365750345
+      },
+      "S_bc58a9c7b105444195dd6770b3fe0a03": {
+        "semantic": "пойти",
+        "excitation": 0.9729676291924271
+      },
+      "S_f66f93c6973d419e9f668dc357f97743": {
+        "semantic": "войти",
+        "excitation": 0.8950063166319221
+      },
+      "T_040c5464a299470e841709aa65170b19": {
+        "semantic": "пойти",
+        "excitation": 0.976335680216741
+      },
+      "T_05bb6beb5424414bacc01361fb8274cb": {
+        "semantic": "упала",
+        "excitation": 0.907804160182186
+      },
+      "T_2791a0f1408e4cddbd3c4130c7e4d9c7": {
+        "semantic": "перекосилась",
+        "excitation": 0.9375362417396166
+      },
+      "T_53e5310e63d849159cacadd0a6374896": {
+        "semantic": "задела",
+        "excitation": 0.917608583560174
+      },
+      "T_68ec594eecec4d0b941da07a876455c5": {
+        "semantic": "поднялась",
+        "excitation": 0.9476617761328255
+      },
+      "T_6c1b8cd8afb8431e967b77c7879241a8": {
+        "semantic": "разбухла",
+        "excitation": 0.9868802544627543
+      },
+      "T_6f33e1d9c55b4eaa909129ef32c95d5e": {
+        "semantic": "сдвинулся",
+        "excitation": 0.917608583560174
+      },
+      "T_7357598d22624cfdaf27d61385374447": {
+        "semantic": "сломалась",
+        "excitation": 0.907804160182186
+      },
+      "T_86ae2e781896412a996bff95bda4bc3b": {
+        "semantic": "заклинилось",
+        "excitation": 0.9375362417396166
+      },
+      "T_915a4dc3d8ce409398cc113eee8d82ef": {
+        "semantic": "войти",
+        "excitation": 0.8981044946710021
+      },
+      "T_a48181aed5d9489092719edd7a9b26ff": {
+        "semantic": "намокла",
+        "excitation": 0.927518896205904
+      },
+      "T_be53cd7031e74ae3a4c8e50b505133ee": {
+        "semantic": "заметила",
+        "excitation": 0.9476617761328255
+      },
+      "T_cecb05564a284f0093771e87bad54400": {
+        "semantic": "на",
+        "excitation": 0.9476617761328255
+      },
+      "T_dfc9cab0a17344469f247a6cca3a73d5": {
+        "semantic": "усилился",
+        "excitation": 0.9555833265075641
+      }
+    },
+    "pending_incoming": {
+      "M_4f13750759294e1ba24c46453b61d578": 0.3040000000000001,
+      "M_18b24fe3f63c4c41911ede1578843e3a": 0.15200000000000005,
+      "M_18dead80db3e452ebb5da9b76542790e": 0.3040000000000001,
+      "M_182c737c9bff4396afe9ebfabab826f5": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+        "kind": "M"
+      },
+      "оно": {
+        "uid": "M_18dead80db3e452ebb5da9b76542790e",
+        "kind": "M"
+      },
+      "она": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_8f9b50a6fed04f72af14da493970525e",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "semantic_note": "Дом у пристани — художественный монолит, paragraph 6",
+  "semantic_family": "document.monolith.literary",
+  "semantic_tags": [
+    "document",
+    "monolith",
+    "literary",
+    "graph-graded"
+  ]
+}

@@ -20,7 +20,7 @@ from .contracts import (
 )
 from .engine import InferenceEngine
 from .materialization import InferenceMaterializer, MaterializationResult
-from .query_builder import QueryBuildResult, QueryGoalBuilder
+from .query_builder import QueryBuildResult, QueryGoalBuilder, SemanticGoalCompiler, TurnGoalBuilder
 
 __all__ = [
     "AttentionFocusEvent",
@@ -44,6 +44,8 @@ __all__ = [
     "MultiRoleFillGoal",
     "QueryBuildResult",
     "QueryGoalBuilder",
+    "SemanticGoalCompiler",
+    "TurnGoalBuilder",
     "RelationGoal",
     "RoleBindingConclusion",
     "RoleFillGoal",

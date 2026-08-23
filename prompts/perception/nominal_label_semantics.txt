@@ -1,0 +1,1 @@
+Return exactly YES, NO, or UNCLEAR. YES only when the clause itself says that the thing in the complement is called, named, titled, labeled, or designated by SUBJECT. NO means the clause expresses another relation. UNCLEAR means the local clause does not decide. Do not infer world knowledge or decide what should be stored.

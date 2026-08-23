@@ -1,0 +1,2678 @@
+{
+  "index": 17,
+  "input": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+  "status": "OK",
+  "scenario_id": "archive_leak",
+  "linguistic_candidate_graph": {
+    "text": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Перекрытие",
+        "start": 0,
+        "end": 10,
+        "analyses": [
+          {
+            "normal_form": "перекрытие",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "neut",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.666666
+          },
+          {
+            "normal_form": "перекрытие",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "accs",
+              "inan",
+              "neut",
+              "sing"
+            ],
+            "score": 0.333333
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "намокло",
+        "start": 11,
+        "end": 18,
+        "analyses": [
+          {
+            "normal_form": "намокнуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "neut",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "past",
+              "neut",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": ",",
+        "start": 18,
+        "end": 19,
+        "analyses": []
+      },
+      {
+        "index": 4,
+        "text": "потому",
+        "start": 20,
+        "end": 26,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "что",
+        "start": 27,
+        "end": 30,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "neut",
+              "NPRO",
+              "accs"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "nomn",
+              "neut",
+              "NPRO"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "вода",
+        "start": 31,
+        "end": 35,
+        "analyses": [
+          {
+            "normal_form": "вода",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "femn",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.989583
+          },
+          {
+            "normal_form": "вод",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "gent"
+            ],
+            "score": 0.010416
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "скопилась",
+        "start": 36,
+        "end": 45,
+        "analyses": [
+          {
+            "normal_form": "скопиться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": ".",
+        "start": 45,
+        "end": 46,
+        "analyses": []
+      },
+      {
+        "index": 9,
+        "text": "Реставратор",
+        "start": 47,
+        "end": 58,
+        "analyses": [
+          {
+            "normal_form": "реставратор",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "anim",
+              "sing",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "осмотрел",
+        "start": 59,
+        "end": 67,
+        "analyses": [
+          {
+            "normal_form": "осмотреть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "indc",
+              "perf",
+              "masc",
+              "past",
+              "VERB",
+              "sing",
+              "tran"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": "альбом",
+        "start": 68,
+        "end": 74,
+        "analyses": [
+          {
+            "normal_form": "альбом",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.596153
+          },
+          {
+            "normal_form": "альбом",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "inan",
+              "sing"
+            ],
+            "score": 0.403846
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "text": ".",
+        "start": 74,
+        "end": 75,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 2,
+          "text": "Перекрытие намокло",
+          "evidence": {
+            "text": "Перекрытие намокло",
+            "start": 0,
+            "end": 18
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "намокнуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "перекрытие",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 4,
+          "end_index": 7,
+          "text": "потому что вода скопилась",
+          "evidence": {
+            "text": "потому что вода скопилась",
+            "start": 20,
+            "end": 45
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 7,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "скопиться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL1",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 4,
+          "end_index": 5,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 20,
+            "end": 30
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 9,
+          "end_index": 11,
+          "text": "Реставратор осмотрел альбом",
+          "evidence": {
+            "text": "Реставратор осмотрел альбом",
+            "start": 47,
+            "end": 74
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 10,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "осмотреть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "реставратор",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "намокнуть"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 7,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "скопиться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 10,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "осмотреть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 2,
+          "child_token_index": 7,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL1",
+          "child_clause_id": "CL2"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "намокло",
+          "normalized_hint": "намокнуть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "намокло",
+            "start": 11,
+            "end": 18
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Перекрытие",
+            "normalized_hint": "Перекрытие",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Перекрытие",
+              "start": 0,
+              "end": 10
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Перекрытие намокло",
+          "start": 0,
+          "end": 18
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "скопилась",
+          "normalized_hint": "скопиться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "скопилась",
+            "start": 36,
+            "end": 45
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_e221f340b4dc421e8994420a984035da",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "вода",
+            "normalized_hint": "вода",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "вода",
+              "start": 31,
+              "end": 35
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что вода скопилась",
+          "start": 20,
+          "end": 45
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "осмотрел",
+          "normalized_hint": "осмотреть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "осмотрел",
+            "start": 59,
+            "end": 67
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "OBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Реставратор",
+            "normalized_hint": "Реставратор",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Реставратор",
+              "start": 47,
+              "end": 58
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "альбом",
+            "normalized_hint": "альбом",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "альбом",
+              "start": 68,
+              "end": 74
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Реставратор осмотрел альбом",
+          "start": 47,
+          "end": 74
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A2",
+        "target_ref": "A1",
+        "evidence": {
+          "text": "потому что",
+          "start": 20,
+          "end": 30
+        }
+      }
+    ],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [
+      {
+        "parent_ref": "A1",
+        "child_ref": "A2",
+        "kind": "SUBORDINATE"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": false,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N"
+        },
+        "reason": "REACTIVATED_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_ad97fc02c5e9434399e2ae0ab73c32f9",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_d64f3de885fb4adb810beca0bc56ed72",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_e38b2e707f4944e9b33f4ccbea4634b2",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_6d872f7c95fc4493b6faaef45c53e486",
+          "kind": "L"
+        },
+        "created": true
+      }
+    ],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_44065cbd7d724fd8812eeff206c6a15b",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Марина открыла архив. Водосток засорился.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Вода скопилась, потому что водосток засорился. Марина проверила окно.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Марина открыла архив. Водосток засорился.»\n- Пользователь ранее сказал: «Вода скопилась, потому что водосток засорился. Марина проверила окно.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_168e999a8a654d76bd000610d2c41988",
+        "kind": "M"
+      },
+      {
+        "uid": "M_471cda1540ea4bc98123afa30bf3746c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_8516c24743434c729910af482768a83f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_bc353bf25e814d5db85cd382aea2849b",
+        "kind": "M"
+      },
+      {
+        "uid": "M_e85e86c500ed41c090798d729ce8e1e6",
+        "kind": "M"
+      },
+      {
+        "uid": "N_392741e8e3134a58ae3dff0c1cdc186f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_44065cbd7d724fd8812eeff206c6a15b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_887b1e80b8124c78b57ccebae7c238a8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9df71edcfb344d4aaecbbc7515923e34",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+        "kind": "N"
+      },
+      {
+        "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e147ddee46724066b7184be6c7815e92",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+        "kind": "N"
+      },
+      {
+        "uid": "S_300963fb1aba45bb883d52f8d4ddb7de",
+        "kind": "S"
+      },
+      {
+        "uid": "S_64a76c5321ea4509a810c00d347c00e3",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ad97fc02c5e9434399e2ae0ab73c32f9",
+        "kind": "S"
+      },
+      {
+        "uid": "S_b8ec3efdf3b44f95bf23f7fd01ea66cd",
+        "kind": "S"
+      },
+      {
+        "uid": "S_d64f3de885fb4adb810beca0bc56ed72",
+        "kind": "S"
+      },
+      {
+        "uid": "S_e38b2e707f4944e9b33f4ccbea4634b2",
+        "kind": "S"
+      },
+      {
+        "uid": "T_063c564fb31945ea9d7975615ac670c5",
+        "kind": "T"
+      },
+      {
+        "uid": "T_42df169a217e496fbbfd4f99b91d9400",
+        "kind": "T"
+      },
+      {
+        "uid": "T_c7a61b041a3446ada422461d05336f78",
+        "kind": "T"
+      },
+      {
+        "uid": "T_d594d797594c4e34aad43a441d9acdc6",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e221f340b4dc421e8994420a984035da",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e46641b9a66147989115e5e1f83ef26b",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 9,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.44668904922879243,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_168e999a8a654d76bd000610d2c41988",
+          "kind": "M"
+        },
+        "semantic": "[M_168e999a8a654d76bd000610d2c41988] Марина",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8168575388467847,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_471cda1540ea4bc98123afa30bf3746c",
+          "kind": "M"
+        },
+        "semantic": "[M_471cda1540ea4bc98123afa30bf3746c] Вода",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.7082737561733881,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_8516c24743434c729910af482768a83f",
+          "kind": "M"
+        },
+        "semantic": "[M_8516c24743434c729910af482768a83f] Водосток",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.793196478615519,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_bc353bf25e814d5db85cd382aea2849b",
+          "kind": "M"
+        },
+        "semantic": "[M_bc353bf25e814d5db85cd382aea2849b] архив",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40456268056730255,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_e85e86c500ed41c090798d729ce8e1e6",
+          "kind": "M"
+        },
+        "semantic": "[M_e85e86c500ed41c090798d729ce8e1e6] окно",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "N_392741e8e3134a58ae3dff0c1cdc186f",
+          "kind": "N"
+        },
+        "semantic": "[N_392741e8e3134a58ae3dff0c1cdc186f] реплика пользователя: Марина открыла архив. Водосток засорился.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48648381459621354,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "N_44065cbd7d724fd8812eeff206c6a15b",
+          "kind": "N"
+        },
+        "semantic": "[N_44065cbd7d724fd8812eeff206c6a15b] [S_64a76c5321ea4509a810c00d347c00e3] открыла(SUBJECT=[M_168e999a8a654d76bd000610d2c41988] Марина, OBJECT=[M_bc353bf25e814d5db85cd382aea2849b] архив)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_887b1e80b8124c78b57ccebae7c238a8",
+          "kind": "N"
+        },
+        "semantic": "[N_887b1e80b8124c78b57ccebae7c238a8] реплика пользователя: Вода скопилась, потому что водосток засорился. Марина проверила окно.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+          "kind": "N"
+        },
+        "semantic": "[N_9b1190fa59fd443a8fbc34f6a544ce38] [S_e38b2e707f4944e9b33f4ccbea4634b2] осмотрел(SUBJECT=[M_b6981ee93fab40cba809a795faaed36e] Реставратор, OBJECT=[M_1a1fda9e2ec949e580dca9843eed6e37] альбом)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "N_9df71edcfb344d4aaecbbc7515923e34",
+          "kind": "N"
+        },
+        "semantic": "[N_9df71edcfb344d4aaecbbc7515923e34] [S_b8ec3efdf3b44f95bf23f7fd01ea66cd] засорился(SUBJECT=[M_8516c24743434c729910af482768a83f] Водосток)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+          "kind": "N"
+        },
+        "semantic": "[N_c52e78c8e7bc4bccbc55f75750c19a40] реплика пользователя: Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N"
+        },
+        "semantic": "[N_cba9c81e2a0b43e4a57afc4a34e51e0c] [S_ad97fc02c5e9434399e2ae0ab73c32f9] скопилась(SUBJECT=[M_471cda1540ea4bc98123afa30bf3746c] Вода)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.4099999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_e147ddee46724066b7184be6c7815e92",
+          "kind": "N"
+        },
+        "semantic": "[N_e147ddee46724066b7184be6c7815e92] [S_300963fb1aba45bb883d52f8d4ddb7de] проверила(SUBJECT=[M_168e999a8a654d76bd000610d2c41988] Марина, OBJECT=[M_e85e86c500ed41c090798d729ce8e1e6] окно)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+          "kind": "N"
+        },
+        "semantic": "[N_e724dd37ba0e4c2c8a85ee0996a1eb05] [S_d64f3de885fb4adb810beca0bc56ed72] намокло(SUBJECT=[M_6518416ac74c485685c02a775808b52a] Перекрытие)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3799999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "S_300963fb1aba45bb883d52f8d4ddb7de",
+          "kind": "S"
+        },
+        "semantic": "[S_300963fb1aba45bb883d52f8d4ddb7de] проверила",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "S_64a76c5321ea4509a810c00d347c00e3",
+          "kind": "S"
+        },
+        "semantic": "[S_64a76c5321ea4509a810c00d347c00e3] открыла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "S_ad97fc02c5e9434399e2ae0ab73c32f9",
+          "kind": "S"
+        },
+        "semantic": "[S_ad97fc02c5e9434399e2ae0ab73c32f9] скопилась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "S_b8ec3efdf3b44f95bf23f7fd01ea66cd",
+          "kind": "S"
+        },
+        "semantic": "[S_b8ec3efdf3b44f95bf23f7fd01ea66cd] засорился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "S_d64f3de885fb4adb810beca0bc56ed72",
+          "kind": "S"
+        },
+        "semantic": "[S_d64f3de885fb4adb810beca0bc56ed72] намокло",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "S_e38b2e707f4944e9b33f4ccbea4634b2",
+          "kind": "S"
+        },
+        "semantic": "[S_e38b2e707f4944e9b33f4ccbea4634b2] осмотрел",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "T_063c564fb31945ea9d7975615ac670c5",
+          "kind": "T"
+        },
+        "semantic": "[T_063c564fb31945ea9d7975615ac670c5] predicate=[S_300963fb1aba45bb883d52f8d4ddb7de] проверила; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "T_42df169a217e496fbbfd4f99b91d9400",
+          "kind": "T"
+        },
+        "semantic": "[T_42df169a217e496fbbfd4f99b91d9400] predicate=[S_64a76c5321ea4509a810c00d347c00e3] открыла; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "T_c7a61b041a3446ada422461d05336f78",
+          "kind": "T"
+        },
+        "semantic": "[T_c7a61b041a3446ada422461d05336f78] predicate=[S_e38b2e707f4944e9b33f4ccbea4634b2] осмотрел; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "T_d594d797594c4e34aad43a441d9acdc6",
+          "kind": "T"
+        },
+        "semantic": "[T_d594d797594c4e34aad43a441d9acdc6] predicate=[S_b8ec3efdf3b44f95bf23f7fd01ea66cd] засорился; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9868802544627543,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "T_e221f340b4dc421e8994420a984035da",
+          "kind": "T"
+        },
+        "semantic": "[T_e221f340b4dc421e8994420a984035da] predicate=[S_ad97fc02c5e9434399e2ae0ab73c32f9] скопилась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "T_e46641b9a66147989115e5e1f83ef26b",
+          "kind": "T"
+        },
+        "semantic": "[T_e46641b9a66147989115e5e1f83ef26b] predicate=[S_d64f3de885fb4adb810beca0bc56ed72] намокло; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 17,
+      "source_text": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nTOKENS:\n[1] Перекрытие\n[2] намокло\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] скопилась\n[8] .\n[9] Реставратор\n[10] осмотрел\n[11] альбом\n[12] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: намокло; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nTOKENS:\n[1] Перекрытие\n[2] намокло\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] скопилась\n[8] .\n[9] Реставратор\n[10] осмотрел\n[11] альбом\n[12] .\nPREDICATE_START: [2] намокло\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: намокло",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло\nTARGET:\nнамокло\nRUSSIAN_LEMMA:\nнамокнуть",
+          "normalized_answer": "намокнуть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло\nPREDICATE:\nнамокло\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nнамокло\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Перекрытие",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nнамокло\nQUESTION_WORD:\nПерекрытие",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nнамокло\nALREADY_SELECTED:\nПерекрытие\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что вода скопилась\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nTOKENS:\n[1] Перекрытие\n[2] намокло\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] скопилась\n[8] .\n[9] Реставратор\n[10] осмотрел\n[11] альбом\n[12] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[7] token 7: скопилась; morphology=VERB",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nTOKENS:\n[1] Перекрытие\n[2] намокло\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] скопилась\n[8] .\n[9] Реставратор\n[10] осмотрел\n[11] альбом\n[12] .\nPREDICATE_START: [7] скопилась\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[7] end at token 7: скопилась",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что вода скопилась\nTARGET:\nскопилась\nRUSSIAN_LEMMA:\nскопиться",
+          "normalized_answer": "скопиться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что вода скопилась\nPREDICATE:\nскопилась\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nскопилась\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] вода",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nскопилась\nQUESTION_WORD:\nвода",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nскопилась\nALREADY_SELECTED:\nвода\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРеставратор осмотрел альбом\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nTOKENS:\n[1] Перекрытие\n[2] намокло\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] скопилась\n[8] .\n[9] Реставратор\n[10] осмотрел\n[11] альбом\n[12] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[10] token 10: осмотрел; morphology=VERB",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nTOKENS:\n[1] Перекрытие\n[2] намокло\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] скопилась\n[8] .\n[9] Реставратор\n[10] осмотрел\n[11] альбом\n[12] .\nPREDICATE_START: [10] осмотрел\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[10] end at token 10: осмотрел",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРеставратор осмотрел альбом\nTARGET:\nосмотрел\nRUSSIAN_LEMMA:\nосмотреть",
+          "normalized_answer": "осмотреть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРеставратор осмотрел альбом\nPREDICATE:\nосмотрел\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Реставратор\n[2] альбом",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "ACTOR_OR_EXPERIENCER",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nTARGET:\nРеставратор\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "ACTOR_OR_EXPERIENCER",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nALREADY_SELECTED:\nРеставратор\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] альбом",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "AFFECTED_OR_CONTENT",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nTARGET:\nальбом\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "AFFECTED_OR_CONTENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nALREADY_SELECTED:\nРеставратор | альбом\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "намокло",
+              "normalized_hint": "намокнуть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "намокло",
+                "start": 11,
+                "end": 18
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Перекрытие",
+                "normalized_hint": "Перекрытие",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Перекрытие",
+                  "start": 0,
+                  "end": 10
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Перекрытие намокло",
+              "start": 0,
+              "end": 18
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "скопилась",
+              "normalized_hint": "скопиться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "скопилась",
+                "start": 36,
+                "end": 45
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "вода",
+                "normalized_hint": "вода",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "вода",
+                  "start": 31,
+                  "end": 35
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что вода скопилась",
+              "start": 20,
+              "end": 45
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "осмотрел",
+              "normalized_hint": "осмотреть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "осмотрел",
+                "start": 59,
+                "end": 67
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Реставратор",
+                "normalized_hint": "Реставратор",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Реставратор",
+                  "start": 47,
+                  "end": 58
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "альбом",
+                "normalized_hint": "альбом",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "альбом",
+                  "start": 68,
+                  "end": 74
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Реставратор осмотрел альбом",
+              "start": 47,
+              "end": 74
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A2",
+            "target_ref": "A1",
+            "evidence": {
+              "text": "потому что",
+              "start": 20,
+              "end": 30
+            }
+          }
+        ],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [
+          {
+            "parent_ref": "A1",
+            "child_ref": "A2",
+            "kind": "SUBORDINATE"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 50,
+      "req_id": "26fd1923f4444fca92a1eb159cbe274e",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nTARGET:\nРеставратор\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nTARGET:\nРеставратор\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 1044,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 51,
+      "req_id": "89106fdb2b5142739e39260bf699b79b",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nTARGET:\nальбом\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nTARGET:\nальбом\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 982,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 52,
+      "req_id": "6dac481adc3e4dc297a9f0ee14bee250",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nSEMANTIC ARGUMENTS:\nSUBJECT = Реставратор\nOBJECT = альбом\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='Реставратор' IS-A OBJECT='альбом'\nR2: OBJECT='альбом' IS-A SUBJECT='Реставратор'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nПерекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.\nPREDICATE:\nосмотрел\nSEMANTIC ARGUMENTS:\nSUBJECT = Реставратор\nOBJECT = альбом\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='Реставратор' IS-A OBJECT='альбом'\nR2: OBJECT='альбом' IS-A SUBJECT='Реставратор'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 322,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_5ca048ee08bf43bf91442ca878d1d6a4": {
+        "uid": "K_5ca048ee08bf43bf91442ca878d1d6a4",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+            "kind": "N"
+          },
+          {
+            "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+            "kind": "N"
+          },
+          {
+            "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_6d872f7c95fc4493b6faaef45c53e486": {
+        "uid": "L_6d872f7c95fc4493b6faaef45c53e486",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.22800000000000004,
+        "source": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+          "kind": "N"
+        }
+      },
+      "L_9b3941367f5648d68cee54f8b72f2ad5": {
+        "uid": "L_9b3941367f5648d68cee54f8b72f2ad5",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_887b1e80b8124c78b57ccebae7c238a8",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+          "kind": "N"
+        }
+      },
+      "M_1a1fda9e2ec949e580dca9843eed6e37": {
+        "uid": "M_1a1fda9e2ec949e580dca9843eed6e37",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "альбом",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_6518416ac74c485685c02a775808b52a": {
+        "uid": "M_6518416ac74c485685c02a775808b52a",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Перекрытие",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_b6981ee93fab40cba809a795faaed36e": {
+        "uid": "M_b6981ee93fab40cba809a795faaed36e",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Реставратор",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_9b1190fa59fd443a8fbc34f6a544ce38": {
+        "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_c7a61b041a3446ada422461d05336f78",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b6981ee93fab40cba809a795faaed36e",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "M_1a1fda9e2ec949e580dca9843eed6e37",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_c52e78c8e7bc4bccbc55f75750c19a40": {
+        "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_28b601c70ecf45e1a159485a18c96ea2",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_5ca048ee08bf43bf91442ca878d1d6a4",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_e724dd37ba0e4c2c8a85ee0996a1eb05": {
+        "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_e46641b9a66147989115e5e1f83ef26b",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_6518416ac74c485685c02a775808b52a",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_d64f3de885fb4adb810beca0bc56ed72": {
+        "uid": "S_d64f3de885fb4adb810beca0bc56ed72",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "намокло",
+          "намокнуть"
+        ]
+      },
+      "S_e38b2e707f4944e9b33f4ccbea4634b2": {
+        "uid": "S_e38b2e707f4944e9b33f4ccbea4634b2",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "осмотрел",
+          "осмотреть"
+        ]
+      },
+      "T_c7a61b041a3446ada422461d05336f78": {
+        "uid": "T_c7a61b041a3446ada422461d05336f78",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_e38b2e707f4944e9b33f4ccbea4634b2",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT"
+        ]
+      },
+      "T_e46641b9a66147989115e5e1f83ef26b": {
+        "uid": "T_e46641b9a66147989115e5e1f83ef26b",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_d64f3de885fb4adb810beca0bc56ed72",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_1a939a5d3eb1470b83fdacb0c84c3c61": {
+        "before": {
+          "uid": "L_1a939a5d3eb1470b83fdacb0c84c3c61",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22800000000000004,
+          "source": {
+            "uid": "N_9df71edcfb344d4aaecbbc7515923e34",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_1a939a5d3eb1470b83fdacb0c84c3c61",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22400000000000003,
+          "source": {
+            "uid": "N_9df71edcfb344d4aaecbbc7515923e34",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+            "kind": "N"
+          }
+        }
+      },
+      "N_cba9c81e2a0b43e4a57afc4a34e51e0c": {
+        "before": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.4,
+          "template": {
+            "uid": "T_e221f340b4dc421e8994420a984035da",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_471cda1540ea4bc98123afa30bf3746c",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 1,
+            "lifecycle_state": "NEW",
+            "created_tick": 3,
+            "expires_tick": 203,
+            "last_qualifying_tick": 3,
+            "qualifying_reactivations": 0
+          }
+        },
+        "after": {
+          "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.41000000000000003,
+          "template": {
+            "uid": "T_e221f340b4dc421e8994420a984035da",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_471cda1540ea4bc98123afa30bf3746c",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 2,
+            "lifecycle_state": "NEW",
+            "created_tick": 3,
+            "expires_tick": 203,
+            "last_qualifying_tick": 3,
+            "qualifying_reactivations": 0
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 9,
+    "workspace_uids": [
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_168e999a8a654d76bd000610d2c41988",
+      "M_471cda1540ea4bc98123afa30bf3746c",
+      "M_8516c24743434c729910af482768a83f",
+      "M_bc353bf25e814d5db85cd382aea2849b",
+      "M_e85e86c500ed41c090798d729ce8e1e6",
+      "N_392741e8e3134a58ae3dff0c1cdc186f",
+      "N_44065cbd7d724fd8812eeff206c6a15b",
+      "N_887b1e80b8124c78b57ccebae7c238a8",
+      "N_9b1190fa59fd443a8fbc34f6a544ce38",
+      "N_9df71edcfb344d4aaecbbc7515923e34",
+      "N_c52e78c8e7bc4bccbc55f75750c19a40",
+      "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+      "N_e147ddee46724066b7184be6c7815e92",
+      "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+      "S_300963fb1aba45bb883d52f8d4ddb7de",
+      "S_64a76c5321ea4509a810c00d347c00e3",
+      "S_ad97fc02c5e9434399e2ae0ab73c32f9",
+      "S_b8ec3efdf3b44f95bf23f7fd01ea66cd",
+      "S_d64f3de885fb4adb810beca0bc56ed72",
+      "S_e38b2e707f4944e9b33f4ccbea4634b2",
+      "T_063c564fb31945ea9d7975615ac670c5",
+      "T_42df169a217e496fbbfd4f99b91d9400",
+      "T_c7a61b041a3446ada422461d05336f78",
+      "T_d594d797594c4e34aad43a441d9acdc6",
+      "T_e221f340b4dc421e8994420a984035da",
+      "T_e46641b9a66147989115e5e1f83ef26b"
+    ],
+    "workspace": {
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.44668904922879243
+      },
+      "M_168e999a8a654d76bd000610d2c41988": {
+        "semantic": "Марина",
+        "excitation": 0.8168575388467847
+      },
+      "M_471cda1540ea4bc98123afa30bf3746c": {
+        "semantic": "Вода",
+        "excitation": 0.7082737561733881
+      },
+      "M_8516c24743434c729910af482768a83f": {
+        "semantic": "Водосток",
+        "excitation": 0.793196478615519
+      },
+      "M_bc353bf25e814d5db85cd382aea2849b": {
+        "semantic": "архив",
+        "excitation": 0.40456268056730255
+      },
+      "M_e85e86c500ed41c090798d729ce8e1e6": {
+        "semantic": "окно",
+        "excitation": 0.4089320192167526
+      },
+      "N_392741e8e3134a58ae3dff0c1cdc186f": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_49e0bbe7188649738545b1d80764b917[открыла(SUBJECT=Марина, OBJECT=архив); засорился(SUBJECT=Водосток)])",
+        "excitation": 0.48648381459621354
+      },
+      "N_44065cbd7d724fd8812eeff206c6a15b": {
+        "semantic": "открыла(SUBJECT=Марина, OBJECT=архив)",
+        "excitation": 0.9787446529613976
+      },
+      "N_887b1e80b8124c78b57ccebae7c238a8": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_75b6294f5f044834ab113d27c6148bc3[скопилась(SUBJECT=Вода); засорился(SUBJECT=Водосток); проверила(SUBJECT=Марина, OBJECT=окно)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_9b1190fa59fd443a8fbc34f6a544ce38": {
+        "semantic": "осмотрел(SUBJECT=Реставратор, OBJECT=альбом)",
+        "excitation": 1.0
+      },
+      "N_9df71edcfb344d4aaecbbc7515923e34": {
+        "semantic": "засорился(SUBJECT=Водосток)",
+        "excitation": 0.9893152444804425
+      },
+      "N_c52e78c8e7bc4bccbc55f75750c19a40": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_5ca048ee08bf43bf91442ca878d1d6a4[намокло(SUBJECT=Перекрытие); скопилась(SUBJECT=Вода); осмотрел(SUBJECT=Реставратор, OBJECT=альбом)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_cba9c81e2a0b43e4a57afc4a34e51e0c": {
+        "semantic": "скопилась(SUBJECT=Вода)",
+        "excitation": 1.0
+      },
+      "N_e147ddee46724066b7184be6c7815e92": {
+        "semantic": "проверила(SUBJECT=Марина, OBJECT=окно)",
+        "excitation": 0.9893152444804425
+      },
+      "N_e724dd37ba0e4c2c8a85ee0996a1eb05": {
+        "semantic": "намокло(SUBJECT=Перекрытие)",
+        "excitation": 1.0
+      },
+      "S_300963fb1aba45bb883d52f8d4ddb7de": {
+        "semantic": "проверила",
+        "excitation": 0.9343020365750345
+      },
+      "S_64a76c5321ea4509a810c00d347c00e3": {
+        "semantic": "открыла",
+        "excitation": 0.9243192477328055
+      },
+      "S_ad97fc02c5e9434399e2ae0ab73c32f9": {
+        "semantic": "скопилась",
+        "excitation": 0.9940975169044439
+      },
+      "S_b8ec3efdf3b44f95bf23f7fd01ea66cd": {
+        "semantic": "засорился",
+        "excitation": 0.9834758279737207
+      },
+      "S_d64f3de885fb4adb810beca0bc56ed72": {
+        "semantic": "намокло",
+        "excitation": 0.9443926410592216
+      },
+      "S_e38b2e707f4944e9b33f4ccbea4634b2": {
+        "semantic": "осмотрел",
+        "excitation": 0.9443926410592216
+      },
+      "T_063c564fb31945ea9d7975615ac670c5": {
+        "semantic": "проверила",
+        "excitation": 0.9375362417396166
+      },
+      "T_42df169a217e496fbbfd4f99b91d9400": {
+        "semantic": "открыла",
+        "excitation": 0.927518896205904
+      },
+      "T_c7a61b041a3446ada422461d05336f78": {
+        "semantic": "осмотрел",
+        "excitation": 0.9476617761328255
+      },
+      "T_d594d797594c4e34aad43a441d9acdc6": {
+        "semantic": "засорился",
+        "excitation": 0.9868802544627543
+      },
+      "T_e221f340b4dc421e8994420a984035da": {
+        "semantic": "скопилась",
+        "excitation": 0.9975387117187637
+      },
+      "T_e46641b9a66147989115e5e1f83ef26b": {
+        "semantic": "намокло",
+        "excitation": 0.9476617761328255
+      }
+    },
+    "pending_incoming": {
+      "M_b6981ee93fab40cba809a795faaed36e": 0.15200000000000005,
+      "M_1a1fda9e2ec949e580dca9843eed6e37": 0.15200000000000005,
+      "N_e724dd37ba0e4c2c8a85ee0996a1eb05": 0.08732999999999999,
+      "M_471cda1540ea4bc98123afa30bf3746c": 0.16809999999999997,
+      "M_6518416ac74c485685c02a775808b52a": 0.15199999999999997
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_b6981ee93fab40cba809a795faaed36e",
+        "kind": "M"
+      },
+      "оно": {
+        "uid": "M_6518416ac74c485685c02a775808b52a",
+        "kind": "M"
+      },
+      "она": {
+        "uid": "M_471cda1540ea4bc98123afa30bf3746c",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_c52e78c8e7bc4bccbc55f75750c19a40",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 3,
+      "actual": 3
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "намокнуть",
+      "actual": "намокнуть"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "перекрытие"
+      },
+      "actual": "Перекрытие"
+    },
+    {
+      "name": "perception.assertions.a2.predicate",
+      "ok": true,
+      "expected": "скопиться",
+      "actual": "скопиться"
+    },
+    {
+      "name": "perception.assertions.a2.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "вода"
+      },
+      "actual": "вода"
+    },
+    {
+      "name": "perception.assertions.a3.predicate",
+      "ok": true,
+      "expected": "осмотреть",
+      "actual": "осмотреть"
+    },
+    {
+      "name": "perception.assertions.a3.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "реставратор"
+      },
+      "actual": "Реставратор"
+    },
+    {
+      "name": "perception.assertions.a3.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "альбом"
+      },
+      "actual": "альбом"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [
+        [
+          "CAUSE",
+          "A2",
+          "A1"
+        ]
+      ],
+      "actual": [
+        [
+          "CAUSE",
+          "A2",
+          "A1"
+        ]
+      ]
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "намокнуть",
+      "actual": [
+        "намокло",
+        "намокнуть"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "перекрытие"
+      },
+      "actual": "Перекрытие"
+    },
+    {
+      "name": "canonical.assertions.a2.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a2.predicate",
+      "ok": true,
+      "expected": "скопиться",
+      "actual": [
+        "скопилась",
+        "скопиться"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "вода"
+      },
+      "actual": "Вода"
+    },
+    {
+      "name": "canonical.assertions.a3.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a3.predicate",
+      "ok": true,
+      "expected": "осмотреть",
+      "actual": [
+        "осмотрел",
+        "осмотреть"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "реставратор"
+      },
+      "actual": "Реставратор"
+    },
+    {
+      "name": "canonical.assertions.a3.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "альбом"
+      },
+      "actual": "альбом"
+    },
+    {
+      "name": "templates.намокнуть.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.осмотреть.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "OBJECT",
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.скопиться.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": "Протечка в архиве, paragraph 3",
+  "semantic_family": "document.causal.archive",
+  "semantic_tags": [
+    "document",
+    "cause",
+    "dedup-bridge",
+    "distractor"
+  ]
+}

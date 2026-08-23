@@ -276,6 +276,7 @@ def run_acceptance_suite(
     *,
     cases_file: str | Path | None = None,
     oracle_file: str | Path | None = None,
+    runs_dirname: str = RUNS_DIRNAME,
 ) -> AcceptanceRunResult:
     """Run file-defined requests sequentially through the normal orchestrator.
 
@@ -296,7 +297,7 @@ def run_acceptance_suite(
     validate_oracle_alignment(cases, oracle_cases)
 
     timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S_%z")
-    runs_root = data_dir / RUNS_DIRNAME
+    runs_root = data_dir / runs_dirname
     output_dir = runs_root / timestamp
     suffix = 1
     while output_dir.exists():

@@ -1,0 +1,11 @@
+{
+  "switch_off": "N_1fd5b2354e6c49a689f0649db96d49ae",
+  "controller_off": "N_ee1b636ca2c442639e9dee22aee3508c",
+  "timer_miss": "N_43818570f5364aedb7a2b475050ccf7c",
+  "watering_delay": "N_d1447aad4e214e569d4cd430ae2c8a10",
+  "soil_dry": "N_84640461fac3422db801122a74fe3c22",
+  "seedling_wilt": "N_c7fda8f973484db4836842ff07e13cb7",
+  "yield_drop": "N_275ca110df6a4abda77a9dc900308687",
+  "anna_check": "N_765555a977b241a98303a2fc9c0f2aed",
+  "fan_work": "N_68fbcb090b1f4b21a56b47f41c335f23"
+}

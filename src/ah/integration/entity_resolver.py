@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
+import re
 
 from ah.agent import InteractionContext
 from ah.core import AHCore
-from ah.model import ActantRole, Domain, Ref, RefKind
+from ah.model import ActantRole, Domain, Ref, RefKind, SemanticEntity
 from ah.perception import ActantCandidate
 from ah.perception.morphology import build_morphology, stable_normal_form
 
@@ -23,6 +25,15 @@ class ExistingEntity:
 class NewEntityPlan:
     name: str
     semantic_hint: str | None = None
+    literal_kind: str | None = None
+    literal_value: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EquivalentLiteralPlan:
+    candidates: tuple[Ref, ...]
+    literal_kind: str
+    literal_value: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,7 +42,7 @@ class AmbiguousEntityPlan:
     mention: str
 
 
-EntityResolution = ExistingEntity | NewEntityPlan | AmbiguousEntityPlan
+EntityResolution = ExistingEntity | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan
 
 
 class EntityResolver:
@@ -48,6 +59,52 @@ class EntityResolver:
         ActantRole.CAUSE, ActantRole.PURPOSE, ActantRole.TOOL, ActantRole.MATERIAL,
         ActantRole.AMOUNT, ActantRole.HOW_TO, ActantRole.STATE,
     }
+
+
+
+    _DECIMAL_LITERAL_RE = re.compile(r"^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$")
+
+    @classmethod
+    def _numeric_literal_value(cls, text: str | None) -> str | None:
+        """Return a canonical decimal value for a bare numeric literal.
+
+        Numeric syntax is deterministic source structure, not semantic inference.
+        We deliberately accept only a bare decimal token here: units, dates,
+        identifiers and names remain ordinary entity resolution.
+        """
+        if text is None:
+            return None
+        raw = text.strip().replace(" ", "")
+        if not raw or cls._DECIMAL_LITERAL_RE.fullmatch(raw) is None:
+            return None
+        normalized = raw.replace(",", ".")
+        try:
+            value = Decimal(normalized)
+        except InvalidOperation:
+            return None
+        if not value.is_finite():
+            return None
+        if value == 0:
+            return "0"
+        rendered = format(value.normalize(), "f")
+        if "." in rendered:
+            rendered = rendered.rstrip("0").rstrip(".")
+        return rendered
+
+    @classmethod
+    def _entity_matches_numeric_literal(cls, entity, value: str) -> bool:
+        explicit_kind = entity.meta.get("literal_kind")
+        explicit_value = entity.meta.get("literal_value")
+        if explicit_kind == "NUMBER":
+            return str(explicit_value) == value
+
+        # Backward compatibility for already persisted memories: before literal
+        # identity existed, a number was stored as a bare name-only m node. Do
+        # not reinterpret richer objects merely because somebody named one "5".
+        if set(entity.properties) != {"name"}:
+            return False
+        name = entity.properties.get("name")
+        return name is not None and cls._numeric_literal_value(str(name.value)) == value
 
     def __init__(self, core: AHCore, deixis: DeixisResolver | None = None) -> None:
         self.core = core
@@ -152,6 +209,7 @@ class EntityResolver:
         first_person_ref: Ref | None = None,
         second_person_ref: Ref | None = None,
         preferred_domain: Domain | None = None,
+        attention_refs: tuple[Ref, ...] = (),
     ) -> EntityResolution:
         deictic = self.deixis.resolve(
             candidate,
@@ -174,6 +232,32 @@ class EntityResolver:
         for value in (candidate.normalized_hint, candidate.mention):
             if value and value.strip() and value.strip() not in lookup_forms:
                 lookup_forms.append(value.strip())
+
+        literal_value = self._numeric_literal_value(candidate.lookup_text)
+        if literal_value is not None:
+            literal_matches: list[Ref] = []
+            for domain in Domain:
+                for entity in self.core.store.find_entities_by_name(candidate.lookup_text or literal_value, domain):
+                    if self._entity_matches_numeric_literal(entity, literal_value):
+                        ref = self.core.ref(entity.uid)
+                        if all(existing.uid != ref.uid for existing in literal_matches):
+                            literal_matches.append(ref)
+            # Normalized persisted values can differ lexically (e.g. 5.0 vs 5).
+            # Scan only semantic entities when exact-name indexing found nothing.
+            if not literal_matches:
+                for domain in Domain:
+                    for element in self.core.store.elements(domain):
+                        if isinstance(element, SemanticEntity) and self._entity_matches_numeric_literal(element, literal_value):
+                            ref = self.core.ref(element.uid)
+                            if all(existing.uid != ref.uid for existing in literal_matches):
+                                literal_matches.append(ref)
+            if len(literal_matches) == 1:
+                return ExistingEntity(literal_matches[0])
+            if len(literal_matches) > 1:
+                return EquivalentLiteralPlan(tuple(literal_matches), "NUMBER", literal_value)
+            return NewEntityPlan(
+                literal_value, candidate.semantic_hint, literal_kind="NUMBER", literal_value=literal_value
+            )
 
         owner = self._possessive_owner(
             candidate, context,
@@ -201,6 +285,16 @@ class EntityResolver:
                 if relational is not None:
                     return relational
             elif len(descriptor_matches) > 1:
+                active = {ref.uid for ref in attention_refs}
+                active_matches = [entity for entity in descriptor_matches if entity.uid in active]
+                if len(active_matches) == 1:
+                    descriptor_ref = self.core.ref(active_matches[0].uid)
+                    relational = self._resolve_relational_reference(
+                        owner, descriptor_ref, candidate.mention or text,
+                        preferred_domain=preferred_domain,
+                    )
+                    if relational is not None:
+                        return relational
                 return AmbiguousEntityPlan(
                     tuple(self.core.ref(entity.uid) for entity in descriptor_matches),
                     candidate.mention or text,
@@ -218,6 +312,10 @@ class EntityResolver:
             if len(entities) == 1:
                 return ExistingEntity(self.core.ref(entities[0].uid))
             if len(entities) > 1:
+                active = {ref.uid for ref in attention_refs}
+                active_matches = [entity for entity in entities if entity.uid in active]
+                if len(active_matches) == 1:
+                    return ExistingEntity(self.core.ref(active_matches[0].uid))
                 return AmbiguousEntityPlan(
                     tuple(self.core.ref(entity.uid) for entity in entities),
                     lookup,

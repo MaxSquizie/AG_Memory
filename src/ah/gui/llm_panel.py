@@ -151,6 +151,7 @@ class LLMControlWidget(QWidget):
 
         root = QVBoxLayout(self)
         info = QFormLayout()
+        self.info_layout = info
         self.status_label = QLabel()
         self.model_label = QLabel()
         self.model_label.setTextInteractionFlags(self.model_label.textInteractionFlags())
@@ -164,6 +165,16 @@ class LLMControlWidget(QWidget):
         self.perception_cfg_label = QLabel()
         self.agent_cfg_label = QLabel()
         self.stage_label = QLabel()
+        # Long model paths / placement diagnostics must wrap instead of forcing
+        # the MONITOR right column to consume half of a 1366/1600px display.
+        for value_label in (
+            self.status_label, self.model_label, self.role_label, self.loader_label,
+            self.device_policy_label, self.cuda_label, self.placement_label,
+            self.ram_label, self.history_label, self.perception_cfg_label,
+            self.agent_cfg_label, self.stage_label,
+        ):
+            value_label.setWordWrap(True)
+            value_label.setMinimumWidth(0)
         info.addRow("Статус", self.status_label)
         info.addRow("Модель", self.model_label)
         info.addRow("Роли", self.role_label)
@@ -176,6 +187,14 @@ class LLMControlWidget(QWidget):
         info.addRow("Perception", self.perception_cfg_label)
         info.addRow("Agent", self.agent_cfg_label)
         info.addRow("Stage", self.stage_label)
+        self._monitor_compact_fields = (
+            self.role_label,
+            self.loader_label,
+            self.device_policy_label,
+            self.history_label,
+            self.perception_cfg_label,
+            self.agent_cfg_label,
+        )
         root.addLayout(info)
 
         buttons = QHBoxLayout()
@@ -229,13 +248,23 @@ class LLMControlWidget(QWidget):
         self.tabs.currentChanged.connect(lambda _index: self.refresh_status(force=True))
         root.addWidget(self.tabs, 1)
 
-        save_prompts = QPushButton("Сохранить prompt-файлы")
-        save_prompts.clicked.connect(self._save_prompts)
-        root.addWidget(save_prompts)
+        self.save_prompts_button = QPushButton("Сохранить prompt-файлы")
+        self.save_prompts_button.clicked.connect(self._save_prompts)
+        root.addWidget(self.save_prompts_button)
 
         self.reload_prompts()
         self.refresh_status()
 
+
+    def set_monitor_compact(self, compact: bool) -> None:
+        """Collapse secondary process metadata while the shared MONITOR view is active."""
+        visible = not bool(compact)
+        for field in self._monitor_compact_fields:
+            field.setVisible(visible)
+            label = self.info_layout.labelForField(field)
+            if label is not None:
+                label.setVisible(visible)
+        self.save_prompts_button.setVisible(visible)
 
     def begin_turn(self, source_text: str) -> None:
         """Start a new GUI diagnostics scope without touching LLM/AH state."""

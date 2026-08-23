@@ -1,0 +1,1467 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "text": "Виктор дежурил на станции. Температура опустилась.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "entity",
+        "baseline"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 1",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дежурить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Виктор",
+                "LOCATION": "станция"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "опуститься",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "температура"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Вода замёрзла, потому что температура опустилась. Виктор проверил фильтр.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 2",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "замёрзнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вода"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "опуститься",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "температура"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Виктор",
+                "OBJECT": "фильтр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 3",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "расшириться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "лёд"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "замёрзнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вода"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "мигнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "лампа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Трубка треснула, потому что лёд расширился. Виктор записал параметр.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 4",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "треснуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "трубка"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "расшириться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "лёд"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "записать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Виктор",
+                "OBJECT": "параметр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Жидкость вытекла, потому что трубка треснула. Датчик работал.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 5",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "вытечь",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "жидкость"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "треснуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "трубка"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "датчик"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Давление упало, потому что жидкость вытекла. Виктор открыл шкаф.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 6",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "упасть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "давление"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "вытечь",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "жидкость"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Виктор",
+                "OBJECT": "шкаф"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Автоматика остановила насос, потому что давление упало. Виктор перекрыл клапан.",
+      "grade": "EXACT",
+      "scenario": "cooling_station",
+      "family": "document.causal.station",
+      "tags": [
+        "document",
+        "cause",
+        "goal",
+        "distractor"
+      ],
+      "note": "Сбой охлаждающего контура, paragraph 7",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остановить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "автоматика",
+                "OBJECT": "насос"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "упасть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "давление"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "перекрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Виктор",
+                "OBJECT": "клапан"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Анна осмотрела теплицу. Коммутатор обесточился.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "entity",
+        "baseline"
+      ],
+      "note": "Сбой управления теплицей, paragraph 1",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "осмотреть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "теплица"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "обесточиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "коммутатор"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "cross-paragraph-coreference",
+        "cause"
+      ],
+      "note": "Сбой управления теплицей, paragraph 2",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "canonical_name": "Анна"
+                },
+                "OBJECT": "щиток"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отключиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "контроллер"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "обесточиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "коммутатор"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a3",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Таймер пропустил команду, потому что контроллер отключился. Вентилятор работал.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой управления теплицей, paragraph 3",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "пропустить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "таймер",
+                "OBJECT": "команда"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отключиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "контроллер"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вентилятор"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Полив задержался, потому что таймер пропустил команду. Анна измерила влажность.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой управления теплицей, paragraph 4",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "задержаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "полив"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "пропустить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "таймер",
+                "OBJECT": "команда"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "измерить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "влажность"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Почва высохла, потому что полив задержался. Анна записала результат.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой управления теплицей, paragraph 5",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "высохнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "почва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "задержаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "полив"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "записать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "результат"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Рассада увяла, потому что почва высохла. Освещение работало.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Сбой управления теплицей, paragraph 6",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увянуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "рассада"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "высохнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "почва"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "освещение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Урожай снизился, потому что рассада увяла. Анна вызвала техника.",
+      "grade": "EXACT",
+      "scenario": "greenhouse_control",
+      "family": "document.causal.greenhouse",
+      "tags": [
+        "document",
+        "cause",
+        "goal",
+        "distractor"
+      ],
+      "note": "Сбой управления теплицей, paragraph 7",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "снизиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "урожай"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "увянуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "рассада"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "вызвать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "техник"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Марина открыла архив. Водосток засорился.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "entity",
+        "baseline"
+      ],
+      "note": "Протечка в архиве, paragraph 1",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Марина",
+                "OBJECT": "архив"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "засориться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "водосток"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Вода скопилась, потому что водосток засорился. Марина проверила окно.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Протечка в архиве, paragraph 2",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "скопиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вода"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "засориться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "водосток"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Марина",
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Протечка в архиве, paragraph 3",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "намокнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "перекрытие"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "скопиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вода"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "осмотреть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "реставратор",
+                "OBJECT": "альбом"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Вода проникла в зал, потому что перекрытие намокло. Свет горел.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Протечка в архиве, paragraph 4",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проникнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вода",
+                "LOCATION": "зал"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "намокнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "перекрытие"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "гореть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "свет"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Датчик сработал, потому что вода проникла в зал. Марина позвонила сотрудникам.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Протечка в архиве, paragraph 5",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "датчик"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "проникнуть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "вода",
+                "LOCATION": "зал"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Марина",
+                "RECIPIENT": "сотрудник"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "Сотрудники перенесли коробки, потому что датчик сработал. Реставратор закрыл шкаф.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "note": "Протечка в архиве, paragraph 6",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "перенести",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сотрудник",
+                "OBJECT": "коробка"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "датчик"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "реставратор",
+                "OBJECT": "шкаф"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "После того как сотрудники перенесли коробки, Марина закрыла зал. Потом охрана проверила дверь.",
+      "grade": "EXACT",
+      "scenario": "archive_leak",
+      "family": "document.causal.archive",
+      "tags": [
+        "document",
+        "follow",
+        "mixed-proof-preflight"
+      ],
+      "note": "Протечка в архиве, paragraph 7",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "перенести",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сотрудник",
+                "OBJECT": "коробка"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Марина",
+                "OBJECT": "зал"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "охрана",
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            },
+            {
+              "id": "FOLLOW",
+              "source": "a2",
+              "target": "a3"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {}
+      }
+    },
+    {
+      "text": "К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 1",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 2",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 3",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 4",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 5",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 6",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Штукатурка отслоилась, потому что вода стекала по балке. Кусок штукатурки упал, потому что штукатурка отслоилась.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 7",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Кот бросился к двери, потому что падение штукатурки его испугало. Он задел стол.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 8",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Лампа упала со стола, потому что кот задел стол. Стекло лампы разбилось.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 9",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Шум разбудил Павла. Он пришёл на чердак.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 10",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Павел поставил таз под протечку. После того как дождь ослаб, вода капала реже.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 11",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Марина сняла коробку со шкафа. Бумага в письмах намокла, потому что вода просочилась в коробку.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 12",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Марина положила письма возле печи. Бумага коробилась, потому что печь грела слишком сильно.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 13",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "Она отодвинула письма от огня. Потом коробление прекратилось.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 14",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    },
+    {
+      "text": "На рассвете дождь прекратился. Марина открыла окно, потому что рама подсохла.",
+      "grade": "EXACT",
+      "scenario": "house_by_pier_monolith",
+      "family": "document.monolith.literary",
+      "tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "note": "Дом у пристани — художественный монолит, paragraph 15",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "unchecked": true
+        }
+      }
+    }
+  ]
+}

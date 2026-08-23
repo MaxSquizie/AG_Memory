@@ -22,6 +22,7 @@ from .adaptive_parser import (
 
 from .contracts import (
     ActantCandidate,
+    ActRelationCandidate,
     AssertionCandidate,
     CommandCandidate,
     EvidenceSpan,
@@ -169,6 +170,88 @@ class LLMPerceptionService:
         if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
             raise PerceptionParseError("Structural clarification requires an adaptive perception protocol")
         return self._parse_adaptive(text, structural_resolution=resolution_key)
+
+    def classify_act_relation(
+        self,
+        source_text: str,
+        act_ref: str,
+        predicate: PredicateCandidate,
+        actants: tuple[ActantCandidate, ...],
+    ) -> ActRelationCandidate | None:
+        """Return one UID-free typed structural relation for an already parsed act.
+
+        This is a tiny bounded semantic probe. Deterministic callers decide which
+        acts need the probe and later resolve the returned endpoint roles to AH refs.
+        """
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            return None
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_acts=self.settings.max_acts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            return parser.classify_act_relation(source_text, act_ref, predicate, actants)
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage, raw_text=trace.raw_text, error=trace.error,
+                    prompt=trace.prompt, normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(source_text, attempts, None, str(exc))
+            raise PerceptionParseError(str(exc)) from exc
+
+    def resolve_actant_role(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        target_text: str,
+        candidate_roles: tuple[ActantRole, ...],
+    ) -> ActantRole:
+        """Resolve one filler against a deterministic UID-free role subset."""
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            raise PerceptionParseError(
+                "Actant role reconciliation requires an adaptive perception protocol"
+            )
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_acts=self.settings.max_acts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            return parser.resolve_actant_role(
+                source_text, predicate, target_text, candidate_roles
+            )
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage, raw_text=trace.raw_text, error=trace.error,
+                    prompt=trace.prompt, normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(source_text, attempts, None, str(exc))
+            raise PerceptionParseError(str(exc)) from exc
 
     def propose_template_candidate(
         self,

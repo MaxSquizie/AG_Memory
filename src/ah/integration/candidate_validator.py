@@ -136,6 +136,57 @@ class CandidateValidator:
                     f"Conditional assertion {candidate.local_id} is not referenced by a ConditionalCandidate"
                 )
 
+        act_by_ref: dict[str, object] = dict(by_id)
+        act_by_ref.update({item.local_id: item for item in result.queries if item.local_id is not None})
+        act_by_ref.update({item.local_id: item for item in result.commands if item.local_id is not None})
+        seen_act_relations: set[tuple[str, str, ActantRole, ActantRole]] = set()
+        for relation in result.act_relations:
+            if relation.canonical_relation_id not in {"IS-A"}:
+                raise CandidateValidationError(
+                    f"Unsupported intra-act relation: {relation.relation_id!r}"
+                )
+            act = act_by_ref.get(relation.act_ref)
+            if act is None:
+                raise CandidateValidationError(
+                    f"Unknown intra-act relation act_ref: {relation.act_ref!r}"
+                )
+            roles = {item.role for item in act.actants}
+            if relation.source_role not in roles or relation.target_role not in roles:
+                raise CandidateValidationError(
+                    f"Intra-act relation endpoints are not present in {relation.act_ref!r}"
+                )
+            key = (
+                relation.canonical_relation_id, relation.act_ref,
+                relation.source_role, relation.target_role,
+            )
+            if key in seen_act_relations:
+                raise CandidateValidationError(
+                    f"Duplicate intra-act relation in {relation.act_ref!r}"
+                )
+            seen_act_relations.add(key)
+
+        # Runtime relation hints are deliberately weaker than canonical situation
+        # relations.  Validate referential integrity here, but do not whitelist them
+        # as AH relation IDs and do not materialize them in Integration.  This keeps
+        # narrative/temporal hypotheses inside the perception boundary.
+        seen_relation_hints: set[tuple[str, str, str]] = set()
+        for hint in result.relation_hints:
+            if hint.source_ref not in by_id or hint.target_ref not in by_id:
+                raise CandidateValidationError(
+                    f"Unknown situation relation hint endpoint: "
+                    f"{hint.source_ref!r} -> {hint.target_ref!r}"
+                )
+            if hint.source_ref == hint.target_ref:
+                raise CandidateValidationError(
+                    f"Situation relation hint cannot be reflexive: {hint.source_ref!r}"
+                )
+            key = (hint.kind.value, hint.source_ref, hint.target_ref)
+            if key in seen_relation_hints:
+                raise CandidateValidationError(
+                    f"Duplicate situation relation hint: {key!r}"
+                )
+            seen_relation_hints.add(key)
+
         for relation in result.relations:
             if relation.canonical_relation_id not in {"FOLLOW", "CAUSE"}:
                 raise CandidateValidationError(

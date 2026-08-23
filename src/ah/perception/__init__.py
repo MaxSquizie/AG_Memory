@@ -1,6 +1,7 @@
 from .contracts import (
     ActDependencyCandidate,
     ActDependencyKind,
+    ActRelationCandidate,
     ActantCandidate,
     ActantCompositionCandidate,
     CompositionMemberCandidate,
@@ -19,6 +20,8 @@ from .contracts import (
     QueryCandidate,
     QueryMode,
     SituationRelationCandidate,
+    SituationRelationHintCandidate,
+    SituationRelationHintKind,
     StructuralClarificationOption,
     StructuralClarificationSpec,
 )
@@ -35,6 +38,7 @@ from .text_sensory import TextSensoryResult, TextSensoryService
 __all__ = [
     "ActDependencyCandidate",
     "ActDependencyKind",
+    "ActRelationCandidate",
     "ActantCandidate",
     "ActantCompositionCandidate",
     "CompositionMemberCandidate",
@@ -53,6 +57,8 @@ __all__ = [
     "QueryCandidate",
     "QueryMode",
     "SituationRelationCandidate",
+    "SituationRelationHintCandidate",
+    "SituationRelationHintKind",
     "StructuralClarificationOption",
     "StructuralClarificationSpec",
     "LLMPerceptionService",
@@ -63,6 +69,12 @@ __all__ = [
     "PerceptionClarificationRequired",
     "TextSensoryResult",
     "TextSensoryService",
+    "apply_speech_act_scoping",
+    "GoalSemanticService",
 ]
 
 from .morphology import MorphInfo, Morphology, NullMorphology, Pymorphy3Morphology, build_morphology, stable_transitivity
+
+from .scoping import apply_speech_act_scoping
+
+from .goal_semantics import GoalSemanticService

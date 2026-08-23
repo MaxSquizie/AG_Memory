@@ -1,0 +1,647 @@
+{
+  "cases_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\document_acceptance\\compiled\\compiled_cases.txt",
+  "output_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\document_acceptance_runs\\20260823_032215_+0300",
+  "total": 36,
+  "succeeded": 35,
+  "failed": 1,
+  "semantic_passed": 36,
+  "semantic_failed": 0,
+  "semantic_gaps": 0,
+  "semantic_families": {
+    "document.causal.station": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "gaps": 0
+    },
+    "document.causal.greenhouse": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "gaps": 0
+    },
+    "document.causal.archive": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "gaps": 0
+    },
+    "document.monolith.literary": {
+      "total": 15,
+      "passed": 15,
+      "failed": 0,
+      "gaps": 0
+    }
+  },
+  "oracle_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\document_acceptance\\compiled\\compiled_oracle.json",
+  "scenario_isolation": true,
+  "scenario_count": 4,
+  "cases": [
+    {
+      "index": 1,
+      "input": "Виктор дежурил на станции. Температура опустилась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "entity",
+        "baseline"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_001.json"
+    },
+    {
+      "index": 2,
+      "input": "Вода замёрзла, потому что температура опустилась. Виктор проверил фильтр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_002.json"
+    },
+    {
+      "index": 3,
+      "input": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_003.json"
+    },
+    {
+      "index": 4,
+      "input": "Трубка треснула, потому что лёд расширился. Виктор записал параметр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_004.json"
+    },
+    {
+      "index": 5,
+      "input": "Жидкость вытекла, потому что трубка треснула. Датчик работал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_005.json"
+    },
+    {
+      "index": 6,
+      "input": "Давление упало, потому что жидкость вытекла. Виктор открыл шкаф.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_006.json"
+    },
+    {
+      "index": 7,
+      "input": "Автоматика остановила насос, потому что давление упало. Виктор перекрыл клапан.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.station",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "goal",
+        "distractor"
+      ],
+      "scenario_id": "cooling_station",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_007.json"
+    },
+    {
+      "index": 8,
+      "input": "Анна осмотрела теплицу. Коммутатор обесточился.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "entity",
+        "baseline"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_008.json"
+    },
+    {
+      "index": 9,
+      "input": "Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "cross-paragraph-coreference",
+        "cause"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_009.json"
+    },
+    {
+      "index": 10,
+      "input": "Таймер пропустил команду, потому что контроллер отключился. Вентилятор работал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_010.json"
+    },
+    {
+      "index": 11,
+      "input": "Полив задержался, потому что таймер пропустил команду. Анна измерила влажность.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_011.json"
+    },
+    {
+      "index": 12,
+      "input": "Почва высохла, потому что полив задержался. Анна записала результат.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_012.json"
+    },
+    {
+      "index": 13,
+      "input": "Рассада увяла, потому что почва высохла. Освещение работало.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_013.json"
+    },
+    {
+      "index": 14,
+      "input": "Урожай снизился, потому что рассада увяла. Анна вызвала техника.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.greenhouse",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "goal",
+        "distractor"
+      ],
+      "scenario_id": "greenhouse_control",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_014.json"
+    },
+    {
+      "index": 15,
+      "input": "Марина открыла архив. Водосток засорился.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "entity",
+        "baseline"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_015.json"
+    },
+    {
+      "index": 16,
+      "input": "Вода скопилась, потому что водосток засорился. Марина проверила окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_016.json"
+    },
+    {
+      "index": 17,
+      "input": "Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_017.json"
+    },
+    {
+      "index": 18,
+      "input": "Вода проникла в зал, потому что перекрытие намокло. Свет горел.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_018.json"
+    },
+    {
+      "index": 19,
+      "input": "Датчик сработал, потому что вода проникла в зал. Марина позвонила сотрудникам.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_019.json"
+    },
+    {
+      "index": 20,
+      "input": "Сотрудники перенесли коробки, потому что датчик сработал. Реставратор закрыл шкаф.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "cause",
+        "dedup-bridge",
+        "distractor"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_020.json"
+    },
+    {
+      "index": 21,
+      "input": "После того как сотрудники перенесли коробки, Марина закрыла зал. Потом охрана проверила дверь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.causal.archive",
+      "semantic_tags": [
+        "document",
+        "follow",
+        "mixed-proof-preflight"
+      ],
+      "scenario_id": "archive_leak",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_021.json"
+    },
+    {
+      "index": 22,
+      "input": "К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_022.json"
+    },
+    {
+      "index": 23,
+      "input": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_023.json"
+    },
+    {
+      "index": 24,
+      "input": "Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_024.json"
+    },
+    {
+      "index": 25,
+      "input": "Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_025.json"
+    },
+    {
+      "index": 26,
+      "input": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_026.json"
+    },
+    {
+      "index": 27,
+      "input": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_027.json"
+    },
+    {
+      "index": 28,
+      "input": "Штукатурка отслоилась, потому что вода стекала по балке. Кусок штукатурки упал, потому что штукатурка отслоилась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_028.json"
+    },
+    {
+      "index": 29,
+      "input": "Кот бросился к двери, потому что падение штукатурки его испугало. Он задел стол.",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": "CandidateValidationError: Correlated runtime alternatives across several roles are not yet canonicalizable: A2",
+      "file": "turn_029.json"
+    },
+    {
+      "index": 30,
+      "input": "Лампа упала со стола, потому что кот задел стол. Стекло лампы разбилось.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_030.json"
+    },
+    {
+      "index": 31,
+      "input": "Шум разбудил Павла. Он пришёл на чердак.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_031.json"
+    },
+    {
+      "index": 32,
+      "input": "Павел поставил таз под протечку. После того как дождь ослаб, вода капала реже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_032.json"
+    },
+    {
+      "index": 33,
+      "input": "Марина сняла коробку со шкафа. Бумага в письмах намокла, потому что вода просочилась в коробку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_033.json"
+    },
+    {
+      "index": 34,
+      "input": "Марина положила письма возле печи. Бумага коробилась, потому что печь грела слишком сильно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_034.json"
+    },
+    {
+      "index": 35,
+      "input": "Она отодвинула письма от огня. Потом коробление прекратилось.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_035.json"
+    },
+    {
+      "index": 36,
+      "input": "На рассвете дождь прекратился. Марина открыла окно, потому что рама подсохла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "document.monolith.literary",
+      "semantic_tags": [
+        "document",
+        "monolith",
+        "literary",
+        "graph-graded"
+      ],
+      "scenario_id": "house_by_pier_monolith",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_036.json"
+    }
+  ]
+}

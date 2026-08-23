@@ -8,6 +8,8 @@ from ah.agent import InteractionContext
 from ah.core import AHCore
 from ah.core.signatures import hypernode_signature
 from ah.model import ActantRole, Domain, FunctionSymbol, Group, Hypernode, Property, Ref, RefKind, SemanticEntity, Template
+from ah.perception.scoping import apply_speech_act_scoping
+from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception import (
     ActantCandidate,
     AssertionCandidate,
@@ -40,6 +42,7 @@ from .domain_router import DomainRouter
 from .entity_resolver import (
     AmbiguousEntityPlan,
     EntityResolver,
+    EquivalentLiteralPlan,
     ExistingEntity,
     NewEntityPlan,
 )
@@ -56,11 +59,23 @@ _ENTITY_PRONOUNS = {
     "их", "им", "ими",
 }
 
+# Cross-turn discourse anchors deliberately cover only nominative third-person
+# personal pronouns.  These forms are morphologically unambiguous enough to be
+# carried in InteractionContext without inventing a second coreference engine.
+# Oblique/possessive forms remain with the richer local coreference machinery until
+# a role-aware cross-turn ambiguity representation is implemented.
+_NOMINATIVE_PRONOUN_BY_SIGNATURE: dict[tuple[str, str | None], str] = {
+    ("sing", "masc"): "он",
+    ("sing", "femn"): "она",
+    ("sing", "neut"): "оно",
+    ("plur", None): "они",
+}
+
 
 @dataclass(frozen=True, slots=True)
 class _CompositionPlan:
     operator: str
-    members: tuple[Ref | NewEntityPlan | AmbiguousEntityPlan, ...]
+    members: tuple[Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,7 +84,7 @@ class _ReferenceAlternativesPlan:
 
     mention: str
     members: tuple[
-        tuple[str | None, Ref | NewEntityPlan | AmbiguousEntityPlan], ...
+        tuple[str | None, Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan], ...
     ]
 
 
@@ -79,6 +94,7 @@ class IntegrationConfig:
     experience_hypernode_weight: float
     follow_link_weight: float
     cause_link_weight: float = 0.2
+    is_a_link_weight: float = 0.2
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -86,6 +102,7 @@ class IntegrationConfig:
             ("experience_hypernode_weight", self.experience_hypernode_weight),
             ("follow_link_weight", self.follow_link_weight),
             ("cause_link_weight", self.cause_link_weight),
+            ("is_a_link_weight", self.is_a_link_weight),
         ):
             if not 0.0 <= value <= 1.0:
                 raise ValueError(f"{name} must be in [0, 1]")
@@ -97,14 +114,26 @@ class IntegrationConfig:
             experience_hypernode_weight=settings.experience_hypernode_weight,
             follow_link_weight=settings.follow_link_weight,
             cause_link_weight=settings.cause_link_weight,
+            is_a_link_weight=settings.is_a_link_weight,
         )
 
 
 class IntegrationService:
-    def __init__(self, core: AHCore, config: IntegrationConfig) -> None:
+    def __init__(
+        self,
+        core: AHCore,
+        config: IntegrationConfig,
+        *,
+        discourse_morphology: Morphology | None = None,
+    ) -> None:
         self.core = core
         self.config = config
         self.validator = CandidateValidator()
+        # Runtime discourse anchoring uses dictionary morphology only. It does not
+        # create canonical identity or semantic relations. Injection is supported
+        # for deterministic tests; production follows the same auto morphology as
+        # the parser environment.
+        self._discourse_morphology = discourse_morphology or build_morphology("auto")
 
     @staticmethod
     def _predicate_occurrence_key(predicate, source_context: str) -> tuple[object, ...]:
@@ -302,15 +331,25 @@ class IntegrationService:
                 for symbol in symbols
                 for template in self.core.store.find_templates_by_predicate(symbol.uid)
             )
+            required_roles = set(roles)
+            compatible = tuple(
+                template for template in existing
+                if required_roles.issubset(set(template.roles))
+            )
 
             if existing and not self._is_structural_predicate_sense(predicate):
+                # Narrow deterministically by the roles already extracted from the
+                # current act before asking Perception to choose a lexical sense.
+                # A sense that cannot host the explicit roles is not a semantic
+                # candidate for this occurrence.
+                sense_candidates = compatible or existing
                 options = tuple(
                     TemplateSenseOption(
                         label=f"C{index}",
                         template_uid=template.uid,
                         description=self._template_sense_description(template),
                     )
-                    for index, template in enumerate(existing, start=1)
+                    for index, template in enumerate(sense_candidates, start=1)
                 )
                 requests.append(
                     TemplateRequest(
@@ -324,9 +363,31 @@ class IntegrationService:
                 continue
 
             if existing:
-                # Synthetic/implicit predicates are structural machinery, not a
-                # lexical polysemy decision. Their existing T follows the ordinary
-                # role-compatible resolver path.
+                # Structural/implicit predicates are not exempt from semantic
+                # ambiguity. If more than one canonical T can host the already
+                # parsed roles, leaving template_selection empty later makes a
+                # perfectly valid polar query fail with ``template_not_unique`` and
+                # lets the language model answer from ACTIVE MEMORY without proof.
+                # Resolve only that genuinely remaining ambiguity with the same
+                # UID-free bounded sense protocol used for lexical predicates.
+                if len(compatible) > 1:
+                    options = tuple(
+                        TemplateSenseOption(
+                            label=f"C{index}",
+                            template_uid=template.uid,
+                            description=self._template_sense_description(template),
+                        )
+                        for index, template in enumerate(compatible, start=1)
+                    )
+                    requests.append(
+                        TemplateRequest(
+                            predicate,
+                            tuple(roles),
+                            source_context,
+                            tuple(bindings),
+                            options,
+                        )
+                    )
                 continue
             if has_candidate:
                 continue
@@ -384,6 +445,10 @@ class IntegrationService:
         speaker_ref: Ref,
         existing_experience_ref: Ref | None = None,
     ) -> IntegrationCommit:
+        # A proposition mentioned under a QUERY/COMMAND root is semantic content,
+        # not an asserted world fact. Enforce this at the canonical write boundary
+        # even for non-LLM/custom perception services.
+        result = apply_speech_act_scoping(result)
         self.validator.validate(result)
         ordered = self.validator.dependency_order(result)
 
@@ -409,13 +474,51 @@ class IntegrationService:
                 speaker_ref=speaker_ref,
                 addressee_ref=addressee_ref,
             )
+            # Query mentions do not create world facts, but canonical maintenance
+            # may still repair an already-existing literal identity collision. A
+            # NUMBER(5) duplicated across C/P is one value, not a clarification
+            # choice. This pass never creates an unseen literal from a question.
+            literal_resolver = EntityResolver(tx)
+            for semantic_act in (*result.queries, *result.commands):
+                for actant in semantic_act.actants:
+                    if (
+                        actant.candidate_ref is not None
+                        or actant.entity_ref is not None
+                        or actant.composition is not None
+                        or actant.proposition is not None
+                    ):
+                        continue
+                    literal_plan = literal_resolver.resolve(
+                        actant,
+                        context,
+                        first_person_ref=speaker_ref,
+                        second_person_ref=addressee_ref,
+                    )
+                    if isinstance(literal_plan, EquivalentLiteralPlan):
+                        self._materialize_equivalent_literal(tx, literal_plan)
+
             # Predicate/T resolution precedes actant/entity resolution for every
             # semantic act, not only assertions. Query/Command candidates do not
             # create N facts here, but an unknown predicate can still register the
             # validated representational T required by downstream query/behavioral
             # handling.
             for query in result.queries:
-                query_roles = [actant.role for actant in query.actants]
+                selection = query.predicate.template_selection
+                if selection is not None and selection.existing_template_uid is not None:
+                    # Queries may ask for an explicit missing role, but their known
+                    # fillers are not authoritative evidence for expanding an
+                    # existing canonical valency.  TemplateCompletion has already
+                    # reconciled known fillers against the selected T where
+                    # possible; any remaining out-of-schema label must fail closed
+                    # in QueryGoalBuilder rather than permanently mutating T.
+                    selected = tx.store.get_template(selection.existing_template_uid)
+                    selected_roles = set(selected.roles)
+                    query_roles = [
+                        actant.role for actant in query.actants
+                        if actant.role in selected_roles
+                    ]
+                else:
+                    query_roles = [actant.role for actant in query.actants]
                 for requested_role in query.requested_roles:
                     if requested_role not in query_roles:
                         query_roles.append(requested_role)
@@ -649,18 +752,65 @@ class IntegrationService:
                         )
                     )
 
-            # Directional situation relations are materialized only after all local
-            # assertion references exist. L has no semantic_scope field, therefore
-            # a relation touching quoted proposition content must never be emitted
-            # as an ordinary canonical world relation. The quoted proposition N
-            # remains available to its matrix speech-content structure.
-            quoted_assertion_ids = {item.local_id for item in ordered if item.quoted}
-            for relation in result.relations:
-                if relation.source_ref in quoted_assertion_ids or relation.target_ref in quoted_assertion_ids:
+            # Structural L truth is emitted only from ASSERTED, non-quoted content.
+            # EMBEDDED/CONDITIONAL/QUOTED propositions may still be canonicalized as
+            # scoped N for reference, but a relation mentioned inside a question or
+            # command must never become the fact that later proves that same target.
+            assertion_by_id = {item.local_id: item for item in ordered}
+
+            # Intra-act structural relations (currently IS-A) use already resolved
+            # semantic role bindings from the integrated N. Perception supplied only
+            # relation type + endpoint roles; canonical UID resolution stays here.
+            for relation in result.act_relations:
+                candidate = assertion_by_id.get(relation.act_ref)
+                if (
+                    candidate is None
+                    or candidate.quoted
+                    or candidate.status is not AssertionStatus.ASSERTED
+                    or relation.act_ref not in local_refs
+                ):
                     continue
-                # Relations wholly or partly inside another non-asserted branch
-                # must not leak into canonical world knowledge either.
-                if relation.source_ref not in local_refs or relation.target_ref not in local_refs:
+                proposition_ref = local_refs[relation.act_ref]
+                if proposition_ref.kind is not RefKind.N:
+                    continue
+                node = tx.store.get_hypernode(proposition_ref.uid)
+                source = node.actants.get(relation.source_role)
+                target = node.actants.get(relation.target_role)
+                if source is None or target is None:
+                    raise IntegrationError(
+                        f"Missing canonical act-relation endpoint in {relation.act_ref}"
+                    )
+                link, created = tx.ensure_link(
+                    relation.canonical_relation_id,
+                    source,
+                    target,
+                    self.config.is_a_link_weight,
+                )
+                relations.append(
+                    IntegratedRelation(
+                        relation_id=relation.canonical_relation_id,
+                        source=source,
+                        target=target,
+                        ref=tx.ref(link.uid),
+                        created=created,
+                    )
+                )
+
+            # Directional inter-situation relations are likewise world truth only
+            # when both endpoint situations are ordinary asserted facts.
+            for relation in result.relations:
+                source_candidate = assertion_by_id.get(relation.source_ref)
+                target_candidate = assertion_by_id.get(relation.target_ref)
+                if (
+                    source_candidate is None
+                    or target_candidate is None
+                    or source_candidate.quoted
+                    or target_candidate.quoted
+                    or source_candidate.status is not AssertionStatus.ASSERTED
+                    or target_candidate.status is not AssertionStatus.ASSERTED
+                    or relation.source_ref not in local_refs
+                    or relation.target_ref not in local_refs
+                ):
                     continue
                 source = local_refs[relation.source_ref]
                 target = local_refs[relation.target_ref]
@@ -697,6 +847,7 @@ class IntegrationService:
                     speaker_ref=speaker_ref,
                     semantic_refs=semantic_refs,
                     context=context,
+                    speech_act_kinds=self._speech_act_kinds(result),
                 )
                 experience_ref = experience.event_ref
                 seeds.append(ActivationSeedRequest(experience.event_ref, SeedReason.EXPERIENCE))
@@ -760,6 +911,8 @@ class IntegrationService:
                 )
 
         assert experience_ref is not None
+        if forced_domain is None:
+            self._refresh_cross_turn_pronoun_anchors(result, assertions, context)
         context.last_experience_ref = experience_ref
         clarifications = self._clarification_requests(tuple(assertions))
         return IntegrationCommit(
@@ -774,6 +927,124 @@ class IntegrationService:
             relations=tuple(relations),
             conditionals=tuple(conditionals),
         )
+
+    def _discourse_signature(self, text: str | None) -> tuple[str, str | None] | None:
+        """Return a stable number/gender signature for one source nominal.
+
+        The signature is runtime evidence only.  It is used to carry a uniquely
+        compatible antecedent into the next turn for nominative ``он/она/оно/они``.
+        If morphology is ambiguous, no anchor is created.
+        """
+        import re
+
+        words = re.findall(r"[A-Za-zА-Яа-яЁё-]+", text or "")
+        for word in reversed(words):
+            try:
+                analyses = self._discourse_morphology.analyze_all(word)
+            except AttributeError:
+                single = self._discourse_morphology.analyze(word)
+                analyses = () if single is None else (single,)
+            nominal = [
+                item for item in material_analyses(tuple(analyses))
+                if item.pos in {"NOUN", "NPRO"} and item.number
+            ]
+            if not nominal:
+                continue
+            numbers = {item.number for item in nominal if item.number}
+            if len(numbers) != 1:
+                return None
+            number = next(iter(numbers))
+            if number == "plur":
+                return ("plur", None)
+            genders = {item.gender for item in nominal if item.gender}
+            if len(genders) != 1:
+                return None
+            return ("sing", next(iter(genders)))
+        return None
+
+    def _refresh_cross_turn_pronoun_anchors(
+        self,
+        result: PerceptionResult,
+        assertions: tuple[IntegratedAssertion, ...] | list[IntegratedAssertion],
+        context: InteractionContext,
+    ) -> None:
+        """Carry only uniquely grounded third-person nominative antecedents.
+
+        This is conversation-state maintenance, not a canonical write.  Every
+        candidate comes from a source-grounded actant and its already integrated
+        canonical M.  If two different entities in the current turn share the same
+        grammatical signature, that pronoun anchor is removed instead of guessed.
+        """
+        candidates_by_signature: dict[tuple[str, str | None], set[Ref]] = {}
+        assertion_by_id = {item.local_id: item for item in result.assertions}
+
+        for integrated in assertions:
+            if integrated.ref.kind is not RefKind.N:
+                continue
+            candidate = assertion_by_id.get(integrated.local_id)
+            if candidate is None or candidate.quoted:
+                continue
+            try:
+                node = self.core.store.get_hypernode(integrated.ref.uid)
+            except Exception:
+                continue
+            for actant in candidate.actants:
+                # Nominative personal pronouns normally continue a discourse
+                # SUBJECT. Restricting anchors to the same semantic role prevents
+                # a feminine OBJECT/LOCATION in the previous turn from competing
+                # with the actual actor merely because grammatical gender matches.
+                if actant.role is not ActantRole.SUBJECT:
+                    continue
+                ref = node.actants.get(actant.role)
+                if ref is None or ref.kind is not RefKind.M:
+                    continue
+                entity = self.core.store.get_element_any_domain(ref.uid)
+                if not isinstance(entity, SemanticEntity):
+                    continue
+                name_prop = entity.properties.get("name")
+                canonical_name = (
+                    str(name_prop.value).strip() if name_prop is not None else ""
+                )
+                # Never promote an unresolved pronoun-shaped M into a discourse
+                # antecedent. A genuinely resolved pronoun points to the existing
+                # named entity and therefore passes this guard.
+                if canonical_name.casefold() in _ENTITY_PRONOUNS:
+                    continue
+                signature = self._discourse_signature(
+                    actant.mention or actant.normalized_hint
+                )
+                if signature not in _NOMINATIVE_PRONOUN_BY_SIGNATURE:
+                    continue
+                candidates_by_signature.setdefault(signature, set()).add(ref)
+
+        for signature, refs in candidates_by_signature.items():
+            pronoun = _NOMINATIVE_PRONOUN_BY_SIGNATURE[signature]
+            if len(refs) == 1:
+                context.pronoun_refs[pronoun] = next(iter(refs))
+            else:
+                # Multiple equally compatible current-turn candidates make the
+                # pronoun genuinely unresolved. Never keep a stale older anchor.
+                context.pronoun_refs.pop(pronoun, None)
+
+    @staticmethod
+    def _speech_act_kinds(result: PerceptionResult) -> tuple[str, ...]:
+        """Return top-level pragmatic kinds for one H experience event.
+
+        Embedded/quoted proposition content is deliberately excluded.  Its
+        presence under a QUERY/COMMAND root records what was mentioned, not what
+        the user asserted as a world fact.
+        """
+        kinds: list[str] = []
+        if any(
+            item.status is AssertionStatus.ASSERTED and not item.quoted
+            for item in result.assertions
+        ):
+            kinds.append("ASSERTION")
+        if any(not item.quoted for item in result.queries):
+            kinds.append("QUERY")
+        if any(not item.quoted for item in result.commands):
+            kinds.append("COMMAND")
+        return tuple(kinds)
 
     @staticmethod
     def _local_assertion_domain_overrides(
@@ -1212,7 +1483,17 @@ class IntegrationService:
                             value = new if value == old else value
                             if value not in members:
                                 members.append(value)
-                        core.edit_element(domain, replace(element, members=tuple(members)))
+                        if (
+                            element.meta.get("TYPE") == "AMBIGUOUS_REFERENCE"
+                            and len(members) == 1
+                        ):
+                            # The ambiguity disappeared because two supposedly
+                            # different candidates were canonically the same value.
+                            # Collapse the K itself so old pending clarifications do
+                            # not survive as one-option zombie questions.
+                            queue.append((core.ref(element.uid), members[0], True))
+                        else:
+                            core.edit_element(domain, replace(element, members=tuple(members)))
 
             for link in tuple(core.store.links()):
                 if link.source != old and link.target != old:
@@ -1333,6 +1614,97 @@ class IntegrationService:
             ambiguous=any(item.ambiguous for item in members),
         )
 
+    @staticmethod
+    def _literal_properties(plan: NewEntityPlan | EquivalentLiteralPlan) -> dict[str, Property]:
+        return {
+            "name": Property("name", plan.literal_value or getattr(plan, "name", ""), "str"),
+            "literal_kind": Property("literal_kind", plan.literal_kind or "NUMBER", "str"),
+            "literal_value": Property("literal_value", plan.literal_value or getattr(plan, "name", ""), "str"),
+        }
+
+    def _materialize_equivalent_literal(
+        self, core: AHCore, plan: EquivalentLiteralPlan
+    ) -> Ref:
+        """Collapse persisted duplicate literal m nodes into one canonical identity.
+
+        Literals are values, not discourse referents. Two NUMBER(5) nodes cannot
+        represent a user-visible ambiguity. Prefer an existing C node; otherwise
+        create the canonical literal in C, then rewrite every old incidence to it.
+        """
+        live = [ref for ref in plan.candidates if core.store.has_uid(ref.uid)]
+        c_refs = [ref for ref in live if core.store.domain_of(ref.uid) is Domain.C]
+        target = min(c_refs, key=lambda ref: ref.uid) if c_refs else None
+        if target is None:
+            entity = core.add_entity(
+                Domain.C,
+                properties=self._literal_properties(plan),
+                meta={
+                    "semantic_literal": True,
+                    "literal_kind": plan.literal_kind,
+                    "literal_value": plan.literal_value,
+                    "gc_auto_created": True,
+                },
+            )
+            target = core.ref(entity.uid)
+        else:
+            element = core.store.get_element_any_domain(target.uid)
+            if isinstance(element, SemanticEntity):
+                properties = dict(element.properties)
+                properties.update(self._literal_properties(plan))
+                meta = dict(element.meta)
+                meta.update({
+                    "semantic_literal": True,
+                    "literal_kind": plan.literal_kind,
+                    "literal_value": plan.literal_value,
+                })
+                core.edit_element(Domain.C, replace(element, properties=properties, meta=meta))
+
+        final_by_uid: dict[str, Ref] = {}
+        for source in live:
+            if source.uid == target.uid or not core.store.has_uid(source.uid):
+                continue
+            self._replace_reference_usages(
+                core, source, target, delete_source=True, final_by_uid=final_by_uid
+            )
+        return target
+
+    def _materialize_entity_plan(
+        self,
+        core: AHCore,
+        plan: Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan,
+        default_domain: Domain,
+    ) -> tuple[Ref, bool]:
+        if isinstance(plan, Ref):
+            return plan, False
+        if isinstance(plan, EquivalentLiteralPlan):
+            return self._materialize_equivalent_literal(core, plan), False
+        if isinstance(plan, NewEntityPlan):
+            domain = Domain.C if plan.literal_kind is not None else default_domain
+            properties = (
+                self._literal_properties(plan)
+                if plan.literal_kind is not None
+                else {"name": Property("name", plan.name, "str")}
+            )
+            meta = {"gc_auto_created": True}
+            if plan.literal_kind is not None:
+                meta.update({
+                    "semantic_literal": True,
+                    "literal_kind": plan.literal_kind,
+                    "literal_value": plan.literal_value,
+                })
+            entity = core.add_entity(domain, properties=properties, meta=meta)
+            return core.ref(entity.uid), False
+        group = core.add_group(
+            default_domain,
+            plan.candidates,
+            meta={
+                "TYPE": "AMBIGUOUS_REFERENCE",
+                "mention": plan.mention,
+                "gc_auto_created": True,
+            },
+        )
+        return core.ref(group.uid), True
+
     def _integrate_assertion(
         self,
         core: AHCore,
@@ -1441,14 +1813,14 @@ class IntegrationService:
 
         staged: dict[
             ActantRole,
-            Ref | NewEntityPlan | AmbiguousEntityPlan | _CompositionPlan | _ReferenceAlternativesPlan,
+            Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan | _CompositionPlan | _ReferenceAlternativesPlan,
         ] = {}
         staged_corefs: dict[ActantRole, str] = {}
         existing_refs: list[Ref] = []
         for actant in effective_actants:
             if actant.role in alternative_role_options:
                 option_members: list[
-                    tuple[str | None, Ref | NewEntityPlan | AmbiguousEntityPlan]
+                    tuple[str | None, Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan]
                 ] = []
                 for option in alternative_role_options[actant.role]:
                     if option.candidate_ref is not None or option.composition is not None:
@@ -1456,7 +1828,7 @@ class IntegrationService:
                             f"Runtime alternatives may vary only canonical entity reference in {candidate.local_id}"
                         )
                     if option.entity_ref is not None and option.entity_ref in entity_local_refs:
-                        plan: Ref | NewEntityPlan | AmbiguousEntityPlan = entity_local_refs[option.entity_ref]
+                        plan: Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan = entity_local_refs[option.entity_ref]
                     else:
                         resolution_candidate = (
                             entity_anchors.get(option.entity_ref, option)
@@ -1528,7 +1900,7 @@ class IntegrationService:
                 staged_corefs[actant.role] = actant.entity_ref
 
             if actant.composition is not None:
-                member_plans: list[Ref | NewEntityPlan | AmbiguousEntityPlan] = []
+                member_plans: list[Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan] = []
                 for member in actant.composition.members:
                     member_candidate = ActantCandidate(
                         role=actant.role,
@@ -1599,27 +1971,10 @@ class IntegrationService:
                 actants[role] = prior
                 continue
 
-            if isinstance(item, Ref):
-                actants[role] = item
-            elif isinstance(item, NewEntityPlan):
-                entity = core.add_entity(
-                    domain,
-                    properties={"name": Property("name", item.name, "str")},
-                    meta={"gc_auto_created": True},
-                )
-                actants[role] = core.ref(entity.uid)
-            elif isinstance(item, AmbiguousEntityPlan):
-                group = core.add_group(
-                    domain,
-                    item.candidates,
-                    meta={
-                        "TYPE": "AMBIGUOUS_REFERENCE",
-                        "mention": item.mention,
-                        "gc_auto_created": True,
-                    },
-                )
-                actants[role] = core.ref(group.uid)
-                ambiguous = True
+            if isinstance(item, (Ref, NewEntityPlan, EquivalentLiteralPlan, AmbiguousEntityPlan)):
+                ref, item_ambiguous = self._materialize_entity_plan(core, item, domain)
+                actants[role] = ref
+                ambiguous = ambiguous or item_ambiguous
             elif isinstance(item, _ReferenceAlternativesPlan):
                 member_refs: list[Ref] = []
                 for member_coref_id, member in item.members:
@@ -1632,24 +1987,9 @@ class IntegrationService:
                         ref = prior
                     elif isinstance(member, Ref):
                         ref = member
-                    elif isinstance(member, NewEntityPlan):
-                        entity = core.add_entity(
-                            domain,
-                            properties={"name": Property("name", member.name, "str")},
-                            meta={"gc_auto_created": True},
-                        )
-                        ref = core.ref(entity.uid)
-                    elif isinstance(member, AmbiguousEntityPlan):
-                        group = core.add_group(
-                            domain,
-                            member.candidates,
-                            meta={
-                                "TYPE": "AMBIGUOUS_REFERENCE",
-                                "mention": member.mention,
-                                "gc_auto_created": True,
-                            },
-                        )
-                        ref = core.ref(group.uid)
+                    elif isinstance(member, (NewEntityPlan, EquivalentLiteralPlan, AmbiguousEntityPlan)):
+                        ref, member_ambiguous = self._materialize_entity_plan(core, member, domain)
+                        ambiguous = ambiguous or member_ambiguous
                     else:
                         raise AssertionError(f"Unhandled alternative member: {member!r}")
                     if member_coref_id is not None:
@@ -1684,25 +2024,10 @@ class IntegrationService:
                 for member in item.members:
                     if isinstance(member, Ref):
                         member_refs.append(member)
-                    elif isinstance(member, NewEntityPlan):
-                        entity = core.add_entity(
-                            domain,
-                            properties={"name": Property("name", member.name, "str")},
-                            meta={"gc_auto_created": True},
-                        )
-                        member_refs.append(core.ref(entity.uid))
-                    elif isinstance(member, AmbiguousEntityPlan):
-                        group = core.add_group(
-                            domain,
-                            member.candidates,
-                            meta={
-                                "TYPE": "AMBIGUOUS_REFERENCE",
-                                "mention": member.mention,
-                                "gc_auto_created": True,
-                            },
-                        )
-                        member_refs.append(core.ref(group.uid))
-                        ambiguous = True
+                    elif isinstance(member, (NewEntityPlan, EquivalentLiteralPlan, AmbiguousEntityPlan)):
+                        ref, member_ambiguous = self._materialize_entity_plan(core, member, domain)
+                        member_refs.append(ref)
+                        ambiguous = ambiguous or member_ambiguous
                     else:
                         raise AssertionError(f"Unhandled composition member: {member!r}")
                 function, _created = core.ensure_function(domain, item.operator, tuple(member_refs))

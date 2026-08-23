@@ -1,6 +1,112 @@
-# AH Agent MVP — v0.12.60
+# AH Agent MVP — v0.12.87
 
 Накопительный исполняемый проект АГ-памяти для текстового LLM-агента.
+
+
+## v0.12.87 — event normalization + third literary monolith
+
+После первого литературного document-run добавлен отдельный deterministic `EventNormalizer` между разобранным linguistic frame graph и canonical Integration. Он восстанавливает independently asserted gerund events, консервативный `FOLLOW` для безопасной временной последовательности, result-state из пассивных полных причастий и runtime-only `CAUSAL_CANDIDATE`/temporal hints. Narrative adjacency сама по себе не становится `CAUSE`; `relation_hints` валидируются, но Integration их не материализует.
+
+Исправлен общий дефект correlated pronoun alternatives: все потенциальные antecedent source mentions получают стабильные turn-local `entity_ref` до ветвления, поэтому альтернативы отличаются только anaphoric role binding, а не случайными мутациями других ролей. После EventNormalizer повторно запускается exact-source-span identity binding, чтобы вновь созданный result-state и исходный факт ссылались на одну сущность.
+
+Document graph oracle получил `forbidden_facts` и scoped matching (`ASSERTED` против `EMBEDDED/QUOTED/...`), а итоговый отчёт теперь отдельно показывает event extraction, temporal graph, causal graph и negative constraints.
+
+Добавлен третий литературный монолит `old_observatory_monolith`: 34 предложения / 17 bounded ingestion windows, написанный вручную как связная проза с деепричастиями, причастиями, прямой речью, двумя персонажами, subjective-content эпизодом и естественной событийной последовательностью. Oracle написан вручную: 40 фактов, 16 FOLLOW, 3 forbidden CAUSE, 2 forbidden asserted-world facts, 4 будущих M2 paths. `Document acceptance` теперь прогоняет шесть документов за один запуск.
+
+Подробности: `docs/SLICE_12_87.md`. Regression: `519 passed, 22 subtests passed`.
+
+
+## v0.12.86 — public-domain literary monolith (Belyaev)
+
+Document acceptance adds a second real literary monolith: an unadapted public-domain excerpt from A. R. Belyaev's 1928 novel `Человек-амфибия`, chapter `Покинутая «Медуза»`. Unlike the hand-authored `house_by_pier_monolith`, this source was not written around parser-friendly causal connectives. It contains combat, pronoun continuity, embedded thought, dialogue, implicit motivation and causal transitions expressed through narrative rather than repeated `потому что`.
+
+The source stays one continuous file and is ingested as one document scenario. Because literary dialogue exposes boundaries not covered by the previous sentence splitter, monolith ingestion now also recognizes a new dialogue turn after terminal punctuation plus an em dash when the next token begins a new utterance; author-attribution continuations with a lowercase token remain inside the same sentence. This is an ingestion-only rule and does not inspect AH, oracle labels or semantics.
+
+The hand-written final oracle checks 25 canonical events, cross-sentence identity (`Педро`/`Зурита`, crew references and pronouns), seven typed CAUSE/FOLLOW expectations, three forbidden causal edges and three predeclared M2 questions. A two-edge implicit physical CAUSE chain (`матрос схватил → Зурита ударил → матрос упал`) is intentionally required without an explicit causal connective.
+
+Regression: `511 passed, 22 subtests passed`.
+
+## v0.12.85 — literary monolith document acceptance
+
+Document acceptance now also accepts a source file as one continuous monolithic text. The source is deterministically split only at explicit sentence boundaries into bounded perception windows; the source itself is not pre-summarized or semantically rewritten, and one scenario keeps AH/InteractionContext/Ignition continuous across every window. The exact ingest plan is saved as `document_ingest_plan.json`.
+
+A new hand-written literary scenario, `house_by_pier_monolith`, contains 30 connected sentences in one paragraph and a manually authored final graph oracle. It checks cross-window entity identity, CAUSE/FOLLOW structure, forbidden causal edges, and a six-edge CAUSE path reserved for M2. See `docs/SLICE_12_85.md`.
+
+## v0.12.84 — document reliability fixes
+
+Разбор первого ручного document acceptance (15/21 paragraph PASS, 0 runtime errors) выявил четыре общих класса ошибок. Исправления сделаны как архитектурные механизмы, без словарей под конкретные тексты:
+
+- подавление ложного non-finite predicate head, когда GRND/INFN-гомограф одновременно является согласованным номинативным участником следующего сильного finite predicate без границы/координатора;
+- deterministic SUBJECT для единственного согласованного номинатива активного intransitive finite frame (совместное ограничение валентности+согласования, не общий NOM→SUBJECT shortcut);
+- cross-turn discourse anchoring для `он/она/оно/они` через уникальный same-role SUBJECT предыдущего внешнего turn; при нескольких совместимых кандидатах anchor удаляется, а не угадывается;
+- role-conditioned lexical normalization bare SUBJECT/OBJECT: уже установленная семантическая роль может выбрать редкое, но грамматически совместимое NOM/ACC чтение вместо top-score homograph;
+- уточнено различие OBJECT vs RECIPIENT для адресата речи/телефона/сообщений в bounded role cue.
+
+Regression: `507 passed, 22 subtests passed`.
+
+## v0.12.83 — manual document-level acceptance
+
+Добавлен второй acceptance-слой для связных текстов. Он намеренно не использует генератор синтетических сценариев: корпус состоит из трёх вручную написанных многоабзацных документов (`data/document_acceptance/texts/`) и отдельного hand-authored oracle (`data/document_acceptance/oracle.json`).
+
+Каждый документ прогоняется как один scenario: между его абзацами сохраняются AH, InteractionContext и Ignition state, а между разными документами runner возвращается к исходному baseline. Абзац является только технической границей одного perception-вызова; причинная цепь проверяется уже на итоговом canonical graph и обязана сшиваться через повторное использование тех же N/M между абзацами.
+
+Текущий набор:
+
+- `cooling_station` — CAUSE-цепь глубины 6 + независимые наблюдения/distractors;
+- `greenhouse_control` — CAUSE-цепь глубины 6 + cross-paragraph coreference (`Она` → `Анна`) + distractors;
+- `archive_leak` — CAUSE-цепь глубины 5, затем два FOLLOW шага; это заранее подготовленный mixed proof path для следующего этапа M2.
+
+Для каждого абзаца используется тот же строгий semantic oracle, что и в broad-200: exact assertions/roles/relations, canonical integration и отсутствие лишних query outcomes. После последнего абзаца дополнительный graph oracle проверяет ключевые canonical N, направление CAUSE/FOLLOW, длину причинной цепочки и явно запрещённые ложные causal edges. В oracle также сохранены typed `m2_questions` с ожидаемыми путями; v0.12.83 их пока не исполняет — они предназначены для следующего этапа M2, чтобы inference тестировался на графе, реально построенном из текста.
+
+В GUI добавлена кнопка `Document acceptance`. Результаты пишутся в `data/document_acceptance_runs/<timestamp>/`, включая обычные turn diagnostics, `document_report.json`, `document_summary.txt` и сопоставление oracle fact IDs с фактическими canonical UID. Живое состояние пользователя после диагностики восстанавливается, как и в обычном acceptance.
+
+Regression: `501 passed, 22 subtests passed`.
+
+## v0.12.82 — bare-PP ambiguity boundary
+
+Live LM Studio acceptance on v0.12.81 reached `Runtime OK 200/200`, `Semantic PASS 198/200`. Both remaining FAILs were the same grammatical class: a larger adverbially headed relational modifier containing an internal instrumental PP (for example, `ADVB + PREP + instrumental`) was incorrectly promoted to the hard postnominal-PP ambiguity path.
+
+The structural rule is narrowed generically:
+
+- hard clarification from instrumental morphology is allowed only for a **bare postnominal PP** whose selected modifier span itself starts with `PREP`;
+- if the instrumental PP is embedded inside a larger lexically headed modifier, instrumental case alone is not sufficient evidence that the whole modifier can attach to the adjacent nominal;
+- such larger modifiers return to the existing bounded `EVENT / NOMINAL_n / UNCLEAR` attachment decision;
+- genuine bare cases such as `NP + с + instrumental` retain the deterministic clarification path; no predicate/noun/fixed-sentence dictionary was added.
+
+A lexical-independent regression fixture uses a different predicate and nouns and verifies that `ADVB + PREP + instrumental` is not blanket-classified as ambiguity, while the existing bare instrumental ambiguity test remains unchanged.
+
+Full regression suite: `496 passed, 22 subtests passed`.
+
+## v0.12.81 — semantic-boundary reliability before M2
+
+Этот срез закрывает системные причины 31 FAIL из live acceptance `20260822_211650`, не добавляя словарных правил под отдельные предложения:
+
+- `EMBEDDED`-факт сам по себе больше не становится inference goal: goal compiler строит цели только от явных `QUERY/COMMAND` roots; это отделяет внутреннее содержание утверждения от пользовательского запроса и убирает ложные `query_outcomes`;
+- coreference сохраняет все грамматические чтения закрытого класса местоимений и учитывает синкретизм косвенных форм третьего лица до same-role/discourse resolution;
+- неоднозначное post-nominal PP с инструментальным дополнением определяется по морфосинтаксису как структурная attachment ambiguity и требует clarification вместо LLM-vote по правдоподобию; directional/non-instrumental PP не попадают под это правило автоматически;
+- `NUMR + nominal` после semantic role resolution нормализуется в counted participant + `AMOUNT`; уже распознанный `DURATION` остаётся единым временным значением;
+- известный query filler, ошибочно размеченный ролью вне выбранного T, повторно решается только среди свободных UID-free ролей уже выбранного шаблона; query-side filler не может молча расширить canonical T неверной ролью;
+- noun-headed `NOMINAL_PREDICATION` больше не отправляется в общий binary `IS-A` classifier по паре SUBJECT/OBJECT, поэтому complement отношения имени/названия/свойства не превращается в ложную taxonomy link;
+- nominal label projection prompt усилен явным контрастом `name/title/label of Y` против прочих nominal relations, оставаясь одним локальным `YES/NO/UNCLEAR` semantic probe.
+
+Новые regression-тесты проверяют свойства на других лексемах и конструкциях, а не на acceptance-фразах. Полный suite: `495 passed, 22 subtests passed`.
+
+
+## v0.12.78 — LM Studio server backend
+
+Этот срез добавляет третий LLM transport без изменения AH Core / Perception / Agent contracts:
+
+- `llm.backend = "lmstudio"` подключается к локальному LM Studio server (по умолчанию `http://127.0.0.1:1234`);
+- модель остаётся загруженной и управляется самим LM Studio, AH runtime не создаёт второй process и не трогает VRAM/offload policy;
+- discovery идёт через `/api/v1/models`, inference — через stateless OpenAI-compatible `/v1/chat/completions`;
+- каждый запрос явно содержит только `system + current user payload`, `history_messages=0`, `stream=false`;
+- если `lmstudio_model` пуст/`auto`, backend выбирает единственную загруженную LLM; при нескольких загруженных моделях fail-closed требует exact model key;
+- `temperature/top_p/top_k/repetition_penalty/max_new_tokens` прокидываются в LM Studio request;
+- machine-protocol роли дополнительно очищаются от Qwen-style `<think>...</think>`;
+- добавлены `config/lmstudio.toml` и `run_gui_lmstudio.bat`;
+- backend сохраняет существующие runtime diagnostics, request trace и единый shared-model contract для Perception + Agent.
+
+Быстрый запуск: включить Local Server в LM Studio, загрузить нужную модель и запустить `run_gui_lmstudio.bat`. Если в LM Studio загружено несколько LLM, вписать точный model key в `config/lmstudio.toml -> llm.lmstudio_model`.
 
 `docs/reference/Архитектура_v3.md` — архитектурный источник для реализации. Код строится так, чтобы каноническая память, runtime-динамика, inference и LLM boundary оставались отдельными слоями.
 

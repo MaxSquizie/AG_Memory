@@ -211,11 +211,17 @@ class RuntimeServices:
         else:
             if self.llm is None:
                 self.llm = build_llm_backend(new_config)
-            elif type(self.llm).__name__ != ("OllamaBackend" if new_config.llm.backend == "ollama" else "LocalLLMProcessBackend"):
-                self.llm.stop()
-                self.llm = build_llm_backend(new_config)
             else:
-                self.llm.config = new_config
+                expected_backend_type = {
+                    "builtin_process": "LocalLLMProcessBackend",
+                    "ollama": "OllamaBackend",
+                    "lmstudio": "LMStudioBackend",
+                }[new_config.llm.backend]
+                if type(self.llm).__name__ != expected_backend_type:
+                    self.llm.stop()
+                    self.llm = build_llm_backend(new_config)
+                else:
+                    self.llm.config = new_config
             self.perception = LLMPerceptionService(
                 self.llm,
                 LLMPerceptionSettings(

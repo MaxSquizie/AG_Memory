@@ -1,0 +1,3964 @@
+{
+  "K_00f9abd08a554e28b558f5ac59ace9b6": {
+    "uid": "K_00f9abd08a554e28b558f5ac59ace9b6",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_9f50c7ece78d40bf966759817917828b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e7fe1076c42940478922bfa1bd9db427",
+        "kind": "N"
+      },
+      {
+        "uid": "N_145e7ac9496d4349ae1d62bf498d6975",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_0265dd22e8104f93aa7895f6b55bcb8e": {
+    "uid": "K_0265dd22e8104f93aa7895f6b55bcb8e",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_0af2f17041ba41e0af881e476d496eea": {
+    "uid": "K_0af2f17041ba41e0af881e476d496eea",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_832a841863eb4b168b960f391862c4b3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0e56e6f81f484e579877dada120bde2c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5b9723466f974091beb2e2d3cf5b4e63",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_1e54a5c7f33e4089b84235c19cd38d22": {
+    "uid": "K_1e54a5c7f33e4089b84235c19cd38d22",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c072402265314d46b30e6c437d2f90e6",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_2309461859e24c7aa9b517aa12ed4e59": {
+    "uid": "K_2309461859e24c7aa9b517aa12ed4e59",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_dac19d4aeda049cbab93e87395e7bc40",
+        "kind": "N"
+      },
+      {
+        "uid": "N_81e4c0b9a8e44734819587c1ae1998cc",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_700f56a239d944da92c9a74425a0cddf": {
+    "uid": "K_700f56a239d944da92c9a74425a0cddf",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_700617f16aba4620b8d9fa6557fdf230",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9ab3043677ac49479f94c9a6956f9cb4",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_7e1835f156ac45aaaefc27b63378c155": {
+    "uid": "K_7e1835f156ac45aaaefc27b63378c155",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_cf8e7ff02fe244cd830ddbd4b9c405ed",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e6f0c2ae8c9046a2aa8e65f9f842d025",
+        "kind": "N"
+      },
+      {
+        "uid": "N_05ce93ba66b54ca0bff83cd6ce9660ae",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_a33741c5f287429f99fec4888f93ad6a": {
+    "uid": "K_a33741c5f287429f99fec4888f93ad6a",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_121d8d85f30048829bb6897e1dd43983",
+        "kind": "N"
+      },
+      {
+        "uid": "N_fbf3f557670e4a35aa5f0b57fcaef56d",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_a39caa9dd74347708aea1ee575a389b0": {
+    "uid": "K_a39caa9dd74347708aea1ee575a389b0",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9d2867eba86b4eeb874f8cffada8d8ff",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_aa2cb09a8f374091adb444e8114246a4": {
+    "uid": "K_aa2cb09a8f374091adb444e8114246a4",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_dd5dec0375ed4352bb4699a88d512598",
+        "kind": "N"
+      },
+      {
+        "uid": "N_846fb7da5ed64304afdb3d1f30e7c0c1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_92afe5d2492140f18fe33d7dcfc0da18",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_ade74ef6158d493d8bc27f1b432d77ad": {
+    "uid": "K_ade74ef6158d493d8bc27f1b432d77ad",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_4a033f9d945045bc969690593fa8a621",
+        "kind": "N"
+      },
+      {
+        "uid": "N_848ae97876e240f4a95c12f7a21f7a7b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c64288e2055c46bdbb42d5128238710b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ab24e557a8fa4b3f9b71339e1da073f1",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_dbcfc9a1718f4c838474d6e2d4b4f68b": {
+    "uid": "K_dbcfc9a1718f4c838474d6e2d4b4f68b",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_6ace82e521874f999b432de5fbc20cb1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d24138cd4e314c55bf000701a85de95d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_7f86f4c99e6f48b8a0d03f005915944d",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_f239244a65264d87b454fd1da6cb5d6b": {
+    "uid": "K_f239244a65264d87b454fd1da6cb5d6b",
+    "kind": "K",
+    "domain": "C",
+    "members": [
+      {
+        "uid": "M_2a96b230c8bb410583ba4b8fffb20008",
+        "kind": "M"
+      },
+      {
+        "uid": "M_21c990eace3f459382d1e04aa5e40f5a",
+        "kind": "M"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "TYPE": "AMBIGUOUS_REFERENCE",
+      "mention": "Он",
+      "gc_auto_created": true
+    }
+  },
+  "K_f906b304b2b5451e985b35d090ca7b20": {
+    "uid": "K_f906b304b2b5451e985b35d090ca7b20",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+        "kind": "N"
+      },
+      {
+        "uid": "N_910a0429a0ee4cd5b98381fde3b84149",
+        "kind": "N"
+      },
+      {
+        "uid": "N_056e65db15364396b571c8cd08c4db04",
+        "kind": "N"
+      },
+      {
+        "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_fde7b41fd89140cfb1d1919851457ed9": {
+    "uid": "K_fde7b41fd89140cfb1d1919851457ed9",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_d029a71a15774a80acd9b2b55a588145",
+        "kind": "N"
+      },
+      {
+        "uid": "N_51cdea3e505642de86f23f8a7b22b671",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d11ab1f6ddc94f60b97ca86f89c15eaa",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d029a71a15774a80acd9b2b55a588145",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "L_177931e0ee5c4cc7900a20eee0031658": {
+    "uid": "L_177931e0ee5c4cc7900a20eee0031658",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_0e56e6f81f484e579877dada120bde2c",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_832a841863eb4b168b960f391862c4b3",
+      "kind": "N"
+    }
+  },
+  "L_17bd099052c845de88f49c30587f14ea": {
+    "uid": "L_17bd099052c845de88f49c30587f14ea",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22200000000000003,
+    "source": {
+      "uid": "N_910a0429a0ee4cd5b98381fde3b84149",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+      "kind": "N"
+    }
+  },
+  "L_22dc9515917b47a7aa277b3dfc4251cd": {
+    "uid": "L_22dc9515917b47a7aa277b3dfc4251cd",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_89bce352b192475ca7e82923cd69a5b8",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_af723702b4d342a086d4488d8d18a686",
+      "kind": "N"
+    }
+  },
+  "L_2940dd27f6d94b0fbad1117ff6342695": {
+    "uid": "L_2940dd27f6d94b0fbad1117ff6342695",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_d24138cd4e314c55bf000701a85de95d",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_6ace82e521874f999b432de5fbc20cb1",
+      "kind": "N"
+    }
+  },
+  "L_328ed7a6aaef41698577765ae177523d": {
+    "uid": "L_328ed7a6aaef41698577765ae177523d",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.25200000000000006,
+    "source": {
+      "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_056e65db15364396b571c8cd08c4db04",
+      "kind": "N"
+    }
+  },
+  "L_352f65c0838c458d9089e2a32b5ede78": {
+    "uid": "L_352f65c0838c458d9089e2a32b5ede78",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_8da74d9154024de5bd0aa96c9e6dd248",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_728675cd8c8c4b88b848cb2c65a06f7d",
+      "kind": "N"
+    }
+  },
+  "L_47aee3346f7b425e9c10851e7d52b393": {
+    "uid": "L_47aee3346f7b425e9c10851e7d52b393",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.25400000000000006,
+    "source": {
+      "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+      "kind": "N"
+    }
+  },
+  "L_5bbfaecf69bd428b87c4cb52186a3c12": {
+    "uid": "L_5bbfaecf69bd428b87c4cb52186a3c12",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_ededdfb21af341e8aec46ce40d513523",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_b1e53abf13074f1082d4dd5b7c888aef",
+      "kind": "N"
+    }
+  },
+  "L_5e190543fedc442284c2e8a4935e45cd": {
+    "uid": "L_5e190543fedc442284c2e8a4935e45cd",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_05ce93ba66b54ca0bff83cd6ce9660ae",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_e6f0c2ae8c9046a2aa8e65f9f842d025",
+      "kind": "N"
+    }
+  },
+  "L_5eee5d9717b742c79cae4e9d3facc38f": {
+    "uid": "L_5eee5d9717b742c79cae4e9d3facc38f",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.25200000000000006,
+    "source": {
+      "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+      "kind": "N"
+    }
+  },
+  "L_6abac8c2e6f9491a81eeb174f24bbecb": {
+    "uid": "L_6abac8c2e6f9491a81eeb174f24bbecb",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_fa99f84be29f44f4b11f7af291cd7b80",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_62b259aa21ac44d0ac27eb21ed4580fb",
+      "kind": "N"
+    }
+  },
+  "L_6ecc8221ce184c17b1f7b64e09e42111": {
+    "uid": "L_6ecc8221ce184c17b1f7b64e09e42111",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_cfe561aa1d06481799eba7784f749a4f",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_859aa66412d048588423fbc9af527b0e",
+      "kind": "N"
+    }
+  },
+  "L_705435dfb289430eb9295573f37eb47d": {
+    "uid": "L_705435dfb289430eb9295573f37eb47d",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22800000000000004,
+    "source": {
+      "uid": "N_145e7ac9496d4349ae1d62bf498d6975",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_e7fe1076c42940478922bfa1bd9db427",
+      "kind": "N"
+    }
+  },
+  "L_72d79794af0f4eb1ab11f2fac6137855": {
+    "uid": "L_72d79794af0f4eb1ab11f2fac6137855",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_62b259aa21ac44d0ac27eb21ed4580fb",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_cfe561aa1d06481799eba7784f749a4f",
+      "kind": "N"
+    }
+  },
+  "L_7c8187d182b94c918892bd33cdc0c286": {
+    "uid": "L_7c8187d182b94c918892bd33cdc0c286",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_f8b5c53becbe4a4fa24296756b3570ca",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_ae3ad9717e564bccbabd23fef561463c",
+      "kind": "N"
+    }
+  },
+  "L_7e2a7c00769d4ee0ad9efd2b7ecf13a4": {
+    "uid": "L_7e2a7c00769d4ee0ad9efd2b7ecf13a4",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_3c68e2fe158742d2a5a585ec053099f1",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_8da74d9154024de5bd0aa96c9e6dd248",
+      "kind": "N"
+    }
+  },
+  "L_83792f29bee343ed9ae29416d10573b9": {
+    "uid": "L_83792f29bee343ed9ae29416d10573b9",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_859aa66412d048588423fbc9af527b0e",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_325418c64eed430d969bd3a98c01916f",
+      "kind": "N"
+    }
+  },
+  "L_8b58bc84e3b24c4db066c7aa366335e9": {
+    "uid": "L_8b58bc84e3b24c4db066c7aa366335e9",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22400000000000003,
+    "source": {
+      "uid": "N_9d2867eba86b4eeb874f8cffada8d8ff",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+      "kind": "N"
+    }
+  },
+  "L_92b65e659cc14ebd91f7adb3437ee302": {
+    "uid": "L_92b65e659cc14ebd91f7adb3437ee302",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.23900000000000005,
+    "source": {
+      "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+      "kind": "N"
+    }
+  },
+  "L_93e0d448843e45e3bb37a784d29054fc": {
+    "uid": "L_93e0d448843e45e3bb37a784d29054fc",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_b1e53abf13074f1082d4dd5b7c888aef",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_8f9b50a6fed04f72af14da493970525e",
+      "kind": "N"
+    }
+  },
+  "L_a6cca55c06a1405dbfe98046b2621384": {
+    "uid": "L_a6cca55c06a1405dbfe98046b2621384",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_ab24e557a8fa4b3f9b71339e1da073f1",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_848ae97876e240f4a95c12f7a21f7a7b",
+      "kind": "N"
+    }
+  },
+  "L_b867723b44284c2f99d8097bbae97f94": {
+    "uid": "L_b867723b44284c2f99d8097bbae97f94",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21300000000000002,
+    "source": {
+      "uid": "N_ae3ad9717e564bccbabd23fef561463c",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_89bce352b192475ca7e82923cd69a5b8",
+      "kind": "N"
+    }
+  },
+  "L_bc49dd3e76f54127ac40f125c90831f9": {
+    "uid": "L_bc49dd3e76f54127ac40f125c90831f9",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_51cdea3e505642de86f23f8a7b22b671",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_d029a71a15774a80acd9b2b55a588145",
+      "kind": "N"
+    }
+  },
+  "L_bdbe139536d34de2b121ad1293dec2c7": {
+    "uid": "L_bdbe139536d34de2b121ad1293dec2c7",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_728675cd8c8c4b88b848cb2c65a06f7d",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_ededdfb21af341e8aec46ce40d513523",
+      "kind": "N"
+    }
+  },
+  "L_c6c61784f81844d1856afcb5c86d3e5a": {
+    "uid": "L_c6c61784f81844d1856afcb5c86d3e5a",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_8f9b50a6fed04f72af14da493970525e",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_f8b5c53becbe4a4fa24296756b3570ca",
+      "kind": "N"
+    }
+  },
+  "L_c771704dca674252a8cd192d109c0368": {
+    "uid": "L_c771704dca674252a8cd192d109c0368",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_846fb7da5ed64304afdb3d1f30e7c0c1",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_dd5dec0375ed4352bb4699a88d512598",
+      "kind": "N"
+    }
+  },
+  "L_d3977fbfba9c47cf927cc75895059a22": {
+    "uid": "L_d3977fbfba9c47cf927cc75895059a22",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22400000000000003,
+    "source": {
+      "uid": "N_121d8d85f30048829bb6897e1dd43983",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_fbf3f557670e4a35aa5f0b57fcaef56d",
+      "kind": "N"
+    }
+  },
+  "L_e8f0ebc831ee46179635bddb90f24c1c": {
+    "uid": "L_e8f0ebc831ee46179635bddb90f24c1c",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_af723702b4d342a086d4488d8d18a686",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_fa99f84be29f44f4b11f7af291cd7b80",
+      "kind": "N"
+    }
+  },
+  "L_ea0e767ca056439a946afb66ba60c10f": {
+    "uid": "L_ea0e767ca056439a946afb66ba60c10f",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "CAUSE",
+    "weight": 0.25600000000000006,
+    "source": {
+      "uid": "N_d029a71a15774a80acd9b2b55a588145",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_d11ab1f6ddc94f60b97ca86f89c15eaa",
+      "kind": "N"
+    }
+  },
+  "M_017eef0882474c8b81080e68f5300450": {
+    "uid": "M_017eef0882474c8b81080e68f5300450",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Рама",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_0773d99a2f074309b29e8eeb7f0083a2": {
+    "uid": "M_0773d99a2f074309b29e8eeb7f0083a2",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "печь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+    "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Пользователь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "USER"
+    }
+  },
+  "M_13e266df7d774e43a110e86c94b2c60b": {
+    "uid": "M_13e266df7d774e43a110e86c94b2c60b",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Окно",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_182c737c9bff4396afe9ebfabab826f5": {
+    "uid": "M_182c737c9bff4396afe9ebfabab826f5",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "потолок",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_18b24fe3f63c4c41911ede1578843e3a": {
+    "uid": "M_18b24fe3f63c4c41911ede1578843e3a",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "чердак",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_18dead80db3e452ebb5da9b76542790e": {
+    "uid": "M_18dead80db3e452ebb5da9b76542790e",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "пятно",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_1ba7b540a0ac4ab1b8ab41ecf1a564b1": {
+    "uid": "M_1ba7b540a0ac4ab1b8ab41ecf1a564b1",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "письмо",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf": {
+    "uid": "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Жёлоб",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_2111ef5f962f47808cddc1236a814bce": {
+    "uid": "M_2111ef5f962f47808cddc1236a814bce",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Кусок",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_21c990eace3f459382d1e04aa5e40f5a": {
+    "uid": "M_21c990eace3f459382d1e04aa5e40f5a",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Павел",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_225677183fd64d9e83db08cf2898633b": {
+    "uid": "M_225677183fd64d9e83db08cf2898633b",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "дождь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_26af73897a204105b6e5dc01bcfe322d": {
+    "uid": "M_26af73897a204105b6e5dc01bcfe322d",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "слишком",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_295aa7e583804db0b982ad826d5cb88b": {
+    "uid": "M_295aa7e583804db0b982ad826d5cb88b",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "кот",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_2a96b230c8bb410583ba4b8fffb20008": {
+    "uid": "M_2a96b230c8bb410583ba4b8fffb20008",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Шум",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_37150d58712843a4b23da735d23c7ac0": {
+    "uid": "M_37150d58712843a4b23da735d23c7ac0",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Балка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_3852f5566ba744ca9aed2aae3d824a0e": {
+    "uid": "M_3852f5566ba744ca9aed2aae3d824a0e",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "рассвет",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_3af204f19be84c23ac21bc845838d58d": {
+    "uid": "M_3af204f19be84c23ac21bc845838d58d",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "огонь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_4b11f1554071454992998d9eb3995078": {
+    "uid": "M_4b11f1554071454992998d9eb3995078",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "стол",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_4f13750759294e1ba24c46453b61d578": {
+    "uid": "M_4f13750759294e1ba24c46453b61d578",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Марина",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_544e88a16c18489d86dfb4fd4351b209": {
+    "uid": "M_544e88a16c18489d86dfb4fd4351b209",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Стекло",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_5af8ddde0a5643a78f149fe74913f2b7": {
+    "uid": "M_5af8ddde0a5643a78f149fe74913f2b7",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Штукатурка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_5b7f7d4fe952425fbc60042824c5bfc4": {
+    "uid": "M_5b7f7d4fe952425fbc60042824c5bfc4",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Дождевая вода",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_6b6f3d9786d54e2eb7a9f1896b977913": {
+    "uid": "M_6b6f3d9786d54e2eb7a9f1896b977913",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "жестяной желоб",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_959624bf8c09471883318730310c1e14": {
+    "uid": "M_959624bf8c09471883318730310c1e14",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Она",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_a338db8ad36c487bb8053512807ee50c": {
+    "uid": "M_a338db8ad36c487bb8053512807ee50c",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Сухая ветка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_a64793317e8d4b22b1d4c308fde45511": {
+    "uid": "M_a64793317e8d4b22b1d4c308fde45511",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "шкаф",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_b10f4e5522764cc28e018e36348a3cc3": {
+    "uid": "M_b10f4e5522764cc28e018e36348a3cc3",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "вечер",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_b8a548ebd7c4440481d81458bcac368a": {
+    "uid": "M_b8a548ebd7c4440481d81458bcac368a",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "сильно",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_bcc719e6555640bcbb482a2adaddb783": {
+    "uid": "M_bcc719e6555640bcbb482a2adaddb783",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Лампа",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_be6fcb514e524b089d8e95909bc54e7c": {
+    "uid": "M_be6fcb514e524b089d8e95909bc54e7c",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "таз",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_cc98d84a1fb34505be7f96742558e68d": {
+    "uid": "M_cc98d84a1fb34505be7f96742558e68d",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "бухта",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d070c1db43d048cd9079d67491b3bfb2": {
+    "uid": "M_d070c1db43d048cd9079d67491b3bfb2",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "ветер",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d16de5a7ec4e42f88c3993232d30e189": {
+    "uid": "M_d16de5a7ec4e42f88c3993232d30e189",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "старый дом",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d2833751c6984ce187a66d2ba608a461": {
+    "uid": "M_d2833751c6984ce187a66d2ba608a461",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "коробление",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d5e1873489b74b8784e8603b94d3efc6": {
+    "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "АГент",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "SELF"
+    }
+  },
+  "M_db40ce67e9674323a8e7fd069dd8c789": {
+    "uid": "M_db40ce67e9674323a8e7fd069dd8c789",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "пристань",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_dbd27c08de674b6483333d633f4a3a64": {
+    "uid": "M_dbd27c08de674b6483333d633f4a3a64",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "протечка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_dd5ce42c96ce40a9b94bd16f27f97ec3": {
+    "uid": "M_dd5ce42c96ce40a9b94bd16f27f97ec3",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Бумага",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_e93461d71c044f859e2cb4b352ac8356": {
+    "uid": "M_e93461d71c044f859e2cb4b352ac8356",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "реже",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_f2a1579e09a44be7b82d40bda9539ac1": {
+    "uid": "M_f2a1579e09a44be7b82d40bda9539ac1",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "коробка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_f83eb54b8aad4e31983960500ab95251": {
+    "uid": "M_f83eb54b8aad4e31983960500ab95251",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "край крыши",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_f8b7b8b456d84ddea05df28bd6ec22ef": {
+    "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "вода",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_fc0ee7bfbf8e48319ac0939418ac31bd": {
+    "uid": "M_fc0ee7bfbf8e48319ac0939418ac31bd",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "ветка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_ff88e19c1d0d4531994336f459884c76": {
+    "uid": "M_ff88e19c1d0d4531994336f459884c76",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "северный ветер",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "N_056e65db15364396b571c8cd08c4db04": {
+    "uid": "N_056e65db15364396b571c8cd08c4db04",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_040c5464a299470e841709aa65170b19",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b7f7d4fe952425fbc60042824c5bfc4",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_f83eb54b8aad4e31983960500ab95251",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_05ce93ba66b54ca0bff83cd6ce9660ae": {
+    "uid": "N_05ce93ba66b54ca0bff83cd6ce9660ae",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_f74a2766c4b64ddf8f115ae3df4178fa",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0773d99a2f074309b29e8eeb7f0083a2",
+        "kind": "M"
+      },
+      "AMOUNT": {
+        "uid": "M_26af73897a204105b6e5dc01bcfe322d",
+        "kind": "M"
+      },
+      "HOW-TO": {
+        "uid": "M_b8a548ebd7c4440481d81458bcac368a",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 33,
+      "expires_tick": 233,
+      "last_qualifying_tick": 33,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_0e56e6f81f484e579877dada120bde2c": {
+    "uid": "N_0e56e6f81f484e579877dada120bde2c",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_53e5310e63d849159cacadd0a6374896",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_295aa7e583804db0b982ad826d5cb88b",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_4b11f1554071454992998d9eb3995078",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 21,
+      "expires_tick": 221,
+      "last_qualifying_tick": 21,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_121d8d85f30048829bb6897e1dd43983": {
+    "uid": "N_121d8d85f30048829bb6897e1dd43983",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_bcf2d9878bbc46e1b4fb670ebba07baa",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_959624bf8c09471883318730310c1e14",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_1ba7b540a0ac4ab1b8ab41ecf1a564b1",
+        "kind": "M"
+      },
+      "SOURCE": {
+        "uid": "M_3af204f19be84c23ac21bc845838d58d",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 36,
+      "expires_tick": 236,
+      "last_qualifying_tick": 36,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_145e7ac9496d4349ae1d62bf498d6975": {
+    "uid": "N_145e7ac9496d4349ae1d62bf498d6975",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_f500ed4d207142d38dd15ab9e666bf48",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_017eef0882474c8b81080e68f5300450",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 39,
+      "expires_tick": 239,
+      "last_qualifying_tick": 39,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_325418c64eed430d969bd3a98c01916f": {
+    "uid": "N_325418c64eed430d969bd3a98c01916f",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_00f9abd08a554e28b558f5ac59ace9b6",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "На рассвете дождь прекратился. Марина открыла окно, потому что рама подсохла.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 39,
+      "expires_tick": 239,
+      "last_qualifying_tick": 39,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_3c68e2fe158742d2a5a585ec053099f1": {
+    "uid": "N_3c68e2fe158742d2a5a585ec053099f1",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_2309461859e24c7aa9b517aa12ed4e59",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_4a033f9d945045bc969690593fa8a621": {
+    "uid": "N_4a033f9d945045bc969690593fa8a621",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_091f2578f074415c8f92e0451c4df721",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_f2a1579e09a44be7b82d40bda9539ac1",
+        "kind": "M"
+      },
+      "SOURCE": {
+        "uid": "M_a64793317e8d4b22b1d4c308fde45511",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 30,
+      "expires_tick": 230,
+      "last_qualifying_tick": 30,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_51cdea3e505642de86f23f8a7b22b671": {
+    "uid": "N_51cdea3e505642de86f23f8a7b22b671",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_20f4e3f7c2f749918b4aade54591b0e7",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_37150d58712843a4b23da735d23c7ac0",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 18,
+      "expires_tick": 218,
+      "last_qualifying_tick": 18,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_5b9723466f974091beb2e2d3cf5b4e63": {
+    "uid": "N_5b9723466f974091beb2e2d3cf5b4e63",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_3bc2e31fcf114047919864cca1184d3d",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_544e88a16c18489d86dfb4fd4351b209",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_bcc719e6555640bcbb482a2adaddb783",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 21,
+      "expires_tick": 221,
+      "last_qualifying_tick": 21,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_62b259aa21ac44d0ac27eb21ed4580fb": {
+    "uid": "N_62b259aa21ac44d0ac27eb21ed4580fb",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_ade74ef6158d493d8bc27f1b432d77ad",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Марина сняла коробку со шкафа. Бумага в письмах намокла, потому что вода просочилась в коробку.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 30,
+      "expires_tick": 230,
+      "last_qualifying_tick": 30,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_6ace82e521874f999b432de5fbc20cb1": {
+    "uid": "N_6ace82e521874f999b432de5fbc20cb1",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_7357598d22624cfdaf27d61385374447",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_a338db8ad36c487bb8053512807ee50c",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 3,
+      "expires_tick": 203,
+      "last_qualifying_tick": 3,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_6d9965e7f7e04af9b8150e6e1df84049": {
+    "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.41000000000000003,
+    "template": {
+      "uid": "T_a48181aed5d9489092719edd7a9b26ff",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_37150d58712843a4b23da735d23c7ac0",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 2,
+      "lifecycle_state": "REINFORCED",
+      "created_tick": 9,
+      "expires_tick": 1032,
+      "last_qualifying_tick": 32,
+      "qualifying_reactivations": 1
+    }
+  },
+  "N_700617f16aba4620b8d9fa6557fdf230": {
+    "uid": "N_700617f16aba4620b8d9fa6557fdf230",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_1f5691121c254aa785e5f47749673684",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_2a96b230c8bb410583ba4b8fffb20008",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_21c990eace3f459382d1e04aa5e40f5a",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 24,
+      "expires_tick": 224,
+      "last_qualifying_tick": 24,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_728675cd8c8c4b88b848cb2c65a06f7d": {
+    "uid": "N_728675cd8c8c4b88b848cb2c65a06f7d",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_f906b304b2b5451e985b35d090ca7b20",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_7371425f7c5d47169ba2dd0bcf51d47c": {
+    "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_68ec594eecec4d0b941da07a876455c5",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_18b24fe3f63c4c41911ede1578843e3a",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_756a39cc12524ba08ad883df019b2d7a": {
+    "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.41000000000000003,
+    "template": {
+      "uid": "T_6f33e1d9c55b4eaa909129ef32c95d5e",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 2,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_7f86f4c99e6f48b8a0d03f005915944d": {
+    "uid": "N_7f86f4c99e6f48b8a0d03f005915944d",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_05bb6beb5424414bacc01361fb8274cb",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_a338db8ad36c487bb8053512807ee50c",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_6b6f3d9786d54e2eb7a9f1896b977913",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "REINFORCED",
+      "created_tick": 3,
+      "expires_tick": 1023,
+      "last_qualifying_tick": 23,
+      "qualifying_reactivations": 1
+    }
+  },
+  "N_81e4c0b9a8e44734819587c1ae1998cc": {
+    "uid": "N_81e4c0b9a8e44734819587c1ae1998cc",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_dfc9cab0a17344469f247a6cca3a73d5",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_ff88e19c1d0d4531994336f459884c76",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_cc98d84a1fb34505be7f96742558e68d",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_832a841863eb4b168b960f391862c4b3": {
+    "uid": "N_832a841863eb4b168b960f391862c4b3",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_05bb6beb5424414bacc01361fb8274cb",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_bcc719e6555640bcbb482a2adaddb783",
+        "kind": "M"
+      },
+      "SOURCE": {
+        "uid": "M_4b11f1554071454992998d9eb3995078",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 21,
+      "expires_tick": 221,
+      "last_qualifying_tick": 21,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_846fb7da5ed64304afdb3d1f30e7c0c1": {
+    "uid": "N_846fb7da5ed64304afdb3d1f30e7c0c1",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_e88c86c1e27449dc8652ae8da2cce989",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_225677183fd64d9e83db08cf2898633b",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 27,
+      "expires_tick": 227,
+      "last_qualifying_tick": 27,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_848ae97876e240f4a95c12f7a21f7a7b": {
+    "uid": "N_848ae97876e240f4a95c12f7a21f7a7b",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_f23c41883b3743888ad725290e9b0c5d",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_dd5ce42c96ce40a9b94bd16f27f97ec3",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_1ba7b540a0ac4ab1b8ab41ecf1a564b1",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 30,
+      "expires_tick": 230,
+      "last_qualifying_tick": 30,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_859aa66412d048588423fbc9af527b0e": {
+    "uid": "N_859aa66412d048588423fbc9af527b0e",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_a33741c5f287429f99fec4888f93ad6a",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Она отодвинула письма от огня. Потом коробление прекратилось.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 36,
+      "expires_tick": 236,
+      "last_qualifying_tick": 36,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_89bce352b192475ca7e82923cd69a5b8": {
+    "uid": "N_89bce352b192475ca7e82923cd69a5b8",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_0af2f17041ba41e0af881e476d496eea",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Лампа упала со стола, потому что кот задел стол. Стекло лампы разбилось.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 21,
+      "expires_tick": 221,
+      "last_qualifying_tick": 21,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_8da74d9154024de5bd0aa96c9e6dd248": {
+    "uid": "N_8da74d9154024de5bd0aa96c9e6dd248",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_dbcfc9a1718f4c838474d6e2d4b4f68b",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 3,
+      "expires_tick": 203,
+      "last_qualifying_tick": 3,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_8f9b50a6fed04f72af14da493970525e": {
+    "uid": "N_8f9b50a6fed04f72af14da493970525e",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_1e54a5c7f33e4089b84235c19cd38d22",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Марина поднялась на чердак. Она заметила пятно на потолке.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_910a0429a0ee4cd5b98381fde3b84149": {
+    "uid": "N_910a0429a0ee4cd5b98381fde3b84149",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_53e5310e63d849159cacadd0a6374896",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_fc0ee7bfbf8e48319ac0939418ac31bd",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_1c8fcf16dc6a4f6dbfc7000d7a0dfdbf",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_92afe5d2492140f18fe33d7dcfc0da18": {
+    "uid": "N_92afe5d2492140f18fe33d7dcfc0da18",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_d96253e4936741e0a3a38013f5206c27",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+        "kind": "M"
+      },
+      "HOW-TO": {
+        "uid": "M_e93461d71c044f859e2cb4b352ac8356",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 27,
+      "expires_tick": 227,
+      "last_qualifying_tick": 27,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_9ab3043677ac49479f94c9a6956f9cb4": {
+    "uid": "N_9ab3043677ac49479f94c9a6956f9cb4",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_e99e69acba9c4e91ac57243c754d0dc4",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "K_f239244a65264d87b454fd1da6cb5d6b",
+        "kind": "K"
+      },
+      "LOCATION": {
+        "uid": "M_18b24fe3f63c4c41911ede1578843e3a",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 24,
+      "expires_tick": 224,
+      "last_qualifying_tick": 24,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_9d2867eba86b4eeb874f8cffada8d8ff": {
+    "uid": "N_9d2867eba86b4eeb874f8cffada8d8ff",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_040c5464a299470e841709aa65170b19",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_f83eb54b8aad4e31983960500ab95251",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_9f50c7ece78d40bf966759817917828b": {
+    "uid": "N_9f50c7ece78d40bf966759817917828b",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_46c75e62fcdf45b8a59161b02fdcb563",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_225677183fd64d9e83db08cf2898633b",
+        "kind": "M"
+      },
+      "TIME": {
+        "uid": "M_3852f5566ba744ca9aed2aae3d824a0e",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 39,
+      "expires_tick": 239,
+      "last_qualifying_tick": 39,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_ab24e557a8fa4b3f9b71339e1da073f1": {
+    "uid": "N_ab24e557a8fa4b3f9b71339e1da073f1",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_8769a77b2164478bb16861b420608a78",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_f8b7b8b456d84ddea05df28bd6ec22ef",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_f2a1579e09a44be7b82d40bda9539ac1",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 30,
+      "expires_tick": 230,
+      "last_qualifying_tick": 30,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_ac53de31bd994e03af6c4f7811b7b7ed": {
+    "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.41000000000000003,
+    "template": {
+      "uid": "T_6c1b8cd8afb8431e967b77c7879241a8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_37150d58712843a4b23da735d23c7ac0",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 2,
+      "lifecycle_state": "REINFORCED",
+      "created_tick": 9,
+      "expires_tick": 1033,
+      "last_qualifying_tick": 33,
+      "qualifying_reactivations": 1
+    }
+  },
+  "N_ae3ad9717e564bccbabd23fef561463c": {
+    "uid": "N_ae3ad9717e564bccbabd23fef561463c",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Кот бросился к двери, потому что падение штукатурки его испугало. Он задел стол.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 21,
+      "expires_tick": 221,
+      "last_qualifying_tick": 21,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_af723702b4d342a086d4488d8d18a686": {
+    "uid": "N_af723702b4d342a086d4488d8d18a686",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_700f56a239d944da92c9a74425a0cddf",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Шум разбудил Павла. Он пришёл на чердак.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 24,
+      "expires_tick": 224,
+      "last_qualifying_tick": 24,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_b1e53abf13074f1082d4dd5b7c888aef": {
+    "uid": "N_b1e53abf13074f1082d4dd5b7c888aef",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_0265dd22e8104f93aa7895f6b55bcb8e",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_c072402265314d46b30e6c437d2f90e6": {
+    "uid": "N_c072402265314d46b30e6c437d2f90e6",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_be53cd7031e74ae3a4c8e50b505133ee",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_18dead80db3e452ebb5da9b76542790e",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_c2c47ef49bda461485674457e4f6ce5e": {
+    "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_86ae2e781896412a996bff95bda4bc3b",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_13e266df7d774e43a110e86c94b2c60b",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "REINFORCED",
+      "created_tick": 12,
+      "expires_tick": 1035,
+      "last_qualifying_tick": 35,
+      "qualifying_reactivations": 1
+    }
+  },
+  "N_c64288e2055c46bdbb42d5128238710b": {
+    "uid": "N_c64288e2055c46bdbb42d5128238710b",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_a48181aed5d9489092719edd7a9b26ff",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_dd5ce42c96ce40a9b94bd16f27f97ec3",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 30,
+      "expires_tick": 230,
+      "last_qualifying_tick": 30,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_cf8e7ff02fe244cd830ddbd4b9c405ed": {
+    "uid": "N_cf8e7ff02fe244cd830ddbd4b9c405ed",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_de83760fd9b442e790c5558c267d5dd9",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_1ba7b540a0ac4ab1b8ab41ecf1a564b1",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_0773d99a2f074309b29e8eeb7f0083a2",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 33,
+      "expires_tick": 233,
+      "last_qualifying_tick": 33,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_cfe561aa1d06481799eba7784f749a4f": {
+    "uid": "N_cfe561aa1d06481799eba7784f749a4f",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_7e1835f156ac45aaaefc27b63378c155",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Марина положила письма возле печи. Бумага коробилась, потому что печь грела слишком сильно.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 33,
+      "expires_tick": 233,
+      "last_qualifying_tick": 33,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_d029a71a15774a80acd9b2b55a588145": {
+    "uid": "N_d029a71a15774a80acd9b2b55a588145",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.41000000000000003,
+    "template": {
+      "uid": "T_a9acc0a05ff5485b88a3209d0dfba60c",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5af8ddde0a5643a78f149fe74913f2b7",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 2,
+      "lifecycle_state": "NEW",
+      "created_tick": 18,
+      "expires_tick": 218,
+      "last_qualifying_tick": 18,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_d11ab1f6ddc94f60b97ca86f89c15eaa": {
+    "uid": "N_d11ab1f6ddc94f60b97ca86f89c15eaa",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_05bb6beb5424414bacc01361fb8274cb",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_2111ef5f962f47808cddc1236a814bce",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_5af8ddde0a5643a78f149fe74913f2b7",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 18,
+      "expires_tick": 218,
+      "last_qualifying_tick": 18,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_d24138cd4e314c55bf000701a85de95d": {
+    "uid": "N_d24138cd4e314c55bf000701a85de95d",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_dfc9cab0a17344469f247a6cca3a73d5",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_d070c1db43d048cd9079d67491b3bfb2",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 3,
+      "expires_tick": 203,
+      "last_qualifying_tick": 3,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_d27398c8ceae4cc2b49d610c71b14acd": {
+    "uid": "N_d27398c8ceae4cc2b49d610c71b14acd",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_cecb05564a284f0093771e87bad54400",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_18dead80db3e452ebb5da9b76542790e",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_182c737c9bff4396afe9ebfabab826f5",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "REINFORCED",
+      "created_tick": 15,
+      "expires_tick": 1041,
+      "last_qualifying_tick": 41,
+      "qualifying_reactivations": 1
+    }
+  },
+  "N_d6e496626aed4e3f9afe8354b1fad213": {
+    "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.41000000000000003,
+    "template": {
+      "uid": "T_2791a0f1408e4cddbd3c4130c7e4d9c7",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_017eef0882474c8b81080e68f5300450",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 2,
+      "lifecycle_state": "REINFORCED",
+      "created_tick": 12,
+      "expires_tick": 1034,
+      "last_qualifying_tick": 34,
+      "qualifying_reactivations": 1
+    }
+  },
+  "N_dac19d4aeda049cbab93e87395e7bc40": {
+    "uid": "N_dac19d4aeda049cbab93e87395e7bc40",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_915a4dc3d8ce409398cc113eee8d82ef",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      "TIME": {
+        "uid": "M_b10f4e5522764cc28e018e36348a3cc3",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_d16de5a7ec4e42f88c3993232d30e189",
+        "kind": "M"
+      },
+      "AUXILLIARY": {
+        "uid": "M_db40ce67e9674323a8e7fd069dd8c789",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_dd5dec0375ed4352bb4699a88d512598": {
+    "uid": "N_dd5dec0375ed4352bb4699a88d512598",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_52f9eea5ebbd48458e6c3ca2a1f3cea0",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_21c990eace3f459382d1e04aa5e40f5a",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_be6fcb514e524b089d8e95909bc54e7c",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_dbd27c08de674b6483333d633f4a3a64",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 27,
+      "expires_tick": 227,
+      "last_qualifying_tick": 27,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_e6f0c2ae8c9046a2aa8e65f9f842d025": {
+    "uid": "N_e6f0c2ae8c9046a2aa8e65f9f842d025",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_fa9aa11e01cb484a9b7f46439d6f43e4",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_dd5ce42c96ce40a9b94bd16f27f97ec3",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 33,
+      "expires_tick": 233,
+      "last_qualifying_tick": 33,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_e7fe1076c42940478922bfa1bd9db427": {
+    "uid": "N_e7fe1076c42940478922bfa1bd9db427",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_942e0dab3228454a9461a72a06635810",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_4f13750759294e1ba24c46453b61d578",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_13e266df7d774e43a110e86c94b2c60b",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 39,
+      "expires_tick": 239,
+      "last_qualifying_tick": 39,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_ededdfb21af341e8aec46ce40d513523": {
+    "uid": "N_ededdfb21af341e8aec46ce40d513523",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_a39caa9dd74347708aea1ee575a389b0",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_f8b5c53becbe4a4fa24296756b3570ca": {
+    "uid": "N_f8b5c53becbe4a4fa24296756b3570ca",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_fde7b41fd89140cfb1d1919851457ed9",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Штукатурка отслоилась, потому что вода стекала по балке. Кусок штукатурки упал, потому что штукатурка отслоилась.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 18,
+      "expires_tick": 218,
+      "last_qualifying_tick": 18,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_fa99f84be29f44f4b11f7af291cd7b80": {
+    "uid": "N_fa99f84be29f44f4b11f7af291cd7b80",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_aa2cb09a8f374091adb444e8114246a4",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Павел поставил таз под протечку. После того как дождь ослаб, вода капала реже.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 27,
+      "expires_tick": 227,
+      "last_qualifying_tick": 27,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_fbf3f557670e4a35aa5f0b57fcaef56d": {
+    "uid": "N_fbf3f557670e4a35aa5f0b57fcaef56d",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_46c75e62fcdf45b8a59161b02fdcb563",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_d2833751c6984ce187a66d2ba608a461",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 36,
+      "expires_tick": 236,
+      "last_qualifying_tick": 36,
+      "qualifying_reactivations": 0
+    }
+  },
+  "S_0356ffdf52cd49588ce7290879acc58e": {
+    "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "заметила",
+      "заметить"
+    ]
+  },
+  "S_05ffb410d9144248a81b3e8c9ac4ad17": {
+    "uid": "S_05ffb410d9144248a81b3e8c9ac4ad17",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "упал",
+      "упала",
+      "упасть"
+    ]
+  },
+  "S_10ab2a233a984e8cb7e6799e26c1247e": {
+    "uid": "S_10ab2a233a984e8cb7e6799e26c1247e",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "разбудил",
+      "разбудить"
+    ]
+  },
+  "S_1d1ba91f160e49d8ba0dbae02ba4c41e": {
+    "uid": "S_1d1ba91f160e49d8ba0dbae02ba4c41e",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "заклинилось",
+      "заклиниться"
+    ]
+  },
+  "S_22ed4106ab2044909837b566afb24581": {
+    "uid": "S_22ed4106ab2044909837b566afb24581",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "сломалась",
+      "сломаться"
+    ]
+  },
+  "S_26d3479d402e4888b269fb13ad366fd1": {
+    "uid": "S_26d3479d402e4888b269fb13ad366fd1",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "высказать"
+    ]
+  },
+  "S_43c1abd217e143f592d15c20127e1f86": {
+    "uid": "S_43c1abd217e143f592d15c20127e1f86",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "сдвинулся",
+      "сдвинуться"
+    ]
+  },
+  "S_479540181ec64bf7acefcb3302542f83": {
+    "uid": "S_479540181ec64bf7acefcb3302542f83",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "отслоилась",
+      "отслоиться"
+    ]
+  },
+  "S_48664f21bdeb4b2fb864830ef29aede8": {
+    "uid": "S_48664f21bdeb4b2fb864830ef29aede8",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "задел",
+      "задела",
+      "задеть"
+    ]
+  },
+  "S_4e9175172dcc4b70a1db3c627c6ca306": {
+    "uid": "S_4e9175172dcc4b70a1db3c627c6ca306",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "ослаб",
+      "ослабнуть"
+    ]
+  },
+  "S_562a16a887424034a4c74cdabb3f0931": {
+    "uid": "S_562a16a887424034a4c74cdabb3f0931",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "прекратилось",
+      "прекратился",
+      "прекратиться"
+    ]
+  },
+  "S_58a2306bb9de4bb3bd9fd69969459e97": {
+    "uid": "S_58a2306bb9de4bb3bd9fd69969459e97",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "просочилась",
+      "просочиться"
+    ]
+  },
+  "S_622faf3357c74b1c81082aba4bf41cbb": {
+    "uid": "S_622faf3357c74b1c81082aba4bf41cbb",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "разбилось",
+      "разбиться"
+    ]
+  },
+  "S_6439ebd4e2614585a8099f33334f5a0b": {
+    "uid": "S_6439ebd4e2614585a8099f33334f5a0b",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "усилился",
+      "усилиться"
+    ]
+  },
+  "S_659a65a458a1469e9021dfb34e4b6887": {
+    "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "поднялась",
+      "подняться"
+    ]
+  },
+  "S_6940dc13af804ed4b770a71332ea87cc": {
+    "uid": "S_6940dc13af804ed4b770a71332ea87cc",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "намокла",
+      "намокнуть"
+    ]
+  },
+  "S_6cc200987dbe44c696bd336004e63fbb": {
+    "uid": "S_6cc200987dbe44c696bd336004e63fbb",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "прийти",
+      "пришёл"
+    ]
+  },
+  "S_6fda1c0b57134140acac0bc74b088f7c": {
+    "uid": "S_6fda1c0b57134140acac0bc74b088f7c",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "разбухла",
+      "разбухнуть"
+    ]
+  },
+  "S_701cef6146f84742a575e620a7ee9bb3": {
+    "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "на"
+    ]
+  },
+  "S_70451b3e82274a129134baf6c5f94f37": {
+    "uid": "S_70451b3e82274a129134baf6c5f94f37",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "коробилась",
+      "коробиться"
+    ]
+  },
+  "S_78cae620a5e14a9a98225da9437a7f02": {
+    "uid": "S_78cae620a5e14a9a98225da9437a7f02",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "грела",
+      "греть"
+    ]
+  },
+  "S_8d51365ead074c57a54c9f313de88d04": {
+    "uid": "S_8d51365ead074c57a54c9f313de88d04",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "капала",
+      "капать"
+    ]
+  },
+  "S_926838f225b74463ab642681bdd5ed6c": {
+    "uid": "S_926838f225b74463ab642681bdd5ed6c",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "подсохла",
+      "подсохнуть"
+    ]
+  },
+  "S_99eebbdf4c5b44cbb8c5e0bf5b834c91": {
+    "uid": "S_99eebbdf4c5b44cbb8c5e0bf5b834c91",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "отодвинула",
+      "отодвинуть"
+    ]
+  },
+  "S_ae30c5d7a8e34653b58e6eb8cac0af09": {
+    "uid": "S_ae30c5d7a8e34653b58e6eb8cac0af09",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "поставил",
+      "поставить"
+    ]
+  },
+  "S_b074dc31b23e46308e6572441b26c9dd": {
+    "uid": "S_b074dc31b23e46308e6572441b26c9dd",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "перекосилась",
+      "перекоситься"
+    ]
+  },
+  "S_b85740f533484b17af7c74ed127bb5a7": {
+    "uid": "S_b85740f533484b17af7c74ed127bb5a7",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "сняла",
+      "снять"
+    ]
+  },
+  "S_bc58a9c7b105444195dd6770b3fe0a03": {
+    "uid": "S_bc58a9c7b105444195dd6770b3fe0a03",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "пойти",
+      "пошла"
+    ]
+  },
+  "S_cf4f49a1181a4213896567fd8015d432": {
+    "uid": "S_cf4f49a1181a4213896567fd8015d432",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "положила",
+      "положить"
+    ]
+  },
+  "S_e7064973679248a294a7c279d376a2c9": {
+    "uid": "S_e7064973679248a294a7c279d376a2c9",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "в"
+    ]
+  },
+  "S_f176726b828446d6b39f751e412fa4cb": {
+    "uid": "S_f176726b828446d6b39f751e412fa4cb",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "стекала",
+      "стекать"
+    ]
+  },
+  "S_f1cf463f6cb34fa0b908f207a0c910ca": {
+    "uid": "S_f1cf463f6cb34fa0b908f207a0c910ca",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "открыла",
+      "открыть"
+    ]
+  },
+  "S_f66f93c6973d419e9f668dc357f97743": {
+    "uid": "S_f66f93c6973d419e9f668dc357f97743",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "войти",
+      "вошла"
+    ]
+  },
+  "T_040c5464a299470e841709aa65170b19": {
+    "uid": "T_040c5464a299470e841709aa65170b19",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_bc58a9c7b105444195dd6770b3fe0a03",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_05bb6beb5424414bacc01361fb8274cb": {
+    "uid": "T_05bb6beb5424414bacc01361fb8274cb",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_05ffb410d9144248a81b3e8c9ac4ad17",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "SOURCE",
+      "LOCATION"
+    ]
+  },
+  "T_091f2578f074415c8f92e0451c4df721": {
+    "uid": "T_091f2578f074415c8f92e0451c4df721",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_b85740f533484b17af7c74ed127bb5a7",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "SOURCE"
+    ]
+  },
+  "T_1f5691121c254aa785e5f47749673684": {
+    "uid": "T_1f5691121c254aa785e5f47749673684",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_10ab2a233a984e8cb7e6799e26c1247e",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_20f4e3f7c2f749918b4aade54591b0e7": {
+    "uid": "T_20f4e3f7c2f749918b4aade54591b0e7",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_f176726b828446d6b39f751e412fa4cb",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_2791a0f1408e4cddbd3c4130c7e4d9c7": {
+    "uid": "T_2791a0f1408e4cddbd3c4130c7e4d9c7",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_b074dc31b23e46308e6572441b26c9dd",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_3bc2e31fcf114047919864cca1184d3d": {
+    "uid": "T_3bc2e31fcf114047919864cca1184d3d",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_622faf3357c74b1c81082aba4bf41cbb",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_46c75e62fcdf45b8a59161b02fdcb563": {
+    "uid": "T_46c75e62fcdf45b8a59161b02fdcb563",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_562a16a887424034a4c74cdabb3f0931",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "TIME"
+    ]
+  },
+  "T_52f9eea5ebbd48458e6c3ca2a1f3cea0": {
+    "uid": "T_52f9eea5ebbd48458e6c3ca2a1f3cea0",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_ae30c5d7a8e34653b58e6eb8cac0af09",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_53e5310e63d849159cacadd0a6374896": {
+    "uid": "T_53e5310e63d849159cacadd0a6374896",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_48664f21bdeb4b2fb864830ef29aede8",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_5f50166c8a8341eebc1c8784ef06ef32": {
+    "uid": "T_5f50166c8a8341eebc1c8784ef06ef32",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_26d3479d402e4888b269fb13ad366fd1",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TIME"
+    ]
+  },
+  "T_68ec594eecec4d0b941da07a876455c5": {
+    "uid": "T_68ec594eecec4d0b941da07a876455c5",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_659a65a458a1469e9021dfb34e4b6887",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_6c1b8cd8afb8431e967b77c7879241a8": {
+    "uid": "T_6c1b8cd8afb8431e967b77c7879241a8",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_6fda1c0b57134140acac0bc74b088f7c",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_6f33e1d9c55b4eaa909129ef32c95d5e": {
+    "uid": "T_6f33e1d9c55b4eaa909129ef32c95d5e",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_43c1abd217e143f592d15c20127e1f86",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_7357598d22624cfdaf27d61385374447": {
+    "uid": "T_7357598d22624cfdaf27d61385374447",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_22ed4106ab2044909837b566afb24581",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_86ae2e781896412a996bff95bda4bc3b": {
+    "uid": "T_86ae2e781896412a996bff95bda4bc3b",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_1d1ba91f160e49d8ba0dbae02ba4c41e",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_8769a77b2164478bb16861b420608a78": {
+    "uid": "T_8769a77b2164478bb16861b420608a78",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_58a2306bb9de4bb3bd9fd69969459e97",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_915a4dc3d8ce409398cc113eee8d82ef": {
+    "uid": "T_915a4dc3d8ce409398cc113eee8d82ef",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_f66f93c6973d419e9f668dc357f97743",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "AUXILLIARY",
+      "LOCATION",
+      "TIME"
+    ]
+  },
+  "T_942e0dab3228454a9461a72a06635810": {
+    "uid": "T_942e0dab3228454a9461a72a06635810",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_f1cf463f6cb34fa0b908f207a0c910ca",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_a48181aed5d9489092719edd7a9b26ff": {
+    "uid": "T_a48181aed5d9489092719edd7a9b26ff",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_6940dc13af804ed4b770a71332ea87cc",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_a9acc0a05ff5485b88a3209d0dfba60c": {
+    "uid": "T_a9acc0a05ff5485b88a3209d0dfba60c",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_479540181ec64bf7acefcb3302542f83",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_bcf2d9878bbc46e1b4fb670ebba07baa": {
+    "uid": "T_bcf2d9878bbc46e1b4fb670ebba07baa",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_99eebbdf4c5b44cbb8c5e0bf5b834c91",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "SOURCE"
+    ]
+  },
+  "T_be53cd7031e74ae3a4c8e50b505133ee": {
+    "uid": "T_be53cd7031e74ae3a4c8e50b505133ee",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_0356ffdf52cd49588ce7290879acc58e",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_cecb05564a284f0093771e87bad54400": {
+    "uid": "T_cecb05564a284f0093771e87bad54400",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_701cef6146f84742a575e620a7ee9bb3",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_d96253e4936741e0a3a38013f5206c27": {
+    "uid": "T_d96253e4936741e0a3a38013f5206c27",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_8d51365ead074c57a54c9f313de88d04",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "HOW-TO"
+    ]
+  },
+  "T_de83760fd9b442e790c5558c267d5dd9": {
+    "uid": "T_de83760fd9b442e790c5558c267d5dd9",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_cf4f49a1181a4213896567fd8015d432",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_dfc9cab0a17344469f247a6cca3a73d5": {
+    "uid": "T_dfc9cab0a17344469f247a6cca3a73d5",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_6439ebd4e2614585a8099f33334f5a0b",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_e88c86c1e27449dc8652ae8da2cce989": {
+    "uid": "T_e88c86c1e27449dc8652ae8da2cce989",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_4e9175172dcc4b70a1db3c627c6ca306",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_e99e69acba9c4e91ac57243c754d0dc4": {
+    "uid": "T_e99e69acba9c4e91ac57243c754d0dc4",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_6cc200987dbe44c696bd336004e63fbb",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_f23c41883b3743888ad725290e9b0c5d": {
+    "uid": "T_f23c41883b3743888ad725290e9b0c5d",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_e7064973679248a294a7c279d376a2c9",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_f500ed4d207142d38dd15ab9e666bf48": {
+    "uid": "T_f500ed4d207142d38dd15ab9e666bf48",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_926838f225b74463ab642681bdd5ed6c",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_f74a2766c4b64ddf8f115ae3df4178fa": {
+    "uid": "T_f74a2766c4b64ddf8f115ae3df4178fa",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_78cae620a5e14a9a98225da9437a7f02",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "AMOUNT",
+      "HOW-TO"
+    ]
+  },
+  "T_fa9aa11e01cb484a9b7f46439d6f43e4": {
+    "uid": "T_fa9aa11e01cb484a9b7f46439d6f43e4",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_70451b3e82274a129134baf6c5f94f37",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  }
+}

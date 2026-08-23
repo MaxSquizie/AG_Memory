@@ -1,0 +1,47 @@
+Acceptance run: 20260823_032215_+0300
+Cases: 36 | RUNTIME OK: 35 | RUNTIME ERROR: 1
+SEMANTIC PASS: 36 | FAIL: 0 | GAP: 0
+SCENARIOS: 4 | isolated between scenarios
+
+Families:
+  document.causal.station: PASS 7/7 | FAIL 0 | GAP 0
+  document.causal.greenhouse: PASS 7/7 | FAIL 0 | GAP 0
+  document.causal.archive: PASS 7/7 | FAIL 0 | GAP 0
+  document.monolith.literary: PASS 15/15 | FAIL 0 | GAP 0
+
+001 PASS (runtime=OK, scenario=cooling_station): Виктор дежурил на станции. Температура опустилась.
+002 PASS (runtime=OK, scenario=cooling_station): Вода замёрзла, потому что температура опустилась. Виктор проверил фильтр.
+003 PASS (runtime=OK, scenario=cooling_station): Лёд расширился, потому что вода замёрзла. Лампа мигнула.
+004 PASS (runtime=OK, scenario=cooling_station): Трубка треснула, потому что лёд расширился. Виктор записал параметр.
+005 PASS (runtime=OK, scenario=cooling_station): Жидкость вытекла, потому что трубка треснула. Датчик работал.
+006 PASS (runtime=OK, scenario=cooling_station): Давление упало, потому что жидкость вытекла. Виктор открыл шкаф.
+007 PASS (runtime=OK, scenario=cooling_station): Автоматика остановила насос, потому что давление упало. Виктор перекрыл клапан.
+008 PASS (runtime=OK, scenario=greenhouse_control): Анна осмотрела теплицу. Коммутатор обесточился.
+009 PASS (runtime=OK, scenario=greenhouse_control): Она проверила щиток. Контроллер отключился, потому что коммутатор обесточился.
+010 PASS (runtime=OK, scenario=greenhouse_control): Таймер пропустил команду, потому что контроллер отключился. Вентилятор работал.
+011 PASS (runtime=OK, scenario=greenhouse_control): Полив задержался, потому что таймер пропустил команду. Анна измерила влажность.
+012 PASS (runtime=OK, scenario=greenhouse_control): Почва высохла, потому что полив задержался. Анна записала результат.
+013 PASS (runtime=OK, scenario=greenhouse_control): Рассада увяла, потому что почва высохла. Освещение работало.
+014 PASS (runtime=OK, scenario=greenhouse_control): Урожай снизился, потому что рассада увяла. Анна вызвала техника.
+015 PASS (runtime=OK, scenario=archive_leak): Марина открыла архив. Водосток засорился.
+016 PASS (runtime=OK, scenario=archive_leak): Вода скопилась, потому что водосток засорился. Марина проверила окно.
+017 PASS (runtime=OK, scenario=archive_leak): Перекрытие намокло, потому что вода скопилась. Реставратор осмотрел альбом.
+018 PASS (runtime=OK, scenario=archive_leak): Вода проникла в зал, потому что перекрытие намокло. Свет горел.
+019 PASS (runtime=OK, scenario=archive_leak): Датчик сработал, потому что вода проникла в зал. Марина позвонила сотрудникам.
+020 PASS (runtime=OK, scenario=archive_leak): Сотрудники перенесли коробки, потому что датчик сработал. Реставратор закрыл шкаф.
+021 PASS (runtime=OK, scenario=archive_leak): После того как сотрудники перенесли коробки, Марина закрыла зал. Потом охрана проверила дверь.
+022 PASS (runtime=OK, scenario=house_by_pier_monolith): К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.
+023 PASS (runtime=OK, scenario=house_by_pier_monolith): Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.
+024 PASS (runtime=OK, scenario=house_by_pier_monolith): Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.
+025 PASS (runtime=OK, scenario=house_by_pier_monolith): Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.
+026 PASS (runtime=OK, scenario=house_by_pier_monolith): Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.
+027 PASS (runtime=OK, scenario=house_by_pier_monolith): Марина поднялась на чердак. Она заметила пятно на потолке.
+028 PASS (runtime=OK, scenario=house_by_pier_monolith): Штукатурка отслоилась, потому что вода стекала по балке. Кусок штукатурки упал, потому что штукатурка отслоилась.
+029 PASS (runtime=ERROR, scenario=house_by_pier_monolith): Кот бросился к двери, потому что падение штукатурки его испугало. Он задел стол. | runtime: CandidateValidationError: Correlated runtime alternatives across several roles are not yet canonicalizable: A2
+030 PASS (runtime=OK, scenario=house_by_pier_monolith): Лампа упала со стола, потому что кот задел стол. Стекло лампы разбилось.
+031 PASS (runtime=OK, scenario=house_by_pier_monolith): Шум разбудил Павла. Он пришёл на чердак.
+032 PASS (runtime=OK, scenario=house_by_pier_monolith): Павел поставил таз под протечку. После того как дождь ослаб, вода капала реже.
+033 PASS (runtime=OK, scenario=house_by_pier_monolith): Марина сняла коробку со шкафа. Бумага в письмах намокла, потому что вода просочилась в коробку.
+034 PASS (runtime=OK, scenario=house_by_pier_monolith): Марина положила письма возле печи. Бумага коробилась, потому что печь грела слишком сильно.
+035 PASS (runtime=OK, scenario=house_by_pier_monolith): Она отодвинула письма от огня. Потом коробление прекратилось.
+036 PASS (runtime=OK, scenario=house_by_pier_monolith): На рассвете дождь прекратился. Марина открыла окно, потому что рама подсохла.

@@ -1,0 +1,3403 @@
+{
+  "index": 26,
+  "input": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+  "status": "OK",
+  "scenario_id": "house_by_pier_monolith",
+  "linguistic_candidate_graph": {
+    "text": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Рама",
+        "start": 0,
+        "end": 4,
+        "analyses": [
+          {
+            "normal_form": "рама",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.857142
+          },
+          {
+            "normal_form": "рам",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "gent",
+              "Geox",
+              "NOUN"
+            ],
+            "score": 0.142857
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "перекосилась",
+        "start": 5,
+        "end": 17,
+        "analyses": [
+          {
+            "normal_form": "перекоситься",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "femn",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": ",",
+        "start": 17,
+        "end": 18,
+        "analyses": []
+      },
+      {
+        "index": 4,
+        "text": "потому",
+        "start": 19,
+        "end": 25,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "что",
+        "start": 26,
+        "end": 29,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "NPRO",
+              "sing",
+              "neut"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "NPRO",
+              "nomn",
+              "sing",
+              "neut"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "балка",
+        "start": 30,
+        "end": 35,
+        "analyses": [
+          {
+            "normal_form": "балка",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "разбухла",
+        "start": 36,
+        "end": 44,
+        "analyses": [
+          {
+            "normal_form": "разбухнуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "femn",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": ".",
+        "start": 44,
+        "end": 45,
+        "analyses": []
+      },
+      {
+        "index": 9,
+        "text": "Окно",
+        "start": 46,
+        "end": 50,
+        "analyses": [
+          {
+            "normal_form": "окно",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "neut",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.708333
+          },
+          {
+            "normal_form": "окно",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "neut",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.291666
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "заклинилось",
+        "start": 51,
+        "end": 62,
+        "analyses": [
+          {
+            "normal_form": "заклиниться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "neut",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "neut",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": ",",
+        "start": 62,
+        "end": 63,
+        "analyses": []
+      },
+      {
+        "index": 12,
+        "text": "потому",
+        "start": 64,
+        "end": 70,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "text": "что",
+        "start": 71,
+        "end": 74,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "NPRO",
+              "sing",
+              "neut"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "NPRO",
+              "nomn",
+              "sing",
+              "neut"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "text": "рама",
+        "start": 75,
+        "end": 79,
+        "analyses": [
+          {
+            "normal_form": "рама",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.857142
+          },
+          {
+            "normal_form": "рам",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "gent",
+              "Geox",
+              "NOUN"
+            ],
+            "score": 0.142857
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "text": "перекосилась",
+        "start": 80,
+        "end": 92,
+        "analyses": [
+          {
+            "normal_form": "перекоситься",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "femn",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "text": ".",
+        "start": 92,
+        "end": 93,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 2,
+          "text": "Рама перекосилась",
+          "evidence": {
+            "text": "Рама перекосилась",
+            "start": 0,
+            "end": 17
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "перекоситься"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "рама",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 4,
+          "end_index": 7,
+          "text": "потому что балка разбухла",
+          "evidence": {
+            "text": "потому что балка разбухла",
+            "start": 19,
+            "end": 44
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 7,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "разбухнуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL1",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 4,
+          "end_index": 5,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 19,
+            "end": 29
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 9,
+          "end_index": 10,
+          "text": "Окно заклинилось",
+          "evidence": {
+            "text": "Окно заклинилось",
+            "start": 46,
+            "end": 62
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 10,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "заклиниться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "окно",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL4",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 12,
+          "end_index": 15,
+          "text": "потому что рама перекосилась",
+          "evidence": {
+            "text": "потому что рама перекосилась",
+            "start": 64,
+            "end": 92
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 15,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "перекоситься"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL3",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 12,
+          "end_index": 13,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 64,
+            "end": 74
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "перекоситься"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 7,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "разбухнуть"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 10,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "заклиниться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 15,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "перекоситься"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 2,
+          "child_token_index": 7,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL1",
+          "child_clause_id": "CL2"
+        },
+        {
+          "parent_token_index": 10,
+          "child_token_index": 15,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL3",
+          "child_clause_id": "CL4"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "перекосилась",
+          "normalized_hint": "перекоситься",
+          "sense_hint": null,
+          "evidence": {
+            "text": "перекосилась",
+            "start": 5,
+            "end": 17
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Рама",
+            "normalized_hint": "Рама",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Рама",
+              "start": 0,
+              "end": 4
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Рама перекосилась",
+          "start": 0,
+          "end": 17
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "разбухла",
+          "normalized_hint": "разбухнуть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "разбухла",
+            "start": 36,
+            "end": 44
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_0898a88737a7411a8384193b253dd99a",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "балка",
+            "normalized_hint": "балка",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "балка",
+              "start": 30,
+              "end": 35
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что балка разбухла",
+          "start": 19,
+          "end": 44
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "заклинилось",
+          "normalized_hint": "заклиниться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "заклинилось",
+            "start": 51,
+            "end": 62
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Окно",
+            "normalized_hint": "Окно",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Окно",
+              "start": 46,
+              "end": 50
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Окно заклинилось",
+          "start": 46,
+          "end": 62
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A4",
+        "predicate": {
+          "surface": "перекосилась",
+          "normalized_hint": "перекоситься",
+          "sense_hint": null,
+          "evidence": {
+            "text": "перекосилась",
+            "start": 80,
+            "end": 92
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "рама",
+            "normalized_hint": "рама",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "рама",
+              "start": 75,
+              "end": 79
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что рама перекосилась",
+          "start": 64,
+          "end": 92
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A2",
+        "target_ref": "A1",
+        "evidence": {
+          "text": "потому что",
+          "start": 19,
+          "end": 29
+        }
+      },
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A4",
+        "target_ref": "A3",
+        "evidence": {
+          "text": "потому что",
+          "start": 64,
+          "end": 74
+        }
+      }
+    ],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [
+      {
+        "parent_ref": "A1",
+        "child_ref": "A2",
+        "kind": "SUBORDINATE"
+      },
+      {
+        "parent_ref": "A3",
+        "child_ref": "A4",
+        "kind": "SUBORDINATE"
+      }
+    ],
+    "relation_hints": [
+      {
+        "kind": "CAUSAL_CANDIDATE",
+        "source_ref": "A2",
+        "target_ref": "A3",
+        "evidence": {
+          "text": ". ",
+          "start": 44,
+          "end": 46
+        },
+        "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": false,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A4",
+        "ref": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": false,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N"
+        },
+        "reason": "REACTIVATED_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "reason": "REACTIVATED_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_53c442e82d764c3ba16d83939072b43a",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_96e0389842ec442f88b64e2cef44614c",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_988cd7606c6c4accb8d1b86d68165bfc",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_553695ee85ea412797725c0cfb1a38c8",
+          "kind": "L"
+        },
+        "created": true
+      },
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_7b741ddd9b73491ca008cbef66129951",
+          "kind": "L"
+        },
+        "created": true
+      }
+    ],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_009a7f61263d40c7a219928f1381fd02",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_0e9bf2db7a2f4ac58e4b14859149362e",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.»\n- Пользователь ранее сказал: «Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.»\n- Пользователь ранее сказал: «Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.»\n- Пользователь ранее сказал: «Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_02a7c710d7734ab290d0798cf9ba053c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8",
+        "kind": "M"
+      },
+      {
+        "uid": "M_27c2801b83dd424aaaa3aec293f1da96",
+        "kind": "M"
+      },
+      {
+        "uid": "M_3b19ddfdf04341f1acfcf4d94331fe3c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_3efaf8086387464d85d1fb0655a7b2b4",
+        "kind": "M"
+      },
+      {
+        "uid": "M_4f07dd1949de4481b4bed98ee2686db5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_5f4ea747520d4e8ab094a9e44148b8d1",
+        "kind": "M"
+      },
+      {
+        "uid": "M_62638611100440a29f15d136bf8c4707",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7e65c9358de7407da9f82d77fcaa3a97",
+        "kind": "M"
+      },
+      {
+        "uid": "M_8c0e4f04ca314e2996861cb5e806eaf8",
+        "kind": "M"
+      },
+      {
+        "uid": "M_8cdf0ac582734ed49bfe2b03988079dc",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b3b726dd0eb94e0f8c8fc69f421d2649",
+        "kind": "M"
+      },
+      {
+        "uid": "M_c466272a8d8049fda02b9cfb110e494d",
+        "kind": "M"
+      },
+      {
+        "uid": "M_c79c3624f7184cbcaa52636e3cccdb28",
+        "kind": "M"
+      },
+      {
+        "uid": "M_da30087c955b4e08a634435c8cec23b9",
+        "kind": "M"
+      },
+      {
+        "uid": "N_009a7f61263d40c7a219928f1381fd02",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0e9bf2db7a2f4ac58e4b14859149362e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_25771bca058a43dd919f904b3dae95d3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_308561117a8d40c49f37175e307cbbb3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+        "kind": "N"
+      },
+      {
+        "uid": "N_3a15126cdc07495e9425aac62e06941d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4ae63eb070224d8991dadf9650f88214",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6478ea4d7a8e43219e493fa3ecf46ea8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+        "kind": "N"
+      },
+      {
+        "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_8b84681bc73245219dc3c82329a4ad99",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d05cf65cbb70479fa6f270df1d6a47c1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_dc04dd2c74834fc2a7dd668b4f6c20cf",
+        "kind": "N"
+      },
+      {
+        "uid": "N_eb181ff2c3624af287e31b645f148e5c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+        "kind": "N"
+      },
+      {
+        "uid": "S_2a1d72162e75446c822f6fa98cc39450",
+        "kind": "S"
+      },
+      {
+        "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+        "kind": "S"
+      },
+      {
+        "uid": "S_44d70827b58c40a38624a4b3c5da2b6e",
+        "kind": "S"
+      },
+      {
+        "uid": "S_4d8607a7f1a7415e96ec9213a7d04442",
+        "kind": "S"
+      },
+      {
+        "uid": "S_53c442e82d764c3ba16d83939072b43a",
+        "kind": "S"
+      },
+      {
+        "uid": "S_804852fdc1844b9da9c97390765e17e6",
+        "kind": "S"
+      },
+      {
+        "uid": "S_96e0389842ec442f88b64e2cef44614c",
+        "kind": "S"
+      },
+      {
+        "uid": "S_988cd7606c6c4accb8d1b86d68165bfc",
+        "kind": "S"
+      },
+      {
+        "uid": "S_9cf3a795326544a78a751dee8979e7a5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ed8e6da40443413d96d2f764790281ea",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ffc7bdde8aa842b8a7693922b4a04de9",
+        "kind": "S"
+      },
+      {
+        "uid": "T_0898a88737a7411a8384193b253dd99a",
+        "kind": "T"
+      },
+      {
+        "uid": "T_1ddd79db8b41401d982e910dd486f70d",
+        "kind": "T"
+      },
+      {
+        "uid": "T_2a1b8668b5894b19b308350e3b8ff28c",
+        "kind": "T"
+      },
+      {
+        "uid": "T_34140f3586ac4cb1a3a5297ef7a15691",
+        "kind": "T"
+      },
+      {
+        "uid": "T_35b70aa2107444d1a5ac95e8e4e786e9",
+        "kind": "T"
+      },
+      {
+        "uid": "T_46fbb00f64a0462484e0f2d27cd67f55",
+        "kind": "T"
+      },
+      {
+        "uid": "T_4a20fe253ee14580abc0fd206f078560",
+        "kind": "T"
+      },
+      {
+        "uid": "T_69bd0c5eaf904c9aaa4660d2afa4bf46",
+        "kind": "T"
+      },
+      {
+        "uid": "T_8d05b144b14e47f58f32e8660f307eff",
+        "kind": "T"
+      },
+      {
+        "uid": "T_95192d4bff154b168fbdaf7fe43590e1",
+        "kind": "T"
+      },
+      {
+        "uid": "T_a50efc94c87a413aba33608ce4b06e20",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 15,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_02a7c710d7734ab290d0798cf9ba053c",
+          "kind": "M"
+        },
+        "semantic": "[M_02a7c710d7734ab290d0798cf9ba053c] Балка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.008558339999999998,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.7408334874756267,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8",
+          "kind": "M"
+        },
+        "semantic": "[M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8] ветер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40802376826664344,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_27c2801b83dd424aaaa3aec293f1da96",
+          "kind": "M"
+        },
+        "semantic": "[M_27c2801b83dd424aaaa3aec293f1da96] Жёлоб",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_3b19ddfdf04341f1acfcf4d94331fe3c",
+          "kind": "M"
+        },
+        "semantic": "[M_3b19ddfdf04341f1acfcf4d94331fe3c] Марина",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3959635603929772,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_3efaf8086387464d85d1fb0655a7b2b4",
+          "kind": "M"
+        },
+        "semantic": "[M_3efaf8086387464d85d1fb0655a7b2b4] вечер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3959635603929772,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_4f07dd1949de4481b4bed98ee2686db5",
+          "kind": "M"
+        },
+        "semantic": "[M_4f07dd1949de4481b4bed98ee2686db5] пристань",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3959635603929772,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_5f4ea747520d4e8ab094a9e44148b8d1",
+          "kind": "M"
+        },
+        "semantic": "[M_5f4ea747520d4e8ab094a9e44148b8d1] край крыши",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "M_62638611100440a29f15d136bf8c4707",
+          "kind": "M"
+        },
+        "semantic": "[M_62638611100440a29f15d136bf8c4707] жестяной желоб",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40024002723310403,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+          "kind": "M"
+        },
+        "semantic": "[M_7e04b33c3bcf404786227ae419ccfc52] Сухая ветка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8851830585203742,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "M_7e65c9358de7407da9f82d77fcaa3a97",
+          "kind": "M"
+        },
+        "semantic": "[M_7e65c9358de7407da9f82d77fcaa3a97] вода",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4168847993519881,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "M_8c0e4f04ca314e2996861cb5e806eaf8",
+          "kind": "M"
+        },
+        "semantic": "[M_8c0e4f04ca314e2996861cb5e806eaf8] ветка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40456268056730255,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "M_8cdf0ac582734ed49bfe2b03988079dc",
+          "kind": "M"
+        },
+        "semantic": "[M_8cdf0ac582734ed49bfe2b03988079dc] бухта",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5535524379089841,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "M_b3b726dd0eb94e0f8c8fc69f421d2649",
+          "kind": "M"
+        },
+        "semantic": "[M_b3b726dd0eb94e0f8c8fc69f421d2649] старый дом",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.3959635603929772,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "M_c466272a8d8049fda02b9cfb110e494d",
+          "kind": "M"
+        },
+        "semantic": "[M_c466272a8d8049fda02b9cfb110e494d] северный ветер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5535524379089841,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "M_c79c3624f7184cbcaa52636e3cccdb28",
+          "kind": "M"
+        },
+        "semantic": "[M_c79c3624f7184cbcaa52636e3cccdb28] Рама",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.45244597000000003,
+        "output": 0.05244597000000001,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "M_da30087c955b4e08a634435c8cec23b9",
+          "kind": "M"
+        },
+        "semantic": "[M_da30087c955b4e08a634435c8cec23b9] Дождевая вода",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.6992269914649484,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "N_009a7f61263d40c7a219928f1381fd02",
+          "kind": "N"
+        },
+        "semantic": "[N_009a7f61263d40c7a219928f1381fd02] [S_4d8607a7f1a7415e96ec9213a7d04442] войти(SUBJECT=[M_3b19ddfdf04341f1acfcf4d94331fe3c] Марина, AUXILLIARY=[M_4f07dd1949de4481b4bed98ee2686db5] пристань, LOCATION=[M_b3b726dd0eb94e0f8c8fc69f421d2649] старый дом, TIME=[M_3efaf8086387464d85d1fb0655a7b2b4] вечер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9579410957005264,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+          "kind": "N"
+        },
+        "semantic": "[N_0b098e75da47471cab8727f78d3c67e9] [S_ed8e6da40443413d96d2f764790281ea] намокла(SUBJECT=[M_02a7c710d7734ab290d0798cf9ba053c] Балка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "N_0e9bf2db7a2f4ac58e4b14859149362e",
+          "kind": "N"
+        },
+        "semantic": "[N_0e9bf2db7a2f4ac58e4b14859149362e] [S_9cf3a795326544a78a751dee8979e7a5] сдвинулся(SUBJECT=[M_27c2801b83dd424aaaa3aec293f1da96] Жёлоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "N_25771bca058a43dd919f904b3dae95d3",
+          "kind": "N"
+        },
+        "semantic": "[N_25771bca058a43dd919f904b3dae95d3] [S_2a1d72162e75446c822f6fa98cc39450] пойти(SUBJECT=[M_da30087c955b4e08a634435c8cec23b9] Дождевая вода, LOCATION=[M_5f4ea747520d4e8ab094a9e44148b8d1] край крыши)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "N_308561117a8d40c49f37175e307cbbb3",
+          "kind": "N"
+        },
+        "semantic": "[N_308561117a8d40c49f37175e307cbbb3] [S_ffc7bdde8aa842b8a7693922b4a04de9] усилился(SUBJECT=[M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8] ветер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9682870056284307,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+          "kind": "N"
+        },
+        "semantic": "[N_33593ddc886f4642911f70f9c9f423c4] реплика пользователя: Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N"
+        },
+        "semantic": "[N_3a15126cdc07495e9425aac62e06941d] [S_96e0389842ec442f88b64e2cef44614c] разбухла(SUBJECT=[M_02a7c710d7734ab290d0798cf9ba053c] Балка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.4099999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "N_4ae63eb070224d8991dadf9650f88214",
+          "kind": "N"
+        },
+        "semantic": "[N_4ae63eb070224d8991dadf9650f88214] [S_44d70827b58c40a38624a4b3c5da2b6e] задела(SUBJECT=[M_8c0e4f04ca314e2996861cb5e806eaf8] ветка, OBJECT=[M_27c2801b83dd424aaaa3aec293f1da96] Жёлоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "N_6478ea4d7a8e43219e493fa3ecf46ea8",
+          "kind": "N"
+        },
+        "semantic": "[N_6478ea4d7a8e43219e493fa3ecf46ea8] [S_ffc7bdde8aa842b8a7693922b4a04de9] усилился(SUBJECT=[M_c466272a8d8049fda02b9cfb110e494d] северный ветер, LOCATION=[M_8cdf0ac582734ed49bfe2b03988079dc] бухта)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9682870056284307,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+          "kind": "N"
+        },
+        "semantic": "[N_666cb1eebea84a4cb6b7c9bb8c102c9d] [S_2bfce5aaf050414cb1300713563dbdd2] упала(SUBJECT=[M_7e04b33c3bcf404786227ae419ccfc52] Сухая ветка, LOCATION=[M_62638611100440a29f15d136bf8c4707] жестяной желоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9682870056284307,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 28,
+        "root": {
+          "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+          "kind": "N"
+        },
+        "semantic": "[N_67ba0f4f9b7d4f088dfc714a74b078ca] реплика пользователя: Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48128585397303125,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 29,
+        "root": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "semantic": "[N_7d47d251978f41a9b1e0c32734f56aa1] [S_53c442e82d764c3ba16d83939072b43a] перекосилась(SUBJECT=[M_c79c3624f7184cbcaa52636e3cccdb28] Рама)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3939879100000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 30,
+        "root": {
+          "uid": "N_8b84681bc73245219dc3c82329a4ad99",
+          "kind": "N"
+        },
+        "semantic": "[N_8b84681bc73245219dc3c82329a4ad99] [S_2a1d72162e75446c822f6fa98cc39450] пойти(SUBJECT=[M_7e65c9358de7407da9f82d77fcaa3a97] вода, LOCATION=[M_5f4ea747520d4e8ab094a9e44148b8d1] край крыши)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 31,
+        "root": {
+          "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+          "kind": "N"
+        },
+        "semantic": "[N_ba11f0929af945e7b6ac2bec38cb21b5] [S_988cd7606c6c4accb8d1b86d68165bfc] заклинилось(SUBJECT=[M_972ded25323747f8a9c4a053cf531aaa] Окно)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.407502155,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 32,
+        "root": {
+          "uid": "N_d05cf65cbb70479fa6f270df1d6a47c1",
+          "kind": "N"
+        },
+        "semantic": "[N_d05cf65cbb70479fa6f270df1d6a47c1] реплика пользователя: Желоб сдвинулся, потому что ветка задела его. Дождевая вода пошла под край крыши, потому что желоб сдвинулся.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48648381459621354,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 33,
+        "root": {
+          "uid": "N_dc04dd2c74834fc2a7dd668b4f6c20cf",
+          "kind": "N"
+        },
+        "semantic": "[N_dc04dd2c74834fc2a7dd668b4f6c20cf] реплика пользователя: Балка намокла, потому что вода пошла под край крыши. Балка разбухла, потому что балка намокла.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 34,
+        "root": {
+          "uid": "N_eb181ff2c3624af287e31b645f148e5c",
+          "kind": "N"
+        },
+        "semantic": "[N_eb181ff2c3624af287e31b645f148e5c] реплика пользователя: К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4761434322883079,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 35,
+        "root": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        },
+        "semantic": "[N_ecb0e26937524a379b153720f0d8f0ef] [S_804852fdc1844b9da9c97390765e17e6] сломалась(SUBJECT=[M_7e04b33c3bcf404786227ae419ccfc52] Сухая ветка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9729676291924271,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 36,
+        "root": {
+          "uid": "S_2a1d72162e75446c822f6fa98cc39450",
+          "kind": "S"
+        },
+        "semantic": "[S_2a1d72162e75446c822f6fa98cc39450] пойти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 37,
+        "root": {
+          "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+          "kind": "S"
+        },
+        "semantic": "[S_2bfce5aaf050414cb1300713563dbdd2] упала",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9144431225487593,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 38,
+        "root": {
+          "uid": "S_44d70827b58c40a38624a4b3c5da2b6e",
+          "kind": "S"
+        },
+        "semantic": "[S_44d70827b58c40a38624a4b3c5da2b6e] задела",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 39,
+        "root": {
+          "uid": "S_4d8607a7f1a7415e96ec9213a7d04442",
+          "kind": "S"
+        },
+        "semantic": "[S_4d8607a7f1a7415e96ec9213a7d04442] войти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.904672521347785,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 40,
+        "root": {
+          "uid": "S_53c442e82d764c3ba16d83939072b43a",
+          "kind": "S"
+        },
+        "semantic": "[S_53c442e82d764c3ba16d83939072b43a] перекосилась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 41,
+        "root": {
+          "uid": "S_804852fdc1844b9da9c97390765e17e6",
+          "kind": "S"
+        },
+        "semantic": "[S_804852fdc1844b9da9c97390765e17e6] сломалась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9144431225487593,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 42,
+        "root": {
+          "uid": "S_96e0389842ec442f88b64e2cef44614c",
+          "kind": "S"
+        },
+        "semantic": "[S_96e0389842ec442f88b64e2cef44614c] разбухла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 43,
+        "root": {
+          "uid": "S_988cd7606c6c4accb8d1b86d68165bfc",
+          "kind": "S"
+        },
+        "semantic": "[S_988cd7606c6c4accb8d1b86d68165bfc] заклинилось",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 44,
+        "root": {
+          "uid": "S_9cf3a795326544a78a751dee8979e7a5",
+          "kind": "S"
+        },
+        "semantic": "[S_9cf3a795326544a78a751dee8979e7a5] сдвинулся",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 45,
+        "root": {
+          "uid": "S_ed8e6da40443413d96d2f764790281ea",
+          "kind": "S"
+        },
+        "semantic": "[S_ed8e6da40443413d96d2f764790281ea] намокла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 46,
+        "root": {
+          "uid": "S_ffc7bdde8aa842b8a7693922b4a04de9",
+          "kind": "S"
+        },
+        "semantic": "[S_ffc7bdde8aa842b8a7693922b4a04de9] усилился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9625717079460625,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 47,
+        "root": {
+          "uid": "T_0898a88737a7411a8384193b253dd99a",
+          "kind": "T"
+        },
+        "semantic": "[T_0898a88737a7411a8384193b253dd99a] predicate=[S_96e0389842ec442f88b64e2cef44614c] разбухла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 48,
+        "root": {
+          "uid": "T_1ddd79db8b41401d982e910dd486f70d",
+          "kind": "T"
+        },
+        "semantic": "[T_1ddd79db8b41401d982e910dd486f70d] predicate=[S_44d70827b58c40a38624a4b3c5da2b6e] задела; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 49,
+        "root": {
+          "uid": "T_2a1b8668b5894b19b308350e3b8ff28c",
+          "kind": "T"
+        },
+        "semantic": "[T_2a1b8668b5894b19b308350e3b8ff28c] predicate=[S_9cf3a795326544a78a751dee8979e7a5] сдвинулся; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 50,
+        "root": {
+          "uid": "T_34140f3586ac4cb1a3a5297ef7a15691",
+          "kind": "T"
+        },
+        "semantic": "[T_34140f3586ac4cb1a3a5297ef7a15691] predicate=[S_804852fdc1844b9da9c97390765e17e6] сломалась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.917608583560174,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 51,
+        "root": {
+          "uid": "T_35b70aa2107444d1a5ac95e8e4e786e9",
+          "kind": "T"
+        },
+        "semantic": "[T_35b70aa2107444d1a5ac95e8e4e786e9] predicate=[S_ed8e6da40443413d96d2f764790281ea] намокла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 52,
+        "root": {
+          "uid": "T_46fbb00f64a0462484e0f2d27cd67f55",
+          "kind": "T"
+        },
+        "semantic": "[T_46fbb00f64a0462484e0f2d27cd67f55] predicate=[S_4d8607a7f1a7415e96ec9213a7d04442] войти; roles=[SUBJECT, AUXILLIARY, LOCATION, TIME]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.907804160182186,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 53,
+        "root": {
+          "uid": "T_4a20fe253ee14580abc0fd206f078560",
+          "kind": "T"
+        },
+        "semantic": "[T_4a20fe253ee14580abc0fd206f078560] predicate=[S_2bfce5aaf050414cb1300713563dbdd2] упала; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.917608583560174,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 54,
+        "root": {
+          "uid": "T_69bd0c5eaf904c9aaa4660d2afa4bf46",
+          "kind": "T"
+        },
+        "semantic": "[T_69bd0c5eaf904c9aaa4660d2afa4bf46] predicate=[S_988cd7606c6c4accb8d1b86d68165bfc] заклинилось; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 55,
+        "root": {
+          "uid": "T_8d05b144b14e47f58f32e8660f307eff",
+          "kind": "T"
+        },
+        "semantic": "[T_8d05b144b14e47f58f32e8660f307eff] predicate=[S_ffc7bdde8aa842b8a7693922b4a04de9] усилился; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9659037721686041,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 56,
+        "root": {
+          "uid": "T_95192d4bff154b168fbdaf7fe43590e1",
+          "kind": "T"
+        },
+        "semantic": "[T_95192d4bff154b168fbdaf7fe43590e1] predicate=[S_53c442e82d764c3ba16d83939072b43a] перекосилась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 57,
+        "root": {
+          "uid": "T_a50efc94c87a413aba33608ce4b06e20",
+          "kind": "T"
+        },
+        "semantic": "[T_a50efc94c87a413aba33608ce4b06e20] predicate=[S_2a1d72162e75446c822f6fa98cc39450] пойти; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9868802544627543,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 26,
+      "source_text": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: перекосилась; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nPREDICATE_START: [2] перекосилась\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: перекосилась",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась\nTARGET:\nперекосилась\nRUSSIAN_LEMMA:\nперекоситься",
+          "normalized_answer": "перекоситься",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась\nPREDICATE:\nперекосилась\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nперекосилась\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Рама",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nперекосилась\nQUESTION_WORD:\nРама",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nперекосилась\nALREADY_SELECTED:\nРама\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что балка разбухла\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[7] token 7: разбухла; morphology=VERB",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nPREDICATE_START: [7] разбухла\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[7] end at token 7: разбухла",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что балка разбухла\nTARGET:\nразбухла\nRUSSIAN_LEMMA:\nразбухнуть",
+          "normalized_answer": "разбухнуть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что балка разбухла\nPREDICATE:\nразбухла\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nразбухла\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] балка",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nразбухла\nQUESTION_WORD:\nбалка",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nразбухла\nALREADY_SELECTED:\nбалка\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОкно заклинилось\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[10] token 10: заклинилось; morphology=VERB",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nPREDICATE_START: [10] заклинилось\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[10] end at token 10: заклинилось",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОкно заклинилось\nTARGET:\nзаклинилось\nRUSSIAN_LEMMA:\nзаклиниться",
+          "normalized_answer": "заклиниться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОкно заклинилось\nPREDICATE:\nзаклинилось\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nзаклинилось\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Окно",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nзаклинилось\nQUESTION_WORD:\nОкно",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nзаклинилось\nALREADY_SELECTED:\nОкно\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что рама перекосилась\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[15] token 15: перекосилась; morphology=VERB",
+          "normalized_answer": "15",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nTOKENS:\n[1] Рама\n[2] перекосилась\n[3] ,\n[4] потому\n[5] что\n[6] балка\n[7] разбухла\n[8] .\n[9] Окно\n[10] заклинилось\n[11] ,\n[12] потому\n[13] что\n[14] рама\n[15] перекосилась\n[16] .\nPREDICATE_START: [15] перекосилась\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[15] end at token 15: перекосилась",
+          "normalized_answer": "15",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что рама перекосилась\nTARGET:\nперекосилась\nRUSSIAN_LEMMA:\nперекоситься",
+          "normalized_answer": "перекоситься",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что рама перекосилась\nPREDICATE:\nперекосилась\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nперекосилась\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] рама",
+          "normalized_answer": "14",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nперекосилась\nQUESTION_WORD:\nрама",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nРама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.\nPREDICATE:\nперекосилась\nALREADY_SELECTED:\nрама\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "перекосилась",
+              "normalized_hint": "перекоситься",
+              "sense_hint": null,
+              "evidence": {
+                "text": "перекосилась",
+                "start": 5,
+                "end": 17
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Рама",
+                "normalized_hint": "Рама",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Рама",
+                  "start": 0,
+                  "end": 4
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Рама перекосилась",
+              "start": 0,
+              "end": 17
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "разбухла",
+              "normalized_hint": "разбухнуть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "разбухла",
+                "start": 36,
+                "end": 44
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "балка",
+                "normalized_hint": "балка",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "балка",
+                  "start": 30,
+                  "end": 35
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что балка разбухла",
+              "start": 19,
+              "end": 44
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "заклинилось",
+              "normalized_hint": "заклиниться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "заклинилось",
+                "start": 51,
+                "end": 62
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Окно",
+                "normalized_hint": "Окно",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Окно",
+                  "start": 46,
+                  "end": 50
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Окно заклинилось",
+              "start": 46,
+              "end": 62
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A4",
+            "predicate": {
+              "surface": "перекосилась",
+              "normalized_hint": "перекоситься",
+              "sense_hint": null,
+              "evidence": {
+                "text": "перекосилась",
+                "start": 80,
+                "end": 92
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "рама",
+                "normalized_hint": "рама",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "рама",
+                  "start": 75,
+                  "end": 79
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что рама перекосилась",
+              "start": 64,
+              "end": 92
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A2",
+            "target_ref": "A1",
+            "evidence": {
+              "text": "потому что",
+              "start": 19,
+              "end": 29
+            }
+          },
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A4",
+            "target_ref": "A3",
+            "evidence": {
+              "text": "потому что",
+              "start": 64,
+              "end": 74
+            }
+          }
+        ],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [
+          {
+            "parent_ref": "A1",
+            "child_ref": "A2",
+            "kind": "SUBORDINATE"
+          },
+          {
+            "parent_ref": "A3",
+            "child_ref": "A4",
+            "kind": "SUBORDINATE"
+          }
+        ],
+        "relation_hints": [
+          {
+            "kind": "CAUSAL_CANDIDATE",
+            "source_ref": "A2",
+            "target_ref": "A3",
+            "evidence": {
+              "text": ". ",
+              "start": 44,
+              "end": 46
+            },
+            "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "K_69cf6b902ffc4680a4dfd54498933a75": {
+        "uid": "K_69cf6b902ffc4680a4dfd54498933a75",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+            "kind": "N"
+          },
+          {
+            "uid": "N_3a15126cdc07495e9425aac62e06941d",
+            "kind": "N"
+          },
+          {
+            "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+            "kind": "N"
+          },
+          {
+            "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_553695ee85ea412797725c0cfb1a38c8": {
+        "uid": "L_553695ee85ea412797725c0cfb1a38c8",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.24500000000000005,
+        "source": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        }
+      },
+      "L_7b741ddd9b73491ca008cbef66129951": {
+        "uid": "L_7b741ddd9b73491ca008cbef66129951",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.24500000000000005,
+        "source": {
+          "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+          "kind": "N"
+        }
+      },
+      "L_894206346cc34bfbb526022948937702": {
+        "uid": "L_894206346cc34bfbb526022948937702",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_dc04dd2c74834fc2a7dd668b4f6c20cf",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+          "kind": "N"
+        }
+      },
+      "M_972ded25323747f8a9c4a053cf531aaa": {
+        "uid": "M_972ded25323747f8a9c4a053cf531aaa",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Окно",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_c79c3624f7184cbcaa52636e3cccdb28": {
+        "uid": "M_c79c3624f7184cbcaa52636e3cccdb28",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Рама",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_33593ddc886f4642911f70f9c9f423c4": {
+        "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_f2061c6c1e474260a08ee67260d6e51e",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_69cf6b902ffc4680a4dfd54498933a75",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Рама перекосилась, потому что балка разбухла. Окно заклинилось, потому что рама перекосилась.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 12,
+          "expires_tick": 212,
+          "last_qualifying_tick": 12,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_7d47d251978f41a9b1e0c32734f56aa1": {
+        "uid": "N_7d47d251978f41a9b1e0c32734f56aa1",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.41000000000000003,
+        "template": {
+          "uid": "T_95192d4bff154b168fbdaf7fe43590e1",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_c79c3624f7184cbcaa52636e3cccdb28",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 2,
+          "lifecycle_state": "NEW",
+          "created_tick": 12,
+          "expires_tick": 212,
+          "last_qualifying_tick": 12,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_ba11f0929af945e7b6ac2bec38cb21b5": {
+        "uid": "N_ba11f0929af945e7b6ac2bec38cb21b5",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_69bd0c5eaf904c9aaa4660d2afa4bf46",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_972ded25323747f8a9c4a053cf531aaa",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 12,
+          "expires_tick": 212,
+          "last_qualifying_tick": 12,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_53c442e82d764c3ba16d83939072b43a": {
+        "uid": "S_53c442e82d764c3ba16d83939072b43a",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "перекосилась",
+          "перекоситься"
+        ]
+      },
+      "S_988cd7606c6c4accb8d1b86d68165bfc": {
+        "uid": "S_988cd7606c6c4accb8d1b86d68165bfc",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "заклинилось",
+          "заклиниться"
+        ]
+      },
+      "T_69bd0c5eaf904c9aaa4660d2afa4bf46": {
+        "uid": "T_69bd0c5eaf904c9aaa4660d2afa4bf46",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_988cd7606c6c4accb8d1b86d68165bfc",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      },
+      "T_95192d4bff154b168fbdaf7fe43590e1": {
+        "uid": "T_95192d4bff154b168fbdaf7fe43590e1",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_53c442e82d764c3ba16d83939072b43a",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_2e64e919027b4e0f91288b3ee7259944": {
+        "before": {
+          "uid": "L_2e64e919027b4e0f91288b3ee7259944",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_3a15126cdc07495e9425aac62e06941d",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_2e64e919027b4e0f91288b3ee7259944",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.25600000000000006,
+          "source": {
+            "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_3a15126cdc07495e9425aac62e06941d",
+            "kind": "N"
+          }
+        }
+      },
+      "L_851ba796956042f4b25a0786c3a3beef": {
+        "before": {
+          "uid": "L_851ba796956042f4b25a0786c3a3beef",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22800000000000004,
+          "source": {
+            "uid": "N_8b84681bc73245219dc3c82329a4ad99",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_851ba796956042f4b25a0786c3a3beef",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22600000000000003,
+          "source": {
+            "uid": "N_8b84681bc73245219dc3c82329a4ad99",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_0b098e75da47471cab8727f78d3c67e9",
+            "kind": "N"
+          }
+        }
+      },
+      "N_3a15126cdc07495e9425aac62e06941d": {
+        "before": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.4,
+          "template": {
+            "uid": "T_0898a88737a7411a8384193b253dd99a",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_02a7c710d7734ab290d0798cf9ba053c",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 1,
+            "lifecycle_state": "NEW",
+            "created_tick": 9,
+            "expires_tick": 209,
+            "last_qualifying_tick": 9,
+            "qualifying_reactivations": 0
+          }
+        },
+        "after": {
+          "uid": "N_3a15126cdc07495e9425aac62e06941d",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.41000000000000003,
+          "template": {
+            "uid": "T_0898a88737a7411a8384193b253dd99a",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_02a7c710d7734ab290d0798cf9ba053c",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 2,
+            "lifecycle_state": "NEW",
+            "created_tick": 9,
+            "expires_tick": 209,
+            "last_qualifying_tick": 9,
+            "qualifying_reactivations": 0
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 15,
+    "workspace_uids": [
+      "M_02a7c710d7734ab290d0798cf9ba053c",
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8",
+      "M_27c2801b83dd424aaaa3aec293f1da96",
+      "M_3b19ddfdf04341f1acfcf4d94331fe3c",
+      "M_3efaf8086387464d85d1fb0655a7b2b4",
+      "M_4f07dd1949de4481b4bed98ee2686db5",
+      "M_5f4ea747520d4e8ab094a9e44148b8d1",
+      "M_62638611100440a29f15d136bf8c4707",
+      "M_7e04b33c3bcf404786227ae419ccfc52",
+      "M_7e65c9358de7407da9f82d77fcaa3a97",
+      "M_8c0e4f04ca314e2996861cb5e806eaf8",
+      "M_8cdf0ac582734ed49bfe2b03988079dc",
+      "M_b3b726dd0eb94e0f8c8fc69f421d2649",
+      "M_c466272a8d8049fda02b9cfb110e494d",
+      "M_c79c3624f7184cbcaa52636e3cccdb28",
+      "M_da30087c955b4e08a634435c8cec23b9",
+      "N_009a7f61263d40c7a219928f1381fd02",
+      "N_0b098e75da47471cab8727f78d3c67e9",
+      "N_0e9bf2db7a2f4ac58e4b14859149362e",
+      "N_25771bca058a43dd919f904b3dae95d3",
+      "N_308561117a8d40c49f37175e307cbbb3",
+      "N_33593ddc886f4642911f70f9c9f423c4",
+      "N_3a15126cdc07495e9425aac62e06941d",
+      "N_4ae63eb070224d8991dadf9650f88214",
+      "N_6478ea4d7a8e43219e493fa3ecf46ea8",
+      "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+      "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+      "N_7d47d251978f41a9b1e0c32734f56aa1",
+      "N_8b84681bc73245219dc3c82329a4ad99",
+      "N_ba11f0929af945e7b6ac2bec38cb21b5",
+      "N_d05cf65cbb70479fa6f270df1d6a47c1",
+      "N_dc04dd2c74834fc2a7dd668b4f6c20cf",
+      "N_eb181ff2c3624af287e31b645f148e5c",
+      "N_ecb0e26937524a379b153720f0d8f0ef",
+      "S_2a1d72162e75446c822f6fa98cc39450",
+      "S_2bfce5aaf050414cb1300713563dbdd2",
+      "S_44d70827b58c40a38624a4b3c5da2b6e",
+      "S_4d8607a7f1a7415e96ec9213a7d04442",
+      "S_53c442e82d764c3ba16d83939072b43a",
+      "S_804852fdc1844b9da9c97390765e17e6",
+      "S_96e0389842ec442f88b64e2cef44614c",
+      "S_988cd7606c6c4accb8d1b86d68165bfc",
+      "S_9cf3a795326544a78a751dee8979e7a5",
+      "S_ed8e6da40443413d96d2f764790281ea",
+      "S_ffc7bdde8aa842b8a7693922b4a04de9",
+      "T_0898a88737a7411a8384193b253dd99a",
+      "T_1ddd79db8b41401d982e910dd486f70d",
+      "T_2a1b8668b5894b19b308350e3b8ff28c",
+      "T_34140f3586ac4cb1a3a5297ef7a15691",
+      "T_35b70aa2107444d1a5ac95e8e4e786e9",
+      "T_46fbb00f64a0462484e0f2d27cd67f55",
+      "T_4a20fe253ee14580abc0fd206f078560",
+      "T_69bd0c5eaf904c9aaa4660d2afa4bf46",
+      "T_8d05b144b14e47f58f32e8660f307eff",
+      "T_95192d4bff154b168fbdaf7fe43590e1",
+      "T_a50efc94c87a413aba33608ce4b06e20"
+    ],
+    "workspace": {
+      "M_02a7c710d7734ab290d0798cf9ba053c": {
+        "semantic": "Балка",
+        "excitation": 0.9975387117187637
+      },
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.7408334874756267
+      },
+      "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8": {
+        "semantic": "ветер",
+        "excitation": 0.40802376826664344
+      },
+      "M_27c2801b83dd424aaaa3aec293f1da96": {
+        "semantic": "Жёлоб",
+        "excitation": 0.9834758279737207
+      },
+      "M_3b19ddfdf04341f1acfcf4d94331fe3c": {
+        "semantic": "Марина",
+        "excitation": 0.3959635603929772
+      },
+      "M_3efaf8086387464d85d1fb0655a7b2b4": {
+        "semantic": "вечер",
+        "excitation": 0.3959635603929772
+      },
+      "M_4f07dd1949de4481b4bed98ee2686db5": {
+        "semantic": "пристань",
+        "excitation": 0.3959635603929772
+      },
+      "M_5f4ea747520d4e8ab094a9e44148b8d1": {
+        "semantic": "край крыши",
+        "excitation": 0.9940975169044439
+      },
+      "M_62638611100440a29f15d136bf8c4707": {
+        "semantic": "жестяной желоб",
+        "excitation": 0.40024002723310403
+      },
+      "M_7e04b33c3bcf404786227ae419ccfc52": {
+        "semantic": "Сухая ветка",
+        "excitation": 0.8851830585203742
+      },
+      "M_7e65c9358de7407da9f82d77fcaa3a97": {
+        "semantic": "вода",
+        "excitation": 0.4168847993519881
+      },
+      "M_8c0e4f04ca314e2996861cb5e806eaf8": {
+        "semantic": "ветка",
+        "excitation": 0.40456268056730255
+      },
+      "M_8cdf0ac582734ed49bfe2b03988079dc": {
+        "semantic": "бухта",
+        "excitation": 0.5535524379089841
+      },
+      "M_b3b726dd0eb94e0f8c8fc69f421d2649": {
+        "semantic": "старый дом",
+        "excitation": 0.3959635603929772
+      },
+      "M_c466272a8d8049fda02b9cfb110e494d": {
+        "semantic": "северный ветер",
+        "excitation": 0.5535524379089841
+      },
+      "M_c79c3624f7184cbcaa52636e3cccdb28": {
+        "semantic": "Рама",
+        "excitation": 0.45244597000000003
+      },
+      "M_da30087c955b4e08a634435c8cec23b9": {
+        "semantic": "Дождевая вода",
+        "excitation": 0.6992269914649484
+      },
+      "N_009a7f61263d40c7a219928f1381fd02": {
+        "semantic": "войти(SUBJECT=Марина, AUXILLIARY=пристань, LOCATION=старый дом, TIME=вечер)",
+        "excitation": 0.9579410957005264
+      },
+      "N_0b098e75da47471cab8727f78d3c67e9": {
+        "semantic": "намокла(SUBJECT=Балка)",
+        "excitation": 0.9940975169044439
+      },
+      "N_0e9bf2db7a2f4ac58e4b14859149362e": {
+        "semantic": "сдвинулся(SUBJECT=Жёлоб)",
+        "excitation": 0.9834758279737207
+      },
+      "N_25771bca058a43dd919f904b3dae95d3": {
+        "semantic": "пойти(SUBJECT=Дождевая вода, LOCATION=край крыши)",
+        "excitation": 0.9893152444804425
+      },
+      "N_308561117a8d40c49f37175e307cbbb3": {
+        "semantic": "усилился(SUBJECT=ветер)",
+        "excitation": 0.9682870056284307
+      },
+      "N_33593ddc886f4642911f70f9c9f423c4": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_69cf6b902ffc4680a4dfd54498933a75[перекосилась(SUBJECT=Рама); разбухла(SUBJECT=Балка); заклинилось(SUBJECT=Окно); перекосилась(SUBJECT=Рама)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_3a15126cdc07495e9425aac62e06941d": {
+        "semantic": "разбухла(SUBJECT=Балка)",
+        "excitation": 1.0
+      },
+      "N_4ae63eb070224d8991dadf9650f88214": {
+        "semantic": "задела(SUBJECT=ветка, OBJECT=Жёлоб)",
+        "excitation": 0.9787446529613976
+      },
+      "N_6478ea4d7a8e43219e493fa3ecf46ea8": {
+        "semantic": "усилился(SUBJECT=северный ветер, LOCATION=бухта)",
+        "excitation": 0.9682870056284307
+      },
+      "N_666cb1eebea84a4cb6b7c9bb8c102c9d": {
+        "semantic": "упала(SUBJECT=Сухая ветка, LOCATION=жестяной желоб)",
+        "excitation": 0.9682870056284307
+      },
+      "N_67ba0f4f9b7d4f088dfc714a74b078ca": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_009c35b41d8943f8bbf2eb94388f6d6c[сломалась(SUBJECT=Сухая ветка); усилился(SUBJECT=ветер); упала(SUBJECT=Сухая ветка, LOCATION=жестяной желоб)])",
+        "excitation": 0.48128585397303125
+      },
+      "N_7d47d251978f41a9b1e0c32734f56aa1": {
+        "semantic": "перекосилась(SUBJECT=Рама)",
+        "excitation": 1.0
+      },
+      "N_8b84681bc73245219dc3c82329a4ad99": {
+        "semantic": "пойти(SUBJECT=вода, LOCATION=край крыши)",
+        "excitation": 0.9893152444804425
+      },
+      "N_ba11f0929af945e7b6ac2bec38cb21b5": {
+        "semantic": "заклинилось(SUBJECT=Окно)",
+        "excitation": 1.0
+      },
+      "N_d05cf65cbb70479fa6f270df1d6a47c1": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_16d534f51d4847bbb8bdc83eb6fb2cfd[сдвинулся(SUBJECT=Жёлоб); задела(SUBJECT=ветка, OBJECT=Жёлоб); пойти(SUBJECT=Дождевая вода, LOCATION=край крыши); сдвинулся(SUBJECT=Жёлоб)])",
+        "excitation": 0.48648381459621354
+      },
+      "N_dc04dd2c74834fc2a7dd668b4f6c20cf": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_0693a465054b43c8a103169362847c83[намокла(SUBJECT=Балка); пойти(SUBJECT=вода, LOCATION=край крыши); разбухла(SUBJECT=Балка); намокла(SUBJECT=Балка)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_eb181ff2c3624af287e31b645f148e5c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_832aab6690ad482192e3be017b2d7fd7[войти(SUBJECT=Марина, AUXILLIARY=пристань, LOCATION=старый дом, TIME=вечер); усилился(SUBJECT=северный ветер, LOCATION=бухта)])",
+        "excitation": 0.4761434322883079
+      },
+      "N_ecb0e26937524a379b153720f0d8f0ef": {
+        "semantic": "сломалась(SUBJECT=Сухая ветка)",
+        "excitation": 0.9729676291924271
+      },
+      "S_2a1d72162e75446c822f6fa98cc39450": {
+        "semantic": "пойти",
+        "excitation": 0.9834758279737207
+      },
+      "S_2bfce5aaf050414cb1300713563dbdd2": {
+        "semantic": "упала",
+        "excitation": 0.9144431225487593
+      },
+      "S_44d70827b58c40a38624a4b3c5da2b6e": {
+        "semantic": "задела",
+        "excitation": 0.9243192477328055
+      },
+      "S_4d8607a7f1a7415e96ec9213a7d04442": {
+        "semantic": "войти",
+        "excitation": 0.904672521347785
+      },
+      "S_53c442e82d764c3ba16d83939072b43a": {
+        "semantic": "перекосилась",
+        "excitation": 0.9443926410592216
+      },
+      "S_804852fdc1844b9da9c97390765e17e6": {
+        "semantic": "сломалась",
+        "excitation": 0.9144431225487593
+      },
+      "S_96e0389842ec442f88b64e2cef44614c": {
+        "semantic": "разбухла",
+        "excitation": 0.9940975169044439
+      },
+      "S_988cd7606c6c4accb8d1b86d68165bfc": {
+        "semantic": "заклинилось",
+        "excitation": 0.9443926410592216
+      },
+      "S_9cf3a795326544a78a751dee8979e7a5": {
+        "semantic": "сдвинулся",
+        "excitation": 0.9243192477328055
+      },
+      "S_ed8e6da40443413d96d2f764790281ea": {
+        "semantic": "намокла",
+        "excitation": 0.9343020365750345
+      },
+      "S_ffc7bdde8aa842b8a7693922b4a04de9": {
+        "semantic": "усилился",
+        "excitation": 0.9625717079460625
+      },
+      "T_0898a88737a7411a8384193b253dd99a": {
+        "semantic": "разбухла",
+        "excitation": 0.9975387117187637
+      },
+      "T_1ddd79db8b41401d982e910dd486f70d": {
+        "semantic": "задела",
+        "excitation": 0.927518896205904
+      },
+      "T_2a1b8668b5894b19b308350e3b8ff28c": {
+        "semantic": "сдвинулся",
+        "excitation": 0.927518896205904
+      },
+      "T_34140f3586ac4cb1a3a5297ef7a15691": {
+        "semantic": "сломалась",
+        "excitation": 0.917608583560174
+      },
+      "T_35b70aa2107444d1a5ac95e8e4e786e9": {
+        "semantic": "намокла",
+        "excitation": 0.9375362417396166
+      },
+      "T_46fbb00f64a0462484e0f2d27cd67f55": {
+        "semantic": "войти",
+        "excitation": 0.907804160182186
+      },
+      "T_4a20fe253ee14580abc0fd206f078560": {
+        "semantic": "упала",
+        "excitation": 0.917608583560174
+      },
+      "T_69bd0c5eaf904c9aaa4660d2afa4bf46": {
+        "semantic": "заклинилось",
+        "excitation": 0.9476617761328255
+      },
+      "T_8d05b144b14e47f58f32e8660f307eff": {
+        "semantic": "усилился",
+        "excitation": 0.9659037721686041
+      },
+      "T_95192d4bff154b168fbdaf7fe43590e1": {
+        "semantic": "перекосилась",
+        "excitation": 0.9476617761328255
+      },
+      "T_a50efc94c87a413aba33608ce4b06e20": {
+        "semantic": "пойти",
+        "excitation": 0.9868802544627543
+      }
+    },
+    "pending_incoming": {
+      "N_7d47d251978f41a9b1e0c32734f56aa1": 0.0943,
+      "M_02a7c710d7734ab290d0798cf9ba053c": 0.16809999999999997,
+      "N_ba11f0929af945e7b6ac2bec38cb21b5": 0.09061721930000004,
+      "M_c79c3624f7184cbcaa52636e3cccdb28": 0.16153504310000005,
+      "M_972ded25323747f8a9c4a053cf531aaa": 0.163000862
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_27c2801b83dd424aaaa3aec293f1da96",
+        "kind": "M"
+      },
+      "оно": {
+        "uid": "M_972ded25323747f8a9c4a053cf531aaa",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_33593ddc886f4642911f70f9c9f423c4",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "semantic_note": "Дом у пристани — художественный монолит, paragraph 5",
+  "semantic_family": "document.monolith.literary",
+  "semantic_tags": [
+    "document",
+    "monolith",
+    "literary",
+    "graph-graded"
+  ]
+}

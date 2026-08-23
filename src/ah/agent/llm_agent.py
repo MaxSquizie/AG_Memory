@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
+import re
 
 from ah.config import LLMRoleSettings
 from ah.projection.contracts import AgentContext
@@ -136,9 +137,29 @@ class LLMAgent:
         )
         raw = str(response.text).strip()
         cleaned, _contaminated = self._sanitize(raw)
-        if cleaned:
+        if cleaned and self._clarification_mentions_all_labels(cleaned, request):
             return cleaned
+        # Clarification structure is deterministic.  A model may improve phrasing,
+        # but it may not replace real option labels by opaque "[1]/[2]" placeholders
+        # or silently drop one of the choices.
         return self._deterministic_clarification(request)
+
+    @staticmethod
+    def _normalize_clarification_label(text: str) -> str:
+        return re.sub(r"[^\wёЁ]+", " ", text.casefold(), flags=re.UNICODE).strip()
+
+    @classmethod
+    def _clarification_mentions_all_labels(
+        cls, text: str, request: ClarificationRequest
+    ) -> bool:
+        normalized_text = f" {cls._normalize_clarification_label(text)} "
+        if not normalized_text.strip():
+            return False
+        for option in request.options:
+            label = cls._normalize_clarification_label(option.label)
+            if not label or f" {label} " not in normalized_text:
+                return False
+        return True
 
     @staticmethod
     def _deterministic_clarification(request: ClarificationRequest) -> str:

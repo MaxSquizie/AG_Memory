@@ -72,6 +72,9 @@ class LLMConfig:
     backend: str = "builtin_process"
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = ""
+    lmstudio_base_url: str = "http://127.0.0.1:1234"
+    lmstudio_model: str = ""
+    lmstudio_api_key: str = ""
     loader_type: str = "auto"
     device_map: str = "auto"
     dtype: str = "auto"
@@ -135,10 +138,12 @@ class LLMConfig:
             raise ValueError("llm.perception.morphology_backend must be auto, pymorphy3, or none")
         if self.agent_repair_attempts < 0 or self.agent_repair_attempts > 2:
             raise ValueError("llm.agent.repair_attempts must be in [0, 2]")
-        if self.backend not in {"builtin_process", "ollama"}:
-            raise ValueError("llm.backend must be builtin_process or ollama")
+        if self.backend not in {"builtin_process", "ollama", "lmstudio"}:
+            raise ValueError("llm.backend must be builtin_process, ollama, or lmstudio")
         if not str(self.ollama_base_url).strip():
             raise ValueError("llm.ollama_base_url must not be empty")
+        if not str(self.lmstudio_base_url).strip():
+            raise ValueError("llm.lmstudio_base_url must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,6 +152,7 @@ class IntegrationSettings:
     experience_hypernode_weight: float = 0.3
     follow_link_weight: float = 0.2
     cause_link_weight: float = 0.2
+    is_a_link_weight: float = 0.2
     initial_inferred_link_weight: float = 0.25
 
     def __post_init__(self) -> None:
@@ -155,6 +161,7 @@ class IntegrationSettings:
             ("experience_hypernode_weight", self.experience_hypernode_weight),
             ("follow_link_weight", self.follow_link_weight),
             ("cause_link_weight", self.cause_link_weight),
+            ("is_a_link_weight", self.is_a_link_weight),
             ("initial_inferred_link_weight", self.initial_inferred_link_weight),
         ):
             if not 0 <= value <= 1:
@@ -479,6 +486,9 @@ def load_config(path: str | Path) -> AppConfig:
         backend=str(llm_raw.get("backend", "builtin_process")),
         ollama_base_url=str(llm_raw.get("ollama_base_url", "http://127.0.0.1:11434")),
         ollama_model=str(llm_raw.get("ollama_model", "")),
+        lmstudio_base_url=str(llm_raw.get("lmstudio_base_url", "http://127.0.0.1:1234")),
+        lmstudio_model=str(llm_raw.get("lmstudio_model", "")),
+        lmstudio_api_key=str(llm_raw.get("lmstudio_api_key", "")),
         loader_type=str(llm_raw.get("loader_type", "auto")),
         device_map=str(llm_raw.get("device_map", "auto")),
         dtype=str(llm_raw.get("dtype", "auto")),
@@ -533,6 +543,7 @@ def load_config(path: str | Path) -> AppConfig:
         experience_hypernode_weight=float(ir.get("experience_hypernode_weight", 0.3)),
         follow_link_weight=float(ir.get("follow_link_weight", 0.2)),
         cause_link_weight=float(ir.get("cause_link_weight", ir.get("follow_link_weight", 0.2))),
+        is_a_link_weight=float(ir.get("is_a_link_weight", 0.2)),
         initial_inferred_link_weight=float(ir.get("initial_inferred_link_weight", 0.25)),
     )
 

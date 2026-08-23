@@ -61,6 +61,10 @@ class PredicateHeadCandidate:
     strength: int
     finite: bool
     lemma_candidates: tuple[str, ...]
+    # Runtime structural cue: this head is a nominal predicate licensed by a
+    # copular shell (e.g. ``Москва — город``). It is not an AH type and does
+    # not make arbitrary nouns predicates.
+    nominal_predicative: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -293,7 +297,87 @@ class LinguisticCandidateBuilder:
             elif secondary:
                 finite = any(a.pos in {"ADJS", "PRTS"} for a in token.analyses)
                 result.append(PredicateHeadCandidate(token.index, 1, finite, secondary))
-        return tuple(result)
+
+        # Dictionary morphology may expose a surface form simultaneously as a
+        # non-finite predicate and as a nominative noun.  A classic Russian case
+        # is a GRND/NOUN homograph at the beginning of an ordinary finite clause.
+        # Treating both readings as independent predicate heads splits one clause
+        # into two propositions before any semantic probe can repair it.
+        #
+        # Suppress only the formally dominated reading: a weak non-finite head is
+        # removed when the *same token* has a material nominative nominal reading,
+        # the nearest following strong finite predicate is in the same punctuation
+        # segment, and that nominal reading agrees with the finite predicate.  A
+        # comma/coordinator keeps genuine gerunds/infinitives alive (e.g. a
+        # detached non-finite clause).  This is morphology + clause structure, not
+        # a lexical exception and not a semantic role decision.
+        by_index = {head.token_index: head for head in result}
+        coordinators = {"и", "или", "либо", "а", "но", "однако"}
+        hard_separators = {",", ";", ".", "!", "?", ":"}
+
+        def agreeing_nominal_with(head: PredicateHeadCandidate, token: SourceToken) -> bool:
+            nominal = [
+                item for item in self._material_analyses(token)
+                if item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
+            ]
+            if not nominal:
+                return False
+            predicate_token = tokens[head.token_index - 1]
+            predicates = [
+                item for item in self._material_analyses(predicate_token)
+                if item.pos == "VERB"
+            ]
+            if not predicates:
+                return False
+
+            n_numbers = {item.number for item in nominal if item.number}
+            p_numbers = {item.number for item in predicates if item.number}
+            if n_numbers and p_numbers and n_numbers.isdisjoint(p_numbers):
+                return False
+
+            past_singular = [
+                item for item in predicates
+                if item.number == "sing" and "past" in item.grammemes and item.gender
+            ]
+            if past_singular:
+                n_genders = {item.gender for item in nominal if item.gender}
+                p_genders = {item.gender for item in past_singular if item.gender}
+                if n_genders and p_genders and n_genders.isdisjoint(p_genders):
+                    return False
+            return True
+
+        suppressed: set[int] = set()
+        finite_heads = [head for head in result if head.finite and head.strength >= 2]
+        for head in result:
+            if head.finite or head.strength >= 2:
+                continue
+            token = tokens[head.token_index - 1]
+            if not any(
+                item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
+                for item in self._material_analyses(token)
+            ):
+                continue
+            following = [item for item in finite_heads if item.token_index > head.token_index]
+            if not following:
+                continue
+            finite = min(following, key=lambda item: item.token_index)
+            between = tokens[head.token_index:finite.token_index - 1]
+            if any(
+                item.text in hard_separators or item.text.casefold() in coordinators
+                for item in between
+            ):
+                continue
+            # Another predicate candidate between the two heads means the weak
+            # reading may participate in a genuine predicate chain; do not erase it.
+            if any(
+                index in by_index
+                for index in range(head.token_index + 1, finite.token_index)
+            ):
+                continue
+            if agreeing_nominal_with(finite, token):
+                suppressed.add(head.token_index)
+
+        return tuple(head for head in result if head.token_index not in suppressed)
 
     @staticmethod
     def _span(text: str, tokens: tuple[SourceToken, ...], start: int, end: int) -> CandidateSpan:

@@ -205,7 +205,7 @@ class OllamaBackend:
                 if system.strip():
                     messages.append({"role": "system", "content": system.strip()})
                 messages.append({"role": "user", "content": prompt})
-                think = bool(self.config.llm.enable_thinking)
+                think = bool(defaults.get("enable_thinking", self.config.llm.enable_thinking))
                 if role.startswith("perception_") or role == "perception":
                     think = False
                 response_text = self._client.chat(

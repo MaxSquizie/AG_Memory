@@ -117,6 +117,39 @@ class ProofSnapshotBuilder:
             core, ContextSettings(include_structural_uids=False)
         )
 
+    def build_unresolved(
+        self,
+        *,
+        chain_id: str,
+        source: str,
+        title: str,
+        diagnostics: Iterable[str] = (),
+    ) -> ProofChainSnapshot:
+        """Freeze a failed proof obligation so the operator never sees silence.
+
+        Goal compilation failure is not an InferenceOutcome because search never
+        started. It is still first-class provenance: a live answer must not look as
+        if no proof was requested at all.
+        """
+        frozen = tuple(str(item) for item in diagnostics)
+        return ProofChainSnapshot(
+            chain_id=chain_id,
+            source=source,
+            title=title,
+            status="UNRESOLVED",
+            stop_reason="GOAL_NOT_COMPILED",
+            logical_depth=0,
+            expanded_states=0,
+            goal_text="GoalSpec не построена",
+            conclusion_text="Доказательство не запускалось",
+            trace_uids=(),
+            nodes=(),
+            edges=(),
+            steps=(),
+            checks=(),
+            diagnostics=frozen,
+        )
+
     def build(
         self,
         outcome: InferenceOutcome,

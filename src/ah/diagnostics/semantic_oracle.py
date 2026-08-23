@@ -407,6 +407,38 @@ def _match_relations(
     _check(checks, "perception.relations", normalized_actual == normalized_expected, expected=normalized_expected, actual=normalized_actual)
 
 
+def _match_relation_hints(
+    checks: list[dict[str, Any]],
+    actual_hints: Sequence[Mapping[str, Any]],
+    expected_hints: Sequence[Mapping[str, Any]],
+    key_to_local: Mapping[str, str],
+) -> None:
+    """Grade runtime-only event/causality hypotheses without treating them as AH links."""
+    normalized_actual = [
+        (
+            str(item.get("kind", "")).upper(),
+            str(item.get("source_ref", "")),
+            str(item.get("target_ref", "")),
+        )
+        for item in actual_hints
+    ]
+    normalized_expected = [
+        (
+            str(item.get("kind", "")).upper(),
+            key_to_local.get(str(item.get("source", "")), "<missing>"),
+            key_to_local.get(str(item.get("target", "")), "<missing>"),
+        )
+        for item in expected_hints
+    ]
+    _check(
+        checks,
+        "perception.relation_hints",
+        normalized_actual == normalized_expected,
+        expected=normalized_expected,
+        actual=normalized_actual,
+    )
+
+
 def _match_conditionals(
     checks: list[dict[str, Any]],
     actual_conditionals: Sequence[Mapping[str, Any]],
@@ -1086,9 +1118,16 @@ def evaluate_semantic_case(
     must_parse = bool(perception_expectation.get("must_parse", True))
     _check(checks, "perception.available", (actual_perception is not None) == must_parse, expected=must_parse, actual=actual_perception is not None)
 
+    # Document-scale diagnostics may intentionally grade the final canonical graph
+    # instead of duplicating a complete sentence-level oracle for every bounded
+    # ingestion window.  ``unchecked`` never changes parsing or integration; it only
+    # says that this unit contributes runtime evidence while semantic grading is
+    # deferred to the document graph oracle.
+    unchecked = bool(perception_expectation.get("unchecked", False))
+
     key_to_actual: dict[str, Mapping[str, Any]] = {}
     key_to_local: dict[str, str] = {}
-    if actual_perception is not None:
+    if actual_perception is not None and not unchecked:
         entity_labels = _entity_labels(actual_perception)
         actual_assertions = [item for item in actual_perception.get("assertions", []) or [] if isinstance(item, dict)]
         actual_queries = [item for item in actual_perception.get("queries", []) or [] if isinstance(item, dict)]
@@ -1106,15 +1145,22 @@ def evaluate_semantic_case(
             perception_expectation.get("conditionals", []) or [],
             key_to_local,
         )
+        _match_relation_hints(
+            checks,
+            [item for item in actual_perception.get("relation_hints", []) or [] if isinstance(item, dict)],
+            perception_expectation.get("relation_hints", []) or [],
+            key_to_local,
+        )
 
-    _update_required_template_roles(required_template_roles, expected_assertions, expected_queries)
-    integration_expectation = expected.get("integration", {}) or {}
-    _match_integration(checks, record, after_snapshot, integration_expectation, expected_assertions, key_to_local)
+    if not unchecked:
+        _update_required_template_roles(required_template_roles, expected_assertions, expected_queries)
+        integration_expectation = expected.get("integration", {}) or {}
+        _match_integration(checks, record, after_snapshot, integration_expectation, expected_assertions, key_to_local)
 
-    if str(record.get("status", "ERROR")) == "OK" and key_to_local:
-        _match_canonical_assertions(checks, record, after_snapshot, expected_assertions, key_to_local)
+        if str(record.get("status", "ERROR")) == "OK" and key_to_local:
+            _match_canonical_assertions(checks, record, after_snapshot, expected_assertions, key_to_local)
 
-    touched_predicates = [str(item.get("predicate", "")) for item in expected_assertions]
+    touched_predicates = [] if unchecked else [str(item.get("predicate", "")) for item in expected_assertions]
     touched_predicates.extend(str(item.get("predicate", "")) for item in expected_queries)
     if oracle_case.grade == "EXACT" and str(record.get("status", "ERROR")) == "OK":
         _check_template_coverage(checks, after_snapshot, required_template_roles, touched_predicates)

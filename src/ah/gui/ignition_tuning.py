@@ -77,7 +77,22 @@ class IgnitionTuningWidget(QWidget):
         self.cold_save = QCheckBox("Сохранить импорт без runtime excitation"); self.cold_save.setChecked(True)
         import_box=QGroupBox("Импорт памяти"); il=QVBoxLayout(import_box); il.addWidget(tabs); il.addWidget(self.cold_save)
 
-        root=QVBoxLayout(self); root.setContentsMargins(0,0,0,0); root.addWidget(mechanism_box); root.addWidget(decay_box); root.addWidget(import_box)
+        # Runtime monitoring must stay compact on ordinary displays. Tuning is
+        # needed frequently; corpus/memory import is operational but not something
+        # that must occupy vertical space all the time. Keep both in the same team3
+        # visual language, separated by one local tab switch.
+        parameters_page = QWidget()
+        parameters_layout = QVBoxLayout(parameters_page)
+        parameters_layout.setContentsMargins(0, 0, 0, 0)
+        parameters_layout.addWidget(mechanism_box)
+        parameters_layout.addWidget(decay_box)
+        parameters_layout.addStretch(1)
+
+        self.sections = QTabWidget()
+        self.sections.addTab(parameters_page, "Параметры")
+        self.sections.addTab(import_box, "Импорт")
+
+        root=QVBoxLayout(self); root.setContentsMargins(0,0,0,0); root.addWidget(self.sections)
 
         self._commit_timer=QTimer(self); self._commit_timer.setSingleShot(True); self._commit_timer.setInterval(450); self._commit_timer.timeout.connect(self._emit_commit)
         self._mechanism_timer=QTimer(self); self._mechanism_timer.setSingleShot(True); self._mechanism_timer.setInterval(450); self._mechanism_timer.timeout.connect(self._emit_mechanism_commit)

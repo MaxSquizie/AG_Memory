@@ -1,0 +1,3164 @@
+{
+  "index": 39,
+  "input": "Они не были вооружены, но зато их было много.",
+  "status": "OK",
+  "scenario_id": "belyaev_amphibian_mutiny",
+  "linguistic_candidate_graph": {
+    "text": "Они не были вооружены, но зато их было много.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Они",
+        "start": 0,
+        "end": 3,
+        "analyses": [
+          {
+            "normal_form": "они",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "3per",
+              "Anph",
+              "nomn",
+              "NPRO",
+              "plur"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "не",
+        "start": 4,
+        "end": 6,
+        "analyses": [
+          {
+            "normal_form": "не",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "были",
+        "start": 7,
+        "end": 11,
+        "analyses": [
+          {
+            "normal_form": "быть",
+            "pos": "VERB",
+            "case": null,
+            "number": "plur",
+            "gender": null,
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "VERB",
+              "impf",
+              "past",
+              "plur"
+            ],
+            "score": 0.997032
+          },
+          {
+            "normal_form": "быль",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "gent",
+              "NOUN"
+            ],
+            "score": 0.000593
+          },
+          {
+            "normal_form": "быль",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "datv",
+              "NOUN"
+            ],
+            "score": 0.000593
+          },
+          {
+            "normal_form": "быль",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "loct",
+              "NOUN"
+            ],
+            "score": 0.000593
+          },
+          {
+            "normal_form": "быль",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.000593
+          },
+          {
+            "normal_form": "быль",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "femn",
+              "accs",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.000593
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "вооружены",
+        "start": 12,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "вооружённый",
+            "pos": "ADJS",
+            "case": null,
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "ADJS"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "вооружить",
+            "pos": "PRTS",
+            "case": null,
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "pssv",
+              "PRTS",
+              "perf",
+              "past",
+              "plur"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": ",",
+        "start": 21,
+        "end": 22,
+        "analyses": []
+      },
+      {
+        "index": 6,
+        "text": "но",
+        "start": 23,
+        "end": 25,
+        "analyses": [
+          {
+            "normal_form": "но",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.999185
+          },
+          {
+            "normal_form": "но",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000814
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "зато",
+        "start": 26,
+        "end": 30,
+        "analyses": [
+          {
+            "normal_form": "зато",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.917241
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "gent",
+              "NOUN"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "datv",
+              "NOUN"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "ablt",
+              "NOUN"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "loct",
+              "NOUN"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "nomn",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "gent",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "datv",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "accs",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "ablt",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.006896
+          },
+          {
+            "normal_form": "зато",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "Abbr",
+              "Fixd",
+              "neut",
+              "loct",
+              "NOUN",
+              "plur"
+            ],
+            "score": 0.006896
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": "их",
+        "start": 31,
+        "end": 33,
+        "analyses": [
+          {
+            "normal_form": "они",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "3per",
+              "Anph",
+              "accs",
+              "NPRO",
+              "plur"
+            ],
+            "score": 0.138888
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.083333
+          },
+          {
+            "normal_form": "они",
+            "pos": "NPRO",
+            "case": "gent",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "3per",
+              "Anph",
+              "gent",
+              "NPRO",
+              "plur"
+            ],
+            "score": 0.083333
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.055555
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "nomn",
+              "plur"
+            ],
+            "score": 0.055555
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "gent"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "datv"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "ablt"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "masc",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "loct"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "gent"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "datv"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "accs"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "ablt"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "femn",
+              "Anph",
+              "loct"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "nomn"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "gent"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "datv"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "ablt"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "sing",
+              "Fixd",
+              "ADJF",
+              "neut",
+              "Anph",
+              "loct"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "gent",
+              "plur"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "datv",
+              "plur"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "accs",
+              "plur"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "ablt",
+              "plur"
+            ],
+            "score": 0.027777
+          },
+          {
+            "normal_form": "их",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Apro",
+              "Fixd",
+              "ADJF",
+              "Anph",
+              "loct",
+              "plur"
+            ],
+            "score": 0.027777
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "text": "было",
+        "start": 34,
+        "end": 38,
+        "analyses": [
+          {
+            "normal_form": "быть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "neut",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "neut",
+              "impf",
+              "past"
+            ],
+            "score": 0.96544
+          },
+          {
+            "normal_form": "было",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.034559
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "много",
+        "start": 39,
+        "end": 44,
+        "analyses": [
+          {
+            "normal_form": "много",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Prdx",
+              "ADVB"
+            ],
+            "score": 0.984732
+          },
+          {
+            "normal_form": "много",
+            "pos": "NUMR",
+            "case": "nomn",
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "NUMR",
+              "nomn"
+            ],
+            "score": 0.007633
+          },
+          {
+            "normal_form": "много",
+            "pos": "NUMR",
+            "case": "accs",
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "NUMR",
+              "accs"
+            ],
+            "score": 0.007633
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": ".",
+        "start": 44,
+        "end": 45,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 4,
+          "text": "Они не были вооружены",
+          "evidence": {
+            "text": "Они не были вооружены",
+            "start": 0,
+            "end": 21
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 3,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "быть"
+            ],
+            "nominal_predicative": false
+          },
+          {
+            "token_index": 4,
+            "strength": 1,
+            "finite": true,
+            "lemma_candidates": [
+              "вооружённый",
+              "вооружить"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "они",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 6,
+          "end_index": 10,
+          "text": "но зато их было много",
+          "evidence": {
+            "text": "но зато их было много",
+            "start": 23,
+            "end": 44
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 9,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "быть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "но",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 3,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "быть"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 4,
+        "strength": 1,
+        "finite": true,
+        "lemma_candidates": [
+          "вооружённый",
+          "вооружить"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 9,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "быть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Они не были вооружены, но зато их было много.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "были",
+          "normalized_hint": "быть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "были",
+            "start": 7,
+            "end": 11
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "STATE"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "STATE",
+            "mention": "вооружены",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E2",
+            "evidence": {
+              "text": "вооружены",
+              "start": 12,
+              "end": 21
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "SUBJECT",
+            "mention": "Они",
+            "normalized_hint": "Они",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Они",
+              "start": 0,
+              "end": 3
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Они не были вооружены",
+          "start": 0,
+          "end": 21
+        },
+        "alternatives": [],
+        "negated": true,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "вооружены",
+          "normalized_hint": "вооружить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "вооружены",
+            "start": 12,
+            "end": 21
+          },
+          "template_candidate": {
+            "roles": [
+              "OBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "OBJECT",
+            "mention": "Они",
+            "normalized_hint": "Они",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Они",
+              "start": 0,
+              "end": 3
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Они не были вооружены",
+          "start": 0,
+          "end": 21
+        },
+        "alternatives": [],
+        "negated": true,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "было",
+          "normalized_hint": "быть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "было",
+            "start": 34,
+            "end": 38
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "STATE",
+              "AMOUNT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "STATE",
+            "mention": "их",
+            "normalized_hint": "они",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E2",
+            "evidence": {
+              "text": "их",
+              "start": 31,
+              "end": 33
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "AMOUNT",
+            "mention": "много",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "много",
+              "start": 39,
+              "end": 44
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "SUBJECT",
+            "mention": "Они",
+            "normalized_hint": "Они",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Они",
+              "start": 0,
+              "end": 3
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "но зато их было много",
+          "start": 23,
+          "end": 44
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [],
+    "relation_hints": [
+      {
+        "kind": "CAUSAL_CANDIDATE",
+        "source_ref": "A1",
+        "target_ref": "A2",
+        "evidence": null,
+        "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+      },
+      {
+        "kind": "CAUSAL_CANDIDATE",
+        "source_ref": "A2",
+        "target_ref": "A3",
+        "evidence": {
+          "text": ", ",
+          "start": 21,
+          "end": 23
+        },
+        "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+          "kind": "G"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+          "kind": "G"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+          "kind": "G"
+        },
+        "reason": "CORRECTION"
+      },
+      {
+        "ref": {
+          "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+          "kind": "G"
+        },
+        "reason": "CORRECTION"
+      },
+      {
+        "ref": {
+          "uid": "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_7cdbd1f11b4f463b871abb9764cc97eb",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_ad7209900aa5476783d1c4a4ebe74eff",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [
+      {
+        "target": {
+          "uid": "N_7dc25c3cb99348b0a2fc89793d263475",
+          "kind": "N"
+        }
+      },
+      {
+        "target": {
+          "uid": "N_dc0cc6a8d0a146abbd273f998b1df5da",
+          "kind": "N"
+        }
+      }
+    ],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Они не были вооружены, но зато их было много.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_2240e0221dd348c3b64c6dbcaa71878f",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Зурита стоял у борта, против фок-мачты.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_b0cfd3586599491f8cb464b962a1998c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «По знаку штурмана несколько матросов сразу набросились на Педро.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Отрицание/опровержение: Они: были (состояние: вооружены).",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Отрицание/опровержение: вооружены.",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nОни не были вооружены, но зато их было много.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Зурита стоял у борта, против фок-мачты.»\n- Пользователь ранее сказал: «По знаку штурмана несколько матросов сразу набросились на Педро.»\n- Отрицание/опровержение: Они: были (состояние: вооружены).\n- Отрицание/опровержение: вооружены.",
+    "source_workspace_refs": [
+      {
+        "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+        "kind": "G"
+      },
+      {
+        "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+        "kind": "G"
+      },
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_20eb82e2ec524d90898e8307548ca135",
+        "kind": "M"
+      },
+      {
+        "uid": "M_2f367018a0bf427a9069bf51cf3224af",
+        "kind": "M"
+      },
+      {
+        "uid": "M_391c4ca5828e4ea38e6b4d0c7165f397",
+        "kind": "M"
+      },
+      {
+        "uid": "M_3b5da7ab8f7b4cb4bb54de6b03168048",
+        "kind": "M"
+      },
+      {
+        "uid": "M_4802e5b1e3364db4b0dd1f8275e0b7c3",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7e51ee6e0b93452c8b556443f8d3196d",
+        "kind": "M"
+      },
+      {
+        "uid": "M_d0f5d65d891f44198eb4d77a21483f50",
+        "kind": "M"
+      },
+      {
+        "uid": "M_f9d61a7740234766af29ef58a1afeb96",
+        "kind": "M"
+      },
+      {
+        "uid": "M_fe274efc16b045cdac9c95d819e117e3",
+        "kind": "M"
+      },
+      {
+        "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+        "kind": "N"
+      },
+      {
+        "uid": "N_2240e0221dd348c3b64c6dbcaa71878f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b0cfd3586599491f8cb464b962a1998c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b138a5186b56423a97373bc70f94ff5e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6f2704cb22f4c7386144a24ab3cbc64",
+        "kind": "N"
+      },
+      {
+        "uid": "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+        "kind": "N"
+      },
+      {
+        "uid": "S_406c0fd2dfa74cbda9953c50fb97c8ed",
+        "kind": "S"
+      },
+      {
+        "uid": "S_7cdbd1f11b4f463b871abb9764cc97eb",
+        "kind": "S"
+      },
+      {
+        "uid": "S_84c64a78994a48d98c7f610fefecf50c",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ad7209900aa5476783d1c4a4ebe74eff",
+        "kind": "S"
+      },
+      {
+        "uid": "T_4e5aaf2336534d7c852b4ca30c67c07f",
+        "kind": "T"
+      },
+      {
+        "uid": "T_ac9f6d5b89574c3cacbb95f5da5e50cf",
+        "kind": "T"
+      },
+      {
+        "uid": "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+        "kind": "T"
+      },
+      {
+        "uid": "T_d67819dafe4742fe9ca483b61cebc659",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 9,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+          "kind": "G"
+        },
+        "semantic": "[G_b2c1f0f38559434a9402c5495b57ff38] NOT ([N_7dc25c3cb99348b0a2fc89793d263475] [S_ad7209900aa5476783d1c4a4ebe74eff] были(SUBJECT=[M_8c086408d608403aa3a1b840f372d636] Они, STATE=[M_4b53f189f38c46fcac34f2a0a2ecd85b] вооружены))",
+        "kind": "G",
+        "domain": "C",
+        "excitation": 0.8859001626171965,
+        "output": 0.23750000000000004,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+          "kind": "G"
+        },
+        "semantic": "[G_cfa2e87a7ab246ac98ced39611fe23ed] NOT ([N_dc0cc6a8d0a146abbd273f998b1df5da] [S_7cdbd1f11b4f463b871abb9764cc97eb] вооружены(OBJECT=[M_8c086408d608403aa3a1b840f372d636] Они))",
+        "kind": "G",
+        "domain": "C",
+        "excitation": 0.8859001626171965,
+        "output": 0.23750000000000004,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.44668904922879243,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_20eb82e2ec524d90898e8307548ca135",
+          "kind": "M"
+        },
+        "semantic": "[M_20eb82e2ec524d90898e8307548ca135] Зурита",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4642005908035962,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_2f367018a0bf427a9069bf51cf3224af",
+          "kind": "M"
+        },
+        "semantic": "[M_2f367018a0bf427a9069bf51cf3224af] штурман",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4692140279788976,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_391c4ca5828e4ea38e6b4d0c7165f397",
+          "kind": "M"
+        },
+        "semantic": "[M_391c4ca5828e4ea38e6b4d0c7165f397] Педро",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4692140279788976,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_3b5da7ab8f7b4cb4bb54de6b03168048",
+          "kind": "M"
+        },
+        "semantic": "[M_3b5da7ab8f7b4cb4bb54de6b03168048] сразу",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4692140279788976,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_4802e5b1e3364db4b0dd1f8275e0b7c3",
+          "kind": "M"
+        },
+        "semantic": "[M_4802e5b1e3364db4b0dd1f8275e0b7c3] знак",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4692140279788976,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "M_7e51ee6e0b93452c8b556443f8d3196d",
+          "kind": "M"
+        },
+        "semantic": "[M_7e51ee6e0b93452c8b556443f8d3196d] несколько матросов",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4692140279788976,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "M_d0f5d65d891f44198eb4d77a21483f50",
+          "kind": "M"
+        },
+        "semantic": "[M_d0f5d65d891f44198eb4d77a21483f50] борт",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4642005908035962,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "M_f9d61a7740234766af29ef58a1afeb96",
+          "kind": "M"
+        },
+        "semantic": "[M_f9d61a7740234766af29ef58a1afeb96] мачта",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4642005908035962,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "M_fe274efc16b045cdac9c95d819e117e3",
+          "kind": "M"
+        },
+        "semantic": "[M_fe274efc16b045cdac9c95d819e117e3] фок",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4642005908035962,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+          "kind": "N"
+        },
+        "semantic": "[N_16befc93b416427c8a94fa0cb8d14ffd] реплика пользователя: Они не были вооружены, но зато их было много.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_2240e0221dd348c3b64c6dbcaa71878f",
+          "kind": "N"
+        },
+        "semantic": "[N_2240e0221dd348c3b64c6dbcaa71878f] [S_406c0fd2dfa74cbda9953c50fb97c8ed] стоял(SUBJECT=[M_20eb82e2ec524d90898e8307548ca135] Зурита, AUXILLIARY=[M_fe274efc16b045cdac9c95d819e117e3] фок, LOCATION=[M_d0f5d65d891f44198eb4d77a21483f50] борт, HOW-TO=[M_f9d61a7740234766af29ef58a1afeb96] мачта)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_b0cfd3586599491f8cb464b962a1998c",
+          "kind": "N"
+        },
+        "semantic": "[N_b0cfd3586599491f8cb464b962a1998c] [S_84c64a78994a48d98c7f610fefecf50c] набросились(SUBJECT=[M_7e51ee6e0b93452c8b556443f8d3196d] несколько матросов, OBJECT=[M_391c4ca5828e4ea38e6b4d0c7165f397] Педро, TIME=[M_3b5da7ab8f7b4cb4bb54de6b03168048] сразу, CAUSE=[M_2f367018a0bf427a9069bf51cf3224af] штурман, HOW-TO=[M_4802e5b1e3364db4b0dd1f8275e0b7c3] знак)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "N_b138a5186b56423a97373bc70f94ff5e",
+          "kind": "N"
+        },
+        "semantic": "[N_b138a5186b56423a97373bc70f94ff5e] реплика пользователя: По знаку штурмана несколько матросов сразу набросились на Педро.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "N_d6f2704cb22f4c7386144a24ab3cbc64",
+          "kind": "N"
+        },
+        "semantic": "[N_d6f2704cb22f4c7386144a24ab3cbc64] реплика пользователя: Зурита стоял у борта, против фок-мачты.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48648381459621354,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+          "kind": "N"
+        },
+        "semantic": "[N_eff1a0a4e4be4218bda133de6ff8cb3b] [S_ad7209900aa5476783d1c4a4ebe74eff] были(SUBJECT=[M_8c086408d608403aa3a1b840f372d636] Они, STATE=[M_4b53f189f38c46fcac34f2a0a2ecd85b] вооружены, AMOUNT=[M_b394cd47a1f44911bc23d86007e68f6a] много)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "S_406c0fd2dfa74cbda9953c50fb97c8ed",
+          "kind": "S"
+        },
+        "semantic": "[S_406c0fd2dfa74cbda9953c50fb97c8ed] стоял",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "S_7cdbd1f11b4f463b871abb9764cc97eb",
+          "kind": "S"
+        },
+        "semantic": "[S_7cdbd1f11b4f463b871abb9764cc97eb] вооружены",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "S_84c64a78994a48d98c7f610fefecf50c",
+          "kind": "S"
+        },
+        "semantic": "[S_84c64a78994a48d98c7f610fefecf50c] набросились",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "S_ad7209900aa5476783d1c4a4ebe74eff",
+          "kind": "S"
+        },
+        "semantic": "[S_ad7209900aa5476783d1c4a4ebe74eff] были",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "T_4e5aaf2336534d7c852b4ca30c67c07f",
+          "kind": "T"
+        },
+        "semantic": "[T_4e5aaf2336534d7c852b4ca30c67c07f] predicate=[S_84c64a78994a48d98c7f610fefecf50c] набросились; roles=[SUBJECT, OBJECT, TIME, CAUSE, HOW-TO]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "T_ac9f6d5b89574c3cacbb95f5da5e50cf",
+          "kind": "T"
+        },
+        "semantic": "[T_ac9f6d5b89574c3cacbb95f5da5e50cf] predicate=[S_406c0fd2dfa74cbda9953c50fb97c8ed] стоял; roles=[SUBJECT, AUXILLIARY, LOCATION, HOW-TO]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+          "kind": "T"
+        },
+        "semantic": "[T_d4b1e86df4e749f2bbf88bc380c9fbcf] predicate=[S_ad7209900aa5476783d1c4a4ebe74eff] были; roles=[SUBJECT, STATE, AMOUNT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "T_d67819dafe4742fe9ca483b61cebc659",
+          "kind": "T"
+        },
+        "semantic": "[T_d67819dafe4742fe9ca483b61cebc659] predicate=[S_7cdbd1f11b4f463b871abb9764cc97eb] вооружены; roles=[OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 39,
+      "source_text": "Они не были вооружены, но зато их было много.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[3] token 3: были; morphology=VERB",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nPREDICATE_START: [3] были\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[3] end at token 3: были",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены\nTARGET:\nбыли\nRUSSIAN_LEMMA:\nбыть",
+          "normalized_answer": "быть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены\nPREDICATE:\nбыли\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_deterministic",
+          "raw_text": "<deterministic:pymorphy3>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nPREDICATE:\nбыли\nTARGET:\nвооружены",
+          "normalized_answer": "STATE:4",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыли\nALREADY_SELECTED:\nвооружены\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Они",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыли\nQUESTION_WORD:\nОни",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыли\nALREADY_SELECTED:\nвооружены | Они\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[4] token 4: вооружены; morphology=ADJS",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nPREDICATE_START: [4] вооружены\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[4] end at token 4: вооружены",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "lexeme_comparison",
+          "raw_text": "A",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nTARGET:\nвооружены\nA LEMMA:\nвооружить\nA MORPHOLOGY:\nPOS=PRTS; CASE=-; NUMBER=plur; GENDER=-; FEATURES=passive,past\nB LEMMA:\nвооружённый\nB MORPHOLOGY:\nPOS=ADJS; CASE=-; NUMBER=plur; GENDER=-\nQUESTION:\nWhich dictionary lemma is TARGET using in TEXT? Use the meaning of the whole sentence and TARGET's surrounding complements/modifiers to identify the lexeme. Decide lexical identity only; do not assign semantic roles.\nCHOICES:\nA\nB\n\nTASK:\nChoose whether TARGET uses lemma A or lemma B in TEXT. Use whole-sentence meaning and TARGET's surrounding complements/modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.",
+          "normalized_answer": "A",
+          "retry_index": 0
+        },
+        {
+          "role": "lexeme_comparison",
+          "raw_text": "B",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nTARGET:\nвооружены\nA LEMMA:\nвооружённый\nA MORPHOLOGY:\nPOS=ADJS; CASE=-; NUMBER=plur; GENDER=-\nB LEMMA:\nвооружить\nB MORPHOLOGY:\nPOS=PRTS; CASE=-; NUMBER=plur; GENDER=-; FEATURES=passive,past\nQUESTION:\nWhich dictionary lemma is TARGET using in TEXT? Use the meaning of the whole sentence and TARGET's surrounding complements/modifiers to identify the lexeme. Decide lexical identity only; do not assign semantic roles.\nCHOICES:\nA\nB\n\nTASK:\nChoose whether TARGET uses lemma A or lemma B in TEXT. Use whole-sentence meaning and TARGET's surrounding complements/modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.",
+          "normalized_answer": "B",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены\nTARGET:\nвооружены\nRUSSIAN_LEMMA:\nвооружить",
+          "normalized_answer": "вооружить",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "YES",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены\nPREDICATE:\nвооружены\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably\n\nTASK:\nChoose exactly one English label from OPTIONS. Return only the label.",
+          "normalized_answer": "True",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Они",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nQUESTION_WORD:\nОни",
+          "normalized_answer": "OBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nALREADY_SELECTED:\nОни\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nно зато их было много\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[9] token 9: было; morphology=VERB",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nTOKENS:\n[1] Они\n[2] не\n[3] были\n[4] вооружены\n[5] ,\n[6] но\n[7] зато\n[8] их\n[9] было\n[10] много\n[11] .\nPREDICATE_START: [9] было\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[9] end at token 9: было",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nно зато их было много\nTARGET:\nбыло\nRUSSIAN_LEMMA:\nбыть",
+          "normalized_answer": "быть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nно зато их было много\nPREDICATE:\nбыло\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] их\n[2] много",
+          "normalized_answer": "8",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nQUESTION_WORD:\nих",
+          "normalized_answer": "STATE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nALREADY_SELECTED:\nих\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] много",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "QUANTITY_OR_MEASURE",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nTARGET:\nмного\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "QUANTITY_OR_MEASURE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nALREADY_SELECTED:\nих | много\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "paratactic_subject_inheritance",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "PARENT SUBJECT:\nОни\nCHILD PREDICATE:\nбыло",
+          "normalized_answer": "Они",
+          "retry_index": 0
+        },
+        {
+          "role": "pronoun_binding",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "PRONOUN:\nих\nANTECEDENT:\nвооружены",
+          "normalized_answer": "E2",
+          "retry_index": 0
+        },
+        {
+          "role": "source_coreference",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE_SPAN:\n0:3",
+          "normalized_answer": "E1",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Они не были вооружены, но зато их было много.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "были",
+              "normalized_hint": "быть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "были",
+                "start": 7,
+                "end": 11
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "STATE",
+                "mention": "вооружены",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E2",
+                "evidence": {
+                  "text": "вооружены",
+                  "start": 12,
+                  "end": 21
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "SUBJECT",
+                "mention": "Они",
+                "normalized_hint": "Они",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Они",
+                  "start": 0,
+                  "end": 3
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Они не были вооружены",
+              "start": 0,
+              "end": 21
+            },
+            "alternatives": [],
+            "negated": true,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "вооружены",
+              "normalized_hint": "вооружить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "вооружены",
+                "start": 12,
+                "end": 21
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "OBJECT",
+                "mention": "Они",
+                "normalized_hint": "Они",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Они",
+                  "start": 0,
+                  "end": 3
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Они не были вооружены",
+              "start": 0,
+              "end": 21
+            },
+            "alternatives": [],
+            "negated": true,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "было",
+              "normalized_hint": "быть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "было",
+                "start": 34,
+                "end": 38
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "STATE",
+                "mention": "их",
+                "normalized_hint": "они",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E2",
+                "evidence": {
+                  "text": "их",
+                  "start": 31,
+                  "end": 33
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "AMOUNT",
+                "mention": "много",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "много",
+                  "start": 39,
+                  "end": 44
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "SUBJECT",
+                "mention": "Они",
+                "normalized_hint": "Они",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Они",
+                  "start": 0,
+                  "end": 3
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "но зато их было много",
+              "start": 23,
+              "end": 44
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [],
+        "relation_hints": [
+          {
+            "kind": "CAUSAL_CANDIDATE",
+            "source_ref": "A1",
+            "target_ref": "A2",
+            "evidence": null,
+            "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+          },
+          {
+            "kind": "CAUSAL_CANDIDATE",
+            "source_ref": "A2",
+            "target_ref": "A3",
+            "evidence": {
+              "text": ", ",
+              "start": 21,
+              "end": 23
+            },
+            "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 172,
+      "req_id": "49482a99cd924360b3789fbb233197ad",
+      "role": "perception_lexeme_comparison",
+      "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nTARGET:\nвооружены\nA LEMMA:\nвооружить\nA MORPHOLOGY:\nPOS=PRTS; CASE=-; NUMBER=plur; GENDER=-; FEATURES=passive,past\nB LEMMA:\nвооружённый\nB MORPHOLOGY:\nPOS=ADJS; CASE=-; NUMBER=plur; GENDER=-\nQUESTION:\nWhich dictionary lemma is TARGET using in TEXT? Use the meaning of the whole sentence and TARGET's surrounding complements/modifiers to identify the lexeme. Decide lexical identity only; do not assign semantic roles.\nCHOICES:\nA\nB\n\nTASK:\nChoose whether TARGET uses lemma A or lemma B in TEXT. Use whole-sentence meaning and TARGET's surrounding complements/modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "A",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nTARGET:\nвооружены\nA LEMMA:\nвооружить\nA MORPHOLOGY:\nPOS=PRTS; CASE=-; NUMBER=plur; GENDER=-; FEATURES=passive,past\nB LEMMA:\nвооружённый\nB MORPHOLOGY:\nPOS=ADJS; CASE=-; NUMBER=plur; GENDER=-\nQUESTION:\nWhich dictionary lemma is TARGET using in TEXT? Use the meaning of the whole sentence and TARGET's surrounding complements/modifiers to identify the lexeme. Decide lexical identity only; do not assign semantic roles.\nCHOICES:\nA\nB\n\nTASK:\nChoose whether TARGET uses lemma A or lemma B in TEXT. Use whole-sentence meaning and TARGET's surrounding complements/modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.",
+      "input_tokens": 300,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 173,
+      "req_id": "fccc8e722f0040ebba0ae34c5a747cc3",
+      "role": "perception_lexeme_comparison",
+      "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nTARGET:\nвооружены\nA LEMMA:\nвооружённый\nA MORPHOLOGY:\nPOS=ADJS; CASE=-; NUMBER=plur; GENDER=-\nB LEMMA:\nвооружить\nB MORPHOLOGY:\nPOS=PRTS; CASE=-; NUMBER=plur; GENDER=-; FEATURES=passive,past\nQUESTION:\nWhich dictionary lemma is TARGET using in TEXT? Use the meaning of the whole sentence and TARGET's surrounding complements/modifiers to identify the lexeme. Decide lexical identity only; do not assign semantic roles.\nCHOICES:\nA\nB\n\nTASK:\nChoose whether TARGET uses lemma A or lemma B in TEXT. Use whole-sentence meaning and TARGET's surrounding complements/modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "B",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nвооружены\nTARGET:\nвооружены\nA LEMMA:\nвооружённый\nA MORPHOLOGY:\nPOS=ADJS; CASE=-; NUMBER=plur; GENDER=-\nB LEMMA:\nвооружить\nB MORPHOLOGY:\nPOS=PRTS; CASE=-; NUMBER=plur; GENDER=-; FEATURES=passive,past\nQUESTION:\nWhich dictionary lemma is TARGET using in TEXT? Use the meaning of the whole sentence and TARGET's surrounding complements/modifiers to identify the lexeme. Decide lexical identity only; do not assign semantic roles.\nCHOICES:\nA\nB\n\nTASK:\nChoose whether TARGET uses lemma A or lemma B in TEXT. Use whole-sentence meaning and TARGET's surrounding complements/modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.",
+      "input_tokens": 300,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 174,
+      "req_id": "9076a25eda8a46bcb57cb6a7af036f08",
+      "role": "perception_negation",
+      "prompt": "TEXT:\nОни не были вооружены\nPREDICATE:\nвооружены\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably\n\nTASK:\nChoose exactly one English label from OPTIONS. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "YES",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОни не были вооружены\nPREDICATE:\nвооружены\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably\n\nTASK:\nChoose exactly one English label from OPTIONS. Return only the label.",
+      "input_tokens": 141,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 175,
+      "req_id": "827d5e7d80a348dbab802f9be08bbe4b",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nTARGET:\nмного\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "QUANTITY_OR_MEASURE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nTARGET:\nмного\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 543,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 176,
+      "req_id": "455ccee92e0242f49e4135fd7eb3a358",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыли\nSEMANTIC ARGUMENTS:\nSTATE = вооружены\nSUBJECT = Они\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: STATE='вооружены' IS-A SUBJECT='Они'\nR2: SUBJECT='Они' IS-A STATE='вооружены'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыли\nSEMANTIC ARGUMENTS:\nSTATE = вооружены\nSUBJECT = Они\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: STATE='вооружены' IS-A SUBJECT='Они'\nR2: SUBJECT='Они' IS-A STATE='вооружены'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 315,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 177,
+      "req_id": "f05596f05275429f93a24e1304c5dfff",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nSEMANTIC ARGUMENTS:\nSTATE = они\nSUBJECT = Они\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: STATE='они' IS-A SUBJECT='Они'\nR2: SUBJECT='Они' IS-A STATE='они'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nОни не были вооружены, но зато их было много.\nPREDICATE:\nбыло\nSEMANTIC ARGUMENTS:\nSTATE = они\nSUBJECT = Они\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: STATE='они' IS-A SUBJECT='Они'\nR2: SUBJECT='Они' IS-A STATE='они'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 306,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "G_b2c1f0f38559434a9402c5495b57ff38": {
+        "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+        "kind": "G",
+        "domain": "C",
+        "function_id": "FALSE",
+        "operands": [
+          {
+            "uid": "N_7dc25c3cb99348b0a2fc89793d263475",
+            "kind": "N"
+          }
+        ]
+      },
+      "G_cfa2e87a7ab246ac98ced39611fe23ed": {
+        "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+        "kind": "G",
+        "domain": "C",
+        "function_id": "FALSE",
+        "operands": [
+          {
+            "uid": "N_dc0cc6a8d0a146abbd273f998b1df5da",
+            "kind": "N"
+          }
+        ]
+      },
+      "K_aef8278d398c449b8c9ae3e834c53997": {
+        "uid": "K_aef8278d398c449b8c9ae3e834c53997",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "G_b2c1f0f38559434a9402c5495b57ff38",
+            "kind": "G"
+          },
+          {
+            "uid": "G_cfa2e87a7ab246ac98ced39611fe23ed",
+            "kind": "G"
+          },
+          {
+            "uid": "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_ab8412ad7cd34e33b3955f9a5a262eb7": {
+        "uid": "L_ab8412ad7cd34e33b3955f9a5a262eb7",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_b138a5186b56423a97373bc70f94ff5e",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+          "kind": "N"
+        }
+      },
+      "M_4b53f189f38c46fcac34f2a0a2ecd85b": {
+        "uid": "M_4b53f189f38c46fcac34f2a0a2ecd85b",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "вооружены",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_8c086408d608403aa3a1b840f372d636": {
+        "uid": "M_8c086408d608403aa3a1b840f372d636",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Они",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_b394cd47a1f44911bc23d86007e68f6a": {
+        "uid": "M_b394cd47a1f44911bc23d86007e68f6a",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "много",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_16befc93b416427c8a94fa0cb8d14ffd": {
+        "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_151df4c092e441baa520ab1082193dce",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_aef8278d398c449b8c9ae3e834c53997",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Они не были вооружены, но зато их было много.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_7dc25c3cb99348b0a2fc89793d263475": {
+        "uid": "N_7dc25c3cb99348b0a2fc89793d263475",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.25,
+        "template": {
+          "uid": "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+          "kind": "T"
+        },
+        "actants": {
+          "STATE": {
+            "uid": "M_4b53f189f38c46fcac34f2a0a2ecd85b",
+            "kind": "M"
+          },
+          "SUBJECT": {
+            "uid": "M_8c086408d608403aa3a1b840f372d636",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 0
+        }
+      },
+      "N_dc0cc6a8d0a146abbd273f998b1df5da": {
+        "uid": "N_dc0cc6a8d0a146abbd273f998b1df5da",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.25,
+        "template": {
+          "uid": "T_d67819dafe4742fe9ca483b61cebc659",
+          "kind": "T"
+        },
+        "actants": {
+          "OBJECT": {
+            "uid": "M_8c086408d608403aa3a1b840f372d636",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 0
+        }
+      },
+      "N_eff1a0a4e4be4218bda133de6ff8cb3b": {
+        "uid": "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+          "kind": "T"
+        },
+        "actants": {
+          "STATE": {
+            "uid": "M_4b53f189f38c46fcac34f2a0a2ecd85b",
+            "kind": "M"
+          },
+          "AMOUNT": {
+            "uid": "M_b394cd47a1f44911bc23d86007e68f6a",
+            "kind": "M"
+          },
+          "SUBJECT": {
+            "uid": "M_8c086408d608403aa3a1b840f372d636",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_7cdbd1f11b4f463b871abb9764cc97eb": {
+        "uid": "S_7cdbd1f11b4f463b871abb9764cc97eb",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "вооружены",
+          "вооружить"
+        ]
+      },
+      "S_ad7209900aa5476783d1c4a4ebe74eff": {
+        "uid": "S_ad7209900aa5476783d1c4a4ebe74eff",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "были",
+          "было",
+          "быть"
+        ]
+      },
+      "T_d4b1e86df4e749f2bbf88bc380c9fbcf": {
+        "uid": "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_ad7209900aa5476783d1c4a4ebe74eff",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "STATE",
+          "AMOUNT"
+        ]
+      },
+      "T_d67819dafe4742fe9ca483b61cebc659": {
+        "uid": "T_d67819dafe4742fe9ca483b61cebc659",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_7cdbd1f11b4f463b871abb9764cc97eb",
+          "kind": "S"
+        },
+        "roles": [
+          "OBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 9,
+    "workspace_uids": [
+      "G_b2c1f0f38559434a9402c5495b57ff38",
+      "G_cfa2e87a7ab246ac98ced39611fe23ed",
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_20eb82e2ec524d90898e8307548ca135",
+      "M_2f367018a0bf427a9069bf51cf3224af",
+      "M_391c4ca5828e4ea38e6b4d0c7165f397",
+      "M_3b5da7ab8f7b4cb4bb54de6b03168048",
+      "M_4802e5b1e3364db4b0dd1f8275e0b7c3",
+      "M_7e51ee6e0b93452c8b556443f8d3196d",
+      "M_d0f5d65d891f44198eb4d77a21483f50",
+      "M_f9d61a7740234766af29ef58a1afeb96",
+      "M_fe274efc16b045cdac9c95d819e117e3",
+      "N_16befc93b416427c8a94fa0cb8d14ffd",
+      "N_2240e0221dd348c3b64c6dbcaa71878f",
+      "N_b0cfd3586599491f8cb464b962a1998c",
+      "N_b138a5186b56423a97373bc70f94ff5e",
+      "N_d6f2704cb22f4c7386144a24ab3cbc64",
+      "N_eff1a0a4e4be4218bda133de6ff8cb3b",
+      "S_406c0fd2dfa74cbda9953c50fb97c8ed",
+      "S_7cdbd1f11b4f463b871abb9764cc97eb",
+      "S_84c64a78994a48d98c7f610fefecf50c",
+      "S_ad7209900aa5476783d1c4a4ebe74eff",
+      "T_4e5aaf2336534d7c852b4ca30c67c07f",
+      "T_ac9f6d5b89574c3cacbb95f5da5e50cf",
+      "T_d4b1e86df4e749f2bbf88bc380c9fbcf",
+      "T_d67819dafe4742fe9ca483b61cebc659"
+    ],
+    "workspace": {
+      "G_b2c1f0f38559434a9402c5495b57ff38": {
+        "semantic": "NOT (были(SUBJECT=Они, STATE=вооружены))",
+        "excitation": 0.8859001626171965
+      },
+      "G_cfa2e87a7ab246ac98ced39611fe23ed": {
+        "semantic": "NOT (вооружены(OBJECT=Они))",
+        "excitation": 0.8859001626171965
+      },
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.44668904922879243
+      },
+      "M_20eb82e2ec524d90898e8307548ca135": {
+        "semantic": "Зурита",
+        "excitation": 0.4642005908035962
+      },
+      "M_2f367018a0bf427a9069bf51cf3224af": {
+        "semantic": "штурман",
+        "excitation": 0.4692140279788976
+      },
+      "M_391c4ca5828e4ea38e6b4d0c7165f397": {
+        "semantic": "Педро",
+        "excitation": 0.4692140279788976
+      },
+      "M_3b5da7ab8f7b4cb4bb54de6b03168048": {
+        "semantic": "сразу",
+        "excitation": 0.4692140279788976
+      },
+      "M_4802e5b1e3364db4b0dd1f8275e0b7c3": {
+        "semantic": "знак",
+        "excitation": 0.4692140279788976
+      },
+      "M_7e51ee6e0b93452c8b556443f8d3196d": {
+        "semantic": "несколько матросов",
+        "excitation": 0.4692140279788976
+      },
+      "M_d0f5d65d891f44198eb4d77a21483f50": {
+        "semantic": "борт",
+        "excitation": 0.4642005908035962
+      },
+      "M_f9d61a7740234766af29ef58a1afeb96": {
+        "semantic": "мачта",
+        "excitation": 0.4642005908035962
+      },
+      "M_fe274efc16b045cdac9c95d819e117e3": {
+        "semantic": "фок",
+        "excitation": 0.4642005908035962
+      },
+      "N_16befc93b416427c8a94fa0cb8d14ffd": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_aef8278d398c449b8c9ae3e834c53997[NOT (были(SUBJECT=Они, STATE=вооружены)); NOT (вооружены(OBJECT=Они)); были(SUBJECT=Они, STATE=вооружены, AMOUNT=много)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_2240e0221dd348c3b64c6dbcaa71878f": {
+        "semantic": "стоял(SUBJECT=Зурита, AUXILLIARY=фок, LOCATION=борт, HOW-TO=мачта)",
+        "excitation": 0.9787446529613976
+      },
+      "N_b0cfd3586599491f8cb464b962a1998c": {
+        "semantic": "набросились(SUBJECT=несколько матросов, OBJECT=Педро, TIME=сразу, CAUSE=штурман, HOW-TO=знак)",
+        "excitation": 0.9893152444804425
+      },
+      "N_b138a5186b56423a97373bc70f94ff5e": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=набросились(SUBJECT=несколько матросов, OBJECT=Педро, TIME=сразу, CAUSE=штурман, HOW-TO=знак))",
+        "excitation": 0.49173791398686034
+      },
+      "N_d6f2704cb22f4c7386144a24ab3cbc64": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=стоял(SUBJECT=Зурита, AUXILLIARY=фок, LOCATION=борт, HOW-TO=мачта))",
+        "excitation": 0.48648381459621354
+      },
+      "N_eff1a0a4e4be4218bda133de6ff8cb3b": {
+        "semantic": "были(SUBJECT=Они, STATE=вооружены, AMOUNT=много)",
+        "excitation": 1.0
+      },
+      "S_406c0fd2dfa74cbda9953c50fb97c8ed": {
+        "semantic": "стоял",
+        "excitation": 0.9243192477328055
+      },
+      "S_7cdbd1f11b4f463b871abb9764cc97eb": {
+        "semantic": "вооружены",
+        "excitation": 0.9443926410592216
+      },
+      "S_84c64a78994a48d98c7f610fefecf50c": {
+        "semantic": "набросились",
+        "excitation": 0.9343020365750345
+      },
+      "S_ad7209900aa5476783d1c4a4ebe74eff": {
+        "semantic": "были",
+        "excitation": 0.9443926410592216
+      },
+      "T_4e5aaf2336534d7c852b4ca30c67c07f": {
+        "semantic": "набросились",
+        "excitation": 0.9375362417396166
+      },
+      "T_ac9f6d5b89574c3cacbb95f5da5e50cf": {
+        "semantic": "стоял",
+        "excitation": 0.927518896205904
+      },
+      "T_d4b1e86df4e749f2bbf88bc380c9fbcf": {
+        "semantic": "были",
+        "excitation": 0.9476617761328255
+      },
+      "T_d67819dafe4742fe9ca483b61cebc659": {
+        "semantic": "вооружены",
+        "excitation": 0.9476617761328255
+      }
+    },
+    "pending_incoming": {
+      "M_4b53f189f38c46fcac34f2a0a2ecd85b": 0.15200000000000005,
+      "M_b394cd47a1f44911bc23d86007e68f6a": 0.15200000000000005,
+      "M_8c086408d608403aa3a1b840f372d636": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "last_experience_ref": {
+      "uid": "N_16befc93b416427c8a94fa0cb8d14ffd",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "semantic_note": "А. Р. Беляев — «Человек-амфибия»: мятеж на «Медузе», paragraph 3",
+  "semantic_family": "document.monolith.public-domain-literary",
+  "semantic_tags": [
+    "document",
+    "monolith",
+    "literary",
+    "public-domain",
+    "graph-graded",
+    "belyaev"
+  ]
+}

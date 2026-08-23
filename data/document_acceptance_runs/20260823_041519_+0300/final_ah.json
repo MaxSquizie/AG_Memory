@@ -1,0 +1,2694 @@
+{
+  "G_f3676d8acfd84cdd886ba21ae42c1b6e": {
+    "uid": "G_f3676d8acfd84cdd886ba21ae42c1b6e",
+    "kind": "G",
+    "domain": "C",
+    "function_id": "FALSE",
+    "operands": [
+      {
+        "uid": "N_b9c7beb72b4b4fa182572ca0afbd4222",
+        "kind": "N"
+      }
+    ]
+  },
+  "K_0eef0e31f1c045ce9cc753f785b4c839": {
+    "uid": "K_0eef0e31f1c045ce9cc753f785b4c839",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_d450f1c3bf41451d9fc4afb98d1a1f3f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1066dbbe55ec406496b3d3b62b28ca8b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_76970bb661894032b9ba544f4eca7aa3",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_192a0d997a0143ebb64a31137a90f7fd": {
+    "uid": "K_192a0d997a0143ebb64a31137a90f7fd",
+    "kind": "K",
+    "domain": "H",
+    "members": [],
+    "properties": {},
+    "meta": {
+      "TYPE": "STRUCTURAL_CLARIFICATION_OPTION",
+      "label": "«с фотографией» описывает «разбитая рамка»",
+      "resolution_key": "ATTACH:NOM:21-22:19-20",
+      "gc_auto_created": true
+    }
+  },
+  "K_27be127633b84053885fa9a18b8aacb7": {
+    "uid": "K_27be127633b84053885fa9a18b8aacb7",
+    "kind": "K",
+    "domain": "C",
+    "members": [
+      {
+        "uid": "M_d260698e7d2d41dbb3a5e0dc48b99867",
+        "kind": "M"
+      },
+      {
+        "uid": "M_bcddd9abbebd4d368f4562894f00311a",
+        "kind": "M"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "TYPE": "AMBIGUOUS_REFERENCE",
+      "mention": "ей",
+      "gc_auto_created": true
+    }
+  },
+  "K_4382b73f4cad4425904894b5a1c50507": {
+    "uid": "K_4382b73f4cad4425904894b5a1c50507",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "K_d9d5aace68ad4f3eaadf20690e59b99d",
+        "kind": "K"
+      },
+      {
+        "uid": "K_192a0d997a0143ebb64a31137a90f7fd",
+        "kind": "K"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "TYPE": "STRUCTURAL_CLARIFICATION",
+      "ambiguity_type": "MODIFIER_ATTACHMENT",
+      "mention": "с фотографией",
+      "source_text": "Поднявшись на второй этаж, они нашли в кабинете опрокинутый стул и раскрытое окно. На полу лежала разбитая рамка с фотографией, но стекло вокруг неё было сухим.",
+      "experience_uid": "N_03da581390bb48d48234f830e1cb5360",
+      "gc_auto_created": true
+    }
+  },
+  "K_45176b5702eb4850bc4294de9d203295": {
+    "uid": "K_45176b5702eb4850bc4294de9d203295",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_6ea3ffd5581a4c47a6adf9f4912505c4",
+        "kind": "N"
+      },
+      {
+        "uid": "N_687305badabf44128b6a378d0fb30bc5",
+        "kind": "N"
+      },
+      {
+        "uid": "N_030b66c00bcd4285ba6371193bf2a887",
+        "kind": "N"
+      },
+      {
+        "uid": "G_f3676d8acfd84cdd886ba21ae42c1b6e",
+        "kind": "G"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_5637da9ea4914db9acbf43728976aac6": {
+    "uid": "K_5637da9ea4914db9acbf43728976aac6",
+    "kind": "K",
+    "domain": "H",
+    "members": [],
+    "properties": {},
+    "meta": {
+      "TYPE": "STRUCTURAL_CLARIFICATION_OPTION",
+      "label": "«в дальней комнате» относится к действию «дрожала»",
+      "resolution_key": "ATTACH:PRED:7-9",
+      "gc_auto_created": true
+    }
+  },
+  "K_57f808bd635248bfb8592cfe89a0f0a7": {
+    "uid": "K_57f808bd635248bfb8592cfe89a0f0a7",
+    "kind": "K",
+    "domain": "H",
+    "members": [],
+    "properties": {},
+    "meta": {
+      "TYPE": "STRUCTURAL_CLARIFICATION_OPTION",
+      "label": "«в дальней комнате» описывает «рама»",
+      "resolution_key": "ATTACH:NOM:7-9:6",
+      "gc_auto_created": true
+    }
+  },
+  "K_6efb90e7fa254de1b0ae977030712a7c": {
+    "uid": "K_6efb90e7fa254de1b0ae977030712a7c",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_5afb86b4a6b941dd838b070cf7383981",
+        "kind": "N"
+      },
+      {
+        "uid": "N_23af314f794c448597def6023f41b2dd",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ae8be04bafd0431e814f5f91667f53f3",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_99d3f44d644d4df38377f98f1d0f7b55": {
+    "uid": "K_99d3f44d644d4df38377f98f1d0f7b55",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_5ee68de62b9142edaefddc7c92ccb711",
+        "kind": "N"
+      },
+      {
+        "uid": "N_a9c4cc310fe84506bb36020456d1ad83",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b5141c1b336149868ad8f532aee85064",
+        "kind": "N"
+      },
+      {
+        "uid": "N_8de1bcbdc5714611a1e59db1994d91e3",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_bd374f0ad33f4055be971c341fa99e84": {
+    "uid": "K_bd374f0ad33f4055be971c341fa99e84",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "K_5637da9ea4914db9acbf43728976aac6",
+        "kind": "K"
+      },
+      {
+        "uid": "K_57f808bd635248bfb8592cfe89a0f0a7",
+        "kind": "K"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "TYPE": "STRUCTURAL_CLARIFICATION",
+      "ambiguity_type": "MODIFIER_ATTACHMENT",
+      "mention": "в дальней комнате",
+      "source_text": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+      "experience_uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+      "gc_auto_created": true
+    }
+  },
+  "K_d5cf10e6f3ba4d87bfe2d271e1e3e407": {
+    "uid": "K_d5cf10e6f3ba4d87bfe2d271e1e3e407",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_71960d8d0a17417c8b6e2d8ade589fd6",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ae8df076c5034e6f90c47c75c4b82e2e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_863ecbaf341245adb385cad1762269cd",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c2f56581a4a0415bb46f986ec716ca8b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b688a505852742b5a116310a6c90256f",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "K_d9d5aace68ad4f3eaadf20690e59b99d": {
+    "uid": "K_d9d5aace68ad4f3eaadf20690e59b99d",
+    "kind": "K",
+    "domain": "H",
+    "members": [],
+    "properties": {},
+    "meta": {
+      "TYPE": "STRUCTURAL_CLARIFICATION_OPTION",
+      "label": "«с фотографией» относится к действию «лежала»",
+      "resolution_key": "ATTACH:PRED:21-22",
+      "gc_auto_created": true
+    }
+  },
+  "L_0748ddfcf4e2417c86c0dfcf5b5b1ae9": {
+    "uid": "L_0748ddfcf4e2417c86c0dfcf5b5b1ae9",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_adf7fd89b0244f34a5640748d5d98ab5",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_723520874c5e47e98b5d2c6d5a8a1475",
+      "kind": "N"
+    }
+  },
+  "L_15513883c291439fa41322f7bbd23f6b": {
+    "uid": "L_15513883c291439fa41322f7bbd23f6b",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+      "kind": "N"
+    }
+  },
+  "L_1f0378cda8d347e19b39598bdff42bd6": {
+    "uid": "L_1f0378cda8d347e19b39598bdff42bd6",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.2,
+    "source": {
+      "uid": "N_03da581390bb48d48234f830e1cb5360",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_d39d1d9051c046288ad232d183c8b7c6",
+      "kind": "N"
+    }
+  },
+  "L_2ccae518110e4598b14eb794c1ebf84f": {
+    "uid": "L_2ccae518110e4598b14eb794c1ebf84f",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21300000000000002,
+    "source": {
+      "uid": "N_43d7552312234084b43bcfcab9439663",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_4059b895456b429b89a1e71487098bb1",
+      "kind": "N"
+    }
+  },
+  "L_316f956b955d414f887b39577eb0a2fe": {
+    "uid": "L_316f956b955d414f887b39577eb0a2fe",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_142e1023a040483a93973057273316da",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_9b152cbf29c44db29b401bc643d325ed",
+      "kind": "N"
+    }
+  },
+  "L_33208a550a114c2e9e5a6120ad6aa92f": {
+    "uid": "L_33208a550a114c2e9e5a6120ad6aa92f",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_43d7552312234084b43bcfcab9439663",
+      "kind": "N"
+    }
+  },
+  "L_3c2b35474ad24c4cb26cdde67d577159": {
+    "uid": "L_3c2b35474ad24c4cb26cdde67d577159",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.2,
+    "source": {
+      "uid": "N_d39d1d9051c046288ad232d183c8b7c6",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_13ce9d86b72d4b62ab0cacc2ab7c6e3d",
+      "kind": "N"
+    }
+  },
+  "L_3fa3faf17fd2477197d090e6eb9f2701": {
+    "uid": "L_3fa3faf17fd2477197d090e6eb9f2701",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.2,
+    "source": {
+      "uid": "N_13ce9d86b72d4b62ab0cacc2ab7c6e3d",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_14d17831e8e5402f98c68ea6c80d2dcf",
+      "kind": "N"
+    }
+  },
+  "L_414ceeeb2afd408f94a9373c92cb6fb1": {
+    "uid": "L_414ceeeb2afd408f94a9373c92cb6fb1",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21300000000000002,
+    "source": {
+      "uid": "N_c882d3390da9439d8618c34047865ec8",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_03da581390bb48d48234f830e1cb5360",
+      "kind": "N"
+    }
+  },
+  "L_4da9cf32de34441b9cdccb77c2d7b5d8": {
+    "uid": "L_4da9cf32de34441b9cdccb77c2d7b5d8",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_9b152cbf29c44db29b401bc643d325ed",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_aa63c90526644fc3ba38c523872767b3",
+      "kind": "N"
+    }
+  },
+  "L_5d110852c58b481b99d6424e5c180ec6": {
+    "uid": "L_5d110852c58b481b99d6424e5c180ec6",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.198,
+    "source": {
+      "uid": "N_aa63c90526644fc3ba38c523872767b3",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_c882d3390da9439d8618c34047865ec8",
+      "kind": "N"
+    }
+  },
+  "L_72100f3f527444e9bf87ef24d5927f39": {
+    "uid": "L_72100f3f527444e9bf87ef24d5927f39",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22800000000000004,
+    "source": {
+      "uid": "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+      "kind": "N"
+    }
+  },
+  "L_735bcab08a5d4fd6a25da5de0c34a03b": {
+    "uid": "L_735bcab08a5d4fd6a25da5de0c34a03b",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_5afb86b4a6b941dd838b070cf7383981",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_23af314f794c448597def6023f41b2dd",
+      "kind": "N"
+    }
+  },
+  "L_7b40b870979a49b0841f48fb5f2d21a6": {
+    "uid": "L_7b40b870979a49b0841f48fb5f2d21a6",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_687305badabf44128b6a378d0fb30bc5",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_030b66c00bcd4285ba6371193bf2a887",
+      "kind": "N"
+    }
+  },
+  "L_7e8f2452512e4b49809a30c2b0145709": {
+    "uid": "L_7e8f2452512e4b49809a30c2b0145709",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21300000000000002,
+    "source": {
+      "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+      "kind": "N"
+    }
+  },
+  "L_9a2bf68560284a04ae92ca17274885ca": {
+    "uid": "L_9a2bf68560284a04ae92ca17274885ca",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21300000000000002,
+    "source": {
+      "uid": "N_723520874c5e47e98b5d2c6d5a8a1475",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_142e1023a040483a93973057273316da",
+      "kind": "N"
+    }
+  },
+  "L_b6397e2eb78f4e588da68201a177b3ae": {
+    "uid": "L_b6397e2eb78f4e588da68201a177b3ae",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22800000000000004,
+    "source": {
+      "uid": "N_4059b895456b429b89a1e71487098bb1",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_adf7fd89b0244f34a5640748d5d98ab5",
+      "kind": "N"
+    }
+  },
+  "L_bb57cbd3c28f419aa8b40d77d444a727": {
+    "uid": "L_bb57cbd3c28f419aa8b40d77d444a727",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21300000000000002,
+    "source": {
+      "uid": "N_d6542d75d5ab431dad7b16bbf865947d",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+      "kind": "N"
+    }
+  },
+  "L_ebe440bd53df4a6f9655e59b7efe9931": {
+    "uid": "L_ebe440bd53df4a6f9655e59b7efe9931",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.22600000000000003,
+    "source": {
+      "uid": "N_b5141c1b336149868ad8f532aee85064",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_8de1bcbdc5714611a1e59db1994d91e3",
+      "kind": "N"
+    }
+  },
+  "M_068590cd14234900a48039ffd858e56c": {
+    "uid": "M_068590cd14234900a48039ffd858e56c",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "герб",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_068677832fea49ea9ac9dd3bcd04e1a4": {
+    "uid": "M_068677832fea49ea9ac9dd3bcd04e1a4",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "остановившиеся часы",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+    "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Пользователь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "USER"
+    }
+  },
+  "M_10f7a6e813ef4202aa9cf3da6f2716c6": {
+    "uid": "M_10f7a6e813ef4202aa9cf3da6f2716c6",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Она",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_197699acf1e4437e87eb0f17ad23e8b2": {
+    "uid": "M_197699acf1e4437e87eb0f17ad23e8b2",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "сырой штукатуркой",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_25825044dcbd45019df442410198105b": {
+    "uid": "M_25825044dcbd45019df442410198105b",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "тлеющую ткань",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_2abc86dd22a24dbd8e5bf6d32d1a6ef5": {
+    "uid": "M_2abc86dd22a24dbd8e5bf6d32d1a6ef5",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Алексей",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_2e7250a1cc43487580918e95f4287020": {
+    "uid": "M_2e7250a1cc43487580918e95f4287020",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "лестница",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_305570f6743b4f559f7a2d1541c2458c": {
+    "uid": "M_305570f6743b4f559f7a2d1541c2458c",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "тонкой стеной",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_3260723c2a6b4579aa944f62f84a1ba6": {
+    "uid": "M_3260723c2a6b4579aa944f62f84a1ba6",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "лампа",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_32e19e4ea94f44aba8d64ac7383893c6": {
+    "uid": "M_32e19e4ea94f44aba8d64ac7383893c6",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "ещё",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_4199cffd25d3453e9e3bd118538dc84d": {
+    "uid": "M_4199cffd25d3453e9e3bd118538dc84d",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "окно",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_470233d78ab6465f83ce4c1688556363": {
+    "uid": "M_470233d78ab6465f83ce4c1688556363",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "мгновение",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_62cbb355a0ae4cba9eb93b3a3e5d3cdc": {
+    "uid": "M_62cbb355a0ae4cba9eb93b3a3e5d3cdc",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "дед",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_77b4722257064798bb8e0824033d5060": {
+    "uid": "M_77b4722257064798bb8e0824033d5060",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "знак",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_7cebbe5d1252408e8abf9bd8018a8421": {
+    "uid": "M_7cebbe5d1252408e8abf9bd8018a8421",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "накрытый серым чехлом",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_82a227b881734795bc6ac735c7e766ad": {
+    "uid": "M_82a227b881734795bc6ac735c7e766ad",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "вестибюль",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_842f7bcad62246c986ec89f0c7506fa5": {
+    "uid": "M_842f7bcad62246c986ec89f0c7506fa5",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "шаг",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_957e7a8e59e84692a024fc06fb43c3e6": {
+    "uid": "M_957e7a8e59e84692a024fc06fb43c3e6",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "коридор",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_963ada175c46446fbaa17939542d1437": {
+    "uid": "M_963ada175c46446fbaa17939542d1437",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "верхний конверт",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_9a13682b6a464da49bbe2029de8bfff8": {
+    "uid": "M_9a13682b6a464da49bbe2029de8bfff8",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "стена",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_a2ef02910c8a4bfb9d472c369581c83e": {
+    "uid": "M_a2ef02910c8a4bfb9d472c369581c83e",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "старой бумагой",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_b4c2450b658b402d83e6e222e417e8ba": {
+    "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "стол",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_b797fcf50c22485a9af07824c9664055": {
+    "uid": "M_b797fcf50c22485a9af07824c9664055",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "треснувшей",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_bcddd9abbebd4d368f4562894f00311a": {
+    "uid": "M_bcddd9abbebd4d368f4562894f00311a",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "лента",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_bfd0866719d14e2995a232cf7c5d395c": {
+    "uid": "M_bfd0866719d14e2995a232cf7c5d395c",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "ничего",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_c653f09f9c2b457cb61e1fdc2eca9ccc": {
+    "uid": "M_c653f09f9c2b457cb61e1fdc2eca9ccc",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "глаз",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d260698e7d2d41dbb3a5e0dc48b99867": {
+    "uid": "M_d260698e7d2d41dbb3a5e0dc48b99867",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Вера",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d48b8506fa3d41ea8c16882480c2e32e": {
+    "uid": "M_d48b8506fa3d41ea8c16882480c2e32e",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "кто",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_d5e1873489b74b8784e8603b94d3efc6": {
+    "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "АГент",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "SELF"
+    }
+  },
+  "M_dfb8b44ad35146678ae36c18637e1714": {
+    "uid": "M_dfb8b44ad35146678ae36c18637e1714",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "сапог",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_f1418d8ebcfa4a4390f3a22f55f59525": {
+    "uid": "M_f1418d8ebcfa4a4390f3a22f55f59525",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Печать",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_f6d492674b384df79ea0bae3964eed41": {
+    "uid": "M_f6d492674b384df79ea0bae3964eed41",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "конверт",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "N_030b66c00bcd4285ba6371193bf2a887": {
+    "uid": "N_030b66c00bcd4285ba6371193bf2a887",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_6001c4216d7e42c5beecf55b03ba6857",
+      "kind": "T"
+    },
+    "actants": {
+      "LOCATION": {
+        "uid": "M_2e7250a1cc43487580918e95f4287020",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_d48b8506fa3d41ea8c16882480c2e32e",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_03a710d58baa48a4b4ac5ec8336bfa8e": {
+    "uid": "N_03a710d58baa48a4b4ac5ec8336bfa8e",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Дорожка заросла мокрой травой, а на ступенях темнели листья, принесённые ветром. Входная дверь сначала не поддалась; Алексей нажал сильнее, и разбухшая створка медленно отошла от косяка.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_03da581390bb48d48234f830e1cb5360": {
+    "uid": "N_03da581390bb48d48234f830e1cb5360",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Поднявшись на второй этаж, они нашли в кабинете опрокинутый стул и раскрытое окно. На полу лежала разбитая рамка с фотографией, но стекло вокруг неё было сухим.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 18,
+      "expires_tick": 218,
+      "last_qualifying_tick": 18,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_0fba167a5c2946039fb1c769bedcc0fa": {
+    "uid": "N_0fba167a5c2946039fb1c769bedcc0fa",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "За окнами усиливался ветер; рама в дальней комнате то дрожала, то снова замирала. Поскольку защёлка давно не держалась в пазу, очередной порыв распахнул створку.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 3,
+      "expires_tick": 203,
+      "last_qualifying_tick": 3,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_1066dbbe55ec406496b3d3b62b28ca8b": {
+    "uid": "N_1066dbbe55ec406496b3d3b62b28ca8b",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_73ace0acfb1545c38166f7bd965daf5d",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_068677832fea49ea9ac9dd3bcd04e1a4",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_9a13682b6a464da49bbe2029de8bfff8",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_13ce9d86b72d4b62ab0cacc2ab7c6e3d": {
+    "uid": "N_13ce9d86b72d4b62ab0cacc2ab7c6e3d",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Пока они спускались, дождь усилился, и вода начала редкими каплями просачиваться сквозь потолок вестибюля. Капли попадали на пол рядом с пачкой старых журналов.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true
+    }
+  },
+  "N_142e1023a040483a93973057273316da": {
+    "uid": "N_142e1023a040483a93973057273316da",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_99d3f44d644d4df38377f98f1d0f7b55",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "— Ты всё-таки нашёл их, — сказала Вера. Алексей развязал ленту и передал ей верхний конверт.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_14d17831e8e5402f98c68ea6c80d2dcf": {
+    "uid": "N_14d17831e8e5402f98c68ea6c80d2dcf",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Заметив воду, Вера принесла из кухни таз и поставила его под протечку. Алексей перенёс журналы на сухую скамью, после чего они ещё долго слушали, как дождь стучит по крыше и как в пустом доме понемногу стихает ветер.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true
+    }
+  },
+  "N_23af314f794c448597def6023f41b2dd": {
+    "uid": "N_23af314f794c448597def6023f41b2dd",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_8a09c01d06f247f5bb104aa20593b71a",
+      "kind": "T"
+    },
+    "actants": {
+      "OBJECT": {
+        "uid": "M_3260723c2a6b4579aa944f62f84a1ba6",
+        "kind": "M"
+      },
+      "SOURCE": {
+        "uid": "M_4199cffd25d3453e9e3bd118538dc84d",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_4059b895456b429b89a1e71487098bb1": {
+    "uid": "N_4059b895456b429b89a1e71487098bb1",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Она быстро разрослась в дымящийся край. Увидев дым, Алексей сорвал занавеску с крючков и бросил её на каменный пол.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_43d7552312234084b43bcfcab9439663": {
+    "uid": "N_43d7552312234084b43bcfcab9439663",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Холодный воздух прошёл по комнате, качнул пламя лампы и поднял край тяжёлой занавески. Занавеска коснулась стекла, нагретого огнём, и на ткани появилась тёмная точка.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_5afb86b4a6b941dd838b070cf7383981": {
+    "uid": "N_5afb86b4a6b941dd838b070cf7383981",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_582f62d2b24a4ea88bc5f948f96f2740",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_25825044dcbd45019df442410198105b",
+        "kind": "M"
+      },
+      "TOOL": {
+        "uid": "M_dfb8b44ad35146678ae36c18637e1714",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_5ee68de62b9142edaefddc7c92ccb711": {
+    "uid": "N_5ee68de62b9142edaefddc7c92ccb711",
+    "kind": "N",
+    "domain": "P",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_f8ee586a97cb40b39cab0f573e9fa227",
+      "kind": "T"
+    },
+    "actants": {
+      "OBJECT": {
+        "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_842f7bcad62246c986ec89f0c7506fa5",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_687305badabf44128b6a378d0fb30bc5": {
+    "uid": "N_687305badabf44128b6a378d0fb30bc5",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_4ce4ead2d726453d80e5f30cd4e19d49",
+      "kind": "T"
+    },
+    "actants": {
+      "LOCATION": {
+        "uid": "M_305570f6743b4f559f7a2d1541c2458c",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_d48b8506fa3d41ea8c16882480c2e32e",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_6ea3ffd5581a4c47a6adf9f4912505c4": {
+    "uid": "N_6ea3ffd5581a4c47a6adf9f4912505c4",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_d559f55e645a4d95a7a4ffed3e14dd82",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_10f7a6e813ef4202aa9cf3da6f2716c6",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_71960d8d0a17417c8b6e2d8ade589fd6": {
+    "uid": "N_71960d8d0a17417c8b6e2d8ade589fd6",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_c157b4e462d04d81bd6256f2e2941ddb",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_f1418d8ebcfa4a4390f3a22f55f59525",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_f6d492674b384df79ea0bae3964eed41",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_723520874c5e47e98b5d2c6d5a8a1475": {
+    "uid": "N_723520874c5e47e98b5d2c6d5a8a1475",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Алексей обернулся, но в дверях уже стояла Вера, промокшая под дождём и сердитая на его молчание. Сняв мокрый плащ, она повесила его на спинку стула и без приветствия посмотрела на письма.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_76970bb661894032b9ba544f4eca7aa3": {
+    "uid": "N_76970bb661894032b9ba544f4eca7aa3",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_4e24c5fde9604064971fccc9c6de68b6",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_b4c2450b658b402d83e6e222e417e8ba",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_068677832fea49ea9ac9dd3bcd04e1a4",
+        "kind": "M"
+      },
+      "STATE": {
+        "uid": "M_7cebbe5d1252408e8abf9bd8018a8421",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_7d6c8ac09b684273b1c7f264f5b7c5de": {
+    "uid": "N_7d6c8ac09b684273b1c7f264f5b7c5de",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Алексей снял чехол, подняв облачко пыли, и поставил на стол керосиновую лампу. Зажёгши фитиль, он увидел на подоконнике пачку писем, перетянутую выцветшей лентой.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 3,
+      "expires_tick": 203,
+      "last_qualifying_tick": 3,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_863ecbaf341245adb385cad1762269cd": {
+    "uid": "N_863ecbaf341245adb385cad1762269cd",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_69a0cec2d185408f800f2b728dae7c53",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_068590cd14234900a48039ffd858e56c",
+        "kind": "M"
+      },
+      "HOW-TO": {
+        "uid": "M_32e19e4ea94f44aba8d64ac7383893c6",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_8de1bcbdc5714611a1e59db1994d91e3": {
+    "uid": "N_8de1bcbdc5714611a1e59db1994d91e3",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_3d0d7b0018814e12abb658643ee51e69",
+      "kind": "T"
+    },
+    "actants": {
+      "RECIPIENT": {
+        "uid": "K_27be127633b84053885fa9a18b8aacb7",
+        "kind": "K"
+      },
+      "OBJECT": {
+        "uid": "M_963ada175c46446fbaa17939542d1437",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_9b152cbf29c44db29b401bc643d325ed": {
+    "uid": "N_9b152cbf29c44db29b401bc643d325ed",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_d5cf10e6f3ba4d87bfe2d271e1e3e407",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Печать на конверте была треснувшей, однако герб ещё различался. Вера узнала знак деда и на мгновение закрыла глаза.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_a9c4cc310fe84506bb36020456d1ad83": {
+    "uid": "N_a9c4cc310fe84506bb36020456d1ad83",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_8cbed93167d942f89c4f06e0f13a6dec",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_d260698e7d2d41dbb3a5e0dc48b99867",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_aa63c90526644fc3ba38c523872767b3": {
+    "uid": "N_aa63c90526644fc3ba38c523872767b3",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_45176b5702eb4850bc4294de9d203295",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Ей показалось, будто за тонкой стеной кто-то прошёл и остановился у лестницы. Алексей ничего не услышал.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 15,
+      "expires_tick": 215,
+      "last_qualifying_tick": 15,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_adf7fd89b0244f34a5640748d5d98ab5": {
+    "uid": "N_adf7fd89b0244f34a5640748d5d98ab5",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_6efb90e7fa254de1b0ae977030712a7c",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Он затоптал тлеющую ткань сапогом, затем отодвинул лампу от окна. В коридоре послышались шаги.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_ae8be04bafd0431e814f5f91667f53f3": {
+    "uid": "N_ae8be04bafd0431e814f5f91667f53f3",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_f3e9177eef0143fd9bae644a20728248",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_842f7bcad62246c986ec89f0c7506fa5",
+        "kind": "M"
+      },
+      "LOCATION": {
+        "uid": "M_957e7a8e59e84692a024fc06fb43c3e6",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 6,
+      "expires_tick": 206,
+      "last_qualifying_tick": 6,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_ae8df076c5034e6f90c47c75c4b82e2e": {
+    "uid": "N_ae8df076c5034e6f90c47c75c4b82e2e",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_2e715e3518ea4e978a0ea9d615a977da",
+      "kind": "T"
+    },
+    "actants": {
+      "STATE": {
+        "uid": "M_b797fcf50c22485a9af07824c9664055",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_f1418d8ebcfa4a4390f3a22f55f59525",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_b5141c1b336149868ad8f532aee85064": {
+    "uid": "N_b5141c1b336149868ad8f532aee85064",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_df91b9462047443a928294eb68f22db2",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_2abc86dd22a24dbd8e5bf6d32d1a6ef5",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_bcddd9abbebd4d368f4562894f00311a",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 9,
+      "expires_tick": 209,
+      "last_qualifying_tick": 9,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_b688a505852742b5a116310a6c90256f": {
+    "uid": "N_b688a505852742b5a116310a6c90256f",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_8f64867f49454b66bba88e9a9508c4e4",
+      "kind": "T"
+    },
+    "actants": {
+      "DURATION": {
+        "uid": "M_470233d78ab6465f83ce4c1688556363",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_c653f09f9c2b457cb61e1fdc2eca9ccc",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_b9c7beb72b4b4fa182572ca0afbd4222": {
+    "uid": "N_b9c7beb72b4b4fa182572ca0afbd4222",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.25,
+    "template": {
+      "uid": "T_0aa613135b784aa28fa532f85d9eee99",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_2abc86dd22a24dbd8e5bf6d32d1a6ef5",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_bfd0866719d14e2995a232cf7c5d395c",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 0
+    }
+  },
+  "N_bbbac47bcbf34bd091c23b8be0fcba90": {
+    "uid": "N_bbbac47bcbf34bd091c23b8be0fcba90",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_0eef0e31f1c045ce9cc753f785b4c839",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "В вестибюле пахло сырой штукатуркой и старой бумагой. На стене висели остановившиеся часы, под ними стоял накрытый серым чехлом стол.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_c2f56581a4a0415bb46f986ec716ca8b": {
+    "uid": "N_c2f56581a4a0415bb46f986ec716ca8b",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_2b46a3860dbd4e5f80343aeb23564969",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_d260698e7d2d41dbb3a5e0dc48b99867",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_77b4722257064798bb8e0824033d5060",
+        "kind": "M"
+      },
+      "SOURCE": {
+        "uid": "M_62cbb355a0ae4cba9eb93b3a3e5d3cdc",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 12,
+      "expires_tick": 212,
+      "last_qualifying_tick": 12,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_c882d3390da9439d8618c34047865ec8": {
+    "uid": "N_c882d3390da9439d8618c34047865ec8",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Сверху внезапно грохнуло, и с потолка осыпалась сухая известка. Вера вздрогнула, а Алексей поднял лампу и пошёл к лестнице.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 18,
+      "expires_tick": 218,
+      "last_qualifying_tick": 18,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_d39d1d9051c046288ad232d183c8b7c6": {
+    "uid": "N_d39d1d9051c046288ad232d183c8b7c6",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Алексей закрыл окно и придвинул стул к стене. Потом Вера собрала письма, унесла их из продуваемого кабинета и положила в нижний ящик письменного стола.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true
+    }
+  },
+  "N_d450f1c3bf41451d9fc4afb98d1a1f3f": {
+    "uid": "N_d450f1c3bf41451d9fc4afb98d1a1f3f",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_9b96c191176e4069b516cf4458fecd83",
+      "kind": "T"
+    },
+    "actants": {
+      "LOCATION": {
+        "uid": "M_82a227b881734795bc6ac735c7e766ad",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_197699acf1e4437e87eb0f17ad23e8b2",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_a2ef02910c8a4bfb9d472c369581c83e",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_d6542d75d5ab431dad7b16bbf865947d": {
+    "uid": "N_d6542d75d5ab431dad7b16bbf865947d",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "К сумеркам Алексей добрался до старой обсерватории на холме, куда не возвращался со студенческих лет. Отперев ржавую калитку, он толкнул её плечом и услышал, как в тишине протяжно звякнула цепь.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "S_07ecb1e20dd644fc883a0dc05ea501b6": {
+    "uid": "S_07ecb1e20dd644fc883a0dc05ea501b6",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "на"
+    ]
+  },
+  "S_0f55b9f6fd4e41e4a949d1af39ca85f2": {
+    "uid": "S_0f55b9f6fd4e41e4a949d1af39ca85f2",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "пахло",
+      "пахнуть"
+    ]
+  },
+  "S_2c4b4872dcef497c8e796c28469c21d7": {
+    "uid": "S_2c4b4872dcef497c8e796c28469c21d7",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "остановился",
+      "остановиться"
+    ]
+  },
+  "S_3c13e969eb864871887464df4a731c36": {
+    "uid": "S_3c13e969eb864871887464df4a731c36",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "узнала",
+      "узнать"
+    ]
+  },
+  "S_5a7d6f57d2cd4f2a82d8a6779b7d5550": {
+    "uid": "S_5a7d6f57d2cd4f2a82d8a6779b7d5550",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "сказала",
+      "сказать"
+    ]
+  },
+  "S_6134c474da2f4ab59075ad21a219493a": {
+    "uid": "S_6134c474da2f4ab59075ad21a219493a",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "высказать"
+    ]
+  },
+  "S_687e78708d544b7b896d2829435acfa5": {
+    "uid": "S_687e78708d544b7b896d2829435acfa5",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "послышались",
+      "послышаться"
+    ]
+  },
+  "S_7c5978af2194465190510aa3239eaf17": {
+    "uid": "S_7c5978af2194465190510aa3239eaf17",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "была",
+      "быть"
+    ]
+  },
+  "S_a175150daf7a40ceb1e7309dbf951565": {
+    "uid": "S_a175150daf7a40ceb1e7309dbf951565",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "стоял",
+      "стоять"
+    ]
+  },
+  "S_b30bbd4545714a2091dbe0a345030833": {
+    "uid": "S_b30bbd4545714a2091dbe0a345030833",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "передал",
+      "передать"
+    ]
+  },
+  "S_b7548136872a46af8a7ab41b40b19981": {
+    "uid": "S_b7548136872a46af8a7ab41b40b19981",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "закрыла",
+      "закрыть"
+    ]
+  },
+  "S_cce4622cd7aa4e78b6b60ce6f3bbfc1a": {
+    "uid": "S_cce4622cd7aa4e78b6b60ce6f3bbfc1a",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "затоптал",
+      "затоптать"
+    ]
+  },
+  "S_d046ababc4144d068073aca83e891536": {
+    "uid": "S_d046ababc4144d068073aca83e891536",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "пройти",
+      "прошёл"
+    ]
+  },
+  "S_d123f5afd14f40538b4a9a6971f0441d": {
+    "uid": "S_d123f5afd14f40538b4a9a6971f0441d",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "услышал",
+      "услышать"
+    ]
+  },
+  "S_d56291153e7b43cbbdee1fccdade7734": {
+    "uid": "S_d56291153e7b43cbbdee1fccdade7734",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "развязал",
+      "развязать"
+    ]
+  },
+  "S_e1cfebbbd1e94699b1cf2fce39e2ed5f": {
+    "uid": "S_e1cfebbbd1e94699b1cf2fce39e2ed5f",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "показалось",
+      "показаться"
+    ]
+  },
+  "S_e7da7f066c0d48f7b44760f08b6e5aee": {
+    "uid": "S_e7da7f066c0d48f7b44760f08b6e5aee",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "висели",
+      "висеть"
+    ]
+  },
+  "S_e9b331b51b3b43edb95ae8cc40c5a9ff": {
+    "uid": "S_e9b331b51b3b43edb95ae8cc40c5a9ff",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "различался",
+      "различаться"
+    ]
+  },
+  "S_fb9c183a83e14e158e7b633350aaca73": {
+    "uid": "S_fb9c183a83e14e158e7b633350aaca73",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "отодвинул",
+      "отодвинуть"
+    ]
+  },
+  "S_fe6a2e6869ff46e2b902e031dc73f74d": {
+    "uid": "S_fe6a2e6869ff46e2b902e031dc73f74d",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "найти",
+      "нашёл"
+    ]
+  },
+  "T_0aa613135b784aa28fa532f85d9eee99": {
+    "uid": "T_0aa613135b784aa28fa532f85d9eee99",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_d123f5afd14f40538b4a9a6971f0441d",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_2b46a3860dbd4e5f80343aeb23564969": {
+    "uid": "T_2b46a3860dbd4e5f80343aeb23564969",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_3c13e969eb864871887464df4a731c36",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "SOURCE"
+    ]
+  },
+  "T_2e715e3518ea4e978a0ea9d615a977da": {
+    "uid": "T_2e715e3518ea4e978a0ea9d615a977da",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_7c5978af2194465190510aa3239eaf17",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "STATE"
+    ]
+  },
+  "T_3d0d7b0018814e12abb658643ee51e69": {
+    "uid": "T_3d0d7b0018814e12abb658643ee51e69",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_b30bbd4545714a2091dbe0a345030833",
+      "kind": "S"
+    },
+    "roles": [
+      "OBJECT",
+      "RECIPIENT"
+    ]
+  },
+  "T_4ce4ead2d726453d80e5f30cd4e19d49": {
+    "uid": "T_4ce4ead2d726453d80e5f30cd4e19d49",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_d046ababc4144d068073aca83e891536",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_4e24c5fde9604064971fccc9c6de68b6": {
+    "uid": "T_4e24c5fde9604064971fccc9c6de68b6",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_a175150daf7a40ceb1e7309dbf951565",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION",
+      "STATE"
+    ]
+  },
+  "T_582f62d2b24a4ea88bc5f948f96f2740": {
+    "uid": "T_582f62d2b24a4ea88bc5f948f96f2740",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_cce4622cd7aa4e78b6b60ce6f3bbfc1a",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TOOL"
+    ]
+  },
+  "T_6001c4216d7e42c5beecf55b03ba6857": {
+    "uid": "T_6001c4216d7e42c5beecf55b03ba6857",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_2c4b4872dcef497c8e796c28469c21d7",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_69a0cec2d185408f800f2b728dae7c53": {
+    "uid": "T_69a0cec2d185408f800f2b728dae7c53",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_e9b331b51b3b43edb95ae8cc40c5a9ff",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "HOW-TO"
+    ]
+  },
+  "T_73ace0acfb1545c38166f7bd965daf5d": {
+    "uid": "T_73ace0acfb1545c38166f7bd965daf5d",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_e7da7f066c0d48f7b44760f08b6e5aee",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_7f4c27faaf1949ff92bd32b9a20f7ad8": {
+    "uid": "T_7f4c27faaf1949ff92bd32b9a20f7ad8",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_6134c474da2f4ab59075ad21a219493a",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TIME"
+    ]
+  },
+  "T_8a09c01d06f247f5bb104aa20593b71a": {
+    "uid": "T_8a09c01d06f247f5bb104aa20593b71a",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_fb9c183a83e14e158e7b633350aaca73",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "SOURCE"
+    ]
+  },
+  "T_8cbed93167d942f89c4f06e0f13a6dec": {
+    "uid": "T_8cbed93167d942f89c4f06e0f13a6dec",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_5a7d6f57d2cd4f2a82d8a6779b7d5550",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_8f64867f49454b66bba88e9a9508c4e4": {
+    "uid": "T_8f64867f49454b66bba88e9a9508c4e4",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_b7548136872a46af8a7ab41b40b19981",
+      "kind": "S"
+    },
+    "roles": [
+      "OBJECT",
+      "DURATION"
+    ]
+  },
+  "T_9b96c191176e4069b516cf4458fecd83": {
+    "uid": "T_9b96c191176e4069b516cf4458fecd83",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_0f55b9f6fd4e41e4a949d1af39ca85f2",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_c157b4e462d04d81bd6256f2e2941ddb": {
+    "uid": "T_c157b4e462d04d81bd6256f2e2941ddb",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_07ecb1e20dd644fc883a0dc05ea501b6",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_d559f55e645a4d95a7a4ffed3e14dd82": {
+    "uid": "T_d559f55e645a4d95a7a4ffed3e14dd82",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_e1cfebbbd1e94699b1cf2fce39e2ed5f",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_df91b9462047443a928294eb68f22db2": {
+    "uid": "T_df91b9462047443a928294eb68f22db2",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_d56291153e7b43cbbdee1fccdade7734",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_f3e9177eef0143fd9bae644a20728248": {
+    "uid": "T_f3e9177eef0143fd9bae644a20728248",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_687e78708d544b7b896d2829435acfa5",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "LOCATION"
+    ]
+  },
+  "T_f8ee586a97cb40b39cab0f573e9fa227": {
+    "uid": "T_f8ee586a97cb40b39cab0f573e9fa227",
+    "kind": "T",
+    "domain": "P",
+    "predicate": {
+      "uid": "S_fe6a2e6869ff46e2b902e031dc73f74d",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  }
+}

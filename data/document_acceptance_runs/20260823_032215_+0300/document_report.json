@@ -1,0 +1,1823 @@
+{
+  "documents": [
+    {
+      "id": "cooling_station",
+      "title": "Сбой охлаждающего контура",
+      "status": "PASS",
+      "paragraph_passed": 7,
+      "paragraph_total": 7,
+      "runtime_errors": 0,
+      "m2_question_count": 1,
+      "graph_checks": [
+        {
+          "name": "fact.temperature_drop",
+          "ok": true,
+          "expected": {
+            "id": "temperature_drop",
+            "predicate": "опуститься",
+            "roles": {
+              "SUBJECT": "температура"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_fc23b1eb6e3741cc8fa39073c5169a5a",
+              "forms": [
+                "опустилась",
+                "опуститься"
+              ],
+              "roles": {
+                "SUBJECT": "Температура"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_freeze",
+          "ok": true,
+          "expected": {
+            "id": "water_freeze",
+            "predicate": "замёрзнуть",
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+              "forms": [
+                "замёрзла",
+                "замёрзнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.ice_expand",
+          "ok": true,
+          "expected": {
+            "id": "ice_expand",
+            "predicate": "расшириться",
+            "roles": {
+              "SUBJECT": "лёд"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+              "forms": [
+                "расширился",
+                "расшириться"
+              ],
+              "roles": {
+                "SUBJECT": "Лёд"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.tube_crack",
+          "ok": true,
+          "expected": {
+            "id": "tube_crack",
+            "predicate": "треснуть",
+            "roles": {
+              "SUBJECT": "трубка"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_43d323cca80141d186d9737c6438e542",
+              "forms": [
+                "треснула",
+                "треснуть"
+              ],
+              "roles": {
+                "SUBJECT": "Трубка"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.fluid_leak",
+          "ok": true,
+          "expected": {
+            "id": "fluid_leak",
+            "predicate": "вытечь",
+            "roles": {
+              "SUBJECT": "жидкость"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_3437cea932e94b579485b4b64bc78827",
+              "forms": [
+                "вытекла",
+                "вытечь"
+              ],
+              "roles": {
+                "SUBJECT": "Жидкость"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.pressure_drop",
+          "ok": true,
+          "expected": {
+            "id": "pressure_drop",
+            "predicate": "упасть",
+            "roles": {
+              "SUBJECT": "давление"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_f0e1af8debf64f0e8256178ddfabb370",
+              "forms": [
+                "упало",
+                "упасть"
+              ],
+              "roles": {
+                "SUBJECT": "Давление"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.pump_stop",
+          "ok": true,
+          "expected": {
+            "id": "pump_stop",
+            "predicate": "остановить",
+            "roles": {
+              "SUBJECT": "автоматика",
+              "OBJECT": "насос"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_6a6488d31b8f48b3a1660c044c1bc092",
+              "forms": [
+                "остановила",
+                "остановить"
+              ],
+              "roles": {
+                "OBJECT": "насос",
+                "SUBJECT": "Автоматика"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.filter_check",
+          "ok": true,
+          "expected": {
+            "id": "filter_check",
+            "predicate": "проверить",
+            "roles": {
+              "SUBJECT": "Виктор",
+              "OBJECT": "фильтр"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_78da659e382e41248ee17286e009d89f",
+              "forms": [
+                "проверил",
+                "проверить"
+              ],
+              "roles": {
+                "OBJECT": "фильтр",
+                "SUBJECT": "Виктор"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.lamp_blink",
+          "ok": true,
+          "expected": {
+            "id": "lamp_blink",
+            "predicate": "мигнуть",
+            "roles": {
+              "SUBJECT": "лампа"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_93eb6b5ff97144498846db3ad950af91",
+              "forms": [
+                "мигнула",
+                "мигнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Лампа"
+              }
+            }
+          ]
+        },
+        {
+          "name": "link.CAUSE.temperature_drop->water_freeze",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.water_freeze->ice_expand",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.ice_expand->tube_crack",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.tube_crack->fluid_leak",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.fluid_leak->pressure_drop",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.pressure_drop->pump_stop",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "forbidden_link.CAUSE.filter_check->pump_stop",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "forbidden_link.CAUSE.lamp_blink->pressure_drop",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "cause_chain.minimum_depth",
+          "ok": true,
+          "expected": 6,
+          "actual": 6
+        }
+      ]
+    },
+    {
+      "id": "greenhouse_control",
+      "title": "Сбой управления теплицей",
+      "status": "PASS",
+      "paragraph_passed": 7,
+      "paragraph_total": 7,
+      "runtime_errors": 0,
+      "m2_question_count": 1,
+      "graph_checks": [
+        {
+          "name": "fact.switch_off",
+          "ok": true,
+          "expected": {
+            "id": "switch_off",
+            "predicate": "обесточиться",
+            "roles": {
+              "SUBJECT": "коммутатор"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_25767f4b45e54463b424baeebff1e2c3",
+              "forms": [
+                "обесточился",
+                "обесточиться"
+              ],
+              "roles": {
+                "SUBJECT": "Коммутатор"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.controller_off",
+          "ok": true,
+          "expected": {
+            "id": "controller_off",
+            "predicate": "отключиться",
+            "roles": {
+              "SUBJECT": "контроллер"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_23cd4fe1bae04cdb96ae1f731e728fa6",
+              "forms": [
+                "отключился",
+                "отключиться"
+              ],
+              "roles": {
+                "SUBJECT": "Контроллер"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.timer_miss",
+          "ok": true,
+          "expected": {
+            "id": "timer_miss",
+            "predicate": "пропустить",
+            "roles": {
+              "SUBJECT": "таймер",
+              "OBJECT": "команда"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_baa5997808f34aa9a9bbec707640cfb9",
+              "forms": [
+                "пропустил",
+                "пропустить"
+              ],
+              "roles": {
+                "OBJECT": "команда",
+                "SUBJECT": "Таймер"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.watering_delay",
+          "ok": true,
+          "expected": {
+            "id": "watering_delay",
+            "predicate": "задержаться",
+            "roles": {
+              "SUBJECT": "полив"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_fc1292b16f354e3b922bb4efdd81ecdf",
+              "forms": [
+                "задержался",
+                "задержаться"
+              ],
+              "roles": {
+                "SUBJECT": "Полив"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.soil_dry",
+          "ok": true,
+          "expected": {
+            "id": "soil_dry",
+            "predicate": "высохнуть",
+            "roles": {
+              "SUBJECT": "почва"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_5781fcfd9fd147c69858c21c10e55e03",
+              "forms": [
+                "высохла",
+                "высохнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Почва"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.seedling_wilt",
+          "ok": true,
+          "expected": {
+            "id": "seedling_wilt",
+            "predicate": "увянуть",
+            "roles": {
+              "SUBJECT": "рассада"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_ccf1553f70c64ca588f70e61469f99c2",
+              "forms": [
+                "увяла",
+                "увянуть"
+              ],
+              "roles": {
+                "SUBJECT": "Рассада"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.yield_drop",
+          "ok": true,
+          "expected": {
+            "id": "yield_drop",
+            "predicate": "снизиться",
+            "roles": {
+              "SUBJECT": "урожай"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_ff45e5328fb144d4ad16a92b3aa4285a",
+              "forms": [
+                "снизился",
+                "снизиться"
+              ],
+              "roles": {
+                "SUBJECT": "Урожай"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.anna_check",
+          "ok": true,
+          "expected": {
+            "id": "anna_check",
+            "predicate": "проверить",
+            "roles": {
+              "SUBJECT": "Анна",
+              "OBJECT": "щиток"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_82a84c1b097a4ce48e1848c2b71feb45",
+              "forms": [
+                "проверила",
+                "проверить"
+              ],
+              "roles": {
+                "OBJECT": "щиток",
+                "SUBJECT": "Анна"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.fan_work",
+          "ok": true,
+          "expected": {
+            "id": "fan_work",
+            "predicate": "работать",
+            "roles": {
+              "SUBJECT": "вентилятор"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_40d6f71aa9f649a08ecc47dba560d99e",
+              "forms": [
+                "работал",
+                "работало",
+                "работать"
+              ],
+              "roles": {
+                "SUBJECT": "Вентилятор"
+              }
+            }
+          ]
+        },
+        {
+          "name": "link.CAUSE.switch_off->controller_off",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.controller_off->timer_miss",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.timer_miss->watering_delay",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.watering_delay->soil_dry",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.soil_dry->seedling_wilt",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.seedling_wilt->yield_drop",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "forbidden_link.CAUSE.anna_check->controller_off",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "forbidden_link.CAUSE.fan_work->yield_drop",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "cause_chain.minimum_depth",
+          "ok": true,
+          "expected": 6,
+          "actual": 6
+        }
+      ]
+    },
+    {
+      "id": "archive_leak",
+      "title": "Протечка в архиве",
+      "status": "PASS",
+      "paragraph_passed": 7,
+      "paragraph_total": 7,
+      "runtime_errors": 0,
+      "m2_question_count": 2,
+      "graph_checks": [
+        {
+          "name": "fact.drain_clog",
+          "ok": true,
+          "expected": {
+            "id": "drain_clog",
+            "predicate": "засориться",
+            "roles": {
+              "SUBJECT": "водосток"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_9df71edcfb344d4aaecbbc7515923e34",
+              "forms": [
+                "засорился",
+                "засориться"
+              ],
+              "roles": {
+                "SUBJECT": "Водосток"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_pool",
+          "ok": true,
+          "expected": {
+            "id": "water_pool",
+            "predicate": "скопиться",
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_cba9c81e2a0b43e4a57afc4a34e51e0c",
+              "forms": [
+                "скопилась",
+                "скопиться"
+              ],
+              "roles": {
+                "SUBJECT": "Вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.ceiling_wet",
+          "ok": true,
+          "expected": {
+            "id": "ceiling_wet",
+            "predicate": "намокнуть",
+            "roles": {
+              "SUBJECT": "перекрытие"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_e724dd37ba0e4c2c8a85ee0996a1eb05",
+              "forms": [
+                "намокло",
+                "намокнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Перекрытие"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_enter",
+          "ok": true,
+          "expected": {
+            "id": "water_enter",
+            "predicate": "проникнуть",
+            "roles": {
+              "SUBJECT": "вода",
+              "LOCATION": "зал"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_6674218f43934185acc876e3bcc9a331",
+              "forms": [
+                "проникла",
+                "проникнуть"
+              ],
+              "roles": {
+                "LOCATION": "зал",
+                "SUBJECT": "Вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.sensor_trigger",
+          "ok": true,
+          "expected": {
+            "id": "sensor_trigger",
+            "predicate": "сработать",
+            "roles": {
+              "SUBJECT": "датчик"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_c245364e99a5465a9f3182d59f5f6185",
+              "forms": [
+                "сработал",
+                "сработать"
+              ],
+              "roles": {
+                "SUBJECT": "Датчик"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.boxes_move",
+          "ok": true,
+          "expected": {
+            "id": "boxes_move",
+            "predicate": "перенести",
+            "roles": {
+              "SUBJECT": "сотрудник",
+              "OBJECT": "коробка"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_f34097e1563846c6a18379af4d1bb765",
+              "forms": [
+                "перенесли",
+                "перенести"
+              ],
+              "roles": {
+                "OBJECT": "коробка",
+                "SUBJECT": "сотрудник"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.hall_close",
+          "ok": true,
+          "expected": {
+            "id": "hall_close",
+            "predicate": "закрыть",
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "зал"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_ae7061f50bcb478fb76626b3cfc6c9c3",
+              "forms": [
+                "закрыл",
+                "закрыла",
+                "закрыть"
+              ],
+              "roles": {
+                "OBJECT": "зал",
+                "SUBJECT": "Марина"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.door_check",
+          "ok": true,
+          "expected": {
+            "id": "door_check",
+            "predicate": "проверить",
+            "roles": {
+              "SUBJECT": "охрана",
+              "OBJECT": "дверь"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_1a46bdf92c194e29a20c856eedb82ab7",
+              "forms": [
+                "проверила",
+                "проверить"
+              ],
+              "roles": {
+                "OBJECT": "дверь",
+                "SUBJECT": "охрана"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.album_inspect",
+          "ok": true,
+          "expected": {
+            "id": "album_inspect",
+            "predicate": "осмотреть",
+            "roles": {
+              "SUBJECT": "реставратор",
+              "OBJECT": "альбом"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_9b1190fa59fd443a8fbc34f6a544ce38",
+              "forms": [
+                "осмотрел",
+                "осмотреть"
+              ],
+              "roles": {
+                "OBJECT": "альбом",
+                "SUBJECT": "Реставратор"
+              }
+            }
+          ]
+        },
+        {
+          "name": "link.CAUSE.drain_clog->water_pool",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.water_pool->ceiling_wet",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.ceiling_wet->water_enter",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.water_enter->sensor_trigger",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.sensor_trigger->boxes_move",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.FOLLOW.boxes_move->hall_close",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.FOLLOW.hall_close->door_check",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "forbidden_link.CAUSE.album_inspect->sensor_trigger",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "forbidden_link.CAUSE.album_inspect->boxes_move",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "cause_chain.minimum_depth",
+          "ok": true,
+          "expected": 5,
+          "actual": 5
+        }
+      ]
+    },
+    {
+      "id": "house_by_pier_monolith",
+      "title": "Дом у пристани — художественный монолит",
+      "status": "FAIL",
+      "paragraph_passed": 15,
+      "paragraph_total": 15,
+      "runtime_errors": 1,
+      "m2_question_count": 3,
+      "graph_checks": [
+        {
+          "name": "fact.wind_rise",
+          "ok": true,
+          "expected": {
+            "id": "wind_rise",
+            "predicate": "усилиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветер"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_d24138cd4e314c55bf000701a85de95d",
+              "forms": [
+                "усилился",
+                "усилиться"
+              ],
+              "roles": {
+                "SUBJECT": "ветер"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.branch_break",
+          "ok": false,
+          "expected": {
+            "id": "branch_break",
+            "predicate": "сломаться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветка"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.branch_fall",
+          "ok": false,
+          "expected": {
+            "id": "branch_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "branch_break.SUBJECT"
+              },
+              "LOCATION": "желоб"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.branch_touch",
+          "ok": true,
+          "expected": {
+            "id": "branch_touch",
+            "predicate": "задеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "ветка",
+              "OBJECT": "желоб"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_910a0429a0ee4cd5b98381fde3b84149",
+              "forms": [
+                "задел",
+                "задела",
+                "задеть"
+              ],
+              "roles": {
+                "OBJECT": "Жёлоб",
+                "SUBJECT": "ветка"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.gutter_shift",
+          "ok": true,
+          "expected": {
+            "id": "gutter_shift",
+            "predicate": "сдвинуться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "желоб"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_756a39cc12524ba08ad883df019b2d7a",
+              "forms": [
+                "сдвинулся",
+                "сдвинуться"
+              ],
+              "roles": {
+                "SUBJECT": "Жёлоб"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_go",
+          "ok": true,
+          "expected": {
+            "id": "water_go",
+            "predicate": "пойти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_9d2867eba86b4eeb874f8cffada8d8ff",
+              "forms": [
+                "пойти",
+                "пошла"
+              ],
+              "roles": {
+                "LOCATION": "край крыши",
+                "SUBJECT": "вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.beam_wet",
+          "ok": true,
+          "expected": {
+            "id": "beam_wet",
+            "predicate": "намокнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "балка"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_6d9965e7f7e04af9b8150e6e1df84049",
+              "forms": [
+                "намокла",
+                "намокнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Балка"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.beam_swell",
+          "ok": true,
+          "expected": {
+            "id": "beam_swell",
+            "predicate": "разбухнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "beam_wet.SUBJECT"
+              }
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_ac53de31bd994e03af6c4f7811b7b7ed",
+              "forms": [
+                "разбухла",
+                "разбухнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Балка"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.frame_warp",
+          "ok": true,
+          "expected": {
+            "id": "frame_warp",
+            "predicate": "перекоситься",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "рама"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_d6e496626aed4e3f9afe8354b1fad213",
+              "forms": [
+                "перекосилась",
+                "перекоситься"
+              ],
+              "roles": {
+                "SUBJECT": "Рама"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.window_jam",
+          "ok": true,
+          "expected": {
+            "id": "window_jam",
+            "predicate": "заклиниться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "окно"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_c2c47ef49bda461485674457e4f6ce5e",
+              "forms": [
+                "заклинилось",
+                "заклиниться"
+              ],
+              "roles": {
+                "SUBJECT": "Окно"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.marina_climb",
+          "ok": true,
+          "expected": {
+            "id": "marina_climb",
+            "predicate": "подняться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "LOCATION": "чердак"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_7371425f7c5d47169ba2dd0bcf51d47c",
+              "forms": [
+                "поднялась",
+                "подняться"
+              ],
+              "roles": {
+                "LOCATION": "чердак",
+                "SUBJECT": "Марина"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.marina_notice",
+          "ok": true,
+          "expected": {
+            "id": "marina_notice",
+            "predicate": "заметить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "marina_climb.SUBJECT"
+              },
+              "OBJECT": "пятно"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_c072402265314d46b30e6c437d2f90e6",
+              "forms": [
+                "заметила",
+                "заметить"
+              ],
+              "roles": {
+                "OBJECT": "пятно",
+                "SUBJECT": "Марина"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_flow",
+          "ok": true,
+          "expected": {
+            "id": "water_flow",
+            "predicate": "стекать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_51cdea3e505642de86f23f8a7b22b671",
+              "forms": [
+                "стекала",
+                "стекать"
+              ],
+              "roles": {
+                "LOCATION": "Балка",
+                "SUBJECT": "вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.plaster_detach",
+          "ok": true,
+          "expected": {
+            "id": "plaster_detach",
+            "predicate": "отслоиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "штукатурка"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_d029a71a15774a80acd9b2b55a588145",
+              "forms": [
+                "отслоилась",
+                "отслоиться"
+              ],
+              "roles": {
+                "SUBJECT": "Штукатурка"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.plaster_fall",
+          "ok": false,
+          "expected": {
+            "id": "plaster_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "кусок штукатурки"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.frighten_cat",
+          "ok": false,
+          "expected": {
+            "id": "frighten_cat",
+            "predicate": "испугать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "падение штукатурки",
+              "OBJECT": "кот"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.cat_rush",
+          "ok": false,
+          "expected": {
+            "id": "cat_rush",
+            "predicate": "броситься",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "кот",
+              "LOCATION": "дверь"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.cat_hit_table",
+          "ok": false,
+          "expected": {
+            "id": "cat_hit_table",
+            "predicate": "задеть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "cat_rush.SUBJECT"
+              },
+              "OBJECT": "стол"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.lamp_fall",
+          "ok": true,
+          "expected": {
+            "id": "lamp_fall",
+            "predicate": "упасть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "лампа",
+              "SOURCE": "стол"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_832a841863eb4b168b960f391862c4b3",
+              "forms": [
+                "упал",
+                "упала",
+                "упасть"
+              ],
+              "roles": {
+                "SOURCE": "стол",
+                "SUBJECT": "Лампа"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.glass_break",
+          "ok": false,
+          "expected": {
+            "id": "glass_break",
+            "predicate": "разбиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "стекло лампы"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.noise_wake",
+          "ok": true,
+          "expected": {
+            "id": "noise_wake",
+            "predicate": "разбудить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "шум",
+              "OBJECT": "Павел"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_700617f16aba4620b8d9fa6557fdf230",
+              "forms": [
+                "разбудил",
+                "разбудить"
+              ],
+              "roles": {
+                "OBJECT": "Павел",
+                "SUBJECT": "Шум"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.pavel_come",
+          "ok": false,
+          "expected": {
+            "id": "pavel_come",
+            "predicate": "прийти",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "same_as": "noise_wake.OBJECT"
+              },
+              "LOCATION": "чердак"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.pavel_put_basin",
+          "ok": true,
+          "expected": {
+            "id": "pavel_put_basin",
+            "predicate": "поставить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Павел",
+              "OBJECT": "таз"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_dd5dec0375ed4352bb4699a88d512598",
+              "forms": [
+                "поставил",
+                "поставить"
+              ],
+              "roles": {
+                "OBJECT": "таз",
+                "LOCATION": "протечка",
+                "SUBJECT": "Павел"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.rain_weaken",
+          "ok": true,
+          "expected": {
+            "id": "rain_weaken",
+            "predicate": "ослабнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "дождь"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_846fb7da5ed64304afdb3d1f30e7c0c1",
+              "forms": [
+                "ослаб",
+                "ослабнуть"
+              ],
+              "roles": {
+                "SUBJECT": "дождь"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_drip",
+          "ok": true,
+          "expected": {
+            "id": "water_drip",
+            "predicate": "капать",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_92afe5d2492140f18fe33d7dcfc0da18",
+              "forms": [
+                "капала",
+                "капать"
+              ],
+              "roles": {
+                "HOW-TO": "реже",
+                "SUBJECT": "вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.marina_remove_box",
+          "ok": true,
+          "expected": {
+            "id": "marina_remove_box",
+            "predicate": "снять",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "коробка"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_4a033f9d945045bc969690593fa8a621",
+              "forms": [
+                "сняла",
+                "снять"
+              ],
+              "roles": {
+                "OBJECT": "коробка",
+                "SOURCE": "шкаф",
+                "SUBJECT": "Марина"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.water_seep",
+          "ok": true,
+          "expected": {
+            "id": "water_seep",
+            "predicate": "просочиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "вода",
+              "LOCATION": "коробка"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_ab24e557a8fa4b3f9b71339e1da073f1",
+              "forms": [
+                "просочилась",
+                "просочиться"
+              ],
+              "roles": {
+                "LOCATION": "коробка",
+                "SUBJECT": "вода"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.paper_wet",
+          "ok": true,
+          "expected": {
+            "id": "paper_wet",
+            "predicate": "намокнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "бумага"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_c64288e2055c46bdbb42d5128238710b",
+              "forms": [
+                "намокла",
+                "намокнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Бумага"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.marina_put_letters",
+          "ok": false,
+          "expected": {
+            "id": "marina_put_letters",
+            "predicate": "положить",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "письма"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.stove_heat",
+          "ok": true,
+          "expected": {
+            "id": "stove_heat",
+            "predicate": "греть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "печь"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_05ce93ba66b54ca0bff83cd6ce9660ae",
+              "forms": [
+                "грела",
+                "греть"
+              ],
+              "roles": {
+                "HOW-TO": "сильно",
+                "SUBJECT": "печь",
+                "AMOUNT": "слишком"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.paper_curl",
+          "ok": true,
+          "expected": {
+            "id": "paper_curl",
+            "predicate": "коробиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "бумага"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_e6f0c2ae8c9046a2aa8e65f9f842d025",
+              "forms": [
+                "коробилась",
+                "коробиться"
+              ],
+              "roles": {
+                "SUBJECT": "Бумага"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.marina_move_letters",
+          "ok": false,
+          "expected": {
+            "id": "marina_move_letters",
+            "predicate": "отодвинуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "письма"
+            }
+          },
+          "actual": []
+        },
+        {
+          "name": "fact.curl_stop",
+          "ok": true,
+          "expected": {
+            "id": "curl_stop",
+            "predicate": "прекратиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "коробление"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_fbf3f557670e4a35aa5f0b57fcaef56d",
+              "forms": [
+                "прекратилось",
+                "прекратился",
+                "прекратиться"
+              ],
+              "roles": {
+                "SUBJECT": "коробление"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.rain_stop",
+          "ok": true,
+          "expected": {
+            "id": "rain_stop",
+            "predicate": "прекратиться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "дождь"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_9f50c7ece78d40bf966759817917828b",
+              "forms": [
+                "прекратилось",
+                "прекратился",
+                "прекратиться"
+              ],
+              "roles": {
+                "TIME": "рассвет",
+                "SUBJECT": "дождь"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.frame_dry",
+          "ok": true,
+          "expected": {
+            "id": "frame_dry",
+            "predicate": "подсохнуть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "рама"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_145e7ac9496d4349ae1d62bf498d6975",
+              "forms": [
+                "подсохла",
+                "подсохнуть"
+              ],
+              "roles": {
+                "SUBJECT": "Рама"
+              }
+            }
+          ]
+        },
+        {
+          "name": "fact.marina_open_window",
+          "ok": true,
+          "expected": {
+            "id": "marina_open_window",
+            "predicate": "открыть",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": "Марина",
+              "OBJECT": "окно"
+            }
+          },
+          "actual": [
+            {
+              "uid": "N_e7fe1076c42940478922bfa1bd9db427",
+              "forms": [
+                "открыла",
+                "открыть"
+              ],
+              "roles": {
+                "OBJECT": "Окно",
+                "SUBJECT": "Марина"
+              }
+            }
+          ]
+        },
+        {
+          "name": "link.CAUSE.wind_rise->branch_break",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.branch_touch->gutter_shift",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.gutter_shift->water_go",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.water_go->beam_wet",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.beam_wet->beam_swell",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.beam_swell->frame_warp",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.frame_warp->window_jam",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.water_flow->plaster_detach",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.CAUSE.plaster_detach->plaster_fall",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.frighten_cat->cat_rush",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.cat_hit_table->lamp_fall",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.FOLLOW.rain_weaken->water_drip",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.water_seep->paper_wet",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.stove_heat->paper_curl",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "link.FOLLOW.marina_move_letters->curl_stop",
+          "ok": false,
+          "expected": true,
+          "actual": false
+        },
+        {
+          "name": "link.CAUSE.frame_dry->marina_open_window",
+          "ok": true,
+          "expected": true,
+          "actual": true
+        },
+        {
+          "name": "forbidden_link.CAUSE.wind_rise->paper_wet",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "forbidden_link.CAUSE.noise_wake->rain_weaken",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "forbidden_link.CAUSE.marina_move_letters->curl_stop",
+          "ok": true,
+          "expected": false,
+          "actual": false
+        },
+        {
+          "name": "cause_chain.minimum_depth",
+          "ok": true,
+          "expected": 6,
+          "actual": 8
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "documents_total": 4,
+    "documents_passed": 3,
+    "documents_failed": 1,
+    "paragraphs_total": 36,
+    "paragraphs_semantic_passed": 36,
+    "paragraphs_semantic_failed": 0,
+    "runtime_errors": 1
+  }
+}

@@ -481,6 +481,29 @@ class LLMRoleTests(unittest.TestCase):
         _encode_prompt({"tokenizer": fallback, "enable_thinking": False}, "sys", "user")
         self.assertFalse(fallback.add_special_tokens)
 
+    def test_worker_encode_prompt_honors_request_local_thinking_override(self) -> None:
+        from ah.llm.worker import _encode_prompt
+
+        class FakeTensor:
+            shape = (1, 3)
+
+        class Tokenizer:
+            def __init__(self):
+                self.thinking = None
+
+            def apply_chat_template(self, messages, **kwargs):
+                self.thinking = kwargs.get("enable_thinking")
+                return {"input_ids": FakeTensor()}
+
+        tok = Tokenizer()
+        _encode_prompt(
+            {"tokenizer": tok, "enable_thinking": False},
+            "sys",
+            "user",
+            enable_thinking=True,
+        )
+        self.assertTrue(tok.thinking)
+
     def test_worker_refuses_to_silently_truncate_overflowing_context(self) -> None:
         class FakeTensor:
             shape = (1, 100)

@@ -12,7 +12,7 @@ from ah.config import PersistenceSettings
 from ah.core import JsonPersistence
 from ah.ignition.engine import IgnitionSnapshot
 from ah.model import RuntimeState
-from ah.perception import PerceptionResult
+from ah.perception import GoalSemanticService, PerceptionResult, apply_speech_act_scoping
 from ah.projection import ContextProjector
 from ah.integration import TemplateCompletionService
 from .errors import CorpusError
@@ -126,6 +126,8 @@ def _import_user_turn(services, text: str, *, parse_user: bool):
         return services.integration.integrate_external(PerceptionResult(source_text=text), services.context)
     parsed = services.perception.parse(text, services.context)
     parsed = _complete_templates(services, parsed)
+    parsed = apply_speech_act_scoping(parsed)
+    parsed = GoalSemanticService(services.perception).complete(parsed)
     return services.integration.integrate_external(parsed, services.context)
 
 
@@ -133,6 +135,8 @@ def _import_agent_turn(services, text: str, *, parse_semantics: bool):
     if parse_semantics and services.perception is not None:
         parsed = services.perception.parse(text, services.context)
         parsed = _complete_templates(services, parsed)
+        parsed = apply_speech_act_scoping(parsed)
+        parsed = GoalSemanticService(services.perception).complete(parsed)
         return services.integration.integrate_to_h(parsed, services.context)
     return services.integration.integrate_to_h(PerceptionResult(source_text=text, diagnostics=("AGENT_H_TEXT_ONLY",)), services.context)
 

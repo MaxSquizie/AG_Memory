@@ -128,6 +128,11 @@ class ProjectionInferenceTests(unittest.TestCase):
         )
         self.assertIs(exists.status, LogicalStatus.UNKNOWN)
         self.assertIs(fill.status, LogicalStatus.UNKNOWN)
+        ctx = ContextProjector(self.core, self.context_settings).project("Верно ли это?", (), (exists,))
+        self.assertIn("# INFERENCE RESULTS", ctx.rendered)
+        self.assertIn("UNKNOWN", ctx.rendered)
+        self.assertIn("не доказана и не опровергнута", ctx.rendered)
+        self.assertNotIn("SEARCH_EXHAUSTED", ctx.rendered)
         self.assertEqual(self.core.store.get_hypernode(scoped.uid).meta.get("semantic_scope"), "CONDITIONAL")
 
     def test_explicit_false_disproves_precise_exists_goal(self) -> None:
@@ -152,6 +157,10 @@ class ProjectionInferenceTests(unittest.TestCase):
         )
         self.assertIs(out.status, LogicalStatus.DISPROVED)
         self.assertEqual(out.conclusion.ref.uid, false_g.uid)
+        ctx = ContextProjector(self.core, self.context_settings).project("Правда ли это?", (), (out,))
+        self.assertIn("DISPROVED", ctx.rendered)
+        self.assertIn("явно опровергнута", ctx.rendered)
+        self.assertNotIn("GOAL_SATISFIED", ctx.rendered)
 
     def test_false_of_one_completion_does_not_disprove_partial_exists(self) -> None:
         masha = self.entity(Domain.P, "Маша")

@@ -1,0 +1,2333 @@
+{
+  "index": 23,
+  "input": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+  "status": "OK",
+  "scenario_id": "house_by_pier_monolith",
+  "linguistic_candidate_graph": {
+    "text": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Сухая",
+        "start": 0,
+        "end": 5,
+        "analyses": [
+          {
+            "normal_form": "сухой",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "ADJF",
+              "femn",
+              "nomn",
+              "Qual"
+            ],
+            "score": 0.9375
+          },
+          {
+            "normal_form": "сухой",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "Surn",
+              "femn",
+              "anim",
+              "nomn",
+              "NOUN",
+              "Sgtm"
+            ],
+            "score": 0.0625
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "ветка",
+        "start": 6,
+        "end": 11,
+        "analyses": [
+          {
+            "normal_form": "ветка",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "femn",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "сломалась",
+        "start": 12,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "сломаться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "femn",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": ",",
+        "start": 21,
+        "end": 22,
+        "analyses": []
+      },
+      {
+        "index": 5,
+        "text": "потому",
+        "start": 23,
+        "end": 29,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "что",
+        "start": 30,
+        "end": 33,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "NPRO",
+              "sing",
+              "neut"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "NPRO",
+              "nomn",
+              "sing",
+              "neut"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "ветер",
+        "start": 34,
+        "end": 39,
+        "analyses": [
+          {
+            "normal_form": "ветер",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.826086
+          },
+          {
+            "normal_form": "ветер",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.173913
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": "усилился",
+        "start": 40,
+        "end": 48,
+        "analyses": [
+          {
+            "normal_form": "усилиться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "masc",
+              "intr",
+              "VERB",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "text": ".",
+        "start": 48,
+        "end": 49,
+        "analyses": []
+      },
+      {
+        "index": 10,
+        "text": "Она",
+        "start": 50,
+        "end": 53,
+        "analyses": [
+          {
+            "normal_form": "она",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "3per",
+              "femn",
+              "Anph",
+              "nomn",
+              "NPRO"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": "упала",
+        "start": 54,
+        "end": 59,
+        "analyses": [
+          {
+            "normal_form": "упасть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "sing",
+              "intr",
+              "VERB",
+              "femn",
+              "perf",
+              "past"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "text": "на",
+        "start": 60,
+        "end": 62,
+        "analyses": [
+          {
+            "normal_form": "на",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.998961
+          },
+          {
+            "normal_form": "на",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000849
+          },
+          {
+            "normal_form": "на",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000188
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "text": "жестяной",
+        "start": 63,
+        "end": 71,
+        "analyses": [
+          {
+            "normal_form": "жестяной",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADJF",
+              "sing",
+              "nomn",
+              "masc"
+            ],
+            "score": 0.16666666666666666
+          },
+          {
+            "normal_form": "жестяной",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "ADJF",
+              "accs"
+            ],
+            "score": 0.16666666666666666
+          },
+          {
+            "normal_form": "жестяной",
+            "pos": "ADJF",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "ADJF",
+              "sing",
+              "gent"
+            ],
+            "score": 0.16666666666666666
+          },
+          {
+            "normal_form": "жестяной",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "datv",
+              "sing",
+              "ADJF"
+            ],
+            "score": 0.16666666666666666
+          },
+          {
+            "normal_form": "жестяной",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "ADJF",
+              "femn",
+              "sing"
+            ],
+            "score": 0.16666666666666666
+          },
+          {
+            "normal_form": "жестяной",
+            "pos": "ADJF",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "ADJF",
+              "femn",
+              "sing"
+            ],
+            "score": 0.16666666666666666
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "text": "желоб",
+        "start": 72,
+        "end": 77,
+        "analyses": [
+          {
+            "normal_form": "жёлоб",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "жёлоб",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "inan",
+              "masc",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.5
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "text": ".",
+        "start": 77,
+        "end": 78,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 3,
+          "text": "Сухая ветка сломалась",
+          "evidence": {
+            "text": "Сухая ветка сломалась",
+            "start": 0,
+            "end": 21
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 3,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "сломаться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "сухая",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 5,
+          "end_index": 8,
+          "text": "потому что ветер усилился",
+          "evidence": {
+            "text": "потому что ветер усилился",
+            "start": 23,
+            "end": 48
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 8,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "усилиться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL1",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 5,
+          "end_index": 6,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 23,
+            "end": 33
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 10,
+          "end_index": 14,
+          "text": "Она упала на жестяной желоб",
+          "evidence": {
+            "text": "Она упала на жестяной желоб",
+            "start": 50,
+            "end": 77
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 11,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "упасть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "она",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 3,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "сломаться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 8,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "усилиться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 11,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "упасть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 3,
+          "child_token_index": 8,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL1",
+          "child_clause_id": "CL2"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "сломалась",
+          "normalized_hint": "сломаться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "сломалась",
+            "start": 12,
+            "end": 21
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Сухая ветка",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Сухая ветка",
+              "start": 0,
+              "end": 11
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Сухая ветка сломалась",
+          "start": 0,
+          "end": 21
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "усилился",
+          "normalized_hint": "усилиться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "усилился",
+            "start": 40,
+            "end": 48
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_8d05b144b14e47f58f32e8660f307eff",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "ветер",
+            "normalized_hint": "ветер",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "ветер",
+              "start": 34,
+              "end": 39
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что ветер усилился",
+          "start": 23,
+          "end": 48
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "упала",
+          "normalized_hint": "упасть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "упала",
+            "start": 54,
+            "end": 59
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "LOCATION"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Она",
+            "normalized_hint": "Она",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "Она",
+              "start": 50,
+              "end": 53
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "LOCATION",
+            "mention": "жестяной желоб",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "на жестяной желоб",
+              "start": 60,
+              "end": 77
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Она упала на жестяной желоб",
+          "start": 50,
+          "end": 77
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A2",
+        "target_ref": "A1",
+        "evidence": {
+          "text": "потому что",
+          "start": 23,
+          "end": 33
+        }
+      }
+    ],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [
+      {
+        "parent_ref": "A1",
+        "child_ref": "A2",
+        "kind": "SUBORDINATE"
+      }
+    ],
+    "relation_hints": [
+      {
+        "kind": "CAUSAL_CANDIDATE",
+        "source_ref": "A2",
+        "target_ref": "A3",
+        "evidence": {
+          "text": ". ",
+          "start": 48,
+          "end": 50
+        },
+        "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_308561117a8d40c49f37175e307cbbb3",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_308561117a8d40c49f37175e307cbbb3",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_804852fdc1844b9da9c97390765e17e6",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_ffc7bdde8aa842b8a7693922b4a04de9",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_308561117a8d40c49f37175e307cbbb3",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_841cf3f4bd1247dbaa2f5b19aaeb3254",
+          "kind": "L"
+        },
+        "created": true
+      }
+    ],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_009a7f61263d40c7a219928f1381fd02",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_3b19ddfdf04341f1acfcf4d94331fe3c",
+        "kind": "M"
+      },
+      {
+        "uid": "M_3efaf8086387464d85d1fb0655a7b2b4",
+        "kind": "M"
+      },
+      {
+        "uid": "M_4f07dd1949de4481b4bed98ee2686db5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+        "kind": "M"
+      },
+      {
+        "uid": "M_8cdf0ac582734ed49bfe2b03988079dc",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b3b726dd0eb94e0f8c8fc69f421d2649",
+        "kind": "M"
+      },
+      {
+        "uid": "M_c466272a8d8049fda02b9cfb110e494d",
+        "kind": "M"
+      },
+      {
+        "uid": "N_009a7f61263d40c7a219928f1381fd02",
+        "kind": "N"
+      },
+      {
+        "uid": "N_308561117a8d40c49f37175e307cbbb3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6478ea4d7a8e43219e493fa3ecf46ea8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+        "kind": "N"
+      },
+      {
+        "uid": "N_eb181ff2c3624af287e31b645f148e5c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+        "kind": "N"
+      },
+      {
+        "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+        "kind": "S"
+      },
+      {
+        "uid": "S_4d8607a7f1a7415e96ec9213a7d04442",
+        "kind": "S"
+      },
+      {
+        "uid": "S_804852fdc1844b9da9c97390765e17e6",
+        "kind": "S"
+      },
+      {
+        "uid": "S_ffc7bdde8aa842b8a7693922b4a04de9",
+        "kind": "S"
+      },
+      {
+        "uid": "T_34140f3586ac4cb1a3a5297ef7a15691",
+        "kind": "T"
+      },
+      {
+        "uid": "T_46fbb00f64a0462484e0f2d27cd67f55",
+        "kind": "T"
+      },
+      {
+        "uid": "T_4a20fe253ee14580abc0fd206f078560",
+        "kind": "T"
+      },
+      {
+        "uid": "T_8d05b144b14e47f58f32e8660f307eff",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 6,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_3b19ddfdf04341f1acfcf4d94331fe3c",
+          "kind": "M"
+        },
+        "semantic": "[M_3b19ddfdf04341f1acfcf4d94331fe3c] Марина",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_3efaf8086387464d85d1fb0655a7b2b4",
+          "kind": "M"
+        },
+        "semantic": "[M_3efaf8086387464d85d1fb0655a7b2b4] вечер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_4f07dd1949de4481b4bed98ee2686db5",
+          "kind": "M"
+        },
+        "semantic": "[M_4f07dd1949de4481b4bed98ee2686db5] пристань",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+          "kind": "M"
+        },
+        "semantic": "[M_7e04b33c3bcf404786227ae419ccfc52] Сухая ветка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5720000000000001,
+        "output": 0.052000000000000046,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_8cdf0ac582734ed49bfe2b03988079dc",
+          "kind": "M"
+        },
+        "semantic": "[M_8cdf0ac582734ed49bfe2b03988079dc] бухта",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_b3b726dd0eb94e0f8c8fc69f421d2649",
+          "kind": "M"
+        },
+        "semantic": "[M_b3b726dd0eb94e0f8c8fc69f421d2649] старый дом",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_c466272a8d8049fda02b9cfb110e494d",
+          "kind": "M"
+        },
+        "semantic": "[M_c466272a8d8049fda02b9cfb110e494d] северный ветер",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "N_009a7f61263d40c7a219928f1381fd02",
+          "kind": "N"
+        },
+        "semantic": "[N_009a7f61263d40c7a219928f1381fd02] [S_4d8607a7f1a7415e96ec9213a7d04442] войти(SUBJECT=[M_3b19ddfdf04341f1acfcf4d94331fe3c] Марина, AUXILLIARY=[M_4f07dd1949de4481b4bed98ee2686db5] пристань, LOCATION=[M_b3b726dd0eb94e0f8c8fc69f421d2649] старый дом, TIME=[M_3efaf8086387464d85d1fb0655a7b2b4] вечер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_308561117a8d40c49f37175e307cbbb3",
+          "kind": "N"
+        },
+        "semantic": "[N_308561117a8d40c49f37175e307cbbb3] [S_ffc7bdde8aa842b8a7693922b4a04de9] усилился(SUBJECT=[M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8] ветер)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.40000000000000013,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "N_6478ea4d7a8e43219e493fa3ecf46ea8",
+          "kind": "N"
+        },
+        "semantic": "[N_6478ea4d7a8e43219e493fa3ecf46ea8] [S_ffc7bdde8aa842b8a7693922b4a04de9] усилился(SUBJECT=[M_c466272a8d8049fda02b9cfb110e494d] северный ветер, LOCATION=[M_8cdf0ac582734ed49bfe2b03988079dc] бухта)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.40000000000000013,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+          "kind": "N"
+        },
+        "semantic": "[N_666cb1eebea84a4cb6b7c9bb8c102c9d] [S_2bfce5aaf050414cb1300713563dbdd2] упала(SUBJECT=[M_7e04b33c3bcf404786227ae419ccfc52] Сухая ветка, LOCATION=[M_62638611100440a29f15d136bf8c4707] жестяной желоб)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+          "kind": "N"
+        },
+        "semantic": "[N_67ba0f4f9b7d4f088dfc714a74b078ca] реплика пользователя: Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_eb181ff2c3624af287e31b645f148e5c",
+          "kind": "N"
+        },
+        "semantic": "[N_eb181ff2c3624af287e31b645f148e5c] реплика пользователя: К вечеру Марина вошла в старый дом у пристани. Над бухтой усилился северный ветер.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        },
+        "semantic": "[N_ecb0e26937524a379b153720f0d8f0ef] [S_804852fdc1844b9da9c97390765e17e6] сломалась(SUBJECT=[M_7e04b33c3bcf404786227ae419ccfc52] Сухая ветка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+          "kind": "S"
+        },
+        "semantic": "[S_2bfce5aaf050414cb1300713563dbdd2] упала",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "S_4d8607a7f1a7415e96ec9213a7d04442",
+          "kind": "S"
+        },
+        "semantic": "[S_4d8607a7f1a7415e96ec9213a7d04442] войти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "S_804852fdc1844b9da9c97390765e17e6",
+          "kind": "S"
+        },
+        "semantic": "[S_804852fdc1844b9da9c97390765e17e6] сломалась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "S_ffc7bdde8aa842b8a7693922b4a04de9",
+          "kind": "S"
+        },
+        "semantic": "[S_ffc7bdde8aa842b8a7693922b4a04de9] усилился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "T_34140f3586ac4cb1a3a5297ef7a15691",
+          "kind": "T"
+        },
+        "semantic": "[T_34140f3586ac4cb1a3a5297ef7a15691] predicate=[S_804852fdc1844b9da9c97390765e17e6] сломалась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "T_46fbb00f64a0462484e0f2d27cd67f55",
+          "kind": "T"
+        },
+        "semantic": "[T_46fbb00f64a0462484e0f2d27cd67f55] predicate=[S_4d8607a7f1a7415e96ec9213a7d04442] войти; roles=[SUBJECT, AUXILLIARY, LOCATION, TIME]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "T_4a20fe253ee14580abc0fd206f078560",
+          "kind": "T"
+        },
+        "semantic": "[T_4a20fe253ee14580abc0fd206f078560] predicate=[S_2bfce5aaf050414cb1300713563dbdd2] упала; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "T_8d05b144b14e47f58f32e8660f307eff",
+          "kind": "T"
+        },
+        "semantic": "[T_8d05b144b14e47f58f32e8660f307eff] predicate=[S_ffc7bdde8aa842b8a7693922b4a04de9] усилился; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 23,
+      "source_text": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nTOKENS:\n[1] Сухая\n[2] ветка\n[3] сломалась\n[4] ,\n[5] потому\n[6] что\n[7] ветер\n[8] усилился\n[9] .\n[10] Она\n[11] упала\n[12] на\n[13] жестяной\n[14] желоб\n[15] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[3] token 3: сломалась; morphology=VERB",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nTOKENS:\n[1] Сухая\n[2] ветка\n[3] сломалась\n[4] ,\n[5] потому\n[6] что\n[7] ветер\n[8] усилился\n[9] .\n[10] Она\n[11] упала\n[12] на\n[13] жестяной\n[14] желоб\n[15] .\nPREDICATE_START: [3] сломалась\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[3] end at token 3: сломалась",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась\nTARGET:\nсломалась\nRUSSIAN_LEMMA:\nсломаться",
+          "normalized_answer": "сломаться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась\nPREDICATE:\nсломалась\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nсломалась\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Сухая ветка",
+          "normalized_answer": "1-2",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nсломалась\nQUESTION_WORD:\nСухая ветка",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nсломалась\nALREADY_SELECTED:\nСухая ветка\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что ветер усилился\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nTOKENS:\n[1] Сухая\n[2] ветка\n[3] сломалась\n[4] ,\n[5] потому\n[6] что\n[7] ветер\n[8] усилился\n[9] .\n[10] Она\n[11] упала\n[12] на\n[13] жестяной\n[14] желоб\n[15] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[8] token 8: усилился; morphology=VERB",
+          "normalized_answer": "8",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nTOKENS:\n[1] Сухая\n[2] ветка\n[3] сломалась\n[4] ,\n[5] потому\n[6] что\n[7] ветер\n[8] усилился\n[9] .\n[10] Она\n[11] упала\n[12] на\n[13] жестяной\n[14] желоб\n[15] .\nPREDICATE_START: [8] усилился\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[8] end at token 8: усилился",
+          "normalized_answer": "8",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что ветер усилился\nTARGET:\nусилился\nRUSSIAN_LEMMA:\nусилиться",
+          "normalized_answer": "усилиться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что ветер усилился\nPREDICATE:\nусилился\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nусилился\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] ветер",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nусилился\nQUESTION_WORD:\nветер",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nусилился\nALREADY_SELECTED:\nветер\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна упала на жестяной желоб\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nTOKENS:\n[1] Сухая\n[2] ветка\n[3] сломалась\n[4] ,\n[5] потому\n[6] что\n[7] ветер\n[8] усилился\n[9] .\n[10] Она\n[11] упала\n[12] на\n[13] жестяной\n[14] желоб\n[15] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[11] token 11: упала; morphology=VERB",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nTOKENS:\n[1] Сухая\n[2] ветка\n[3] сломалась\n[4] ,\n[5] потому\n[6] что\n[7] ветер\n[8] усилился\n[9] .\n[10] Она\n[11] упала\n[12] на\n[13] жестяной\n[14] желоб\n[15] .\nPREDICATE_START: [11] упала\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[11] end at token 11: упала",
+          "normalized_answer": "11",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна упала на жестяной желоб\nTARGET:\nупала\nRUSSIAN_LEMMA:\nупасть",
+          "normalized_answer": "упасть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nОна упала на жестяной желоб\nPREDICATE:\nупала\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Она\n[2] на жестяной желоб",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nQUESTION_WORD:\nОна",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nALREADY_SELECTED:\nОна\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] на жестяной желоб",
+          "normalized_answer": "12-14",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "PLACE",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nTARGET:\nна жестяной желоб\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "PLACE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nALREADY_SELECTED:\nОна | на жестяной желоб\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "pronoun_binding",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "PRONOUN:\nОна\nANTECEDENT:\nСухая ветка",
+          "normalized_answer": "E1",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "сломалась",
+              "normalized_hint": "сломаться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "сломалась",
+                "start": 12,
+                "end": 21
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Сухая ветка",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Сухая ветка",
+                  "start": 0,
+                  "end": 11
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Сухая ветка сломалась",
+              "start": 0,
+              "end": 21
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "усилился",
+              "normalized_hint": "усилиться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "усилился",
+                "start": 40,
+                "end": 48
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "ветер",
+                "normalized_hint": "ветер",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "ветер",
+                  "start": 34,
+                  "end": 39
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что ветер усилился",
+              "start": 23,
+              "end": 48
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "упала",
+              "normalized_hint": "упасть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "упала",
+                "start": 54,
+                "end": 59
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Она",
+                "normalized_hint": "Она",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "Она",
+                  "start": 50,
+                  "end": 53
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "LOCATION",
+                "mention": "жестяной желоб",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "на жестяной желоб",
+                  "start": 60,
+                  "end": 77
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Она упала на жестяной желоб",
+              "start": 50,
+              "end": 77
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A2",
+            "target_ref": "A1",
+            "evidence": {
+              "text": "потому что",
+              "start": 23,
+              "end": 33
+            }
+          }
+        ],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [
+          {
+            "parent_ref": "A1",
+            "child_ref": "A2",
+            "kind": "SUBORDINATE"
+          }
+        ],
+        "relation_hints": [
+          {
+            "kind": "CAUSAL_CANDIDATE",
+            "source_ref": "A2",
+            "target_ref": "A3",
+            "evidence": {
+              "text": ". ",
+              "start": 48,
+              "end": 50
+            },
+            "reason": "adjacent narrated events; requires semantic evidence before CAUSE materialization"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 85,
+      "req_id": "b9f864755fe94abea72e21b467158614",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nTARGET:\nна жестяной желоб\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "PLACE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nСухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.\nPREDICATE:\nупала\nTARGET:\nна жестяной желоб\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 990,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_009c35b41d8943f8bbf2eb94388f6d6c": {
+        "uid": "K_009c35b41d8943f8bbf2eb94388f6d6c",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+            "kind": "N"
+          },
+          {
+            "uid": "N_308561117a8d40c49f37175e307cbbb3",
+            "kind": "N"
+          },
+          {
+            "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_841cf3f4bd1247dbaa2f5b19aaeb3254": {
+        "uid": "L_841cf3f4bd1247dbaa2f5b19aaeb3254",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.22800000000000004,
+        "source": {
+          "uid": "N_308561117a8d40c49f37175e307cbbb3",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+          "kind": "N"
+        }
+      },
+      "L_9eeb36fea58f4cccaccaa9ba90be2c9c": {
+        "uid": "L_9eeb36fea58f4cccaccaa9ba90be2c9c",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_eb181ff2c3624af287e31b645f148e5c",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+          "kind": "N"
+        }
+      },
+      "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8": {
+        "uid": "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "ветер",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_62638611100440a29f15d136bf8c4707": {
+        "uid": "M_62638611100440a29f15d136bf8c4707",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "жестяной желоб",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_7e04b33c3bcf404786227ae419ccfc52": {
+        "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Сухая ветка",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_308561117a8d40c49f37175e307cbbb3": {
+        "uid": "N_308561117a8d40c49f37175e307cbbb3",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_8d05b144b14e47f58f32e8660f307eff",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_666cb1eebea84a4cb6b7c9bb8c102c9d": {
+        "uid": "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_4a20fe253ee14580abc0fd206f078560",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+            "kind": "M"
+          },
+          "LOCATION": {
+            "uid": "M_62638611100440a29f15d136bf8c4707",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_67ba0f4f9b7d4f088dfc714a74b078ca": {
+        "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_f2061c6c1e474260a08ee67260d6e51e",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_009c35b41d8943f8bbf2eb94388f6d6c",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Сухая ветка сломалась, потому что ветер усилился. Она упала на жестяной желоб.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_ecb0e26937524a379b153720f0d8f0ef": {
+        "uid": "N_ecb0e26937524a379b153720f0d8f0ef",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_34140f3586ac4cb1a3a5297ef7a15691",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 3,
+          "expires_tick": 203,
+          "last_qualifying_tick": 3,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_2bfce5aaf050414cb1300713563dbdd2": {
+        "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "упала",
+          "упасть"
+        ]
+      },
+      "S_804852fdc1844b9da9c97390765e17e6": {
+        "uid": "S_804852fdc1844b9da9c97390765e17e6",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "сломалась",
+          "сломаться"
+        ]
+      },
+      "T_34140f3586ac4cb1a3a5297ef7a15691": {
+        "uid": "T_34140f3586ac4cb1a3a5297ef7a15691",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_804852fdc1844b9da9c97390765e17e6",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      },
+      "T_4a20fe253ee14580abc0fd206f078560": {
+        "uid": "T_4a20fe253ee14580abc0fd206f078560",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_2bfce5aaf050414cb1300713563dbdd2",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "LOCATION"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 6,
+    "workspace_uids": [
+      "M_3b19ddfdf04341f1acfcf4d94331fe3c",
+      "M_3efaf8086387464d85d1fb0655a7b2b4",
+      "M_4f07dd1949de4481b4bed98ee2686db5",
+      "M_7e04b33c3bcf404786227ae419ccfc52",
+      "M_8cdf0ac582734ed49bfe2b03988079dc",
+      "M_b3b726dd0eb94e0f8c8fc69f421d2649",
+      "M_c466272a8d8049fda02b9cfb110e494d",
+      "N_009a7f61263d40c7a219928f1381fd02",
+      "N_308561117a8d40c49f37175e307cbbb3",
+      "N_6478ea4d7a8e43219e493fa3ecf46ea8",
+      "N_666cb1eebea84a4cb6b7c9bb8c102c9d",
+      "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+      "N_eb181ff2c3624af287e31b645f148e5c",
+      "N_ecb0e26937524a379b153720f0d8f0ef",
+      "S_2bfce5aaf050414cb1300713563dbdd2",
+      "S_4d8607a7f1a7415e96ec9213a7d04442",
+      "S_804852fdc1844b9da9c97390765e17e6",
+      "S_ffc7bdde8aa842b8a7693922b4a04de9",
+      "T_34140f3586ac4cb1a3a5297ef7a15691",
+      "T_46fbb00f64a0462484e0f2d27cd67f55",
+      "T_4a20fe253ee14580abc0fd206f078560",
+      "T_8d05b144b14e47f58f32e8660f307eff"
+    ],
+    "workspace": {
+      "M_3b19ddfdf04341f1acfcf4d94331fe3c": {
+        "semantic": "Марина",
+        "excitation": 0.4089320192167526
+      },
+      "M_3efaf8086387464d85d1fb0655a7b2b4": {
+        "semantic": "вечер",
+        "excitation": 0.4089320192167526
+      },
+      "M_4f07dd1949de4481b4bed98ee2686db5": {
+        "semantic": "пристань",
+        "excitation": 0.4089320192167526
+      },
+      "M_7e04b33c3bcf404786227ae419ccfc52": {
+        "semantic": "Сухая ветка",
+        "excitation": 0.5720000000000001
+      },
+      "M_8cdf0ac582734ed49bfe2b03988079dc": {
+        "semantic": "бухта",
+        "excitation": 0.4089320192167526
+      },
+      "M_b3b726dd0eb94e0f8c8fc69f421d2649": {
+        "semantic": "старый дом",
+        "excitation": 0.4089320192167526
+      },
+      "M_c466272a8d8049fda02b9cfb110e494d": {
+        "semantic": "северный ветер",
+        "excitation": 0.4089320192167526
+      },
+      "N_009a7f61263d40c7a219928f1381fd02": {
+        "semantic": "войти(SUBJECT=Марина, AUXILLIARY=пристань, LOCATION=старый дом, TIME=вечер)",
+        "excitation": 0.9893152444804425
+      },
+      "N_308561117a8d40c49f37175e307cbbb3": {
+        "semantic": "усилился(SUBJECT=ветер)",
+        "excitation": 1.0
+      },
+      "N_6478ea4d7a8e43219e493fa3ecf46ea8": {
+        "semantic": "усилился(SUBJECT=северный ветер, LOCATION=бухта)",
+        "excitation": 1.0
+      },
+      "N_666cb1eebea84a4cb6b7c9bb8c102c9d": {
+        "semantic": "упала(SUBJECT=Сухая ветка, LOCATION=жестяной желоб)",
+        "excitation": 1.0
+      },
+      "N_67ba0f4f9b7d4f088dfc714a74b078ca": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_009c35b41d8943f8bbf2eb94388f6d6c[сломалась(SUBJECT=Сухая ветка); усилился(SUBJECT=ветер); упала(SUBJECT=Сухая ветка, LOCATION=жестяной желоб)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_eb181ff2c3624af287e31b645f148e5c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_832aab6690ad482192e3be017b2d7fd7[войти(SUBJECT=Марина, AUXILLIARY=пристань, LOCATION=старый дом, TIME=вечер); усилился(SUBJECT=северный ветер, LOCATION=бухта)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_ecb0e26937524a379b153720f0d8f0ef": {
+        "semantic": "сломалась(SUBJECT=Сухая ветка)",
+        "excitation": 1.0
+      },
+      "S_2bfce5aaf050414cb1300713563dbdd2": {
+        "semantic": "упала",
+        "excitation": 0.9443926410592216
+      },
+      "S_4d8607a7f1a7415e96ec9213a7d04442": {
+        "semantic": "войти",
+        "excitation": 0.9343020365750345
+      },
+      "S_804852fdc1844b9da9c97390765e17e6": {
+        "semantic": "сломалась",
+        "excitation": 0.9443926410592216
+      },
+      "S_ffc7bdde8aa842b8a7693922b4a04de9": {
+        "semantic": "усилился",
+        "excitation": 0.9940975169044439
+      },
+      "T_34140f3586ac4cb1a3a5297ef7a15691": {
+        "semantic": "сломалась",
+        "excitation": 0.9476617761328255
+      },
+      "T_46fbb00f64a0462484e0f2d27cd67f55": {
+        "semantic": "войти",
+        "excitation": 0.9375362417396166
+      },
+      "T_4a20fe253ee14580abc0fd206f078560": {
+        "semantic": "упала",
+        "excitation": 0.9476617761328255
+      },
+      "T_8d05b144b14e47f58f32e8660f307eff": {
+        "semantic": "усилился",
+        "excitation": 0.9975387117187637
+      }
+    },
+    "pending_incoming": {
+      "N_ecb0e26937524a379b153720f0d8f0ef": 0.08520000000000004,
+      "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8": 0.16000000000000006,
+      "M_c466272a8d8049fda02b9cfb110e494d": 0.16000000000000006,
+      "M_8cdf0ac582734ed49bfe2b03988079dc": 0.16000000000000006,
+      "M_7e04b33c3bcf404786227ae419ccfc52": 0.3040000000000001,
+      "M_62638611100440a29f15d136bf8c4707": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "она": {
+        "uid": "M_7e04b33c3bcf404786227ae419ccfc52",
+        "kind": "M"
+      },
+      "он": {
+        "uid": "M_10c71d6ce2c846cb9bfcb0e2cbd1d7e8",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_67ba0f4f9b7d4f088dfc714a74b078ca",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "semantic_note": "Дом у пристани — художественный монолит, paragraph 2",
+  "semantic_family": "document.monolith.literary",
+  "semantic_tags": [
+    "document",
+    "monolith",
+    "literary",
+    "graph-graded"
+  ]
+}

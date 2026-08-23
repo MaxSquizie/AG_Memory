@@ -15,6 +15,7 @@ from ah.inference import (
     InferenceEngine,
     InferenceMaterializer,
     QueryGoalBuilder,
+    TurnGoalBuilder,
 )
 from ah.inference.contracts import InferenceOutcome
 from ah.inference.materialization import MaterializationResult
@@ -28,6 +29,8 @@ from ah.perception import (
     PerceptionClarificationRequired,
     PerceptionResult,
     PredicateCandidate,
+    GoalSemanticService,
+    apply_speech_act_scoping,
     TemplateCandidate,
     TemplateSelection,
     TextSensoryResult,
@@ -198,12 +201,45 @@ class AgentOrchestrator:
                 matches.append(option.index)
         return matches[0] if len(matches) == 1 else None
 
+    def _clarification_selection(
+        self, text: str, request: ClarificationRequest
+    ) -> int | None:
+        """Return one explicit clarification choice, or ``None`` for an unrelated turn.
+
+        Pending clarification is dialogue state, not a global input mode.  A new user
+        utterance may answer it, but an utterance that does not explicitly identify
+        one option must continue through ordinary perception instead of being trapped
+        behind the old ambiguity.
+        """
+        selected_index = self._deterministic_clarification_selection(text, request)
+        if selected_index is not None:
+            return selected_index
+        interpreter = getattr(self.perception, "interpret_clarification_answer", None)
+        if callable(interpreter):
+            interpreted = interpreter(text, tuple(option.label for option in request.options))
+            if isinstance(interpreted, int) and 1 <= interpreted <= len(request.options):
+                return interpreted
+        return None
+
     def _generate_clarification(self, request: ClarificationRequest) -> str:
         clarify = getattr(self.agent, "clarify", None)
         if callable(clarify):
             return str(clarify(request)).strip()
         labels = ", ".join(option.label for option in request.options)
         return f"Уточните, кого или что означает «{request.mention}»: {labels}?"
+
+    @staticmethod
+    def _unresolved_goal_response(text: str) -> str:
+        if re.search(r"[А-Яа-яЁё]", text):
+            return (
+                "Не могу подтвердить это по памяти: для текущей цели не удалось "
+                "построить формальную цепочку вывода, поэтому содержательный ответ "
+                "из ACTIVE MEMORY не выдаю."
+            )
+        return (
+            "I cannot establish this from memory: no formal proof goal could be "
+            "compiled for the current target, so I will not answer from ACTIVE MEMORY alone."
+        )
 
     def _enqueue_clarifications(self, requests: tuple[ClarificationRequest, ...]) -> None:
         known = {ref.uid for ref in self.context.pending_clarification_refs}
@@ -259,6 +295,8 @@ class AgentOrchestrator:
         self,
         text: str,
         *,
+        request: ClarificationRequest,
+        selected_index: int,
         generate_response: bool,
         lock,
     ) -> AgentTurnResult:
@@ -266,19 +304,6 @@ class AgentOrchestrator:
             self.ignition.begin_prompt_epoch()
             sensory = self.sensory.process(text)
             self.ignition.apply_seed_requests(sensory.activation_seeds)
-            request = self._next_pending_clarification()
-        if request is None:
-            # A stale pending queue was cleaned while entering the turn; resume the
-            # ordinary path rather than treating the input as a phantom answer.
-            return self.handle_user_text(text, generate_response=generate_response)
-
-        selected_index = self._deterministic_clarification_selection(text, request)
-        if selected_index is None:
-            interpreter = getattr(self.perception, "interpret_clarification_answer", None)
-            if callable(interpreter):
-                interpreted = interpreter(text, tuple(option.label for option in request.options))
-                if isinstance(interpreted, int) and 1 <= interpreted <= len(request.options):
-                    selected_index = interpreted
 
         perception = PerceptionResult(
             source_text=text,
@@ -301,6 +326,8 @@ class AgentOrchestrator:
                 raise PerceptionParseError("Perception service cannot resolve structural clarification")
             structural_result = parser(source_text, self.context, resolution_key)
             structural_result = self._complete_dynamic_templates(structural_result, lock)
+            structural_result = apply_speech_act_scoping(structural_result)
+            structural_result = GoalSemanticService(self.perception).complete(structural_result)
 
         with lock:
             if selected is not None:
@@ -385,9 +412,17 @@ class AgentOrchestrator:
             with lock:
                 pending_request = self._next_pending_clarification()
             if pending_request is not None:
-                return self._handle_clarification_answer(
-                    text, generate_response=generate_response, lock=lock
-                )
+                selected_index = self._clarification_selection(text, pending_request)
+                if selected_index is not None:
+                    return self._handle_clarification_answer(
+                        text,
+                        request=pending_request,
+                        selected_index=selected_index,
+                        generate_response=generate_response,
+                        lock=lock,
+                    )
+                # The utterance does not answer the pending choice.  Keep the
+                # unresolved K in dialogue state, but process this input normally.
 
         # Memory mutations/reads are short critical sections. The expensive LLM
         # calls stay outside the lock so a continuously running IgnitionClock can
@@ -401,6 +436,8 @@ class AgentOrchestrator:
         try:
             perception = self.perception.parse(text, self.context)
             perception = self._complete_dynamic_templates(perception, lock)
+            perception = apply_speech_act_scoping(perception)
+            perception = GoalSemanticService(self.perception).complete(perception)
         except PerceptionClarificationRequired as exc:
             # Genuine structural ambiguity is not an error and must not be guessed.
             # Record the external utterance in H, persist only the pending structural
@@ -485,12 +522,18 @@ class AgentOrchestrator:
             # already canonical support fact (USER + ДРУГ -> N_ЕСТЬ -> МИША).
             # The resolved referent and that support N are attention anchors only:
             # no fact is created and h_N confirmation is not triggered.
-            built_queries = [
-                (query, self.query_builder.build(query, self.context))
-                for query in integration.unresolved_queries
-            ]
+            # Evidence retrieval is driven by turn semantics, never lexical intent
+            # markers. Direct queries and propositions scoped EMBEDDED under any
+            # QUERY/COMMAND root become inference goals automatically.
+            identity_attention_refs = tuple(self.ignition.workspace_refs())
+            built_requests = list(
+                TurnGoalBuilder(self.integration.core, self.query_builder).build(
+                    integration, self.context, perception,
+                    attention_refs=identity_attention_refs,
+                )
+            )
             attention: dict[str, object] = {}
-            for _query, built in built_queries:
+            for built in built_requests:
                 for ref in built.attention_refs:
                     attention[ref.uid] = ref
             if attention:
@@ -506,7 +549,7 @@ class AgentOrchestrator:
 
             query_results: list[QueryExecution] = []
             inference_outcomes: list[InferenceOutcome] = []
-            for _query, built in built_queries:
+            for built in built_requests:
                 if built.goal is None:
                     query_results.append(QueryExecution(None, None, built.diagnostics))
                     continue
@@ -527,7 +570,17 @@ class AgentOrchestrator:
                 )
                 query_results.append(QueryExecution(outcome, materialized, built.diagnostics))
 
-            agent_context = self.projector.project(text, workspace, tuple(inference_outcomes))
+            unresolved_goal_diagnostics = tuple(
+                execution.diagnostics
+                for execution in query_results
+                if execution.outcome is None
+            )
+            agent_context = self.projector.project(
+                text,
+                workspace,
+                tuple(inference_outcomes),
+                unresolved_goal_diagnostics,
+            )
             agent_context_diagnostic = self.projector.diagnose(
                 agent_context,
                 tick_index=self.ignition.tick_index,
@@ -544,6 +597,13 @@ class AgentOrchestrator:
         if generate_response:
             if integration.clarifications:
                 response_text = self._generate_clarification(clarification_request)
+            elif any(execution.outcome is None for execution in query_results):
+                # A semantic proof obligation exists but deterministic compilation
+                # failed. ACTIVE MEMORY may contain suggestive prose/H experiences,
+                # but letting the response LLM answer from it would recreate the
+                # black-box path the proof system is meant to eliminate. Fail closed
+                # and expose the compiler failure through diagnostics/Proof Explorer.
+                response_text = self._unresolved_goal_response(text)
             else:
                 response_text = self.agent.respond(agent_context)
             response_perception, response_integration, response_ticks = self._record_agent_utterance(

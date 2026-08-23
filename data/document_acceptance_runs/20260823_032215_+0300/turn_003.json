@@ -1,0 +1,2485 @@
+{
+  "index": 3,
+  "input": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+  "status": "OK",
+  "scenario_id": "cooling_station",
+  "linguistic_candidate_graph": {
+    "text": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Лёд",
+        "start": 0,
+        "end": 3,
+        "analyses": [
+          {
+            "normal_form": "лёд",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "accs",
+              "inan",
+              "sing"
+            ],
+            "score": 0.571428
+          },
+          {
+            "normal_form": "лёд",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.428571
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "расширился",
+        "start": 4,
+        "end": 14,
+        "analyses": [
+          {
+            "normal_form": "расшириться",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "masc",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": ",",
+        "start": 14,
+        "end": 15,
+        "analyses": []
+      },
+      {
+        "index": 4,
+        "text": "потому",
+        "start": 16,
+        "end": 22,
+        "analyses": [
+          {
+            "normal_form": "потому",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Dmns"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "что",
+        "start": 23,
+        "end": 26,
+        "analyses": [
+          {
+            "normal_form": "что",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.922033
+          },
+          {
+            "normal_form": "что",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.030508
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "neut",
+              "NPRO",
+              "accs"
+            ],
+            "score": 0.020338
+          },
+          {
+            "normal_form": "что",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "nomn",
+              "neut",
+              "NPRO"
+            ],
+            "score": 0.016949
+          },
+          {
+            "normal_form": "что",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Ques"
+            ],
+            "score": 0.010169
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "вода",
+        "start": 27,
+        "end": 31,
+        "analyses": [
+          {
+            "normal_form": "вода",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "femn",
+              "sing",
+              "nomn"
+            ],
+            "score": 0.989583
+          },
+          {
+            "normal_form": "вод",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "masc",
+              "inan",
+              "sing",
+              "gent"
+            ],
+            "score": 0.010416
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": "замёрзла",
+        "start": 32,
+        "end": 40,
+        "analyses": [
+          {
+            "normal_form": "замёрзнуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 0.666666
+          },
+          {
+            "normal_form": "замёрзлый",
+            "pos": "ADJS",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "femn",
+              "ADJS"
+            ],
+            "score": 0.333333
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "text": ".",
+        "start": 40,
+        "end": 41,
+        "analyses": []
+      },
+      {
+        "index": 9,
+        "text": "Лампа",
+        "start": 42,
+        "end": 47,
+        "analyses": [
+          {
+            "normal_form": "лампа",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "inan",
+              "femn",
+              "sing",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "мигнула",
+        "start": 48,
+        "end": 55,
+        "analyses": [
+          {
+            "normal_form": "мигнуть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "indc",
+              "intr",
+              "perf",
+              "femn",
+              "past",
+              "VERB",
+              "sing"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": ".",
+        "start": 55,
+        "end": 56,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 2,
+          "text": "Лёд расширился",
+          "evidence": {
+            "text": "Лёд расширился",
+            "start": 0,
+            "end": 14
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "расшириться"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "лёд",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 4,
+          "end_index": 7,
+          "text": "потому что вода замёрзла",
+          "evidence": {
+            "text": "потому что вода замёрзла",
+            "start": 16,
+            "end": 40
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 7,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "замёрзнуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "потому_что",
+        "parent_clause_id": "CL1",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 4,
+          "end_index": 5,
+          "text": "потому что",
+          "evidence": {
+            "text": "потому что",
+            "start": 16,
+            "end": 26
+          }
+        },
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL3",
+        "sentence_id": 2,
+        "span": {
+          "start_index": 9,
+          "end_index": 10,
+          "text": "Лампа мигнула",
+          "evidence": {
+            "text": "Лампа мигнула",
+            "start": 42,
+            "end": 55
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 10,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "мигнуть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "лампа",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "расшириться"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 7,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "замёрзнуть"
+        ],
+        "nominal_predicative": false
+      },
+      {
+        "token_index": 10,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "мигнуть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 2,
+          "child_token_index": 7,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL1",
+          "child_clause_id": "CL2"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "расширился",
+          "normalized_hint": "расшириться",
+          "sense_hint": null,
+          "evidence": {
+            "text": "расширился",
+            "start": 4,
+            "end": 14
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Лёд",
+            "normalized_hint": "Лёд",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Лёд",
+              "start": 0,
+              "end": 3
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Лёд расширился",
+          "start": 0,
+          "end": 14
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "замёрзла",
+          "normalized_hint": "замёрзнуть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "замёрзла",
+            "start": 32,
+            "end": 40
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_ae233354fdf24bdcb0407e1d6724fb36",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "вода",
+            "normalized_hint": "вода",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "вода",
+              "start": 27,
+              "end": 31
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "потому что вода замёрзла",
+          "start": 16,
+          "end": 40
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      },
+      {
+        "local_id": "A3",
+        "predicate": {
+          "surface": "мигнула",
+          "normalized_hint": "мигнуть",
+          "sense_hint": null,
+          "evidence": {
+            "text": "мигнула",
+            "start": 48,
+            "end": 55
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Лампа",
+            "normalized_hint": "Лампа",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Лампа",
+              "start": 42,
+              "end": 47
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Лампа мигнула",
+          "start": 42,
+          "end": 55
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source_ref": "A2",
+        "target_ref": "A1",
+        "evidence": {
+          "text": "потому что",
+          "start": 16,
+          "end": 26
+        }
+      }
+    ],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [
+      {
+        "parent_ref": "A1",
+        "child_ref": "A2",
+        "kind": "SUBORDINATE"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": false,
+        "ambiguous": false,
+        "semantic_scope": null
+      },
+      {
+        "local_id": "A3",
+        "ref": {
+          "uid": "N_93eb6b5ff97144498846db3ad950af91",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_3a101961a13347d79263b1d2420e83ae",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N"
+        },
+        "reason": "REACTIVATED_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_93eb6b5ff97144498846db3ad950af91",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_3a101961a13347d79263b1d2420e83ae",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_1a34c548b98c4996b2b1968ceab383c3",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_d4d53ba494534ceb912bad7414a2236a",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      },
+      {
+        "ref": {
+          "uid": "S_e49e5481df1c41c6a3cda3b5ac27dd1c",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [
+      {
+        "relation_id": "CAUSE",
+        "source": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+          "kind": "N"
+        },
+        "ref": {
+          "uid": "L_81f01939768f4257a4c970fa269f0818",
+          "kind": "L"
+        },
+        "created": true
+      }
+    ],
+    "conditionals": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_4585fa348969404592bca4bbecc9875d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Виктор дежурил на станции. Температура опустилась.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Вода замёрзла, потому что температура опустилась. Виктор проверил фильтр.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Виктор дежурил на станции. Температура опустилась.»\n- Пользователь ранее сказал: «Вода замёрзла, потому что температура опустилась. Виктор проверил фильтр.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+        "kind": "M"
+      },
+      {
+        "uid": "M_1bd9782bc3f046f882febc71960dccc8",
+        "kind": "M"
+      },
+      {
+        "uid": "M_27cea4a508d442ceafa0bc959eb7d7a5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7f19085edeee487a9c36af6d0d0b288a",
+        "kind": "M"
+      },
+      {
+        "uid": "M_a558018467294b51b6165dc49df9ebaa",
+        "kind": "M"
+      },
+      {
+        "uid": "M_b74dfda605924fbb92eda35c9fee7a38",
+        "kind": "M"
+      },
+      {
+        "uid": "N_3a101961a13347d79263b1d2420e83ae",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4585fa348969404592bca4bbecc9875d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5d31fe1af5884ab79ed5e8198892803b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_78da659e382e41248ee17286e009d89f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_93eb6b5ff97144498846db3ad950af91",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+        "kind": "N"
+      },
+      {
+        "uid": "N_f0f782b982d1492fa2a11bb75e69dfb7",
+        "kind": "N"
+      },
+      {
+        "uid": "N_fc23b1eb6e3741cc8fa39073c5169a5a",
+        "kind": "N"
+      },
+      {
+        "uid": "S_1a34c548b98c4996b2b1968ceab383c3",
+        "kind": "S"
+      },
+      {
+        "uid": "S_3102237a462b469d82b4c72c7fb359b8",
+        "kind": "S"
+      },
+      {
+        "uid": "S_32cca82f39ab41de972475bae132ce75",
+        "kind": "S"
+      },
+      {
+        "uid": "S_482d96687d2b480eb75efc2065bd87c2",
+        "kind": "S"
+      },
+      {
+        "uid": "S_d4d53ba494534ceb912bad7414a2236a",
+        "kind": "S"
+      },
+      {
+        "uid": "S_e49e5481df1c41c6a3cda3b5ac27dd1c",
+        "kind": "S"
+      },
+      {
+        "uid": "T_1d5ee9794ce34c7a90a56147c10db89f",
+        "kind": "T"
+      },
+      {
+        "uid": "T_670a497393bc46549c67d56b3a1e6c57",
+        "kind": "T"
+      },
+      {
+        "uid": "T_833d5945a9764831b90d1c9f6cb592dc",
+        "kind": "T"
+      },
+      {
+        "uid": "T_ae233354fdf24bdcb0407e1d6724fb36",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e8e279477541467590d52d860c962abe",
+        "kind": "T"
+      },
+      {
+        "uid": "T_f507971255e149a686f1c1383866dd24",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 9,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+          "kind": "M"
+        },
+        "semantic": "[M_0e9c2c17a3184a59aa494d9c16bbaf2f] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.44668904922879243,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_1bd9782bc3f046f882febc71960dccc8",
+          "kind": "M"
+        },
+        "semantic": "[M_1bd9782bc3f046f882febc71960dccc8] фильтр",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4089320192167526,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_27cea4a508d442ceafa0bc959eb7d7a5",
+          "kind": "M"
+        },
+        "semantic": "[M_27cea4a508d442ceafa0bc959eb7d7a5] Температура",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.793196478615519,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_7f19085edeee487a9c36af6d0d0b288a",
+          "kind": "M"
+        },
+        "semantic": "[M_7f19085edeee487a9c36af6d0d0b288a] Виктор",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8168575388467847,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_a558018467294b51b6165dc49df9ebaa",
+          "kind": "M"
+        },
+        "semantic": "[M_a558018467294b51b6165dc49df9ebaa] Вода",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.7082737561733881,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_b74dfda605924fbb92eda35c9fee7a38",
+          "kind": "M"
+        },
+        "semantic": "[M_b74dfda605924fbb92eda35c9fee7a38] станция",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.40456268056730255,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "N_3a101961a13347d79263b1d2420e83ae",
+          "kind": "N"
+        },
+        "semantic": "[N_3a101961a13347d79263b1d2420e83ae] реплика пользователя: Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "N_4585fa348969404592bca4bbecc9875d",
+          "kind": "N"
+        },
+        "semantic": "[N_4585fa348969404592bca4bbecc9875d] [S_3102237a462b469d82b4c72c7fb359b8] дежурил(SUBJECT=[M_7f19085edeee487a9c36af6d0d0b288a] Виктор, LOCATION=[M_b74dfda605924fbb92eda35c9fee7a38] станция)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9787446529613976,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+          "kind": "N"
+        },
+        "semantic": "[N_465ae61c95624d9c806f2be98514f0ad] [S_1a34c548b98c4996b2b1968ceab383c3] расширился(SUBJECT=[M_a5c80823200a42468812ef84f87fb84d] Лёд)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3799999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "N_5d31fe1af5884ab79ed5e8198892803b",
+          "kind": "N"
+        },
+        "semantic": "[N_5d31fe1af5884ab79ed5e8198892803b] реплика пользователя: Вода замёрзла, потому что температура опустилась. Виктор проверил фильтр.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49173791398686034,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "N_78da659e382e41248ee17286e009d89f",
+          "kind": "N"
+        },
+        "semantic": "[N_78da659e382e41248ee17286e009d89f] [S_482d96687d2b480eb75efc2065bd87c2] проверил(SUBJECT=[M_7f19085edeee487a9c36af6d0d0b288a] Виктор, OBJECT=[M_1bd9782bc3f046f882febc71960dccc8] фильтр)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "N_93eb6b5ff97144498846db3ad950af91",
+          "kind": "N"
+        },
+        "semantic": "[N_93eb6b5ff97144498846db3ad950af91] [S_d4d53ba494534ceb912bad7414a2236a] мигнула(SUBJECT=[M_a3b0f5c9516949b8b4ace3f58e5e385f] Лампа)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N"
+        },
+        "semantic": "[N_e1dbab0762e3465d90c45e2ad761ac72] [S_e49e5481df1c41c6a3cda3b5ac27dd1c] замёрзла(SUBJECT=[M_a558018467294b51b6165dc49df9ebaa] Вода)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.4099999999999999,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_f0f782b982d1492fa2a11bb75e69dfb7",
+          "kind": "N"
+        },
+        "semantic": "[N_f0f782b982d1492fa2a11bb75e69dfb7] реплика пользователя: Виктор дежурил на станции. Температура опустилась.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48648381459621354,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_fc23b1eb6e3741cc8fa39073c5169a5a",
+          "kind": "N"
+        },
+        "semantic": "[N_fc23b1eb6e3741cc8fa39073c5169a5a] [S_32cca82f39ab41de972475bae132ce75] опустилась(SUBJECT=[M_27cea4a508d442ceafa0bc959eb7d7a5] Температура)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9893152444804425,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "S_1a34c548b98c4996b2b1968ceab383c3",
+          "kind": "S"
+        },
+        "semantic": "[S_1a34c548b98c4996b2b1968ceab383c3] расширился",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "S_3102237a462b469d82b4c72c7fb359b8",
+          "kind": "S"
+        },
+        "semantic": "[S_3102237a462b469d82b4c72c7fb359b8] дежурил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9243192477328055,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "S_32cca82f39ab41de972475bae132ce75",
+          "kind": "S"
+        },
+        "semantic": "[S_32cca82f39ab41de972475bae132ce75] опустилась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9834758279737207,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "S_482d96687d2b480eb75efc2065bd87c2",
+          "kind": "S"
+        },
+        "semantic": "[S_482d96687d2b480eb75efc2065bd87c2] проверил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9343020365750345,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "S_d4d53ba494534ceb912bad7414a2236a",
+          "kind": "S"
+        },
+        "semantic": "[S_d4d53ba494534ceb912bad7414a2236a] мигнула",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "S_e49e5481df1c41c6a3cda3b5ac27dd1c",
+          "kind": "S"
+        },
+        "semantic": "[S_e49e5481df1c41c6a3cda3b5ac27dd1c] замёрзла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9940975169044439,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "T_1d5ee9794ce34c7a90a56147c10db89f",
+          "kind": "T"
+        },
+        "semantic": "[T_1d5ee9794ce34c7a90a56147c10db89f] predicate=[S_482d96687d2b480eb75efc2065bd87c2] проверил; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9375362417396166,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "T_670a497393bc46549c67d56b3a1e6c57",
+          "kind": "T"
+        },
+        "semantic": "[T_670a497393bc46549c67d56b3a1e6c57] predicate=[S_1a34c548b98c4996b2b1968ceab383c3] расширился; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "T_833d5945a9764831b90d1c9f6cb592dc",
+          "kind": "T"
+        },
+        "semantic": "[T_833d5945a9764831b90d1c9f6cb592dc] predicate=[S_d4d53ba494534ceb912bad7414a2236a] мигнула; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "T_ae233354fdf24bdcb0407e1d6724fb36",
+          "kind": "T"
+        },
+        "semantic": "[T_ae233354fdf24bdcb0407e1d6724fb36] predicate=[S_e49e5481df1c41c6a3cda3b5ac27dd1c] замёрзла; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "T_e8e279477541467590d52d860c962abe",
+          "kind": "T"
+        },
+        "semantic": "[T_e8e279477541467590d52d860c962abe] predicate=[S_3102237a462b469d82b4c72c7fb359b8] дежурил; roles=[SUBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.927518896205904,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "T_f507971255e149a686f1c1383866dd24",
+          "kind": "T"
+        },
+        "semantic": "[T_f507971255e149a686f1c1383866dd24] predicate=[S_32cca82f39ab41de972475bae132ce75] опустилась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9868802544627543,
+        "output": 0.0,
+        "decay_age": 3,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 3,
+      "source_text": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nTOKENS:\n[1] Лёд\n[2] расширился\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] замёрзла\n[8] .\n[9] Лампа\n[10] мигнула\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: расширился; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nTOKENS:\n[1] Лёд\n[2] расширился\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] замёрзла\n[8] .\n[9] Лампа\n[10] мигнула\n[11] .\nPREDICATE_START: [2] расширился\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: расширился",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился\nTARGET:\nрасширился\nRUSSIAN_LEMMA:\nрасшириться",
+          "normalized_answer": "расшириться",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился\nPREDICATE:\nрасширился\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nрасширился\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Лёд",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nрасширился\nQUESTION_WORD:\nЛёд",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nрасширился\nALREADY_SELECTED:\nЛёд\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что вода замёрзла\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nTOKENS:\n[1] Лёд\n[2] расширился\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] замёрзла\n[8] .\n[9] Лампа\n[10] мигнула\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[7] token 7: замёрзла; morphology=VERB",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nTOKENS:\n[1] Лёд\n[2] расширился\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] замёрзла\n[8] .\n[9] Лампа\n[10] мигнула\n[11] .\nPREDICATE_START: [7] замёрзла\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[7] end at token 7: замёрзла",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что вода замёрзла\nTARGET:\nзамёрзла\nRUSSIAN_LEMMA:\nзамёрзнуть",
+          "normalized_answer": "замёрзнуть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nпотому что вода замёрзла\nPREDICATE:\nзамёрзла\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nзамёрзла\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] вода",
+          "normalized_answer": "6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nзамёрзла\nQUESTION_WORD:\nвода",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nзамёрзла\nALREADY_SELECTED:\nвода\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛампа мигнула\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nTOKENS:\n[1] Лёд\n[2] расширился\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] замёрзла\n[8] .\n[9] Лампа\n[10] мигнула\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[10] token 10: мигнула; morphology=VERB",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nTOKENS:\n[1] Лёд\n[2] расширился\n[3] ,\n[4] потому\n[5] что\n[6] вода\n[7] замёрзла\n[8] .\n[9] Лампа\n[10] мигнула\n[11] .\nPREDICATE_START: [10] мигнула\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[10] end at token 10: мигнула",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛампа мигнула\nTARGET:\nмигнула\nRUSSIAN_LEMMA:\nмигнуть",
+          "normalized_answer": "мигнуть",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛампа мигнула\nPREDICATE:\nмигнула\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nмигнула\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Лампа",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nмигнула\nQUESTION_WORD:\nЛампа",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЛёд расширился, потому что вода замёрзла. Лампа мигнула.\nPREDICATE:\nмигнула\nALREADY_SELECTED:\nЛампа\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "расширился",
+              "normalized_hint": "расшириться",
+              "sense_hint": null,
+              "evidence": {
+                "text": "расширился",
+                "start": 4,
+                "end": 14
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Лёд",
+                "normalized_hint": "Лёд",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Лёд",
+                  "start": 0,
+                  "end": 3
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Лёд расширился",
+              "start": 0,
+              "end": 14
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "замёрзла",
+              "normalized_hint": "замёрзнуть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "замёрзла",
+                "start": 32,
+                "end": 40
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "вода",
+                "normalized_hint": "вода",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "вода",
+                  "start": 27,
+                  "end": 31
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "потому что вода замёрзла",
+              "start": 16,
+              "end": 40
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          },
+          {
+            "local_id": "A3",
+            "predicate": {
+              "surface": "мигнула",
+              "normalized_hint": "мигнуть",
+              "sense_hint": null,
+              "evidence": {
+                "text": "мигнула",
+                "start": 48,
+                "end": 55
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Лампа",
+                "normalized_hint": "Лампа",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Лампа",
+                  "start": 42,
+                  "end": 47
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Лампа мигнула",
+              "start": 42,
+              "end": 55
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [
+          {
+            "relation_id": "CAUSE",
+            "source_ref": "A2",
+            "target_ref": "A1",
+            "evidence": {
+              "text": "потому что",
+              "start": 16,
+              "end": 26
+            }
+          }
+        ],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [
+          {
+            "parent_ref": "A1",
+            "child_ref": "A2",
+            "kind": "SUBORDINATE"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "K_b2e98afb1c064c54958d4a689066e982": {
+        "uid": "K_b2e98afb1c064c54958d4a689066e982",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+            "kind": "N"
+          },
+          {
+            "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+            "kind": "N"
+          },
+          {
+            "uid": "N_93eb6b5ff97144498846db3ad950af91",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "L_81f01939768f4257a4c970fa269f0818": {
+        "uid": "L_81f01939768f4257a4c970fa269f0818",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "CAUSE",
+        "weight": 0.22800000000000004,
+        "source": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+          "kind": "N"
+        }
+      },
+      "L_a7265d3fe56144f8a75a75ee2d803bff": {
+        "uid": "L_a7265d3fe56144f8a75a75ee2d803bff",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_5d31fe1af5884ab79ed5e8198892803b",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_3a101961a13347d79263b1d2420e83ae",
+          "kind": "N"
+        }
+      },
+      "M_a3b0f5c9516949b8b4ace3f58e5e385f": {
+        "uid": "M_a3b0f5c9516949b8b4ace3f58e5e385f",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Лампа",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_a5c80823200a42468812ef84f87fb84d": {
+        "uid": "M_a5c80823200a42468812ef84f87fb84d",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Лёд",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_3a101961a13347d79263b1d2420e83ae": {
+        "uid": "N_3a101961a13347d79263b1d2420e83ae",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_543e30faf28341dd8dd1d2cc10dd4d81",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_b2e98afb1c064c54958d4a689066e982",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Лёд расширился, потому что вода замёрзла. Лампа мигнула.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_465ae61c95624d9c806f2be98514f0ad": {
+        "uid": "N_465ae61c95624d9c806f2be98514f0ad",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_670a497393bc46549c67d56b3a1e6c57",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_a5c80823200a42468812ef84f87fb84d",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_93eb6b5ff97144498846db3ad950af91": {
+        "uid": "N_93eb6b5ff97144498846db3ad950af91",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_833d5945a9764831b90d1c9f6cb592dc",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_a3b0f5c9516949b8b4ace3f58e5e385f",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 6,
+          "expires_tick": 206,
+          "last_qualifying_tick": 6,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_1a34c548b98c4996b2b1968ceab383c3": {
+        "uid": "S_1a34c548b98c4996b2b1968ceab383c3",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "расширился",
+          "расшириться"
+        ]
+      },
+      "S_d4d53ba494534ceb912bad7414a2236a": {
+        "uid": "S_d4d53ba494534ceb912bad7414a2236a",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "мигнула",
+          "мигнуть"
+        ]
+      },
+      "T_670a497393bc46549c67d56b3a1e6c57": {
+        "uid": "T_670a497393bc46549c67d56b3a1e6c57",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_1a34c548b98c4996b2b1968ceab383c3",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      },
+      "T_833d5945a9764831b90d1c9f6cb592dc": {
+        "uid": "T_833d5945a9764831b90d1c9f6cb592dc",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_d4d53ba494534ceb912bad7414a2236a",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_60bc9bba96cd42d4b76e7ff12198219e": {
+        "before": {
+          "uid": "L_60bc9bba96cd42d4b76e7ff12198219e",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22800000000000004,
+          "source": {
+            "uid": "N_fc23b1eb6e3741cc8fa39073c5169a5a",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_60bc9bba96cd42d4b76e7ff12198219e",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "CAUSE",
+          "weight": 0.22400000000000003,
+          "source": {
+            "uid": "N_fc23b1eb6e3741cc8fa39073c5169a5a",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+            "kind": "N"
+          }
+        }
+      },
+      "N_e1dbab0762e3465d90c45e2ad761ac72": {
+        "before": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.4,
+          "template": {
+            "uid": "T_ae233354fdf24bdcb0407e1d6724fb36",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_a558018467294b51b6165dc49df9ebaa",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 1,
+            "lifecycle_state": "NEW",
+            "created_tick": 3,
+            "expires_tick": 203,
+            "last_qualifying_tick": 3,
+            "qualifying_reactivations": 0
+          }
+        },
+        "after": {
+          "uid": "N_e1dbab0762e3465d90c45e2ad761ac72",
+          "kind": "N",
+          "domain": "C",
+          "weight": 0.41000000000000003,
+          "template": {
+            "uid": "T_ae233354fdf24bdcb0407e1d6724fb36",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_a558018467294b51b6165dc49df9ebaa",
+              "kind": "M"
+            }
+          },
+          "properties": {},
+          "meta": {
+            "occurrence_count": 2,
+            "lifecycle_state": "NEW",
+            "created_tick": 3,
+            "expires_tick": 203,
+            "last_qualifying_tick": 3,
+            "qualifying_reactivations": 0
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 9,
+    "workspace_uids": [
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "M_1bd9782bc3f046f882febc71960dccc8",
+      "M_27cea4a508d442ceafa0bc959eb7d7a5",
+      "M_7f19085edeee487a9c36af6d0d0b288a",
+      "M_a558018467294b51b6165dc49df9ebaa",
+      "M_b74dfda605924fbb92eda35c9fee7a38",
+      "N_3a101961a13347d79263b1d2420e83ae",
+      "N_4585fa348969404592bca4bbecc9875d",
+      "N_465ae61c95624d9c806f2be98514f0ad",
+      "N_5d31fe1af5884ab79ed5e8198892803b",
+      "N_78da659e382e41248ee17286e009d89f",
+      "N_93eb6b5ff97144498846db3ad950af91",
+      "N_e1dbab0762e3465d90c45e2ad761ac72",
+      "N_f0f782b982d1492fa2a11bb75e69dfb7",
+      "N_fc23b1eb6e3741cc8fa39073c5169a5a",
+      "S_1a34c548b98c4996b2b1968ceab383c3",
+      "S_3102237a462b469d82b4c72c7fb359b8",
+      "S_32cca82f39ab41de972475bae132ce75",
+      "S_482d96687d2b480eb75efc2065bd87c2",
+      "S_d4d53ba494534ceb912bad7414a2236a",
+      "S_e49e5481df1c41c6a3cda3b5ac27dd1c",
+      "T_1d5ee9794ce34c7a90a56147c10db89f",
+      "T_670a497393bc46549c67d56b3a1e6c57",
+      "T_833d5945a9764831b90d1c9f6cb592dc",
+      "T_ae233354fdf24bdcb0407e1d6724fb36",
+      "T_e8e279477541467590d52d860c962abe",
+      "T_f507971255e149a686f1c1383866dd24"
+    ],
+    "workspace": {
+      "M_0e9c2c17a3184a59aa494d9c16bbaf2f": {
+        "semantic": "Пользователь",
+        "excitation": 0.44668904922879243
+      },
+      "M_1bd9782bc3f046f882febc71960dccc8": {
+        "semantic": "фильтр",
+        "excitation": 0.4089320192167526
+      },
+      "M_27cea4a508d442ceafa0bc959eb7d7a5": {
+        "semantic": "Температура",
+        "excitation": 0.793196478615519
+      },
+      "M_7f19085edeee487a9c36af6d0d0b288a": {
+        "semantic": "Виктор",
+        "excitation": 0.8168575388467847
+      },
+      "M_a558018467294b51b6165dc49df9ebaa": {
+        "semantic": "Вода",
+        "excitation": 0.7082737561733881
+      },
+      "M_b74dfda605924fbb92eda35c9fee7a38": {
+        "semantic": "станция",
+        "excitation": 0.40456268056730255
+      },
+      "N_3a101961a13347d79263b1d2420e83ae": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_b2e98afb1c064c54958d4a689066e982[расширился(SUBJECT=Лёд); замёрзла(SUBJECT=Вода); мигнула(SUBJECT=Лампа)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_4585fa348969404592bca4bbecc9875d": {
+        "semantic": "дежурил(SUBJECT=Виктор, LOCATION=станция)",
+        "excitation": 0.9787446529613976
+      },
+      "N_465ae61c95624d9c806f2be98514f0ad": {
+        "semantic": "расширился(SUBJECT=Лёд)",
+        "excitation": 1.0
+      },
+      "N_5d31fe1af5884ab79ed5e8198892803b": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_765ce67f029140f4badcedd85d0ed465[замёрзла(SUBJECT=Вода); опустилась(SUBJECT=Температура); проверил(SUBJECT=Виктор, OBJECT=фильтр)])",
+        "excitation": 0.49173791398686034
+      },
+      "N_78da659e382e41248ee17286e009d89f": {
+        "semantic": "проверил(SUBJECT=Виктор, OBJECT=фильтр)",
+        "excitation": 0.9893152444804425
+      },
+      "N_93eb6b5ff97144498846db3ad950af91": {
+        "semantic": "мигнула(SUBJECT=Лампа)",
+        "excitation": 1.0
+      },
+      "N_e1dbab0762e3465d90c45e2ad761ac72": {
+        "semantic": "замёрзла(SUBJECT=Вода)",
+        "excitation": 1.0
+      },
+      "N_f0f782b982d1492fa2a11bb75e69dfb7": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_d3c0b1c4cdaa48c3aba0d668505a0d5d[дежурил(SUBJECT=Виктор, LOCATION=станция); опустилась(SUBJECT=Температура)])",
+        "excitation": 0.48648381459621354
+      },
+      "N_fc23b1eb6e3741cc8fa39073c5169a5a": {
+        "semantic": "опустилась(SUBJECT=Температура)",
+        "excitation": 0.9893152444804425
+      },
+      "S_1a34c548b98c4996b2b1968ceab383c3": {
+        "semantic": "расширился",
+        "excitation": 0.9443926410592216
+      },
+      "S_3102237a462b469d82b4c72c7fb359b8": {
+        "semantic": "дежурил",
+        "excitation": 0.9243192477328055
+      },
+      "S_32cca82f39ab41de972475bae132ce75": {
+        "semantic": "опустилась",
+        "excitation": 0.9834758279737207
+      },
+      "S_482d96687d2b480eb75efc2065bd87c2": {
+        "semantic": "проверил",
+        "excitation": 0.9343020365750345
+      },
+      "S_d4d53ba494534ceb912bad7414a2236a": {
+        "semantic": "мигнула",
+        "excitation": 0.9443926410592216
+      },
+      "S_e49e5481df1c41c6a3cda3b5ac27dd1c": {
+        "semantic": "замёрзла",
+        "excitation": 0.9940975169044439
+      },
+      "T_1d5ee9794ce34c7a90a56147c10db89f": {
+        "semantic": "проверил",
+        "excitation": 0.9375362417396166
+      },
+      "T_670a497393bc46549c67d56b3a1e6c57": {
+        "semantic": "расширился",
+        "excitation": 0.9476617761328255
+      },
+      "T_833d5945a9764831b90d1c9f6cb592dc": {
+        "semantic": "мигнула",
+        "excitation": 0.9476617761328255
+      },
+      "T_ae233354fdf24bdcb0407e1d6724fb36": {
+        "semantic": "замёрзла",
+        "excitation": 0.9975387117187637
+      },
+      "T_e8e279477541467590d52d860c962abe": {
+        "semantic": "дежурил",
+        "excitation": 0.927518896205904
+      },
+      "T_f507971255e149a686f1c1383866dd24": {
+        "semantic": "опустилась",
+        "excitation": 0.9868802544627543
+      }
+    },
+    "pending_incoming": {
+      "M_a5c80823200a42468812ef84f87fb84d": 0.15199999999999997,
+      "M_a3b0f5c9516949b8b4ace3f58e5e385f": 0.15200000000000005,
+      "N_465ae61c95624d9c806f2be98514f0ad": 0.08732999999999999,
+      "M_a558018467294b51b6165dc49df9ebaa": 0.16809999999999997
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_d5e1873489b74b8784e8603b94d3efc6",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_0e9c2c17a3184a59aa494d9c16bbaf2f",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_a5c80823200a42468812ef84f87fb84d",
+        "kind": "M"
+      }
+    },
+    "last_experience_ref": {
+      "uid": "N_3a101961a13347d79263b1d2420e83ae",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 3,
+      "actual": 3
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "расшириться",
+      "actual": "расшириться"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "лёд"
+      },
+      "actual": "Лёд"
+    },
+    {
+      "name": "perception.assertions.a2.predicate",
+      "ok": true,
+      "expected": "замёрзнуть",
+      "actual": "замёрзнуть"
+    },
+    {
+      "name": "perception.assertions.a2.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "вода"
+      },
+      "actual": "вода"
+    },
+    {
+      "name": "perception.assertions.a3.predicate",
+      "ok": true,
+      "expected": "мигнуть",
+      "actual": "мигнуть"
+    },
+    {
+      "name": "perception.assertions.a3.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "лампа"
+      },
+      "actual": "Лампа"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [
+        [
+          "CAUSE",
+          "A2",
+          "A1"
+        ]
+      ],
+      "actual": [
+        [
+          "CAUSE",
+          "A2",
+          "A1"
+        ]
+      ]
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "расшириться",
+      "actual": [
+        "расширился",
+        "расшириться"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "лёд"
+      },
+      "actual": "Лёд"
+    },
+    {
+      "name": "canonical.assertions.a2.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a2.predicate",
+      "ok": true,
+      "expected": "замёрзнуть",
+      "actual": [
+        "замёрзла",
+        "замёрзнуть"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "вода"
+      },
+      "actual": "Вода"
+    },
+    {
+      "name": "canonical.assertions.a3.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a3.predicate",
+      "ok": true,
+      "expected": "мигнуть",
+      "actual": [
+        "мигнула",
+        "мигнуть"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a3.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a3.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "лампа"
+      },
+      "actual": "Лампа"
+    },
+    {
+      "name": "templates.замёрзнуть.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.мигнуть.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    },
+    {
+      "name": "templates.расшириться.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": "Сбой охлаждающего контура, paragraph 3",
+  "semantic_family": "document.causal.station",
+  "semantic_tags": [
+    "document",
+    "cause",
+    "dedup-bridge",
+    "distractor"
+  ]
+}
