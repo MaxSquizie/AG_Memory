@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ah.logic import FunctionRegistry
 from ah.model import (
     AbstractSymbol,
     ActantRole,
@@ -10,6 +11,7 @@ from ah.model import (
     Group,
     Hypernode,
     Link,
+    Operand,
     Property,
     Ref,
     RefKind,
@@ -18,6 +20,7 @@ from ah.model import (
 )
 
 from .signatures import hypernode_signature
+from .supports import SupportLedger, SupportRecord
 from .store import AHStore, AHTransaction
 from .uid import UidGenerator, UuidUidGenerator
 from .validation import ValidationError, validate_hypernode, validate_ref_exists
@@ -35,9 +38,17 @@ _KIND_BY_TYPE = {
 class AHCore:
     """Only public write boundary for canonical AH structures in the first code slice."""
 
-    def __init__(self, store: AHStore | None = None, uid_generator: UidGenerator | None = None) -> None:
+    def __init__(
+        self,
+        store: AHStore | None = None,
+        uid_generator: UidGenerator | None = None,
+        support_ledger: SupportLedger | None = None,
+        function_registry: FunctionRegistry | None = None,
+    ) -> None:
         self.store = store or AHStore()
         self.uid = uid_generator or UuidUidGenerator()
+        self.supports = support_ledger or SupportLedger()
+        self.function_registry = function_registry or FunctionRegistry()
 
     def transaction(self) -> "AHCoreTransaction":
         return AHCoreTransaction(self)
@@ -84,12 +95,14 @@ class AHCore:
         self,
         domain: Domain,
         function_id: str,
-        operands: tuple[Ref, ...],
+        operands: tuple[Operand, ...],
         uid: str | None = None,
     ) -> FunctionSymbol:
-        for ref in operands:
-            validate_ref_exists(self.store, ref)
-        g = FunctionSymbol(uid or self.uid.new(RefKind.G), function_id, operands)
+        self.function_registry.validate(function_id, operands)
+        for operand in operands:
+            if isinstance(operand, Ref):
+                validate_ref_exists(self.store, operand)
+        g = FunctionSymbol(uid or self.uid.new(RefKind.G), function_id.strip().upper(), operands)
         self.store._insert_element(domain, g, RefKind.G)
         return g
 
@@ -123,7 +136,7 @@ class AHCore:
         self,
         domain: Domain,
         template: Ref,
-        actants: dict[ActantRole, Ref],
+        actants: dict[ActantRole, Operand],
         weight: float,
         properties: dict[str, Property] | None = None,
         meta: dict[str, object] | None = None,
@@ -161,6 +174,119 @@ class AHCore:
         if deduplicate:
             self.store._register_n_signature(domain, signature, candidate.uid)
         return candidate, True
+
+    def add_or_enrich_hypernode(
+        self,
+        domain: Domain,
+        template: Ref,
+        actants: dict[ActantRole, Operand],
+        weight: float,
+        properties: dict[str, Property] | None = None,
+        meta: dict[str, object] | None = None,
+        *,
+        count_occurrence: bool = True,
+    ) -> tuple[Hypernode, bool]:
+        """Add one canonical proposition or monotonically enrich a unique match.
+
+        Ordinary ``add_hypernode`` deduplicates only exact T+actant signatures.
+        Natural language often repeats the same proposition with a different amount
+        of source-grounded detail (``ветер усилился`` vs ``ветер усилился над
+        бухтой``).  When exactly one existing N with the same T/scope is compatible,
+        shares at least one identical role filler, and has no conflicting filler, the
+        two descriptions are one proposition under the existing AH semantics.  Reuse
+        its UID and add only the newly observed roles.
+
+        The uniqueness guard is essential: ``Иван вошёл`` must not choose between
+        existing ``Иван вошёл в дом`` and ``Иван вошёл в офис``.  In that case the
+        less-specific proposition remains a separate N instead of guessing event
+        identity.  Zero-overlap frames are never merged.
+        """
+        effective_meta = dict(meta or {})
+        candidate = Hypernode(
+            self.uid.new(RefKind.N),
+            weight,
+            template,
+            actants,
+            properties or {},
+            effective_meta,
+        )
+        canonical_template = validate_hypernode(self.store, candidate)
+        exact_signature = hypernode_signature(candidate, canonical_template)
+        exact = self.store.find_hypernode_by_signature(domain, exact_signature)
+        if exact is not None:
+            if not count_occurrence:
+                return exact, False
+            occurrence = int(exact.meta.get("occurrence_count", 1)) + 1
+            updated = replace(
+                exact, meta={**dict(exact.meta), "occurrence_count": occurrence}
+            )
+            # Metadata-only occurrence bookkeeping does not alter any derived index.
+            self.store._state.domains[domain][exact.uid] = updated
+            return updated, False
+
+        scope = effective_meta.get("semantic_scope")
+        compatible: list[Hypernode] = []
+        for existing in self.store.find_hypernodes_by_template(template.uid):
+            if self.store.domain_of(existing.uid) is not domain:
+                continue
+            if bool(existing.meta.get("dedup_exempt", False)):
+                continue
+            if existing.meta.get("semantic_scope") != scope:
+                continue
+            shared = False
+            conflict = False
+            for role in set(existing.actants) & set(actants):
+                if existing.actants[role] != actants[role]:
+                    conflict = True
+                    break
+                shared = True
+            if conflict or not shared:
+                continue
+            compatible.append(existing)
+
+        if len(compatible) != 1:
+            return self.add_hypernode(
+                domain,
+                template,
+                actants,
+                weight,
+                properties=properties,
+                meta=meta,
+                count_occurrence=count_occurrence,
+            )
+
+        existing = compatible[0]
+        merged_actants = {**dict(existing.actants), **actants}
+        occurrence = int(existing.meta.get("occurrence_count", 1))
+        if count_occurrence:
+            occurrence += 1
+        merged_meta = {**dict(existing.meta), **effective_meta, "occurrence_count": occurrence}
+        merged_properties = {**dict(existing.properties), **dict(properties or {})}
+        updated = replace(
+            existing,
+            actants=merged_actants,
+            properties=merged_properties,
+            meta=merged_meta,
+        )
+
+        # Editing may create an exact signature that already belongs to another N
+        # in legacy/imported state.  Do not corrupt the signature index or choose a
+        # winner implicitly; fall back to a new proposition in that rare case.
+        merged_signature = hypernode_signature(updated, canonical_template)
+        collision = self.store.find_hypernode_by_signature(domain, merged_signature)
+        if collision is not None and collision.uid != existing.uid:
+            return self.add_hypernode(
+                domain,
+                template,
+                actants,
+                weight,
+                properties=properties,
+                meta=meta,
+                count_occurrence=count_occurrence,
+            )
+
+        self.edit_element(domain, updated)
+        return self.store.get_hypernode(existing.uid), False
 
     # ----- L -----
     def add_link(
@@ -250,8 +376,10 @@ class AHCore:
         elif isinstance(element, Hypernode):
             validate_hypernode(self.store, element)
         elif isinstance(element, FunctionSymbol):
-            for ref in element.operands:
-                validate_ref_exists(self.store, ref)
+            self.function_registry.validate(element.function_id, element.operands)
+            for operand in element.operands:
+                if isinstance(operand, Ref):
+                    validate_ref_exists(self.store, operand)
         elif isinstance(element, Group):
             for ref in element.members:
                 validate_ref_exists(self.store, ref)
@@ -327,9 +455,10 @@ class AHCore:
         self,
         domain: Domain,
         function_id: str,
-        operands: tuple[Ref, ...],
+        operands: tuple[Operand, ...],
     ) -> tuple[FunctionSymbol, bool]:
-        normalized = function_id.upper()
+        normalized = function_id.strip().upper()
+        self.function_registry.validate(normalized, operands)
         for element in self.store.elements(domain):
             if (
                 isinstance(element, FunctionSymbol)
@@ -356,9 +485,12 @@ class AHCore:
         if isinstance(element, Template):
             return (element.predicate,)
         if isinstance(element, Hypernode):
-            return (element.template, *element.actants.values())
+            return (
+                element.template,
+                *(value for value in element.actants.values() if isinstance(value, Ref)),
+            )
         if isinstance(element, FunctionSymbol):
-            return element.operands
+            return tuple(operand for operand in element.operands if isinstance(operand, Ref))
         if isinstance(element, Group):
             return element.members
         return ()
@@ -494,6 +626,24 @@ class AHCore:
         by_uid = {link.uid: link for link in (*self.store.outgoing_links(element.uid), *self.store.incoming_links(element.uid))}
         return tuple(by_uid[uid] for uid in sorted(by_uid))
 
+    # ----- derived-support sidecar -----
+    def add_support(self, conclusion: Ref, support: SupportRecord) -> bool:
+        if not self.store.has_uid(conclusion.uid):
+            raise KeyError(conclusion.uid)
+        for premise in support.premise_refs:
+            validate_ref_exists(self.store, premise)
+        return self.supports.add(conclusion.uid, support)
+
+    def resolve_supports(self, expression: Ref) -> tuple[SupportRecord, ...]:
+        if not self.store.has_uid(expression.uid):
+            raise KeyError(expression.uid)
+        return self.supports.get(expression.uid)
+
+    def invalidate_supports_by_premise(self, premise: Ref) -> tuple[Ref, ...]:
+        validate_ref_exists(self.store, premise)
+        lost = self.supports.invalidate_by_premise(premise.uid)
+        return tuple(self.ref(uid) for uid in lost if self.store.has_uid(uid))
+
     # ----- canonical reads -----
     def ref(self, uid: str) -> Ref:
         return Ref(uid, self.store.kind_of(uid))
@@ -503,7 +653,8 @@ class AHCoreTransaction:
     def __init__(self, parent_core: AHCore) -> None:
         self.parent_core = parent_core
         self._tx = AHTransaction(parent_core.store)
-        self.core = AHCore(self._tx.store, parent_core.uid)
+        self._supports = parent_core.supports.clone()
+        self.core = AHCore(self._tx.store, parent_core.uid, self._supports, parent_core.function_registry)
 
     def __enter__(self) -> AHCore:
         return self.core
@@ -511,4 +662,5 @@ class AHCoreTransaction:
     def __exit__(self, exc_type, exc, tb) -> bool:
         if exc_type is None:
             self._tx.commit()
+            self.parent_core.supports.replace_from(self._supports)
         return False

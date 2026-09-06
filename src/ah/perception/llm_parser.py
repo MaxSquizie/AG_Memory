@@ -25,6 +25,7 @@ from .contracts import (
     ActRelationCandidate,
     AssertionCandidate,
     CommandCandidate,
+    DiscourseRelationDecision,
     EvidenceSpan,
     PerceptionResult,
     PredicateCandidate,
@@ -62,7 +63,6 @@ class LLMPerceptionSettings:
     probe_retry_attempts: int = 1
     repair_attempts: int | None = None  # deprecated alias -> probe_retry_attempts
     ground_actants: bool = True
-    max_acts: int = 4
     max_actants_per_act: int = 8
     predicate_symbol_language: str = "en"
     morphology_backend: str = "auto"
@@ -74,8 +74,8 @@ class LLMPerceptionSettings:
             raise ValueError("Unsupported perception protocol")
         if self.probe_retry_attempts < 0 or self.probe_retry_attempts > 2:
             raise ValueError("probe_retry_attempts must be in [0, 2]")
-        if self.max_acts <= 0 or self.max_actants_per_act <= 0:
-            raise ValueError("adaptive parser budgets must be > 0")
+        if self.max_actants_per_act <= 0:
+            raise ValueError("adaptive parser actant budget must be > 0")
         if self.predicate_symbol_language != "en":
             raise ValueError("predicate_symbol_language currently must be 'en'")
         if self.morphology_backend not in {"auto", "pymorphy3", "none"}:
@@ -191,7 +191,6 @@ class LLMPerceptionService:
                 prompt_dir=self.settings.probe_prompt_dir,
                 generation=self.settings.generation,
                 retry_attempts=self.settings.probe_retry_attempts,
-                max_acts=self.settings.max_acts,
                 max_actants_per_act=self.settings.max_actants_per_act,
                 predicate_symbol_language=self.settings.predicate_symbol_language,
                 morphology_backend=self.settings.morphology_backend,
@@ -212,6 +211,57 @@ class LLMPerceptionService:
             self._record_diagnostic(source_text, attempts, None, str(exc))
             raise PerceptionParseError(str(exc)) from exc
 
+    def classify_discourse_relation(
+        self,
+        narrative_context: str,
+        prior_events: tuple[str, ...],
+        current_events: tuple[str, ...],
+        *,
+        excluded_pairs: tuple[tuple[int, int], ...] = (),
+    ) -> DiscourseRelationDecision | None:
+        """Return one UID-free cross-turn semantic relation decision.
+
+        Runtime code has already narrowed the memory to cognitively accessible
+        canonical events and serialized them without UIDs.  This wrapper preserves
+        the same trust boundary as the ordinary parser: the model chooses only local
+        option labels; deterministic Integration later owns canonical mutation.
+        """
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            return None
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            return parser.classify_discourse_relation(
+                narrative_context,
+                prior_events,
+                current_events,
+                excluded_pairs=excluded_pairs,
+            )
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(narrative_context, attempts, None, str(exc))
+            raise PerceptionParseError(str(exc)) from exc
+
     def resolve_actant_role(
         self,
         source_text: str,
@@ -230,7 +280,6 @@ class LLMPerceptionService:
                 prompt_dir=self.settings.probe_prompt_dir,
                 generation=self.settings.generation,
                 retry_attempts=self.settings.probe_retry_attempts,
-                max_acts=self.settings.max_acts,
                 max_actants_per_act=self.settings.max_actants_per_act,
                 predicate_symbol_language=self.settings.predicate_symbol_language,
                 morphology_backend=self.settings.morphology_backend,
@@ -296,7 +345,6 @@ class LLMPerceptionService:
                 prompt_dir=self.settings.probe_prompt_dir,
                 generation=self.settings.generation,
                 retry_attempts=self.settings.probe_retry_attempts,
-                max_acts=self.settings.max_acts,
                 max_actants_per_act=self.settings.max_actants_per_act,
                 predicate_symbol_language=self.settings.predicate_symbol_language,
                 morphology_backend=self.settings.morphology_backend,
@@ -337,7 +385,6 @@ class LLMPerceptionService:
                 prompt_dir=self.settings.probe_prompt_dir,
                 generation=self.settings.generation,
                 retry_attempts=self.settings.probe_retry_attempts,
-                max_acts=self.settings.max_acts,
                 max_actants_per_act=self.settings.max_actants_per_act,
                 predicate_symbol_language=self.settings.predicate_symbol_language,
                 morphology_backend=self.settings.morphology_backend,
@@ -371,7 +418,6 @@ class LLMPerceptionService:
                 prompt_dir=self.settings.probe_prompt_dir,
                 generation=self.settings.generation,
                 retry_attempts=self.settings.probe_retry_attempts,
-                max_acts=self.settings.max_acts,
                 max_actants_per_act=self.settings.max_actants_per_act,
                 predicate_symbol_language=self.settings.predicate_symbol_language,
                 morphology_backend=self.settings.morphology_backend,

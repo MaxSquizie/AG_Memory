@@ -39,6 +39,16 @@ from .m2_acceptance import (
     run_m2_attention_acceptance,
     run_m2_cold_workspace_acceptance,
 )
+from .hackathon_preflight import (
+    HackathonPreflightInspector, HackathonPreflightReport, HyperparameterRecord,
+)
+
+from .hackathon_metrics import (
+    M1Report, M2QuestionObservation, M2ScoreReport, M3Report, M4Report, M5Report, TickBenchmarkReport,
+    RoleMetric, run_m3_gc_acceptance, score_m1_acceptance_bundle, score_m1_role_f1,
+    score_m2_explainability, score_m4_comparison, score_m5_robustness, run_tick_benchmark, write_metric_report,
+)
+
 from .propagation_audit import (
     FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
 )
@@ -87,6 +97,25 @@ __all__ = [
     "M2AcceptanceRunResult",
     "run_m2_attention_acceptance",
     "run_m2_cold_workspace_acceptance",
+    "HackathonPreflightInspector",
+    "HackathonPreflightReport",
+    "HyperparameterRecord",
+    "RoleMetric",
+    "M1Report",
+    "M2QuestionObservation",
+    "M2ScoreReport",
+    "M3Report",
+    "M4Report",
+    "M5Report",
+    "TickBenchmarkReport",
+    "score_m1_role_f1",
+    "score_m1_acceptance_bundle",
+    "score_m2_explainability",
+    "run_m3_gc_acceptance",
+    "score_m4_comparison",
+    "score_m5_robustness",
+    "run_tick_benchmark",
+    "write_metric_report",
     "FanoutAudit",
     "PropagationAudit",
     "PropagationEdgeAudit",

@@ -86,8 +86,10 @@ class IgnitionEngine:
             core,
             enabled=self.lifecycle_settings.gc_enabled,
             orphan_cleanup=self.lifecycle_settings.orphan_cleanup,
+            initial_lifetime_ticks=self.lifecycle_settings.initial_lifetime_ticks,
         )
         self.tick_index = 0
+        self.core.store.enable_lifetime_tracking(self.tick_index)
         self._incoming: dict[str, float] = defaultdict(float)
         # Portion of _incoming whose complete causal ancestry is pacemaker-only.
         # This provenance prevents ν background activity from turning into
@@ -135,7 +137,9 @@ class IgnitionEngine:
                 self.core,
                 enabled=lifecycle.gc_enabled,
                 orphan_cleanup=lifecycle.orphan_cleanup,
+                initial_lifetime_ticks=lifecycle.initial_lifetime_ticks,
             )
+            self.core.store.set_lifetime_clock(self.tick_index)
             self._active_uids = {
                 uid
                 for uid, state in self.core.store.runtime_items()
@@ -266,6 +270,15 @@ class IgnitionEngine:
     def restore_snapshot(self, snapshot: IgnitionSnapshot) -> None:
         with self._lock:
             self.tick_index = max(0, int(snapshot.tick_index))
+            self.core.store.set_lifetime_clock(self.tick_index)
+            # Rebuild the general initial-lifetime schedule against the restored
+            # clock/birth metadata. Canonical state itself is unchanged.
+            self.gc = GarbageCollector(
+                self.core,
+                enabled=self.lifecycle_settings.gc_enabled,
+                orphan_cleanup=self.lifecycle_settings.orphan_cleanup,
+                initial_lifetime_ticks=self.lifecycle_settings.initial_lifetime_ticks,
+            )
             self._incoming = defaultdict(
                 float,
                 {
@@ -322,6 +335,7 @@ class IgnitionEngine:
 
     def _tick_locked(self, *, include_pacemaker: bool = True) -> TickResult:
         tick = self.tick_index
+        self.core.store.set_lifetime_clock(tick)
         incoming = dict(self._incoming)
         pacemaker_incoming = dict(self._pacemaker_incoming)
         seed_reasons_mut = {uid: list(values) for uid, values in self._seed_reasons.items()}
@@ -547,6 +561,10 @@ class IgnitionEngine:
                 if element.weight > 0:
                     impulse = source_output * element.weight
                     for role, ref in element.actants.items():
+                        if not isinstance(ref, Ref):
+                            # BoundVar is a scoped formula placeholder, not an AH
+                            # node and therefore never participates in ignition.
+                            continue
                         scheduled[ref.uid] += impulse
                         if uid in output_pacemaker_only:
                             scheduled_pacemaker[ref.uid] += impulse
@@ -638,7 +656,7 @@ class IgnitionEngine:
             activation_uids=activation_uids - pacemaker_only_activation_uids,
             seed_reasons=seed_reasons,
         )
-        gc_result = self.gc.collect(lifecycle_result.expired_candidates)
+        gc_result = self.gc.collect(lifecycle_result.expired_candidates, tick=tick)
 
         self._active_uids = {
             uid for uid in self._active_uids if self.core.store.has_uid(uid)
@@ -681,5 +699,6 @@ class IgnitionEngine:
             propagations=tuple(propagations),
         )
         self.tick_index += 1
+        self.core.store.set_lifetime_clock(self.tick_index)
         return result
 

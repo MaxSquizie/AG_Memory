@@ -124,6 +124,25 @@ class NullMorphology:
         return ()
 
 
+def _plain_tag_scalar(value: object | None) -> str | None:
+    """Normalize pymorphy tag attributes to plain Python strings.
+
+    pymorphy3 exposes several tag attributes (number/case/gender/etc.) as
+    grammeme objects that behave *almost* like strings but overload equality and
+    may raise when compared with unrelated strings.  MorphInfo's public contract
+    is ``str | None``; crossing the adapter boundary with library-specific scalar
+    objects leaks those semantics into integration and can make innocent
+    comparisons fail at runtime.
+
+    Keep the dependency quarantined here: every scalar leaving the pymorphy
+    adapter is either an exact built-in ``str`` or ``None``.
+    """
+    if value is None:
+        return None
+    text = str(value)
+    return text if text else None
+
+
 class Pymorphy3Morphology:
     """Dictionary/rule morphology only; no semantic or AH knowledge.
 
@@ -160,12 +179,12 @@ class Pymorphy3Morphology:
             )
             info = MorphInfo(
                 normal_form=str(item.normal_form),
-                pos=getattr(tag, "POS", None),
-                case=getattr(tag, "case", None),
-                number=getattr(tag, "number", None),
-                gender=getattr(tag, "gender", None),
-                mood=getattr(tag, "mood", None),
-                animacy=getattr(tag, "animacy", None),
+                pos=_plain_tag_scalar(getattr(tag, "POS", None)),
+                case=_plain_tag_scalar(getattr(tag, "case", None)),
+                number=_plain_tag_scalar(getattr(tag, "number", None)),
+                gender=_plain_tag_scalar(getattr(tag, "gender", None)),
+                mood=_plain_tag_scalar(getattr(tag, "mood", None)),
+                animacy=_plain_tag_scalar(getattr(tag, "animacy", None)),
                 transitivity=transitivity,
                 grammemes=grammemes,
                 score=float(getattr(item, "score", 0.0) or 0.0),

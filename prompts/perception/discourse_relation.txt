@@ -1,0 +1,1 @@
+Return exactly CAUSE, FOLLOW, NO_RELATION, or UNCLEAR. CAUSE means the current event is presented as a direct reaction/response/consequence/result triggered by the prior event. FOLLOW means a direct continuation or next phase of the prior activity without a causal assertion. Mere same-episode membership or chronological order is NO_RELATION.

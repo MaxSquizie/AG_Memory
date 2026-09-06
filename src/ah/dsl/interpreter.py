@@ -23,6 +23,35 @@ from .contracts import DSLError, DSLResult
 
 
 class DSLInterpreter:
+    # Exact operation surface required by table 3 / hackathon statement plus the
+    # seven normative mutation primitives from the monograph. Helpers such as
+    # ``where`` and ``refs`` are deliberately excluded from this manifest.
+    NORMATIVE_OPERATIONS = (
+        "addAbstractSymbol",
+        "editAbstractSymbol",
+        "addElement",
+        "editElement",
+        "addProperty",
+        "editProperty",
+        "addLink",
+        "getAbstractSymbol",
+        "findAbstractSymbols",
+        "getSReference",
+        "findSReferences",
+        "getMReference",
+        "findMReferences",
+        "getSymbol",
+        "findSymbols",
+        "getList",
+        "findLists",
+        "getTemplate",
+        "getHypernode",
+        "findHypernodes",
+        "findRoles",
+        "getLink",
+        "findLinks",
+    )
+
     """Small textual DSL mapped only to canonical AH Core operations.
 
     Syntax is intentionally boring and deterministic:
@@ -37,6 +66,10 @@ class DSLInterpreter:
 
     def __init__(self, core: AHCore) -> None:
         self.core = core
+
+    @classmethod
+    def operation_names(cls) -> tuple[str, ...]:
+        return cls.NORMATIVE_OPERATIONS
 
     def execute(self, text: str) -> DSLResult:
         stages = self._split_pipeline(text)
@@ -370,18 +403,74 @@ class DSLInterpreter:
             link = self.core.store.get_link(uid)
             if "weight" not in args:
                 raise DSLError("editElement on L currently supports weight")
-            updated = replace(link, weight=float(args["weight"]))
-            return self.core.edit_link(updated)
+            return self.core.edit_link(replace(link, weight=float(args["weight"])))
+
         domain = self.core.store.domain_of(uid)
         assert domain is not None
         element = self.core.store.get_element(domain, uid)
-        if isinstance(element, Hypernode) and "weight" in args:
-            return self.core.edit_element(domain, replace(element, weight=float(args["weight"])))
-        if isinstance(element, FunctionSymbol) and "function" in args:
-            return self.core.edit_element(domain, replace(element, function_id=args["function"]))
-        if isinstance(element, Group) and "members" in args:
-            return self.core.edit_element(domain, replace(element, members=self._refs(args["members"])))
-        raise DSLError("editElement currently requires a supported field for the target type")
+
+        if isinstance(element, SemanticEntity):
+            props = dict(element.properties)
+            changed = False
+            if "name" in args:
+                props["name"] = Property("name", self._scalar(args["name"]), "str")
+                changed = True
+            for key, raw in args.items():
+                if key.startswith("pr."):
+                    name = key[3:]
+                    props[name] = Property(name, self._scalar(raw), "auto")
+                    changed = True
+            if not changed:
+                raise DSLError("editElement M requires name=... or pr.<name>=...")
+            return self.core.edit_element(domain, replace(element, properties=props))
+
+        if isinstance(element, Hypernode):
+            updated = element
+            changed = False
+            if "weight" in args:
+                updated = replace(updated, weight=float(args["weight"]))
+                changed = True
+            actants = dict(updated.actants)
+            for key, raw in args.items():
+                if key in {"uid", "weight", "domain", "kind"}:
+                    continue
+                try:
+                    role = ActantRole(key.upper().replace("_", "-"))
+                except ValueError:
+                    continue
+                actants[role] = self._ref(raw)
+                changed = True
+            if not changed:
+                raise DSLError("editElement N requires weight=... or ROLE=@UID")
+            return self.core.edit_element(domain, replace(updated, actants=actants))
+
+        if isinstance(element, FunctionSymbol):
+            function_id = args.get("function", element.function_id)
+            operands = self._refs(args["operands"]) if "operands" in args else element.operands
+            if function_id == element.function_id and operands == element.operands:
+                raise DSLError("editElement G requires function=... and/or operands=...")
+            return self.core.edit_element(
+                domain, replace(element, function_id=function_id, operands=operands)
+            )
+
+        if isinstance(element, Group):
+            if "members" not in args:
+                raise DSLError("editElement K requires members=...")
+            return self.core.edit_element(
+                domain, replace(element, members=self._refs(args["members"]))
+            )
+
+        if isinstance(element, Template):
+            if "roles" not in args:
+                raise DSLError("editElement T requires roles=...")
+            roles = tuple(
+                ActantRole(x.strip().upper().replace("_", "-"))
+                for x in args.get("roles", "").split(",")
+                if x.strip()
+            )
+            return self.core.expand_template_roles(uid, roles)
+
+        raise DSLError(f"Unsupported editElement target kind: {kind.value}")
 
     def _where(self, previous: Any, args: dict[str, str]) -> tuple[Any, ...]:
         if previous is None or isinstance(previous, (str, bytes, dict)):

@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Mapping
+from typing import Any, Mapping, TYPE_CHECKING
 
 UID = str
+
+if TYPE_CHECKING:
+    from .operands import Operand
 
 
 class Domain(str, Enum):
@@ -81,7 +84,7 @@ class SemanticEntity:
 class FunctionSymbol:
     uid: UID
     function_id: str
-    operands: tuple[Ref, ...]
+    operands: tuple["Operand", ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,7 +113,7 @@ class Hypernode:
     uid: UID
     weight: float
     template: Ref
-    actants: Mapping[ActantRole, Ref]
+    actants: Mapping[ActantRole, "Operand"]
     properties: PropertyMap = field(default_factory=dict)
     meta: MetaMap = field(default_factory=dict)
 

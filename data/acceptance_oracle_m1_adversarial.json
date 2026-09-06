@@ -1,0 +1,1511 @@
+{
+  "version": 1,
+  "corpus_id": "m1-adversarial-v1",
+  "case_count": 36,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Hidden-corpus pressure derived from hackathon M1: typos, syntactic inversion and ellipsis.",
+    "rule": "Oracle is written from intended semantics, never from current parser output."
+  },
+  "coverage": {
+    "m1_typo_noise": 10,
+    "m1_inversion": 10,
+    "m1_ellipsis": 10,
+    "m1_mixed_noise": 6
+  },
+  "cases": [
+    {
+      "text": "Иван купл книгу.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "subject",
+        "object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_001"
+    },
+    {
+      "text": "Мария прочитала докмент.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "subject",
+        "object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_002"
+    },
+    {
+      "text": "Сергей передал Анне клю.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_003"
+    },
+    {
+      "text": "Ольга положила книгу на стл.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_004"
+    },
+    {
+      "text": "Пётр открл дверь ключом.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_005"
+    },
+    {
+      "text": "Анна отправила писмо Сергею.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_006"
+    },
+    {
+      "text": "Мастер сделал стол из дерва.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_007"
+    },
+    {
+      "text": "Иван приехал в Мскву.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_008"
+    },
+    {
+      "text": "Мария работала два чса.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "duration"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "два часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_009"
+    },
+    {
+      "text": "Турист остановился у рки вечером.",
+      "grade": "EXACT",
+      "family": "m1_typo_noise",
+      "tags": [
+        "typo",
+        "location",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остановиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Турист",
+                "LOCATION": "река",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_010"
+    },
+    {
+      "text": "Книгу прочитал Иван.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "subject",
+        "object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_011"
+    },
+    {
+      "text": "Анне письмо передал Сергей.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_012"
+    },
+    {
+      "text": "На стол книгу положила Анна.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_013"
+    },
+    {
+      "text": "Ключом дверь открыл Пётр.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_014"
+    },
+    {
+      "text": "Из дерева стол сделал мастер.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_015"
+    },
+    {
+      "text": "В Москву утром приехал Иван.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "location",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва",
+                "TIME": "утром"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_016"
+    },
+    {
+      "text": "Сергею сообщение отправила Ольга.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Сергей",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_017"
+    },
+    {
+      "text": "Два часа книгу читал Иван.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "duration"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга",
+                "DURATION": "два часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_018"
+    },
+    {
+      "text": "В комнате книгу искала Мария.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "искать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга",
+                "LOCATION": "комната"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_019"
+    },
+    {
+      "text": "От Сергея письмо получила Анна.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "SOURCE": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_020"
+    },
+    {
+      "text": "Иван прочитал книгу, а Мария — журнал.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_021"
+    },
+    {
+      "text": "Иван купил чай, а Мария — кофе.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "object"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "чай"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "кофе"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_022"
+    },
+    {
+      "text": "Сергей передал Анне ключ, а Пётр Ольге — письмо.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Ольга",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_023"
+    },
+    {
+      "text": "Ольга положила книгу на стол, а Анна журнал — на полку.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_024"
+    },
+    {
+      "text": "Иван пришёл утром, а Мария — вечером.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "TIME": "утром"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_025"
+    },
+    {
+      "text": "Книга лежит на столе, а журнал — на полке.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_026"
+    },
+    {
+      "text": "Иван работает в Москве, а Мария — в Казани.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_027"
+    },
+    {
+      "text": "Мастер сделал стол из дерева, а ученик — стул из металла.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "ученик",
+                "OBJECT": "стул",
+                "MATERIAL": "металл"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_028"
+    },
+    {
+      "text": "Пётр открыл дверь ключом, а Иван — окно отвёрткой.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_029"
+    },
+    {
+      "text": "Анна отправила письмо Сергею, а Ольга — сообщение Петру.",
+      "grade": "EXACT",
+      "family": "m1_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coordination",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "сообщение",
+                "RECIPIENT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_030"
+    },
+    {
+      "text": "Книгу Анне пердал Сергей.",
+      "grade": "EXACT",
+      "family": "m1_mixed_noise",
+      "tags": [
+        "typo",
+        "inversion",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_031"
+    },
+    {
+      "text": "На стл журнал положила Анна.",
+      "grade": "EXACT",
+      "family": "m1_mixed_noise",
+      "tags": [
+        "typo",
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "журнал",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_032"
+    },
+    {
+      "text": "Иван купл чай, а Мария — кофе.",
+      "grade": "EXACT",
+      "family": "m1_mixed_noise",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "coordination"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "чай"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "кофе"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_033"
+    },
+    {
+      "text": "Ключом дверь открл Пётр, а Иван — окно отвёрткой.",
+      "grade": "EXACT",
+      "family": "m1_mixed_noise",
+      "tags": [
+        "typo",
+        "inversion",
+        "ellipsis",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_034"
+    },
+    {
+      "text": "Письмо Сергею отпраила Анна.",
+      "grade": "EXACT",
+      "family": "m1_mixed_noise",
+      "tags": [
+        "typo",
+        "inversion",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_035"
+    },
+    {
+      "text": "В Мскве работает Иван, а в Казани — Мария.",
+      "grade": "EXACT",
+      "family": "m1_mixed_noise",
+      "tags": [
+        "typo",
+        "inversion",
+        "ellipsis",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_036"
+    }
+  ],
+  "oracle_revision": "2026-09-06"
+}

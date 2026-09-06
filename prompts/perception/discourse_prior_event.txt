@@ -1,0 +1,1 @@
+Return exactly one listed P-label, NONE, or UNCLEAR. For the selected current event, choose the prior active event that the narrative establishes as the initiating source/activity of the direct cross-turn dependency. Prefer the initiating event over a more recent incidental intermediate step. Use only the supplied narrative.

@@ -198,6 +198,7 @@ class ArchitectureAlignment1220Tests(unittest.TestCase):
             "perception_content_addressee": ["CONTENT_ADDRESSEE"],
             "perception_frame_relation": ["CONTENT_LINK"],
             "perception_control_subject": ["SECOND"],
+            "semantic_nonfinite_assertion_status": ["NONASSERTED_CONTENT"],
         })
         parser = AdaptivePerceptionParser(
             backend,

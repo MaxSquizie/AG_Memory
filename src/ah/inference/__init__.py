@@ -1,11 +1,17 @@
 from .attention import AttentionFocusEvent, IgnitionInferenceAttention, InferenceAttention
 from .contracts import (
     AllOfGoal,
+    AssociationGoal,
     CauseEntailmentGoal,
+    CounterfactualGoal,
+    CognitiveEventKind,
+    CognitiveTraceEvent,
     CompositeConclusion,
     DerivedLinkConclusion,
     ExistingRefConclusion,
     ExistsGoal,
+    FormulaGoal,
+    GoalMode,
     GoalSpec,
     InferenceGoal,
     InferenceOutcome,
@@ -17,7 +23,12 @@ from .contracts import (
     RoleBindingConclusion,
     RoleFillGoal,
     StopReason,
+    ProofSupport,
 )
+from .bindings import BindingEnvironment
+from .runtime import GoalRuntime
+from .context import BranchContext, CounterfactualContext, ProofContext
+from .schema import InferenceSchema, InferenceSchemaRegistry
 from .engine import InferenceEngine
 from .materialization import InferenceMaterializer, MaterializationResult
 from .query_builder import QueryBuildResult, QueryGoalBuilder, SemanticGoalCompiler, TurnGoalBuilder
@@ -25,12 +36,19 @@ from .query_builder import QueryBuildResult, QueryGoalBuilder, SemanticGoalCompi
 __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
+    "AssociationGoal",
     "CauseEntailmentGoal",
+    "CounterfactualGoal",
+    "CognitiveEventKind",
+    "CognitiveTraceEvent",
     "CompositeConclusion",
     "DerivedLinkConclusion",
     "ExistingRefConclusion",
     "ExistsGoal",
+    "FormulaGoal",
+    "GoalMode",
     "GoalSpec",
+    "GoalRuntime",
     "InferenceEngine",
     "InferenceAttention",
     "InferenceGoal",
@@ -50,4 +68,11 @@ __all__ = [
     "RoleBindingConclusion",
     "RoleFillGoal",
     "StopReason",
+    "ProofSupport",
+    "BindingEnvironment",
+    "ProofContext",
+    "BranchContext",
+    "CounterfactualContext",
+    "InferenceSchema",
+    "InferenceSchemaRegistry",
 ]

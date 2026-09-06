@@ -10,13 +10,14 @@ from ah.agent.orchestrator import AgentOrchestrator
 from ah.config import AppConfig, PersistenceSettings
 from ah.core import AHCore, JsonPersistence
 from ah.diagnostics import GraphInspector, RuntimeDiagnostics
+from ah.diagnostics.session_log import audit_tick_result
 from ah.dsl import DSLInterpreter
 from ah.ignition import IgnitionClock, IgnitionEngine
 from ah.ignition.engine import IgnitionSnapshot
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.integration.correction import RefutationCommit, SemanticCorrectionService
 from ah.integration.contracts import IntegrationCommit
-from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
+from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder, InferenceSchemaRegistry
 from ah.llm import LLMBackend, build_llm_backend
 from ah.model import Domain, Property, SemanticEntity
 from ah.perception import (
@@ -36,6 +37,7 @@ class RuntimeServices:
     core: AHCore
     context: InteractionContext
     integration: IntegrationService
+    schema_registry: InferenceSchemaRegistry
     ignition: IgnitionEngine
     clock: IgnitionClock
     inference: InferenceEngine
@@ -74,19 +76,26 @@ class RuntimeServices:
         cls._ensure_identity_context(core, context, config)
 
         operation_lock = RLock()
-        integration = IntegrationService(core, IntegrationConfig.from_settings(config.integration))
+        schema_registry = InferenceSchemaRegistry.default()
+        integration = IntegrationService(
+            core,
+            IntegrationConfig.from_settings(config.integration),
+            schema_registry=schema_registry,
+        )
         ignition = IgnitionEngine(core, config.ignition, config.workspace, config.lifecycle)
         if loaded_snapshot is not None:
             ignition.restore_snapshot(loaded_snapshot)
+        def _on_tick(result):
+            audit_tick_result(result)
+            persistence.maybe_autosave(core, ignition=ignition, context=context)
+
         clock = IgnitionClock(
             ignition,
             config.ignition.tick_interval_seconds,
-            on_tick=lambda _result: persistence.maybe_autosave(
-                core, ignition=ignition, context=context
-            ),
+            on_tick=_on_tick,
             execution_lock=operation_lock,
         )
-        inference = InferenceEngine(core, config.inference)
+        inference = InferenceEngine(core, config.inference, schema_registry=schema_registry)
         materializer = InferenceMaterializer(core, config.integration)
         query_builder = QueryGoalBuilder(core)
         projector = ContextProjector(core, config.context)
@@ -107,7 +116,6 @@ class RuntimeServices:
                     probe_prompt_dir=config.paths.perception_prompt_dir,
                     probe_retry_attempts=config.llm.perception_probe_retry_attempts,
                     ground_actants=config.llm.perception_ground_actants,
-                    max_acts=config.llm.perception_max_acts,
                     max_actants_per_act=config.llm.perception_max_actants_per_act,
                     predicate_symbol_language=config.llm.perception_predicate_symbol_language,
                     morphology_backend=config.llm.perception_morphology_backend,
@@ -137,6 +145,7 @@ class RuntimeServices:
             core=core,
             context=context,
             integration=integration,
+            schema_registry=schema_registry,
             ignition=ignition,
             clock=clock,
             inference=inference,
@@ -231,7 +240,6 @@ class RuntimeServices:
                     probe_prompt_dir=new_config.paths.perception_prompt_dir,
                     probe_retry_attempts=new_config.llm.perception_probe_retry_attempts,
                     ground_actants=new_config.llm.perception_ground_actants,
-                    max_acts=new_config.llm.perception_max_acts,
                     max_actants_per_act=new_config.llm.perception_max_actants_per_act,
                     predicate_symbol_language=new_config.llm.perception_predicate_symbol_language,
                     morphology_backend=new_config.llm.perception_morphology_backend,

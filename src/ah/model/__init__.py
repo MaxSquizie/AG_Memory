@@ -1,3 +1,5 @@
+from .operands import BoundVar, Operand, VariableSort
+from .scope import ScopeFrame, ScopeStack, ScopeType
 from .types import (
     AbstractSymbol,
     CanonicalElement,
@@ -30,4 +32,10 @@ __all__ = [
     "RuntimeState",
     "SemanticEntity",
     "Template",
+    "BoundVar",
+    "Operand",
+    "VariableSort",
+    "ScopeFrame",
+    "ScopeStack",
+    "ScopeType",
 ]

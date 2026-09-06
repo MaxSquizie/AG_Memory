@@ -82,6 +82,8 @@ class ExperienceMapper:
         semantic_refs: tuple[Ref, ...],
         context: InteractionContext,
         speech_act_kinds: tuple[str, ...] = (),
+        source_ref: str | None = None,
+        batch_kind: str | None = None,
     ) -> ExperienceResult:
         if not self.core.store.has_uid(speaker_ref.uid):
             raise IntegrationError(f"Unknown speaker ref: {speaker_ref.uid}")
@@ -113,18 +115,31 @@ class ExperienceMapper:
         if context.now_ref is not None:
             actants[ActantRole.TIME] = context.now_ref
 
+        # A DOCUMENT batch may keep its raw text in an external/local provenance
+        # store, but raw source must not become ordinary retrieval memory in H.
+        # The H occurrence keeps only the source handle and semantic OBJECT roots.
+        # MESSAGE turns retain their utterance text because the communication event
+        # itself is part of experienced dialogue history.
+        event_properties = (
+            {}
+            if str(batch_kind or "").upper() == "DOCUMENT"
+            else {"text": Property("text", source_text, "str")}
+        )
+
         event, _ = self.core.add_hypernode(
             Domain.H,
             self.core.ref(template.uid),
             actants,
             weight=self.event_weight,
-            properties={"text": Property("text", source_text, "str")},
+            properties=event_properties,
             meta={
                 "event_instance": True,
                 # Dialogue history remains ordinary H experience, but its pragmatic
                 # type matters to projection: a past question/command is not
                 # evidence that its proposition was asserted.
                 "speech_act_kinds": tuple(dict.fromkeys(speech_act_kinds)),
+                **({"source_ref": source_ref} if source_ref else {}),
+                **({"batch_kind": batch_kind} if batch_kind else {}),
             },
             deduplicate=False,
         )

@@ -1,3 +1,3 @@
-from .interaction_context import InteractionContext
+from .interaction_context import ExistentialDiscourseAnchor, InteractionContext
 
-__all__ = ["InteractionContext"]
+__all__ = ["ExistentialDiscourseAnchor", "InteractionContext"]

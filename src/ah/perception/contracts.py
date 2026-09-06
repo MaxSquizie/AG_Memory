@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from ah.model import ActantRole
+from ah.temporal.contracts import TemporalCandidate, TemporalMode, TransitionOperator
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,7 +81,8 @@ class PropositionOperator(str, Enum):
     REF = "REF"
     AND = "AND"
     OR = "OR"
-    FALSE = "FALSE"
+    NOT = "NOT"
+    FALSE = "FALSE"  # legacy runtime alias; canonical object negation is NOT
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,7 +90,7 @@ class PropositionExprCandidate:
     """Runtime-only proposition expression over local assertion refs.
 
     This is deliberately not a canonical AH type. Integration maps REF to the
-    corresponding scoped N and AND/OR/FALSE to the already-canonical g operators.
+    corresponding scoped N and AND/OR/NOT to the already-canonical g operators.
     """
 
     operator: PropositionOperator
@@ -102,9 +104,9 @@ class PropositionExprCandidate:
             return
         if self.ref is not None:
             raise ValueError("non-REF proposition cannot carry ref")
-        if self.operator is PropositionOperator.FALSE:
+        if self.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}:
             if len(self.members) != 1:
-                raise ValueError("FALSE proposition requires exactly one member")
+                raise ValueError(f"{self.operator.value} proposition requires exactly one member")
             return
         if len(self.members) < 2:
             raise ValueError(f"{self.operator.value} proposition requires at least two members")
@@ -123,6 +125,41 @@ class PropositionExprCandidate:
         return tuple(dict.fromkeys(out))
 
 
+class NominalRelationKind(str, Enum):
+    """Runtime-only relation internal to one nominal phrase.
+
+    These labels are deliberately structural and source-grounded. ``POSSESSOR``
+    is used only when morphology explicitly marks possession/anaphoric
+    possessive structure; ``GENITIVE_DEP`` preserves a genitive nominal
+    dependency without pretending that every Russian genitive means ownership;
+    ``NOMINAL_MODIFIER`` keeps an attributive adjective/participle/number attached
+    to the nominal head without promoting it to a stronger world relation.
+    Integration may materialize these as typed canonical L edges for asserted
+    content.
+    """
+
+    POSSESSOR = "POSSESSOR"
+    GENITIVE_DEP = "GENITIVE_DEP"
+    NOMINAL_MODIFIER = "NOMINAL_MODIFIER"
+
+
+@dataclass(frozen=True, slots=True)
+class NominalRelationCandidate:
+    kind: NominalRelationKind
+    head_mention: str
+    head_normalized_hint: str | None
+    dependent_mention: str
+    dependent_normalized_hint: str | None = None
+    dependent_entity_ref: str | None = None
+    evidence: EvidenceSpan | None = None
+
+    def __post_init__(self) -> None:
+        if not self.head_mention.strip():
+            raise ValueError("NominalRelationCandidate.head_mention must be non-empty")
+        if not self.dependent_mention.strip():
+            raise ValueError("NominalRelationCandidate.dependent_mention must be non-empty")
+
+
 @dataclass(frozen=True, slots=True)
 class ActantCandidate:
     role: ActantRole
@@ -135,6 +172,14 @@ class ActantCandidate:
     parser_confidence: float | None = None
     composition: ActantCompositionCandidate | None = None
     proposition: PropositionExprCandidate | None = None
+    nominal_relations: tuple[NominalRelationCandidate, ...] = ()
+    # Runtime grammatical cardinality of the source nominal head.  This is not
+    # semantic truth about real-world multiplicity, but it is identity-relevant:
+    # a singular ``матрос`` and a plural/group ``матросы`` must not collapse to
+    # one canonical M merely because both lemmatize to ``матрос``.
+    grammatical_number: str | None = None
+    # Runtime-only normalized TIME descriptor. Canonical time remains ordinary m.
+    temporal: TemporalCandidate | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -157,6 +202,15 @@ class ActantCandidate:
             raise ValueError("entity_ref must be non-empty when provided")
         if self.parser_confidence is not None and not 0.0 <= self.parser_confidence <= 1.0:
             raise ValueError("parser_confidence must be in [0, 1]")
+        if self.grammatical_number is not None:
+            # Morphology adapters are required to expose plain Python strings.
+            # Normalize defensively here as well so library-specific grammeme
+            # scalar subclasses can never leak into Integration.
+            number = str(self.grammatical_number)
+            if number not in {"sing", "plur"}:
+                raise ValueError("grammatical_number must be sing, plur, or None")
+            if type(self.grammatical_number) is not str:
+                object.__setattr__(self, "grammatical_number", number)
 
     @property
     def lookup_text(self) -> str | None:
@@ -168,6 +222,8 @@ class AssertionStatus(str, Enum):
     ASSERTED = "ASSERTED"
     EMBEDDED = "EMBEDDED"
     CONDITIONAL = "CONDITIONAL"
+    HYPOTHETICAL = "HYPOTHETICAL"
+    MODAL = "MODAL"
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,11 +235,20 @@ class AssertionCandidate:
     alternatives: tuple["AssertionCandidate", ...] = ()
     negated: bool = False
     status: AssertionStatus = AssertionStatus.ASSERTED
+    # Occurrence-level temporal interpretation. It is staging metadata, not a
+    # global property of T. A predicate may be STATE in one occurrence and EVENT
+    # in another.
+    temporal_mode: TemporalMode | None = None
+    transition_operator: TransitionOperator | None = None
     # Quotation is orthogonal to conditional/embedded proposition status.  A
     # quoted assertion is represented canonically as proposition content but is
     # never eligible for ordinary asserted-fact retrieval merely because it was
     # mentioned inside somebody's speech.
     quoted: bool = False
+
+    def __post_init__(self) -> None:
+        if self.transition_operator is not None and self.temporal_mode is not TemporalMode.TRANSITION:
+            raise ValueError("transition_operator requires temporal_mode=TRANSITION")
 
 
 class CompositionOperator(str, Enum):
@@ -338,6 +403,32 @@ class SituationRelationCandidate:
         return self.relation_id.strip().upper()
 
 
+@dataclass(frozen=True, slots=True)
+class DiscourseRelationDecision:
+    """UID-free cross-turn semantic relation selected from local option lists.
+
+    ``prior_index`` and ``current_index`` address the caller-provided semantic
+    strings only.  They are never canonical UIDs and have no meaning outside one
+    bounded perception probe.  Deterministic orchestration maps them back to refs
+    and Integration remains the sole canonical write boundary.
+    """
+
+    relation_id: str
+    prior_index: int
+    current_index: int
+
+    def __post_init__(self) -> None:
+        relation = self.relation_id.strip().upper()
+        if relation not in {"CAUSE", "FOLLOW"}:
+            raise ValueError("DiscourseRelationDecision supports only CAUSE/FOLLOW")
+        if self.prior_index < 0 or self.current_index < 0:
+            raise ValueError("DiscourseRelationDecision indexes must be >= 0")
+
+    @property
+    def canonical_relation_id(self) -> str:
+        return self.relation_id.strip().upper()
+
+
 
 
 class SituationRelationHintKind(str, Enum):
@@ -378,7 +469,7 @@ class ConditionalCandidate:
 
     The antecedent and consequent are semantic proposition candidates, but they are
     not ordinary asserted world facts. Integration canonicalizes them as scoped N
-    operands and binds the two sides with deterministic g_IF / g_AND composition.
+    operands and binds the two sides with deterministic g_IMPLIES / g_AND composition.
     Ordinary EXISTS/ROLE_FILL therefore cannot treat either branch as already true.
     """
 

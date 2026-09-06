@@ -4,7 +4,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass
 
 from ah.core import AHCore
-from ah.model import Domain, FunctionSymbol, Hypernode, RefKind
+from ah.model import Domain, FunctionSymbol, Hypernode, Ref, RefKind
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,6 +83,8 @@ def propagation_edges(core: AHCore) -> tuple[PropagationEdgeAudit, ...]:
                     )
             if element.weight > 0:
                 for role, ref in element.actants.items():
+                    if not isinstance(ref, Ref):
+                        continue
                     out.append(
                         PropagationEdgeAudit(
                             element.uid, ref.uid, float(element.weight),

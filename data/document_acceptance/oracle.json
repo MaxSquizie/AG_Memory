@@ -1930,7 +1930,15 @@
             "domain": "C",
             "exact_roles": false,
             "roles": {
-              "SUBJECT": "кусок штукатурки"
+              "SUBJECT": {
+                "canonical_name": "кусок",
+                "relations": [
+                  {
+                    "relation": "GENITIVE_DEP",
+                    "target": "штукатурка"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1939,7 +1947,15 @@
             "domain": "C",
             "exact_roles": false,
             "roles": {
-              "SUBJECT": "падение штукатурки",
+              "SUBJECT": {
+                "canonical_name": "падение",
+                "relations": [
+                  {
+                    "relation": "GENITIVE_DEP",
+                    "target": "штукатурка"
+                  }
+                ]
+              },
               "OBJECT": "кот"
             }
           },
@@ -1981,7 +1997,15 @@
             "domain": "C",
             "exact_roles": false,
             "roles": {
-              "SUBJECT": "стекло лампы"
+              "SUBJECT": {
+                "canonical_name": "стекло",
+                "relations": [
+                  {
+                    "relation": "GENITIVE_DEP",
+                    "target": "лампа"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2070,7 +2094,10 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": "Марина",
-              "OBJECT": "письма"
+              "OBJECT": {
+                "canonical_name": "письмо",
+                "grammatical_number": "plur"
+              }
             }
           },
           {
@@ -2098,7 +2125,10 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": "Марина",
-              "OBJECT": "письма"
+              "OBJECT": {
+                "canonical_name": "письмо",
+                "grammatical_number": "plur"
+              }
             }
           },
           {
@@ -2295,7 +2325,7 @@
         "source_name": "Викитека",
         "source_url": "https://ru.wikisource.org/wiki/Человек-амфибия_(Беляев)",
         "public_domain": true,
-        "note": "Непрерывный фрагмент из главы; текст не переписывался под acceptance."
+        "note": "Непрерывный фрагмент из главы; текст не переписывался под acceptance. Oracle опирается только на сведения самого фрагмента: раннее «Педро» не приравнивается к «Зурита» до более позднего полного имени «Педро Зурита»."
       },
       "ingest": {
         "mode": "monolith",
@@ -3085,10 +3115,11 @@
             "domain": "C",
             "exact_roles": false,
             "roles": {
-              "SUBJECT": "матросы",
-              "OBJECT": {
-                "same_as": "zurita_stand.SUBJECT"
-              }
+              "SUBJECT": {
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
+              },
+              "OBJECT": "Педро"
             }
           },
           {
@@ -3109,7 +3140,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               },
               "LOCATION": "палуба"
             }
@@ -3204,7 +3236,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               }
             }
           },
@@ -3215,7 +3248,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               },
               "LOCATION": "люк"
             }
@@ -3232,6 +3266,23 @@
             }
           },
           {
+            "id": "submarine_approach",
+            "predicate": "приближаться",
+            "domain": "C",
+            "exact_roles": false,
+            "roles": {
+              "SUBJECT": {
+                "canonical_name": "лодка",
+                "relations": [
+                  {
+                    "relation": "NOMINAL_MODIFIER",
+                    "target": "подводный"
+                  }
+                ]
+              }
+            }
+          },
+          {
             "id": "zurita_see_submarine",
             "predicate": "увидеть",
             "domain": "C",
@@ -3240,17 +3291,8 @@
               "SUBJECT": {
                 "same_as": "zurita_stand.SUBJECT"
               },
-              "OBJECT": "подводная лодка"
-            }
-          },
-          {
-            "id": "submarine_approach",
-            "predicate": "приближаться",
-            "domain": "C",
-            "exact_roles": false,
-            "roles": {
-              "SUBJECT": {
-                "same_as": "zurita_see_submarine.OBJECT"
+              "OBJECT": {
+                "fact": "submarine_approach"
               }
             }
           },
@@ -3272,7 +3314,7 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "zurita_see_submarine.OBJECT"
+                "same_as": "submarine_approach.SUBJECT"
               }
             }
           },
@@ -3283,7 +3325,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               }
             }
           },
@@ -3316,7 +3359,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               }
             }
           },
@@ -3327,9 +3371,13 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               },
-              "OBJECT": "шлюпки"
+              "OBJECT": {
+                "canonical_name": "шлюпка",
+                "grammatical_number": "plur"
+              }
             }
           },
           {
@@ -3339,7 +3387,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               },
               "LOCATION": "вода"
             }
@@ -3351,7 +3400,8 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": {
-                "same_as": "sailors_attack.SUBJECT"
+                "canonical_name": "матрос",
+                "grammatical_number": "plur"
               },
               "LOCATION": "берег"
             }
@@ -3822,6 +3872,15 @@
             "roles": {
               "SUBJECT": {
                 "same_as": "alexei_arrive.SUBJECT"
+              },
+              "OBJECT": {
+                "canonical_name": "пачка",
+                "relations": [
+                  {
+                    "relation": "GENITIVE_DEP",
+                    "target": "письмо"
+                  }
+                ]
               }
             }
           },
@@ -3970,7 +4029,7 @@
             "exact_roles": false,
             "roles": {
               "SUBJECT": "Вера",
-              "LOCATION": "двери"
+              "LOCATION": "дверь"
             }
           },
           {
@@ -4047,7 +4106,10 @@
               "SUBJECT": {
                 "same_as": "vera_stand.SUBJECT"
               },
-              "OBJECT": "глаза"
+              "OBJECT": {
+                "canonical_name": "глаз",
+                "grammatical_number": "plur"
+              }
             }
           },
           {
@@ -4105,7 +4167,10 @@
               "SUBJECT": {
                 "same_as": "vera_stand.SUBJECT"
               },
-              "OBJECT": "письма"
+              "OBJECT": {
+                "canonical_name": "письмо",
+                "grammatical_number": "plur"
+              }
             }
           },
           {
@@ -4118,7 +4183,8 @@
                 "same_as": "vera_stand.SUBJECT"
               },
               "OBJECT": {
-                "same_as": "collect_letters.OBJECT"
+                "canonical_name": "письмо",
+                "grammatical_number": "plur"
               }
             }
           },
@@ -4132,7 +4198,8 @@
                 "same_as": "vera_stand.SUBJECT"
               },
               "OBJECT": {
-                "same_as": "collect_letters.OBJECT"
+                "canonical_name": "письмо",
+                "grammatical_number": "plur"
               },
               "LOCATION": "ящик"
             }
@@ -4152,8 +4219,7 @@
             "domain": "C",
             "exact_roles": false,
             "roles": {
-              "SUBJECT": "вода",
-              "LOCATION": "вестибюль"
+              "SUBJECT": "вода"
             }
           },
           {
@@ -4206,7 +4272,10 @@
               "SUBJECT": {
                 "same_as": "alexei_arrive.SUBJECT"
               },
-              "OBJECT": "журналы",
+              "OBJECT": {
+                "canonical_name": "журнал",
+                "grammatical_number": "plur"
+              },
               "LOCATION": "скамья"
             }
           }

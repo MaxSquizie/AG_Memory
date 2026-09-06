@@ -321,23 +321,50 @@ class LMStudioBackend:
             if str(system or "").strip():
                 messages.append({"role": "system", "content": str(system).strip()})
             messages.append({"role": "user", "content": str(prompt)})
-            response_data = self._client.chat_completions(
-                model=self._active_model,
-                messages=messages,
-                **self._generation_options(defaults),
-            )
-            response_text = self._client.chat_text(response_data)
-            # LM Studio/OpenAI-compatible endpoints may still expose Qwen-style
-            # reasoning inside the content. Keep machine protocols clean even if
-            # the loaded chat template chooses to reason internally.
-            if self.config.llm.strip_thinking or role.startswith("perception_") or role.startswith("semantic_"):
+            is_protocol_probe = role.startswith("perception_") or role.startswith("semantic_")
+            if is_protocol_probe and not bool(defaults.get("enable_thinking", False)):
+                # The OpenAI-compatible chat endpoint accepts only the documented
+                # OpenAI-style sampling keys and may ignore custom Jinja variables.
+                # Use LM Studio's native v1 endpoint for bounded probes so
+                # ``reasoning=off`` is an actual transport contract rather than a
+                # best-effort hint.
+                options = self._generation_options(defaults)
+                response_data = self._client.native_chat(
+                    model=self._active_model,
+                    prompt=str(prompt),
+                    system=str(system or ""),
+                    temperature=options["temperature"],
+                    top_p=options["top_p"],
+                    top_k=options["top_k"],
+                    repeat_penalty=options["repeat_penalty"],
+                    max_tokens=options["max_tokens"],
+                    reasoning="off",
+                )
+                response_text = self._client.native_chat_text(response_data)
+                stats = response_data.get("stats")
+                if isinstance(stats, dict):
+                    try:
+                        input_tokens = int(stats.get("input_tokens"))
+                    except (TypeError, ValueError):
+                        input_tokens = None
+            else:
+                response_data = self._client.chat_completions(
+                    model=self._active_model,
+                    messages=messages,
+                    enable_thinking=bool(defaults.get("enable_thinking", False)),
+                    **self._generation_options(defaults),
+                )
+                response_text = self._client.chat_text(response_data)
+                usage = response_data.get("usage")
+                if isinstance(usage, dict):
+                    try:
+                        input_tokens = int(usage.get("prompt_tokens"))
+                    except (TypeError, ValueError):
+                        input_tokens = None
+            # Keep machine protocols clean even if a model/template emits legacy
+            # inline <think> blocks despite reasoning being disabled.
+            if self.config.llm.strip_thinking or is_protocol_probe:
                 response_text = _strip_thinking(response_text)
-            usage = response_data.get("usage")
-            if isinstance(usage, dict):
-                try:
-                    input_tokens = int(usage.get("prompt_tokens"))
-                except (TypeError, ValueError):
-                    input_tokens = None
             return LLMResponse(response_text, {"text": response_text, **response_data})
         except Exception as exc:
             error = str(exc)

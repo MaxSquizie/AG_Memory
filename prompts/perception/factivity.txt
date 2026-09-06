@@ -1,0 +1,1 @@
+Return exactly FACTIVE, NONFACTIVE, or UNCLEAR. Decide only whether this matrix use commits to the supplied content event as an actual narrated fact. Perception/discovery/knowledge may be factive here. Speech, thought, hope, intention, imagination, quotation, and similar representation are not automatically factive. Use only the supplied text.

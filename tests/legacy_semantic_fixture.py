@@ -61,6 +61,16 @@ def legacy_semantic_answer(role: str, prompt: str) -> str | None:
         known_role = _section(prompt, "KNOWN SEMANTIC ROLE").upper()
         return "LOCAL" if known_role == "RECIPIENT" else "SHARED"
 
+    if role == "semantic_nonfinite_assertion_status":
+        # Historical fixtures only cover non-asserted complement infinitives
+        # (want/request) and predate the v0.12.93 status probe. Production never
+        # imports this helper; asserted-event cases are tested with explicit
+        # scripted answers in test_narrative_identity_v093.py.
+        matrix = _section(prompt, "MATRIX PREDICATE").casefold()
+        if matrix.startswith(("хоч", "попрос")):
+            return "NONASSERTED_CONTENT"
+        return "UNCLEAR"
+
     if role == "perception_frame_relation":
         text = _section(prompt, "TEXT").casefold()
         choices_block = prompt.split("CHOICES:\n", 1)[1] if "CHOICES:\n" in prompt else ""

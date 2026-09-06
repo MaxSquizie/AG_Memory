@@ -159,7 +159,7 @@ class IntegrationServiceTests(unittest.TestCase):
         self.assertEqual(semantic.weight, 0.4)
 
 
-    def test_explicit_negation_materializes_false_without_confirming_positive_n(self) -> None:
+    def test_explicit_negation_materializes_not_without_confirming_or_refuting_positive_n(self) -> None:
         positive = PerceptionResult(
             source_text="Кошка спит",
             assertions=(
@@ -190,13 +190,13 @@ class IntegrationServiceTests(unittest.TestCase):
             ),
         )
         commit = self.service.integrate_external(negated, self.context)
-        false_ref = commit.assertions[0].ref
-        self.assertEqual(false_ref.kind, RefKind.G)
-        false_g = self.core.store.get_element_any_domain(false_ref.uid)
-        self.assertEqual(false_g.function_id, "FALSE")
-        self.assertEqual(false_g.operands, (positive_ref,))
+        not_ref = commit.assertions[0].ref
+        self.assertEqual(not_ref.kind, RefKind.G)
+        not_g = self.core.store.get_element_any_domain(not_ref.uid)
+        self.assertEqual(not_g.function_id, "NOT")
+        self.assertEqual(not_g.operands, (positive_ref,))
         self.assertEqual(self.core.store.get_hypernode(positive_ref.uid).meta["occurrence_count"], 1)
-        self.assertEqual(tuple(r.target.uid for r in commit.refutations), (positive_ref.uid,))
+        self.assertEqual(commit.refutations, ())
 
     def test_nested_candidate_ref_becomes_nested_n_actant(self) -> None:
         result = PerceptionResult(
@@ -463,7 +463,7 @@ class IntegrationServiceTests(unittest.TestCase):
         self.assertEqual(len(commit.conditionals), 1)
         conditional = commit.conditionals[0]
         function = self.core.store.get_element_any_domain(conditional.ref.uid)
-        self.assertEqual(function.function_id, "IF")
+        self.assertEqual(function.function_id, "IMPLIES")
         self.assertEqual(function.operands, (conditional.antecedent, conditional.consequent))
         self.assertEqual(len(conditional.member_refs), 2)
         for ref in conditional.member_refs:
@@ -594,7 +594,7 @@ class IntegrationServiceTests(unittest.TestCase):
         conditional = commit.conditionals[0]
         top = self.core.store.get_element_any_domain(conditional.ref.uid)
         antecedent = self.core.store.get_element_any_domain(conditional.antecedent.uid)
-        self.assertEqual(top.function_id, "IF")
+        self.assertEqual(top.function_id, "IMPLIES")
         self.assertEqual(antecedent.function_id, "AND")
         self.assertEqual(tuple(ref.uid for ref in antecedent.operands), tuple(ref.uid for ref in conditional.member_refs[:2]))
         self.assertEqual(conditional.consequent, conditional.member_refs[2])
@@ -709,6 +709,10 @@ class IntegrationServiceTests(unittest.TestCase):
             states.add(self.core.store.get_element_any_domain(node.actants[ActantRole.STATE].uid).properties["name"].value)
         self.assertEqual(subjects, {"Яблоки"})
         self.assertEqual(states, {"зелёные", "красные"})
+        for ref in function.operands:
+            node = self.core.store.get_hypernode(ref.uid)
+            self.assertEqual(node.meta.get("semantic_scope"), "DISJUNCTIVE")
+            self.assertEqual(node.meta.get("occurrence_count"), 0)
 
 
 

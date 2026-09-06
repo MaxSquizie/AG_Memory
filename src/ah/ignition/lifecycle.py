@@ -144,8 +144,17 @@ class LifecycleManager:
             qualifying_activation = uid in activation_uids and not pacemaker_only
 
             if before_stage is None:
-                # Lifecycle begins only from semantic/cognitive participation.
-                if not (just_created or qualifying_activation):
+                # The consolidation lifecycle belongs to *newly perceived facts*.
+                # Merely recalling/focusing an established proposition for proof or
+                # association must not retroactively classify it as NEW and start a
+                # forgetting deadline.  General initial-lifetime/structural GC is a
+                # separate mechanism and already covers canonical insertions after
+                # Ignition starts.
+                #
+                # In particular QUERY_RECALL is attention, not a new observation.
+                # A fact enters this state machine only through the explicit
+                # NEW_FACT seed emitted by integration.
+                if not just_created:
                     continue
                 meta[self.META_STAGE] = LifecycleStage.NEW.value
                 meta[self.META_CREATED] = tick

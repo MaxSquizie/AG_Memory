@@ -1,0 +1,1 @@
+Return exactly one allowed choice label. Decide only whether the displayed FOLLOWING NOMINAL is grammatically attached inside the same noun phrase as a genitive dependent of HEAD NOMINAL in the given TEXT. Do not infer memory facts, entity identity, or unstated relations. If the text does not determine the attachment, return UNCLEAR.

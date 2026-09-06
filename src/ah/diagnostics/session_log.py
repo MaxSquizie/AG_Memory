@@ -69,3 +69,30 @@ def emit(kind: str, **payload: Any) -> None:
 
 def log_llm_request(**payload: Any) -> None:
     emit("llm_request", **payload)
+
+
+def audit_tick_result(result: Any) -> None:
+    """Emit lifecycle/GC diagnostics for one Ignition tick, never into AH/H."""
+    gc = getattr(result, "gc", None)
+    if gc is not None and getattr(gc, "deleted", ()):
+        emit(
+            "gc_delete",
+            tick=int(getattr(result, "tick", -1)),
+            deleted=list(gc.deleted),
+            orphan_deleted=list(getattr(gc, "orphan_deleted", ())),
+            reasons=dict(getattr(gc, "reasons", {})),
+        )
+    lifecycle = getattr(result, "lifecycle", None)
+    if lifecycle is not None and getattr(lifecycle, "updates", ()):
+        emit(
+            "lifecycle_update",
+            tick=int(getattr(result, "tick", -1)),
+            updates=[
+                {
+                    "uid": item.uid,
+                    "before": None if item.before is None else str(getattr(item.before, "value", item.before)),
+                    "after": str(getattr(item.after, "value", item.after)),
+                }
+                for item in lifecycle.updates
+            ],
+        )

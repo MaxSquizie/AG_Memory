@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ah.model import Hypernode, Ref, RefKind, Template
+from ah.model import BoundVar, Hypernode, Ref, RefKind, Template
 
 
 class ValidationError(ValueError):
@@ -26,8 +26,22 @@ def validate_hypernode(store: "AHStoreLike", node: Hypernode) -> Template:
         names = ", ".join(sorted(role.value for role in unexpected))
         raise ValidationError(f"Actants not allowed by template {template.uid}: {names}")
 
-    for ref in node.actants.values():
-        validate_ref_exists(store, ref)
+    has_bound_vars = False
+    for operand in node.actants.values():
+        if isinstance(operand, Ref):
+            validate_ref_exists(store, operand)
+            continue
+        if isinstance(operand, BoundVar):
+            has_bound_vars = True
+            continue
+        raise ValidationError(f"Unsupported N actant operand: {type(operand).__name__}")
+
+    if has_bound_vars:
+        scope = str(node.meta.get("semantic_scope") or "").upper()
+        if scope != "QUANTIFIED":
+            raise ValidationError(
+                "BoundVar actants are allowed only in QUANTIFIED formula-pattern N, not factual N"
+            )
 
     return template
 

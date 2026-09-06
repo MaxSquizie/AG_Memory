@@ -6,6 +6,7 @@ from ah.config import ContextSettings
 from ah.core import AHCore
 from ah.model import (
     AbstractSymbol,
+    BoundVar,
     ActantRole,
     FunctionSymbol,
     Group,
@@ -86,6 +87,16 @@ class SemanticProjector:
         unit = f" {prop.unit}" if prop.unit else ""
         return f"{prop.name}={prop.value!r}{unit}"
 
+    @staticmethod
+    def _bound_var_text(variable: BoundVar) -> str:
+        suffix = "" if variable.sort.value == "UNKNOWN" else f":{variable.sort.value}"
+        return f"${variable.local_id}{suffix}"
+
+    def _render_operand(self, operand: Ref | BoundVar, state: _RenderState) -> str:
+        if isinstance(operand, BoundVar):
+            return self._bound_var_text(operand)
+        return self._render(operand, ProjectionMode.DEPENDENCY, state)
+
     def _render(self, ref: Ref, mode: ProjectionMode, state: _RenderState) -> str:
         if state.depth > self.settings.max_dependency_depth:
             return self._label(ref, "<dependency-depth-limit>")
@@ -130,7 +141,7 @@ class SemanticProjector:
                 if text_prop is not None and isinstance(text_prop.value, str):
                     speaker = "реплика"
                     subject_ref = obj.actants.get(ActantRole.SUBJECT)
-                    if subject_ref is not None and subject_ref.kind is RefKind.M:
+                    if isinstance(subject_ref, Ref) and subject_ref.kind is RefKind.M:
                         try:
                             subject = self.core.store.get_element_any_domain(subject_ref.uid)
                             if isinstance(subject, SemanticEntity):
@@ -152,7 +163,7 @@ class SemanticProjector:
                 if actant is None:
                     continue
                 role_chunks.append(
-                    f"{role.value}={self._render(actant, ProjectionMode.DEPENDENCY, child_state)}"
+                    f"{role.value}={self._render_operand(actant, child_state)}"
                 )
             semantic = f"{predicate}({', '.join(role_chunks)})"
             if mode is ProjectionMode.ACTIVE and obj.properties:
@@ -162,13 +173,19 @@ class SemanticProjector:
         if isinstance(obj, Link):
             source = self._render(obj.source, ProjectionMode.DEPENDENCY, child_state)
             target = self._render(obj.target, ProjectionMode.DEPENDENCY, child_state)
-            semantic = f"{source} --{obj.relation_id}--> {target}"
+            if obj.relation_id == "POSSESSOR":
+                semantic = f"POSSESSOR(head={source}, owner={target})"
+            elif obj.relation_id == "GENITIVE_DEP":
+                semantic = f"GENITIVE_DEP(head={source}, dependent={target})"
+            elif obj.relation_id == "NOMINAL_MODIFIER":
+                semantic = f"NOMINAL_MODIFIER(head={source}, modifier={target})"
+            else:
+                semantic = f"{source} --{obj.relation_id}--> {target}"
             return self._label(ref, semantic)
 
         if isinstance(obj, FunctionSymbol):
             operands = tuple(
-                self._render(r, ProjectionMode.DEPENDENCY, child_state)
-                for r in obj.operands
+                self._render_operand(r, child_state) for r in obj.operands
             )
             semantic = self.functions.render(obj.function_id, operands)
             return self._label(ref, semantic)
@@ -178,6 +195,10 @@ class SemanticProjector:
                 self._render(r, ProjectionMode.DEPENDENCY, child_state)
                 for r in obj.members
             )
+            group_type = str(obj.meta.get("TYPE") or obj.meta.get("type") or "").upper()
+            if group_type == "CONFLICT":
+                semantic = "CONFLICT[" + "; ".join(members) + "]"
+                return self._label(ref, semantic)
             name = obj.properties.get("name")
             identity = str(name.value) if name is not None else obj.uid
             if mode is ProjectionMode.ACTIVE:

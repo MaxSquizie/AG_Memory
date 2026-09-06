@@ -1,0 +1,1 @@
+Return exactly one listed C-label, NONE, or UNCLEAR. Select a current event only when the supplied narrative window presents it as directly dependent on one listed prior active event by causal reaction/result or by a direct continuation/next phase. Same participant, topic continuity, and simple chronological order are insufficient.

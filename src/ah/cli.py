@@ -36,6 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     dsl.add_argument("expression")
 
     sub.add_parser("summary", help="print runtime summary")
+    sub.add_parser("preflight", help="print deterministic hackathon structural preflight (not M1-M5)")
     sub.add_parser("dump-json", help="dump canonical/runtime graph as JSON")
     sub.add_parser("dump-dot", help="dump graph as Graphviz DOT")
 
@@ -73,12 +74,40 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("reset-memory", help="clear AH/runtime/context and recreate SELF/USER")
 
+
+    semantic = sub.add_parser(
+        "semantic-acceptance",
+        help="run a semantic acceptance cases/oracle pair through the normal local-LLM pipeline",
+    )
+    semantic.add_argument(
+        "--cases",
+        default="data/acceptance_cases_m1_adversarial.txt",
+        help="one-turn-per-line acceptance cases file",
+    )
+    semantic.add_argument(
+        "--oracle",
+        default="data/acceptance_oracle_m1_adversarial.json",
+        help="semantic oracle JSON aligned with --cases",
+    )
     sub.add_parser(
         "m2-acceptance",
         help=(
             "run attention-driven M2 on a dirty/live-AH snapshot with >=150k UIDs "
             "(no LLM, no live AH mutation)"
         ),
+    )
+    m1 = sub.add_parser(
+        "m1-score",
+        help="score weighted actant-role F1 from an existing acceptance_runs bundle",
+    )
+    m1.add_argument("run_dir")
+    sub.add_parser(
+        "m3-acceptance",
+        help="run committee-shape GC check: 200 injected orphans, <=50 ticks, 100%% live preservation",
+    )
+    sub.add_parser(
+        "tick-benchmark",
+        help="benchmark Ignition ticks on a fixture with >=1000 N+L graph units",
     )
     return parser
 
@@ -102,8 +131,38 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
         return 0 if result.failed == 0 else 1
+    if args.command == "m1-score":
+        from ah.diagnostics import score_m1_acceptance_bundle
+
+        report = score_m1_acceptance_bundle(args.run_dir)
+        print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        return 0 if report.weighted_mean >= 0.6 else 1
+    if args.command == "m3-acceptance":
+        from ah.diagnostics import run_m3_gc_acceptance
+
+        report = run_m3_gc_acceptance(cfg)
+        print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        return 0 if report.passed else 1
+    if args.command == "tick-benchmark":
+        from ah.diagnostics import run_tick_benchmark
+
+        report = run_tick_benchmark(cfg)
+        print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        return 0 if report.passes_500ms else 1
 
     services = RuntimeServices.build(cfg)
+
+    if args.command == "semantic-acceptance":
+        from ah.diagnostics import run_acceptance_suite
+
+        result = run_acceptance_suite(
+            services,
+            cases_file=Path(args.cases),
+            oracle_file=Path(args.oracle),
+            runs_dirname="acceptance_runs_m1_adversarial",
+        )
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0 if result.semantic_failed == 0 and result.failed == 0 else 1
 
     if args.command == "import-corpus":
         from ah.model import Domain
@@ -139,6 +198,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "summary":
         print(json.dumps(_jsonable(services.diagnostics.summary()), ensure_ascii=False, indent=2))
         return 0
+    if args.command == "preflight":
+        from ah.diagnostics import HackathonPreflightInspector
+
+        report = HackathonPreflightInspector(services.core, cfg).inspect()
+        print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        return 0 if report.structural_ok else 1
     if args.command == "dump-json":
         print(services.graph_inspector.to_json())
         return 0

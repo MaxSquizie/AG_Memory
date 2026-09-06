@@ -9,7 +9,7 @@ import json
 import os
 import tempfile
 
-from ah.agent.interaction_context import InteractionContext
+from ah.agent.interaction_context import ExistentialDiscourseAnchor, InteractionContext
 from ah.config import PersistenceSettings
 from ah.model import (
     AbstractSymbol,
@@ -19,6 +19,8 @@ from ah.model import (
     Group,
     Hypernode,
     Link,
+    BoundVar,
+    VariableSort,
     Property,
     Ref,
     RefKind,
@@ -28,6 +30,7 @@ from ah.model import (
 )
 
 from .operations import AHCore
+from .supports import SupportRecord
 from .store import AHStore
 from .uid import UidGenerator, UuidUidGenerator
 from .validation import validate_hypernode, validate_ref_exists
@@ -56,6 +59,29 @@ def _ref(ref: Ref) -> dict[str, str]:
 
 def _parse_ref(raw: dict[str, Any]) -> Ref:
     return Ref(str(raw["uid"]), RefKind(str(raw["kind"])))
+
+
+def _operand(value: Ref | BoundVar) -> dict[str, Any]:
+    if isinstance(value, Ref):
+        # Keep legacy shape for ordinary AH refs so old schema-1 dumps remain
+        # byte-shape compatible where no BoundVar is used.
+        return _ref(value)
+    if isinstance(value, BoundVar):
+        return {
+            "__operand__": "BOUND_VAR",
+            "local_id": value.local_id,
+            "sort": value.sort.value,
+        }
+    raise PersistenceError(f"Unsupported function operand: {type(value).__name__}")
+
+
+def _parse_operand(raw: dict[str, Any]) -> Ref | BoundVar:
+    if raw.get("__operand__") == "BOUND_VAR":
+        return BoundVar(
+            int(raw["local_id"]),
+            VariableSort(str(raw.get("sort", VariableSort.UNKNOWN.value))),
+        )
+    return _parse_ref(raw)
 
 
 def _encode_value(value: Any) -> Any:
@@ -131,7 +157,7 @@ def _serialize_element(domain: Domain, element: Any) -> dict[str, Any]:
     if isinstance(element, SemanticEntity):
         return {**base, "kind": "M", "properties": _properties(element.properties), "meta": _encode_value(dict(element.meta))}
     if isinstance(element, FunctionSymbol):
-        return {**base, "kind": "G", "function_id": element.function_id, "operands": [_ref(r) for r in element.operands]}
+        return {**base, "kind": "G", "function_id": element.function_id, "operands": [_operand(r) for r in element.operands]}
     if isinstance(element, Group):
         return {
             **base,
@@ -153,7 +179,7 @@ def _serialize_element(domain: Domain, element: Any) -> dict[str, Any]:
             "kind": "N",
             "weight": element.weight,
             "template": _ref(element.template),
-            "actants": {role.value: _ref(ref) for role, ref in element.actants.items()},
+            "actants": {role.value: _operand(value) for role, value in element.actants.items()},
             "properties": _properties(element.properties),
             "meta": _encode_value(dict(element.meta)),
         }
@@ -197,6 +223,14 @@ def _serialize_context(context: InteractionContext | None) -> dict[str, Any] | N
         "now_ref": _ref(context.now_ref) if context.now_ref else None,
         "active_location_ref": _ref(context.active_location_ref) if context.active_location_ref else None,
         "pronoun_refs": {k: _ref(v) for k, v in context.pronoun_refs.items()},
+        "existential_pronoun_anchors": {
+            k: {
+                "existential_ref": _ref(anchor.existential_ref),
+                "member_refs": [_ref(ref) for ref in anchor.member_refs],
+                "variable_id": anchor.variable_id,
+            }
+            for k, anchor in context.existential_pronoun_anchors.items()
+        },
         "last_experience_ref": _ref(context.last_experience_ref) if context.last_experience_ref else None,
         "pending_clarification_refs": [_ref(ref) for ref in context.pending_clarification_refs],
     }
@@ -228,6 +262,25 @@ def _parse_context(core: AHCore, raw: dict[str, Any] | None) -> InteractionConte
         for k, value in (raw.get("pronoun_refs") or {}).items()
         if (ref := existing(value)) is not None
     }
+    anchors: dict[str, ExistentialDiscourseAnchor] = {}
+    for key, value in (raw.get("existential_pronoun_anchors") or {}).items():
+        if not isinstance(value, dict):
+            continue
+        root = existing(value.get("existential_ref"))
+        members = tuple(
+            ref
+            for item in (value.get("member_refs") or [])
+            if (ref := existing(item)) is not None
+        )
+        if root is None or root.kind is not RefKind.G or not members:
+            continue
+        try:
+            anchors[str(key)] = ExistentialDiscourseAnchor(
+                root, members, int(value.get("variable_id", 0))
+            )
+        except (TypeError, ValueError):
+            continue
+    ctx.existential_pronoun_anchors = anchors
     ctx.pending_clarification_refs = [
         ref
         for value in (raw.get("pending_clarification_refs") or [])
@@ -293,6 +346,24 @@ class JsonPersistence:
                     for uid, seq in sorted(core.store.creation_items(), key=lambda item: item[1])
                 },
                 "next_creation_sequence": int(core.store._state.next_creation_sequence),
+                "lifetime_clock_tick": int(core.store._state.lifetime_clock_tick),
+                "lifetime_birth_tick": {
+                    uid: int(tick)
+                    for uid, tick in sorted(core.store.lifetime_birth_items())
+                    if core.store.has_uid(uid)
+                },
+                "lifetime_managed_uids": sorted(core.store.lifetime_managed_uids()),
+                "proof_supports": {
+                    conclusion_uid: [
+                        {
+                            "premise_refs": [_ref(ref) for ref in support.premise_refs],
+                            "rule_id": support.rule_id,
+                            "relation_id": support.relation_id,
+                        }
+                        for support in supports
+                    ]
+                    for conclusion_uid, supports in core.supports.items()
+                },
             },
         }
 
@@ -376,7 +447,7 @@ class JsonPersistence:
             if kind == "M":
                 element = SemanticEntity(uid, _parse_properties(item.get("properties", {})), _decode_value(item.get("meta", {})))
             elif kind == "G":
-                element = FunctionSymbol(uid, str(item["function_id"]), tuple(_parse_ref(v) for v in item.get("operands", [])))
+                element = FunctionSymbol(uid, str(item["function_id"]), tuple(_parse_operand(v) for v in item.get("operands", [])))
             elif kind == "K":
                 element = Group(
                     uid,
@@ -395,7 +466,7 @@ class JsonPersistence:
                     uid,
                     float(item["weight"]),
                     _parse_ref(item["template"]),
-                    {ActantRole(str(role)): _parse_ref(ref) for role, ref in item.get("actants", {}).items()},
+                    {ActantRole(str(role)): _parse_operand(value) for role, value in item.get("actants", {}).items()},
                     _parse_properties(item.get("properties", {})),
                     _decode_value(item.get("meta", {})),
                 )
@@ -425,8 +496,37 @@ class JsonPersistence:
                     else int(metadata.get("next_creation_sequence"))
                 ),
             )
+        store.restore_lifetime_metadata(
+            {
+                str(uid): int(tick)
+                for uid, tick in (metadata.get("lifetime_birth_tick") or {}).items()
+            },
+            clock_tick=int(metadata.get("lifetime_clock_tick", 0)),
+            managed_uids={str(uid) for uid in (metadata.get("lifetime_managed_uids") or [])},
+        )
         core = AHCore(store, uid_generator or UuidUidGenerator())
         self._validate_loaded_core(core)
+
+        support_raw = metadata.get("proof_supports") or {}
+        restored_supports: dict[str, list[SupportRecord]] = {}
+        for conclusion_uid, raw_supports in support_raw.items():
+            if not core.store.has_uid(str(conclusion_uid)):
+                continue
+            records: list[SupportRecord] = []
+            for item in raw_supports or []:
+                premise_refs = tuple(_parse_ref(value) for value in item.get("premise_refs", []))
+                if any(not core.store.has_uid(ref.uid) for ref in premise_refs):
+                    continue
+                records.append(
+                    SupportRecord(
+                        premise_refs=premise_refs,
+                        rule_id=(None if item.get("rule_id") is None else str(item.get("rule_id"))),
+                        relation_id=(None if item.get("relation_id") is None else str(item.get("relation_id"))),
+                    )
+                )
+            if records:
+                restored_supports[str(conclusion_uid)] = records
+        core.supports.restore(restored_supports)
 
         if self.settings.save_runtime_state:
             states_raw = raw.get("runtime_states") or {}
@@ -479,8 +579,15 @@ class JsonPersistence:
                 elif isinstance(element, Hypernode):
                     validate_hypernode(core.store, element)
                 elif isinstance(element, FunctionSymbol):
-                    for ref in element.operands:
-                        validate_ref_exists(core.store, ref)
+                    try:
+                        core.function_registry.validate(element.function_id, element.operands)
+                    except (KeyError, ValueError) as exc:
+                        raise PersistenceError(
+                            f"Invalid deterministic function {element.uid}/{element.function_id}: {exc}"
+                        ) from exc
+                    for operand in element.operands:
+                        if isinstance(operand, Ref):
+                            validate_ref_exists(core.store, operand)
                 elif isinstance(element, Group):
                     for ref in element.members:
                         validate_ref_exists(core.store, ref)

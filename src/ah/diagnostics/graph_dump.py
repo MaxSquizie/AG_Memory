@@ -8,7 +8,7 @@ from threading import RLock
 from ah.config import ContextSettings
 from ah.core import AHCore
 from ah.ignition import IgnitionEngine
-from ah.model import Domain, FunctionSymbol, Group, Hypernode, Link, RefKind, SemanticEntity, Template
+from ah.model import Domain, FunctionSymbol, Group, Hypernode, Link, Ref, RefKind, SemanticEntity, Template
 from ah.projection.semantic_projection import SemanticProjector
 
 
@@ -136,10 +136,12 @@ class GraphInspector:
                 elif isinstance(element, Hypernode):
                     structural.append(StructuralEdgeDiagnostic(element.uid, element.template.uid, "TEMPLATE", "N->T"))
                     for role, ref in element.actants.items():
-                        structural.append(StructuralEdgeDiagnostic(element.uid, ref.uid, role.value, "N->ACTANT"))
+                        if isinstance(ref, Ref):
+                            structural.append(StructuralEdgeDiagnostic(element.uid, ref.uid, role.value, "N->ACTANT"))
                 elif isinstance(element, FunctionSymbol):
                     for index, ref in enumerate(element.operands):
-                        structural.append(StructuralEdgeDiagnostic(element.uid, ref.uid, f"OPERAND:{index}", "G->OPERAND"))
+                        if isinstance(ref, Ref):
+                            structural.append(StructuralEdgeDiagnostic(element.uid, ref.uid, f"OPERAND:{index}", "G->OPERAND"))
                 elif isinstance(element, Group):
                     for index, ref in enumerate(element.members):
                         structural.append(StructuralEdgeDiagnostic(element.uid, ref.uid, f"MEMBER:{index}", "K->MEMBER"))

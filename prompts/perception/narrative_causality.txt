@@ -1,0 +1,1 @@
+Return exactly CAUSAL_RESPONSE, NO_CAUSAL_RESPONSE, or UNCLEAR. Decide whether EVENT B is presented as a direct reaction, response, consequence, or result triggered by EVENT A. A contrastive connector may still frame a reaction. Mere temporal order, topic continuity, shared participants, or plausibility are insufficient.

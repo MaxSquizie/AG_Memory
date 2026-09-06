@@ -379,7 +379,46 @@ def _match_target(
     if "fact" in expected:
         return str(ref.get("uid")) == str(matched.get(str(expected["fact"])) or "")
     if "canonical_name" in expected:
-        return _norm(_ref_label(snapshot, ref)) == _norm(expected["canonical_name"])
+        if _norm(_ref_label(snapshot, ref)) != _norm(expected["canonical_name"]):
+            return False
+        expected_number = expected.get("grammatical_number")
+        if expected_number is not None:
+            entity = snapshot.get(str(ref.get("uid") or ""))
+            if not isinstance(entity, dict) or entity.get("kind") != "M":
+                return False
+            meta = entity.get("meta") or {}
+            properties = entity.get("properties") or {}
+            prop = properties.get("grammatical_number") or {}
+            actual_number = meta.get("grammatical_number") or (
+                prop.get("value") if isinstance(prop, dict) else None
+            )
+            if str(actual_number or "") != str(expected_number):
+                return False
+        # Structured NP expectations validate the canonical head and its explicit
+        # source-grounded internal L edges rather than falling back to an opaque
+        # multiword entity name.  This keeps the literary oracle aligned with the
+        # same global-memory representation used by production Integration.
+        for relation_spec in expected.get("relations") or []:
+            relation_id = str(relation_spec.get("relation") or "").strip()
+            target_expected = relation_spec.get("target")
+            if not relation_id or target_expected is None:
+                return False
+            found = False
+            for item in snapshot.values():
+                if not isinstance(item, dict) or item.get("kind") != "L":
+                    continue
+                if str(item.get("relation_id") or "") != relation_id:
+                    continue
+                source = item.get("source") or {}
+                target = item.get("target") or {}
+                if str(source.get("uid") or "") != str(ref.get("uid") or ""):
+                    continue
+                if _match_target(snapshot, target, target_expected, matched):
+                    found = True
+                    break
+            if not found:
+                return False
+        return True
     if "any_of" in expected:
         options = expected.get("any_of") or []
         return any(_norm(_ref_label(snapshot, ref)) == _norm(option) for option in options)

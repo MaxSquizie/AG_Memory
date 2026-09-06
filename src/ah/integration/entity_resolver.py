@@ -27,6 +27,7 @@ class NewEntityPlan:
     semantic_hint: str | None = None
     literal_kind: str | None = None
     literal_value: str | None = None
+    grammatical_number: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -177,10 +178,15 @@ class EntityResolver:
         for node in self.core.store.hypernodes_for_actant(owner.uid):
             if preferred_domain is not None and self.core.store.domain_of(node.uid) is not preferred_domain:
                 continue
-            if not any(ref.uid == descriptor.uid for ref in node.actants.values()):
+            if not any(
+                isinstance(ref, Ref) and ref.uid == descriptor.uid
+                for ref in node.actants.values()
+            ):
                 continue
             support = self.core.ref(node.uid)
             for role, ref in node.actants.items():
+                if not isinstance(ref, Ref):
+                    continue
                 if ref.uid in {owner.uid, descriptor.uid}:
                     continue
                 if role in self._RELATIONAL_CIRCUMSTANCE_ROLES or ref.kind is not RefKind.M:
@@ -200,6 +206,33 @@ class EntityResolver:
                 mention,
             )
         return None
+
+    @staticmethod
+    def _filter_by_grammatical_number(entities, number: str | None):
+        """Keep lexical identity separate from source grammatical cardinality.
+
+        Lemma lookup intentionally maps both ``матрос`` and ``матросы`` to the
+        same lexical name.  A known singular/plural source feature is therefore a
+        second deterministic identity constraint.  Entities created before this
+        feature (no metadata) are not silently treated as either cardinality;
+        ambiguity/duplication is safer than merging distinct discourse referents.
+        """
+        # Be defensive at the integration boundary too.  Fresh perception now
+        # emits plain strings, but an already-running process or imported object
+        # may still carry a pymorphy grammeme scalar from an older build.
+        normalized_number = str(number) if number is not None else None
+        if normalized_number not in {"sing", "plur"}:
+            return list(entities)
+
+        result = []
+        for entity in entities:
+            raw_entity_number = entity.meta.get("grammatical_number")
+            entity_number = (
+                str(raw_entity_number) if raw_entity_number is not None else None
+            )
+            if entity_number == normalized_number:
+                result.append(entity)
+        return result
 
     def resolve(
         self,
@@ -309,6 +342,9 @@ class EntityResolver:
             # (deixis, candidate_ref, turn-local entity_ref) is resolved before this
             # lookup and may still route the assertion to P.
             entities = self.core.store.find_entities_by_name(lookup, preferred_domain)
+            entities = self._filter_by_grammatical_number(
+                entities, candidate.grammatical_number
+            )
             if len(entities) == 1:
                 return ExistingEntity(self.core.ref(entities[0].uid))
             if len(entities) > 1:
@@ -322,4 +358,8 @@ class EntityResolver:
                 )
 
         canonical_name = lookup_forms[0] if lookup_forms else text
-        return NewEntityPlan(canonical_name, candidate.semantic_hint)
+        return NewEntityPlan(
+            canonical_name,
+            candidate.semantic_hint,
+            grammatical_number=candidate.grammatical_number,
+        )

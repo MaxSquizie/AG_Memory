@@ -1,6 +1,331 @@
-# AH Agent MVP — v0.12.87
+# AH Agent MVP — v0.25.13
+
+## v0.25.13 — границы эллипсиса и посылок М2
+
+Исправлено восстановление antecedent, сохранение provenance/scope, обработка координированного отрицания и защита от частичного успешного разбора. Добавлены 106 проверок; целевой набор с прежними тестами: 114 PASS. Полный прогон имеет исходные failures: см. `TEST_RESULTS_02513.md`.
+
+Запуск: `run_formalization_tests.bat` либо команды из `VERSION_02513.md`.
+Последний живой acceptance — 25/100 PASS; нового живого результата пока нет.
+Разбор: `docs/ACCEPTANCE_REVIEW_02513.md`.
+
+## v4 development alignment — v0.25.9
+
+Рабочая архитектурная база: `docs/ARCHITECTURE_V4_DEV.md`.
+
+Текущая реализация последовательно закрывает контракты архитектуры v4: формальная логика и кванторы, proof-support lifecycle, конфликты, пакетная граница `CandidateIR → MutationPlan → atomic AH commit`, delayed discourse state, deterministic identity merge, temporal/state tracking, сложные proof-overlays, GoalSpec-driven proof-through-Ignition, отдельный ассоциативный режим и AH-only source projection. В 0.22.0 закрыт системный контур перед acceptance: общий initial-lifetime/physical GC для новых S/C/P/H элементов, удаление холодных detached-from-S подграфов без использования inactivity как semantic criterion, persistence технического lifetime-state, полный нормативный DSL surface и детерминированный hackathon preflight с ровно пятью обязательными гиперпараметрами. Существовавшая до запуска Ignition AH считается установленным snapshot и не уничтожается ретроактивным GC — это сохраняет dirty-150k M2 semantics. Семантика `IS-A / FOLLOW / CAUSE` не менялась. Подробности: `docs/ARCH_V4_PROGRESS.md`.
 
 Накопительный исполняемый проект АГ-памяти для текстового LLM-агента.
+
+## v0.25.9 — 100-case composite ellipsis acceptance
+
+- `M1: ellipsis acceptance` expanded from **22 to 100 EXACT cases**; the original 22 remain unchanged at positions 1..22 for longitudinal comparison.
+- New cases focus on **interactions**, not shallow paraphrase repetition: long ellipsis chains, coordinated subjects/objects, mixed `тоже/нет/не`, rich roles, TIME+LOCATION+DURATION, explicit predicate reset, nominal-predicate boundaries, semicolon/cross-sentence recovery, embedded/control scope, coreference, inversion and typo+ellipsis.
+- Added the requested hard cases `Иван купил журнал, а Мария и Пётр - нет.` and `Иван живёт в Москве, Мария - в Казани, Пётр - в Париже, а Слава - бродяга.` with explicit semantic oracle structures.
+- The corpus remains loaded by the same production GUI/runner path; no parser logic was changed in this slice.
+- Corpus regression now enforces 100/100 case-oracle alignment and the new interaction families.
+
+Подробности: `docs/SLICE_25_9.md`, `docs/ACCEPTANCE_ELLIPSIS_V2.md`.
+
+## v0.25.8 — ellipsis hardening after live acceptance
+
+- Live `M1: ellipsis acceptance` improved from `0/22` before the first reconstruction layer to `11/22` on v0.25.7.
+- Fixed dash-ellipsis contamination: lexical/nominal predicate candidates inside a clause already licensed as ellipsis are removed from the ordinary predicate work queue. This prevents `Мария — журнал`, `журнал — на полке`, `Мария — в Казани` from being committed as unrelated nominal predications before frame completion.
+- Fixed a diagnostic false negative: semantic oracle canonical matching now unwraps object-level `g_NOT` for predicate/role checks and treats `NOT`, not meta-level `FALSE(N)`, as the meaning of expected `negated=true`. The live proposition-negation cases were already correct in perception/integration.
+- Added deterministic ellipsis slot alignment by **source-grounded realization signatures**. It does not introduce generic `NOM→SUBJECT` / `DAT→RECIPIENT` rules; target fillers may inherit a role only when their morphology/preposition signature uniquely matches the same realized slot in the already parsed antecedent frame. This repairs role swaps such as `Анна отправила письмо Сергею, а Ольга сообщение Петру`.
+- Remaining live gaps are intentionally not hidden: material attachment clarification (`из дерева`), relative TIME without a current/source/experience anchor, and lexical typo recovery remain separate mechanisms.
+- Regression after the slice: `749 passed, 38 subtests passed`.
+
+Подробности: `docs/SLICE_25_8.md`.
+
+## v0.25.7 — ellipsis frame completion
+
+- Clause segmentation теперь выделяет координированный zero-predicate tail как отдельный runtime clause для конструкций вида `X VERB Y, а Z W` и `X VERB Y, а Z — W`.
+- Добавлен runtime `EllipsisKind`: обычное frame completion, proposition-level negation (`... а Мария — нет`) и confirmation (`... и Ольга тоже`).
+- `нет` в доказанном ellipsis-shell больше не остаётся в predicate work queue как самостоятельный PRED.
+- После разбора antecedent frame выполняется bounded `ellipsis_recovery`: target clause может заполнять только роли, уже лицензированные antecedent frame; явные fillers заменяют старые, действительно опущенные наследуются.
+- Для temporal/locative ellipsis это позволяет сохранить SUBJECT при замене TIME/LOCATION, а для proposition negation — восстановить пропущенный OBJECT и выставить negation без создания отдельного lexical predicate `нет`.
+- В `docs/ARCHITECTURE_V4_DEV.md` заново внесён нормативный Lexical Recovery contract: Levenshtein для генерации кандидатов, embeddings для contextual rerank, morphology validation, без semantic commitment до обычной formalization/consolidation.
+- Добавлено 4 regression tests на structural split, marker modes, role-limited frame completion и proposition negation. Полная регрессия: `746 passed, 38 subtests passed`.
+
+Подробности: `docs/SLICE_25_7.md`.
+
+## v0.25.2 — LM Studio bounded-probe reasoning isolation
+
+Diagnostic acceptance runs exposed a transport failure: reasoning-capable LM Studio models could ignore non-standard `enable_thinking=false` fields on the OpenAI-compatible `/v1/chat/completions` endpoint, spend the complete 2–10 token probe budget in `reasoning_content`, and return empty assistant `content`. This made previously stable acceptance cases fail before semantic parsing.
+
+Bounded `perception_*` / `semantic_*` probes now use LM Studio's native stateless `/api/v1/chat` endpoint with explicit `reasoning=off`, `store=false`, and `stream=false`. Generic/agent generation remains on `/v1/chat/completions`; hidden reasoning is still never consumed as a semantic answer.
+
+## v0.25.1 — GUI binding for M1 adversarial acceptance
+
+- В dock «Диалог» добавлена отдельная кнопка `M1: adversarial acceptance`.
+- Кнопка запускает реальный `run_acceptance_suite` на `acceptance_cases_m1_adversarial.txt` + `acceptance_oracle_m1_adversarial.json`.
+- Результаты пишутся отдельно в `data/acceptance_runs_m1_adversarial/`, поэтому broad acceptance и M1 breaker-run не смешиваются.
+- Обычная кнопка `Прогнать acceptance-файл` по-прежнему запускает исходные `acceptance_cases.txt` / `acceptance_oracle.json`.
+- Во время любого cognitive/diagnostic run обе acceptance-кнопки взаимно блокируются; tooltip пересчитывается при смене `data_dir` в конфигурации.
+
+## v0.25.0 — cross-turn existential discourse + adversarial M1 frontier
+
+Продолжен capability-frontier acceptance вместо наращивания вариаций уже зелёных тестов. Runtime `InteractionContext` получил `ExistentialDiscourseAnchor`: одно-переменная existential proposition из предыдущего turn может быть продолжена последующим номинативным местоимением без создания фиктивного `m_UNKNOWN` и без превращения runtime anchor в canonical node. `«Кто-то вошёл.» → «Он сел.»` теперь даёт новую asserted `EXISTS`-формулу, объединяющую старый и новый quantified member с тем же `BoundVar`; цепочка может продолжаться через несколько turns и переживает persistence/reload контекста. При нескольких равноправных неизвестных или multi-variable existential система fail-closed и не угадывает referent. Более свежий обычный именованный SUBJECT заменяет existential salience для последующих местоимений. Это **не** late grounding: `«Кто-то вошёл. Это был Иван.»` пока не перепривязывает старые existential facts к `m_ИВАН`.
+
+Отдельно добавлен диагностический M1 adversarial corpus из 36 `EXACT` cases, построенный из классов скрытого контрольного корпуса постановки: опечатки, синтаксическая инверсия и эллипсис, плюс их смешанные варианты. Oracle задан от требуемой семантики до запуска текущего parser-а; обязательные SUBJECT/OBJECT/LOCATION дополнены RECIPIENT/TOOL/MATERIAL/TIME/DURATION/SOURCE. Эллиптические примеры требуют восстановления двух assertions, а не снижения ожидания под текущую реализацию. Новый CLI `semantic-acceptance` запускает произвольную пару cases/oracle через обычный local-LLM pipeline; результат затем можно оценить существующим `m1-score`. В этом срезе 36-case corpus **не объявляется пройденным**: реальный M1 score зависит от подключённой локальной модели и должен быть измерен отдельным запуском.
+
+Добавлено 10 regression tests: 7 на cross-turn existential discourse и 3 на контракт нового M1 corpus. Полная регрессия: `733 passed, 38 subtests passed`, `compileall OK`. Readiness после изменений: dirty M2 `40/40`, M3 `200/200` orphan removed при `202/202` live preserved, tick benchmark на `1001 N+L` units: mean `33.91 ms`, p95 `41.66 ms`, max `42.03 ms` (<500 ms). Подробности: `docs/SLICE_25_0.md`.
+
+## v0.24.0 — capability-frontier acceptance: EXISTS для истинно неизвестных и FUNCTIONAL conflicts
+
+После измерительного среза M1–M5 acceptance расширен в двух местах, которые архитектура уже требовала, а предыдущие версии явно оставляли незакрытыми. Истинно неизвестный участник с batch-local `entity_ref` теперь не превращается в фиктивный `m_UNKNOWN`: assertions с ним становятся `QUANTIFIED` pattern N с `BoundVar`, связанные assertions собираются в `AND` и asserted `EXISTS`, а H occurrence указывает на existential proposition. Существующий `DiscourseRef` может до atomic commit связать последующее местоимение с тем же existential anchor. Текущий recognizer намеренно ограничен явными indefinite pronouns (`кто-то/что-то/...`); generalized quantifiers не заявляются.
+
+Conflict Engine расширен positive-positive конфликтом только для явно зарегистрированной functional semantics. `InferenceSchema` теперь может задавать `functional_role`; conflict возникает лишь для одного T/domain при одинаковых non-value actants и разных значениях functional slot. Разный LOCATION/другой контекст не конфликтует, третье значение расширяет один `k_CONFLICT`, winner по recency/x/w не выбирается. Bootstrap использует общий `InferenceSchemaRegistry` для integration и inference.
+
+Добавлено 9 capability-frontier regression cases, включая persistence/reload. Полная регрессия: `723 passed, 38 subtests passed`, `compileall OK`. Подробности: `docs/SLICE_24_0.md`.
+
+
+## v0.23.0 — измеримый acceptance-контур M1–M5 и hard-requirement benchmark
+
+После закрытия основных архитектурных срезов добавлена отдельная диагностическая граница, которая считает метрики постановки, но не меняет canonical AH и не подменяет скрытый комитетский acceptance. `hackathon_metrics.py` реализует M1 weighted role F1, точную формулу M2 ExplainScore, M3 GC efficiency/live-preservation, M4 deltas и M5 RobustnessGain. M1 умеет считать результат прямо из существующего `acceptance_runs` bundle; при этом отчёт сохраняет буквально напечатанную в постановке weighted sum и отдельно bounded weighted mean, пригодный для порога 0.6, не маскируя неоднозначность формулы.
+
+Добавлен committee-shape локальный M3 harness: Ignition запускается до инъекции, затем через обычный AH Core создаются 200 изолированных узлов и связная живая структура. Никакого test-only GC path нет. На дефолтном `initial_lifetime_ticks=40` текущий прогон удаляет 200/200 orphan на 41-м tick и сохраняет 202/202 live UID (`GC_efficiency=1.0`, live preservation `1.0`). Добавлен отдельный `tick-benchmark` для жёсткого требования <=500 ms: fixture содержит >=1000 `N+L` graph units и реальный lexical fanout через Ignition; локальный прогон текущего контейнера на 1001 N+L units дал mean ~30.01 ms, max ~50.18 ms за 20 measured ticks. Это readiness-измерение, не замена референсного стенда оргкомитета.
+
+M2 повторно прогнан на dirty stress AH: `40/40`, `153599 UID`, около `5.82 s` на полный внутренний набор; точный UID trace присутствует во всех случаях. Внутренний ExplainScore по этим 40 собственным кейсам равен `0.6375`; он не называется официальным M2, потому что постановка использует скрытые 20 вопросов. M1 свежим LLM-прогоном, M4 RAG baseline и M5 SLM/commercial experiment в этом срезе не подменяются синтетическими числами — для них теперь есть расчётный контракт и CLI/данные должны поступить из реального эксперимента.
+
+Новые CLI: `m1-score <acceptance_run_dir>`, `m3-acceptance`, `tick-benchmark`. Полное описание: `docs/SLICE_23_0.md`.
+
+## v0.22.0 — normative GC, полный DSL и hackathon preflight
+
+Закрыт системный слой v4 перед переходом к acceptance. Общий GC теперь имеет отдельную от N-lifecycle техническую initial-lifetime регистрацию для всех **новых после запуска Ignition** S/C/P/H элементов. `initial_lifetime` трактуется именно как окно иммунитета, а не как срок жизни: после TTL элемент только становится допустимым для structural check. S-anchored/структурно живой узел сохраняется независимо от возраста; холодный effective-component удаляется лишь если он отвязан от сенсорной базы S либо является реально потерянным zero-weight leaf. Положительные L/N задают effective weighted edges, T→S и g/k containment остаются structural edges. Изолированный S после TTL также считается потерянным. Текущая активация сама по себе не является основанием удаления: активный detached component временно защищён и будет перепроверен позже. Существующая до старта Ignition память не ретроактивно маркируется «новой», поэтому большой dirty snapshot M2 не вычищается GC; новые committee/API injections получают lifetime автоматически. Birth/managed metadata сохраняются отдельно от canonical AH и переживают persistence/reload. Отдельный N-lifecycle больше не запускается от простого `QUERY_RECALL`: фокус proof/association не превращает старое утверждение в `NEW`. Истечение N-lifecycle также является только сигналом проверки и не обходит structural GC. GC инвалидирует только зависимые proof supports, удаляет incident L вместе с endpoint и выдаёт причины удаления во внешний diagnostic/audit channel, не в H.
+
+DSL теперь публикует полный нормативный manifest из 23 операций и исполняет все mutation/query primitives постановки; `editElement` покрывает m/T/N/g/k и L-weight через AH Core, а pipeline composition (`findRoles | findLists | where ...`) остаётся детерминированной. Добавлен `HackathonPreflightInspector` и CLI `preflight`: он проверяет DAG для IS-A и H/FOLLOW, типизированные ссылки, непустой R_text, полный DSL surface, размеры графа/S и выдаёт **ровно пять** обязательных параметров: initial lifetime, decay g, Workspace threshold t, weight update h, rhythm frequency ν. Это structural preflight, а не подмена M1–M5.
+
+Подробности: `docs/SLICE_22_0.md`. Регрессия перед выпуском: `707 passed, 38 subtests passed`, `compileall OK`; отдельный dirty-150k M2 operator regression — `40/40` (pytest case `7.14s` в текущем контейнере). Полный hackathon acceptance не запускается в рамках этого среза.
+
+
+## v0.21.0 — Context Projector, source scope и AH-only документы
+
+Закрыт runtime-контур v4 `source provenance → activation → Workspace → compact AgentContext`. Добавлены `SourceScopeResolver/SourceScopeActivator/SourceScopedContextService`: технический `source_ref` через rebuildable индекс находит H-occurrence источника и его canonical semantic OBJECT roots без broad scan; seed получает именно семантика, а не сырой текст или H-событие. `ContextProjector` умеет source-bounded projection: тёплая посторонняя память не протекает в summary, а прямые `CAUSE/FOLLOW/IS-A` отношения между видимыми source roots добавляются через bounded outgoing adjacency, несмотря на то что L не имеет собственного x. DOCUMENT occurrence больше не сохраняет raw source в `H.text`; legacy document text также fail-closed исключается из model-facing projection. Введён deterministic context-budget guard `ProjectionBudgetExceeded`: превышение бюджета не вызывает silent top-k/truncation и не превращается в hidden raw-chunk RAG. Runtime `source_scope_ref` и estimated token count доступны только диагностике и не сериализуются в prompt.
+
+Подробности: `docs/SLICE_21_0.md`. Регрессия перед выпуском: `695 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.20.0 — ассоциативный режим `expand(A) ∩ expand(B)`
+
+Закрыт специализированный association path v4. `AssociationGoal` является отдельным target для `GoalSpec(mode=ASSOCIATION)`, но не `InferenceGoal`: `AssociationCoordinator` seed-ит обе стороны через `QUERY_RECALL`, использует обычные synchronous Ignition ticks и хранит ancestry двух фронтов только в runtime `AssociationSearchState`. Направленный packet flow дополняется только narrow queries из текущего активированного focus (`actant→N`, `operand→g`, `member→k`, incoming `L`, `N→T`, `T→S`, `g→operands`, `k→members`); найденный кандидат должен реально активироваться на следующем tick до включения во front. Convergence не materialize, не создаёт `ProofSupport` и не считается entailment. Common node может быть `S/m/T/N/g/k/...`; generic `T` не фильтруется. Обратное возбуждение по directed `L` не создаёт обратный relation. H-domain оставлен runtime option `ALL/EXCLUDE_H`. Поиск не использует broad full-store enumerators.
+
+Подробности: `docs/SLICE_20_0.md`. Регрессия перед выпуском: `688 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.19.0 — GoalSpec-driven cognition и proof-through-Ignition
+
+Закрыт runtime-срез целевого рассуждения v4. `GoalSpec` теперь несёт явный `GoalMode`, а `GoalRuntime` сопровождает один запрос от постановки цели до termination и сохраняет диагностический `cognitive_trace`: начало цели, focus shifts, goal-derived narrow memory queries, subgoals, выбранные правила и причину остановки. `RoleFill/MultiRoleFill/Exists` получили настоящий goal-generated T seed через `InferenceAttention`; relation/CAUSE proof читает только typed adjacency/index queries текущего focus, а formula/quantified proof отражает reverse function/T-index lookups и backward subgoals. При подключённом `IgnitionInferenceAttention` каждый подтверждённый proof proposition получает `QUERY_RECALL` seed и обычный synchronous tick до продолжения вывода. Reverse-distance по target сохраняется исключительно как bounded pruning/order heuristic и явно помечается в trace как `not proof`. Reasoner не нуждается в `all_elements/all_uids/elements/links` для transitive proof; регрессия это запрещает monkeypatch-guard'ом. После `GOAL_SATISFIED` хвост цепи не раскрывается. `ProofSnapshotBuilder` показывает когнитивный цикл отдельно от канонического proof trace.
+
+Подробности: `docs/SLICE_19_0.md`. Регрессия перед выпуском: `675 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.18.0 — ветвящееся, контрфактуальное и мета-рассуждение
+
+Закрыт runtime-срез сложного proof layer из v4: asserted `OR` поддерживает proof by cases через изолированные `BranchContext`; `CounterfactualGoal` исполняется в `CounterfactualContext` без копирования/изменения AH и рекурсивно фильтрует derived supports, зависящие от локально подавленных premises. Несколько assumptions применяются одновременно; scoped hypothetical N сопоставляется с эквивалентным world N через T-index. Counterfactual conclusion не materialize в factual AH. `EMBEDDED/HYPOTHETICAL/MODAL` content остаётся адресуемым proposition content, но не ordinary premise. Зарегистрированы operational meta-functions `CONTRADICTS` и `CORRECTS` поверх уже существующего `FALSE`; correction инвалидирует только зависимые supports и сохраняет историю. Self-reference fail-closed исключается из ordinary proof.
+
+Подробности: `docs/SLICE_18_0.md`. Регрессия перед выпуском: `671 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.17.0 — семантическое время и интервалы состояний
+
+Закрыта архитектурная граница времени/state tracking: semantic TIME materialize как обычный `m` и подключается к `N` ролью `TIME`; partial time не получает выдуманных компонентов, а relative time разрешается строго по `explicit → source → experience` anchor и остаётся unresolved без допустимого anchor. `TemporalReasoner` детерминированно выводит `BEFORE/AFTER/OVERLAP/CONTAINS` и materialize результат обычным `N` с proof support, не новым `L`. Реализован `StateTracker` с интервалами и `START/STOP/CONTINUE/AGAIN/NO_LONGER`; текущая полярность определяется temporal coverage, а не последним упоминанием. `FOLLOW` остаётся эпизодической последовательностью и не трактуется как timestamp.
+
+Подробности: `docs/SLICE_17_0.md`. Регрессия перед выпуском: `656 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.16.0 — пакетная формализация, CandidateIR и атомарная интеграция
+
+Закрыта явная runtime-граница между восприятием и canonical AH: `FormalizationBatch → SemanticConsolidator → CandidateIR → MutationPlan → AHCore.transaction()`. Документ может состоять из нескольких bounded perception windows, но их локальные `A/E` идентификаторы namespaced, evidence spans переводятся в координаты полного источника, а весь batch коммитится одной транзакцией. Неразрешённые third-person references сохраняются как `DiscourseRef` без AH UID; они могут быть связаны только после отдельного детерминированного/ bounded решения и блокируют canonical commit, пока не разрешены. Добавлен explicit `merge_identity`: старший canonical UID выживает, ссылки/supports rewired, эквивалентные N дедуплицируются, событие merge пишется только во внешний audit log. `IS-A/FOLLOW/CAUSE` и M2 не изменены.
+
+Подробности: `docs/SLICE_16_0.md`. Регрессия перед выпуском: `642 passed, 22 subtests passed`, `compileall OK`.
+
+## v0.15.0 — канонические конфликты полярности и допустимость посылок
+
+Закрыт первый полный исполняемый контур `Conflict Engine` для формально взаимоисключающих утверждений `P` / `NOT(P)`. Конфликт сохраняется как обычная адресуемая группа `k` с `Mt.TYPE=CONFLICT`; сама группа не становится логическим оператором. Интеграция создаёт или переиспользует conflict-set после фиксации пользовательского события в `H`, а reasoner проверяет допустимость его членов перед использованием в доказательстве.
+
+Свойства среза:
+
+- ни новизна, ни повтор, ни `x`, ни `w` не выбирают сторону конфликта;
+- `FormulaGoal`, `RoleFill`, `MultiRoleFill`, `Exists`, relation proof и `CAUSE` не используют неразрешённый конфликт как безусловную посылку;
+- независимые непротиворечивые доказательства продолжают работать;
+- явный `FALSE(N)` снимает допустимость соответствующей версии без уничтожения исторического conflict-set;
+- конфликт сохраняется/восстанавливается persistence и явно отображается в semantic projection / AgentContext;
+- ответ самой Main LLM, записанный только как пережитое событие в `H`, не создаёт конфликт знаний `C/P`.
+
+Граница этого среза: автоматически обнаруживается строгий полярный конфликт `P` против asserted `NOT(P)`. Положительные конфликты значений по `FUNCTIONAL`/взаимоисключающим схемам остаются следующим расширением общего `Conflict Engine`; текущая версия их не угадывает.
+
+Подробности: `docs/SLICE_15_0.md`.
+
+## v0.14.0 — исполнение кванторов и универсальных правил
+
+Закрыт следующий цельный слой логического контура v4: `BoundVar` теперь может использоваться в актантах только у scoped-шаблонов `N` с `semantic_scope=QUANTIFIED`; такая переменная не получает UID, activation state или Hebbian semantics. Реализованы runtime-подстановки с лексическими областями видимости, `EXISTS` с поиском конкретного witness, open-world `FORALL`, вложенные кванторы без фиксированного восьмиуровневого семантического ограничения и goal-directed применение явно утверждённых правил `FORALL ... IMPLIES(...)`. Поиск кандидатов начинается от T текущей цели и rebuildable reverse function indexes, а не от полного сканирования AH. Вывод сохраняет bindings и `ProofSupport`, проходит через `InferenceAttention/Ignition`, а явное refutation premise инвалидирует только зависимые supports materialized conclusion. Канонические `IS-A / FOLLOW / CAUSE` и их M2-семантика не изменены. Подробности: `docs/SLICE_14_0.md`. Регрессия перед выпуском: `620 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.13.0 — каноническая наземная пропозициональная логика
+
+Закрыт цельный исполняемый слой для наземных формул `N/g`: объектное отрицание хранится как `NOT(P)`, явное опровержение конкретного утверждения — как `FALSE(N)`, новые условные конструкции канонизируются в `IMPLIES`, а ветви `OR` остаются scoped и не становятся самостоятельными фактами. Добавлен `FormulaGoal` и детерминированный `GroundFormulaReasoner` с открытой семантикой мира, локализованными конфликтами, `AND/OR/NOT/IMPLIES` и наземным modus ponens. Поиск опирается на rebuildable индексы от текущей цели и при наличии attention проводит подтверждённые шаги через focus/Ignition. `IS-A / FOLLOW / CAUSE` не изменены. Выполнение кванторов пока не заявляется: `FORALL/EXISTS` уже имеют канонический контейнер, но variable-bearing atoms остаются следующим архитектурным срезом. Подробности: `docs/SLICE_13_0.md`.
+
+
+## v0.12.99 — deterministic FunctionRegistry boundary
+
+Архитектурный `FunctionRegistry` вынесен в общий слой `ah.logic` и стал обязательной границей записи/загрузки `g`: неизвестный `g.ID` больше нельзя канонически записать или восстановить из persistence. Зарегистрированы `AND / OR / NOT / FALSE / IMPLIES / FORALL / EXISTS`; старый `IF` сохранён как совместимый alias `IMPLIES`. AHCore проверяет арность/форму операндов, persistence повторяет проверку на load. Подробности: `docs/SLICE_12_99.md`.
+
+## v0.12.98 — factive proposition content and active-history discourse relations
+
+Live `Document acceptance` on v0.12.97 remained fully runtime-stable (`98/98` paragraph semantic, `0` Runtime ERROR) and reached `4/6` document passes: cooling station `18/18`, greenhouse `18/18`, archive leak `19/19`, house-by-pier `56/56`, Belyaev `26/36`, old observatory `59/61`. The remaining failures exposed three semantic-boundary defects and one missing cross-turn relation mechanism.
+
+- **Factive proposition content is separated from generic embedded content.** `увидел, что ... приближалась подводная лодка` already produced `SEE.OBJECT -> N_APPROACH`, but the child was conservatively marked `EMBEDDED`; that blocked its ordinary nominal relation (`лодка --NOMINAL_MODIFIER--> подводный`) and semantic seed. A tiny UID-free `FACTIVE | NONFACTIVE | UNCLEAR` probe now promotes only factive proposition complements back to ordinary `ASSERTED`. Speech/thought/hope/intention/quotation remain embedded unless the concrete matrix use commits to the child proposition as true.
+- **PP attachment uses the coherent nominal head case rather than any ambiguous modifier reading.** In `в дальней комнате`, the adjective `дальней` exposes multiple morphology readings while the noun head `комнате` is strongly locative. Instrumental ambiguity is now determined from the nominal head, so this locative no longer rolls back the whole turn. Genuine `с биноклем` attachment still requires clarification.
+- **Same-sentence CAUSE asks the right semantic question.** The deterministic gate remains narrow, but the model now decides `CAUSAL_RESPONSE | NO_CAUSAL_RESPONSE | UNCLEAR`: whether B is narrated as a direct reaction/response/consequence/result of A. This covers adversative reactions such as `матрос ухватил ... но Зурита ударил ...` without turning ordinary sequential coordination into CAUSE.
+- **Cross-turn discourse relations now have an architectural path.** A `DiscourseRelationRefiner` walks backward only through the active H/FOLLOW experience chain and considers only active ordinary C/P event roots. It serializes UID-free event semantics within the existing context budget, asks three bounded choices (current event, prior source event, `CAUSE/FOLLOW`), and maps local indexes back through `IntegrationService.integrate_discourse_relation`. The model never sees canonical UIDs and never writes AH. There is no global AH scan or hidden semantic reranker; inactive history is inaccessible to this refiner. FOLLOW cycles and non-asserted/embedded/H-event endpoints are rejected deterministically at the Integration boundary.
+
+Focused regressions cover factive vs non-factive complements, narrative-response causality, locative-head morphology, UID-free discourse selection, active-H-only access, canonical relation materialization, and rejection of embedded discourse endpoints.
+
+Regression: `586 passed, 22 subtests passed`, `compileall OK`.
+
+Подробности: `docs/SLICE_12_98.md`.
+
+## v0.12.97 — proposition content and local narrative causality
+
+- subordinate proposition content can now be represented canonically as `N.OBJECT -> N` instead of forcing the child SUBJECT into the matrix OBJECT slot;
+- same-sentence narrative CAUSE remains source-only and model-gated, with a sparse review gate for SUBJECT↔OBJECT role transitions and passive-result re-mentions;
+- serial perfective pairs retain conservative FOLLOW and add a non-canonical causal hypothesis only for participant continuity or a passive-result subject;
+- pre-predicate bare locative PPs use deterministic event-location normalization, while the genuine instrumental attachment ambiguity remains a clarification.
+
+Подробности: `docs/SLICE_12_97.md`.
+
+## v0.12.96 — discourse and temporal refinement
+
+Live `Document acceptance` on v0.12.95 remained runtime-stable (`98/98` paragraph semantic, `0` Runtime ERROR) and improved the literary graph to `house_by_pier 53/56`, Belyaev `25/36`, `old_observatory 45/61`. The remaining failures exposed four general mechanisms rather than transport/runtime faults.
+
+- **Local pronoun identity is reopened after structural propagation.** Subject-control and coordination may temporarily copy an unresolved third-person pronoun into several frames with a synthetic local `entity_ref`. A pronoun-only ref is no longer mistaken for a resolved antecedent: it is reopened before the source-local coreference pass, while refs shared with a real non-pronominal mention remain intact. This targets patterns such as `Алексей ... Отперев калитку, он ...` and `стояла Вера ... Сняв плащ, она ...` without consulting global AH state during perception.
+- **Cross-turn salience distinguishes a stable named subject from incidental common-noun subjects.** If exactly one source-grounded proper-name subject exists for a pronoun signature, it remains the discourse anchor; several distinct named subjects clear the anchor. With no named subject, ordinary source recency still wins. Proper-name status is morphology-driven and requires the best proper reading to be at least as strong as competing common-noun readings, so weak surname homographs do not become protagonists. This fixes `Марина ... Бумага ... печь ... Она ...` without a global animacy preference.
+- **Clause CAUSE/FOLLOW attaches to the real source predicate.** Structural nominal helpers can share a host parse span. Relation derivation now compares each assertion predicate's own evidence with the clause predicate-head token instead of using the host assertion span. Thus `Бумага ... намокла, потому что вода просочилась` links `просочиться -> намокнуть`, not `просочиться -> structural-helper`.
+- **Postnominal possessive detection is stricter at the morphology boundary.** The possessive adjective reading now requires the explicit `Anph+Apro+Fixd` signature. `Subx` by itself is insufficient because demonstrative/correlative forms can expose it too; this prevents constructions such as `то дрожала, то замирала` from being swallowed into the preceding NP.
+- **Serial perfective narration gets conservative FOLLOW recovery.** Consecutive top-level asserted finite perfective events in one sentence receive FOLLOW when source order is explicit through additive `и/да`, or through a comma chain with exactly the same SUBJECT identity. Adversative/disjunctive coordination, semicolons, subordinate/relative/quoted clauses are excluded. This recovers literary sequences that the frame graph intentionally leaves as sibling clauses or that are interrupted by a gerund. No CAUSE is asserted by this rule; shared-participant pairs only receive a runtime causal candidate.
+- Two oracle entries were corrected to reflect canonical memory rather than surface spelling: `увидел ... пачку писем` is disambiguated by its structured OBJECT (`пачка --GENITIVE_DEP--> письмо`), and `закрыла глаза` expects canonical `глаз[plur]`. These are stricter structural checks, not weakened literary expectations.
+
+Focused regressions cover provisional pronoun reopening, non-possessive demonstrative morphology, source-predicate relation anchoring, comma/additive serial perfectives, and named-subject discourse salience.
+
+Regression: `577 passed, 22 subtests passed`, `compileall OK`.
+
+Подробности: `docs/SLICE_12_96.md`.
+
+
+## v0.12.95 — narrative graph refinement
+
+Live `Document acceptance` on v0.12.94 reached `98/98` paragraph semantic with `0` Runtime ERROR; the remaining failures were therefore graph semantics rather than transport/parser stability: `house_by_pier 51/56`, Belyaev `25/36`, `old_observatory 45/61`. This slice strengthens canonical event identity and performs only narrowly gated semantic causal enrichment. No literary oracle expectations were weakened.
+
+- Canonical N writes now use monotonic **unique-match enrichment**. A repeated proposition with the same T/scope and non-conflicting shared role fillers reuses its existing UID and adds newly observed roles (`ветер усилился` + `ветер усилился над бухтой`). If zero or several compatible N exist, Integration creates/keeps a separate N instead of guessing event identity. Existing L links remain valid because enrichment edits the same UID.
+- Broad `CAUSAL_CANDIDATE` hints remain runtime-only by default. A semantic `CAUSE` probe is now allowed only for a high-information local reaction pattern already fixed by syntax: in one non-relative finite sentence, an OBJECT/RECIPIENT of event A becomes the SUBJECT of the following event B. The probe sees only the source text and two events and returns `ENTAILED | NOT_ENTAILED | UNCLEAR`; only `ENTAILED` becomes canonical `L(CAUSE)`. Ordinary adjacency, relative clauses, nominal helpers and generic coordination do not trigger a semantic second pass.
+- The Belyaev failure around `увидел, что ... приближалась подводная лодка` was reclassified correctly: `подводная лодка` was already a structured NP (`M_лодка --NOMINAL_MODIFIER--> M_подводный`); the missing piece was the matrix actant. A new orphan-subordinate participant refinement handles comma-heavy cases where a recognized subordinate connector is separated from its finite child by a detached parenthetical. Python narrows this to one matrix frame, one nearest asserted finite child and one child SUBJECT; a tiny `OBJECT | NO_DIRECT_OBJECT | UNCLEAR` probe may project that same structured participant into the free matrix OBJECT slot. The child assertion remains independently asserted; NO/UNCLEAR changes nothing.
+- Reused copies of an unresolved third-person personal pronoun no longer receive a fresh local entity id before coreference. Structural inheritance/coordination gets one additional deterministic coreference pass before exact-source-span coalescing, allowing patterns like `Алексей ... . Он ...` / `Вера ... . Она ...` to retain the real antecedent instead of freezing a synthetic pronoun entity.
+- Added focused regressions for ambiguous enrichment, template-valency growth with existing links, narrow causal promotion/uncertainty, generic adjacency non-probing, orphan subordinate participant projection, and delayed pronoun identity.
+
+Regression: `571 passed, 22 subtests passed`, `compileall OK`.
+
+Подробности: `docs/SLICE_12_95.md`.
+
+
+## v0.12.94 — morphology boundary normalization
+
+Live `Document acceptance` on v0.12.93 reached `98/98` paragraph semantic with `7` Runtime ERROR. All seven failures had the same integration traceback: pymorphy3's `tag.number` grammeme object escaped the morphology adapter despite `MorphInfo.number` being declared as `str | None`. Its overloaded equality then raised `ValueError` while EntityResolver compared canonical singular/plural identity metadata. The failure therefore was not literary semantics and not the new event-status probe; it was a type-boundary contract violation.
+
+- `Pymorphy3Morphology` now converts every scalar tag attribute (`POS`, `case`, `number`, `gender`, `mood`, `animacy`) to an exact built-in Python `str` before creating `MorphInfo`. Library-specific grammeme scalar objects no longer cross the perception adapter boundary.
+- `_grammatical_number_for_span` and `ActantCandidate.__post_init__` defensively normalize grammatical number again, so custom morphology implementations cannot leak a string subclass into Integration accidentally.
+- `EntityResolver._filter_by_grammatical_number` also normalizes both the source constraint and legacy/in-memory entity metadata before comparison. This protects already-running/imported state created by older builds without weakening singular/plural identity separation.
+- Added regressions with a fake grammeme scalar whose equality deliberately raises on unrelated values. The tests exercise the adapter boundary, `ActantCandidate`, and EntityResolver independently of whether pymorphy3 is installed in CI.
+
+The live run itself already showed useful semantic progress before the crashes: `house_by_pier` reached `47/56`, and Belyaev reached `23/36`; most of the old-observatory deficit is contaminated by six of the seven runtime aborts and should be re-evaluated only after this fix. No oracle expectations or literary semantics were weakened in v0.12.94.
+
+Regression: `563 passed, 22 subtests passed`, `compileall OK`.
+
+Подробности: `docs/SLICE_12_94.md`.
+
+
+## v0.12.93 — narrative identity + infinitive assertion status
+
+Последний live `Document acceptance` на v0.12.92 стабилизировал runtime полностью (`98/98` paragraph semantic, `0` Runtime ERROR), поэтому этот срез исправляет уже собственно структурно-семантические ошибки литературного текста.
+
+- Межпредложные/межклаузные connectives больше не связываются с предыдущим предложением только из-за линейной близости: parent для фронтального `После того как...` ищется внутри того же sentence.
+- `CAUSE`/`FOLLOW` от clause markers теперь ориентируются на source predicate head, а не на вспомогательный structural fact, который мог быть материализован внутри той же клаузы.
+- Omitted-subject inheritance и coordinated predicate sharing повторяются после non-finite control до fixed point, что закрывает случаи, где субъект появляется только после разрешения control.
+- Singular/plural source morphology стала identity-relevant метаданными `M`: одинаковая lemma больше не схлопывает `матрос` и `матросы` в одну глобальную сущность. Quantified NP вроде `несколько матросов` сохраняет common-noun lemma и plural cardinality вместо surname-homograph.
+- Case-syncretic N+N (`кусок штукатурки`, `стекло лампы`) разрешается только одним локальным bounded attachment probe: `GENITIVE_DEP | SEPARATE | UNCLEAR`. Постпозитивное `его/её/их` при реально возможной participant-интерпретации аналогично получает локальный `POSSESSOR | SEPARATE_PARTICIPANT | UNCLEAR`, поэтому `падение штукатурки его испугало` не обязано поглощать `его` внутрь NP.
+- Слабая predicative morphology внутри явно управляемой PP больше не создаёт ложный predicate head, если та же source form имеет oblique nominal reading (`с крючков`-класс homograph-ов).
+- Для `NONFINITE` теперь отдельно решается truth status вложенного INFN. После того как Python уже установил одну конкретную matrix/infinitive пару, tiny source-only probe выбирает `ASSERTED_EVENT`, `NONASSERTED_CONTENT` или `UNCLEAR`. Это различает `продолжала идти / начала просачиваться / успел подняться` и `хотел уйти / попросил уйти` без словаря фазовых/модальных глаголов. `ASSERTED_EVENT` не переводится в `EMBEDDED`; `UNCLEAR` и protocol failure остаются conservative embedded.
+- Новый semantic probe не видит AH UID, Workspace, canonical entity candidates или proof state и принудительно работает с thinking off; он является post-parse semantic enrichment, а не вторым parser-ом.
+- Document oracle теперь умеет проверять `grammatical_number` canonical entity, чтобы literary acceptance различал singular instance и plural/group identity на текущем уровне модели.
+
+Подробности: `docs/SLICE_12_93.md`. Regression: `560 passed, 22 subtests passed`, `compileall OK`.
+
+
+
+## v0.12.92 — structured nominal heads + discourse control
+
+Последний live `Document acceptance` на v0.12.91 дал `3/6` документов, `97/98` paragraph semantic и один Runtime ERROR. Три технических документа остались полностью зелёными; литературные документы теперь в основном показывают не runtime-падения, а качество событийного/дискурсивного графа. Разбор этого прогона выявил несколько общих механизмов, которые были исправлены без словарных патчей под конкретные фразы.
+
+- Реальная morphology текущего pymorphy для постпозитивного `его/её/их` использует possessive-adjective signature `Apro+Anph+Fixd`, тогда как старые unit fixtures проверяли только `Subx`. Оба явных структурных варианта теперь поддерживаются; `торжество его` остаётся одной NP на perception-границе и затем декомпозируется в head + `POSSESSOR`, а не оставляет `его` ложным отдельным actant.
+- Обычные атрибутивные NP больше не становятся opaque M: `сухая ветка`, `керосиновая лампа`, `старая обсерватория`, `разбухшая створка` используют canonical identity головного nominal и source-grounded `NOMINAL_MODIFIER(head, modifier)`. Это слабая структурная L: она не превращает прилагательное автоматически в MATERIAL/STATE/CAUSE или скрытое событие. Модификаторы вложенного генитива остаются на собственном head (`нижний ящик письменного стола` -> modifier(ящик, нижний), genitive(ящик, стол), modifier(стол, письменный)).
+- Coreference agreement теперь проверяет source-inflected nominal head прежде canonical lookup lemma. Поэтому plural source `письма/документы` не становится грамматически singular только из-за `normalized_hint=письмо/документ`, а локальное `их` может связаться с фактически plural antecedent вместо падения в устаревший cross-turn anchor.
+- Для `FrameDependencyKind.NONFINITE` добавлен отдельный deterministic control только для GRND: matrix SUBJECT наследуется деепричастным frame (`Отперев калитку, Алексей вошёл`). На INFN правило намеренно не распространяется, поскольку в `попросил его уйти` controller может быть другим участником.
+- `InteractionContext.pronoun_refs` теперь обновляется по source-recency SUBJECT внутри turn. При двух одинаковых по роду субъектах ранний больше не стирает поздний: `Лампа погасла. Точка появилась.` оставляет `она -> точка`. При реальной ничьей разных canonical refs anchor по-прежнему удаляется. Это только runtime salience cache, не canonical truth.
+- Document oracle научился проверять structured NP напрямую: expected participant может требовать canonical head и конкретные NP-internal L edges. Поэтому `стекло лампы` и `подводная лодка` больше не вынуждают тест ожидать старую opaque строку после перехода памяти на структурное представление.
+
+Отдельно не объявляется решённой проблема instance/plural individuation: head normalization структурирует описание, но существующая M-identity модель всё ещё не различает автоматически два разных экземпляра одного и того же nominal head и не представляет неопределённую plural group как отдельную исчислимую группу. Это следующий уровень identity semantics, а не повод снова хранить NP одной строкой. Causal induction из литературной последовательности также не менялся в этом срезе.
+
+Подробности: `docs/SLICE_12_92.md`. Regression: `549 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.12.91 — LM Studio protocol-output guard
+
+This release hardens the LM Studio transport for bounded perception/semantic probes.
+
+- `llm.enable_thinking=false` is now actually propagated to LM Studio on every chat request through both the top-level `enable_thinking` field and `chat_template_kwargs.enable_thinking`.
+- Empty `message.content` is no longer accepted as a valid model answer. The client fails closed with `finish_reason`, completion/reasoning token counts (when available), and a flag indicating whether a hidden reasoning channel was present.
+- Hidden `reasoning_content` is deliberately **not** consumed as a parser answer: deterministic AH probes require the requested protocol label in ordinary assistant content.
+- The change is transport-only; canonical AH, nominal relations, EventNormalizer, Integration, Ignition, and inference semantics are unchanged from v0.12.90.
+
+The guard addresses LM Studio reasoning-mode failures where a small `max_tokens` budget is spent entirely on hidden reasoning, leaving the OpenAI-compatible `message.content` empty. If the LM Studio build ignores per-request reasoning controls, disable the model's **Enable Thinking** setting in LM Studio; v0.12.91 will now report that condition directly instead of surfacing dozens of misleading parser protocol errors.
+
+## v0.12.90 — structural nominal relations in canonical AH
+
+Исправлено плоское хранение многословных именных групп вроде `торжество его`, `мой проект`, `дверь здания`. Perception теперь отделяет identity головного существительного от внутренней структуры NP и передаёт runtime-only `NominalRelationCandidate`. Явная possessive morphology становится `POSSESSOR`, обычная генитивная зависимость — более слабым `GENITIVE_DEP` без догадки, что любой родительный падеж означает владение.
+
+Integration материализует эти отношения как типизированные canonical `L` только для обычного ASSERTED content: `HEAD --POSSESSOR--> owner` и `HEAD --GENITIVE_DEP--> dependent`. Embedded/quoted/conditional/negated content не протекает в world graph. Вложенные генитивы сохраняются цепочкой (`дверь дома брата` → `дверь→дом→брат`), а main `N` ссылается на `M_дверь`, а не на opaque `M_"дверь дома брата"`. Постпозитивный third-person possessor может переиспользовать уникальный turn-local antecedent; first/second-person possessives разрешаются через deixis.
+
+Подробности: `docs/SLICE_12_90.md`. Regression: `537 passed, 22 subtests passed`, `compileall OK`.
+
+
+## v0.12.89 — source-bounded perception + literary anaphora
+
+Убран `max_acts` как семантический потолок perception. Parser больше не ограничивает число событий константой: он последовательно потребляет все конечные predicate/implicit frames, которые реально присутствуют в source candidate graph. Если модель отвечает `NONE`, пока deterministic frames ещё остались, parser по-прежнему fail-closed и не коммитит частичный смысл. Поле `llm.perception.max_acts` удалено из config/runtime/GUI; GUI показывает `acts=source-bounded`.
+
+По live literary run дополнительно закрыты два общих грамматико-дискурсивных дефекта: deterministic copular holder теперь включает непосредственно постпозитивный possessive anaphor (`торжество его`), а local personal-pronoun resolver больше не считает обычный adjectival STATE референтной сущностью. Для явно связанного `NONFINITE -> matrix` frame добавлено безопасное same-role continuity: если у матричного местоимения существует ровно один совместимый участник той же роли в non-finite child, используется его source identity (`Сняв плащ, она повесила его`).
+
+Подробности: `docs/SLICE_12_89.md`.
+
+
+## v0.12.88 — literary reliability: grammar, discourse and acceptance boundary
+
+Разбор live document-run `20260823_041519_+0300` показал два разных класса проблем. Первые три технических документа сохранили итоговые графы без единой ошибки (`18/18`, `18/18`, `19/19`), но новый runtime-only `relation_hints` ошибочно учитывался старым exact-oracle как обязательный канал. Теперь semantic oracle проверяет hints только если поле `relation_hints` явно присутствует в oracle.
+
+Лимит perception `max_acts=4` оказался ресурсным потолком, а не семантическим ограничением: 13 из 14 runtime failures реальной прозы возникли на предложениях с более чем четырьмя meaningful predicate frames. Shipped/default budget поднят до 12 (валидатор по-прежнему ограничивает его сверху 16); explicit test settings `max_acts=4` продолжают проверять fail-closed поведение.
+
+Cross-turn coreference усилен общими русскими грамматическими правилами без словарей по персонажам:
+
+- discourse signature SUBJECT сначала использует число/род finite predicate agreement, затем только при отсутствии такого сигнала — morphology самого nominal. Это покрывает неизменяемые/неоднозначные имена и количественные NP (`... стоял` → `он`, `... вошли` → `они`);
+- oblique third-person paradigm (`его/ему/ей/их/...`) может детерминированно dereference nominative anchors из `InteractionContext`, но только если все грамматически совместимые anchors сводятся к одному canonical Ref;
+- локальный third-person oblique pronoun не может bind-иться к SUBJECT той же клаузы (`X схватил его` требует другого antecedent; самореференция по-русски выражается `себя`);
+- postnominal possessive anaphor остаётся частью NP (`решение его`, `торжество его`) и больше не становится ложным отдельным copular actant;
+- explicit predicate coordination теперь переносит постпозитивный общий SUBJECT вправо (`выпустили матросы ... и упали`) при отсутствии нового nominative subject shell.
+
+Ручной oracle Беляева также исправлен как oracle, а не как parser patch: ранний `Педро` больше не требует скрытого знания `Педро == Зурита` до того, как сам фрагмент позже произнесёт полное имя `Педро Зурита`; проверки группы матросов меньше зависят от одного upstream `same_as` anchor, чтобы event extraction не маскировался каскадом diagnostic failures.
+
+Regression: `526 passed, 22 subtests passed`, `compileall OK`.
+
+Подробности: `docs/SLICE_12_88.md`.
 
 
 ## v0.12.87 — event normalization + third literary monolith
@@ -1180,3 +1505,16 @@ Memory-runtime fixes in the freeze slice:
 - naive reverse `actant→N` hyperedge propagation was experimentally rejected for MVP because it creates uncontrolled recurrent saturation under the current additive activation policy.
 
 See `docs/FORMALIZATION_FREEZE_20260817.md` and `docs/MVP_MEMORY_AUDIT_20260817.md`.
+
+
+## v0.25.5 changes
+- Added GUI button `M1: ellipsis acceptance` wired to `data/acceptance_ellipsis/cases.txt` and `oracle.json`.
+- Added separate output folder `acceptance_runs_m1_ellipsis`.
+
+
+## v0.25.6 — ellipsis acceptance oracle hotfix
+
+- Fixed `data/acceptance_ellipsis/oracle.json` to the real semantic-oracle schema (`version: 1`, `cases: [...]`).
+- Fixed `cases.txt`: one utterance per line; removed `[ELL_*]` labels that the runner was incorrectly counting as test requests.
+- Expanded the runnable ellipsis suite to 22 real cases across predicate/frame inheritance, proposition negation/confirmation, temporal and locative ellipsis.
+- Added regression that loads both files through the production loaders and validates exact alignment.

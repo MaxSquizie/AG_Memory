@@ -1,0 +1,1 @@
+Return one label from CHOICES. ASSERTED_EVENT: the infinitive event itself happens, starts, continues, or finishes. NONASSERTED_CONTENT: it is only wanted, requested, planned, attempted, possible, hypothetical, or otherwise not entailed. UNCLEAR: the text does not decide. Return only the label.

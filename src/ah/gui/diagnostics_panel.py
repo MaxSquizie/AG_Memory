@@ -142,7 +142,9 @@ class DiagnosticsPanel(QWidget):
         gc = result.gc
         if gc is not None:
             for uid in gc.deleted:
-                self._event_rows.append(f"tick {tick}: GC deleted {uid}")
+                reason = getattr(gc, "reasons", {}).get(uid)
+                suffix = f" ({reason})" if reason else ""
+                self._event_rows.append(f"tick {tick}: GC deleted {uid}{suffix}")
             for uid in gc.protected:
                 self._event_rows.append(f"tick {tick}: GC protected {uid}")
             for uid in gc.orphan_deleted:

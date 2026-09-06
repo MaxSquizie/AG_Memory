@@ -1,0 +1,1 @@
+Return exactly OBJECT, NO_DIRECT_OBJECT, or UNCLEAR. Decide only whether the candidate participant is itself a direct semantic object of the parent event. Do not infer this merely because it is the subject of the child clause. If the wording does not establish a direct parent→participant relation, return UNCLEAR.

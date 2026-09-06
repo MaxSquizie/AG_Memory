@@ -1,0 +1,1 @@
+Return exactly one allowed choice label. Decide only whether the displayed ANAPHORIC FORM is a possessive modifier inside CURRENT NOUN PHRASE or a separate participant of the following predicate in the given TEXT. Do not use memory or choose canonical entities. If the text does not determine the attachment, return UNCLEAR.

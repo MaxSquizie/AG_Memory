@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ah.config import IntegrationSettings
-from ah.core import AHCore
+from ah.core import AHCore, SupportRecord
 from ah.model import Domain, Ref
 
 from .contracts import (
@@ -38,11 +38,30 @@ class InferenceMaterializer:
     def materialize(self, outcome: InferenceOutcome) -> MaterializationResult:
         if outcome.status is not LogicalStatus.PROVED or outcome.conclusion is None:
             return MaterializationResult(None, None, False)
+        # Counterfactual and branch-local conclusions are runtime results only.
+        # They must never leak into factual AH merely because a caller invokes the
+        # ordinary materializer on a successful sandbox proof.
+        if outcome.proof_context is not None and outcome.proof_context.is_counterfactual():
+            return MaterializationResult(None, None, False)
 
         domain = domain_from_premises(self.core, outcome.premise_refs)
         conclusion = outcome.conclusion
 
         if isinstance(conclusion, ExistingRefConclusion):
+            # A formula proof may establish an already-addressable N/g that was
+            # previously only a zero-occurrence conclusion placeholder.  Persist
+            # dependency supports without manufacturing a second semantic object.
+            # This makes the conclusion admissible through its proof while keeping
+            # proof metadata outside canonical q-types.
+            for support in outcome.proof_support:
+                self.core.add_support(
+                    conclusion.ref,
+                    SupportRecord(
+                        premise_refs=support.premise_refs,
+                        rule_id=support.rule_id,
+                        relation_id=support.relation_id,
+                    ),
+                )
             return MaterializationResult(conclusion.ref, domain, False)
 
         if isinstance(conclusion, RoleBindingConclusion):
@@ -61,6 +80,16 @@ class InferenceMaterializer:
                 conclusion.target,
                 weight=self.integration.initial_inferred_link_weight,
             )
-            return MaterializationResult(self.core.ref(link.uid), domain, created)
+            link_ref = self.core.ref(link.uid)
+            for support in outcome.proof_support:
+                self.core.add_support(
+                    link_ref,
+                    SupportRecord(
+                        premise_refs=support.premise_refs,
+                        rule_id=support.rule_id,
+                        relation_id=support.relation_id,
+                    ),
+                )
+            return MaterializationResult(link_ref, domain, created)
 
         raise TypeError(f"Unsupported conclusion: {type(conclusion).__name__}")

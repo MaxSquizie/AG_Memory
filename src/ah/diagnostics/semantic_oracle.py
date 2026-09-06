@@ -552,7 +552,7 @@ def _canonical_target_ref(
     uid = str(assertion_ref.get("uid", ""))
     kind = str(assertion_ref.get("kind", ""))
     item = snapshot.get(uid)
-    if kind == "G" and isinstance(item, dict) and item.get("function_id") == "FALSE":
+    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"NOT", "FALSE"}:
         operands = item.get("operands", []) or []
         if len(operands) == 1 and isinstance(operands[0], dict):
             return _canonical_target_ref(snapshot, operands[0], role)
@@ -567,7 +567,7 @@ def _canonical_assertion_predicate_forms(snapshot: Mapping[str, Mapping[str, Any
     uid = str(assertion_ref.get("uid", ""))
     kind = str(assertion_ref.get("kind", ""))
     item = snapshot.get(uid)
-    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"FALSE", "OR"}:
+    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"NOT", "FALSE", "OR"}:
         operands = item.get("operands", []) or []
         if operands and isinstance(operands[0], dict):
             return _canonical_assertion_predicate_forms(snapshot, operands[0])
@@ -589,7 +589,7 @@ def _canonical_role_set(snapshot: Mapping[str, Mapping[str, Any]], assertion_ref
     uid = str(assertion_ref.get("uid", ""))
     kind = str(assertion_ref.get("kind", ""))
     item = snapshot.get(uid)
-    if kind == "G" and isinstance(item, dict) and item.get("function_id") == "FALSE":
+    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"NOT", "FALSE"}:
         operands = item.get("operands", []) or []
         if len(operands) == 1 and isinstance(operands[0], dict):
             return _canonical_role_set(snapshot, operands[0])
@@ -703,7 +703,7 @@ def _match_canonical_assertions(
         _check(checks, f"{prefix}.predicate", predicate_ok, expected=expected_predicate, actual=predicate_forms)
         expected_negated = bool(expected.get("negated", False))
         item = snapshot.get(str(ref.get("uid", "")))
-        actual_negated = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "FALSE")
+        actual_negated = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "NOT")
         if any("composition" in (target if isinstance(target, dict) else {}) and str((target if isinstance(target, dict) else {}).get("composition", {}).get("operator", "")).upper() == "OR" for target in (expected.get("roles", {}) or {}).values()):
             # An OR-valued assertion is lifted to g_OR over complete N propositions.
             actual_or = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "OR")
@@ -767,12 +767,12 @@ def _match_integrated_conditionals(
         top_ok = bool(
             isinstance(top, dict)
             and top.get("kind") == "G"
-            and str(top.get("function_id", "")).upper() == "IF"
+            and str(top.get("function_id", "")).upper() in {"IF", "IMPLIES"}
             and top.get("operands") == [antecedent_ref, consequent_ref]
         )
         _check(
             checks, f"{prefix}.if_function", top_ok,
-            expected="IF(antecedent, consequent)",
+            expected="IMPLIES(antecedent, consequent)",
             actual=(top or {}).get("function_id") if isinstance(top, dict) else None,
         )
 
@@ -1145,12 +1145,18 @@ def evaluate_semantic_case(
             perception_expectation.get("conditionals", []) or [],
             key_to_local,
         )
-        _match_relation_hints(
-            checks,
-            [item for item in actual_perception.get("relation_hints", []) or [] if isinstance(item, dict)],
-            perception_expectation.get("relation_hints", []) or [],
-            key_to_local,
-        )
+        # Relation hints are deliberately runtime-only, weaker-than-canonical
+        # diagnostics (for example CAUSAL_CANDIDATE from narrative adjacency).
+        # Legacy/exact semantic oracles that do not mention this channel must not
+        # start failing merely because a new diagnostic hint was emitted. Grade
+        # hints only when the oracle explicitly opts into that channel.
+        if "relation_hints" in perception_expectation:
+            _match_relation_hints(
+                checks,
+                [item for item in actual_perception.get("relation_hints", []) or [] if isinstance(item, dict)],
+                perception_expectation.get("relation_hints", []) or [],
+                key_to_local,
+            )
 
     if not unchecked:
         _update_required_template_roles(required_template_roles, expected_assertions, expected_queries)

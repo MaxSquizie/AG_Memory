@@ -61,3 +61,99 @@ def test_lexically_governed_modifier_with_internal_instrumental_pp_is_not_auto_a
     )
     assert selected is not None
     assert selected.kind.value == "PREDICATE"
+
+
+def test_pre_predicate_locative_pp_uses_event_location_normal_form_without_model_vote():
+    text = "рама в дальней комнате то дрожала"
+    morph = Morphology({
+        "рама": (MorphInfo("рама", "NOUN", case="nomn", number="sing", gender="femn", score=1.0),),
+        "в": (MorphInfo("в", "PREP", score=1.0),),
+        "дальней": (MorphInfo("дальний", "ADJF", case="loct", number="sing", gender="femn", score=1.0),),
+        "комнате": (MorphInfo("комната", "NOUN", case="loct", number="sing", gender="femn", score=1.0),),
+        "то": (MorphInfo("то", "PRCL", score=1.0),),
+        "дрожала": (MorphInfo("дрожать", "VERB", mood="indc", number="sing", gender="femn", score=1.0),),
+    })
+    class NoCallBackend:
+        def __init__(self):
+            self.calls = []
+
+        def generate(self, prompt, *, system="", override=None, role="generic"):
+            self.calls.append((role, prompt))
+            raise AssertionError(f"unexpected model call {role}")
+
+    backend = NoCallBackend()
+    parser = AdaptivePerceptionParser(
+        backend,
+        AdaptiveSettings(
+            prompt_dir=PROJECT / "prompts/perception",
+            generation=LLMRoleSettings(max_new_tokens=24, temperature=0.0),
+            retry_attempts=0,
+            morphology_backend="none",
+        ),
+        morphology=morph,
+    )
+    parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+    tokens = parser._source_tokens(text)
+    predicate_span = parser._resolve_span(text, tokens, 6, 6)
+    modifier = parser._resolve_span(text, tokens, 2, 4)
+    selected = parser._resolve_modifier_attachment(
+        text,
+        tokens,
+        predicate_span,
+        PredicateCandidate("дрожала", "дрожать"),
+        modifier,
+    )
+    assert selected is not None
+    assert selected.kind.value == "PREDICATE"
+    assert backend.calls == []
+
+
+def test_pre_predicate_locative_pp_uses_noun_head_case_not_ambiguous_adjective_case():
+    text = "рама в дальней комнате то дрожала"
+    morph = Morphology({
+        "рама": (MorphInfo("рама", "NOUN", case="nomn", score=1.0),),
+        "в": (MorphInfo("в", "PREP", score=1.0),),
+        # The adjective is genuinely case-ambiguous in isolation.  Phrase case must
+        # come from the nominal head instead of treating this weak ABLT reading as
+        # an instrumental attachment ambiguity.
+        "дальней": (
+            MorphInfo("дальний", "ADJF", case="gent", score=0.2),
+            MorphInfo("дальний", "ADJF", case="datv", score=0.2),
+            MorphInfo("дальний", "ADJF", case="ablt", score=0.2),
+            MorphInfo("дальний", "ADJF", case="loct", score=0.2),
+        ),
+        "комнате": (
+            MorphInfo("комната", "NOUN", case="loct", score=0.82),
+            MorphInfo("комната", "NOUN", case="datv", score=0.10),
+        ),
+        "то": (MorphInfo("то", "PRCL", score=1.0),),
+        "дрожала": (MorphInfo("дрожать", "VERB", mood="indc", score=1.0),),
+    })
+
+    class NoCallBackend:
+        def generate(self, prompt, *, system="", override=None, role="generic"):
+            raise AssertionError(f"unexpected model call {role}")
+
+    parser = AdaptivePerceptionParser(
+        NoCallBackend(),
+        AdaptiveSettings(
+            prompt_dir=PROJECT / "prompts/perception",
+            generation=LLMRoleSettings(max_new_tokens=24, temperature=0.0),
+            retry_attempts=0,
+            morphology_backend="none",
+        ),
+        morphology=morph,
+    )
+    parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+    tokens = parser._source_tokens(text)
+    predicate_span = parser._resolve_span(text, tokens, 6, 6)
+    modifier = parser._resolve_span(text, tokens, 2, 4)
+    selected = parser._resolve_modifier_attachment(
+        text,
+        tokens,
+        predicate_span,
+        PredicateCandidate("дрожала", "дрожать"),
+        modifier,
+    )
+    assert selected is not None
+    assert selected.kind.value == "PREDICATE"

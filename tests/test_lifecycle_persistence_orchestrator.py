@@ -156,7 +156,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             LifecycleStage.REINFORCED.value,
         )
 
-    def test_expired_unreferenced_new_n_is_gc_deleted(self) -> None:
+    def test_expired_new_n_with_live_s_anchor_is_not_deleted_by_timer_alone(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
         n = self._fact(core)
         engine = IgnitionEngine(
@@ -174,8 +174,30 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         engine.tick()
         engine.tick()
         result = engine.tick()
-        self.assertFalse(core.store.has_uid(n.uid))
-        self.assertIn(n.uid, set(result.gc.deleted))
+        self.assertTrue(core.store.has_uid(n.uid))
+        self.assertIn(n.uid, set(result.gc.protected))
+
+    def test_query_recall_does_not_retroactively_start_new_fact_lifecycle(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        n = self._fact(core)
+        engine = IgnitionEngine(
+            core,
+            IgnitionSettings(),
+            WorkspaceSettings(threshold=0.1),
+            LifecycleSettings(
+                initial_lifetime_ticks=2,
+                reinforced_lifetime_ticks=10,
+                min_spacing_1_ticks=10,
+                min_spacing_2_ticks=10,
+            ),
+        )
+        engine.seed(n, 0.4, reason=SeedReason.QUERY_RECALL)
+        engine.tick()
+        self.assertNotIn("lifecycle_state", core.store.get_hypernode(n.uid).meta)
+        engine.tick()
+        engine.tick()
+        self.assertTrue(core.store.has_uid(n.uid))
+        self.assertNotIn("lifecycle_state", core.store.get_hypernode(n.uid).meta)
 
     def test_unlinked_h_experience_event_survives_ordinary_ttl(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())

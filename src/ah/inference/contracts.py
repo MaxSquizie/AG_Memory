@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Mapping
 
+from ah.inference.bindings import BindingEnvironment
+from ah.inference.context import ProofContext
+
 from ah.model import ActantRole, Domain, Ref
 
 
@@ -13,11 +16,50 @@ class LogicalStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class GoalMode(str, Enum):
+    FACTUAL = "FACTUAL"
+    PROOF = "PROOF"
+    ASSOCIATION = "ASSOCIATION"
+    EVIDENCE = "EVIDENCE"
+
+
+class CognitiveEventKind(str, Enum):
+    GOAL_START = "GOAL_START"
+    FOCUS = "FOCUS"
+    MEMORY_QUERY = "MEMORY_QUERY"
+    SUBGOAL = "SUBGOAL"
+    RULE_SELECTED = "RULE_SELECTED"
+    GOAL_STOP = "GOAL_STOP"
+
+
+@dataclass(frozen=True, slots=True)
+class CognitiveTraceEvent:
+    """One runtime cognition event produced while solving a GoalSpec.
+
+    This is diagnostic runtime state only: it is not canonical AH and never
+    becomes a proof premise merely because it appears in the trace.
+    """
+
+    kind: CognitiveEventKind
+    logical_depth: int = 0
+    ref: Ref | None = None
+    query_kind: str | None = None
+    query_key: str | None = None
+    candidate_count: int | None = None
+    rule_id: str | None = None
+    detail: str = ""
+    workspace_refs: tuple[Ref, ...] = ()
+
+
 class StopReason(str, Enum):
     GOAL_SATISFIED = "GOAL_SATISFIED"
+    GOAL_REFUTED = "GOAL_REFUTED"
+    CONFLICTED = "CONFLICTED"
+    CLARIFICATION_REQUIRED = "CLARIFICATION_REQUIRED"
     SEARCH_EXHAUSTED = "SEARCH_EXHAUSTED"
     DEPTH_EXHAUSTED = "DEPTH_EXHAUSTED"
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
+    RESOURCE_LIMIT = "RESOURCE_LIMIT"
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,6 +100,58 @@ class CauseEntailmentGoal:
     effect: Ref
 
 
+
+
+@dataclass(frozen=True, slots=True)
+class FormulaGoal:
+    """Prove/refute one canonical ground proposition/formula root (N or g)."""
+
+    expression: Ref
+
+    def __post_init__(self) -> None:
+        if self.expression.kind.value not in {"N", "G"}:
+            raise ValueError("FormulaGoal.expression must reference N or G")
+
+
+
+@dataclass(frozen=True, slots=True)
+class AssociationGoal:
+    """Find a runtime associative convergence between two excitable AH refs.
+
+    This is a GoalSpec target but deliberately not an InferenceGoal: the result is
+    representation intersection, not entailment. Execution belongs to
+    AssociationCoordinator rather than InferenceEngine.
+    """
+
+    left: Ref
+    right: Ref
+
+    def __post_init__(self) -> None:
+        for name, ref in (("left", self.left), ("right", self.right)):
+            if ref.kind.value == "L":
+                raise ValueError(
+                    f"AssociationGoal.{name} cannot be L because L has no excitation state"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class CounterfactualGoal:
+    """Evaluate one formula under explicit temporary assumptions.
+
+    Assumptions are canonical N/g proposition references used only by a runtime
+    CounterfactualContext. They never mutate, duplicate or replace canonical AH.
+    """
+
+    assumptions: tuple[Ref, ...]
+    target: FormulaGoal
+
+    def __post_init__(self) -> None:
+        if not self.assumptions:
+            raise ValueError("CounterfactualGoal requires at least one assumption")
+        for ref in self.assumptions:
+            if ref.kind.value not in {"N", "G"}:
+                raise ValueError("Counterfactual assumptions must reference N or G")
+
 @dataclass(frozen=True, slots=True)
 class AllOfGoal:
     """Conjunctive proof target for typed rule composition.
@@ -76,20 +170,23 @@ class AllOfGoal:
             raise ValueError("AllOfGoal requires at least two child goals")
 
 
-InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | AllOfGoal
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal
+GoalTarget = InferenceGoal | AssociationGoal
 
 
 @dataclass(frozen=True, slots=True)
 class GoalSpec:
-    """Explicit runtime inference target.
+    """Explicit runtime inference target and query mode.
 
-    The goal exists before search starts and is the semantic stop condition. Search
-    is therefore not an instruction to walk a graph until an endpoint: every rule
-    application is evaluated against this target and successful proof stops at the
-    first goal-satisfying derivation.
+    The goal exists before search starts, controls admissible narrow memory
+    queries and is the semantic stop condition. ``request_all_proofs`` is false by
+    default: ordinary cognition stops at the first valid proof instead of walking
+    the graph "just in case".
     """
 
-    target: InferenceGoal
+    target: GoalTarget
+    mode: GoalMode = GoalMode.PROOF
+    request_all_proofs: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,6 +203,7 @@ class InferenceQuery:
     premise_refs: tuple[Ref, ...] = ()
     max_depth: int | None = None
     max_expanded_states: int | None = None
+    proof_context: ProofContext | None = None
 
     def __post_init__(self) -> None:
         if self.max_depth is not None and self.max_depth < 1:
@@ -162,6 +260,19 @@ SemanticConclusion = SemanticConclusion | CompositeConclusion
 
 
 @dataclass(frozen=True, slots=True)
+class ProofSupport:
+    """Runtime dependency record for a derived conclusion.
+
+    Does not represent truth strength. It records which runtime proof context
+    produced a derived result and is used later for lifecycle handling.
+    """
+
+    premise_refs: tuple[Ref, ...]
+    rule_id: str | None = None
+    relation_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class InferenceOutcome:
     status: LogicalStatus
     stop_reason: StopReason
@@ -173,3 +284,7 @@ class InferenceOutcome:
     diagnostics: tuple[str, ...] = ()
     goal_spec: GoalSpec | None = None
     logical_depth: int = 0
+    proof_support: tuple[ProofSupport, ...] = ()
+    bindings: BindingEnvironment | None = None
+    proof_context: ProofContext | None = None
+    cognitive_trace: tuple[CognitiveTraceEvent, ...] = ()

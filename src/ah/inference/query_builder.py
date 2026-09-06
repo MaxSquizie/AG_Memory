@@ -324,12 +324,17 @@ class SemanticGoalCompiler:
             return QueryBuildResult(None, ("semantic:embedded_target_missing",))
         attention: list[Ref] = []
         seen: set[str] = set()
-        for ref in node.actants.values():
+        ground_actants = {
+            role: value for role, value in node.actants.items() if isinstance(value, Ref)
+        }
+        if len(ground_actants) != len(node.actants):
+            return QueryBuildResult(None, ("semantic:embedded_quantified_pattern",))
+        for ref in ground_actants.values():
             if ref.uid not in seen:
                 seen.add(ref.uid)
                 attention.append(ref)
         return QueryBuildResult(
-            InferenceQuery(GoalSpec(ExistsGoal(node.template, dict(node.actants)))),
+            InferenceQuery(GoalSpec(ExistsGoal(node.template, ground_actants))),
             ("evidence:embedded_proposition",),
             tuple(attention),
         )

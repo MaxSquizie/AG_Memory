@@ -97,7 +97,10 @@ class SemanticRoots1241Tests(unittest.TestCase):
             next(a.entity_ref for a in child.actants if a.role == ActantRole.SUBJECT),
             recipient.entity_ref,
         )
-        controller_prompt = backend.calls[-1][1]
+        controller_prompt = next(
+            prompt for role, prompt, _override in backend.calls
+            if role == "perception_control_subject"
+        )
         self.assertIn("PARTICIPANTS:\nFIRST =", controller_prompt)
         self.assertIn("CHOICES:\nFIRST\nSECOND", controller_prompt)
         self.assertNotIn("CONTROLLER OPTIONS:", controller_prompt)

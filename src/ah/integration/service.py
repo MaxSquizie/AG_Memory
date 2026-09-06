@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from datetime import datetime
+import re
 
 from ah.config import IntegrationSettings
+from ah.conflict import ConflictEngine
 
-from ah.agent import InteractionContext
+from ah.agent import ExistentialDiscourseAnchor, InteractionContext
 from ah.core import AHCore
 from ah.core.signatures import hypernode_signature
-from ah.model import ActantRole, Domain, FunctionSymbol, Group, Hypernode, Property, Ref, RefKind, SemanticEntity, Template
+from ah.model import (
+    ActantRole, BoundVar, Domain, FunctionSymbol, Group, Hypernode, Property, Ref,
+    RefKind, SemanticEntity, Template, VariableSort,
+)
 from ah.perception.scoping import apply_speech_act_scoping
+from ah.inference.schema import InferenceSchemaRegistry
+from ah.temporal import StateTracker, ensure_time_entity, exact_datetime_from_ref
 from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception import (
     ActantCandidate,
@@ -18,6 +26,7 @@ from ah.perception import (
     PropositionExprCandidate,
     PropositionOperator,
     StructuralClarificationSpec,
+    NominalRelationKind,
     TemplateSelection,
 )
 
@@ -28,8 +37,11 @@ from .contracts import (
     ClarificationRequest,
     ClarificationResolutionCommit,
     ClarificationUse,
+    IdentityMergeResult,
     IntegratedAssertion,
     IntegratedConditional,
+    IntegratedExistential,
+    IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
     RefutationRequest,
@@ -46,8 +58,12 @@ from .entity_resolver import (
     ExistingEntity,
     NewEntityPlan,
 )
-from .errors import CandidateValidationError, IntegrationError
+from .errors import (
+    CandidateValidationError, IntegrationError, UnresolvedDiscourseReferenceError,
+    UnresolvedTemporalReferenceError,
+)
 from .experience_mapper import ExperienceMapper
+from .formalization import BatchKind, FormalizationBatch, MutationPlan, SemanticConsolidator
 from .template_resolver import TemplateResolver
 
 
@@ -95,6 +111,7 @@ class IntegrationConfig:
     follow_link_weight: float
     cause_link_weight: float = 0.2
     is_a_link_weight: float = 0.2
+    nominal_relation_link_weight: float = 0.2
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -103,6 +120,7 @@ class IntegrationConfig:
             ("follow_link_weight", self.follow_link_weight),
             ("cause_link_weight", self.cause_link_weight),
             ("is_a_link_weight", self.is_a_link_weight),
+            ("nominal_relation_link_weight", self.nominal_relation_link_weight),
         ):
             if not 0.0 <= value <= 1.0:
                 raise ValueError(f"{name} must be in [0, 1]")
@@ -115,6 +133,7 @@ class IntegrationConfig:
             follow_link_weight=settings.follow_link_weight,
             cause_link_weight=settings.cause_link_weight,
             is_a_link_weight=settings.is_a_link_weight,
+            nominal_relation_link_weight=settings.nominal_relation_link_weight,
         )
 
 
@@ -125,15 +144,20 @@ class IntegrationService:
         config: IntegrationConfig,
         *,
         discourse_morphology: Morphology | None = None,
+        schema_registry: InferenceSchemaRegistry | None = None,
     ) -> None:
         self.core = core
         self.config = config
+        self.schema_registry = schema_registry or InferenceSchemaRegistry.default()
         self.validator = CandidateValidator()
         # Runtime discourse anchoring uses dictionary morphology only. It does not
         # create canonical identity or semantic relations. Injection is supported
         # for deterministic tests; production follows the same auto morphology as
         # the parser environment.
         self._discourse_morphology = discourse_morphology or build_morphology("auto")
+        self.consolidator = SemanticConsolidator(
+            self.validator, morphology=self._discourse_morphology
+        )
 
     @staticmethod
     def _predicate_occurrence_key(predicate, source_context: str) -> tuple[object, ...]:
@@ -223,11 +247,16 @@ class IntegrationService:
         roles = ", ".join(role.value for role in template.roles) or "no explicit roles"
         examples: list[str] = []
         for element in self.core.store.all_elements():
-            if not isinstance(element, Hypernode) or element.template.uid != template.uid:
+            if (
+                not isinstance(element, Hypernode)
+                or element.template.uid != template.uid
+                or element.meta.get("semantic_scope")
+            ):
                 continue
             bindings = ", ".join(
                 f"{role.value}={self._template_ref_label(ref)}"
                 for role, ref in element.actants.items()
+                if isinstance(ref, Ref)
             )
             if bindings:
                 examples.append(bindings)
@@ -401,14 +430,125 @@ class IntegrationService:
             )
         return tuple(requests)
 
+    def prepare_external_plan(
+        self,
+        result: PerceptionResult,
+        context: InteractionContext,
+        *,
+        batch_kind: BatchKind = BatchKind.MESSAGE,
+        source_ref: str | None = None,
+        source_timestamp: datetime | None = None,
+        existing_experience_ref: Ref | None = None,
+    ) -> MutationPlan:
+        """Build the complete validated staging plan without mutating canonical AH."""
+        if context.user_ref is None:
+            raise IntegrationError("External integration requires context.user_ref")
+        return self.consolidator.prepare(
+            result,
+            speaker_ref=context.user_ref,
+            forced_domain=None,
+            context=context,
+            existing_experience_ref=existing_experience_ref,
+            batch_kind=batch_kind,
+            source_ref=source_ref,
+            source_timestamp=source_timestamp,
+            experience_timestamp=(
+                exact_datetime_from_ref(self.core, context.now_ref)
+                if context.now_ref is not None else None
+            ),
+        )
+
+    def prepare_external_batch_plan(
+        self,
+        batch: FormalizationBatch,
+        context: InteractionContext,
+        *,
+        existing_experience_ref: Ref | None = None,
+    ) -> MutationPlan:
+        """Validate/consolidate a complete message/document batch before writing AH."""
+        if context.user_ref is None:
+            raise IntegrationError("External integration requires context.user_ref")
+        return self.consolidator.prepare_batch(
+            batch,
+            speaker_ref=context.user_ref,
+            forced_domain=None,
+            context=context,
+            existing_experience_ref=existing_experience_ref,
+            experience_timestamp=(
+                exact_datetime_from_ref(self.core, context.now_ref)
+                if context.now_ref is not None else None
+            ),
+        )
+
+    def integrate_external_batch(
+        self,
+        batch: FormalizationBatch,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        return self.integrate_plan(self.prepare_external_batch_plan(batch, context), context)
+
+    def prepare_h_plan(
+        self,
+        result: PerceptionResult,
+        context: InteractionContext,
+        *,
+        batch_kind: BatchKind = BatchKind.MESSAGE,
+        source_ref: str | None = None,
+        source_timestamp: datetime | None = None,
+    ) -> MutationPlan:
+        if context.self_ref is None:
+            raise IntegrationError("H-only agent integration requires context.self_ref")
+        return self.consolidator.prepare(
+            result,
+            speaker_ref=context.self_ref,
+            forced_domain=Domain.H,
+            context=context,
+            batch_kind=batch_kind,
+            source_ref=source_ref,
+            source_timestamp=source_timestamp,
+            experience_timestamp=(
+                exact_datetime_from_ref(self.core, context.now_ref)
+                if context.now_ref is not None else None
+            ),
+        )
+
+    def bind_discourse_ref(
+        self,
+        plan: MutationPlan,
+        discourse_ref_id: str,
+        entity_ref: str,
+        context: InteractionContext,
+    ) -> MutationPlan:
+        """Apply an explicit batch-local discourse binding without touching AH."""
+        return self.consolidator.bind_discourse_ref(
+            plan, discourse_ref_id, entity_ref, context=context
+        )
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+            raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+        if plan.candidate_ir.temporal_refs:
+            raise UnresolvedTemporalReferenceError(plan.candidate_ir.temporal_refs)
+        return self._integrate_plan(plan, context)
+
     def integrate_external(
         self,
         result: PerceptionResult,
         context: InteractionContext,
     ) -> IntegrationCommit:
-        if context.user_ref is None:
-            raise IntegrationError("External integration requires context.user_ref")
-        return self._integrate(result, context, forced_domain=None, speaker_ref=context.user_ref)
+        return self.integrate_plan(self.prepare_external_plan(result, context), context)
 
     def integrate_external_resolution(
         self,
@@ -417,49 +557,144 @@ class IntegrationService:
         existing_experience_ref: Ref,
     ) -> IntegrationCommit:
         """Integrate delayed semantics into the original external H experience."""
-        if context.user_ref is None:
-            raise IntegrationError("External integration requires context.user_ref")
-        return self._integrate(
-            result,
-            context,
-            forced_domain=None,
-            speaker_ref=context.user_ref,
-            existing_experience_ref=existing_experience_ref,
+        plan = self.prepare_external_plan(
+            result, context, existing_experience_ref=existing_experience_ref
         )
+        return self.integrate_plan(plan, context)
 
     def integrate_to_h(
         self,
         result: PerceptionResult,
         context: InteractionContext,
     ) -> IntegrationCommit:
-        if context.self_ref is None:
-            raise IntegrationError("H-only agent integration requires context.self_ref")
-        return self._integrate(result, context, forced_domain=Domain.H, speaker_ref=context.self_ref)
+        return self.integrate_plan(self.prepare_h_plan(result, context), context)
 
-    def _integrate(
+    def integrate_discourse_relation(
         self,
-        result: PerceptionResult,
+        relation_id: str,
+        source: Ref,
+        target: Ref,
+    ) -> IntegratedRelation:
+        """Materialize one validated cross-turn relation between semantic events.
+
+        The semantic selector is runtime-only and UID-free.  This method is the
+        deterministic trust boundary that maps its local decision back to canonical
+        AH refs.  Only ordinary asserted C/P hypernodes are eligible; H dialogue
+        event carriers and EMBEDDED/CONDITIONAL/QUOTED propositions cannot become
+        world CAUSE/FOLLOW endpoints through discourse refinement.
+        """
+        canonical_relation = relation_id.strip().upper()
+        if canonical_relation not in {"CAUSE", "FOLLOW"}:
+            raise IntegrationError(
+                f"Unsupported discourse relation: {relation_id!r}"
+            )
+        if source == target:
+            raise IntegrationError("Discourse relation cannot be reflexive")
+
+        with self.core.transaction() as tx:
+            for label, ref in (("source", source), ("target", target)):
+                if ref.kind is not RefKind.N or not tx.store.has_uid(ref.uid):
+                    raise IntegrationError(
+                        f"Discourse relation {label} must be an existing canonical N"
+                    )
+                domain = tx.store.domain_of(ref.uid)
+                if domain not in {Domain.C, Domain.P}:
+                    raise IntegrationError(
+                        f"Discourse relation {label} must belong to C/P semantic memory"
+                    )
+                node = tx.store.get_hypernode(ref.uid)
+                if bool(node.meta.get("event_instance", False)):
+                    raise IntegrationError(
+                        f"Discourse relation {label} cannot be an H dialogue event"
+                    )
+                if node.meta.get("semantic_scope") is not None:
+                    raise IntegrationError(
+                        f"Discourse relation {label} must be ordinary asserted content"
+                    )
+
+            # FOLLOW is interpreted transitively by the reasoner.  Creating an edge
+            # that closes a directed FOLLOW cycle would violate that semantics even
+            # if the model selected it, so reject it deterministically.
+            if canonical_relation == "FOLLOW":
+                agenda = [target.uid]
+                visited: set[str] = set()
+                while agenda:
+                    uid = agenda.pop()
+                    if uid == source.uid:
+                        raise IntegrationError("Discourse FOLLOW would create a cycle")
+                    if uid in visited:
+                        continue
+                    visited.add(uid)
+                    agenda.extend(
+                        link.target.uid
+                        for link in tx.store.outgoing_links(uid, "FOLLOW")
+                    )
+
+            weight = (
+                self.config.cause_link_weight
+                if canonical_relation == "CAUSE"
+                else self.config.follow_link_weight
+            )
+            link, created = tx.ensure_link(
+                canonical_relation,
+                source,
+                target,
+                weight,
+            )
+            return IntegratedRelation(
+                relation_id=canonical_relation,
+                source=source,
+                target=target,
+                ref=tx.ref(link.uid),
+                created=created,
+            )
+
+    def _integrate_plan(
+        self,
+        plan: MutationPlan,
         context: InteractionContext,
-        *,
-        forced_domain: Domain | None,
-        speaker_ref: Ref,
-        existing_experience_ref: Ref | None = None,
     ) -> IntegrationCommit:
-        # A proposition mentioned under a QUERY/COMMAND root is semantic content,
-        # not an asserted world fact. Enforce this at the canonical write boundary
-        # even for non-LLM/custom perception services.
-        result = apply_speech_act_scoping(result)
-        self.validator.validate(result)
-        ordered = self.validator.dependency_order(result)
+        # All source-level scoping and graph validation has already happened in the
+        # immutable MutationPlan. Canonical UID allocation and entity/template
+        # materialization start only inside the transaction below.
+        result = plan.perception
+        ordered = plan.ordered_assertions
+        forced_domain = plan.forced_domain
+        speaker_ref = plan.speaker_ref
+        existing_experience_ref = plan.existing_experience_ref
 
         assertions: list[IntegratedAssertion] = []
         seeds: list[ActivationSeedRequest] = []
         refutations: list[RefutationRequest] = []
         relations: list[IntegratedRelation] = []
         conditionals: list[IntegratedConditional] = []
+        existentials: list[IntegratedExistential] = []
+        conflicts: list[IntegratedConflict] = []
         local_refs: dict[str, Ref] = {}
         entity_local_refs: dict[str, Ref] = {}
         entity_anchors = self._entity_anchors(result)
+        existential_bindings = {
+            item.entity_ref: item for item in plan.candidate_ir.existential_bindings
+        }
+        existential_vars = {
+            item.entity_ref: BoundVar(item.variable_id, item.sort)
+            for item in plan.candidate_ir.existential_bindings
+        }
+
+        def candidate_existential_refs(candidate: AssertionCandidate) -> tuple[str, ...]:
+            refs: list[str] = []
+            variants = candidate.alternatives or (candidate,)
+            for variant in variants:
+                for actant in variant.actants:
+                    if actant.entity_ref in existential_vars and actant.entity_ref not in refs:
+                        refs.append(actant.entity_ref)
+            return tuple(refs)
+
+        existential_assertion_vars = {
+            candidate.local_id: candidate_existential_refs(candidate)
+            for candidate in ordered
+            if candidate_existential_refs(candidate)
+        }
         experience_ref: Ref | None = None
         resolved_queries = []
         resolved_commands = []
@@ -553,6 +788,54 @@ class IntegrationService:
                 )
 
             for candidate in ordered:
+                if candidate.local_id in existential_assertion_vars:
+                    # A genuinely unknown participant is not a semantic entity.
+                    # Source assertions that mention it become QUANTIFIED pattern N
+                    # and are asserted only through an EXISTS formula built after
+                    # all members of the connected existential component exist.
+                    if (
+                        candidate.quoted
+                        or candidate.status is not AssertionStatus.ASSERTED
+                        or candidate.transition_operator is not None
+                    ):
+                        raise CandidateValidationError(
+                            "Existential discourse participants are currently supported only "
+                            "in ordinary asserted, non-transition propositions"
+                        )
+                    integrated = self._integrate_assertion(
+                        tx,
+                        candidate,
+                        context,
+                        local_refs,
+                        entity_local_refs,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
+                        entity_anchors=entity_anchors,
+                        speaker_ref=speaker_ref,
+                        addressee_ref=addressee_ref,
+                        count_occurrence=False,
+                        semantic_scope="QUANTIFIED",
+                        existential_vars=existential_vars,
+                    )
+                    proposition_ref = integrated.ref
+                    created = integrated.created
+                    if candidate.negated:
+                        not_g, not_created = tx.ensure_function(
+                            integrated.domain, "NOT", (proposition_ref,)
+                        )
+                        proposition_ref = tx.ref(not_g.uid)
+                        created = created or not_created
+                    final = IntegratedAssertion(
+                        local_id=integrated.local_id,
+                        ref=proposition_ref,
+                        domain=integrated.domain,
+                        created=created,
+                        ambiguous=integrated.ambiguous,
+                        semantic_scope="QUANTIFIED",
+                    )
+                    assertions.append(final)
+                    local_refs[candidate.local_id] = final.ref
+                    continue
+
                 # Quoted proposition content is canonicalized so a matrix speech
                 # predicate may reference it, but it is never an ordinary asserted
                 # world fact. Quotation is orthogonal to conditional status.
@@ -573,11 +856,11 @@ class IntegrationService:
                     proposition_ref = integrated.ref
                     created = integrated.created
                     if candidate.negated:
-                        false_g, false_created = tx.ensure_function(
-                            integrated.domain, "FALSE", (proposition_ref,)
+                        not_g, not_created = tx.ensure_function(
+                            integrated.domain, "NOT", (proposition_ref,)
                         )
-                        proposition_ref = tx.ref(false_g.uid)
-                        created = created or false_created
+                        proposition_ref = tx.ref(not_g.uid)
+                        created = created or not_created
                     final = IntegratedAssertion(
                         local_id=integrated.local_id,
                         ref=proposition_ref,
@@ -590,28 +873,35 @@ class IntegrationService:
                     local_refs[candidate.local_id] = final.ref
                     continue
 
-                # Embedded proposition content must exist canonically for matrix
-                # references, but mention alone does not assert it as a world fact.
-                if candidate.status is AssertionStatus.EMBEDDED:
+                # Embedded / hypothetical / modal proposition content must exist
+                # canonically for matrix references, but mention/scope alone does
+                # not assert it as an ordinary world fact.  The scope is attached
+                # to the proposition N, not smuggled into truth/confidence fields.
+                if candidate.status in {
+                    AssertionStatus.EMBEDDED,
+                    AssertionStatus.HYPOTHETICAL,
+                    AssertionStatus.MODAL,
+                }:
+                    semantic_scope = candidate.status.value
                     integrated = self._integrate_assertion(
                         tx, candidate, context, local_refs, entity_local_refs,
                         local_domain_overrides.get(candidate.local_id, forced_domain),
                         entity_anchors=entity_anchors, speaker_ref=speaker_ref,
                         addressee_ref=addressee_ref, count_occurrence=False,
-                        semantic_scope="EMBEDDED",
+                        semantic_scope=semantic_scope,
                     )
                     proposition_ref = integrated.ref
                     created = integrated.created
                     if candidate.negated:
-                        false_g, false_created = tx.ensure_function(
-                            integrated.domain, "FALSE", (proposition_ref,)
+                        not_g, not_created = tx.ensure_function(
+                            integrated.domain, "NOT", (proposition_ref,)
                         )
-                        proposition_ref = tx.ref(false_g.uid)
-                        created = created or false_created
+                        proposition_ref = tx.ref(not_g.uid)
+                        created = created or not_created
                     final = IntegratedAssertion(
                         local_id=integrated.local_id, ref=proposition_ref,
                         domain=integrated.domain, created=created,
-                        ambiguous=integrated.ambiguous, semantic_scope="EMBEDDED",
+                        ambiguous=integrated.ambiguous, semantic_scope=semantic_scope,
                     )
                     assertions.append(final)
                     local_refs[candidate.local_id] = final.ref
@@ -619,9 +909,49 @@ class IntegrationService:
 
                 # Conditional branches are propositions under a semantic operator,
                 # not ordinary world assertions. Skip them here; they are
-                # canonicalized below as scoped operands of g_IF.
+                # canonicalized below as scoped operands of g_IMPLIES.
                 if candidate.status is not AssertionStatus.ASSERTED:
                     continue
+
+                if candidate.transition_operator is not None:
+                    if candidate.negated:
+                        raise CandidateValidationError(
+                            "Negated transition wrapper is not a canonical state transition"
+                        )
+                    integrated = self._integrate_assertion(
+                        tx,
+                        candidate,
+                        context,
+                        local_refs,
+                        entity_local_refs,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
+                        entity_anchors=entity_anchors,
+                        speaker_ref=speaker_ref,
+                        addressee_ref=addressee_ref,
+                        count_occurrence=False,
+                        semantic_scope="TRANSITION_OPERAND",
+                    )
+                    node = tx.store.get_hypernode(integrated.ref.uid)
+                    time_ref = node.actants.get(ActantRole.TIME)
+                    if not isinstance(time_ref, Ref) or time_ref.kind is not RefKind.M:
+                        raise CandidateValidationError(
+                            f"Transition {candidate.local_id} requires an explicit/resolved TIME actant"
+                        )
+                    transition = StateTracker(
+                        tx, default_weight=self.config.initial_hypernode_weight
+                    ).apply(integrated.ref, candidate.transition_operator, time_ref)
+                    final = IntegratedAssertion(
+                        local_id=integrated.local_id,
+                        ref=transition.transition_ref,
+                        domain=integrated.domain,
+                        created=True,
+                        ambiguous=integrated.ambiguous,
+                    )
+                    assertions.append(final)
+                    local_refs[candidate.local_id] = final.ref
+                    seeds.append(ActivationSeedRequest(final.ref, SeedReason.NEW_FACT))
+                    continue
+
                 integrated = self._integrate_assertion(
                     tx,
                     candidate,
@@ -636,18 +966,29 @@ class IntegrationService:
                 )
 
                 if candidate.negated:
-                    correction = SemanticCorrectionService(tx).refute(integrated.ref)
+                    # Object-level negation is canonical NOT(P), not FALSE(N).
+                    # FALSE is reserved for explicit correction/refutation of one
+                    # already stored proposition/support.  A negative statement
+                    # therefore does not trigger correction plasticity on P.
+                    not_g, not_created = tx.ensure_function(
+                        integrated.domain, "NOT", (integrated.ref,)
+                    )
+                    not_ref = tx.ref(not_g.uid)
                     final = IntegratedAssertion(
                         local_id=integrated.local_id,
-                        ref=correction.false_ref,
+                        ref=not_ref,
                         domain=integrated.domain,
-                        created=correction.false_created,
+                        created=integrated.created or not_created,
                         ambiguous=integrated.ambiguous,
                     )
                     assertions.append(final)
                     local_refs[candidate.local_id] = final.ref
-                    seeds.extend(correction.activation_seeds)
-                    refutations.extend(correction.refutations)
+                    seeds.append(
+                        ActivationSeedRequest(
+                            not_ref,
+                            SeedReason.NEW_FACT if not_created else SeedReason.REACTIVATED_FACT,
+                        )
+                    )
                 else:
                     assertions.append(integrated)
                     local_refs[candidate.local_id] = integrated.ref
@@ -658,9 +999,106 @@ class IntegrationService:
                         )
                     )
 
+            # Build asserted existential formulae from connected components of
+            # batch-local unknown participants.  An assertion that shares two
+            # existential handles joins their variables into one scope; disconnected
+            # unknowns remain separate EXISTS roots rather than being conflated.
+            if existential_assertion_vars:
+                parent = {key: key for key in existential_vars}
+
+                def find(key: str) -> str:
+                    while parent[key] != key:
+                        parent[key] = parent[parent[key]]
+                        key = parent[key]
+                    return key
+
+                def union(left: str, right: str) -> None:
+                    lroot, rroot = find(left), find(right)
+                    if lroot != rroot:
+                        parent[rroot] = lroot
+
+                for refs in existential_assertion_vars.values():
+                    if refs:
+                        for ref_id in refs[1:]:
+                            union(refs[0], ref_id)
+
+                components: dict[str, set[str]] = {}
+                for ref_id in existential_vars:
+                    components.setdefault(find(ref_id), set()).add(ref_id)
+
+                for root_id in sorted(components, key=lambda item: existential_vars[item].local_id):
+                    variable_refs = components[root_id]
+                    member_ids = tuple(
+                        candidate.local_id
+                        for candidate in ordered
+                        if variable_refs.intersection(existential_assertion_vars.get(candidate.local_id, ()))
+                    )
+                    if not member_ids:
+                        continue
+                    current_member_refs = tuple(local_refs[item] for item in member_ids)
+                    prior_member_refs: list[Ref] = []
+                    prior_anchor_refs: set[Ref] = set()
+                    for variable_ref in variable_refs:
+                        binding = existential_bindings[variable_ref]
+                        if binding.anchor_ref is None:
+                            continue
+                        if not tx.store.has_uid(binding.anchor_ref.uid):
+                            raise CandidateValidationError(
+                                "Cross-turn existential anchor no longer exists in canonical AH"
+                            )
+                        prior_anchor_refs.add(binding.anchor_ref)
+                        for member_ref in binding.anchor_member_refs:
+                            if not tx.store.has_uid(member_ref.uid):
+                                raise CandidateValidationError(
+                                    "Cross-turn existential member no longer exists in canonical AH"
+                                )
+                            if member_ref not in prior_member_refs:
+                                prior_member_refs.append(member_ref)
+                    if len(prior_anchor_refs) > 1:
+                        raise CandidateValidationError(
+                            "One existential component cannot silently merge distinct cross-turn scopes"
+                        )
+                    member_refs = tuple(
+                        dict.fromkeys((*prior_member_refs, *current_member_refs))
+                    )
+                    domain = (
+                        forced_domain
+                        if forced_domain is not None
+                        else DomainRouter(tx).route_external(member_refs)
+                    )
+                    body_ref = member_refs[0]
+                    created_any = False
+                    if len(member_refs) > 1:
+                        and_g, and_created = tx.ensure_function(domain, "AND", member_refs)
+                        body_ref = tx.ref(and_g.uid)
+                        created_any = created_any or and_created
+                    ordered_vars = tuple(
+                        sorted((existential_vars[item] for item in variable_refs), key=lambda var: var.local_id)
+                    )
+                    for variable in reversed(ordered_vars):
+                        exists_g, exists_created = tx.ensure_function(
+                            domain, "EXISTS", (variable, body_ref)
+                        )
+                        body_ref = tx.ref(exists_g.uid)
+                        created_any = created_any or exists_created
+                    existentials.append(
+                        IntegratedExistential(
+                            ref=body_ref,
+                            member_refs=member_refs,
+                            variable_ids=tuple(item.local_id for item in ordered_vars),
+                            created=created_any,
+                        )
+                    )
+                    seeds.append(
+                        ActivationSeedRequest(
+                            body_ref,
+                            SeedReason.NEW_FACT if created_any else SeedReason.REACTIVATED_FACT,
+                        )
+                    )
+
             # Conditional branches are canonical proposition content but are not
             # ordinary asserted world facts.  Integrate them as scoped N/G operands,
-            # then bind the antecedent and consequent through deterministic IF.
+            # then bind the antecedent and consequent through deterministic IMPLIES.
             # A multi-member side uses AND, preserving conjunction semantics such as
             # (A AND B) -> C instead of the incorrect pairwise A->C / B->C reading.
             conditional_local_refs: dict[str, Ref] = {}
@@ -693,10 +1131,10 @@ class IntegrationService:
                     )
                     proposition_ref = integrated.ref
                     if candidate.negated:
-                        false_g, _false_created = tx.ensure_function(
-                            integrated.domain, "FALSE", (proposition_ref,)
+                        not_g, _not_created = tx.ensure_function(
+                            integrated.domain, "NOT", (proposition_ref,)
                         )
-                        proposition_ref = tx.ref(false_g.uid)
+                        proposition_ref = tx.ref(not_g.uid)
                     conditional_local_refs[local_id] = proposition_ref
 
                 antecedent_members = tuple(conditional_local_refs[item] for item in conditional.antecedent_refs)
@@ -717,7 +1155,12 @@ class IntegrationService:
                         return conditional_local_refs[expr.ref]
                     members = tuple(materialize_expr(member, member.leaf_refs()) for member in expr.members)
                     domain = forced_domain if forced_domain is not None else DomainRouter(tx).route_external(members)
-                    function, _ = tx.ensure_function(domain, expr.operator.value, members)
+                    function_id = (
+                        "NOT"
+                        if expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
+                        else expr.operator.value
+                    )
+                    function, _ = tx.ensure_function(domain, function_id, members)
                     return tx.ref(function.uid)
 
                 antecedent_ref = materialize_expr(conditional.antecedent_expr, conditional.antecedent_refs)
@@ -728,7 +1171,7 @@ class IntegrationService:
                     else DomainRouter(tx).route_external((antecedent_ref, consequent_ref))
                 )
                 function, created = tx.ensure_function(
-                    conditional_domain, "IF", (antecedent_ref, consequent_ref)
+                    conditional_domain, "IMPLIES", (antecedent_ref, consequent_ref)
                 )
                 conditional_ref = tx.ref(function.uid)
                 conditionals.append(
@@ -840,7 +1283,11 @@ class IntegrationService:
                 event_weight=self.config.experience_hypernode_weight,
                 follow_weight=self.config.follow_link_weight,
             )
-            semantic_refs = tuple(item.ref for item in assertions) + tuple(item.ref for item in conditionals)
+            semantic_refs = (
+                tuple(item.ref for item in assertions if item.semantic_scope != "QUANTIFIED")
+                + tuple(item.ref for item in conditionals)
+                + tuple(item.ref for item in existentials)
+            )
             if existing_experience_ref is None:
                 experience = mapper.record_turn(
                     source_text=result.source_text,
@@ -848,12 +1295,38 @@ class IntegrationService:
                     semantic_refs=semantic_refs,
                     context=context,
                     speech_act_kinds=self._speech_act_kinds(result),
+                    source_ref=plan.candidate_ir.source_ref,
+                    batch_kind=plan.candidate_ir.batch_kind.value,
                 )
                 experience_ref = experience.event_ref
                 seeds.append(ActivationSeedRequest(experience.event_ref, SeedReason.EXPERIENCE))
             else:
                 experience = mapper.attach_content(existing_experience_ref, semantic_refs)
                 experience_ref = experience.event_ref
+
+            # Conflict detection runs only after the H occurrence is attached.  A
+            # compound g carries no ad-hoc asserted flag; its top-level assertion
+            # status is derived from the user's experience occurrence.  The
+            # ConflictEngine therefore sees the same canonical evidence that the
+            # reasoner will later use and can create/reuse addressable k_CONFLICT
+            # sets without choosing a winner.
+            if forced_domain is None and assertions:
+                conflict_engine = ConflictEngine(tx, self.schema_registry)
+                conflict_records = conflict_engine.register_asserted_roots(
+                    tuple(item.ref for item in assertions if item.semantic_scope is None)
+                )
+                for record in conflict_records:
+                    conflicts.append(
+                        IntegratedConflict(
+                            ref=record.group_ref,
+                            members=record.members,
+                            kind=record.kind,
+                            created=record.created,
+                        )
+                    )
+                    seeds.append(
+                        ActivationSeedRequest(record.group_ref, SeedReason.CONFLICT)
+                    )
 
             # External language recognition has a second, post-semantic stage.
             # TextSensory can stimulate already-known surface candidates before
@@ -888,7 +1361,8 @@ class IntegrationService:
                         element = tx.store.get_element_any_domain(ref.uid)
                         if isinstance(element, FunctionSymbol):
                             for operand in element.operands:
-                                collect_predicate_symbols(operand)
+                                if isinstance(operand, Ref):
+                                    collect_predicate_symbols(operand)
                         return
                     if kind is RefKind.K:
                         element = tx.store.get_element_any_domain(ref.uid)
@@ -899,6 +1373,8 @@ class IntegrationService:
                 for item in assertions:
                     collect_predicate_symbols(item.ref)
                 for item in conditionals:
+                    collect_predicate_symbols(item.ref)
+                for item in existentials:
                     collect_predicate_symbols(item.ref)
                 for semantic_act in (*resolved_queries, *resolved_commands):
                     selection = semantic_act.predicate.template_selection
@@ -913,6 +1389,9 @@ class IntegrationService:
         assert experience_ref is not None
         if forced_domain is None:
             self._refresh_cross_turn_pronoun_anchors(result, assertions, context)
+            self._refresh_cross_turn_existential_anchors(
+                plan, result, assertions, existentials, context
+            )
         context.last_experience_ref = experience_ref
         clarifications = self._clarification_requests(tuple(assertions))
         return IntegrationCommit(
@@ -926,6 +1405,8 @@ class IntegrationService:
             clarifications=clarifications,
             relations=tuple(relations),
             conditionals=tuple(conditionals),
+            existentials=tuple(existentials),
+            conflicts=tuple(conflicts),
         )
 
     def _discourse_signature(self, text: str | None) -> tuple[str, str | None] | None:
@@ -962,20 +1443,117 @@ class IntegrationService:
             return ("sing", next(iter(genders)))
         return None
 
+    def _predicate_discourse_signature(
+        self, assertion: AssertionCandidate
+    ) -> tuple[str, str | None] | None:
+        """Return number/gender carried by a finite predicate occurrence.
+
+        Russian noun forms can be lexically ambiguous (proper names and quantified
+        NPs are common examples), while a finite verb in the same clause often
+        exposes the number and, in the past singular, gender agreement directly.
+        This is source grammar only; it never resolves an entity by semantics.
+        """
+        surface = (assertion.predicate.surface or "").strip()
+        if not surface and assertion.predicate.evidence is not None:
+            surface = assertion.predicate.evidence.text.strip()
+        words = re.findall(r"[A-Za-zА-Яа-яЁё-]+", surface)
+        if not words:
+            return None
+        analyses: list = []
+        for word in words:
+            try:
+                values = self._discourse_morphology.analyze_all(word)
+            except AttributeError:
+                single = self._discourse_morphology.analyze(word)
+                values = () if single is None else (single,)
+            analyses.extend(
+                item for item in material_analyses(tuple(values))
+                if item.pos == "VERB" and item.number
+            )
+        if not analyses:
+            return None
+        numbers = {item.number for item in analyses if item.number}
+        if len(numbers) != 1:
+            return None
+        number = next(iter(numbers))
+        if number == "plur":
+            return ("plur", None)
+        if number != "sing":
+            return None
+        genders = {item.gender for item in analyses if item.gender}
+        if len(genders) == 1:
+            return ("sing", next(iter(genders)))
+        return None
+
+    def _subject_discourse_signature(
+        self, assertion: AssertionCandidate, actant: ActantCandidate
+    ) -> tuple[str, str | None] | None:
+        # Predicate agreement is preferred when it is explicit because it describes
+        # the grammatical SUBJECT of this exact clause. Fall back to the nominal
+        # surface only when the predicate does not carry a unique signature.
+        return self._predicate_discourse_signature(assertion) or self._discourse_signature(
+            actant.mention or actant.normalized_hint
+        )
+
+    def _subject_is_proper_name(self, actant: ActantCandidate) -> bool:
+        """Return whether source morphology selects a proper-name nominal reading.
+
+        This is a discourse-salience feature only; it never changes canonical
+        entity identity.  Pymorphy can expose surname/name homographs for ordinary
+        nouns, so a weak proper-name reading is not enough.  Treat the source head
+        as named only when the best proper reading is at least as strong as the best
+        competing common-noun reading.
+        """
+        surface = (
+            actant.nominal_relations[0].head_mention
+            if actant.nominal_relations
+            else (actant.mention or actant.normalized_hint or "")
+        )
+        words = re.findall(r"[A-Za-zА-Яа-яЁё-]+", surface)
+        if not words:
+            return False
+        for word in reversed(words):
+            try:
+                values = self._discourse_morphology.analyze_all(word)
+            except AttributeError:
+                single = self._discourse_morphology.analyze(word)
+                values = () if single is None else (single,)
+            nominal = [
+                item for item in material_analyses(tuple(values))
+                if item.pos == "NOUN"
+            ]
+            if not nominal:
+                continue
+            proper = [
+                item for item in nominal
+                if {"Name", "Surn", "Patr"} & set(item.grammemes)
+            ]
+            if not proper:
+                return False
+            common = [item for item in nominal if item not in proper]
+            best_proper = max(float(item.score) for item in proper)
+            best_common = max((float(item.score) for item in common), default=-1.0)
+            return best_proper >= best_common
+        return False
+
     def _refresh_cross_turn_pronoun_anchors(
         self,
         result: PerceptionResult,
         assertions: tuple[IntegratedAssertion, ...] | list[IntegratedAssertion],
         context: InteractionContext,
     ) -> None:
-        """Carry only uniquely grounded third-person nominative antecedents.
+        """Refresh third-person discourse anchors from source-grounded subjects.
 
-        This is conversation-state maintenance, not a canonical write.  Every
-        candidate comes from a source-grounded actant and its already integrated
-        canonical M.  If two different entities in the current turn share the same
-        grammatical signature, that pronoun anchor is removed instead of guessed.
+        ``pronoun_refs`` is a salience cache, not canonical truth.  A unique
+        source-grounded proper-name SUBJECT outranks incidental common-noun subjects
+        of the same signature; otherwise source recency is used.  This preserves a
+        stable narrative protagonist without making animacy a global preference.
+        Several distinct named subjects or a tie at the winning recency remain
+        unresolved and clear the cache rather than guessing.
         """
-        candidates_by_signature: dict[tuple[str, str | None], set[Ref]] = {}
+        candidates_by_signature: dict[
+            tuple[str, str | None], list[tuple[int, Ref, bool]]
+        ] = {}
         assertion_by_id = {item.local_id: item for item in result.assertions}
 
         for integrated in assertions:
@@ -989,14 +1567,10 @@ class IntegrationService:
             except Exception:
                 continue
             for actant in candidate.actants:
-                # Nominative personal pronouns normally continue a discourse
-                # SUBJECT. Restricting anchors to the same semantic role prevents
-                # a feminine OBJECT/LOCATION in the previous turn from competing
-                # with the actual actor merely because grammatical gender matches.
                 if actant.role is not ActantRole.SUBJECT:
                     continue
                 ref = node.actants.get(actant.role)
-                if ref is None or ref.kind is not RefKind.M:
+                if not isinstance(ref, Ref) or ref.kind is not RefKind.M:
                     continue
                 entity = self.core.store.get_element_any_domain(ref.uid)
                 if not isinstance(entity, SemanticEntity):
@@ -1005,26 +1579,128 @@ class IntegrationService:
                 canonical_name = (
                     str(name_prop.value).strip() if name_prop is not None else ""
                 )
-                # Never promote an unresolved pronoun-shaped M into a discourse
-                # antecedent. A genuinely resolved pronoun points to the existing
-                # named entity and therefore passes this guard.
+                # Never promote an unresolved pronoun-shaped M into the salience
+                # cache. A resolved source pronoun points to an existing named M.
                 if canonical_name.casefold() in _ENTITY_PRONOUNS:
                     continue
-                signature = self._discourse_signature(
-                    actant.mention or actant.normalized_hint
-                )
+                signature = self._subject_discourse_signature(candidate, actant)
                 if signature not in _NOMINATIVE_PRONOUN_BY_SIGNATURE:
                     continue
-                candidates_by_signature.setdefault(signature, set()).add(ref)
+                position = (
+                    actant.evidence.start
+                    if actant.evidence is not None and actant.evidence.start is not None
+                    else (
+                        candidate.evidence.start
+                        if candidate.evidence is not None and candidate.evidence.start is not None
+                        else -1
+                    )
+                )
+                candidates_by_signature.setdefault(signature, []).append(
+                    (position, ref, self._subject_is_proper_name(actant))
+                )
 
-        for signature, refs in candidates_by_signature.items():
+        for signature, candidates in candidates_by_signature.items():
             pronoun = _NOMINATIVE_PRONOUN_BY_SIGNATURE[signature]
-            if len(refs) == 1:
-                context.pronoun_refs[pronoun] = next(iter(refs))
+            # A fresh canonical subject of this grammatical signature supersedes
+            # an older runtime existential continuation anchor. If the current turn
+            # is ambiguous, both caches are cleared below rather than guessed.
+            context.existential_pronoun_anchors.pop(pronoun, None)
+
+            # A unique explicitly named subject is a stronger discourse anchor than
+            # later incidental common-noun subjects of the same grammatical gender.
+            # This handles narrative continuity such as ``Марина ... Бумага ...
+            # печь ... Она ...`` without globally preferring animate entities: when
+            # there is no named referent, ordinary source recency still resolves
+            # ``Лампа погасла. Точка появилась. Она ...`` to ``Точка``.  Multiple
+            # distinct named subjects remain ambiguous and clear the cache.
+            named_refs = {ref for _position, ref, is_named in candidates if is_named}
+            if named_refs:
+                if len(named_refs) == 1:
+                    context.pronoun_refs[pronoun] = next(iter(named_refs))
+                else:
+                    context.pronoun_refs.pop(pronoun, None)
+                continue
+
+            latest_position = max(position for position, _ref, _named in candidates)
+            latest_refs = {
+                ref for position, ref, _named in candidates if position == latest_position
+            }
+            if len(latest_refs) == 1:
+                context.pronoun_refs[pronoun] = next(iter(latest_refs))
             else:
-                # Multiple equally compatible current-turn candidates make the
-                # pronoun genuinely unresolved. Never keep a stale older anchor.
+                # Distinct entities tied at the latest source position are truly
+                # unresolved; keeping an older anchor would be a hidden guess.
                 context.pronoun_refs.pop(pronoun, None)
+
+    def _refresh_cross_turn_existential_anchors(
+        self,
+        plan: MutationPlan,
+        result: PerceptionResult,
+        assertions: tuple[IntegratedAssertion, ...] | list[IntegratedAssertion],
+        existentials: tuple[IntegratedExistential, ...] | list[IntegratedExistential],
+        context: InteractionContext,
+    ) -> None:
+        """Publish one-variable existential subjects as runtime pronoun anchors.
+
+        The canonical memory remains the quantified G/N structure.  The context
+        stores only a reconstructible discourse handle so a following nominative
+        pronoun can extend the same existential scope.  Multi-variable scopes are
+        deliberately not exposed through this shortcut.
+        """
+
+        if not existentials or not plan.candidate_ir.existential_bindings:
+            return
+
+        candidates_by_id = {item.local_id: item for item in result.assertions}
+        bindings = {item.entity_ref: item for item in plan.candidate_ir.existential_bindings}
+        integrated_by_id = {item.local_id: item for item in assertions}
+
+        # Determine which variable IDs are source-grounded SUBJECTs in this turn and
+        # which nominative pronoun form their grammar licenses.
+        pronouns_by_var: dict[int, set[str]] = {}
+        for local_id, candidate in candidates_by_id.items():
+            if local_id not in integrated_by_id:
+                continue
+            variants = candidate.alternatives or (candidate,)
+            for variant in variants:
+                for actant in variant.actants:
+                    if actant.role is not ActantRole.SUBJECT or actant.entity_ref is None:
+                        continue
+                    binding = bindings.get(actant.entity_ref)
+                    if binding is None:
+                        continue
+                    signature = self._subject_discourse_signature(candidate, actant)
+                    pronoun = _NOMINATIVE_PRONOUN_BY_SIGNATURE.get(signature)
+                    if pronoun is not None:
+                        pronouns_by_var.setdefault(binding.variable_id, set()).add(pronoun)
+
+        proposed: dict[str, list[ExistentialDiscourseAnchor]] = {}
+        for existential in existentials:
+            if len(existential.variable_ids) != 1:
+                continue
+            variable_id = existential.variable_ids[0]
+            pronouns = pronouns_by_var.get(variable_id, set())
+            if len(pronouns) != 1:
+                continue
+            pronoun = next(iter(pronouns))
+            proposed.setdefault(pronoun, []).append(
+                ExistentialDiscourseAnchor(
+                    existential_ref=existential.ref,
+                    member_refs=existential.member_refs,
+                    variable_id=variable_id,
+                )
+            )
+
+        for pronoun, anchors in proposed.items():
+            # A latest existential subject must replace any stale canonical referent.
+            # Multiple distinct existential scopes of the same signature in one turn
+            # remain unresolved and clear both runtime caches.
+            unique = {anchor.existential_ref.uid: anchor for anchor in anchors}
+            context.pronoun_refs.pop(pronoun, None)
+            if len(unique) == 1:
+                context.existential_pronoun_anchors[pronoun] = next(iter(unique.values()))
+            else:
+                context.existential_pronoun_anchors.pop(pronoun, None)
 
     @staticmethod
     def _speech_act_kinds(result: PerceptionResult) -> tuple[str, ...]:
@@ -1227,6 +1903,126 @@ class IntegrationService:
             source_text=str(group.meta.get("source_text") or ""),
         )
 
+    @staticmethod
+    def _property_values_for_aliases(entity: SemanticEntity) -> tuple[str, ...]:
+        values: list[str] = []
+        for key in ("name", "aliases"):
+            prop = entity.properties.get(key)
+            if prop is None:
+                continue
+            raw = prop.value
+            items = raw if isinstance(raw, (tuple, list, set, frozenset)) else (raw,)
+            for item in items:
+                text = str(item).strip()
+                if text and text not in values:
+                    values.append(text)
+        return tuple(values)
+
+    def merge_identity(
+        self,
+        left: Ref,
+        right: Ref,
+        *,
+        reason: str,
+    ) -> IdentityMergeResult:
+        """Canonically merge two explicitly proven duplicate semantic identities.
+
+        The method performs no identity inference.  The caller must already have
+        established that ``left`` and ``right`` denote one entity.  The older
+        canonical UID survives deterministically; every canonical incidence and
+        proof support is rewired inside one AH transaction, and exact N collisions
+        are recursively deduplicated.
+
+        Conflicting ordinary properties are not silently resolved here.  Until a
+        property-level conflict policy is registered, such a merge fails atomically
+        instead of choosing a value by recency/frequency.
+        """
+        if not reason.strip():
+            raise CandidateValidationError("Identity merge reason must be non-empty")
+        if left.kind is not RefKind.M or right.kind is not RefKind.M:
+            raise CandidateValidationError("Identity merge endpoints must be M")
+        if left == right:
+            return IdentityMergeResult(left, right, ())
+
+        final_by_uid: dict[str, Ref] = {}
+        with self.core.transaction() as tx:
+            for ref in (left, right):
+                if not tx.store.has_uid(ref.uid) or tx.store.kind_of(ref.uid) is not RefKind.M:
+                    raise CandidateValidationError(f"Identity merge endpoint is not canonical: {ref.uid}")
+
+            survivor, removed = sorted(
+                (left, right),
+                key=lambda ref: (tx.store.creation_sequence(ref.uid), ref.uid),
+            )
+            survivor_entity = tx.store.get_element_any_domain(survivor.uid)
+            removed_entity = tx.store.get_element_any_domain(removed.uid)
+            assert isinstance(survivor_entity, SemanticEntity)
+            assert isinstance(removed_entity, SemanticEntity)
+
+            merged_properties = dict(survivor_entity.properties)
+            aliases = list(self._property_values_for_aliases(survivor_entity))
+            for value in self._property_values_for_aliases(removed_entity):
+                if value not in aliases:
+                    aliases.append(value)
+
+            for name, prop in removed_entity.properties.items():
+                if name in {"name", "aliases"}:
+                    continue
+                existing = merged_properties.get(name)
+                if existing is None:
+                    merged_properties[name] = prop
+                    continue
+                if (existing.value, existing.type_name, existing.unit) != (
+                    prop.value, prop.type_name, prop.unit
+                ):
+                    raise CandidateValidationError(
+                        f"Identity merge property conflict for {name!r}: "
+                        f"{existing.value!r} != {prop.value!r}"
+                    )
+
+            survivor_name = merged_properties.get("name")
+            alias_values = tuple(
+                value
+                for value in aliases
+                if survivor_name is None or str(survivor_name.value).strip() != value
+            )
+            if alias_values:
+                merged_properties["aliases"] = Property("aliases", alias_values, "str[]")
+
+            merged_meta = dict(survivor_entity.meta)
+            for key, value in removed_entity.meta.items():
+                if key not in merged_meta:
+                    merged_meta[key] = value
+
+            survivor_domain = tx.store.domain_of(survivor.uid)
+            assert survivor_domain is not None
+            tx.edit_element(
+                survivor_domain,
+                replace(
+                    survivor_entity,
+                    properties=merged_properties,
+                    meta=merged_meta,
+                ),
+            )
+            self._replace_reference_usages(
+                tx, removed, survivor, delete_source=True, final_by_uid=final_by_uid
+            )
+
+        # Recursive N/L dedup rewiring is intentionally internal to the atomic
+        # mutation.  The public merge result reports the identity replacement;
+        # diagnostics can inspect the canonical graph for collapsed dependants.
+        from ah.diagnostics.session_log import emit as emit_session_event
+
+        emit_session_event(
+            "identity_merge",
+            survivor_uid=survivor.uid,
+            removed_uid=removed.uid,
+            reason=reason.strip(),
+        )
+        return IdentityMergeResult(
+            survivor, removed, ((removed, survivor),), reason=reason.strip()
+        )
+
     def resolve_clarification(
         self,
         ambiguous_ref: Ref,
@@ -1299,13 +2095,15 @@ class IntegrationService:
             if ref.kind is RefKind.N:
                 node = self.core.store.get_hypernode(ref.uid)
                 for child in node.actants.values():
-                    walk(child)
+                    if isinstance(child, Ref):
+                        walk(child)
                 return
             if ref.kind is RefKind.G:
                 element = self.core.store.get_element_any_domain(ref.uid)
                 if isinstance(element, FunctionSymbol):
                     for child in element.operands:
-                        walk(child)
+                        if isinstance(child, Ref):
+                            walk(child)
                 return
             if ref.kind is RefKind.K:
                 element = self.core.store.get_element_any_domain(ref.uid)
@@ -1365,7 +2163,9 @@ class IntegrationService:
             if ref.kind is RefKind.G:
                 element = graph.store.get_element_any_domain(ref.uid)
                 return isinstance(element, FunctionSymbol) and any(
-                    contains(child, visited) for child in element.operands
+                    contains(child, visited)
+                    for child in element.operands
+                    if isinstance(child, Ref)
                 )
             if ref.kind is RefKind.K:
                 element = graph.store.get_element_any_domain(ref.uid)
@@ -1387,7 +2187,7 @@ class IntegrationService:
                 roles = tuple(
                     role
                     for role, value in element.actants.items()
-                    if contains(value, set())
+                    if isinstance(value, Ref) and contains(value, set())
                 )
                 if roles:
                     uses.append(ClarificationUse(graph.ref(element.uid), roles))
@@ -1505,9 +2305,11 @@ class IntegrationService:
                 )
                 if not created and replacement.weight < link.weight:
                     core.edit_link(replace(replacement, weight=link.weight))
+                core.supports.rewire_ref(core.ref(link.uid), core.ref(replacement.uid))
                 core.store._remove_uid(link.uid)
 
             if remove_old and core.store.has_uid(old.uid):
+                core.supports.rewire_ref(old, new)
                 core.store._remove_uid(old.uid)
 
     @staticmethod
@@ -1593,7 +2395,8 @@ class IntegrationService:
                 core, variant, context, local_refs, entity_local_refs, forced_domain,
                 entity_anchors=entity_anchors,
                 speaker_ref=speaker_ref, addressee_ref=addressee_ref,
-                count_occurrence=count_occurrence,
+                count_occurrence=False,
+                semantic_scope="DISJUNCTIVE",
                 _allow_or_lift=False,
             )
             members.append(integrated)
@@ -1685,7 +2488,13 @@ class IntegrationService:
                 if plan.literal_kind is not None
                 else {"name": Property("name", plan.name, "str")}
             )
+            if plan.literal_kind is None and plan.grammatical_number in {"sing", "plur"}:
+                properties["grammatical_number"] = Property(
+                    "grammatical_number", plan.grammatical_number, "str"
+                )
             meta = {"gc_auto_created": True}
+            if plan.literal_kind is None and plan.grammatical_number in {"sing", "plur"}:
+                meta["grammatical_number"] = plan.grammatical_number
             if plan.literal_kind is not None:
                 meta.update({
                     "semantic_literal": True,
@@ -1705,6 +2514,151 @@ class IntegrationService:
         )
         return core.ref(group.uid), True
 
+    @staticmethod
+    def _nominal_relation_key(mention: str | None, normalized: str | None) -> str:
+        value = (normalized or mention or "").strip().casefold().replace("ё", "е")
+        return value
+
+    def _materialize_nominal_relations(
+        self,
+        core: AHCore,
+        source_actants: tuple[ActantCandidate, ...],
+        canonical_actants: dict[ActantRole, Ref | BoundVar],
+        context: InteractionContext,
+        *,
+        domain: Domain,
+        speaker_ref: Ref,
+        addressee_ref: Ref | None,
+        entity_local_refs: dict[str, Ref],
+        semantic_scope: str | None,
+    ) -> tuple[IntegratedRelation, ...]:
+        """Materialize source-grounded NP-internal structure as canonical L.
+
+        Only ordinary asserted content creates these links.  Embedded, quoted and
+        conditional proposition content remains scoped and therefore must not leak
+        a possessive/genitive relation into the asserted world graph.
+
+        Direction is always ``HEAD --RELATION--> DEPENDENT``.  ``POSSESSOR`` is
+        semantically stronger and is emitted only from explicit possessive
+        morphology. ``GENITIVE_DEP`` intentionally preserves the weaker grammatical
+        relation rather than guessing whether a genitive means ownership, part-of,
+        content, source, material, etc. ``NOMINAL_MODIFIER`` is weaker still: it
+        records an attributive source modifier without guessing a MATERIAL, STATE,
+        historical event, or other specialized semantic relation.
+        """
+        if semantic_scope is not None:
+            return ()
+
+        resolver = EntityResolver(core)
+        integrated: list[IntegratedRelation] = []
+        for actant in source_actants:
+            if not actant.nominal_relations:
+                continue
+            main_ref = canonical_actants.get(actant.role)
+            if not isinstance(main_ref, Ref):
+                # Nominal world relations cannot use a scoped logical variable as
+                # a canonical L endpoint.  Rich existential NP-internal semantics
+                # remains a later formula-level extension rather than fabricating M.
+                continue
+
+            # Internal chains reuse identities already materialized earlier in the
+            # same NP: дверь дома брата -> дверь->дом, then дом->брат.
+            refs_by_key: dict[str, Ref] = {}
+            for relation in actant.nominal_relations:
+                if not refs_by_key:
+                    for key in (
+                        self._nominal_relation_key(relation.head_mention, relation.head_normalized_hint),
+                        self._nominal_relation_key(actant.mention, actant.normalized_hint),
+                    ):
+                        if key:
+                            refs_by_key[key] = main_ref
+
+                head_key = self._nominal_relation_key(
+                    relation.head_mention, relation.head_normalized_hint
+                )
+                source_ref = refs_by_key.get(head_key)
+                if source_ref is None:
+                    head_candidate = ActantCandidate(
+                        role=actant.role,
+                        mention=relation.head_mention,
+                        normalized_hint=relation.head_normalized_hint,
+                        evidence=relation.evidence,
+                    )
+                    head_resolution = resolver.resolve(
+                        head_candidate,
+                        context,
+                        first_person_ref=speaker_ref,
+                        second_person_ref=addressee_ref,
+                        preferred_domain=domain,
+                    )
+                    head_plan = (
+                        head_resolution.ref
+                        if isinstance(head_resolution, ExistingEntity)
+                        else head_resolution
+                    )
+                    source_ref, _ = self._materialize_entity_plan(core, head_plan, domain)
+                    if head_key:
+                        refs_by_key[head_key] = source_ref
+
+                dependent_ref = (
+                    entity_local_refs.get(relation.dependent_entity_ref)
+                    if relation.dependent_entity_ref is not None
+                    else None
+                )
+                if dependent_ref is None:
+                    dependent_candidate = ActantCandidate(
+                        role=ActantRole.OBJECT,
+                        mention=relation.dependent_mention,
+                        normalized_hint=relation.dependent_normalized_hint,
+                        entity_ref=relation.dependent_entity_ref,
+                        evidence=relation.evidence,
+                    )
+                    dependent_resolution = resolver.resolve(
+                        dependent_candidate,
+                        context,
+                        first_person_ref=speaker_ref,
+                        second_person_ref=addressee_ref,
+                        preferred_domain=domain,
+                    )
+                    dependent_plan = (
+                        dependent_resolution.ref
+                        if isinstance(dependent_resolution, ExistingEntity)
+                        else dependent_resolution
+                    )
+                    dependent_ref, _ = self._materialize_entity_plan(
+                        core, dependent_plan, domain
+                    )
+                    if relation.dependent_entity_ref is not None:
+                        prior = entity_local_refs.get(relation.dependent_entity_ref)
+                        if prior is not None and prior != dependent_ref:
+                            raise CandidateValidationError(
+                                f"entity_ref {relation.dependent_entity_ref!r} resolved inconsistently "
+                                "inside nominal relation"
+                            )
+                        entity_local_refs[relation.dependent_entity_ref] = dependent_ref
+
+                link, created = core.ensure_link(
+                    relation.kind.value,
+                    source_ref,
+                    dependent_ref,
+                    self.config.nominal_relation_link_weight,
+                )
+                integrated.append(
+                    IntegratedRelation(
+                        relation_id=relation.kind.value,
+                        source=source_ref,
+                        target=dependent_ref,
+                        ref=core.ref(link.uid),
+                        created=created,
+                    )
+                )
+                dep_key = self._nominal_relation_key(
+                    relation.dependent_mention, relation.dependent_normalized_hint
+                )
+                if dep_key:
+                    refs_by_key[dep_key] = dependent_ref
+        return tuple(integrated)
+
     def _integrate_assertion(
         self,
         core: AHCore,
@@ -1720,7 +2674,9 @@ class IntegrationService:
         count_occurrence: bool = True,
         semantic_scope: str | None = None,
         _allow_or_lift: bool = True,
+        existential_vars: dict[str, BoundVar] | None = None,
     ) -> IntegratedAssertion:
+        existential_vars = existential_vars or {}
         if _allow_or_lift and semantic_scope is None:
             lifted = self._integrate_disjunctive_assertion(
                 core, candidate, context, local_refs, entity_local_refs, forced_domain,
@@ -1776,6 +2732,8 @@ class IntegrationService:
         # is known, lexical entity lookup is restricted to that domain.
         provenance_refs: list[Ref] = []
         for actant in effective_actants:
+            if actant.entity_ref in existential_vars:
+                continue
             if actant.candidate_ref is not None:
                 ref = local_refs.get(actant.candidate_ref)
                 if ref is not None:
@@ -1813,11 +2771,24 @@ class IntegrationService:
 
         staged: dict[
             ActantRole,
-            Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan | _CompositionPlan | _ReferenceAlternativesPlan,
+            Ref | BoundVar | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan | _CompositionPlan | _ReferenceAlternativesPlan,
         ] = {}
         staged_corefs: dict[ActantRole, str] = {}
         existing_refs: list[Ref] = []
         for actant in effective_actants:
+            if actant.entity_ref in existential_vars:
+                staged[actant.role] = existential_vars[actant.entity_ref]
+                continue
+            if actant.role is ActantRole.TIME and actant.temporal is not None:
+                if not actant.temporal.resolved or actant.temporal.value is None:
+                    raise CandidateValidationError(
+                        f"Unresolved temporal actant reached Integration: {candidate.local_id}"
+                    )
+                time_ref, _time_created = ensure_time_entity(core, actant.temporal.value)
+                staged[actant.role] = time_ref
+                existing_refs.append(time_ref)
+                continue
+
             if actant.role in alternative_role_options:
                 option_members: list[
                     tuple[str | None, Ref | NewEntityPlan | EquivalentLiteralPlan | AmbiguousEntityPlan]
@@ -1872,7 +2843,12 @@ class IntegrationService:
                             ) from exc
                     members = tuple(resolve_expr(member) for member in expr.members)
                     domain = forced_domain if forced_domain is not None else DomainRouter(core).route_external(members)
-                    function, _ = core.ensure_function(domain, expr.operator.value, members)
+                    function_id = (
+                        "NOT"
+                        if expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
+                        else expr.operator.value
+                    )
+                    function, _ = core.ensure_function(domain, function_id, members)
                     return core.ref(function.uid)
                 ref = resolve_expr(actant.proposition)
                 staged[actant.role] = ref
@@ -1949,7 +2925,7 @@ class IntegrationService:
             if domain_locked
             else DomainRouter(core).route_external(tuple(existing_refs))
         )
-        actants: dict[ActantRole, Ref] = {}
+        actants: dict[ActantRole, Ref | BoundVar] = {}
         ambiguous = False
 
         for role, item in staged.items():
@@ -1971,7 +2947,9 @@ class IntegrationService:
                 actants[role] = prior
                 continue
 
-            if isinstance(item, (Ref, NewEntityPlan, EquivalentLiteralPlan, AmbiguousEntityPlan)):
+            if isinstance(item, BoundVar):
+                actants[role] = item
+            elif isinstance(item, (Ref, NewEntityPlan, EquivalentLiteralPlan, AmbiguousEntityPlan)):
                 ref, item_ambiguous = self._materialize_entity_plan(core, item, domain)
                 actants[role] = ref
                 ambiguous = ambiguous or item_ambiguous
@@ -2044,13 +3022,29 @@ class IntegrationService:
                     )
                 entity_local_refs[coref_id] = resolved
 
-        scoped_meta = {"semantic_scope": semantic_scope} if semantic_scope else None
-        node, created = core.add_hypernode(
+        nominal_relations = self._materialize_nominal_relations(
+            core,
+            effective_actants,
+            actants,
+            context,
+            domain=domain,
+            speaker_ref=speaker_ref,
+            addressee_ref=addressee_ref,
+            entity_local_refs=entity_local_refs,
+            semantic_scope=(semantic_scope or ("NEGATED" if candidate.negated else None)),
+        )
+
+        scoped_meta: dict[str, object] = {}
+        if semantic_scope:
+            scoped_meta["semantic_scope"] = semantic_scope
+        if candidate.temporal_mode is not None:
+            scoped_meta["temporal_mode"] = candidate.temporal_mode.value
+        node, created = core.add_or_enrich_hypernode(
             domain,
             core.ref(template.uid),
             actants,
             weight=self.config.initial_hypernode_weight,
-            meta=scoped_meta,
+            meta=(scoped_meta or None),
             count_occurrence=count_occurrence,
         )
         return IntegratedAssertion(
@@ -2060,4 +3054,5 @@ class IntegrationService:
             created=created,
             ambiguous=ambiguous,
             semantic_scope=semantic_scope,
+            nominal_relations=nominal_relations,
         )

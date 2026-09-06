@@ -1,15 +1,52 @@
 from __future__ import annotations
 
 from ah.agent import InteractionContext
+import re
 from ah.model import ActantRole, Ref
 from ah.perception import ActantCandidate
 
 
 class DeixisResolver:
-    _SELF = {"я", "мне", "меня", "мной", "мой", "моя", "моё", "мои"}
-    _USER = {"ты", "тебе", "тебя", "тобой", "твой", "твоя", "твоё", "твои"}
+    _SELF = {
+        "я", "мне", "меня", "мной",
+        "мой", "моя", "моё", "мое", "мои", "моего", "моей", "моему",
+        "моим", "моими", "моих", "мою",
+    }
+    _USER = {
+        "ты", "тебе", "тебя", "тобой",
+        "твой", "твоя", "твоё", "твое", "твои", "твоего", "твоей", "твоему",
+        "твоим", "твоими", "твоих", "твою",
+    }
     _TODAY = {"сегодня"}
     _HERE = {"здесь", "тут", "там"}
+
+    # Russian third-person oblique/possessive forms are a closed grammatical
+    # paradigm. InteractionContext intentionally stores only nominative anchors;
+    # this table projects an oblique surface back to the compatible nominatives.
+    # A resolution is accepted only when the available anchors collapse to one
+    # canonical Ref, so syncretic forms such as ``его``/``им`` never force gender.
+    _OBLIQUE_TO_NOMINATIVE = {
+        "его": ("он", "оно"),
+        "него": ("он", "оно"),
+        "ему": ("он", "оно"),
+        "нему": ("он", "оно"),
+        "им": ("он", "оно", "они"),
+        "ним": ("он", "оно", "они"),
+        "нем": ("он", "оно"),
+        "нём": ("он", "оно"),
+        "ее": ("она",),
+        "её": ("она",),
+        "нее": ("она",),
+        "неё": ("она",),
+        "ей": ("она",),
+        "ней": ("она",),
+        "ею": ("она",),
+        "нею": ("она",),
+        "их": ("они",),
+        "них": ("они",),
+        "ими": ("они",),
+        "ними": ("они",),
+    }
 
     def resolve(
         self,
@@ -34,4 +71,21 @@ class DeixisResolver:
             return context.now_ref
         if candidate.role is ActantRole.LOCATION and key in self._HERE:
             return context.active_location_ref
-        return context.resolve_pronoun(key)
+
+        direct = context.resolve_pronoun(key)
+        if direct is not None:
+            return direct
+
+        # Actant mentions can retain a governing preposition (``у него``). Use the
+        # final lexical word only for this closed pronoun paradigm; ordinary noun
+        # resolution remains the responsibility of EntityResolver.
+        words = re.findall(r"[A-Za-zА-Яа-яЁё-]+", key)
+        pronoun_key = words[-1].replace("ё", "е") if words else key.replace("ё", "е")
+        candidates = self._OBLIQUE_TO_NOMINATIVE.get(pronoun_key)
+        if candidates is None:
+            return None
+        refs = {
+            ref for nominative in candidates
+            if (ref := context.resolve_pronoun(nominative)) is not None
+        }
+        return next(iter(refs)) if len(refs) == 1 else None

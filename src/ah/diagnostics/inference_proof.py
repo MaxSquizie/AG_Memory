@@ -8,9 +8,11 @@ from ah.core import AHCore
 from ah.inference.contracts import (
     AllOfGoal,
     CauseEntailmentGoal,
+    CounterfactualGoal,
     CompositeConclusion,
     DerivedLinkConclusion,
     ExistingRefConclusion,
+    FormulaGoal,
     ExistsGoal,
     InferenceOutcome,
     MultiRoleBindingConclusion,
@@ -74,6 +76,7 @@ class ProofChainSnapshot:
     steps: tuple[ProofStepSnapshot, ...]
     checks: tuple[ProofCheck, ...] = ()
     diagnostics: tuple[str, ...] = ()
+    cognitive_events: tuple[str, ...] = ()
 
     @property
     def node_uids(self) -> tuple[str, ...]:
@@ -96,6 +99,10 @@ class ProofChainSnapshot:
         else:
             lines.append("Ход вывода: канонический proof trace пуст.")
         lines.extend(("", f"Заключение: {self.conclusion_text}"))
+        if self.cognitive_events:
+            lines.append("")
+            lines.append("Когнитивный цикл:")
+            lines.extend(f"- {item}" for item in self.cognitive_events)
         if self.diagnostics:
             lines.append("")
             lines.append("Диагностика:")
@@ -179,7 +186,30 @@ class ProofSnapshotBuilder:
             steps=steps,
             checks=tuple(checks),
             diagnostics=tuple(outcome.diagnostics),
+            cognitive_events=self._cognitive_events(outcome),
         )
+
+    @staticmethod
+    def _cognitive_events(outcome: InferenceOutcome) -> tuple[str, ...]:
+        lines: list[str] = []
+        for event in outcome.cognitive_trace:
+            parts = [f"d={event.logical_depth}", event.kind.value]
+            if event.ref is not None:
+                parts.append(event.ref.uid)
+            if event.query_kind is not None:
+                parts.append(event.query_kind)
+            if event.query_key is not None:
+                parts.append(event.query_key)
+            if event.candidate_count is not None:
+                parts.append(f"candidates={event.candidate_count}")
+            if event.rule_id is not None:
+                parts.append(f"rule={event.rule_id}")
+            if event.detail:
+                parts.append(event.detail)
+            if event.workspace_refs:
+                parts.append(f"workspace={len(event.workspace_refs)}")
+            lines.append(" | ".join(parts))
+        return tuple(lines)
 
     def _text(self, ref: Ref) -> str:
         try:
@@ -270,14 +300,36 @@ class ProofSnapshotBuilder:
             )
         if isinstance(conclusion, ExistingRefConclusion) and trace:
             ref = conclusion.ref
+            support_rule = next(
+                (support.rule_id for support in outcome.proof_support if support.rule_id),
+                None,
+            )
+            # Preserve the established diagnostic contract for direct/retrieval
+            # proofs. Only the new branch/counterfactual scopes need a distinct
+            # visible rule label here.
+            if support_rule == "OR_CASES":
+                rule = "OR_CASES"
+                explanation = (
+                    f"Цель «{self._text(ref)}» доказана разбором всех ветвей asserted OR; "
+                    "ветвевые допущения существовали только в BranchContext."
+                )
+            elif outcome.proof_context is not None and outcome.proof_context.is_counterfactual():
+                rule = support_rule or "COUNTERFACTUAL_PROOF"
+                explanation = (
+                    f"Цель «{self._text(ref)}» доказана внутри CounterfactualContext; "
+                    "результат не является factual commit в AH."
+                )
+            else:
+                rule = "DIRECT_FACT"
+                explanation = f"Цель непосредственно удовлетворена каноническим фактом «{self._text(ref)}»."
             return (
                 ProofStepSnapshot(
                     1,
-                    "DIRECT_FACT",
-                    ref.uid,
+                    rule,
+                    trace[0].uid if trace else ref.uid,
                     None,
                     ref.uid,
-                    f"Цель непосредственно удовлетворена каноническим фактом «{self._text(ref)}».",
+                    explanation,
                 ),
             )
         if trace:
@@ -358,6 +410,11 @@ class ProofSnapshotBuilder:
         if isinstance(goal, AllOfGoal):
             parts = [self._render_goal(child) for child in goal.goals]
             return "ALL-OF { " + "; ".join(parts) + " }"
+        if isinstance(goal, CounterfactualGoal):
+            assumptions = ", ".join(f"«{self._text(ref)}»" for ref in goal.assumptions)
+            return f"при допущениях [{assumptions}] {self._render_goal(goal.target)}"
+        if isinstance(goal, FormulaGoal):
+            return f"доказать формулу «{self._text(goal.expression)}»"
         if isinstance(goal, RelationGoal):
             return f"доказать «{self._text(goal.source)} {goal.relation_id.upper()} {self._text(goal.target)}»"
         if isinstance(goal, CauseEntailmentGoal):

@@ -92,3 +92,23 @@ three rules:
 2. write the oracle from intended semantics, not from parser output;
 3. never turn a current implementation failure into an expected GAP merely to
    improve the score.
+
+## M1 adversarial hidden-noise frontier (v0.25.0)
+
+Отдельный corpus `data/acceptance_cases_m1_adversarial.txt` + `data/acceptance_oracle_m1_adversarial.json` не заменяет broad200. Он специально проверяет классы, явно перечисленные для скрытого M1 corpus постановки хакатона, но не имевшие отдельного систематического семейства в broad200:
+
+- 10 `m1_typo_noise`;
+- 10 `m1_inversion`;
+- 10 `m1_ellipsis`;
+- 6 `m1_mixed_noise`.
+
+Все 36 cases имеют grade `EXACT`; oracle написан от ожидаемой семантики, а не от текущего parser output. Ellipsis cases требуют восстановления двух assertions. Mandatory M1 roles SUBJECT/OBJECT/LOCATION дополнены RECIPIENT/TOOL/MATERIAL/TIME/DURATION/SOURCE.
+
+Запуск:
+
+```bash
+PYTHONPATH=src python -m ah.cli semantic-acceptance
+PYTHONPATH=src python -m ah.cli m1-score <acceptance_runs_m1_adversarial/...>
+```
+
+Без подключённой реальной perception LLM этот corpus считается **не измеренным**, а не `PASS`. Unit tests проверяют только alignment/family/role invariants самого benchmark-а.

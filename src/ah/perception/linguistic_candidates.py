@@ -25,6 +25,18 @@ class FrameDependencyKind(str, Enum):
     QUOTED = "QUOTED"
 
 
+class EllipsisKind(str, Enum):
+    """Runtime-only reconstruction mode for an overtly incomplete peer clause.
+
+    The label describes source syntax/discourse only.  It is never persisted as
+    a canonical AH relation or used as a truth marker.
+    """
+
+    FRAME = "FRAME"
+    PROPOSITION_NEGATION = "PROPOSITION_NEGATION"
+    PROPOSITION_CONFIRMATION = "PROPOSITION_CONFIRMATION"
+
+
 @dataclass(frozen=True, slots=True)
 class SourceToken:
     index: int
@@ -80,6 +92,8 @@ class ClauseCandidate:
     relative: bool = False
     quoted: bool = False
     implicit_copula: bool = False
+    ellipsis_kind: EllipsisKind | None = None
+    ellipsis_source_clause_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -234,6 +248,33 @@ class LinguisticCandidateBuilder:
         tokens = self._tokens(text)
         predicates = self._predicate_heads(tokens)
         clauses = self._clauses(text, tokens, predicates)
+        # A proposition-level ellipsis marker such as Russian ``нет`` may have a
+        # legitimate dictionary PRED reading.  Once clause analysis has proved
+        # that the token belongs to ``..., а X — нет``, keep its morphology but
+        # remove it from the runtime predicate work queue; otherwise the adaptive
+        # parser would parse the rejection marker as an independent lexical fact
+        # before ellipsis completion runs.
+        # Once a coordinated tail is structurally licensed as ellipsis, *none* of
+        # the lexical predicate candidates inside that tail may re-enter the main
+        # predicate work queue.  This is broader than the special ``нет`` case:
+        # zero-predicate tails with a dash often make the final noun look like a
+        # nominal predicate to morphology (``Мария — журнал``, ``журнал — на полке``).
+        # Parsing that noun first prevents frame completion from ever running and
+        # produces a spurious canonical fact.  Clause analysis is the stronger
+        # structural result here: the tail is a peer frame whose predicate must be
+        # recovered from its antecedent, not an independent nominal predication.
+        ellipsis_owned_predicate_indices = {
+            item.token_index
+            for clause in clauses
+            if clause.ellipsis_kind is not None
+            for item in predicates
+            if clause.span.start_index <= item.token_index <= clause.span.end_index
+        }
+        if ellipsis_owned_predicate_indices:
+            predicates = tuple(
+                item for item in predicates
+                if item.token_index not in ellipsis_owned_predicate_indices
+            )
         coordinations = self._coordinations(text, tokens, predicates)
         predicate_coordinations = self._predicate_coordinations(tokens, clauses)
         frame_graph = self._frame_graph(
@@ -289,12 +330,50 @@ class LinguisticCandidateBuilder:
 
     def _predicate_heads(self, tokens: tuple[SourceToken, ...]) -> tuple[PredicateHeadCandidate, ...]:
         result: list[PredicateHeadCandidate] = []
+
+        def governed_oblique_nominal(index: int) -> bool:
+            """Return True when a weak predicate reading sits inside a PP.
+
+            Russian dictionary morphology can expose an oblique common noun as a
+            short adjective / nominative proper-name homograph.  In ``с крючков``
+            that weak ADJS reading must not become a predicate head merely because
+            ``крючковый`` exists in the dictionary.  The source preposition plus an
+            oblique nominal reading is stronger local syntax.
+
+            We scan left only across nominal modifiers.  Crossing punctuation, a
+            coordinator, another lexical predicate, or an ordinary content word
+            aborts the PP cue, so this cannot suppress an unrelated predicative
+            adjective elsewhere in the clause.
+            """
+            token = tokens[index - 1]
+            material = self._material_analyses(token)
+            if not any(
+                item.pos in {"NOUN", "NPRO"} and item.case not in {None, "nomn"}
+                for item in material
+            ):
+                return False
+            cursor = index - 1
+            while cursor >= 1:
+                left = tokens[cursor - 1]
+                if left.text in _HARD_BOUNDARY or left.text.casefold() in (_COORD_AND | _COORD_OR):
+                    return False
+                left_material = self._material_analyses(left)
+                if any(item.pos == "PREP" for item in left_material):
+                    return True
+                if not left_material:
+                    return False
+                if any(item.pos in {"ADJF", "PRTF", "NUMR"} for item in left_material):
+                    cursor -= 1
+                    continue
+                return False
+            return False
+
         for token in tokens:
             strong = self._lemma_candidates(token, _STRONG_PREDICATE_POS)
             secondary = self._lemma_candidates(token, _SECONDARY_PREDICATE_POS)
             if strong:
                 result.append(PredicateHeadCandidate(token.index, 2, True, strong))
-            elif secondary:
+            elif secondary and not governed_oblique_nominal(token.index):
                 finite = any(a.pos in {"ADJS", "PRTS"} for a in token.analyses)
                 result.append(PredicateHeadCandidate(token.index, 1, finite, secondary))
 
@@ -509,6 +588,159 @@ class LinguisticCandidateBuilder:
         def inside_compound(index: int) -> bool:
             return any(start <= index <= end for start, end in compound_ranges)
 
+        def ellipsis_tail_candidate(index: int, coordinator: str) -> bool:
+            """Recognize a conservative coordinated zero-predicate tail.
+
+            This is only a clause-boundary cue.  It does not reconstruct any
+            predicate or assign semantic roles.  We require an explicit comma
+            before the coordinator, an overt finite frame on the left, no overt
+            predicate on the right, and enough content in the tail to make an
+            omitted peer frame plausible.  ``и`` is admitted only for the very
+            explicit confirmation marker ``тоже`` so ordinary NP coordination is
+            not reclassified as ellipsis.
+            """
+            if index <= 1 or tokens[index - 2].text != ",":
+                return False
+            left, right = sentence_window(index)
+            left_finite = [p for p in finite_positions if left <= p < index]
+            right_predicates = [p for p in pred_positions if index < p <= right]
+            if not left_finite or right_predicates:
+                return False
+            tail = [
+                token for token in tokens
+                if index < token.index <= right and token.text not in _HARD_BOUNDARY
+            ]
+            words = [token for token in tail if re.search(r"\w", token.text)]
+            if not words:
+                return False
+            lows = {token.text.casefold() for token in words}
+            if coordinator == "и" and "тоже" not in lows:
+                return False
+            if lows & {"нет", "тоже"}:
+                return True
+
+            content = []
+            for token in words:
+                analyses = self._material_analyses(token)
+                poses = {item.pos for item in analyses if item.pos is not None}
+                if poses and poses.issubset({"PRCL", "CONJ", "INTJ", "PREP"}):
+                    continue
+                content.append(token)
+            return len(content) >= 2
+
+        implicit_peer_starts: set[int] = set()
+
+        def comma_ellipsis_tail_candidate(comma_index: int) -> bool:
+            """Recognize an uncoordinated comma-separated ellipsis continuation.
+
+            Russian parallel frames often omit the coordinator after the first
+            member: ``Иван купил книгу, Мария — журнал, Пётр — газету``.  The
+            old splitter only saw an ellipsis tail introduced by ``а``/``и`` and
+            therefore kept the whole chain inside one clause.
+
+            This remains deliberately conservative.  A candidate must have an
+            overt finite frame somewhere to the left in the same sentence, no
+            overt predicate in the comma-delimited segment itself, and at least
+            two content-bearing surface items.  Plain NP enumerations containing
+            an internal coordinator are rejected so ``книгу, журнал и газету``
+            is not silently promoted to proposition coordination.
+            """
+            left, right = sentence_window(comma_index)
+            if not any(left <= p < comma_index for p in finite_positions):
+                return False
+
+            segment_start = comma_index + 1
+            while segment_start <= right and tokens[segment_start - 1].text in {",", ";"}:
+                segment_start += 1
+            if segment_start > right:
+                return False
+
+            segment_end = right
+            for token in tokens:
+                if token.index <= comma_index:
+                    continue
+                if token.text == "," or token.text in _HARD_BOUNDARY:
+                    segment_end = token.index - 1
+                    break
+            if segment_start > segment_end:
+                return False
+
+            first_word = next(
+                (
+                    tokens[i - 1].text.casefold()
+                    for i in range(segment_start, segment_end + 1)
+                    if re.search(r"\w", tokens[i - 1].text)
+                ),
+                "",
+            )
+            # Coordinator-led tails are handled by ellipsis_tail_candidate(),
+            # which has stricter rules for ``и`` and proposition markers.
+            if first_word in (_CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR):
+                return False
+
+            if any(segment_start <= p <= segment_end for p in pred_positions):
+                return False
+
+            words = [
+                tokens[i - 1]
+                for i in range(segment_start, segment_end + 1)
+                if re.search(r"\w", tokens[i - 1].text)
+            ]
+            if not words:
+                return False
+            lows = {token.text.casefold() for token in words}
+            if lows & {"нет", "тоже"}:
+                return len(words) >= 2
+
+            # Do not reinterpret a plain coordinated NP tail as a new frame.
+            if any(token.text.casefold() in (_COORD_AND | _COORD_OR) for token in words):
+                return False
+
+            content = []
+            for token in words:
+                analyses = self._material_analyses(token)
+                poses = {item.pos for item in analyses if item.pos is not None}
+                if poses and poses.issubset({"PRCL", "CONJ", "INTJ", "PREP"}):
+                    continue
+                content.append(token)
+            return len(content) >= 2
+
+        def bare_dash_nominal_predication(start: int, end: int) -> bool:
+            """Whether ``X — Y`` is structurally safer as zero-copula nominal.
+
+            A dash is not itself an ellipsis marker.  In a running ellipsis chain
+            ``Мария — в Казани`` or ``Мария — журнал`` can inherit a frame, while
+            ``Слава — бродяга`` introduces a new nominal predicate.  Preserve the
+            latter when the post-dash material is exactly one bare nominal whose
+            material morphology is nominative-only.  Ambiguous NOM/ACC nouns such
+            as ``журнал`` remain eligible as object replacements.
+            """
+            dash = next(
+                (
+                    i for i in range(start, end + 1)
+                    if tokens[i - 1].text in {"-", "—", "–"}
+                ),
+                None,
+            )
+            if dash is None:
+                return False
+            after = [
+                tokens[i - 1]
+                for i in range(dash + 1, end + 1)
+                if re.search(r"\w", tokens[i - 1].text)
+            ]
+            if len(after) != 1:
+                return False
+            token = after[0]
+            infos = tuple(
+                item for item in self._material_analyses(token)
+                if item.pos in {"NOUN", "NPRO"}
+            )
+            if not infos:
+                return False
+            cases = {item.case for item in infos if item.case}
+            return bool(cases) and cases <= {"nomn"}
+
         for token in tokens:
             if token.text in _HARD_BOUNDARY:
                 boundaries.add(token.index + 1)
@@ -541,23 +773,41 @@ class LinguisticCandidateBuilder:
             right_has = any(p > token.index for p in local_preds)
 
             if token.text == ",":
-                if left_has and right_has:
+                peer_tail = comma_ellipsis_tail_candidate(token.index)
+                if (left_has and right_has) or peer_tail:
                     boundaries.add(token.index + 1)
+                if peer_tail:
+                    # A later overt predicate may already justify this boundary;
+                    # it must not erase the local zero-predicate peer evidence.
+                    implicit_peer_starts.add(token.index + 1)
                 continue
 
             low = token.text.casefold()
             if low in _CLAUSE_COORDINATORS:
                 if left_has and right_has:
                     boundaries.add(token.index)
+                elif ellipsis_tail_candidate(token.index, low):
+                    boundaries.add(token.index)
                 continue
 
             if low in _COORD_AND or low in _COORD_OR:
-                left_finite = [p for p in local_finite if p < token.index]
-                right_finite = [p for p in local_finite if p > token.index]
+                # A finite predicate in an earlier, already separated clause
+                # cannot turn NP coordination here into two predicate clauses.
+                # In "..., а Мария и Пётр — нет" the left verbal head belongs
+                # to the antecedent; "Мария и Пётр" is one target participant.
+                current_start = max(b for b in boundaries if b <= token.index)
+                left_finite = [p for p in local_finite if current_start <= p < token.index]
+                next_comma = next(
+                    (item.index for item in tokens
+                     if item.index > token.index and item.text == ","), len(tokens) + 1,
+                )
+                right_finite = [p for p in local_finite if token.index < p < next_comma]
                 if left_finite and right_finite:
                     right_predicate = min(right_finite)
                     if explicit_subject_before_right_predicate(token.index, right_predicate):
                         boundaries.add(token.index)
+                elif low == "и" and ellipsis_tail_candidate(token.index, low):
+                    boundaries.add(token.index)
                 continue
 
             if low in _SUBORDINATORS and any(p >= token.index for p in local_preds):
@@ -627,49 +877,110 @@ class LinguisticCandidateBuilder:
             relative = False
             quoted = start in quoted_starts
             implicit_copula = not heads and looks_like_zero_copula(start, end)
+            ellipsis_kind: EllipsisKind | None = None
+            ellipsis_source_clause_id: str | None = None
+            sentence_id = 1 + sum(
+                1 for t in tokens if t.index < start and t.text in {".", "!", "?"}
+            )
+
+            def previous_clause_same_sentence() -> ClauseCandidate | None:
+                if clauses and clauses[-1].sentence_id == sentence_id:
+                    return clauses[-1]
+                return None
+
+            previous = previous_clause_same_sentence()
+            marker_only_predicate = bool(heads) and all(
+                tokens[head.token_index - 1].text.casefold() in {"нет"}
+                for head in heads
+            )
+            if (
+                marker_only_predicate
+                and first_word in {"а", "и"}
+                and previous is not None
+                and (previous.predicate_heads or previous.ellipsis_kind is not None)
+            ):
+                # In ``..., а Мария — нет`` pymorphy correctly exposes ``нет``
+                # as PRED, but in this coordination shell it is a proposition-
+                # level rejection marker, not the lexical predicate of an
+                # independent fact.  Keep the morphology on the token; only the
+                # runtime frame view suppresses it as a predicate head.
+                heads = ()
+                implicit_copula = False
+            previous_can_supply_frame = (
+                previous is not None
+                and (bool(previous.predicate_heads) or previous.ellipsis_kind is not None)
+            )
+            structurally_parallel = first_word in {"а", "и"} or start in implicit_peer_starts
+            if (
+                not heads
+                and structurally_parallel
+                and previous_can_supply_frame
+                and not bare_dash_nominal_predication(start, end)
+            ):
+                tail_lows = {
+                    tokens[i - 1].text.casefold()
+                    for i in range(start, end + 1)
+                    if re.search(r"\w", tokens[i - 1].text)
+                }
+                if "нет" in tail_lows:
+                    ellipsis_kind = EllipsisKind.PROPOSITION_NEGATION
+                elif "тоже" in tail_lows:
+                    ellipsis_kind = EllipsisKind.PROPOSITION_CONFIRMATION
+                else:
+                    ellipsis_kind = EllipsisKind.FRAME
+                assert previous is not None
+                ellipsis_source_clause_id = previous.clause_id
+                # The peer-frame interpretation owns this coordinated shell.  It
+                # must not be reintroduced later as an unrelated zero-copula
+                # predication (e.g. ``Мария журнал``).
+                implicit_copula = False
 
             compound = compound_by_start.get(start)
             if quoted:
                 marker = "QUOTE"
-                if clauses:
-                    parent = clauses[-1].clause_id
+                previous = previous_clause_same_sentence()
+                if previous is not None:
+                    parent = previous.clause_id
             elif compound is not None:
                 connector_end, marker, role_hint = compound
                 connector_span = self._span(text, tokens, start, connector_end)
-                if clauses:
-                    parent = clauses[-1].clause_id
+                previous = previous_clause_same_sentence()
+                if previous is not None:
+                    parent = previous.clause_id
             elif (
                 first_word in _RELATIVE_ADVERBS
-                and clauses
-                and clause_ends_in_nominal(clauses[-1])
+                and previous_clause_same_sentence() is not None
+                and clause_ends_in_nominal(previous_clause_same_sentence())
             ):
                 # Relative adverbs are structural relatives only when a preceding
                 # nominal anchor is present: ``дом, где...`` / ``день, когда...``.
                 # Without such an anchor (``я знаю, где...``) they remain ordinary
                 # subordinate connectors and their parent relation is resolved later.
                 relative = True
-                parent = clauses[-1].clause_id
+                previous = previous_clause_same_sentence()
+                if previous is not None:
+                    parent = previous.clause_id
                 if first_word_token is not None:
                     connector_span = self._span(text, tokens, first_word_token.index, first_word_token.index)
             elif first_word in _SUBORDINATORS:
                 role_hint = _SUBORDINATORS.get(first_word)
-                if clauses:
-                    parent = clauses[-1].clause_id
+                previous = previous_clause_same_sentence()
+                if previous is not None:
+                    parent = previous.clause_id
                 if first_word_token is not None:
                     connector_span = self._span(text, tokens, first_word_token.index, first_word_token.index)
             elif first_word.startswith(_RELATIVE_PREFIXES):
                 relative = True
-                if clauses:
-                    parent = clauses[-1].clause_id
+                previous = previous_clause_same_sentence()
+                if previous is not None:
+                    parent = previous.clause_id
                 if first_word_token is not None:
                     connector_span = self._span(text, tokens, first_word_token.index, first_word_token.index)
 
             clauses.append(
                 ClauseCandidate(
                     clause_id=f"CL{idx}",
-                    sentence_id=1 + sum(
-                        1 for t in tokens if t.index < start and t.text in {".", "!", "?"}
-                    ),
+                    sentence_id=sentence_id,
                     span=self._span(text, tokens, start, end),
                     predicate_heads=heads,
                     marker=marker,
@@ -679,6 +990,8 @@ class LinguisticCandidateBuilder:
                     relative=relative,
                     quoted=quoted,
                     implicit_copula=implicit_copula,
+                    ellipsis_kind=ellipsis_kind,
+                    ellipsis_source_clause_id=ellipsis_source_clause_id,
                 )
             )
 

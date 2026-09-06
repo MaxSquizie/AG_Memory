@@ -7,6 +7,7 @@ import re
 from threading import RLock
 
 from ah.agent.interaction_context import InteractionContext
+from ah.agent.discourse import DiscourseRelationRefiner
 from ah.config import OrchestratorSettings
 from ah.core.persistence import JsonPersistence
 from ah.ignition import IgnitionEngine, TickResult
@@ -25,6 +26,7 @@ from ah.integration.contracts import (
     IntegrationCommit, SeedReason,
 )
 from ah.perception import (
+    DiscourseRelationDecision,
     PerceptionParseError,
     PerceptionClarificationRequired,
     PerceptionResult,
@@ -67,6 +69,15 @@ class PerceptionService(Protocol):
     def parse_with_structural_resolution(
         self, text: str, interaction_context: InteractionContext, resolution_key: str
     ) -> PerceptionResult: ...
+
+    def classify_discourse_relation(
+        self,
+        narrative_context: str,
+        prior_events: tuple[str, ...],
+        current_events: tuple[str, ...],
+        *,
+        excluded_pairs: tuple[tuple[int, int], ...] = (),
+    ) -> DiscourseRelationDecision | None: ...
 
 
 class ResponseAgent(Protocol):
@@ -135,6 +146,7 @@ class AgentOrchestrator:
         self.inference_attention = IgnitionInferenceAttention(ignition)
         self.materializer = materializer
         self.projector = projector
+        self.discourse = DiscourseRelationRefiner(integration, perception, projector)
         self.agent = agent
         self.settings = settings
         self.persistence = persistence
@@ -545,6 +557,28 @@ class AgentOrchestrator:
                 )
 
             input_ticks = self._settle_input_wave()
+            workspace = self.ignition.workspace_refs()
+
+            discourse_review = self.discourse.prepare(integration, workspace, text)
+
+        # Cross-turn semantic probes follow the same trust boundary as primary
+        # Perception: never hold the canonical runtime lock while waiting on the
+        # language model.  The review is an immutable snapshot containing only
+        # UID-free semantics on the model-facing side; canonical refs stay local.
+        discourse_decisions = self.discourse.decide(discourse_review)
+
+        with lock:
+            discourse_relations = self.discourse.integrate(
+                discourse_review, discourse_decisions
+            )
+            if discourse_relations:
+                integration = replace(
+                    integration,
+                    relations=integration.relations + discourse_relations,
+                )
+            # L has no excitation field, so Workspace membership is unchanged by
+            # the relation write. Re-read it nevertheless to preserve one canonical
+            # snapshot boundary before inference.
             workspace = self.ignition.workspace_refs()
 
             query_results: list[QueryExecution] = []

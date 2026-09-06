@@ -1,0 +1,1 @@
+Return only EVENT_CONTENT, DIRECT_SUBJECT_OBJECT, NO_LINK, or UNCLEAR. Use source text only. EVENT_CONTENT: CHILD EVENT itself is parent content/object. DIRECT_SUBJECT_OBJECT: CHILD SUBJECT itself is a direct parent object, independently of CHILD EVENT. NO_LINK: neither. UNCLEAR: genuinely unresolved. Never replace proposition content with its subject.

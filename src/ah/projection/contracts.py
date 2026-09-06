@@ -50,6 +50,58 @@ class AgentContextDiagnostic:
     settle_ticks: int = 0
 
 
+
+
+@dataclass(frozen=True, slots=True)
+class SourceScope:
+    """Runtime provenance scope used for source-bounded recall/projection.
+
+    The scope is reconstructed from canonical H provenance plus the semantic
+    content refs attached to those H occurrences.  It is not a canonical node, is
+    not persisted independently, and never grants arbitrary access to the graph.
+    """
+
+    source_ref: str
+    experience_refs: tuple[Ref, ...]
+    semantic_roots: tuple[Ref, ...]
+
+    def __post_init__(self) -> None:
+        if not self.source_ref.strip():
+            raise ValueError("SourceScope.source_ref must be non-empty")
+
+
+@dataclass(frozen=True, slots=True)
+class SourceScopeActivation:
+    source_scope: SourceScope
+    seeded_refs: tuple[Ref, ...]
+    tick_count: int
+    workspace_after: tuple[Ref, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class SourceScopedContextResult:
+    activation: SourceScopeActivation
+    context: "AgentContext"
+
+
+class ProjectionBudgetExceeded(ValueError):
+    """Fail-closed source/context overflow.
+
+    Architecture v4 intentionally leaves iterative oversized-source projection
+    open.  Until that protocol is specified, projection must never silently fall
+    back to raw chunks or drop semantic blocks.
+    """
+
+    def __init__(self, estimated_tokens: int, budget_tokens: int) -> None:
+        self.estimated_tokens = int(estimated_tokens)
+        self.budget_tokens = int(budget_tokens)
+        super().__init__(
+            f"AgentContext requires about {self.estimated_tokens} tokens, "
+            f"exceeding deterministic budget {self.budget_tokens}; "
+            "no raw-chunk or silent-truncation fallback is permitted"
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class AgentContext:
     current_input: str
@@ -59,6 +111,9 @@ class AgentContext:
     # Exact cognitive Workspace roots captured before model-facing semantic
     # compression. Debug/operator only; never serialized into ``rendered``.
     source_workspace_refs: tuple[Ref, ...] = ()
+    # Runtime-only provenance/budget diagnostics; never serialized into ``rendered``.
+    source_scope_ref: str | None = None
+    estimated_tokens: int = 0
 
     @property
     def all_blocks(self) -> tuple[ProjectionBlock, ...]:

@@ -48,7 +48,6 @@ history_messages = 0                # 0 = строго stateless между ме
 protocol = "adaptive_v3"           # weak-model discrete probes; Python owns choices/spans/roles
 probe_retry_attempts = 1           # retry same probe from scratch; never show the bad answer
 ground_actants = true
-max_acts = 4
 max_actants_per_act = 8
 predicate_symbol_language = "en"   # compatibility for adaptive_v1/v2; adaptive_v3 uses deterministic lexical S
 morphology_backend = "pymorphy3"    # deterministic Russian POS/lemma narrowing before LLM probes
@@ -77,6 +76,7 @@ experience_hypernode_weight = 0.30
 follow_link_weight = 0.20
 cause_link_weight = 0.20
 is_a_link_weight = 0.20
+nominal_relation_link_weight = 0.20
 initial_inferred_link_weight = 0.25
 
 [ignition]
@@ -145,7 +145,7 @@ random_seed = 0
 threshold = 0.35
 
 [lifecycle]
-initial_lifetime_ticks = 200
+initial_lifetime_ticks = 40
 reinforced_lifetime_ticks = 1000
 min_spacing_1_ticks = 20
 min_spacing_2_ticks = 50

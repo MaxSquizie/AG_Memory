@@ -97,7 +97,6 @@ class LLMConfig:
     perception_protocol: str = "adaptive_v3"
     perception_probe_retry_attempts: int = 1
     perception_ground_actants: bool = True
-    perception_max_acts: int = 4
     perception_max_actants_per_act: int = 8
     perception_predicate_symbol_language: str = "en"
     perception_morphology_backend: str = "auto"
@@ -128,8 +127,6 @@ class LLMConfig:
             raise ValueError("llm.perception.protocol must be adaptive_v3/adaptive_v2/adaptive_v1 or a legacy protocol")
         if self.perception_probe_retry_attempts < 0 or self.perception_probe_retry_attempts > 2:
             raise ValueError("llm.perception.probe_retry_attempts must be in [0, 2]")
-        if self.perception_max_acts <= 0 or self.perception_max_acts > 16:
-            raise ValueError("llm.perception.max_acts must be in [1, 16]")
         if self.perception_max_actants_per_act <= 0 or self.perception_max_actants_per_act > 32:
             raise ValueError("llm.perception.max_actants_per_act must be in [1, 32]")
         if self.perception_predicate_symbol_language != "en":
@@ -153,6 +150,7 @@ class IntegrationSettings:
     follow_link_weight: float = 0.2
     cause_link_weight: float = 0.2
     is_a_link_weight: float = 0.2
+    nominal_relation_link_weight: float = 0.2
     initial_inferred_link_weight: float = 0.25
 
     def __post_init__(self) -> None:
@@ -162,6 +160,7 @@ class IntegrationSettings:
             ("follow_link_weight", self.follow_link_weight),
             ("cause_link_weight", self.cause_link_weight),
             ("is_a_link_weight", self.is_a_link_weight),
+            ("nominal_relation_link_weight", self.nominal_relation_link_weight),
             ("initial_inferred_link_weight", self.initial_inferred_link_weight),
         ):
             if not 0 <= value <= 1:
@@ -295,7 +294,7 @@ class WorkspaceSettings:
 
 @dataclass(frozen=True, slots=True)
 class LifecycleSettings:
-    initial_lifetime_ticks: int = 200
+    initial_lifetime_ticks: int = 40
     reinforced_lifetime_ticks: int = 1000
     min_spacing_1_ticks: int = 20
     min_spacing_2_ticks: int = 50
@@ -511,7 +510,6 @@ def load_config(path: str | Path) -> AppConfig:
         perception_protocol=str(llm_perception_raw.get("protocol", "adaptive_v3")),
         perception_probe_retry_attempts=int(llm_perception_raw.get("probe_retry_attempts", llm_perception_raw.get("repair_attempts", 1))),
         perception_ground_actants=bool(llm_perception_raw.get("ground_actants", True)),
-        perception_max_acts=int(llm_perception_raw.get("max_acts", 4)),
         perception_max_actants_per_act=int(llm_perception_raw.get("max_actants_per_act", 8)),
         perception_predicate_symbol_language=str(llm_perception_raw.get("predicate_symbol_language", "en")),
         perception_morphology_backend=str(llm_perception_raw.get("morphology_backend", "auto")),
@@ -544,6 +542,7 @@ def load_config(path: str | Path) -> AppConfig:
         follow_link_weight=float(ir.get("follow_link_weight", 0.2)),
         cause_link_weight=float(ir.get("cause_link_weight", ir.get("follow_link_weight", 0.2))),
         is_a_link_weight=float(ir.get("is_a_link_weight", 0.2)),
+        nominal_relation_link_weight=float(ir.get("nominal_relation_link_weight", 0.2)),
         initial_inferred_link_weight=float(ir.get("initial_inferred_link_weight", 0.25)),
     )
 
@@ -621,7 +620,7 @@ def load_config(path: str | Path) -> AppConfig:
         ignition=ignition,
         workspace=WorkspaceSettings(threshold=float(wr.get("threshold", 0.35))),
         lifecycle=LifecycleSettings(
-            initial_lifetime_ticks=int(lifecycle_raw.get("initial_lifetime_ticks", 200)),
+            initial_lifetime_ticks=int(lifecycle_raw.get("initial_lifetime_ticks", 40)),
             reinforced_lifetime_ticks=int(lifecycle_raw.get("reinforced_lifetime_ticks", 1000)),
             min_spacing_1_ticks=int(lifecycle_raw.get("min_spacing_1_ticks", 20)),
             min_spacing_2_ticks=int(lifecycle_raw.get("min_spacing_2_ticks", 50)),

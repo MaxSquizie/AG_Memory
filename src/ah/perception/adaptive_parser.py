@@ -21,6 +21,7 @@ from .morphology import (
 from .event_normalizer import EventNormalizer
 from .linguistic_candidates import (
     CoordinationKind,
+    EllipsisKind,
     FrameDependencyKind,
     LinguisticCandidateBuilder,
     LinguisticCandidateGraph,
@@ -32,6 +33,8 @@ from .contracts import (
     ActDependencyKind,
     ActRelationCandidate,
     ActantCandidate,
+    NominalRelationCandidate,
+    NominalRelationKind,
     ActantCompositionCandidate,
     CompositionMemberCandidate,
     CompositionOperator,
@@ -39,6 +42,7 @@ from .contracts import (
     AssertionStatus,
     ConditionalCandidate,
     CommandCandidate,
+    DiscourseRelationDecision,
     EvidenceSpan,
     PerceptionResult,
     PredicateCandidate,
@@ -48,6 +52,8 @@ from .contracts import (
     QueryCandidate,
     QueryMode,
     SituationRelationCandidate,
+    SituationRelationHintCandidate,
+    SituationRelationHintKind,
     StructuralClarificationOption,
     StructuralClarificationSpec,
 )
@@ -94,7 +100,6 @@ class AdaptiveSettings:
     prompt_dir: Path | None
     generation: LLMRoleSettings
     retry_attempts: int = 1
-    max_acts: int = 4
     max_actants_per_act: int = 8
     predicate_symbol_language: str = "en"
     morphology_backend: str = "auto"
@@ -103,8 +108,6 @@ class AdaptiveSettings:
     def __post_init__(self) -> None:
         if self.retry_attempts < 0 or self.retry_attempts > 2:
             raise ValueError("retry_attempts must be in [0, 2]")
-        if self.max_acts <= 0:
-            raise ValueError("max_acts must be > 0")
         if self.max_actants_per_act <= 0:
             raise ValueError("max_actants_per_act must be > 0")
         if self.predicate_symbol_language != "en":
@@ -440,6 +443,8 @@ class AdaptivePerceptionParser:
         # The analyser score is evidence, not truth; a tiny A/B semantic probe may
         # select one lexeme before syntax/canonical identity consumes its features.
         self._contextual_nominal_lemmas: dict[int, str] = {}
+        self._genitive_attachment_cache: dict[tuple[int, int], bool] = {}
+        self._postnominal_possessive_cache: dict[tuple[int, int, int], bool] = {}
 
     def classify_act_relation(
         self,
@@ -518,6 +523,126 @@ class AdaptivePerceptionParser:
             return None
         source_role, target_role = labels[choice]
         return ActRelationCandidate("IS-A", act_ref, source_role, target_role)
+
+    def classify_discourse_relation(
+        self,
+        narrative_context: str,
+        prior_events: tuple[str, ...],
+        current_events: tuple[str, ...],
+        *,
+        excluded_pairs: tuple[tuple[int, int], ...] = (),
+    ) -> DiscourseRelationDecision | None:
+        """Select one source-grounded cross-turn CAUSE/FOLLOW relation.
+
+        Candidate generation is deliberately outside the model: callers provide a
+        bounded narrative window plus semantic strings for canonical events that
+        are already cognitively accessible.  This method never sees AH refs.  The
+        model performs three small choices only: which current event has a direct
+        discourse dependency, which prior event is its source, and whether that
+        dependency is CAUSE or FOLLOW.  NONE/UNCLEAR fails closed.
+
+        ``excluded_pairs`` addresses the supplied option lists by zero-based local
+        indexes.  It lets deterministic orchestration avoid asking for a relation
+        already materialized without exposing canonical identity.
+        """
+        self._traces = []
+        if not narrative_context.strip() or not prior_events or not current_events:
+            return None
+
+        excluded = set(excluded_pairs)
+        current_available = tuple(
+            index for index in range(len(current_events))
+            if any((prior, index) not in excluded for prior in range(len(prior_events)))
+        )
+        if not current_available:
+            return None
+
+        prior_lines = "\n".join(
+            f"P{index + 1}: {text}" for index, text in enumerate(prior_events)
+        )
+        current_lines = "\n".join(
+            f"C{index + 1}: {text}" for index, text in enumerate(current_events)
+        )
+        excluded_lines = "\n".join(
+            f"P{prior + 1} -> C{current + 1}"
+            for prior, current in sorted(excluded)
+            if 0 <= prior < len(prior_events) and 0 <= current < len(current_events)
+        ) or "none"
+
+        current_labels = tuple(f"C{index + 1}" for index in current_available)
+        current_choices = (*current_labels, "NONE", "UNCLEAR")
+        current_prompt = (
+            f"NARRATIVE WINDOW:\n{narrative_context}\n"
+            f"PRIOR ACTIVE EVENTS:\n{prior_lines}\n"
+            f"CURRENT EVENTS:\n{current_lines}\n"
+            f"ALREADY EXCLUDED PAIRS:\n{excluded_lines}\n"
+            "QUESTION:\nWhich CURRENT event, if any, is presented as having one direct "
+            "cross-turn dependency on a PRIOR ACTIVE event? Select a current event only "
+            "for a direct causal reaction/result or a direct continuation/next phase of "
+            "an earlier activity. Same actor, same topic, or mere later occurrence is not enough.\n"
+            "CHOICES:\n" + "\n".join(current_choices)
+        )
+        current_label, _ = self._deep_semantic_choice_probe(
+            "discourse_current_event",
+            current_prompt,
+            current_choices,
+            optional=True,
+        )
+        if current_label in {None, "NONE", "UNCLEAR"}:
+            return None
+        current_index = int(current_label[1:]) - 1
+
+        prior_available = tuple(
+            index for index in range(len(prior_events))
+            if (index, current_index) not in excluded
+        )
+        if not prior_available:
+            return None
+        prior_choices = tuple(f"P{index + 1}" for index in prior_available) + (
+            "NONE", "UNCLEAR"
+        )
+        source_prompt = (
+            f"NARRATIVE WINDOW:\n{narrative_context}\n"
+            f"SELECTED CURRENT EVENT:\nC{current_index + 1}: {current_events[current_index]}\n"
+            f"PRIOR ACTIVE EVENTS:\n{prior_lines}\n"
+            f"ALREADY EXCLUDED PAIRS:\n{excluded_lines}\n"
+            "QUESTION:\nWhich ONE PRIOR event is the source of the direct cross-turn "
+            "dependency for the selected current event? Prefer the narratively established "
+            "initiating event/activity rather than a merely more recent incidental step. "
+            "Choose NONE if no listed prior event has that relation.\n"
+            "CHOICES:\n" + "\n".join(prior_choices)
+        )
+        prior_label, _ = self._deep_semantic_choice_probe(
+            "discourse_prior_event",
+            source_prompt,
+            prior_choices,
+            optional=True,
+        )
+        if prior_label in {None, "NONE", "UNCLEAR"}:
+            return None
+        prior_index = int(prior_label[1:]) - 1
+
+        pair_prompt = (
+            f"NARRATIVE WINDOW:\n{narrative_context}\n"
+            f"PRIOR EVENT:\n{prior_events[prior_index]}\n"
+            f"CURRENT EVENT:\n{current_events[current_index]}\n"
+            "QUESTION:\nWhat direct relation, if any, does the narrative establish from "
+            "PRIOR EVENT to CURRENT EVENT?\n"
+            "CAUSE: CURRENT is a reaction, response, consequence, or result triggered by PRIOR.\n"
+            "FOLLOW: CURRENT is a direct continuation/next phase of PRIOR, without asserting causation.\n"
+            "NO_RELATION: the events are only in the same narrative/episode or merely ordered in time.\n"
+            "UNCLEAR: the text does not determine the relation safely.\n"
+            "CHOICES:\nCAUSE\nFOLLOW\nNO_RELATION\nUNCLEAR"
+        )
+        relation, _ = self._deep_semantic_choice_probe(
+            "discourse_relation",
+            pair_prompt,
+            ("CAUSE", "FOLLOW", "NO_RELATION", "UNCLEAR"),
+            optional=True,
+        )
+        if relation not in {"CAUSE", "FOLLOW"}:
+            return None
+        return DiscourseRelationDecision(relation, prior_index, current_index)
 
     def propose_template_candidate(
         self,
@@ -657,6 +782,10 @@ class AdaptivePerceptionParser:
         self._pending_nominal_modifiers = []
         self._runtime_compositions = {}
         self._contextual_nominal_lemmas = {}
+        self._genitive_attachment_cache = {}
+        self._postnominal_possessive_cache = {}
+        self._asserted_nonfinite_refs: set[str] = set()
+        self._runtime_blocked_token_indices: set[int] = set()
         tokens = self._source_tokens(text)
         candidate_builder = LinguisticCandidateBuilder(self.morphology)
         self._nominal_subject_spans: dict[int, _Span] = {}
@@ -680,7 +809,9 @@ class AdaptivePerceptionParser:
         used_implicit_clauses: set[str] = set()
 
         try:
-            for act_index in range(1, self.settings.max_acts + 1):
+            act_index = 0
+            while True:
+                act_index += 1
                 morph_candidates = self._predicate_morph_candidates(tokens, used_predicates)
                 implicit_clause = (
                     None if morph_candidates else self._next_implicit_copula_clause(used_implicit_clauses)
@@ -980,15 +1111,20 @@ class AdaptivePerceptionParser:
                 traces = exc.traces
             raise AdaptiveParseError(str(exc), traces) from exc
 
-        # Resource limits are guards, never permission to commit partial semantics.
-        # If any deterministic predicate/implicit frame remains after the act loop
-        # (whether because the cap was reached or a model emitted NONE), fail closed.
+        # There is deliberately no semantic cap on the number of acts in one
+        # perception unit. Every successful iteration consumes a distinct source
+        # predicate span or implicit copular clause, so the source itself provides
+        # the finite structural bound. A model-emitted NONE is never permission to
+        # commit a partial parse: if deterministic frames remain, fail closed.
         if self._has_remaining_frame_candidates(tokens, used_predicates, used_implicit_clauses):
             raise AdaptiveParseError(
-                f"incomplete parse: meaningful predicate frames remain after max_acts={self.settings.max_acts}",
+                "incomplete parse: model stopped while meaningful predicate frames remain",
                 tuple(self._traces),
             )
 
+        assertions, assertion_spans = self._recover_ellipsis_assertions(
+            text, tokens, assertions, assertion_spans
+        )
         assertions, assertion_spans = self._materialize_nominal_modifier_assertions(
             assertions, assertion_spans
         )
@@ -996,9 +1132,11 @@ class AdaptivePerceptionParser:
             text, tokens, assertions, assertion_spans
         )
         assertions = self._attach_nested_assertions(assertions, assertion_spans)
+        assertions, participant_projection_diagnostics = self._project_orphan_subordinate_participants(assertions)
         conditionals = self._derive_conditionals(assertions, assertion_spans)
         assertions = self._mark_conditional_statuses(assertions, conditionals)
         assertions = self._mark_embedded_statuses(assertions)
+        assertions, factivity_diagnostics = self._promote_factive_embedded_content(assertions)
         relations = self._derive_situation_relations(assertions, assertion_spans)
         assertions = self._strip_structural_relation_actants(assertions, relations)
         act_dependencies = self._derive_act_dependencies(
@@ -1014,7 +1152,10 @@ class AdaptivePerceptionParser:
         # situations and conservative FOLLOW edges from the already-built
         # linguistic frame graph.  Weaker narrative causality stays in
         # relation_hints and is intentionally invisible to Integration.
-        event_diagnostics: tuple[str, ...] = ()
+        event_diagnostics: tuple[str, ...] = (
+            *participant_projection_diagnostics,
+            *factivity_diagnostics,
+        )
         relation_hints = ()
         if self._candidate_graph is not None and assertions:
             normalized = EventNormalizer(self._candidate_graph, self.morphology).normalize(
@@ -1023,7 +1164,15 @@ class AdaptivePerceptionParser:
             assertions = list(normalized.assertions)
             relations = normalized.relations
             relation_hints = normalized.relation_hints
-            event_diagnostics = normalized.diagnostics
+            relations, relation_hints, causal_diagnostics = self._resolve_narrative_causal_candidates(
+                assertions, relations, relation_hints
+            )
+            event_diagnostics = (
+                *participant_projection_diagnostics,
+                *factivity_diagnostics,
+                *normalized.diagnostics,
+                *causal_diagnostics,
+            )
             # EventNormalizer can add a result-state assertion that deliberately
             # reuses the exact source NP evidence of an existing assertion.  Run
             # the same deterministic source-span identity binder once more so the
@@ -1062,6 +1211,610 @@ class AdaptivePerceptionParser:
             relation_hints=relation_hints,
         )
         return AdaptiveParseResult(result, tuple(self._traces))
+
+    def _recover_ellipsis_assertions(
+        self,
+        text: str,
+        tokens: tuple[_SourceToken, ...],
+        assertions: list[AssertionCandidate],
+        assertion_spans: dict[str, _Span | None],
+    ) -> tuple[list[AssertionCandidate], dict[str, _Span | None]]:
+        """Complete coordinated zero-predicate frames before canonicalization.
+
+        ``LinguisticCandidateBuilder`` marks only a narrowly licensed structural
+        shell: an overt finite peer clause followed by a comma+coordinator tail
+        with no predicate of its own.  This method performs the semantic part of
+        reconstruction *after* the source assertion exists, so the inherited
+        predicate and admissible role inventory come from an already parsed frame
+        rather than from a lexical marker or free-form model guess.
+
+        The recovered assertion is still runtime perception data.  No UID is
+        allocated and AH is not mutated here.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return assertions, assertion_spans
+
+        ellipsis_clauses = [
+            clause for clause in graph.clauses
+            if clause.ellipsis_kind is not None
+        ]
+        if not ellipsis_clauses:
+            return assertions, assertion_spans
+
+        source_by_clause: dict[str, list[AssertionCandidate]] = {}
+        for assertion in assertions:
+            span = assertion_spans.get(assertion.local_id)
+            if span is None:
+                continue
+            clause = graph.clause_for_token(span.start_index)
+            if clause is not None:
+                source_by_clause.setdefault(clause.clause_id, []).append(assertion)
+
+        out = list(assertions)
+        spans_out = dict(assertion_spans)
+        marker_words = {"нет", "тоже"}
+
+        used_ids = {item.local_id for item in assertions} | set(assertion_spans)
+
+        def unresolved(clause, reason: str) -> None:
+            self._deterministic_trace(
+                "ellipsis_recovery", f"TARGET_CLAUSE:{clause.span.text}",
+                f"UNRESOLVED:{reason}",
+            )
+            # A licensed frame is meaningful source content. Returning the other
+            # assertions as a successful parse would authorize a partial commit.
+            raise AdaptiveParseError(f"unresolved ellipsis: {reason}", tuple(self._traces))
+
+        for clause in ellipsis_clauses:
+            source_clause = next(
+                (item for item in graph.clauses
+                 if item.clause_id == clause.ellipsis_source_clause_id), None,
+            )
+            candidates = source_by_clause.get(clause.ellipsis_source_clause_id or "", [])
+            if (
+                source_clause is None
+                or source_clause.span.end_index >= clause.span.start_index
+                or source_clause.sentence_id != clause.sentence_id
+                or len(candidates) != 1
+            ):
+                unresolved(clause, "source_frame_not_unique_or_unavailable")
+            source = candidates[0]
+            if source.alternatives:
+                unresolved(clause, "source_has_unresolved_alternatives")
+            source_roles = {actant.role for actant in source.actants}
+            if not source_roles or len(source_roles) != len(source.actants):
+                unresolved(clause, "source_roles_not_unique_or_empty")
+
+            blocked_markers = {
+                token.index
+                for token in graph.tokens
+                if clause.span.start_index <= token.index <= clause.span.end_index
+                and token.text.casefold() in marker_words
+            }
+            old_active_clause = self._active_implicit_clause_id
+            old_blocked = set(getattr(self, "_runtime_blocked_token_indices", set()))
+            self._active_implicit_clause_id = clause.clause_id
+            self._runtime_blocked_token_indices = old_blocked | blocked_markers
+            try:
+                target_actants, _ = self._extract_actants(
+                    text,
+                    tokens,
+                    None,
+                    source.predicate,
+                    act_type="ASSERTION",
+                    requested_roles=(),
+                    requested_spans=(),
+                    role_whitelist=source_roles,
+                )
+            finally:
+                self._active_implicit_clause_id = old_active_clause
+                self._runtime_blocked_token_indices = old_blocked
+
+            for actant in target_actants:
+                evidence = actant.evidence
+                if (
+                    evidence is None or evidence.start is None or evidence.end is None
+                    or evidence.start < clause.span.evidence.start
+                    or evidence.end > clause.span.evidence.end
+                    or evidence.start >= evidence.end
+                    or text[evidence.start:evidence.end] != evidence.text
+                ):
+                    unresolved(clause, "target_role_without_local_evidence")
+
+            # Parallel ellipsis gives us stronger *structural* evidence than a
+            # free-standing role probe: overt fillers in the target can be aligned
+            # with the already-resolved source frame by their grammatical
+            # realization signature.  This is deliberately not a generic
+            # DAT->RECIPIENT / NOM->SUBJECT shortcut.  We only transfer a source
+            # role when the target phrase has the same source-grounded realization
+            # signature and that signature identifies exactly one source slot.
+            # Example: ``Анна отправила письмо Сергею, а Ольга сообщение Петру``
+            # aligns NOM->{SUBJECT}, NOM/ACC->{OBJECT}, DAT->{RECIPIENT}, even if a
+            # bounded semantic probe swaps the two person roles.
+            def _realization_signature(actant: ActantCandidate):
+                evidence = actant.evidence
+                if evidence is None or evidence.start is None or evidence.end is None:
+                    return None
+                covered = [
+                    token for token in tokens
+                    if token.start >= evidence.start and token.end <= evidence.end
+                    and self._is_word_token(token)
+                ]
+                if not covered:
+                    return None
+                prepositions: list[str] = []
+                nominal_cases: list[tuple[str, ...]] = []
+                nominal_pos: list[tuple[str, ...]] = []
+                for token in covered:
+                    infos = tuple(self._material_morph_analyses(token))
+                    prep_lemmas = sorted({
+                        info.normal_form.casefold() for info in infos
+                        if info.pos == "PREP" and info.normal_form
+                    })
+                    prepositions.extend(prep_lemmas)
+                    nom_infos = [info for info in infos if info.pos in {"NOUN", "NPRO"}]
+                    if nom_infos:
+                        nominal_cases.append(tuple(sorted({info.case for info in nom_infos if info.case})))
+                        nominal_pos.append(tuple(sorted({info.pos for info in nom_infos if info.pos})))
+                if not nominal_cases:
+                    return None
+                return (tuple(prepositions), tuple(nominal_cases), tuple(nominal_pos))
+
+            source_signature_roles: dict[object, list[ActantRole]] = {}
+            for source_actant in source.actants:
+                signature = _realization_signature(source_actant)
+                if signature is not None:
+                    source_signature_roles.setdefault(signature, []).append(source_actant.role)
+
+            aligned: list[ActantCandidate] = []
+            claimed_roles: set[ActantRole] = set()
+            alignment_changed = False
+            for target_actant in target_actants:
+                signature = _realization_signature(target_actant)
+                candidates = source_signature_roles.get(signature, []) if signature is not None else []
+                if len(candidates) == 1 and candidates[0] not in claimed_roles:
+                    aligned_role = candidates[0]
+                    claimed_roles.add(aligned_role)
+                    if aligned_role is not target_actant.role:
+                        target_actant = replace(target_actant, role=aligned_role)
+                        alignment_changed = True
+                else:
+                    claimed_roles.add(target_actant.role)
+                aligned.append(target_actant)
+            if alignment_changed:
+                target_actants = tuple(aligned)
+                self._deterministic_trace(
+                    "ellipsis_slot_alignment",
+                    f"SOURCE:{source.local_id}\nTARGET_CLAUSE:{clause.span.text}",
+                    ",".join(f"{item.role.value}:{item.mention or item.normalized_hint or '?'}" for item in target_actants),
+                )
+
+            # One canonical slot cannot silently keep only the final filler.
+            # Coordinated fillers must arrive as one explicit composition.
+            if not target_actants:
+                unresolved(clause, "no_explicit_target_roles")
+            explicit_by_role = {actant.role: actant for actant in target_actants}
+            if len(explicit_by_role) != len(target_actants):
+                unresolved(clause, "duplicate_target_roles")
+            if not set(explicit_by_role) <= source_roles:
+                unresolved(clause, "target_role_outside_source_frame")
+            merged: list[ActantCandidate] = []
+            inherited_roles: list[str] = []
+            replaced_roles: list[str] = []
+            for source_actant in source.actants:
+                replacement = explicit_by_role.get(source_actant.role)
+                if replacement is not None:
+                    merged.append(replacement)
+                    replaced_roles.append(source_actant.role.value)
+                else:
+                    merged.append(source_actant)
+                    inherited_roles.append(source_actant.role.value)
+
+            kind = clause.ellipsis_kind
+            if kind is EllipsisKind.PROPOSITION_NEGATION and source.negated:
+                unresolved(clause, "negated_antecedent_requires_clarification")
+
+            negated = (
+                True
+                if kind is EllipsisKind.PROPOSITION_NEGATION
+                else source.negated
+            )
+            next_id = len(out) + 1
+            while f"A{next_id}" in used_ids:
+                next_id += 1
+            local_id = f"A{next_id}"
+            used_ids.add(local_id)
+            evidence = EvidenceSpan(
+                clause.span.text,
+                clause.span.evidence.start,
+                clause.span.evidence.end,
+            )
+            recovered = AssertionCandidate(
+                local_id=local_id,
+                predicate=source.predicate,
+                actants=tuple(merged),
+                evidence=evidence,
+                negated=negated,
+                status=source.status,
+                temporal_mode=source.temporal_mode,
+                transition_operator=source.transition_operator,
+                quoted=source.quoted,
+            )
+            out.append(recovered)
+            # Predicate evidence still points to the antecedent; structural scope
+            # ownership belongs to the target clause and must survive compilation.
+            spans_out[local_id] = self._resolve_span(
+                text, tokens, clause.span.start_index, clause.span.end_index,
+            )
+            source_by_clause[clause.clause_id] = [recovered]
+            self._deterministic_trace(
+                "frame_completion",
+                (
+                    f"SOURCE:{source.local_id}\n"
+                    f"TARGET_CLAUSE:{clause.span.text}\n"
+                    f"INHERITED:{','.join(inherited_roles) or '-'}"
+                ),
+                f"predicate={source.predicate.lookup_form if source.predicate else '?'}",
+            )
+            self._deterministic_trace(
+                "ellipsis_recovery",
+                (
+                    f"SOURCE:{source.local_id}\n"
+                    f"TARGET_CLAUSE:{clause.span.text}\n"
+                    f"MODE:{kind.value if kind is not None else 'FRAME'}"
+                ),
+                (
+                    f"{local_id}; replaced={','.join(replaced_roles) or '-'}; "
+                    f"inherited={','.join(inherited_roles) or '-'}; "
+                    f"negated={str(negated).lower()}"
+                ),
+            )
+
+        return out, spans_out
+
+    def _project_orphan_subordinate_participants(
+        self,
+        assertions: list[AssertionCandidate],
+    ) -> tuple[list[AssertionCandidate], tuple[str, ...]]:
+        """Recover semantic content behind an orphaned subordinate connector.
+
+        Comma-heavy prose can place an empty subordinate connector segment between a
+        matrix predicate and the finite predicate that completes it, e.g. ``увидел,
+        что к судну, разрезая воду, приближалась лодка``.  The clause graph correctly
+        recognizes ``что`` as subordinate to the matrix clause, but a detached
+        parenthetical can leave the later finite clause without a dependency edge.
+
+        The important distinction is semantic: in ``увидел, что лодка приближалась``
+        the matrix OBJECT is the *proposition/event*, not the noun ``лодка``.  AH
+        already supports an N as an actant of another N, so this pass first asks one
+        tiny source-only question whether CHILD EVENT itself is matrix content.  Only
+        when the text instead makes the child's SUBJECT a direct matrix participant
+        do we project that participant.  NO_LINK/UNCLEAR changes nothing.
+
+        Python fixes the exact orphaned-connector shape, one parent with a free
+        OBJECT slot, and one nearest asserted finite child before the model is called.
+        The model never sees or chooses canonical UIDs.
+        """
+        graph = self._candidate_graph
+        if graph is None or not assertions:
+            return assertions, ()
+
+        by_id = {item.local_id: item for item in assertions}
+        head_by_index = {head.token_index: head for head in graph.predicates}
+
+        def predicate_token(item: AssertionCandidate):
+            evidence = item.predicate.evidence
+            if evidence is None or evidence.start is None or evidence.end is None:
+                return None
+            matches = [
+                token for token in graph.tokens
+                if token.start == evidence.start and token.end == evidence.end
+            ]
+            return matches[0] if len(matches) == 1 else None
+
+        assertion_clause: dict[str, object] = {}
+        assertion_head: dict[str, object] = {}
+        for item in assertions:
+            token = predicate_token(item)
+            if token is None:
+                continue
+            clause = graph.clause_for_token(token.index)
+            head = head_by_index.get(token.index)
+            if clause is not None and head is not None:
+                assertion_clause[item.local_id] = clause
+                assertion_head[item.local_id] = head
+
+        diagnostics: list[str] = []
+        for bridge in graph.clauses:
+            if (
+                bridge.parent_clause_id is None
+                or bridge.relative
+                or bridge.quoted
+                or bridge.predicate_heads
+                or bridge.connector_span is None
+                or not bridge.marker
+            ):
+                continue
+
+            parents = [
+                item for item in assertions
+                if getattr(assertion_clause.get(item.local_id), "clause_id", None) == bridge.parent_clause_id
+                and item.status is AssertionStatus.ASSERTED
+                and not item.quoted
+                and not item.negated
+                and not any(actant.role is ActantRole.OBJECT for actant in item.actants)
+            ]
+            if len(parents) != 1:
+                continue
+            parent = parents[0]
+            parent_head = assertion_head.get(parent.local_id)
+            if parent_head is None or not getattr(parent_head, "finite", False):
+                continue
+
+            connector_end = bridge.connector_span.evidence.end
+            if connector_end is None:
+                continue
+            child_pool: list[tuple[int, AssertionCandidate]] = []
+            for child in assertions:
+                if child.local_id == parent.local_id:
+                    continue
+                child_clause = assertion_clause.get(child.local_id)
+                child_head = assertion_head.get(child.local_id)
+                predicate_evidence = child.predicate.evidence
+                if (
+                    child_clause is None or child_head is None
+                    or child.status is not AssertionStatus.ASSERTED
+                    or child.quoted or child.negated
+                    or getattr(child_clause, "sentence_id", None) != bridge.sentence_id
+                    or getattr(child_clause, "relative", False)
+                    or getattr(child_clause, "quoted", False)
+                    or getattr(child_clause, "implicit_copula", False)
+                    or not getattr(child_head, "finite", False)
+                    or predicate_evidence is None or predicate_evidence.start is None
+                    or predicate_evidence.start <= connector_end
+                ):
+                    continue
+                subjects = [a for a in child.actants if a.role is ActantRole.SUBJECT]
+                if len(subjects) != 1:
+                    continue
+                participant = subjects[0]
+                if participant.candidate_ref is not None or participant.proposition is not None:
+                    continue
+                child_pool.append((predicate_evidence.start, child))
+            if not child_pool:
+                continue
+            child_pool.sort(key=lambda pair: pair[0])
+            child = child_pool[0][1]
+            participant = next(a for a in child.actants if a.role is ActantRole.SUBJECT)
+
+            source_text = graph.text
+            prompt = (
+                f"TEXT:\n{source_text}\n"
+                f"PARENT EVENT:\n{parent.predicate.surface}\n"
+                f"CHILD EVENT:\n{child.predicate.surface}\n"
+                f"CHILD SUBJECT:\n{participant.mention or participant.normalized_hint or '?'}\n"
+                "QUESTION:\nWhat, if anything, fills the direct semantic OBJECT/content slot "
+                "of PARENT EVENT in this sentence?\n"
+                "EVENT_CONTENT: the proposition CHILD EVENT itself is what is perceived, "
+                "said, known, thought, etc.\n"
+                "DIRECT_SUBJECT_OBJECT: CHILD SUBJECT itself is a direct OBJECT of PARENT "
+                "EVENT, independently of CHILD EVENT.\n"
+                "NO_LINK: neither relation is entailed by the text.\n"
+                "UNCLEAR: the sentence does not determine one reading.\n"
+                "CHOICES:\nEVENT_CONTENT\nDIRECT_SUBJECT_OBJECT\nNO_LINK\nUNCLEAR"
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "subordinate_content",
+                prompt,
+                ("EVENT_CONTENT", "DIRECT_SUBJECT_OBJECT", "NO_LINK", "UNCLEAR"),
+                optional=True,
+            )
+            parent = by_id[parent.local_id]
+            if decision == "EVENT_CONTENT":
+                projected = ActantCandidate(
+                    ActantRole.OBJECT,
+                    candidate_ref=child.local_id,
+                    semantic_hint="SUBORDINATE_PROPOSITION_CONTENT",
+                    evidence=child.evidence or child.predicate.evidence,
+                )
+                by_id[parent.local_id] = replace(parent, actants=parent.actants + (projected,))
+                diagnostics.append(
+                    f"subordinate-content: {child.local_id} projected as {parent.local_id}.OBJECT event"
+                )
+                continue
+            if decision == "DIRECT_SUBJECT_OBJECT":
+                projected = replace(participant, role=ActantRole.OBJECT)
+                by_id[parent.local_id] = replace(parent, actants=parent.actants + (projected,))
+                diagnostics.append(
+                    f"subordinate-content: {child.local_id}.SUBJECT projected as {parent.local_id}.OBJECT"
+                )
+
+        return [by_id.get(item.local_id, item) for item in assertions], tuple(diagnostics)
+
+    def _narrative_causal_review_eligible(
+        self,
+        source: AssertionCandidate,
+        target: AssertionCandidate,
+        hint: SituationRelationHintCandidate,
+    ) -> bool:
+        """Return True only for a narrow source pattern worth one causal probe.
+
+        ``EventNormalizer`` intentionally emits broad CAUSAL_CANDIDATE hints for
+        diagnostic/runtime use.  Calling an LLM for every adjacent pair would turn
+        ordinary coordination, relative clauses and nominal helper facts into an
+        unbounded semantic second pass.  Promotion is therefore restricted to a
+        high-information pair already established by EventNormalizer: two material
+        events in the same non-relative, non-quoted sentence and an explicit
+        CAUSAL_CANDIDATE for that exact adjacent pair.  A role-changing shared
+        participant or a structural passive-result description is additionally
+        required before the model is asked.
+
+        The guard is structural, not lexical.  It never decides CAUSE itself; it only
+        decides whether the already bounded CAUSAL_RESPONSE/NO_CAUSAL_RESPONSE/UNCLEAR question is
+        worth asking.  Cross-sentence adjacency remains a weak runtime hint.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return False
+
+        def predicate_token_and_clause(item: AssertionCandidate):
+            evidence = item.predicate.evidence
+            if evidence is None or evidence.start is None or evidence.end is None:
+                return None, None
+            matches = [
+                token for token in graph.tokens
+                if token.start == evidence.start and token.end == evidence.end
+            ]
+            if len(matches) != 1:
+                return None, None
+            token = matches[0]
+            return token, graph.clause_for_token(token.index)
+
+        source_token, source_clause = predicate_token_and_clause(source)
+        target_token, target_clause = predicate_token_and_clause(target)
+        if source_token is None or target_token is None or source_clause is None or target_clause is None:
+            return False
+        if (
+            source_clause.sentence_id != target_clause.sentence_id
+            or source_clause.relative
+            or target_clause.relative
+            or source_clause.quoted
+            or target_clause.quoted
+            or source_clause.implicit_copula
+            or target_clause.implicit_copula
+        ):
+            return False
+
+        # Synthetic/helper predicates need not have a material finite/gerund head.
+        def is_event_head(token) -> bool:
+            material = material_analyses(token.analyses)
+            return any(item.pos in {"VERB", "GRND"} for item in material)
+
+        if not is_event_head(source_token) or not is_event_head(target_token):
+            return False
+
+        def identity(actant: ActantCandidate) -> tuple[str, str] | None:
+            if actant.entity_ref:
+                return ("entity", actant.entity_ref)
+            value = (actant.normalized_hint or actant.mention or "").strip().casefold().replace("ё", "е")
+            return ("text", value) if value else None
+
+        # Reaching this point means EventNormalizer has already reduced the text
+        # to one concrete adjacent event pair and emitted a CAUSAL_CANDIDATE.  Keep
+        # the semantic second pass sparse: ordinary same-subject serial narration
+        # must not trigger a model call.  A review is useful when source identity
+        # already shows a participant changing between actor/patient roles (reaction
+        # pattern), or when EventNormalizer marked the target as a passive-result
+        # description whose referent may not yet have converged.
+        source_by_role: dict[ActantRole, set[tuple[str, str]]] = {}
+        target_by_role: dict[ActantRole, set[tuple[str, str]]] = {}
+        for actant in source.actants:
+            ident = identity(actant)
+            if ident is not None:
+                source_by_role.setdefault(actant.role, set()).add(ident)
+        for actant in target.actants:
+            ident = identity(actant)
+            if ident is not None:
+                target_by_role.setdefault(actant.role, set()).add(ident)
+
+        source_patients = set().union(
+            source_by_role.get(ActantRole.OBJECT, set()),
+            source_by_role.get(ActantRole.RECIPIENT, set()),
+        )
+        target_patients = set().union(
+            target_by_role.get(ActantRole.OBJECT, set()),
+            target_by_role.get(ActantRole.RECIPIENT, set()),
+        )
+        source_subjects = source_by_role.get(ActantRole.SUBJECT, set())
+        target_subjects = target_by_role.get(ActantRole.SUBJECT, set())
+        role_transition = bool(
+            (source_patients & target_subjects)
+            or (source_subjects & target_patients)
+        )
+        result_description = "passive-result subject" in (hint.reason or "")
+        return role_transition or result_description
+
+    def _resolve_narrative_causal_candidates(
+        self,
+        assertions: list[AssertionCandidate],
+        relations: tuple[SituationRelationCandidate, ...],
+        hints: tuple[SituationRelationHintCandidate, ...],
+    ) -> tuple[
+        tuple[SituationRelationCandidate, ...],
+        tuple[SituationRelationHintCandidate, ...],
+        tuple[str, ...],
+    ]:
+        """Promote only source-grounded narrative response hints to canonical CAUSE.
+
+        EventNormalizer deliberately emits broad runtime CAUSAL_CANDIDATE hints
+        from local narrative structure.  They are not truth.  This pass asks one
+        tiny UID-free question only after Python has fixed the two concrete source
+        events.  CAUSAL_RESPONSE promotes the pair to an ordinary
+        SituationRelationCandidate so Integration may materialize ``L(CAUSE)``;
+        NO_CAUSAL_RESPONSE/UNCLEAR leave the
+        hint non-canonical.  Invalid protocol output is optional/fail-closed and
+        never destroys the already parsed facts.
+        """
+        by_id = {item.local_id: item for item in assertions}
+        existing = {(item.canonical_relation_id, item.source_ref, item.target_ref) for item in relations}
+        out = list(relations)
+        kept_hints: list[SituationRelationHintCandidate] = []
+        diagnostics: list[str] = []
+        for hint in hints:
+            if hint.kind is not SituationRelationHintKind.CAUSAL_CANDIDATE:
+                kept_hints.append(hint)
+                continue
+            source = by_id.get(hint.source_ref)
+            target = by_id.get(hint.target_ref)
+            if (
+                source is None or target is None
+                or source.status is not AssertionStatus.ASSERTED
+                or target.status is not AssertionStatus.ASSERTED
+                or source.quoted or target.quoted
+                or source.negated or target.negated
+                or ("CAUSE", source.local_id, target.local_id) in existing
+                or not self._narrative_causal_review_eligible(source, target, hint)
+            ):
+                kept_hints.append(hint)
+                continue
+
+            def event_text(item: AssertionCandidate) -> str:
+                evidence = item.evidence or item.predicate.evidence
+                if evidence is not None and evidence.text.strip():
+                    return evidence.text.strip()
+                parts = [item.predicate.surface]
+                parts.extend(a.mention for a in item.actants if a.mention)
+                return " ".join(parts).strip()
+
+            prompt = (
+                f"TEXT:\n{self._candidate_graph.text if self._candidate_graph is not None else ''}\n"
+                f"EVENT A:\n{event_text(source)}\n"
+                f"EVENT B:\n{event_text(target)}\n"
+                "QUESTION:\nDoes this narrative present EVENT B as a direct reaction, "
+                "response, consequence, or result triggered by EVENT A in this scene? "
+                "A contrastive construction can still describe a reaction. Mere temporal "
+                "order, topic continuity, shared participants, or plausibility are not enough.\n"
+                "CHOICES:\nCAUSAL_RESPONSE\nNO_CAUSAL_RESPONSE\nUNCLEAR"
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "narrative_causality",
+                prompt,
+                ("CAUSAL_RESPONSE", "NO_CAUSAL_RESPONSE", "UNCLEAR"),
+                optional=True,
+            )
+            if decision == "CAUSAL_RESPONSE":
+                relation = SituationRelationCandidate(
+                    "CAUSE", source.local_id, target.local_id, hint.evidence
+                )
+                out.append(relation)
+                existing.add(("CAUSE", source.local_id, target.local_id))
+                diagnostics.append(
+                    f"narrative-causality: {source.local_id} CAUSE {target.local_id} confirmed from source"
+                )
+                continue
+            kept_hints.append(hint)
+        return tuple(out), tuple(kept_hints), tuple(diagnostics)
 
     def _materialize_nominal_subject_projections(
         self,
@@ -1950,8 +2703,8 @@ class AdaptivePerceptionParser:
 
         return [mark(item) for item in assertions]
 
-    @staticmethod
     def _mark_embedded_statuses(
+        self,
         assertions: list[AssertionCandidate],
     ) -> list[AssertionCandidate]:
         """Mark proposition-valued content that is not independently asserted.
@@ -1966,10 +2719,16 @@ class AdaptivePerceptionParser:
             for actant in parent.actants:
                 if actant.role not in {ActantRole.OBJECT, ActantRole.PURPOSE, ActantRole.HOW_TO}:
                     continue
-                if actant.candidate_ref is not None:
+                if (
+                    actant.candidate_ref is not None
+                    and actant.candidate_ref not in self._asserted_nonfinite_refs
+                ):
                     embedded_refs.add(actant.candidate_ref)
                 if actant.proposition is not None:
-                    embedded_refs.update(actant.proposition.leaf_refs())
+                    embedded_refs.update(
+                        ref for ref in actant.proposition.leaf_refs()
+                        if ref not in self._asserted_nonfinite_refs
+                    )
         if not embedded_refs:
             return assertions
         def mark(item: AssertionCandidate) -> AssertionCandidate:
@@ -1987,6 +2746,105 @@ class AdaptivePerceptionParser:
             )
 
         return [mark(item) for item in assertions]
+
+    def _promote_factive_embedded_content(
+        self,
+        assertions: list[AssertionCandidate],
+    ) -> tuple[list[AssertionCandidate], tuple[str, ...]]:
+        """Promote proposition content only when the matrix event entails its truth.
+
+        ``_mark_embedded_statuses`` is intentionally conservative: proposition-valued
+        OBJECT content is scoped EMBEDDED so verbs of saying, thinking, hoping, etc.
+        cannot leak their complements into ordinary world truth.  Some matrix events
+        are factive in the concrete source use, however (for example perception or
+        discovery of an event that actually occurred).  This pass handles exactly
+        that missing semantic boundary.
+
+        Python first fixes one asserted matrix proposition and one already-linked
+        EMBEDDED child through the explicit ``SUBORDINATE_PROPOSITION_CONTENT`` cue.
+        The model receives only the source text and the two local event descriptions
+        and answers one bounded FACTIVE/NONFACTIVE/UNCLEAR question.  Canonical UIDs
+        never cross the perception boundary.  NONFACTIVE/UNCLEAR leaves the child
+        scoped; only FACTIVE restores ordinary ASSERTED status.
+        """
+        graph = self._candidate_graph
+        if graph is None or not assertions:
+            return assertions, ()
+
+        by_id = {item.local_id: item for item in assertions}
+        diagnostics: list[str] = []
+
+        def event_text(item: AssertionCandidate) -> str:
+            evidence = item.evidence or item.predicate.evidence
+            if evidence is not None and evidence.text.strip():
+                return evidence.text.strip()
+            parts = [item.predicate.surface]
+            parts.extend(a.mention for a in item.actants if a.mention)
+            return " ".join(parts).strip()
+
+        for parent in assertions:
+            if (
+                parent.status is not AssertionStatus.ASSERTED
+                or parent.quoted
+                or parent.negated
+            ):
+                continue
+            for actant in parent.actants:
+                if (
+                    actant.role is not ActantRole.OBJECT
+                    or actant.candidate_ref is None
+                    or (actant.semantic_hint or "").strip().upper()
+                    != "SUBORDINATE_PROPOSITION_CONTENT"
+                ):
+                    continue
+                child = by_id.get(actant.candidate_ref)
+                if (
+                    child is None
+                    or child.status is not AssertionStatus.EMBEDDED
+                    or child.quoted
+                    or child.negated
+                ):
+                    continue
+
+                prompt = (
+                    f"TEXT:\n{graph.text}\n"
+                    f"MATRIX EVENT:\n{event_text(parent)}\n"
+                    f"CONTENT EVENT:\n{event_text(child)}\n"
+                    "QUESTION:\nDoes this use of MATRIX EVENT present CONTENT EVENT "
+                    "as an actual fact in the narrated world, rather than merely as "
+                    "something said, thought, imagined, hoped, intended, or otherwise "
+                    "represented without asserting its truth?\n"
+                    "FACTIVE: the text commits to CONTENT EVENT as actually occurring/holding.\n"
+                    "NONFACTIVE: the text only represents CONTENT EVENT as content and does not "
+                    "commit to its truth.\n"
+                    "UNCLEAR: the text does not determine this safely.\n"
+                    "CHOICES:\nFACTIVE\nNONFACTIVE\nUNCLEAR"
+                )
+                decision, _ = self._deep_semantic_choice_probe(
+                    "factivity",
+                    prompt,
+                    ("FACTIVE", "NONFACTIVE", "UNCLEAR"),
+                    optional=True,
+                )
+                if decision != "FACTIVE":
+                    continue
+
+                alternatives = tuple(
+                    replace(alt, status=AssertionStatus.ASSERTED)
+                    if alt.status is AssertionStatus.EMBEDDED else alt
+                    for alt in child.alternatives
+                )
+                promoted = replace(
+                    child,
+                    status=AssertionStatus.ASSERTED,
+                    alternatives=alternatives,
+                )
+                by_id[child.local_id] = promoted
+                diagnostics.append(
+                    f"factivity: {child.local_id} promoted to ASSERTED content of {parent.local_id}"
+                )
+
+        return [by_id.get(item.local_id, item) for item in assertions], tuple(diagnostics)
 
     def _derive_situation_relations(
         self,
@@ -2016,6 +2874,47 @@ class AdaptivePerceptionParser:
                 key=lambda lid: assertion_spans[lid].start_index
                 if assertion_spans[lid] is not None else 10**9
             )
+
+        clause_by_id = {clause.clause_id: clause for clause in graph.clauses}
+
+        def primary_locals(clause_id: str) -> list[str]:
+            """Return assertions headed by the clause's source predicate heads.
+
+            Clause-local helper assertions (for example a structural locative
+            predicate materialized from ``в``) are useful canonical facts, but
+            they are not the situation denoted by an inter-clause connective.
+            FOLLOW/CAUSE therefore anchor to the source predicate head(s) first
+            and fall back to all clause-local assertions only for legacy/implicit
+            clauses without an explicit head.
+            """
+            values = clause_to_locals.get(clause_id, [])
+            clause = clause_by_id.get(clause_id)
+            if clause is None or not clause.predicate_heads:
+                return values
+            heads = {head.token_index for head in clause.predicate_heads}
+            # ``assertion_spans`` describe the source region consumed while parsing
+            # an assertion, not necessarily the token that *heads* that assertion.
+            # A structural helper materialized inside the same region can therefore
+            # share the host span even though its own predicate is a preposition.
+            # Anchor connective relations to the assertion's predicate evidence
+            # itself and compare that evidence with the clause's explicit source
+            # predicate heads.
+            head_tokens = {
+                token.index: token for token in graph.tokens if token.index in heads
+            }
+            assertion_by_id = {item.local_id: item for item in assertions}
+            direct: list[str] = []
+            for local_id in values:
+                candidate = assertion_by_id.get(local_id)
+                evidence = candidate.predicate.evidence if candidate is not None else None
+                if evidence is None or evidence.start is None or evidence.end is None:
+                    continue
+                if any(
+                    token.start == evidence.start and token.end == evidence.end
+                    for token in head_tokens.values()
+                ):
+                    direct.append(local_id)
+            return direct or values
 
         # Values encode which local situation precedes the other.
         directions = {
@@ -2053,8 +2952,8 @@ class AdaptivePerceptionParser:
             if clause.parent_clause_id is None:
                 continue
             if clause.marker in {"потому_что", "так_как", "поскольку"}:
-                child_ids = clause_to_locals.get(clause.clause_id, [])
-                parent_ids = clause_to_locals.get(clause.parent_clause_id, [])
+                child_ids = primary_locals(clause.clause_id)
+                parent_ids = primary_locals(clause.parent_clause_id)
                 if child_ids and parent_ids:
                     source_id = child_ids[0]
                     target_id = parent_ids[-1]
@@ -2076,8 +2975,8 @@ class AdaptivePerceptionParser:
             direction = directions.get(clause.marker or "")
             if direction is None:
                 continue
-            child_ids = clause_to_locals.get(clause.clause_id, [])
-            parent_ids = clause_to_locals.get(clause.parent_clause_id, [])
+            child_ids = primary_locals(clause.clause_id)
+            parent_ids = primary_locals(clause.parent_clause_id)
             if not child_ids or not parent_ids:
                 continue
             child_id = child_ids[0]
@@ -2412,15 +3311,34 @@ class AdaptivePerceptionParser:
         # coordinated frame. Otherwise assigning a fresh id to the copied pronoun
         # would hide the stronger antecedent relation already available in context.
         self._resolve_pronoun_coreferences(by_id)
+        # A source-linked gerund is grammatically controlled by its matrix
+        # subject. Perform this after local pronoun resolution so an already
+        # established entity_ref is copied when available, then let exact-span
+        # binding below stabilize any still-deictic source copy.
+        self._inherit_nonfinite_subjects(by_id)
+        # A fronted gerund can itself receive the matrix subject only in the pass
+        # above and then license a following finite conjunct (``снял, подняв..., и
+        # поставил``). Re-run the same source-structural inheritance to a fixed
+        # point; already filled SUBJECT slots make this idempotent.
+        self._inherit_omitted_clause_subjects(by_id, clause_to_locals)
         # Predicate coordination owns shared arguments as a group-level property.
         # SUBJECT, postposed OBJECT and other roles therefore use one mechanism
         # instead of accumulating role-specific ellipsis functions.
         self._share_coordinated_predicate_actants(
             by_id, clause_to_locals, assertion_spans
         )
+        # Structural inheritance/coordination may have introduced the first usable
+        # copy of a source pronoun only after the initial coreference pass. Resolve
+        # once more before exact-span coalescing; already resolved pronouns are
+        # skipped, so this is idempotent.
+        self._resolve_pronoun_coreferences(by_id)
         # Repeated copies of the same source span must retain the identity that was
         # established above. Exact evidence-span identity is deterministic.
         self._bind_reused_source_mentions(by_id)
+        # Possessive pronouns that live *inside* an NP are not ordinary actants,
+        # so bind their unique turn-local antecedent after ordinary coreference has
+        # stabilized source entity ids.
+        self._resolve_nominal_relation_coreferences(by_id)
 
         def attach_expr(parent_id: str, expr: PropositionExprCandidate, role: ActantRole) -> bool:
             parent = by_id[parent_id]
@@ -2615,7 +3533,97 @@ class AdaptivePerceptionParser:
             attach_oriented_frame(parents[0], children[0])
 
         self._resolve_control_subjects(by_id, assertion_spans)
+        # Control resolution can be the first point where an infinitival member of
+        # an explicit predicate coordination acquires its source actor
+        # (``Зурита успел подняться и уселся``). Re-run the generic coordination
+        # sharing after control; filled role slots make the operation idempotent.
+        self._share_coordinated_predicate_actants(
+            by_id, clause_to_locals, assertion_spans
+        )
+        self._bind_reused_source_mentions(by_id)
+        self._classify_nonfinite_assertion_status(by_id, assertion_spans)
         return [by_id[item.local_id] for item in assertions]
+
+    def _classify_nonfinite_assertion_status(
+        self,
+        by_id: dict[str, AssertionCandidate],
+        assertion_spans: dict[str, _Span | None],
+    ) -> None:
+        """Distinguish asserted infinitival activity from merely embedded content.
+
+        A structural NONFINITE edge does not decide truth status.  Compare
+        ``лодка продолжала идти`` / ``вода начала просачиваться`` with
+        ``он хотел уйти`` / ``он попросил друга уйти``: all contain an infinitive,
+        but only the first class asserts that the child activity occurs.
+
+        Python first narrows the question to one already-oriented matrix/infinitive
+        pair.  A tiny fixed-choice semantic probe sees only source text and the two
+        source predicates; it never receives AH UIDs or canonical candidates.
+        UNCLEAR and protocol failure conservatively keep the ordinary EMBEDDED
+        treatment.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return
+
+        head_to_locals: dict[int, list[str]] = {}
+        for local_id, span in assertion_spans.items():
+            if span is None:
+                continue
+            for head in graph.predicates:
+                if span.start_index <= head.token_index <= span.end_index:
+                    head_to_locals.setdefault(head.token_index, []).append(local_id)
+
+        def child_is_attached(parent: AssertionCandidate, child_id: str) -> bool:
+            for actant in parent.actants:
+                if actant.candidate_ref == child_id:
+                    return True
+                if (
+                    actant.proposition is not None
+                    and child_id in actant.proposition.leaf_refs()
+                ):
+                    return True
+            return False
+
+        for dependency in graph.frame_graph.dependencies:
+            if dependency.kind is not FrameDependencyKind.NONFINITE:
+                continue
+            child_token = next(
+                (item for item in graph.tokens if item.index == dependency.child_token_index),
+                None,
+            )
+            if child_token is None or not any(
+                info.pos == "INFN" for info in self._material_morph_analyses(child_token)
+            ):
+                # Gerunds describe a source-visible event/state directly and are
+                # handled by gerund control/EventNormalizer, not this ambiguity.
+                continue
+            parents = head_to_locals.get(dependency.parent_token_index, [])
+            children = head_to_locals.get(dependency.child_token_index, [])
+            if len(parents) != 1 or len(children) != 1:
+                continue
+            parent_id, child_id = parents[0], children[0]
+            parent, child = by_id.get(parent_id), by_id.get(child_id)
+            if parent is None or child is None or not child_is_attached(parent, child_id):
+                continue
+
+            prompt = (
+                f"TEXT:\n{graph.text}\n"
+                f"MATRIX PREDICATE:\n{parent.predicate.surface}\n"
+                f"INFINITIVE EVENT:\n{child.predicate.surface}\n"
+                "QUESTION:\nDoes the sentence assert that the INFINITIVE EVENT actually "
+                "occurs/starts/continues/completes, or does the matrix only present it "
+                "as wanted, requested, planned, attempted, possible, or other non-asserted "
+                "content?\nCHOICES:\nASSERTED_EVENT\nNONASSERTED_CONTENT\nUNCLEAR"
+            )
+            decision, _margin = self._deep_semantic_choice_probe(
+                "nonfinite_assertion_status",
+                prompt,
+                ("ASSERTED_EVENT", "NONASSERTED_CONTENT", "UNCLEAR"),
+                optional=True,
+            )
+            if decision == "ASSERTED_EVENT":
+                self._asserted_nonfinite_refs.add(child_id)
 
     def _plausible_recipient_participant(self, actant: ActantCandidate) -> bool:
         """Conservatively gate post-structural OBJECT→RECIPIENT repair.
@@ -2809,6 +3817,7 @@ class AdaptivePerceptionParser:
                             semantic_hint=controller.semantic_hint,
                             entity_ref=entity_ref,
                             evidence=controller.evidence,
+                            grammatical_number=controller.grammatical_number,
                         )
                         for base in current_child.alternatives or (replace(current_child, alternatives=()),):
                             if any(a.role == ActantRole.SUBJECT for a in base.actants):
@@ -2835,6 +3844,7 @@ class AdaptivePerceptionParser:
                     semantic_hint=chosen.semantic_hint,
                     entity_ref=entity_ref,
                     evidence=chosen.evidence,
+                    grammatical_number=chosen.grammatical_number,
                 )
                 by_id[child_id] = replace(
                     current_child, actants=current_child.actants + (copied,)
@@ -3562,6 +4572,36 @@ class AdaptivePerceptionParser:
                             targets,
                             stage="coordinated_shared_actant",
                         )
+                        continue
+
+                    # Russian permits the explicit subject after the first finite
+                    # predicate but before the coordinator: ``выпустили матросы X
+                    # и упали``. In an explicit predicate-coordination group, that
+                    # grammatical subject controls rightward members unless a new
+                    # nominative shell starts there. This is stronger than generic
+                    # ellipsis and needs no semantic guess.
+                    source_span = assertion_spans.get(source_id)
+                    rightward_subjects: list[str] = []
+                    if source_evidence is not None and source_span is not None:
+                        for target in targets:
+                            target_span = assertion_spans.get(target)
+                            if target_span is None or target_span.start_index <= source_span.start_index:
+                                continue
+                            if any(
+                                source_evidence.end is not None
+                                and target_span.evidence.start is not None
+                                and source_evidence.end <= token.start < target_span.evidence.start
+                                and token.index in group.coordinator_token_indices
+                                for token in graph.tokens
+                            ):
+                                rightward_subjects.append(target)
+                    if rightward_subjects:
+                        add_to_targets(
+                            source,
+                            role,
+                            rightward_subjects,
+                            stage="coordinated_rightward_subject",
+                        )
                     continue
 
                 # Never propagate a non-subject actant across independently resolved
@@ -3792,6 +4832,7 @@ class AdaptivePerceptionParser:
                     semantic_hint=inherited.semantic_hint,
                     entity_ref=entity_ref,
                     evidence=inherited.evidence,
+                    grammatical_number=inherited.grammatical_number,
                 )
                 by_id[child_id] = replace(child, actants=child.actants + (copied,))
                 self._deterministic_trace(
@@ -3855,14 +4896,113 @@ class AdaptivePerceptionParser:
                 for token in graph.tokens
                 if left.span.end_index < token.index < right.span.start_index
             ]
-            if "," not in between or any(mark in _STRONG_BOUNDARY for mark in between):
+            if any(mark in _STRONG_BOUNDARY for mark in between):
+                continue
+            # Besides comma-separated serial predicates, an explicit coordinator
+            # can start a new same-sentence clause: ``Вера узнала знак и на
+            # мгновение закрыла глаза``. The coordinator licenses omitted-subject
+            # inheritance only when the right clause has no competing subject;
+            # ``inherit`` enforces that condition. This is source syntax, not a
+            # lexical valency rule.
+            right_first = next(
+                (
+                    token.text.casefold()
+                    for token in graph.tokens
+                    if right.span.start_index <= token.index <= right.span.end_index
+                    and re.search(r"\w", token.text)
+                ),
+                "",
+            )
+            explicit_coordinator = right_first in {"и", "а", "но", "да", "однако"}
+            if "," not in between and not explicit_coordinator:
                 continue
             inherit(
                 clause_to_locals.get(left.clause_id, []),
                 clause_to_locals.get(right.clause_id, []),
                 all_children=False,
-                stage="paratactic_subject_inheritance",
+                stage=(
+                    "coordinated_clause_subject_inheritance"
+                    if explicit_coordinator else "paratactic_subject_inheritance"
+                ),
             )
+
+
+    def _inherit_nonfinite_subjects(
+        self,
+        by_id: dict[str, AssertionCandidate],
+    ) -> None:
+        """Propagate the matrix subject into source-linked gerund frames.
+
+        Russian adverbial participles (GRND) are subject-controlled by the matrix
+        clause: in ``Отперев калитку, Алексей вошёл`` the understood actor of
+        ``отперев`` is the same grammatical participant as ``Алексей``.  The
+        linguistic candidate graph already records a NONFINITE dependency, so this
+        pass only copies a source-grounded SUBJECT across that dependency.  It does
+        not apply to infinitives, whose controller can legitimately differ
+        (``попросил его уйти``), and it never invents a subject when the matrix
+        frame itself has none.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return
+
+        token_by_start = {token.start: token for token in graph.tokens}
+        local_ids_by_token: dict[int, list[str]] = {}
+        for local_id, assertion in by_id.items():
+            evidence = assertion.predicate.evidence
+            if evidence is None:
+                continue
+            token = token_by_start.get(evidence.start)
+            if token is not None:
+                local_ids_by_token.setdefault(token.index, []).append(local_id)
+
+        def identity_key(actant: ActantCandidate) -> tuple[object, ...]:
+            if actant.entity_ref is not None:
+                return ("entity", actant.entity_ref)
+            if actant.evidence is not None:
+                return ("span", actant.evidence.start, actant.evidence.end)
+            return ("text", (actant.lookup_text or "").casefold())
+
+        for dependency in graph.frame_graph.dependencies:
+            if dependency.kind is not FrameDependencyKind.NONFINITE:
+                continue
+            child_token = graph.token(dependency.child_token_index)
+            # NONFINITE also includes infinitives. Only GRND has deterministic
+            # same-subject control in the construction handled here.
+            if not self._has_morph(child_token, poses={"GRND"}):
+                continue
+
+            parent_ids = local_ids_by_token.get(dependency.parent_token_index, [])
+            child_ids = local_ids_by_token.get(dependency.child_token_index, [])
+            if not parent_ids or not child_ids:
+                continue
+
+            subjects: list[ActantCandidate] = []
+            for parent_id in parent_ids:
+                subjects.extend(
+                    actant
+                    for actant in by_id[parent_id].actants
+                    if actant.role is ActantRole.SUBJECT
+                )
+            unique_subjects: dict[tuple[object, ...], ActantCandidate] = {}
+            for subject in subjects:
+                unique_subjects.setdefault(identity_key(subject), subject)
+            if len(unique_subjects) != 1:
+                continue
+            inherited = next(iter(unique_subjects.values()))
+
+            for child_id in child_ids:
+                child = by_id[child_id]
+                if any(actant.role is ActantRole.SUBJECT for actant in child.actants):
+                    continue
+                copied = replace(inherited, role=ActantRole.SUBJECT)
+                by_id[child_id] = replace(child, actants=child.actants + (copied,))
+                self._deterministic_trace(
+                    "nonfinite_subject_control",
+                    f"MATRIX SUBJECT:\n{copied.lookup_text or copied.mention or '?'}\n"
+                    f"GERUND PREDICATE:\n{child.predicate.surface}",
+                    copied.entity_ref or copied.lookup_text or "",
+                )
 
 
     def _bind_reused_source_mentions(
@@ -3894,6 +5034,29 @@ class AdaptivePerceptionParser:
             if len(members) < 2:
                 continue
             existing = [actant.entity_ref for _aid, actant in members if actant.entity_ref]
+            # Reused copies of an unresolved third-person personal pronoun are not
+            # an identity commitment yet.  Allocating a fresh E here would make the
+            # later anaphora resolver believe the pronoun was already resolved and
+            # block ordinary cross-sentence binding (e.g. ``Алексей пришёл. Он...``).
+            # Keep the exact source-span copies unbound until `_resolve_pronoun_coreferences`
+            # can attach them to an earlier nominal.  This is a grammatical-class
+            # rule derived from morphology, not a lexical name list.
+            if not existing:
+                def unresolved_personal_pronoun(actant: ActantCandidate) -> bool:
+                    words = re.findall(r"[\w-]+", actant.mention or actant.normalized_hint or "", flags=re.UNICODE)
+                    if not words:
+                        return False
+                    try:
+                        analyses = tuple(self.morphology.analyze_all(words[-1]))
+                    except AttributeError:
+                        item = self.morphology.analyze(words[-1])
+                        analyses = () if item is None else (item,)
+                    return any(
+                        info.pos == "NPRO" and info.normal_form.casefold() in {"он", "она", "оно", "они"}
+                        for info in analyses
+                    )
+                if all(unresolved_personal_pronoun(actant) for _aid, actant in members):
+                    continue
             # Conflicting refs for one exact source occurrence are an internal
             # semantic inconsistency. Never continue with two established identities
             # for the same evidence span.
@@ -3924,6 +5087,197 @@ class AdaptivePerceptionParser:
                     f"SOURCE_SPAN:\n{start}:{end}",
                     entity_ref,
                 )
+
+    def _resolve_nominal_relation_coreferences(
+        self,
+        by_id: dict[str, AssertionCandidate],
+    ) -> None:
+        """Bind explicit third-person possessors inside already parsed NPs.
+
+        Ordinary pronoun resolution operates on actant positions. A possessive in
+        ``торжество его`` is intentionally *inside* the SUBJECT NP and therefore
+        never becomes a standalone actant. This pass applies the same conservative
+        source-order principle to that internal relation: bind only when one
+        structurally compatible earlier discourse entity remains; otherwise keep
+        the relation unresolved for InteractionContext/clarification rather than
+        guessing.
+        """
+        third_person = {"он", "она", "оно", "они"}
+
+        def morphs(text: str | None) -> tuple[MorphInfo, ...]:
+            if not text:
+                return ()
+            words = re.findall(r"[\w-]+", text, flags=re.UNICODE)
+            if not words:
+                return ()
+            
+            try:
+                return tuple(self.morphology.analyze_all(words[-1]))
+            except AttributeError:
+                item = self.morphology.analyze(words[-1])
+                return () if item is None else (item,)
+
+        def pronoun_signature(text: str) -> tuple[set[str], set[str], set[str]] | None:
+            infos = tuple(
+                item for item in morphs(text)
+                if item.pos == "NPRO" and item.normal_form.casefold() in third_person
+            )
+            if not infos:
+                return None
+            numbers = {item.number for item in infos if item.number}
+            genders = {item.gender for item in infos if item.gender}
+            # Russian его/ему etc. are masculine/neuter syncretic even when one
+            # dictionary reading carries only masc. Preserve that grammatical fact.
+            folded = text.casefold().replace("ё", "е")
+            if folded in {"его", "него", "ему", "нему", "нем"} and genders == {"masc"}:
+                genders.add("neut")
+            lemmas = {item.normal_form.casefold() for item in infos}
+            return numbers, genders, lemmas
+
+        def candidate_surface_infos(candidate: ActantCandidate) -> tuple[MorphInfo, ...]:
+            # Compatibility is about the grammatical form that occurred in the
+            # source, not the canonical lemma used for entity lookup.  In
+            # particular ``письма`` may be plural in the sentence even though its
+            # normalized_hint is singular ``письмо``.  For structured NPs inspect
+            # the explicit head token rather than the last genitive dependent.
+            surface = (
+                candidate.nominal_relations[0].head_mention
+                if candidate.nominal_relations
+                else candidate.mention
+            )
+            infos = material_analyses(morphs(surface))
+            role_cases = {
+                ActantRole.SUBJECT: {"nomn"},
+                ActantRole.OBJECT: {"accs", "gent", "gen2"},
+                ActantRole.RECIPIENT: {"datv"},
+                ActantRole.LOCATION: {"loct"},
+                ActantRole.TOOL: {"ablt"},
+            }.get(candidate.role)
+            if role_cases and infos:
+                narrowed = tuple(item for item in infos if item.case in role_cases)
+                if narrowed:
+                    infos = narrowed
+            if infos:
+                return infos
+            return material_analyses(morphs(candidate.normalized_hint))
+
+        def compatible(sig: tuple[set[str], set[str], set[str]], candidate: ActantCandidate) -> bool:
+            infos = candidate_surface_infos(candidate)
+            if not infos:
+                return True
+            if not any(
+                item.pos in {"NOUN", "NPRO"}
+                or (item.pos in {"ADJF", "ADJS", "PRTF", "PRTS"} and "Subx" in item.grammemes)
+                for item in infos
+            ):
+                return False
+            p_numbers, p_genders, _ = sig
+            c_numbers = {item.number for item in infos if item.number}
+            c_genders = {item.gender for item in infos if item.gender}
+            if p_numbers and c_numbers and p_numbers.isdisjoint(c_numbers):
+                return False
+            if p_genders and c_genders and p_genders.isdisjoint(c_genders):
+                return False
+            return True
+
+        # Snapshot source candidates by position. entity_ref allocation may mutate
+        # by_id, so we keep stable assertion ids + actant indexes rather than object
+        # identities.
+        antecedents: list[tuple[int, str, int]] = []
+        for assertion_id, assertion in by_id.items():
+            for actant_index, actant in enumerate(assertion.actants):
+                if (
+                    actant.candidate_ref is not None
+                    or actant.composition is not None
+                    or actant.proposition is not None
+                    or actant.evidence is None
+                ):
+                    continue
+                antecedents.append((actant.evidence.start or 0, assertion_id, actant_index))
+        antecedents.sort(key=lambda row: row[0])
+
+        relation_sites: list[tuple[int, str, int, int]] = []
+        for assertion_id, assertion in by_id.items():
+            for actant_index, actant in enumerate(assertion.actants):
+                for relation_index, relation in enumerate(actant.nominal_relations):
+                    if (
+                        relation.kind is not NominalRelationKind.POSSESSOR
+                        or relation.dependent_entity_ref is not None
+                        or relation.evidence is None
+                        or pronoun_signature(relation.dependent_mention) is None
+                    ):
+                        continue
+                    relation_sites.append((relation.evidence.start or 0, assertion_id, actant_index, relation_index))
+        relation_sites.sort(key=lambda row: row[0])
+
+        for relation_pos, assertion_id, actant_index, relation_index in relation_sites:
+            current_assertion = by_id[assertion_id]
+            if actant_index >= len(current_assertion.actants):
+                continue
+            current_actant = current_assertion.actants[actant_index]
+            if relation_index >= len(current_actant.nominal_relations):
+                continue
+            relation = current_actant.nominal_relations[relation_index]
+            sig = pronoun_signature(relation.dependent_mention)
+            if sig is None:
+                continue
+
+            pool: list[tuple[int, str, int, ActantCandidate]] = []
+            for pos, antecedent_id, antecedent_index in antecedents:
+                if pos >= relation_pos:
+                    break
+                assertion = by_id[antecedent_id]
+                if antecedent_index >= len(assertion.actants):
+                    continue
+                candidate = assertion.actants[antecedent_index]
+                if compatible(sig, candidate):
+                    pool.append((pos, antecedent_id, antecedent_index, candidate))
+            if not pool:
+                continue
+            # Subjects are the strongest discourse anchors. If exactly one entity
+            # survives among prior SUBJECT mentions, do not let incidental OBJECTs
+            # of the same gender create a false ambiguity. Otherwise keep all.
+            subject_pool = [row for row in pool if row[3].role is ActantRole.SUBJECT]
+            if subject_pool:
+                pool = subject_pool
+
+            unique: dict[tuple[object, ...], tuple[int, str, int, ActantCandidate]] = {}
+            for row in pool:
+                candidate = row[3]
+                if candidate.entity_ref is not None:
+                    key = ("entity", candidate.entity_ref)
+                elif candidate.evidence is not None:
+                    key = ("span", candidate.evidence.start, candidate.evidence.end)
+                else:
+                    key = ("site", row[1], row[2])
+                unique[key] = row
+            if len(unique) != 1:
+                continue
+            _pos, antecedent_id, antecedent_index, antecedent = next(iter(unique.values()))
+            entity_ref = antecedent.entity_ref or self._ensure_actant_entity_ref(
+                by_id, antecedent_id, antecedent
+            )
+            if entity_ref is None:
+                continue
+
+            # _ensure_actant_entity_ref may have replaced assertions; fetch the
+            # current relation site again and update only its internal possessor.
+            assertion = by_id[assertion_id]
+            actants = list(assertion.actants)
+            if actant_index >= len(actants):
+                continue
+            target_actant = actants[actant_index]
+            rels = list(target_actant.nominal_relations)
+            if relation_index >= len(rels):
+                continue
+            rels[relation_index] = replace(rels[relation_index], dependent_entity_ref=entity_ref)
+            actants[actant_index] = replace(target_actant, nominal_relations=tuple(rels))
+            by_id[assertion_id] = replace(assertion, actants=tuple(actants))
+            self._deterministic_trace(
+                "nominal_possessor_binding",
+                f"POSSESSOR:\n{relation.dependent_mention}\nANTECEDENT:\n{antecedent.lookup_text}",
+                entity_ref,
+            )
 
     def _resolve_pronoun_coreferences(
         self,
@@ -3988,6 +5342,18 @@ class AdaptivePerceptionParser:
             narrowed = tuple(info for info in infos if info.case in role_cases)
             return narrowed or infos
 
+        def is_oblique_third_person(
+            infos: tuple[MorphInfo, ...], role: ActantRole
+        ) -> bool:
+            return (
+                role is not ActantRole.SUBJECT
+                and any(
+                    info.pos == "NPRO"
+                    and info.normal_form.casefold() in third_person_lemmas
+                    for info in infos
+                )
+            )
+
         def needs_local_antecedent_probe(infos: tuple[MorphInfo, ...]) -> bool:
             # Morphology-marked substantivized anaphors (e.g. demonstratives)
             # carry an explicit backward-reference function but are not ordinary
@@ -4002,16 +5368,56 @@ class AdaptivePerceptionParser:
                 for info in infos
             )
 
+        def candidate_surface_infos(candidate: ActantCandidate) -> tuple[MorphInfo, ...]:
+            # Keep source inflection for agreement/coreference.  Canonical entity
+            # lookup deliberately lemmatizes nouns, but using that lemma here loses
+            # number/gender evidence (e.g. plural ``письма`` -> singular
+            # ``письмо``) and can make a local pronoun fall through to a stale
+            # cross-turn anchor.  Structured NPs expose their source head directly.
+            surface = (
+                candidate.nominal_relations[0].head_mention
+                if candidate.nominal_relations
+                else candidate.mention
+            )
+            infos = material_analyses(morphs(surface))
+            role_cases = {
+                ActantRole.SUBJECT: {"nomn"},
+                ActantRole.OBJECT: {"accs", "gent", "gen2"},
+                ActantRole.RECIPIENT: {"datv"},
+                ActantRole.LOCATION: {"loct"},
+                ActantRole.TOOL: {"ablt"},
+            }.get(candidate.role)
+            if role_cases and infos:
+                narrowed = tuple(item for item in infos if item.case in role_cases)
+                if narrowed:
+                    infos = narrowed
+            if infos:
+                return infos
+            return material_analyses(morphs(candidate.normalized_hint))
+
         def compatible(
             pronoun: tuple[MorphInfo, ...],
             candidate: ActantCandidate,
             pronoun_role: ActantRole,
         ) -> bool:
-            candidate_infos = material_analyses(morphs(candidate.normalized_hint or candidate.mention))
+            candidate_infos = candidate_surface_infos(candidate)
             if not candidate_infos:
                 return True
-            nominal_pos = {"NOUN", "NPRO", "ADJF", "ADJS", "PRTF", "PRTS"}
-            if not any(info.pos in nominal_pos for info in candidate_infos):
+            # Personal pronouns refer to discourse entities, not ordinary
+            # predicative properties.  Dictionary morphology marks adjective and
+            # participle states as nominal-like forms too, but allowing every
+            # ADJF/PRTF here made a state such as ``сердитая`` compete with the
+            # actual woman as antecedent of ``она``.  Keep only genuine nominal
+            # readings plus explicitly substantivized adjective/participle forms.
+            referential = any(
+                info.pos in {"NOUN", "NPRO"}
+                or (
+                    info.pos in {"ADJF", "ADJS", "PRTF", "PRTS"}
+                    and "Subx" in info.grammemes
+                )
+                for info in candidate_infos
+            )
+            if not referential:
                 return False
             p_numbers = {x.number for x in pronoun if x.number}
             c_numbers = {x.number for x in candidate_infos if x.number}
@@ -4065,6 +5471,64 @@ class AdaptivePerceptionParser:
                 return False
             return True
 
+        # Structural subject-control / coordination can copy the same unresolved
+        # third-person pronoun into several frames before this resolver runs.  Those
+        # copies may carry a temporary local ``entity_ref`` merely to keep the
+        # copies together (``Отперев калитку, он толкнул её``).  Such a ref is not
+        # evidence that ``он`` has already been linked to an antecedent.  If an
+        # entity_ref is used *only* by third-person personal-pronoun mentions, reset
+        # it to unresolved before antecedent search.  A real local binding is safe:
+        # its ref is also present on at least one non-pronominal source mention and
+        # therefore survives this pass.  This keeps structural propagation from
+        # hiding a stronger same-unit antecedent without consulting AH state.
+        ref_sites: dict[str, list[tuple[str, int, ActantCandidate]]] = {}
+        for current_id, current_assertion in by_id.items():
+            for current_index, current_actant in enumerate(current_assertion.actants):
+                if current_actant.entity_ref is not None:
+                    ref_sites.setdefault(current_actant.entity_ref, []).append(
+                        (current_id, current_index, current_actant)
+                    )
+
+        provisional_refs: set[str] = set()
+        for ref_id, sites in ref_sites.items():
+            if not sites:
+                continue
+            only_personal_third = True
+            for _site_id, _site_index, site_actant in sites:
+                infos = pronoun_infos(
+                    site_actant.mention or site_actant.normalized_hint,
+                    site_actant.role,
+                )
+                if not any(
+                    info.pos == "NPRO"
+                    and info.normal_form.casefold() in third_person_lemmas
+                    for info in infos
+                ):
+                    only_personal_third = False
+                    break
+            if only_personal_third:
+                provisional_refs.add(ref_id)
+
+        if provisional_refs:
+            for current_id, current_assertion in tuple(by_id.items()):
+                changed = False
+                updated_actants: list[ActantCandidate] = []
+                for current_actant in current_assertion.actants:
+                    if current_actant.entity_ref in provisional_refs:
+                        updated_actants.append(replace(current_actant, entity_ref=None))
+                        changed = True
+                    else:
+                        updated_actants.append(current_actant)
+                if changed:
+                    by_id[current_id] = replace(
+                        current_assertion, actants=tuple(updated_actants)
+                    )
+            self._deterministic_trace(
+                "pronoun_provisional_ref_reset",
+                "LOCAL_PRONOUN_REFS:\n" + ", ".join(sorted(provisional_refs)),
+                "UNRESOLVED",
+            )
+
         # Snapshot the original source order. `by_id` itself stays mutable because
         # binding the antecedent may have to allocate its local entity_ref first.
         ordered: list[tuple[int, str, ActantCandidate]] = []
@@ -4091,6 +5555,11 @@ class AdaptivePerceptionParser:
             if not p_infos or original_pronoun.entity_ref is not None:
                 continue
             anaphoric_substantive = needs_local_antecedent_probe(p_infos)
+            personal_third = any(
+                info.pos == "NPRO"
+                and info.normal_form.casefold() in third_person_lemmas
+                for info in p_infos
+            )
 
             prior: list[tuple[int, str, ActantCandidate]] = []
             for candidate_position, candidate_id, candidate in ordered:
@@ -4099,6 +5568,19 @@ class AdaptivePerceptionParser:
                 if candidate_id == assertion_id and candidate == original_pronoun:
                     continue
                 if not compatible(p_infos, candidate, original_pronoun.role):
+                    continue
+                # Russian non-reflexive third-person oblique pronouns cannot bind
+                # the grammatical SUBJECT of their own local clause. ``Матрос
+                # ухватил его`` therefore cannot mean the matros grabbed himself;
+                # that reading requires reflexive ``себя``. This is a binding
+                # constraint, not a semantic preference, and it prevents a local
+                # subject from stealing an antecedent that should remain available
+                # from the preceding discourse.
+                if (
+                    candidate_id == assertion_id
+                    and candidate.role is ActantRole.SUBJECT
+                    and is_oblique_third_person(p_infos, original_pronoun.role)
+                ):
                     continue
                 # Do not use an unresolved third-person pronoun as a fresh anchor.
                 # A previously bound pronoun is safe because its entity_ref already
@@ -4111,11 +5593,60 @@ class AdaptivePerceptionParser:
                     continue
                 prior.append((candidate_position, candidate_id, candidate))
 
+            # A matrix pronoun may resume the same semantic participant from an
+            # immediately dependent non-finite frame: ``Сняв плащ, она повесила
+            # его``.  This is stronger than generic recency because the linguistic
+            # frame graph explicitly links the gerund/infinitive child to this
+            # matrix predicate.  Prefer the child only when one compatible
+            # antecedent with the *same semantic role* survives; otherwise keep
+            # the ordinary ambiguity-preserving resolver below.  No canonical UID
+            # or lexical predicate is consulted here.
+            graph = self._candidate_graph
+            structural_pool: list[tuple[int, str, ActantCandidate]] = []
+            if graph is not None:
+                current_predicate = by_id[assertion_id].predicate.evidence
+                current_token = (
+                    next((t for t in graph.tokens if current_predicate is not None and t.start == current_predicate.start), None)
+                    if current_predicate is not None
+                    else None
+                )
+                if current_token is not None:
+                    nonfinite_children = {
+                        dep.child_token_index
+                        for dep in graph.frame_graph.dependencies
+                        if dep.parent_token_index == current_token.index
+                        and dep.kind is FrameDependencyKind.NONFINITE
+                    }
+                    if nonfinite_children:
+                        for item in prior:
+                            candidate_predicate = by_id[item[1]].predicate.evidence
+                            if candidate_predicate is None or item[2].role is not original_pronoun.role:
+                                continue
+                            candidate_token = next(
+                                (t for t in graph.tokens if t.start == candidate_predicate.start),
+                                None,
+                            )
+                            if candidate_token is not None and candidate_token.index in nonfinite_children:
+                                structural_pool.append(item)
+                        structural_keys = {
+                            (
+                                ("entity", item[2].entity_ref)
+                                if item[2].entity_ref is not None
+                                else (
+                                    "span",
+                                    item[2].evidence.start if item[2].evidence is not None else item[0],
+                                    item[2].evidence.end if item[2].evidence is not None else item[0],
+                                )
+                            )
+                            for item in structural_pool
+                        }
+                        if len(structural_keys) != 1:
+                            structural_pool = []
+
             # Same-role preference is safe only inside one non-subordinate
             # sentence region (for example a conditional antecedent followed by
             # its main clause).  Across sentence boundaries or inside an embedded
             # complement, other matrix participants remain legitimate antecedents.
-            graph = self._candidate_graph
             current_clause = None
             if graph is not None:
                 pe = by_id[assertion_id].predicate.evidence
@@ -4134,7 +5665,9 @@ class AdaptivePerceptionParser:
                     if clause is not None and clause.sentence_id != current_clause.sentence_id:
                         cross_sentence = True
                         break
-            if (
+            if structural_pool:
+                pool = structural_pool
+            elif (
                 current_clause is not None
                 and current_clause.parent_clause_id is None
                 and not cross_sentence
@@ -4143,34 +5676,46 @@ class AdaptivePerceptionParser:
                 same_role = [item for item in prior if item[2].role == original_pronoun.role]
                 pool = same_role if same_role else prior
             elif graph is not None and current_clause is not None and cross_sentence:
-                # Explicit continuation markers license a conservative discourse
-                # salience rule in the deterministic resolver: first keep only the
-                # immediately preceding sentence, then prefer the same grammatical
-                # role when it is uniquely represented there.  Without such a
-                # marker we preserve all compatible readings as runtime alternatives.
-                first_word = next(
-                    (graph.token(i).text.casefold() for i in range(
-                        current_clause.span.start_index, current_clause.span.end_index + 1
-                    ) if re.search(r"\w", graph.token(i).text)),
-                    "",
-                )
-                if first_word in {"потом", "затем", "тогда", "далее"}:
-                    sentence_items: list[tuple[int, tuple[int, str, ActantCandidate]]] = []
-                    for item in prior:
-                        pe = by_id[item[1]].predicate.evidence
-                        if pe is None:
-                            continue
-                        token = next((t for t in graph.tokens if t.start == pe.start), None)
-                        clause = graph.clause_for_token(token.index) if token is not None else None
-                        if clause is not None and clause.sentence_id < current_clause.sentence_id:
-                            sentence_items.append((clause.sentence_id, item))
-                    if sentence_items:
-                        latest_sentence = max(x[0] for x in sentence_items)
-                        recent = [item for sid, item in sentence_items if sid == latest_sentence]
-                        same_role = [item for item in recent if item[2].role == original_pronoun.role]
+                # Ordinary personal-pronoun continuity does not require a lexical
+                # discourse marker.  Keep only compatible mentions from the most
+                # recent preceding sentence; older sentences remain outside the
+                # local ambiguity set.  Crucially, do *not* prefer the same semantic
+                # role across a sentence boundary: ``Шум разбудил Павла. Он пришёл``
+                # must keep Павел eligible even though he was OBJECT, not SUBJECT.
+                # If several recent mentions survive grammar, one bounded source-
+                # label probe below may select one or return UNCLEAR; no AH UID is
+                # ever shown to the model.
+                sentence_items: list[tuple[int, tuple[int, str, ActantCandidate]]] = []
+                for item in prior:
+                    pe = by_id[item[1]].predicate.evidence
+                    if pe is None:
+                        continue
+                    token = next((t for t in graph.tokens if t.start == pe.start), None)
+                    clause = graph.clause_for_token(token.index) if token is not None else None
+                    if clause is not None and clause.sentence_id < current_clause.sentence_id:
+                        sentence_items.append((clause.sentence_id, item))
+                if sentence_items:
+                    latest_sentence = max(x[0] for x in sentence_items)
+                    recent = [item for sid, item in sentence_items if sid == latest_sentence]
+                    first_word = next(
+                        (
+                            graph.token(i).text.casefold()
+                            for i in range(
+                                current_clause.span.start_index,
+                                current_clause.span.end_index + 1,
+                            )
+                            if re.search(r"\w", graph.token(i).text)
+                        ),
+                        "",
+                    )
+                    if first_word in {"потом", "затем", "тогда", "далее"}:
+                        same_role = [
+                            item for item in recent
+                            if item[2].role == original_pronoun.role
+                        ]
                         pool = same_role if len(same_role) == 1 else recent
                     else:
-                        pool = prior
+                        pool = recent
                 else:
                     pool = prior
             else:
@@ -4194,7 +5739,7 @@ class AdaptivePerceptionParser:
             if len(unique_pool) == 1:
                 _, antecedent_id, antecedent = next(iter(unique_pool.values()))
             else:
-                if anaphoric_substantive:
+                if anaphoric_substantive or (personal_third and cross_sentence):
                     candidates = list(unique_pool.values())
                     labels = [f"C{i}" for i in range(1, len(candidates) + 1)]
                     allowed = tuple([*labels, "UNCLEAR"])
@@ -4547,6 +6092,7 @@ class AdaptivePerceptionParser:
         act_type: str,
         requested_roles: tuple[ActantRole, ...],
         requested_spans: tuple[_Span, ...],
+        role_whitelist: set[ActantRole] | None = None,
     ) -> tuple[tuple[ActantCandidate, ...], tuple[_Span, ...]]:
         spans: list[_Span] = []
         roles: set[ActantRole] = set()
@@ -4624,6 +6170,10 @@ class AdaptivePerceptionParser:
                 role_candidates = self._deterministic_role_candidates(
                     tokens, predicate_span, predicate, candidate_span
                 )
+                if role_whitelist is not None:
+                    role_candidates = tuple(
+                        role for role in role_candidates if role in role_whitelist
+                    )
                 if len(role_candidates) != 1:
                     continue
                 role_candidate = role_candidates[0]
@@ -4652,6 +6202,10 @@ class AdaptivePerceptionParser:
                 allowed_roles = self._deterministic_role_candidates(
                     tokens, predicate_span, predicate, span
                 )
+                if role_whitelist is not None:
+                    allowed_roles = tuple(
+                        role for role in allowed_roles if role in role_whitelist
+                    )
             self._deterministic_trace(
                 "actant_start",
                 self._actant_phrase_prompt(text, predicate_span, spans, candidates, requested_spans),
@@ -4699,6 +6253,16 @@ class AdaptivePerceptionParser:
                     {item for item in allowed_roles if item not in roles}
                     if allowed_roles else None
                 )
+                if role_whitelist is not None:
+                    remaining_whitelist = {
+                        item for item in role_whitelist
+                        if item not in roles and item not in requested_roles
+                    }
+                    filtered_allowed = (
+                        remaining_whitelist
+                        if filtered_allowed is None
+                        else filtered_allowed & remaining_whitelist
+                    )
                 role = self._classify_role(
                     text,
                     predicate,
@@ -4754,7 +6318,19 @@ class AdaptivePerceptionParser:
                 allowed = self._deterministic_role_candidates(
                     tokens, predicate_span, predicate, remaining
                 )
+                if role_whitelist is not None:
+                    allowed = tuple(role for role in allowed if role in role_whitelist)
                 filtered = {item for item in allowed if item not in roles} if allowed else None
+                if role_whitelist is not None:
+                    remaining_whitelist = {
+                        item for item in role_whitelist
+                        if item not in roles and item not in requested_roles
+                    }
+                    filtered = (
+                        remaining_whitelist
+                        if filtered is None
+                        else filtered & remaining_whitelist
+                    )
                 role = self._classify_role(
                     text,
                     predicate,
@@ -5127,16 +6703,348 @@ class AdaptivePerceptionParser:
                 "fallback did not resolve it: " + ", ".join(candidates)
             ) from exc
 
+    def _grammatical_number_for_span(
+        self, span: _Span, *, role: ActantRole | None = None
+    ) -> str | None:
+        """Return stable source-head singular/plural morphology when available.
+
+        Canonical lookup may lemmatize ``письма`` to ``письмо`` or ``матросы`` to
+        ``матрос``. Number must therefore be captured from the source head before
+        lemmatization. Case supplied by an already known semantic core role can
+        narrow syncretic readings; otherwise the value is accepted only when all
+        material readings of the head agree.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return None
+        tokens = [
+            graph.token(i)
+            for i in range(span.start_index, span.end_index + 1)
+            if re.search(r"\w", graph.token(i).text)
+        ]
+        if not tokens:
+            return None
+        if (
+            len(tokens) >= 3
+            and tokens[0].text.casefold() in _SPATIAL_RELATION_ADVERBS
+            and tokens[1].text.casefold() == "с"
+        ):
+            tokens = tokens[2:]
+        elif tokens and tokens[0].has_pos("PREP"):
+            tokens = tokens[1:]
+        if not tokens:
+            return None
+
+        head: _SourceToken | None = None
+        for token in tokens:
+            infos = self._morph_all(token)
+            if any(info.pos in {"NOUN", "NPRO"} for info in infos):
+                head = token
+                break
+        if head is None:
+            return None
+        all_head_infos = self._morph_all(head)
+        infos = tuple(
+            info for info in all_head_infos
+            if info.pos in {"NOUN", "NPRO"} and info.number in {"sing", "plur"}
+        )
+        selected_lemma = self._contextual_nominal_lemmas.get(head.index)
+        if selected_lemma is None:
+            stable = stable_normal_form(all_head_infos, poses={"NOUN", "NPRO"})
+            selected_lemma = stable.casefold() if stable else None
+        if selected_lemma is not None:
+            lexical = tuple(
+                info for info in infos
+                if info.normal_form.strip().casefold() == selected_lemma
+            )
+            if lexical:
+                infos = lexical
+        case_hint = {
+            ActantRole.SUBJECT: "nomn",
+            ActantRole.OBJECT: "accs",
+        }.get(role)
+        if case_hint is not None:
+            narrowed = tuple(info for info in infos if info.case == case_hint)
+            if narrowed:
+                infos = narrowed
+        numbers = {
+            str(info.number)
+            for info in infos
+            if info.number is not None and str(info.number) in {"sing", "plur"}
+        }
+        return next(iter(numbers)) if len(numbers) == 1 else None
+
     def _make_actant(self, role: ActantRole, span: _Span) -> ActantCandidate:
         composition = self._composition_for_span(span)
+        nominal_relations = self._nominal_relations_for_span(span, role=role)
         mention, normalized_hint = self._semantic_actant_text(span, role=role)
+        # A structurally decomposed NP must resolve the actant identity from its
+        # nominal head, not from the whole source phrase.  The full source mention
+        # remains evidence, while internal possessive/genitive structure is carried
+        # separately and canonicalized by Integration.
+        if nominal_relations:
+            head_hint = nominal_relations[0].head_normalized_hint
+            if head_hint:
+                normalized_hint = head_hint
         return ActantCandidate(
             role=role,
             mention=mention,
             normalized_hint=normalized_hint,
             evidence=span.evidence,
             composition=composition,
+            nominal_relations=nominal_relations,
+            grammatical_number=self._grammatical_number_for_span(span, role=role),
         )
+
+    _FIRST_POSSESSIVE_FORMS = frozenset({
+        "мой", "моя", "моё", "мое", "мои", "моего", "моей",
+        "моему", "моим", "моими", "моих", "мою",
+    })
+    _SECOND_POSSESSIVE_FORMS = frozenset({
+        "твой", "твоя", "твоё", "твое", "твои", "твоего", "твоей",
+        "твоему", "твоим", "твоими", "твоих", "твою",
+    })
+
+    def _nominal_relations_for_span(
+        self, span: _Span, *, role: ActantRole | None = None
+    ) -> tuple[NominalRelationCandidate, ...]:
+        """Extract source-grounded structure internal to one NP.
+
+        Canonical entity identity follows the substantive nominal head rather than
+        the whole surface description.  Internal source structure is preserved as
+        typed relations:
+
+        - explicit possessive morphology -> ``POSSESSOR``;
+        - post-head genitive nominal dependency -> ``GENITIVE_DEP``;
+        - attributive adjective/participle/number -> ``NOMINAL_MODIFIER``.
+
+        ``NOMINAL_MODIFIER`` is deliberately weak.  It records that a modifier was
+        asserted inside this NP but does not reinterpret ``керосиновая`` as
+        MATERIAL, ``разбухшая`` as a historical event, or ``старая`` as any other
+        stronger predicate.  Such semantic specialization, if needed, belongs to a
+        separate bounded decision.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return ()
+        tokens = [
+            graph.token(i) for i in range(span.start_index, span.end_index + 1)
+            if re.search(r"\w", graph.token(i).text)
+        ]
+        if not tokens:
+            return ()
+
+        # Strip only external event governors.  They describe the event-to-NP
+        # relation and therefore are not part of the NP's internal structure.
+        if (
+            len(tokens) >= 3
+            and tokens[0].text.casefold() in _SPATIAL_RELATION_ADVERBS
+            and tokens[1].text.casefold() == "с"
+        ):
+            tokens = tokens[2:]
+        elif tokens and tokens[0].has_pos("PREP"):
+            tokens = tokens[1:]
+        if not tokens:
+            return ()
+
+        def preserve_case(token: _SourceToken, value: str | None) -> str | None:
+            if value is not None and token.text[:1].isupper():
+                return value[:1].upper() + value[1:]
+            return value
+
+        def nominal_form(
+            token: _SourceToken, *, role_hint: ActantRole | None = None
+        ) -> str | None:
+            analyses = self._morph_all(token)
+            case_hint = {
+                ActantRole.SUBJECT: "nomn",
+                ActantRole.OBJECT: "accs",
+            }.get(role_hint)
+            # Quantified NPs can govern a non-nominative head even when the whole
+            # phrase is SUBJECT (``несколько матросов``). Do not let the semantic
+            # role force a surname-like NOM.SG homograph over the lexical noun.
+            try:
+                token_position = tokens.index(token)
+            except ValueError:
+                token_position = 0
+            quantified = any(
+                any(info.pos == "NUMR" for info in self._morph_all(previous))
+                for previous in tokens[:token_position]
+            )
+            if case_hint is not None and not quantified:
+                forms = {
+                    item.normal_form.strip().casefold(): item.normal_form.strip()
+                    for item in analyses
+                    if item.pos in {"NOUN", "NPRO"}
+                    and item.case == case_hint
+                    and item.normal_form.strip()
+                }
+                if len(forms) == 1:
+                    return preserve_case(token, next(iter(forms.values())))
+            return preserve_case(
+                token, stable_normal_form(analyses, poses={"NOUN", "NPRO"})
+            )
+
+        def modifier_form(token: _SourceToken) -> str | None:
+            # Attributive modifiers are lexical descriptors, not proper-name
+            # identities. Sentence-initial capitalization must therefore not turn
+            # ``Сухая`` into a distinct canonical descriptor from ``сухая``.
+            return stable_normal_form(
+                self._morph_all(token), poses={"ADJF", "PRTF", "NUMR"}
+            )
+
+        def relation_evidence(left: _SourceToken, right: _SourceToken) -> EvidenceSpan:
+            start = min(left.start, right.start)
+            end = max(left.end, right.end)
+            return EvidenceSpan(graph.text[start:end], start, end)
+
+        possessive_forms = {
+            item.replace("ё", "е")
+            for item in self._FIRST_POSSESSIVE_FORMS | self._SECOND_POSSESSIVE_FORMS
+        }
+
+        # Find the first substantive head.  A token with a possessive-adjective
+        # reading is a modifier when a real noun follows inside this established NP.
+        head_pos: int | None = None
+        for pos, token in enumerate(tokens):
+            if self._has_structural_morph(token, poses={"NOUN"}):
+                head_pos = pos
+                break
+            if self._has_structural_morph(token, poses={"NPRO"}):
+                if self._is_postnominal_possessive_anaphor(token) and any(
+                    self._has_structural_morph(other, poses={"NOUN"})
+                    for other in tokens[pos + 1:]
+                ):
+                    continue
+                head_pos = pos
+                break
+        if head_pos is None:
+            return ()
+
+        head_token = tokens[head_pos]
+        main_head_form = nominal_form(head_token, role_hint=role)
+        main_head_mention = head_token.text
+        relations: list[NominalRelationCandidate] = []
+
+        # Pre-head attributes are part of the description of the nominal head.
+        # First/second-person possessive adjectives are semantically explicit;
+        # ordinary attributes stay at the weak NOMINAL_MODIFIER level.  A token
+        # that also has a material NPRO reading is deliberately not swallowed as a
+        # normal pre-head modifier, preserving the conservative boundary used by
+        # _nominal_phrase_end for third-person forms.
+        for modifier in tokens[:head_pos]:
+            folded = modifier.text.casefold().replace("ё", "е")
+            if folded in possessive_forms:
+                relations.append(
+                    NominalRelationCandidate(
+                        NominalRelationKind.POSSESSOR,
+                        head_mention=main_head_mention,
+                        head_normalized_hint=main_head_form,
+                        dependent_mention=modifier.text,
+                        dependent_normalized_hint=None,
+                        evidence=relation_evidence(modifier, head_token),
+                    )
+                )
+                continue
+            if self._has_structural_morph(modifier, poses={"NPRO"}):
+                continue
+            if self._has_morph(modifier, poses={"ADJF", "PRTF", "NUMR"}):
+                relations.append(
+                    NominalRelationCandidate(
+                        NominalRelationKind.NOMINAL_MODIFIER,
+                        head_mention=main_head_mention,
+                        head_normalized_hint=main_head_form,
+                        dependent_mention=modifier.text,
+                        dependent_normalized_hint=modifier_form(modifier),
+                        evidence=relation_evidence(modifier, head_token),
+                    )
+                )
+
+        current_head_token = head_token
+        current_head_form = main_head_form
+        current_head_mention = main_head_mention
+        cursor = head_pos + 1
+        genitive_family = {"gent", "gen1", "gen2"}
+        while cursor < len(tokens):
+            token = tokens[cursor]
+            folded = token.text.casefold().replace("ё", "е")
+            if (
+                self._is_postnominal_possessive_anaphor(token)
+                or folded in possessive_forms
+            ):
+                relations.append(
+                    NominalRelationCandidate(
+                        NominalRelationKind.POSSESSOR,
+                        head_mention=current_head_mention,
+                        head_normalized_hint=current_head_form,
+                        dependent_mention=token.text,
+                        dependent_normalized_hint=None,
+                        evidence=relation_evidence(current_head_token, token),
+                    )
+                )
+                cursor += 1
+                continue
+
+            # A genitive dependent may itself have attributive modifiers:
+            # ``нижний ящик письменного стола`` -> modifier(ящик, нижний),
+            # genitive(ящик, стол), modifier(стол, письменный).
+            dep_start = cursor
+            while cursor < len(tokens) and self._has_morph(
+                tokens[cursor], poses={"ADJF", "PRTF", "NUMR"}
+            ):
+                if self._has_structural_morph(tokens[cursor], poses={"NPRO"}):
+                    break
+                cursor += 1
+            if cursor >= len(tokens):
+                break
+            dep_head = tokens[cursor]
+            cases = self._structural_nominal_cases(dep_head)
+            if (
+                not cases
+                or not (cases & genitive_family)
+                or not self._has_morph(dep_head, poses={"NOUN", "NPRO"})
+            ):
+                break
+            if (
+                not cases.issubset(genitive_family)
+                and not self._ambiguous_genitive_dependency(
+                    tuple(graph.tokens), current_head_token.index, dep_head.index
+                )
+            ):
+                break
+            dep_form = nominal_form(dep_head)
+            dep_mention = graph.text[tokens[dep_start].start:dep_head.end]
+            relations.append(
+                NominalRelationCandidate(
+                    NominalRelationKind.GENITIVE_DEP,
+                    head_mention=current_head_mention,
+                    head_normalized_hint=current_head_form,
+                    dependent_mention=dep_mention,
+                    dependent_normalized_hint=dep_form,
+                    evidence=relation_evidence(current_head_token, dep_head),
+                )
+            )
+            for modifier in tokens[dep_start:cursor]:
+                if self._has_structural_morph(modifier, poses={"NPRO"}):
+                    continue
+                relations.append(
+                    NominalRelationCandidate(
+                        NominalRelationKind.NOMINAL_MODIFIER,
+                        head_mention=dep_head.text,
+                        head_normalized_hint=dep_form,
+                        dependent_mention=modifier.text,
+                        dependent_normalized_hint=modifier_form(modifier),
+                        evidence=relation_evidence(modifier, dep_head),
+                    )
+                )
+
+            # Preserve nested genitive chains, e.g. ``дверь дома брата``.
+            current_head_token = dep_head
+            current_head_form = dep_form
+            current_head_mention = dep_head.text
+            cursor += 1
+
+        return tuple(relations)
 
     def _semantic_actant_text(
         self, span: _Span, *, role: ActantRole | None = None
@@ -5259,6 +7167,130 @@ class AdaptivePerceptionParser:
         )
         return ActantCompositionCandidate(operator=operator, members=members)
 
+    def _is_postnominal_possessive_anaphor(self, token: _SourceToken) -> bool:
+        """Whether a token can be a postnominal possessive pronoun modifier.
+
+        Russian ``его/её/их`` receive both personal-pronoun and indeclinable
+        possessive-adjective analyses. Before a noun they must remain available as
+        independent participants (``увидел его друга`` is genuinely ambiguous at
+        the lexical level), but immediately *after an already established nominal
+        head* an anaphoric possessive-adjective reading is structural evidence for
+        a possessive NP such as ``решение его``.
+
+        Current pymorphy exposes the indeclinable possessive reading as the
+        combined ``Apro+Anph+Fixd`` adjective signature.  ``Subx`` alone is *not*
+        sufficient: demonstrative/correlative forms can also be substantivized and
+        anaphoric (for example the first ``то`` in ``то дрожала, то замирала``).
+        Requiring the indeclinable marker keeps those discourse particles outside
+        the preceding NP without consulting a surface-word list.
+        """
+        return any(
+            info.pos == "ADJF"
+            and {"Anph", "Apro", "Fixd"} <= set(info.grammemes)
+            for info in self._morph_all(token)
+        )
+
+    def _ambiguous_genitive_dependency(
+        self,
+        tokens: tuple[_SourceToken, ...],
+        head_index: int,
+        dependent_index: int,
+    ) -> bool:
+        """Resolve only a case-syncretic N+N attachment, never entity identity.
+
+        Forms such as ``штукатурки`` and ``лампы`` can be GEN.SG or NOM.PL.
+        Dictionary case alone therefore cannot decide whether ``кусок штукатурки``
+        is one NP. Python exposes exactly the local structural alternatives and a
+        bounded probe returns GENITIVE_DEP or SEPARATE. The decision is cached for
+        the source token pair and never sees AH state or canonical UIDs.
+        """
+        key = (head_index, dependent_index)
+        cached = self._genitive_attachment_cache.get(key)
+        if cached is not None:
+            return cached
+        graph = self._candidate_graph
+        if graph is None:
+            return False
+        head = graph.token(head_index)
+        dependent = graph.token(dependent_index)
+        prompt = (
+            f"TEXT:\n{graph.text}\n"
+            f"HEAD NOMINAL:\n{head.text}\n"
+            f"FOLLOWING NOMINAL:\n{dependent.text}\n"
+            "QUESTION:\nIn this exact text, is FOLLOWING NOMINAL a genitive "
+            "dependent inside the same noun phrase headed by HEAD NOMINAL, or is "
+            "it a separate participant/nominal?\n"
+            "CHOICES:\nGENITIVE_DEP\nSEPARATE\nUNCLEAR"
+        )
+        decision, _margin = self._exact_choice_probe(
+            "nominal_genitive_attachment",
+            prompt,
+            ("GENITIVE_DEP", "SEPARATE", "UNCLEAR"),
+        )
+        value = decision == "GENITIVE_DEP"
+        self._genitive_attachment_cache[key] = value
+        return value
+
+    def _postnominal_possessive_belongs_to_np(
+        self,
+        tokens: tuple[_SourceToken, ...],
+        start: int,
+        end: int,
+        pronoun_index: int,
+        limit: int,
+    ) -> bool:
+        """Disambiguate possessive-modifier vs participant only when both fit.
+
+        ``торжество его было...`` has no plausible transitive argument slot for
+        the postnominal anaphor and remains deterministic possession. In a source
+        like ``решение его удивило`` / ``падение ... его испугало`` both readings
+        are structurally possible, so one tiny source-only probe decides whether
+        the token stays inside the NP. UNCLEAR conservatively leaves it separate.
+        """
+        # If no following finite transitive predicate exists before a strong
+        # boundary, the personal-pronoun reading has no local predicate argument
+        # host and the explicit possessive morphology is sufficient.
+        transitive_head: _SourceToken | None = None
+        for index in range(pronoun_index + 1, limit + 1):
+            token = tokens[index - 1]
+            if token.text in _STRONG_BOUNDARY:
+                break
+            analyses = self._morph_all(token)
+            finite = any(info.pos == "VERB" for info in analyses)
+            if finite and stable_transitivity(analyses) == "tran":
+                transitive_head = token
+                break
+        if transitive_head is None:
+            return True
+
+        key = (start, end, pronoun_index)
+        cached = self._postnominal_possessive_cache.get(key)
+        if cached is not None:
+            return cached
+        graph = self._candidate_graph
+        if graph is None:
+            return False
+        phrase = graph.text[tokens[start - 1].start:tokens[end - 1].end]
+        pronoun = tokens[pronoun_index - 1]
+        prompt = (
+            f"TEXT:\n{graph.text}\n"
+            f"CURRENT NOUN PHRASE:\n{phrase}\n"
+            f"ANAPHORIC FORM:\n{pronoun.text}\n"
+            f"FOLLOWING PREDICATE:\n{transitive_head.text}\n"
+            "QUESTION:\nIn this exact text, does ANAPHORIC FORM possessively modify "
+            "CURRENT NOUN PHRASE, or is it a separate participant of the following "
+            "predicate?\n"
+            "CHOICES:\nPOSSESSOR\nSEPARATE_PARTICIPANT\nUNCLEAR"
+        )
+        decision, _margin = self._exact_choice_probe(
+            "postnominal_possessive_attachment",
+            prompt,
+            ("POSSESSOR", "SEPARATE_PARTICIPANT", "UNCLEAR"),
+        )
+        value = decision == "POSSESSOR"
+        self._postnominal_possessive_cache[key] = value
+        return value
+
     def _nominal_phrase_end(
         self,
         tokens: tuple[_SourceToken, ...],
@@ -5301,6 +7333,18 @@ class AdaptivePerceptionParser:
         genitive_family = {"gent", "gen1", "gen2"}
         cursor += 1
         while cursor <= limit and cursor not in blocked:
+            # A postnominal possessive anaphor belongs to the NP even though the
+            # same surface also has an NPRO reading. This special handling is
+            # intentionally position-sensitive; pre-head NPRO forms keep the
+            # conservative participant boundary above.
+            if self._is_postnominal_possessive_anaphor(tokens[cursor - 1]):
+                if not self._postnominal_possessive_belongs_to_np(
+                    tokens, start, end, cursor, limit
+                ):
+                    break
+                end = cursor
+                cursor += 1
+                continue
             modifier_start = cursor
             while cursor <= limit and cursor not in blocked and self._has_morph(
                 tokens[cursor - 1], poses={"ADJF", "PRTF", "NUMR"}
@@ -5311,10 +7355,19 @@ class AdaptivePerceptionParser:
             if cursor > limit or cursor in blocked:
                 break
             nominal_cases = self._structural_nominal_cases(tokens[cursor - 1])
-            if not nominal_cases or not nominal_cases.issubset(genitive_family):
+            if not nominal_cases or not (nominal_cases & genitive_family):
                 break
             if not self._has_morph(tokens[cursor - 1], poses={"NOUN", "NPRO"}):
                 break
+            if not nominal_cases.issubset(genitive_family):
+                # Case-syncretic form: require the minimal local attachment
+                # decision instead of either splitting every GEN/NOM homograph or
+                # swallowing arbitrary neighbouring participants.
+                head_index = end
+                if not self._ambiguous_genitive_dependency(
+                    tokens, head_index, cursor
+                ):
+                    break
             end = cursor
             cursor += 1
             if modifier_start == cursor:
@@ -5356,6 +7409,7 @@ class AdaptivePerceptionParser:
     ) -> tuple[_Span, ...]:
         clause_start, clause_end = self._predicate_argument_bounds(predicate, tokens)
         blocked: set[int] = set(getattr(self, "_nominal_linker_tokens", set()))
+        blocked.update(getattr(self, "_runtime_blocked_token_indices", set()))
         if predicate is not None:
             blocked.update(range(predicate.start_index, predicate.end_index + 1))
         for requested_span in requested_spans:
@@ -5698,6 +7752,54 @@ class AdaptivePerceptionParser:
         ]
         if prep_positions:
             first_prep = min(prep_positions)
+
+            def stable_pp_head_case() -> str | None:
+                """Return one coherent case for the PP nominal head, or ``None``.
+
+                Case is a phrase-level constraint.  Looking for *any* case reading
+                on *any* token lets an ambiguous adjective override the much stronger
+                noun head analysis (live example: ``в дальней комнате`` where
+                ``дальней`` has a weak instrumental reading but ``комнате`` is
+                strongly locative).  Select the rightmost material NOUN/NPRO as the
+                nominal head and accept its case only when readings agree or one
+                scored case clearly dominates.  Adjective/participle case is a
+                fallback only when the PP has no nominal head at all.
+                """
+
+                def case_for_infos(infos: tuple[MorphInfo, ...]) -> str | None:
+                    material = tuple(item for item in infos if item.case)
+                    if not material:
+                        return None
+                    cases = {item.case for item in material if item.case}
+                    if len(cases) == 1:
+                        return next(iter(cases))
+                    scores: dict[str, float] = {}
+                    for item in material:
+                        assert item.case is not None
+                        scores[item.case] = scores.get(item.case, 0.0) + max(0.0, item.score)
+                    ranked = sorted(scores.items(), key=lambda pair: pair[1], reverse=True)
+                    if len(ranked) < 2:
+                        return ranked[0][0] if ranked else None
+                    best_case, best_score = ranked[0]
+                    second_score = ranked[1][1]
+                    if best_score >= 0.60 and best_score >= second_score * 1.8:
+                        return best_case
+                    return None
+
+                nominal_fallback: tuple[MorphInfo, ...] | None = None
+                for i in range(span.end_index, first_prep, -1):
+                    analyses = self._material_morph_analyses(tokens[i - 1])
+                    nominal = tuple(item for item in analyses if item.pos in {"NOUN", "NPRO"})
+                    if nominal:
+                        return case_for_infos(nominal)
+                    if nominal_fallback is None:
+                        adjectival = tuple(
+                            item for item in analyses if item.pos in {"ADJF", "PRTF"}
+                        )
+                        if adjectival:
+                            nominal_fallback = adjectival
+                return case_for_infos(nominal_fallback or ())
+
             # The hard ambiguity rule applies only to a *bare postnominal PP*
             # (``NP + PREP + instrumental``).  If the selected modifier has a
             # lexical governor before the preposition, the instrumental noun is
@@ -5712,14 +7814,41 @@ class AdaptivePerceptionParser:
             # such as ``увидел человека с прибором`` still starts at PREP and
             # therefore retains the clarification path.
             bare_postnominal_pp = first_prep == span.start_index
-            instrumental_complement = any(
-                info.case == "ablt"
-                and info.pos in {"NOUN", "NPRO", "ADJF", "PRTF"}
-                for i in range(first_prep + 1, span.end_index + 1)
-                for info in self._material_morph_analyses(tokens[i - 1])
-            )
+            pp_head_case = stable_pp_head_case()
+            instrumental_complement = pp_head_case == "ablt"
             if bare_postnominal_pp and instrumental_complement:
                 require_clarification()
+
+            # A bare locative PP placed on the subject side of the finite predicate
+            # has a useful canonical normal form even when surface attachment between
+            # the adjacent NP and the event is not uniquely recoverable.  Represent it
+            # as event LOCATION rather than escalating a second, non-identity
+            # ambiguity to the user.  This rule is deliberately narrow:
+            #
+            #   NP + PREP + LOCT ... finite predicate
+            #
+            # It does not apply to post-predicate/object PPs and it never weakens the
+            # hard instrumental ambiguity above (``увидел Петра с биноклем``).  The
+            # choice is a deterministic semantic normalization: the physical event is
+            # located where its explicitly located participant is during that event.
+            locative_complement = pp_head_case in {"loct", "loc2"}
+            nominal_targets = [
+                target for target in targets
+                if target.kind is _AttachmentTargetKind.NOMINAL
+            ]
+            predicate_target = next(
+                (target for target in targets if target.kind is _AttachmentTargetKind.PREDICATE),
+                None,
+            )
+            if (
+                bare_postnominal_pp
+                and locative_complement
+                and predicate_span is not None
+                and span.end_index < predicate_span.start_index
+                and len(nominal_targets) == 1
+                and predicate_target is not None
+            ):
+                return predicate_target
 
         # Structural adjacency only enumerates possible owners; it is not itself
         # evidence that every PP is genuinely ambiguous.  For constructions not
@@ -6248,7 +8377,16 @@ class AdaptivePerceptionParser:
                 break
             start = cursor
             cursor -= 1
-        return self._resolve_span_from_source(tokens, start, head)
+        end = head
+        # Russian postnominal possessives (``решение его``, ``торжество её``)
+        # are part of the referential NP.  The generic NP chunker already knows
+        # this, but deterministic copular-holder recovery used to return only the
+        # nominal head and left the possessive behind as a fake third actant.
+        # Extend only across the immediately following morphology-marked
+        # possessive anaphor; no lexical list or semantic guess is involved.
+        if head < clause_end and self._is_postnominal_possessive_anaphor(tokens[head]):
+            end = head + 1
+        return self._resolve_span_from_source(tokens, start, end)
 
     def _deterministic_copular_holder_span(
         self,

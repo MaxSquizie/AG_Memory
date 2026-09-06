@@ -102,7 +102,7 @@ class P0ArchitectureV022Tests(unittest.TestCase):
         commit = self.service.integrate_external(PerceptionResult("если A или B, C", assertions=(a,b,c), conditionals=(conditional,)), self.context)
         self.assertEqual(len(commit.conditionals), 1)
         if_g = self.core.store.get_element_any_domain(commit.conditionals[0].ref.uid)
-        self.assertEqual(if_g.function_id, "IF")
+        self.assertEqual(if_g.function_id, "IMPLIES")
         ant = self.core.store.get_element_any_domain(if_g.operands[0].uid)
         self.assertEqual(ant.function_id, "OR")
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 from pathlib import Path
 from ah.config import LLMRoleSettings
 from ah.llm.process_backend import LLMResponse
-from ah.perception.adaptive_parser import AdaptiveParseError, AdaptivePerceptionParser, AdaptiveSettings
+from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import MorphInfo
 
@@ -168,15 +168,17 @@ class P0ParserBoundaryV022Tests(unittest.TestCase):
             self.assertTrue(subordinate, text)
             self.assertTrue(all(c.parent_role_hint is None for c in subordinate), text)
 
-    def test_max_acts_fails_closed_with_remaining_predicate_frames(self):
+    def test_act_count_is_source_bounded_not_config_capped(self):
+        words = {
+            f"действует{i}": f"действовать{i}"
+            for i in range(1, 21)
+        }
         morph = _Morph({
             word: (MorphInfo(lemma, "VERB", mood="indc", score=1.0),)
-            for word, lemma in {
-                "спит":"спать", "идёт":"идти", "сидит":"сидеть", "стоит":"стоять", "лежит":"лежать"
-            }.items()
+            for word, lemma in words.items()
         })
         parser = AdaptivePerceptionParser(
-            _NoProbeBackend(), self._settings(max_acts=4), morphology=morph
+            _NoProbeBackend(), self._settings(), morphology=morph
         )
-        with self.assertRaisesRegex(AdaptiveParseError, "incomplete parse"):
-            parser.parse("Спит. Идёт. Сидит. Стоит. Лежит.")
+        result = parser.parse(". ".join(words) + ".")
+        self.assertEqual(len(result.perception.assertions), 20)

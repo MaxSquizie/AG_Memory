@@ -89,6 +89,8 @@ class MainWindow(QMainWindow):
         self._turn_sequence = 0
         self._chat_worker: FunctionWorker | None = None
         self._acceptance_worker: FunctionWorker | None = None
+        self._active_acceptance_label = "Acceptance"
+        self._active_acceptance_title = "Acceptance suite"
         self._document_acceptance_worker: FunctionWorker | None = None
         self._hidden_valency_worker: FunctionWorker | None = None
         self._m2_acceptance_worker: FunctionWorker | None = None
@@ -434,6 +436,20 @@ class MainWindow(QMainWindow):
             + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_oracle.json")
         )
         self.acceptance_button.clicked.connect(self._run_acceptance_cases)
+        self.m1_adversarial_button = QPushButton("M1: adversarial acceptance")
+        self.m1_adversarial_button.setToolTip(
+            "36 EXACT breaker-cases: typo/noise, syntactic inversion, ellipsis и mixed.\n"
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_cases_m1_adversarial.txt")
+            + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_oracle_m1_adversarial.json")
+        )
+        self.m1_adversarial_button.clicked.connect(self._run_m1_adversarial_acceptance)
+        self.m1_ellipsis_button = QPushButton("M1: ellipsis acceptance")
+        self.m1_ellipsis_button.setToolTip(
+            "Discourse reconstruction / ellipsis corpus.\n"
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_ellipsis" / "cases.txt")
+            + "\\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_ellipsis" / "oracle.json")
+        )
+        self.m1_ellipsis_button.clicked.connect(self._run_m1_ellipsis_acceptance)
         self.document_acceptance_button = QPushButton("Document acceptance")
         self.document_acceptance_button.setToolTip(
             "3 вручную написанных многоабзацных текста: причинные цепочки, distractors, "
@@ -457,12 +473,16 @@ class MainWindow(QMainWindow):
         chat_buttons = QHBoxLayout()
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
-        chat_buttons.addWidget(self.document_acceptance_button)
-        chat_buttons.addWidget(self.hidden_valency_button)
-        chat_buttons.addWidget(self.m2_acceptance_button)
+        chat_buttons.addWidget(self.m1_adversarial_button)
+        chat_buttons.addWidget(self.m1_ellipsis_button)
+        diagnostic_buttons = QHBoxLayout()
+        diagnostic_buttons.addWidget(self.document_acceptance_button)
+        diagnostic_buttons.addWidget(self.hidden_valency_button)
+        diagnostic_buttons.addWidget(self.m2_acceptance_button)
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
         layout.addLayout(chat_buttons)
+        layout.addLayout(diagnostic_buttons)
 
         # A dock may be squeezed to a very small height by other panels. Keep the
         # controls reachable instead of letting the bottom rows disappear below
@@ -807,6 +827,41 @@ class MainWindow(QMainWindow):
         self.thread_pool.start(worker)
 
     def _run_acceptance_cases(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_cases.txt",
+            oracle_filename="acceptance_oracle.json",
+            runs_dirname="acceptance_runs",
+            label="Acceptance",
+            title="Acceptance suite",
+        )
+
+    def _run_m1_adversarial_acceptance(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_cases_m1_adversarial.txt",
+            oracle_filename="acceptance_oracle_m1_adversarial.json",
+            runs_dirname="acceptance_runs_m1_adversarial",
+            label="M1 adversarial",
+            title="M1 adversarial acceptance",
+        )
+
+    def _run_m1_ellipsis_acceptance(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_ellipsis/cases.txt",
+            oracle_filename="acceptance_ellipsis/oracle.json",
+            runs_dirname="acceptance_runs_m1_ellipsis",
+            label="M1 ellipsis",
+            title="M1 ellipsis acceptance",
+        )
+
+    def _run_acceptance_pair(
+        self,
+        *,
+        cases_filename: str,
+        oracle_filename: str,
+        runs_dirname: str,
+        label: str,
+        title: str,
+    ) -> None:
         if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
@@ -814,22 +869,25 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("Дождитесь завершения операции LLM", 2500)
             return
         if self.services.llm is None or not self.services.llm.is_running:
-            QMessageBox.warning(self, "Acceptance suite", "Сначала запустите локальную LLM.")
+            QMessageBox.warning(self, title, "Сначала запустите локальную LLM.")
             return
 
-        cases_file = self.services.config.paths.data_dir / "acceptance_cases.txt"
-        oracle_file = self.services.config.paths.data_dir / "acceptance_oracle.json"
+        cases_file = self.services.config.paths.data_dir / cases_filename
+        oracle_file = self.services.config.paths.data_dir / oracle_filename
         try:
             cases = load_acceptance_cases(cases_file)
             oracle = load_semantic_oracle(oracle_file)
             validate_oracle_alignment(cases, oracle)
         except Exception as exc:
-            QMessageBox.critical(self, "Acceptance suite", f"{type(exc).__name__}: {exc}")
+            QMessageBox.critical(self, title, f"{type(exc).__name__}: {exc}")
             return
 
+        self._active_acceptance_label = label
+        self._active_acceptance_title = title
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.m1_adversarial_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -838,15 +896,18 @@ class MainWindow(QMainWindow):
         self.action_tick.setEnabled(False)
         self.action_save.setEnabled(False)
         self.chat_history.append(
-            f"<b>Acceptance:</b> запускаю {len(cases)} запросов с semantic oracle: "
+            f"<b>{self._html(label)}:</b> запускаю {len(cases)} запросов с semantic oracle: "
             f"{self._html(str(cases_file))}."
         )
-        self.statusBar().showMessage(f"Acceptance suite: 0/{len(cases)} — выполняется")
+        self.statusBar().showMessage(f"{label}: 0/{len(cases)} — выполняется")
         self._suspend_acceptance_status_polling()
 
         def run_suite():
             return run_acceptance_suite(
-                self.services, cases_file=cases_file, oracle_file=oracle_file
+                self.services,
+                cases_file=cases_file,
+                oracle_file=oracle_file,
+                runs_dirname=runs_dirname,
             )
 
         worker = FunctionWorker(run_suite)
@@ -860,8 +921,9 @@ class MainWindow(QMainWindow):
     def _acceptance_finished(self, result) -> None:
         if getattr(result, "proofs", ()):
             self.inference_explorer.add_chains(result.proofs, select_last=False)
+        label = self._active_acceptance_label
         self.chat_history.append(
-            f"<b>Acceptance:</b> semantic PASS {result.semantic_passed}/{result.total}, "
+            f"<b>{self._html(label)}:</b> semantic PASS {result.semantic_passed}/{result.total}, "
             f"FAIL {result.semantic_failed}, GAP {result.semantic_gaps}; "
             f"runtime ERROR {result.failed}. Результаты: {self._html(str(result.output_dir))}"
         )
@@ -872,7 +934,7 @@ class MainWindow(QMainWindow):
         )
         QMessageBox.information(
             self,
-            "Acceptance suite",
+            self._active_acceptance_title,
             f"Прогон завершён.\n\n"
             f"SEMANTIC PASS: {result.semantic_passed}/{result.total}\n"
             f"SEMANTIC FAIL: {result.semantic_failed}\n"
@@ -884,8 +946,9 @@ class MainWindow(QMainWindow):
 
     @Slot(str)
     def _acceptance_error(self, message: str) -> None:
-        self.chat_history.append(f"<b>ACCEPTANCE ERROR:</b> {self._html(message)}")
-        QMessageBox.critical(self, "Acceptance suite", message)
+        label = self._active_acceptance_label
+        self.chat_history.append(f"<b>{self._html(label)} ERROR:</b> {self._html(message)}")
+        QMessageBox.critical(self, self._active_acceptance_title, message)
 
     @Slot()
     def _acceptance_worker_finished(self) -> None:
@@ -893,6 +956,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.m1_adversarial_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -902,6 +966,8 @@ class MainWindow(QMainWindow):
         self.action_save.setEnabled(True)
         self.chat_input.setFocus()
         self._resume_acceptance_status_polling()
+        self._active_acceptance_label = "Acceptance"
+        self._active_acceptance_title = "Acceptance suite"
 
     def _run_document_acceptance(self) -> None:
         if (
@@ -928,6 +994,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.m1_adversarial_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -985,6 +1052,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.m1_adversarial_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1011,6 +1079,7 @@ class MainWindow(QMainWindow):
         # attention during proof. Live memory is never polluted by M2 fixtures.
         self.m2_acceptance_button.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.m1_adversarial_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.send_button.setEnabled(False)
@@ -1084,6 +1153,7 @@ class MainWindow(QMainWindow):
         self._m2_acceptance_worker = None
         self.m2_acceptance_button.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.m1_adversarial_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.send_button.setEnabled(True)
@@ -1103,6 +1173,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
+        self.m1_adversarial_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -1164,6 +1235,7 @@ class MainWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
+        self.m1_adversarial_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1541,6 +1613,11 @@ class MainWindow(QMainWindow):
             self.acceptance_button.setToolTip(
                 "Cases: " + str(new_config.paths.data_dir / "acceptance_cases.txt")
                 + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_oracle.json")
+            )
+            self.m1_adversarial_button.setToolTip(
+                "36 EXACT breaker-cases: typo/noise, syntactic inversion, ellipsis и mixed.\n"
+                "Cases: " + str(new_config.paths.data_dir / "acceptance_cases_m1_adversarial.txt")
+                + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_oracle_m1_adversarial.json")
             )
         except Exception as exc:
             QMessageBox.critical(self, "Config apply", str(exc))

@@ -168,7 +168,6 @@ def _parser_for(services: "RuntimeServices") -> AdaptivePerceptionParser:
             prompt_dir=settings.probe_prompt_dir,
             generation=settings.generation,
             retry_attempts=0,
-            max_acts=settings.max_acts,
             max_actants_per_act=settings.max_actants_per_act,
             predicate_symbol_language=settings.predicate_symbol_language,
             morphology_backend=settings.morphology_backend,

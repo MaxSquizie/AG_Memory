@@ -60,7 +60,6 @@ class _Services:
                 protocol="adaptive_v3",
                 probe_prompt_dir=prompt_dir,
                 generation=LLMRoleSettings(max_new_tokens=24, temperature=0.0),
-                max_acts=4,
                 max_actants_per_act=8,
                 predicate_symbol_language="en",
                 morphology_backend="none",

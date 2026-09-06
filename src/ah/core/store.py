@@ -13,6 +13,7 @@ from ah.model import (
     Group,
     Hypernode,
     Link,
+    BoundVar,
     Ref,
     RefKind,
     RuntimeState,
@@ -40,6 +41,16 @@ class _StoreState:
     creation_sequence: dict[str, int] = field(default_factory=dict)
     next_creation_sequence: int = 1
 
+    # Technical lifetime clock/birth registry used by normative GC.  These values
+    # are not canonical AH semantics (and therefore are not Pr/Mt on S/T/g/L);
+    # they are persisted alongside other store metadata so initial-lifetime
+    # protection survives restart.
+    lifetime_clock_tick: int = 0
+    lifetime_birth_tick: dict[str, int] = field(default_factory=dict)
+    lifetime_creation_log: list[str] = field(default_factory=list)
+    lifetime_managed_uids: set[str] = field(default_factory=set)
+    lifetime_tracking_enabled: bool = False
+
     # Derived indexes. None of these are a second source of truth.
     uid_kind: dict[str, RefKind] = field(default_factory=dict)
     uid_domain: dict[str, Domain] = field(default_factory=dict)
@@ -64,6 +75,9 @@ class _StoreState:
     actant_hypernodes: dict[str, list[str]] = field(default_factory=dict)
     group_memberships: dict[str, list[str]] = field(default_factory=dict)
     function_parents: dict[str, list[str]] = field(default_factory=dict)
+    # H experience occurrences grouped by external provenance/source handle.
+    # This is a rebuildable source-scope retrieval index, not a second memory.
+    source_experiences: dict[str, list[str]] = field(default_factory=dict)
 
 
 class AHStore:
@@ -222,6 +236,23 @@ class AHStore:
             uids = self._state.property_value_index.get((name, self._property_value_key(value)), [])
         return tuple(Ref(uid, self._state.uid_kind[uid]) for uid in uids)
 
+    def find_experiences_by_source_ref(self, source_ref: str) -> tuple[Hypernode, ...]:
+        """Return H experience occurrences carrying one provenance source handle.
+
+        ``source_ref`` is technical provenance attached to an H occurrence.  This
+        derived index lets source-scoped recall remain bounded without scanning H.
+        It never changes semantic identity and is rebuilt from canonical records.
+        """
+        key = source_ref.strip()
+        if not key:
+            return ()
+        result: list[Hypernode] = []
+        for uid in self._state.source_experiences.get(key, []):
+            element = self.get_element_any_domain(uid)
+            if isinstance(element, Hypernode):
+                result.append(element)
+        return tuple(result)
+
     def outgoing_links(self, uid: str, relation_id: str | None = None) -> tuple[Link, ...]:
         if relation_id is None:
             ids = self._state.outgoing_links.get(uid, [])
@@ -262,8 +293,9 @@ class AHStore:
         return tuple(out)
 
     def hypernode_actants(self, uid: str) -> tuple[Ref, ...]:
+        """Canonical Ref actants of N; formula BoundVar slots are runtime-inert."""
         node = self.get_hypernode(uid)
-        return tuple(node.actants.values())
+        return tuple(value for value in node.actants.values() if isinstance(value, Ref))
 
     def hypernodes_for_actant(self, uid: str) -> tuple[Hypernode, ...]:
         return tuple(self.get_hypernode(n_uid) for n_uid in self._state.actant_hypernodes.get(uid, []))
@@ -308,6 +340,21 @@ class AHStore:
         if not isinstance(current, Hypernode):
             raise KeyError(node.uid)
         self._state.domains[domain][node.uid] = node
+        # Weight/lifecycle-only updates are hot-path operations and do not affect
+        # retrieval indexes. Structural/provenance edits do: actant reverse lookup,
+        # property lookup, N signatures and source-scope provenance must remain
+        # exact even for internal callers that replace an N directly.
+        indexed_meta_keys = (
+            "semantic_scope", "dedup_exempt", "event_instance", "source_ref", "batch_kind"
+        )
+        indexed_change = (
+            current.template != node.template
+            or current.actants != node.actants
+            or current.properties != node.properties
+            or any(current.meta.get(key) != node.meta.get(key) for key in indexed_meta_keys)
+        )
+        if indexed_change:
+            self.rebuild_indexes()
 
     def _replace_symbol(self, symbol: AbstractSymbol) -> None:
         if symbol.uid not in self._state.symbols:
@@ -344,6 +391,8 @@ class AHStore:
             self._state.domains[domain].pop(uid, None)
         self._state.runtime.pop(uid, None)
         self._state.creation_sequence.pop(uid, None)
+        self._state.lifetime_birth_tick.pop(uid, None)
+        self._state.lifetime_managed_uids.discard(uid)
         self.rebuild_indexes()
 
     # ---------- canonical insertions ----------
@@ -360,6 +409,77 @@ class AHStore:
         sequence = max(1, int(self._state.next_creation_sequence))
         self._state.creation_sequence[uid] = sequence
         self._state.next_creation_sequence = sequence + 1
+        if uid not in self._state.lifetime_birth_tick:
+            self._state.lifetime_birth_tick[uid] = int(self._state.lifetime_clock_tick)
+            self._state.lifetime_creation_log.append(uid)
+        if self._state.lifetime_tracking_enabled:
+            self._state.lifetime_managed_uids.add(uid)
+
+    def enable_lifetime_tracking(self, tick: int) -> None:
+        """Enable initial-lifetime registration for subsequent insertions.
+
+        Canonical data that existed before Ignition starts is treated as an
+        established memory snapshot, not as a batch of freshly injected orphans.
+        Persisted managed UIDs remain managed across restart.
+        """
+        self._state.lifetime_clock_tick = max(0, int(tick))
+        self._state.lifetime_tracking_enabled = True
+
+    def set_lifetime_clock(self, tick: int) -> None:
+        """Set the technical tick used to timestamp subsequent canonical insertions."""
+        self._state.lifetime_clock_tick = max(0, int(tick))
+
+    def lifetime_birth_tick(self, uid: str) -> int:
+        """Return technical birth tick, lazily protecting legacy records from instant GC."""
+        if not self.has_uid(uid):
+            raise KeyError(uid)
+        return int(
+            self._state.lifetime_birth_tick.setdefault(
+                uid, int(self._state.lifetime_clock_tick)
+            )
+        )
+
+    def lifetime_birth_items(self) -> tuple[tuple[str, int], ...]:
+        return tuple(self._state.lifetime_birth_tick.items())
+
+    def lifetime_creation_log(self) -> tuple[str, ...]:
+        return tuple(self._state.lifetime_creation_log)
+
+    def is_lifetime_managed(self, uid: str) -> bool:
+        return uid in self._state.lifetime_managed_uids
+
+    def lifetime_managed_uids(self) -> tuple[str, ...]:
+        return tuple(self._state.lifetime_managed_uids)
+
+    def restore_lifetime_metadata(
+        self, mapping: dict[str, int], *, clock_tick: int = 0, managed_uids: set[str] | None = None
+    ) -> None:
+        """Restore optional technical lifetime metadata from persistence."""
+        self._state.lifetime_clock_tick = max(0, int(clock_tick))
+        self._state.lifetime_tracking_enabled = False
+        self._state.lifetime_birth_tick = {
+            uid: max(0, int(tick))
+            for uid, tick in mapping.items()
+            if self.has_uid(uid)
+        }
+        # Legacy dumps had no birth registry.  Treat loaded canonical records as
+        # newly observed at the restored clock rather than deleting them
+        # immediately merely because metadata did not exist in an older version.
+        for uid in self.all_uids():
+            self._state.lifetime_birth_tick.setdefault(
+                uid, self._state.lifetime_clock_tick
+            )
+        self._state.lifetime_creation_log = [
+            uid
+            for uid, _ in sorted(
+                self._state.lifetime_birth_tick.items(),
+                key=lambda item: (item[1], self._state.creation_sequence.get(item[0], 10**18)),
+            )
+        ]
+        requested_managed = managed_uids or set()
+        self._state.lifetime_managed_uids = {
+            uid for uid in requested_managed if self.has_uid(uid)
+        }
 
     def _restore_creation_sequence(
         self, mapping: dict[str, int], *, next_sequence: int | None = None
@@ -492,7 +612,8 @@ class AHStore:
             self._index_properties(element.uid, element.properties)
         elif isinstance(element, FunctionSymbol):
             for operand in element.operands:
-                self._state.function_parents.setdefault(operand.uid, []).append(element.uid)
+                if isinstance(operand, Ref):
+                    self._state.function_parents.setdefault(operand.uid, []).append(element.uid)
         elif isinstance(element, Group):
             self._index_properties(element.uid, element.properties)
             for member in element.members:
@@ -500,8 +621,17 @@ class AHStore:
         elif isinstance(element, Hypernode):
             self._state.hypernodes_by_template.setdefault(element.template.uid, []).append(element.uid)
             self._index_properties(element.uid, element.properties)
-            self._state.n_actants[element.uid] = tuple(ref.uid for ref in element.actants.values())
-            for ref in element.actants.values():
+            if domain is Domain.H and bool(element.meta.get("event_instance", False)):
+                source_ref = element.meta.get("source_ref")
+                if isinstance(source_ref, str) and source_ref.strip():
+                    bucket = self._state.source_experiences.setdefault(source_ref.strip(), [])
+                    if element.uid not in bucket:
+                        bucket.append(element.uid)
+            ref_actants = tuple(
+                value for value in element.actants.values() if isinstance(value, Ref)
+            )
+            self._state.n_actants[element.uid] = tuple(ref.uid for ref in ref_actants)
+            for ref in ref_actants:
                 self._state.actant_hypernodes.setdefault(ref.uid, []).append(element.uid)
             if not bool(element.meta.get("dedup_exempt", False)):
                 from .signatures import hypernode_signature
@@ -548,6 +678,7 @@ class AHStore:
         self._state.actant_hypernodes = {}
         self._state.group_memberships = {}
         self._state.function_parents = {}
+        self._state.source_experiences = {}
 
         new_runtime: dict[str, RuntimeState] = {}
         for symbol in self._state.symbols.values():
@@ -600,6 +731,17 @@ class AHStore:
             self._state.next_creation_sequence = max(1, int(self._state.next_creation_sequence))
         for uid in self._state.uid_kind:
             self._register_creation(uid)
+        existing = set(self._state.uid_kind)
+        self._state.lifetime_birth_tick = {
+            uid: int(tick)
+            for uid, tick in self._state.lifetime_birth_tick.items()
+            if uid in existing
+        }
+        for uid in existing:
+            self._state.lifetime_birth_tick.setdefault(
+                uid, int(self._state.lifetime_clock_tick)
+            )
+        self._state.lifetime_managed_uids.intersection_update(existing)
 
     # ---------- reference inspection / GC support ----------
     def structural_referrers(self, uid: str) -> tuple[Ref, ...]:
@@ -626,6 +768,84 @@ class AHStore:
     def has_any_link(self, uid: str) -> bool:
         return bool(self._state.outgoing_links.get(uid) or self._state.incoming_links.get(uid))
 
+    def structural_children(self, uid: str) -> tuple[Ref, ...]:
+        """Direct canonical references owned by one non-L element."""
+        if not self.has_uid(uid):
+            return ()
+        kind = self.kind_of(uid)
+        if kind is RefKind.S or kind is RefKind.L:
+            return ()
+        element = self.get_element_any_domain(uid)
+        if isinstance(element, Template):
+            return (element.predicate,)
+        if isinstance(element, Hypernode):
+            return (
+                element.template,
+                *(value for value in element.actants.values() if isinstance(value, Ref)),
+            )
+        if isinstance(element, FunctionSymbol):
+            return tuple(value for value in element.operands if isinstance(value, Ref))
+        if isinstance(element, Group):
+            return element.members
+        return ()
+
+    def gc_neighbors(self, uid: str, *, positive_weight_only: bool = True) -> tuple[str, ...]:
+        """Undirected effective-topology neighbors used only by lifecycle/GC.
+
+        L with zero effective weight and N hyperedges with zero weight do not
+        anchor memory. T→S and g/k containment are structural references without
+        their own weights and therefore remain effective.  The method uses only
+        rebuildable indexes plus the current element; it is not a semantic search.
+        """
+        if not self.has_uid(uid):
+            return ()
+        out: set[str] = set()
+        for link in (*self.outgoing_links(uid), *self.incoming_links(uid)):
+            if positive_weight_only and link.weight <= 0:
+                continue
+            out.add(link.target.uid if link.source.uid == uid else link.source.uid)
+
+        kind = self.kind_of(uid)
+        if kind is RefKind.N:
+            node = self.get_hypernode(uid)
+            if not positive_weight_only or node.weight > 0:
+                out.update(ref.uid for ref in self.structural_children(uid))
+        else:
+            out.update(ref.uid for ref in self.structural_children(uid))
+
+        for referrer in self.structural_referrers(uid):
+            if referrer.kind is RefKind.N and positive_weight_only:
+                try:
+                    if self.get_hypernode(referrer.uid).weight <= 0:
+                        continue
+                except (KeyError, TypeError):
+                    continue
+            out.add(referrer.uid)
+        out.discard(uid)
+        return tuple(sorted(v for v in out if self.has_uid(v)))
+
+    def has_positive_weighted_support(self, uid: str) -> bool:
+        """Whether a node participates in any positive L/N transmission path."""
+        if not self.has_uid(uid):
+            return False
+        for link in (*self.outgoing_links(uid), *self.incoming_links(uid)):
+            if link.weight > 0:
+                return True
+        if self.kind_of(uid) is RefKind.N:
+            try:
+                if self.get_hypernode(uid).weight > 0:
+                    return True
+            except (KeyError, TypeError):
+                pass
+        for node in self.hypernodes_for_actant(uid):
+            if node.weight > 0:
+                return True
+        if self.kind_of(uid) is RefKind.T:
+            for node in self.find_hypernodes_by_template(uid):
+                if node.weight > 0:
+                    return True
+        return False
+
     def _delete_uids(self, uids: set[str]) -> set[str]:
         """Delete canonical UIDs and links incident to deleted endpoints, then rebuild indexes."""
         if not uids:
@@ -644,6 +864,8 @@ class AHStore:
                 self._state.domains[domain].pop(uid, None)
             self._state.runtime.pop(uid, None)
             self._state.creation_sequence.pop(uid, None)
+            self._state.lifetime_birth_tick.pop(uid, None)
+            self._state.lifetime_managed_uids.discard(uid)
 
         self.rebuild_indexes()
         return removed

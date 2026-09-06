@@ -639,7 +639,7 @@ class LLMControlWidget(QWidget):
         )
         self.perception_cfg_label.setText(
             f"{cfg.llm.perception_protocol}, retry={cfg.llm.perception_probe_retry_attempts}, "
-            f"acts≤{cfg.llm.perception_max_acts}, actants≤{cfg.llm.perception_max_actants_per_act}, "
+            f"acts=source-bounded, actants≤{cfg.llm.perception_max_actants_per_act}, "
             f"predicate S/T={'lexical deterministic' if cfg.llm.perception_protocol == 'adaptive_v3' else cfg.llm.perception_predicate_symbol_language}, "
             f"T={cfg.llm.perception.temperature:g}"
         )

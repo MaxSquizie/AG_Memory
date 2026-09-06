@@ -14,11 +14,11 @@ class LMStudioClient:
     """Small dependency-free client for LM Studio's local HTTP server.
 
     Model discovery uses LM Studio's OpenAI-compatible ``/v1/models`` endpoint.
-    This endpoint is available across a wider range of LM Studio server versions
-    than the newer native ``/api/v1/models`` API and is sufficient for selecting
-    the configured model. Inference uses the stateless OpenAI-compatible
-    ``/v1/chat/completions`` endpoint, matching AH's requirement that every
-    mechanical call owns no hidden chat history.
+    Generic generation keeps using stateless ``/v1/chat/completions``. Bounded
+    machine-protocol probes use the native ``/api/v1/chat`` endpoint because it
+    exposes a first-class ``reasoning=off`` control; the OpenAI-compatible endpoint
+    does not define request-level thinking control in its supported payload. Both
+    paths explicitly disable server-side conversation storage/history.
     """
 
     def __init__(
@@ -127,6 +127,7 @@ class LMStudioClient:
         top_k: int,
         repeat_penalty: float,
         max_tokens: int,
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         body: dict[str, Any] = {
             "model": model,
@@ -140,7 +141,93 @@ class LMStudioClient:
             # it also avoids clients/servers disagreeing about streaming defaults.
             "stream": False,
         }
+        if enable_thinking is not None:
+            # LM Studio model.yaml exposes reasoning through the Jinja variable
+            # ``enable_thinking``. Different LM Studio builds have accepted this
+            # setting through different compatibility surfaces, so send the same
+            # explicit value through both known request forms. Servers that ignore
+            # one form can still honor the other; neither changes AH semantics.
+            flag = bool(enable_thinking)
+            body["enable_thinking"] = flag
+            body["chat_template_kwargs"] = {"enable_thinking": flag}
         return self._request("POST", "/v1/chat/completions", body)
+
+
+    def native_chat(
+        self,
+        *,
+        model: str,
+        prompt: str,
+        system: str,
+        temperature: float,
+        top_p: float,
+        top_k: int,
+        repeat_penalty: float,
+        max_tokens: int,
+        reasoning: str = "off",
+    ) -> dict[str, Any]:
+        """Run one stateless request through LM Studio's native v1 chat API.
+
+        The native endpoint has an explicit ``reasoning`` switch. This is required
+        for AH's bounded protocol probes: a reasoning-capable model must not spend
+        the tiny label budget in a hidden reasoning channel. ``store=False`` keeps
+        the call stateless, matching the backend contract.
+        """
+        mode = str(reasoning or "off").strip().lower()
+        if mode not in {"off", "low", "medium", "high", "on"}:
+            raise ValueError(f"Unsupported LM Studio reasoning mode: {reasoning!r}")
+        body: dict[str, Any] = {
+            "model": model,
+            "input": str(prompt),
+            "temperature": float(temperature),
+            "top_p": float(top_p),
+            "top_k": int(top_k),
+            "repeat_penalty": float(repeat_penalty),
+            "max_output_tokens": int(max_tokens),
+            "reasoning": mode,
+            "stream": False,
+            "store": False,
+        }
+        if str(system or "").strip():
+            body["system_prompt"] = str(system).strip()
+        return self._request("POST", "/api/v1/chat", body)
+
+    @staticmethod
+    def native_chat_text(data: dict[str, Any]) -> str:
+        output = data.get("output")
+        if not isinstance(output, list):
+            raise LMStudioClientError("LM Studio native chat response missing output list")
+        messages: list[str] = []
+        has_reasoning = False
+        for item in output:
+            if not isinstance(item, dict):
+                continue
+            kind = str(item.get("type") or "").strip().lower()
+            content = item.get("content")
+            if kind == "reasoning":
+                if isinstance(content, str) and content.strip():
+                    has_reasoning = True
+                continue
+            if kind == "message" and isinstance(content, str) and content.strip():
+                messages.append(content.strip())
+        text = "\n".join(messages).strip()
+        if text:
+            return text
+        stats = data.get("stats")
+        reasoning_tokens = None
+        total_output_tokens = None
+        if isinstance(stats, dict):
+            reasoning_tokens = stats.get("reasoning_output_tokens")
+            total_output_tokens = stats.get("total_output_tokens")
+        details = []
+        if total_output_tokens is not None:
+            details.append(f"total_output_tokens={total_output_tokens}")
+        if reasoning_tokens is not None:
+            details.append(f"reasoning_output_tokens={reasoning_tokens}")
+        details.append(f"reasoning_content={'present' if has_reasoning else 'absent'}")
+        raise LMStudioClientError(
+            "LM Studio native chat returned no message content (" + "; ".join(details) + ")"
+        )
 
     @staticmethod
     def chat_text(data: dict[str, Any]) -> str:
@@ -154,13 +241,48 @@ class LMStudioClient:
         if not isinstance(message, dict):
             raise LMStudioClientError("LM Studio chat response missing message")
         content = message.get("content")
+        text = ""
         if isinstance(content, str):
-            return content.strip()
-        # Some OpenAI-compatible servers represent content as typed parts.
-        if isinstance(content, list):
+            text = content.strip()
+        elif isinstance(content, list):
+            # Some OpenAI-compatible servers represent content as typed parts.
             parts: list[str] = []
             for item in content:
                 if isinstance(item, dict) and isinstance(item.get("text"), str):
                     parts.append(str(item["text"]))
-            return "".join(parts).strip()
-        return ""
+            text = "".join(parts).strip()
+        if text:
+            return text
+
+        # Never silently treat an empty assistant message as a valid protocol
+        # answer. Reasoning-capable LM Studio models can spend the entire small
+        # generation budget in ``reasoning_content`` and leave ``content`` empty.
+        # Feeding that hidden reasoning to the parser would violate the bounded
+        # semantic-probe contract, so fail closed with transport diagnostics only.
+        has_reasoning = any(
+            isinstance(message.get(key), str) and bool(str(message.get(key)).strip())
+            for key in ("reasoning_content", "reasoning")
+        )
+        finish_reason = first.get("finish_reason")
+        usage = data.get("usage")
+        reasoning_tokens = None
+        completion_tokens = None
+        if isinstance(usage, dict):
+            completion_tokens = usage.get("completion_tokens")
+            details = usage.get("completion_tokens_details")
+            if isinstance(details, dict):
+                reasoning_tokens = details.get("reasoning_tokens")
+        details: list[str] = []
+        if finish_reason is not None:
+            details.append(f"finish_reason={finish_reason}")
+        if completion_tokens is not None:
+            details.append(f"completion_tokens={completion_tokens}")
+        if reasoning_tokens is not None:
+            details.append(f"reasoning_tokens={reasoning_tokens}")
+        details.append(f"reasoning_content={'present' if has_reasoning else 'absent'}")
+        suffix = "; ".join(details)
+        raise LMStudioClientError(
+            "LM Studio returned empty assistant content (" + suffix + "). "
+            "For bounded AH perception probes, disable model Thinking in LM Studio; "
+            "the backend already requests enable_thinking=false and does not consume hidden reasoning as an answer."
+        )

@@ -72,6 +72,7 @@ class SeedReason(str, Enum):
     QUERY_RECALL = "QUERY_RECALL"
     CORRECTION = "CORRECTION"
     PACEMAKER = "PACEMAKER"
+    CONFLICT = "CONFLICT"
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,6 +147,19 @@ class ClarificationResolutionCommit:
     affected_facts: tuple[Ref, ...]
     activation_seeds: tuple[ActivationSeedRequest, ...] = ()
 
+
+
+@dataclass(frozen=True, slots=True)
+class IdentityMergeResult:
+    survivor: Ref
+    removed: Ref
+    rewired: tuple[tuple[Ref, Ref], ...] = ()
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.survivor.kind.value != "M" or self.removed.kind.value != "M":
+            raise ValueError("IdentityMergeResult endpoints must be M")
+
 @dataclass(frozen=True, slots=True)
 class IntegratedAssertion:
     local_id: str
@@ -154,10 +168,29 @@ class IntegratedAssertion:
     created: bool
     ambiguous: bool = False
     semantic_scope: str | None = None
+    nominal_relations: tuple["IntegratedRelation", ...] = ()
 
 
 
 
+
+
+@dataclass(frozen=True, slots=True)
+class IntegratedExistential:
+    """One asserted existential formula built from scoped source propositions."""
+
+    ref: Ref
+    member_refs: tuple[Ref, ...]
+    variable_ids: tuple[int, ...]
+    created: bool
+
+    def __post_init__(self) -> None:
+        if self.ref.kind.value != "G":
+            raise ValueError("IntegratedExistential.ref must be G")
+        if not self.member_refs:
+            raise ValueError("IntegratedExistential requires at least one member proposition")
+        if not self.variable_ids:
+            raise ValueError("IntegratedExistential requires at least one variable")
 
 
 @dataclass(frozen=True, slots=True)
@@ -178,6 +211,20 @@ class IntegratedRelation:
 
 
 @dataclass(frozen=True, slots=True)
+class IntegratedConflict:
+    ref: Ref
+    members: tuple[Ref, ...]
+    kind: str
+    created: bool
+
+    def __post_init__(self) -> None:
+        if self.ref.kind.value != "K":
+            raise ValueError("IntegratedConflict.ref must be K")
+        if len(self.members) < 2:
+            raise ValueError("IntegratedConflict requires at least two members")
+
+
+@dataclass(frozen=True, slots=True)
 class IntegrationCommit:
     assertions: tuple[IntegratedAssertion, ...]
     experience_ref: Ref
@@ -189,3 +236,5 @@ class IntegrationCommit:
     clarifications: tuple[ClarificationRequest, ...] = ()
     relations: tuple[IntegratedRelation, ...] = ()
     conditionals: tuple[IntegratedConditional, ...] = ()
+    existentials: tuple[IntegratedExistential, ...] = ()
+    conflicts: tuple[IntegratedConflict, ...] = ()
