@@ -1,0 +1,20 @@
+Baseline: AG_Memory v0.25.16
+Modified production/prompt files checked: 9
+Added production/prompt lines checked: 878
+Acceptance case texts checked: 331
+Exact acceptance text hits in added production lines: 0
+Typo/fuzzy/Levenshtein/embedding recovery hits in added production lines: 0
+
+Decision-literal review:
+- repeated finite-frame completion contains only dash variants and the closed
+  adversative coordinator class;
+- ellipsis recovery contains no participant, predicate, object, place, time, or
+  acceptance-case vocabulary;
+- remaining literals are morphology/POS labels, punctuation, protocol labels,
+  grammatical function words, metadata keys, or local-id prefixes;
+- the benchmark isolation change adds no semantic condition literal and keeps
+  the 1000-unit workload and 500 ms acceptance limit unchanged;
+- no corpus answer table, case id, proper name, content noun, or content predicate
+  was added to a production condition.
+
+The machine-readable AST condition-literal inventory is control_literals.json.

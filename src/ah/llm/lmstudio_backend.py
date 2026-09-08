@@ -98,6 +98,17 @@ class LMStudioBackend:
     def list_models(self) -> tuple[str, ...]:
         return self._available_models
 
+    def embed_texts(self, texts: tuple[str, ...]) -> tuple[tuple[float, ...], ...]:
+        """Embed only a bounded lexical shortlist with the configured local model.
+
+        This path is deliberately separate from ``generate``: Lexical Recovery
+        never asks the chat LLM to correct or select a spelling.
+        """
+        model = self.config.llm.perception_embedding_model.strip()
+        if not model:
+            raise RuntimeError("No llm.perception.embedding_model is configured")
+        return self._client.embeddings(model=model, texts=texts)
+
     def _context_window(self) -> int | None:
         instances = _loaded_instances(self._active_model_info)
         for instance in instances:

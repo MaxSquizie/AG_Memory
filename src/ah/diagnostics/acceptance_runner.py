@@ -12,6 +12,7 @@ from typing import Any, Mapping, TYPE_CHECKING
 
 from ah.model import AbstractSymbol, Domain, FunctionSymbol, Group, Hypernode, Link, SemanticEntity, Template
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+from ah.perception.lexical_recovery import EmbeddingSemanticReranker, LexicalRecovery
 from ah.perception.morphology import build_morphology
 from ah.diagnostics.inference_proof import ProofChainSnapshot, ProofSnapshotBuilder
 from ah.diagnostics.semantic_oracle import (
@@ -308,7 +309,20 @@ def run_acceptance_suite(
     shutil.copyfile(oracle_source, output_dir / "oracle_used.json")
 
     morphology = build_morphology(services.config.llm.perception_morphology_backend)
-    candidate_builder = LinguisticCandidateBuilder(morphology)
+    semantic_reranker = (
+        EmbeddingSemanticReranker(services.llm)  # type: ignore[arg-type]
+        if services.llm is not None
+        and str(getattr(services.config.llm, "perception_embedding_model", "")).strip()
+        and callable(getattr(services.llm, "embed_texts", None))
+        else None
+    )
+    candidate_builder = LinguisticCandidateBuilder(
+        morphology,
+        lexical_recovery=LexicalRecovery(
+            morphology,
+            semantic_reranker=semantic_reranker,
+        ),
+    )
 
     clock = getattr(services, "clock", None)
     clock_was_running = bool(clock is not None and getattr(clock, "running", False))

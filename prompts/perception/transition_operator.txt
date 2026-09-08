@@ -1,0 +1,3 @@
+Return one: START|STOP|CONTINUE|AGAIN|NO_LONGER|NONE|UNCLEAR.
+Use only TEXT/OPERAND. With OPERATOR CUE, classify only it; ordinary time/manner/degree/discourse=NONE.
+START=P begins; STOP=P ends; CONTINUE=P persists; AGAIN=new P after prior P (does not prove intervening NOT(P)); NO_LONGER=P held before, not now; NONE=no transition; UNCLEAR=underdetermined.

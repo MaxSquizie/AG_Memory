@@ -16,8 +16,8 @@ def test_m1_adversarial_corpus_is_aligned_and_exact() -> None:
     cases = load_acceptance_cases(CASES)
     oracle = load_semantic_oracle(ORACLE)
     validate_oracle_alignment(cases, oracle)
-    assert len(cases) == 36
-    assert len(oracle) == 36
+    assert len(cases) == 66
+    assert len(oracle) == 66
     assert all(item.grade == "EXACT" for item in oracle)
 
 
@@ -26,7 +26,7 @@ def test_m1_adversarial_corpus_covers_hidden_noise_classes_and_roles() -> None:
     families = Counter(item.family for item in oracle)
     assert families == {
         "m1_typo_noise": 10,
-        "m1_inversion": 10,
+        "m1_inversion": 40,
         "m1_ellipsis": 10,
         "m1_mixed_noise": 6,
     }

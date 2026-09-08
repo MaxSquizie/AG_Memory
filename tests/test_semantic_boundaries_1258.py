@@ -148,7 +148,8 @@ class StructuralNarrowing1258Tests(unittest.TestCase):
         self.assertEqual(roles, ())
 
     def test_ambiguous_genitive_dative_nominal_is_not_absorbed_into_previous_np(self):
-        parser = make_parser()
+        backend = ScriptedBackend({"perception_nominal_genitive_attachment": ["SEPARATE"]})
+        parser = make_parser(backend=backend)
         text = "Сергей отправил письмо Марии."
         tokens = parser._source_tokens(text)
         parser._candidate_graph = LinguisticCandidateBuilder(parser.morphology).build(text)

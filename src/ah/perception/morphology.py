@@ -26,6 +26,14 @@ class Morphology(Protocol):
     def analyze(self, word: str) -> MorphInfo | None: ...
     def analyze_all(self, word: str) -> tuple[MorphInfo, ...]: ...
 
+    # Optional lexical-recovery capabilities.  Lightweight/test morphology
+    # adapters need not implement them; callers feature-detect the methods and
+    # leave their input untouched when no dictionary index is available.
+    def is_known(self, word: str) -> bool: ...
+    def indexed_candidates(
+        self, word: str, *, max_distance: int, limit: int = 512
+    ) -> tuple[str, ...]: ...
+
 
 def material_analyses(analyses: tuple[MorphInfo, ...]) -> tuple[MorphInfo, ...]:
     """Return morphology readings strong enough to remain runtime candidates.
@@ -202,6 +210,85 @@ class Pymorphy3Morphology:
     def analyze(self, word: str) -> MorphInfo | None:
         analyses = self.analyze_all(word)
         return analyses[0] if analyses else None
+
+    @lru_cache(maxsize=16384)
+    def is_known(self, word: str) -> bool:
+        """Return dictionary membership, not pymorphy's productive OOV guess.
+
+        ``MorphAnalyzer.parse`` deliberately invents analyses for unknown words.
+        Lexical Recovery must distinguish that useful morphology fallback from an
+        exact dictionary hit, otherwise every typo would be mislabeled EXACT.
+        """
+        return bool(self._analyzer.word_is_known(word.casefold()))
+
+    @lru_cache(maxsize=4096)
+    def _indexed_candidates_cached(
+        self, word: str, max_distance: int, limit: int
+    ) -> tuple[str, ...]:
+        """Search pymorphy's compressed word DAWG with edit-distance pruning.
+
+        This is an on-demand Levenshtein automaton over the dictionary trie.  It
+        visits only prefixes whose dynamic-programming row can still reach the
+        query inside ``max_distance``; it never scans or materializes the full
+        dictionary.  Adjacent transpositions are added as exact DAWG lookups and
+        weighted more precisely by the recovery ranker.
+        """
+        query = word.casefold()
+        if not query or max_distance < 0 or limit <= 0:
+            return ()
+        words = self._analyzer.dictionary.words
+        dictionary = words.dct
+        alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя-"
+        initial_row = tuple(range(len(query) + 1))
+        found: set[str] = set()
+
+        def visit(prefix: str, state: int, previous_row: tuple[int, ...]) -> None:
+            if len(found) >= limit:
+                return
+            for char in alphabet:
+                next_state = dictionary.follow_bytes(char.encode("utf-8"), state)
+                if next_state is None:
+                    continue
+                current = [previous_row[0] + 1]
+                for column, query_char in enumerate(query, start=1):
+                    current.append(
+                        min(
+                            current[column - 1] + 1,
+                            previous_row[column] + 1,
+                            previous_row[column - 1] + (query_char != char),
+                        )
+                    )
+                candidate = prefix + char
+                if current[-1] <= max_distance and words._has_value(next_state) is not None:
+                    found.add(candidate)
+                    if len(found) >= limit:
+                        return
+                if min(current) <= max_distance:
+                    visit(candidate, next_state, tuple(current))
+
+        visit("", dictionary.ROOT, initial_row)
+
+        # A transposition is two Levenshtein edits but one keyboard event.  Probe
+        # those O(len(word)) exact variants directly in the same compressed DAWG.
+        if max_distance >= 1:
+            chars = list(query)
+            for index in range(len(chars) - 1):
+                if chars[index] == chars[index + 1]:
+                    continue
+                swapped = chars.copy()
+                swapped[index], swapped[index + 1] = swapped[index + 1], swapped[index]
+                candidate = "".join(swapped)
+                if self._analyzer.word_is_known(candidate):
+                    found.add(candidate)
+
+        return tuple(sorted(found))
+
+    def indexed_candidates(
+        self, word: str, *, max_distance: int, limit: int = 512
+    ) -> tuple[str, ...]:
+        return self._indexed_candidates_cached(
+            word.casefold(), int(max_distance), int(limit)
+        )
 
 
 def build_morphology(backend: str = "auto") -> Morphology:

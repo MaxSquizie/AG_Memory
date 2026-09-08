@@ -1,0 +1,4 @@
+Full regression suite
+Command: python3 -m pytest -q --junitxml=verification/02517/full_suite.xml
+Result: 1054 passed, 38 subtests passed in 143.41s
+Exit code: 0

@@ -1,0 +1,97 @@
+[
+  {
+    "file": "src/ah/integration/formalization.py",
+    "function": "_referent_text",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/integration/formalization.py",
+    "function": "_dependent_candidate",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/integration/formalization.py",
+    "function": "_third_person_signature",
+    "condition_literals": [
+      "3per",
+      "NPRO",
+      "он",
+      "она",
+      "они",
+      "оно"
+    ]
+  },
+  {
+    "file": "src/ah/integration/formalization.py",
+    "function": "_referent_signature",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/integration/formalization.py",
+    "function": "_discourse_refs",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/integration/formalization.py",
+    "function": "bind_discourse_ref",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_realization_signature",
+    "condition_literals": [
+      "NOUN",
+      "NPRO",
+      "PREP"
+    ]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_compatible_realizations",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_unique_realization_roles",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_recover_ellipsis_assertions",
+    "condition_literals": [
+      "A"
+    ]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_resolve_modifier_attachment",
+    "condition_literals": [
+      "ADJF",
+      "NOUN",
+      "NPRO",
+      "OBJECT_ATTACHMENT",
+      "PREDICATE_ATTACHMENT",
+      "PREP",
+      "PRTF",
+      "UNCLEAR"
+    ]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_deterministic_role_candidates",
+    "condition_literals": [
+      "ADJF",
+      "ADJS",
+      "ADVB",
+      "NOUN",
+      "NPRO",
+      "PRED",
+      "PREP",
+      "PRTF",
+      "PRTS",
+      "ablt",
+      "intr",
+      "nomn"
+    ]
+  }
+]

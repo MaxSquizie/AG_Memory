@@ -1,0 +1,123 @@
+Acceptance run: 20260907_054039_+0300
+Cases: 100 | RUNTIME OK: 86 | RUNTIME ERROR: 14
+SEMANTIC PASS: 63 | FAIL: 37 | GAP: 0
+SCENARIOS: 100 | isolated between scenarios
+
+Families:
+  predicate_frame: PASS 6/6 | FAIL 0 | GAP 0
+  role_frame: PASS 4/5 | FAIL 1 | GAP 0
+  proposition_negation: PASS 4/4 | FAIL 0 | GAP 0
+  proposition_confirmation: PASS 2/2 | FAIL 0 | GAP 0
+  temporal_ellipsis: PASS 2/3 | FAIL 1 | GAP 0
+  locative_ellipsis: PASS 1/2 | FAIL 1 | GAP 0
+  complex_chain: PASS 9/12 | FAIL 3 | GAP 0
+  coordination_ellipsis: PASS 9/12 | FAIL 3 | GAP 0
+  polarity_chain: PASS 9/10 | FAIL 1 | GAP 0
+  role_rich_chain: PASS 7/10 | FAIL 3 | GAP 0
+  temporal_locative_combo: PASS 3/10 | FAIL 7 | GAP 0
+  antecedent_reset: PASS 7/10 | FAIL 3 | GAP 0
+  punctuation_ellipsis: PASS 0/6 | FAIL 6 | GAP 0
+  scope_ellipsis: PASS 0/4 | FAIL 4 | GAP 0
+  coreference_ellipsis: PASS 0/2 | FAIL 2 | GAP 0
+  mixed_adversarial_ellipsis: PASS 0/2 | FAIL 2 | GAP 0
+
+001 PASS (runtime=OK, scenario=ellipsis_v1_001): Иван купил книгу, а Мария журнал.
+002 PASS (runtime=OK, scenario=ellipsis_v1_002): Иван прочитал книгу, а Мария — журнал.
+003 PASS (runtime=OK, scenario=ellipsis_v1_003): Пётр открыл дверь, а Иван окно.
+004 PASS (runtime=OK, scenario=ellipsis_v1_004): Анна написала письмо, а Ольга сообщение.
+005 PASS (runtime=OK, scenario=ellipsis_v1_005): Сергей увидел машину, а Пётр автобус.
+006 PASS (runtime=OK, scenario=ellipsis_v1_006): Иван любит музыку, а Мария театр.
+007 PASS (runtime=OK, scenario=ellipsis_v1_007): Сергей передал Анне письмо, а Пётр Ольге посылку.
+008 PASS (runtime=OK, scenario=ellipsis_v1_008): Ольга положила книгу на стол, а Анна журнал — на полку.
+009 PASS (runtime=OK, scenario=ellipsis_v1_009): Пётр открыл дверь ключом, а Иван окно отвёрткой.
+010 FAIL (runtime=OK, scenario=ellipsis_v1_010): Мастер сделал стол из дерева, а ученик стул из металла. | perception.assertion_count, integration.domains.a1, integration.domains.a2, templates.сделать.explicit_role_coverage
+011 PASS (runtime=OK, scenario=ellipsis_v1_011): Анна отправила письмо Сергею, а Ольга сообщение Петру.
+012 PASS (runtime=OK, scenario=ellipsis_v1_012): Иван купил книгу, а Мария — нет.
+013 PASS (runtime=OK, scenario=ellipsis_v1_013): Иван прочитал книгу, а Мария — нет.
+014 PASS (runtime=OK, scenario=ellipsis_v1_014): Анна знает ответ, а Пётр — нет.
+015 PASS (runtime=OK, scenario=ellipsis_v1_015): Сергей открыл дверь, а Иван — нет.
+016 PASS (runtime=OK, scenario=ellipsis_v1_016): Иван купил книгу, а Мария тоже.
+017 PASS (runtime=OK, scenario=ellipsis_v1_017): Анна прочитала отчёт, и Ольга тоже.
+018 FAIL (runtime=ERROR, scenario=ellipsis_v1_018): Вчера Иван прочитал книгу, а сегодня журнал. | integration.completed | runtime: UnresolvedTemporalReferenceError: Unresolved temporal reference(s) require an explicit/source/experience anchor before canonical commit: A1.TIME='Вчера', A2.TIME='сегодня'
+019 PASS (runtime=OK, scenario=ellipsis_v1_019): Утром Пётр работал в офисе, а вечером дома.
+020 PASS (runtime=OK, scenario=ellipsis_v1_020): Иван пришёл утром, а Мария — вечером.
+021 FAIL (runtime=OK, scenario=ellipsis_v1_021): Книга лежит на столе, а журнал — на полке. | perception.assertion_count, perception.assertions.a2.roles.LOCATION, canonical.assertions.a2.roles.LOCATION
+022 PASS (runtime=OK, scenario=ellipsis_v1_022): Иван работает в Москве, а Мария — в Казани.
+023 PASS (runtime=OK, scenario=ellipsis_v2_023): Иван купил журнал, а Мария и Пётр - нет.
+024 PASS (runtime=OK, scenario=ellipsis_v2_024): Иван живёт в Москве, Мария - в Казани, Пётр - в Париже, а Слава - бродяга.
+025 PASS (runtime=OK, scenario=ellipsis_v2_025): Иван живёт в Москве, Мария — в Казани, а Пётр работает в Париже.
+026 PASS (runtime=OK, scenario=ellipsis_v2_026): Иван купил книгу, Мария — журнал, Пётр — газету.
+027 PASS (runtime=OK, scenario=ellipsis_v2_027): Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.
+028 PASS (runtime=OK, scenario=ellipsis_v2_028): Пётр открыл дверь, Иван — окно, Сергей — ворота.
+029 PASS (runtime=OK, scenario=ellipsis_v2_029): Иван работает дома, Мария — в офисе, Пётр — в школе.
+030 FAIL (runtime=OK, scenario=ellipsis_v2_030): Книга лежит на столе, журнал — на полке, тетрадь — в ящике. | perception.assertion_count, perception.assertions.a2.roles.LOCATION, perception.assertions.a3.predicate, perception.assertions.a3.roles.SUBJECT, perception.assertions.a3.roles.LOCATION, canonical.assertions.a2.roles.LOCATION, ... (+3)
+031 FAIL (runtime=OK, scenario=ellipsis_v2_031): Иван пришёл утром, Мария — днём, Пётр — вечером. | perception.assertions.a2.roles.TIME, canonical.assertions.a2.roles.TIME
+032 FAIL (runtime=ERROR, scenario=ellipsis_v2_032): Вчера Иван читал книгу, сегодня — журнал, завтра — газету. | integration.completed | runtime: UnresolvedTemporalReferenceError: Unresolved temporal reference(s) require an explicit/source/experience anchor before canonical commit: A1.TIME='Вчера', A2.TIME='сегодня', A3.TIME='завтра'
+033 PASS (runtime=OK, scenario=ellipsis_v2_033): Иван купил книгу, Мария — журнал, а Пётр прочитал газету.
+034 PASS (runtime=OK, scenario=ellipsis_v2_034): Иван купил книгу, а Мария прочитала журнал, Пётр — газету.
+035 PASS (runtime=OK, scenario=ellipsis_v2_035): Иван и Пётр купили книгу, а Мария — журнал.
+036 PASS (runtime=OK, scenario=ellipsis_v2_036): Иван купил книгу, а Мария и Пётр — журнал.
+037 PASS (runtime=OK, scenario=ellipsis_v2_037): Иван и Пётр купили книгу, а Мария и Анна — журнал.
+038 PASS (runtime=OK, scenario=ellipsis_v2_038): Иван купил хлеб и молоко, а Мария — чай и кофе.
+039 PASS (runtime=OK, scenario=ellipsis_v2_039): Иван купил хлеб и молоко, а Мария — нет.
+040 PASS (runtime=OK, scenario=ellipsis_v2_040): Иван и Пётр купили хлеб, а Мария и Анна — нет.
+041 PASS (runtime=OK, scenario=ellipsis_v2_041): Иван и Пётр пришли утром, а Мария — вечером.
+042 PASS (runtime=OK, scenario=ellipsis_v2_042): Иван пришёл утром, а Мария и Пётр — вечером.
+043 FAIL (runtime=OK, scenario=ellipsis_v2_043): Книга и журнал лежат на столе, а тетрадь — на полке. | perception.assertion_count, perception.assertions.a2.roles.SUBJECT, perception.assertions.a2.roles.LOCATION, canonical.assertions.a2.roles.SUBJECT, canonical.assertions.a2.roles.LOCATION
+044 FAIL (runtime=OK, scenario=ellipsis_v2_044): Книга лежит на столе, а журнал и тетрадь — на полке. | perception.assertion_count, perception.assertions.a2.roles.LOCATION, canonical.assertions.a2.roles.LOCATION
+045 PASS (runtime=OK, scenario=ellipsis_v2_045): Анна отправила письмо Сергею, а Ольга и Мария — сообщение Петру.
+046 FAIL (runtime=ERROR, scenario=ellipsis_v2_046): Сергей передал Анне книгу и журнал, а Пётр — Ольге письмо и открытку. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: duplicate_target_roles
+047 PASS (runtime=OK, scenario=ellipsis_v2_047): Иван купил книгу, Мария — журнал, а Пётр — нет.
+048 PASS (runtime=OK, scenario=ellipsis_v2_048): Иван купил книгу, а Мария — нет, Пётр — тоже нет.
+049 PASS (runtime=OK, scenario=ellipsis_v2_049): Иван купил книгу, а Мария тоже, Пётр — нет.
+050 PASS (runtime=OK, scenario=ellipsis_v2_050): Иван купил книгу, Мария — журнал, Пётр — тоже.
+051 PASS (runtime=OK, scenario=ellipsis_v2_051): Анна знает ответ, Ольга — нет, а Пётр тоже.
+052 PASS (runtime=OK, scenario=ellipsis_v2_052): Анна знает ответ, Ольга — тоже, а Пётр — нет.
+053 PASS (runtime=OK, scenario=ellipsis_v2_053): Иван открыл дверь, Мария — окно, а Пётр — нет.
+054 PASS (runtime=OK, scenario=ellipsis_v2_054): Иван открыл дверь, а Мария и Пётр тоже.
+055 PASS (runtime=OK, scenario=ellipsis_v2_055): Иван не купил книгу, а Мария — тоже.
+056 FAIL (runtime=OK, scenario=ellipsis_v2_056): Иван не купил книгу, а Мария — купила. | perception.assertions.a2.role_set, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.OBJECT
+057 PASS (runtime=OK, scenario=ellipsis_v2_057): Иван открыл дверь ключом, Мария — окно отвёрткой, Пётр — ворота ломом.
+058 FAIL (runtime=ERROR, scenario=ellipsis_v2_058): Анна отправила Ивану письмо, Ольга — Петру посылку, Мария — Сергею открытку. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: duplicate_target_roles
+059 FAIL (runtime=OK, scenario=ellipsis_v2_059): Мастер сделал стол из дерева, ученик — стул из металла, подмастерье — шкаф из пластика. | perception.assertion_count, perception.assertions.a1.role_set, perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.SUBJECT, perception.assertions.a2.roles.MATERIAL, ... (+15)
+060 PASS (runtime=OK, scenario=ellipsis_v2_060): Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.
+061 PASS (runtime=OK, scenario=ellipsis_v2_061): Иван открыл дверь ключом, а Мария — нет.
+062 PASS (runtime=OK, scenario=ellipsis_v2_062): Анна отправила письмо Сергею, а Ольга — нет.
+063 FAIL (runtime=OK, scenario=ellipsis_v2_063): Мастер сделал стол из дерева, а ученик — стул из металла, подмастерье — нет. | perception.assertion_count, perception.assertions.a1.role_set, perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.SUBJECT, perception.assertions.a2.roles.MATERIAL, ... (+15)
+064 PASS (runtime=OK, scenario=ellipsis_v2_064): Пётр открыл дверь ключом, а Иван окно — отвёрткой.
+065 PASS (runtime=OK, scenario=ellipsis_v2_065): Сергей передал Анне письмо утром, а Пётр Ольге посылку вечером.
+066 PASS (runtime=OK, scenario=ellipsis_v2_066): Ольга положила книгу на стол утром, а Анна журнал — на полку вечером.
+067 FAIL (runtime=ERROR, scenario=ellipsis_v2_067): Вчера Иван работал в Москве, а сегодня — в Казани. | integration.completed | runtime: UnresolvedTemporalReferenceError: Unresolved temporal reference(s) require an explicit/source/experience anchor before canonical commit: A1.TIME='Вчера', A2.TIME='сегодня'
+068 FAIL (runtime=ERROR, scenario=ellipsis_v2_068): Утром Иван работал дома, Мария — в офисе, а вечером Пётр — в кафе. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: duplicate_target_roles
+069 FAIL (runtime=ERROR, scenario=ellipsis_v2_069): Вчера книга лежала на столе, сегодня — на полке. | integration.completed | runtime: UnresolvedTemporalReferenceError: Unresolved temporal reference(s) require an explicit/source/experience anchor before canonical commit: A1.TIME='Вчера', A2.TIME='сегодня'
+070 FAIL (runtime=OK, scenario=ellipsis_v2_070): Иван был в Москве утром, Мария — в Казани вечером. | perception.assertion_count, integration.domains.a1, integration.domains.a2, templates.быть.explicit_role_coverage
+071 PASS (runtime=OK, scenario=ellipsis_v2_071): Иван пришёл утром, Мария — вечером, а Пётр — ночью.
+072 PASS (runtime=OK, scenario=ellipsis_v2_072): Утром Анна отправила письмо Ивану, а вечером Ольга — посылку Петру.
+073 FAIL (runtime=ERROR, scenario=ellipsis_v2_073): Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла. | perception.assertion_count, perception.assertions.a1.role_set, perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.SUBJECT, perception.assertions.a2.roles.MATERIAL, ... (+1) | runtime: UnresolvedTemporalReferenceError: Unresolved temporal reference(s) require an explicit/source/experience anchor before canonical commit: A1.TIME='Вчера', A2.TIME='сегодня'
+074 FAIL (runtime=OK, scenario=ellipsis_v2_074): Иван работал в Москве два года, а Мария — в Казани три года. | perception.assertions.a1.role_set, perception.assertions.a1.roles.DURATION, perception.assertions.a2.role_set, perception.assertions.a2.roles.DURATION, canonical.assertions.a1.role_set, canonical.assertions.a1.roles.LOCATION, ... (+5)
+075 FAIL (runtime=OK, scenario=ellipsis_v2_075): Два часа книгу читал Иван, а три часа — журнал Пётр. | perception.assertions.a1.roles.DURATION, perception.assertions.a2.roles.DURATION, canonical.assertions.a1.roles.DURATION, canonical.assertions.a2.roles.DURATION
+076 PASS (runtime=OK, scenario=ellipsis_v2_076): В Москве Иван работал утром, а в Казани Мария — вечером.
+077 PASS (runtime=OK, scenario=ellipsis_v2_077): Иван купил книгу, Мария — журнал, а Пётр продал газету.
+078 PASS (runtime=OK, scenario=ellipsis_v2_078): Иван купил книгу, а Мария продала журнал, Пётр — газету.
+079 FAIL (runtime=OK, scenario=ellipsis_v2_079): Иван живёт в Москве, Мария — в Казани, а Пётр учится в Париже, Ольга — в Лондоне. | perception.assertion_count, perception.assertions.a2.roles.LOCATION, perception.assertions.a3.predicate, perception.assertions.a3.roles.SUBJECT, perception.assertions.a3.roles.LOCATION, perception.assertions.a4.roles.SUBJECT, ... (+7)
+080 PASS (runtime=OK, scenario=ellipsis_v2_080): Иван открыл дверь, Мария — окно, а Пётр закрыл ворота, Сергей — калитку.
+081 PASS (runtime=OK, scenario=ellipsis_v2_081): Анна отправила письмо Сергею, Ольга — сообщение Петру, а Мария получила посылку.
+082 PASS (runtime=OK, scenario=ellipsis_v2_082): Иван купил книгу, а Мария — журнал, но Пётр книгу продал.
+083 PASS (runtime=OK, scenario=ellipsis_v2_083): Иван работает в Москве, Мария — в Казани, а Пётр — инженер.
+084 FAIL (runtime=OK, scenario=ellipsis_v2_084): Книга лежит на столе, журнал — на полке, а тетрадь упала на пол. | perception.assertion_count, perception.assertions.a2.roles.LOCATION, perception.assertions.a3.predicate, perception.assertions.a3.roles.SUBJECT, perception.assertions.a3.roles.LOCATION, canonical.assertions.a2.roles.LOCATION, ... (+3)
+085 PASS (runtime=OK, scenario=ellipsis_v2_085): Иван купил книгу и журнал, а Мария продала газету и открытку.
+086 FAIL (runtime=OK, scenario=ellipsis_v2_086): Иван купил книгу, Мария — журнал; затем Пётр прочитал газету, а Ольга — письмо. | perception.relations
+087 FAIL (runtime=OK, scenario=ellipsis_v2_087): Иван купил книгу; Мария — журнал. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.OBJECT
+088 FAIL (runtime=OK, scenario=ellipsis_v2_088): Иван купил книгу; Мария — журнал; Пётр — газету. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a3.predicate, perception.assertions.a3.role_set, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, ... (+4)
+089 FAIL (runtime=OK, scenario=ellipsis_v2_089): Иван купил книгу. Мария — журнал. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.OBJECT
+090 FAIL (runtime=OK, scenario=ellipsis_v2_090): Иван купил книгу. А Мария — журнал. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.OBJECT
+091 FAIL (runtime=OK, scenario=ellipsis_v2_091): Книга лежит на столе; журнал — на полке. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.LOCATION
+092 FAIL (runtime=OK, scenario=ellipsis_v2_092): Анна отправила письмо Сергею; Ольга — сообщение Петру. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.OBJECT
+093 FAIL (runtime=ERROR, scenario=ellipsis_v2_093): Иван хочет купить книгу, а Мария — журнал. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: source_frame_not_unique_or_unavailable
+094 FAIL (runtime=ERROR, scenario=ellipsis_v2_094): Анна начала читать книгу, а Ольга — отчёт. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: source_frame_not_unique_or_unavailable
+095 FAIL (runtime=ERROR, scenario=ellipsis_v2_095): Сергей решил купить билет, а Пётр — журнал. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: source_frame_not_unique_or_unavailable
+096 FAIL (runtime=ERROR, scenario=ellipsis_v2_096): Иван попросил Марию прочитать книгу, а Пётр — Ольгу журнал. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: source_frame_not_unique_or_unavailable
+097 FAIL (runtime=ERROR, scenario=ellipsis_v2_097): Иван купил книгу и положил её на стол, а Мария — журнал на полку. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: source_frame_not_unique_or_unavailable
+098 FAIL (runtime=ERROR, scenario=ellipsis_v2_098): Анна написала письмо и отправила его Сергею, а Ольга — сообщение Петру. | perception.available, integration.completed | runtime: PerceptionParseError: unresolved ellipsis: source_frame_not_unique_or_unavailable
+099 FAIL (runtime=OK, scenario=ellipsis_v2_099): Книгу купил Иван, а журнал — Мария. | perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.SUBJECT, canonical.assertions.a2.predicate, canonical.assertions.a2.role_set, canonical.assertions.a2.roles.SUBJECT, ... (+1)
+100 FAIL (runtime=OK, scenario=ellipsis_v2_100): Иван купил кнгу, а Мария — журнал. | perception.assertions.a1.roles.OBJECT, canonical.assertions.a1.roles.OBJECT

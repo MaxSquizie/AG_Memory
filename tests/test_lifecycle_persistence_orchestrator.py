@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -34,6 +35,7 @@ from ah.perception import (
     TextSensoryService,
 )
 from ah.projection import ContextProjector
+from ah.temporal import TemporalKind, temporal_value_from_ref
 
 
 class FakeResponse:
@@ -444,6 +446,87 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             if isinstance(item, Hypernode) and item.properties.get("text") is not None
         ]
         self.assertEqual(h_texts, ["Привет"])
+
+    def test_external_turn_timestamp_resolves_relative_time_without_becoming_a_fact_role(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        self_e = core.add_entity(Domain.P, properties={"name": Property("name", "Agent", "str")})
+        user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
+        context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
+        integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
+        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        perception = PerceptionResult(
+            "Узел работал вчера.",
+            assertions=(
+                AssertionCandidate(
+                    "A1",
+                    PredicateCandidate(
+                        "работал",
+                        "работать",
+                        template_candidate=TemplateCandidate(
+                            (ActantRole.SUBJECT, ActantRole.TIME)
+                        ),
+                    ),
+                    (
+                        ActantCandidate(ActantRole.SUBJECT, mention="узел"),
+                        ActantCandidate(ActantRole.TIME, mention="вчера"),
+                    ),
+                ),
+            ),
+        )
+        orchestrator = AgentOrchestrator(
+            context=context,
+            sensory=TextSensoryService(core),
+            perception=FakePerception(perception, PerceptionResult("unused")),
+            integration=integration,
+            ignition=ignition,
+            query_builder=QueryGoalBuilder(core),
+            inference=InferenceEngine(core, InferenceSettings()),
+            materializer=InferenceMaterializer(core, IntegrationSettings()),
+            projector=ContextProjector(core, ContextSettings(max_tokens=4096)),
+            agent=FakeAgent("unused"),
+            settings=OrchestratorSettings(),
+            persistence=None,
+        )
+        turn = orchestrator.handle_user_text(
+            perception.source_text,
+            generate_response=False,
+            source_timestamp=datetime(2026, 9, 7, 14, 30, tzinfo=timezone.utc),
+        )
+        node = core.store.get_hypernode(turn.integration.assertions[0].ref.uid)
+        temporal = temporal_value_from_ref(core, node.actants[ActantRole.TIME])
+        self.assertIsNotNone(temporal)
+        self.assertEqual(temporal.kind, TemporalKind.POINT)
+        self.assertEqual(temporal.start, "2026-09-06")
+        experience = core.store.get_hypernode(turn.integration.experience_ref.uid)
+        self.assertNotIn(ActantRole.TIME, experience.actants)
+
+    def test_external_turn_rejects_a_naive_source_timestamp(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        self_e = core.add_entity(Domain.P, properties={"name": Property("name", "Agent", "str")})
+        user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
+        context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
+        integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
+        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        orchestrator = AgentOrchestrator(
+            context=context,
+            sensory=TextSensoryService(core),
+            perception=FakePerception(PerceptionResult("текст"), PerceptionResult("unused")),
+            integration=integration,
+            ignition=ignition,
+            query_builder=QueryGoalBuilder(core),
+            inference=InferenceEngine(core, InferenceSettings()),
+            materializer=InferenceMaterializer(core, IntegrationSettings()),
+            projector=ContextProjector(core, ContextSettings(max_tokens=4096)),
+            agent=FakeAgent("unused"),
+            settings=OrchestratorSettings(),
+            persistence=None,
+        )
+        with self.assertRaisesRegex(ValueError, "timezone-aware"):
+            orchestrator.handle_user_text(
+                "текст",
+                generate_response=False,
+                source_timestamp=datetime(2026, 9, 7, 14, 30),
+            )
 
     def test_perception_failure_is_raised_but_raw_user_turn_is_still_experienced_in_h(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())

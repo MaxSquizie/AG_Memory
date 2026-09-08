@@ -1,0 +1,341 @@
+FFF..FFFFF..FFFFFFF                                                      [100%]
+=================================== FAILURES ===================================
+_ test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0434\u0432\u0430 \u0447\u0430\u0441\u0430] _
+
+value = 'два часа', pattern = 'Мария ждала {value}.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'час' == 'два часа'
+E         
+E         - два часа
+E         + час
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0442\u0440\u0438 \u0447\u0430\u0441\u0430] _
+
+value = 'три часа', pattern = 'Мария ждала {value}.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'час' == 'три часа'
+E         
+E         - три часа
+E         + час
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u043f\u044f\u0442\u044c \u043c\u0438\u043d\u0443\u0442] _
+
+value = 'пять минут', pattern = 'Мария ждала {value}.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'минута' == 'пять минут'
+E         
+E         - пять минут
+E         + минута
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0434\u0432\u0430 \u0434\u043d\u044f] _
+
+value = 'два дня', pattern = 'Мария ждала {value}.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'день' == 'два дня'
+E         
+E         - два дня
+E         + день
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0442\u0440\u0438 \u0434\u043d\u044f] _
+
+value = 'три дня', pattern = 'Мария ждала {value}.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'день' == 'три дня'
+E         
+E         - три дня
+E         + день
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0434\u0432\u0430 \u0447\u0430\u0441\u0430] _
+
+value = 'два часа', pattern = '{value} ждала Мария.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'час' == 'два часа'
+E         
+E         - два часа
+E         + час
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0442\u0440\u0438 \u0447\u0430\u0441\u0430] _
+
+value = 'три часа', pattern = '{value} ждала Мария.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'час' == 'три часа'
+E         
+E         - три часа
+E         + час
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u043f\u044f\u0442\u044c \u043c\u0438\u043d\u0443\u0442] _
+
+value = 'пять минут', pattern = '{value} ждала Мария.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'минута' == 'пять минут'
+E         
+E         - пять минут
+E         + минута
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0434\u0432\u0430 \u0434\u043d\u044f] _
+
+value = 'два дня', pattern = '{value} ждала Мария.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'день' == 'два дня'
+E         
+E         - два дня
+E         + день
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+_ test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0442\u0440\u0438 \u0434\u043d\u044f] _
+
+value = 'три дня', pattern = '{value} ждала Мария.'
+
+    @pytest.mark.parametrize('value', ['два часа', 'три часа', 'пять минут', '2 часа', '3 часа', 'два дня', 'три дня'])
+    @pytest.mark.parametrize('pattern', ['Мария ждала {value}.', '{value} ждала Мария.'])
+    def test_duration_preserves_measure_and_source_through_commit(value, pattern):
+        core, context, integration = runtime()
+        service = perception()
+        text = pattern.format(value=value)
+        parsed = service.parse(text, context)
+        assert len(parsed.assertions) == 1
+        duration = next(a for a in parsed.assertions[0].actants if a.role is ActantRole.DURATION)
+>       assert duration.lookup_text.casefold() == value.casefold()
+E       AssertionError: assert 'день' == 'три дня'
+E         
+E         - три дня
+E         + день
+
+tests/test_duration_conflict_02515.py:47: AssertionError
+________ test_different_durations_are_distinct_and_repeat_is_idempotent ________
+
+    def test_different_durations_are_distinct_and_repeat_is_idempotent():
+        core, context, integration = runtime()
+        service = perception()
+        completion = TemplateCompletionService(integration, service)
+        refs = []
+        values = []
+        for value in ['два часа', 'три часа', 'два часа']:
+            commit = integration.integrate_external(completion.complete(
+                service.parse(f'Мария ждала {value}.', context)), context)
+            ref = commit.assertions[0].ref
+            refs.append(ref)
+            values.append(core.store.get_hypernode(ref.uid).actants[ActantRole.DURATION])
+>       assert refs[0] != refs[1] and refs[0] == refs[2]
+E       AssertionError: assert (Ref(uid='N_2', kind=<RefKind.N: 'N'>) != Ref(uid='N_2', kind=<RefKind.N: 'N'>))
+
+tests/test_duration_conflict_02515.py:70: AssertionError
+_____ test_real_polarity_conflict_reaches_ignition_without_selecting_truth _____
+
+    def test_real_polarity_conflict_reaches_ignition_without_selecting_truth():
+        from ah.conflict import ConflictEngine
+        from ah.inference import LogicalStatus, StopReason
+        from test_v4_conflict_engine_1500 import _env, _solve
+        core, context, integration, inference = _env()
+        service = perception()
+        completion = TemplateCompletionService(integration, service)
+        ignition = IgnitionEngine(core, IgnitionSettings(seeds=SeedSettings(correction=0.73)), WorkspaceSettings())
+        commits = []
+        for text in ['Иван читает книгу.', 'Иван не читает книгу.']:
+            commit = integration.integrate_external(completion.complete(service.parse(text, context)), context)
+>           ignition.apply_seed_requests(commit.activation_seeds)
+
+tests/test_duration_conflict_02515.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/ignition/engine.py:201: in apply_seed_requests
+    self.seed(request.ref, self._seed_amount(request.reason), reason=request.reason)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.ignition.engine.IgnitionEngine object at 0x7f39e4192210>
+reason = <SeedReason.CONFLICT: 'CONFLICT'>
+
+    def _seed_amount(self, reason: SeedReason) -> float:
+        seeds = self.settings.seeds
+        if reason is SeedReason.NEW_FACT:
+            return seeds.new_fact
+        if reason is SeedReason.REACTIVATED_FACT:
+            return seeds.reactivated_fact
+        if reason is SeedReason.EXPERIENCE:
+            return seeds.experience
+        if reason is SeedReason.SENSORY_SYMBOL:
+            return seeds.sensory_symbol
+        if reason is SeedReason.RESOLVED_SYMBOL:
+            return seeds.resolved_symbol
+        if reason is SeedReason.QUERY_RECALL:
+            return seeds.query_recall
+        if reason is SeedReason.CORRECTION:
+            return seeds.correction
+        if reason is SeedReason.PACEMAKER:
+            return seeds.pacemaker
+>       raise ValueError(f"Unhandled seed reason: {reason}")
+E       ValueError: Unhandled seed reason: SeedReason.CONFLICT
+
+src/ah/ignition/engine.py:183: ValueError
+___ test_ellipsis_transfers_role_without_collapsing_duration_values[\u2014] ____
+
+dash = '—'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_ellipsis_transfers_role_without_collapsing_duration_values(dash):
+        core, context, integration = runtime()
+        service = perception()
+        parsed = service.parse(f'Мария ждала два часа, а Иван {dash} три часа.', context)
+        assert len(parsed.assertions) == 2
+        values = [next(a.lookup_text for a in assertion.actants if a.role is ActantRole.DURATION)
+                  for assertion in parsed.assertions]
+>       assert values == ['два часа', 'три часа']
+E       AssertionError: assert ['час', 'час'] == ['два часа', 'три часа']
+E         
+E         At index 0 diff: 'час' != 'два часа'
+E         Use -v to get more diff
+
+tests/test_duration_conflict_02515.py:108: AssertionError
+___ test_ellipsis_transfers_role_without_collapsing_duration_values[\u2013] ____
+
+dash = '–'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_ellipsis_transfers_role_without_collapsing_duration_values(dash):
+        core, context, integration = runtime()
+        service = perception()
+        parsed = service.parse(f'Мария ждала два часа, а Иван {dash} три часа.', context)
+        assert len(parsed.assertions) == 2
+        values = [next(a.lookup_text for a in assertion.actants if a.role is ActantRole.DURATION)
+                  for assertion in parsed.assertions]
+>       assert values == ['два часа', 'три часа']
+E       AssertionError: assert ['час', 'час'] == ['два часа', 'три часа']
+E         
+E         At index 0 diff: 'час' != 'два часа'
+E         Use -v to get more diff
+
+tests/test_duration_conflict_02515.py:108: AssertionError
+______ test_ellipsis_transfers_role_without_collapsing_duration_values[-] ______
+
+dash = '-'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_ellipsis_transfers_role_without_collapsing_duration_values(dash):
+        core, context, integration = runtime()
+        service = perception()
+        parsed = service.parse(f'Мария ждала два часа, а Иван {dash} три часа.', context)
+        assert len(parsed.assertions) == 2
+        values = [next(a.lookup_text for a in assertion.actants if a.role is ActantRole.DURATION)
+                  for assertion in parsed.assertions]
+>       assert values == ['два часа', 'три часа']
+E       AssertionError: assert ['час', 'час'] == ['два часа', 'три часа']
+E         
+E         At index 0 diff: 'час' != 'два часа'
+E         Use -v to get more diff
+
+tests/test_duration_conflict_02515.py:108: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0434\u0432\u0430 \u0447\u0430\u0441\u0430]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0442\u0440\u0438 \u0447\u0430\u0441\u0430]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u043f\u044f\u0442\u044c \u043c\u0438\u043d\u0443\u0442]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0434\u0432\u0430 \u0434\u043d\u044f]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[\u041c\u0430\u0440\u0438\u044f \u0436\u0434\u0430\u043b\u0430 {value}.-\u0442\u0440\u0438 \u0434\u043d\u044f]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0434\u0432\u0430 \u0447\u0430\u0441\u0430]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0442\u0440\u0438 \u0447\u0430\u0441\u0430]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u043f\u044f\u0442\u044c \u043c\u0438\u043d\u0443\u0442]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0434\u0432\u0430 \u0434\u043d\u044f]
+FAILED tests/test_duration_conflict_02515.py::test_duration_preserves_measure_and_source_through_commit[{value} \u0436\u0434\u0430\u043b\u0430 \u041c\u0430\u0440\u0438\u044f.-\u0442\u0440\u0438 \u0434\u043d\u044f]
+FAILED tests/test_duration_conflict_02515.py::test_different_durations_are_distinct_and_repeat_is_idempotent
+FAILED tests/test_duration_conflict_02515.py::test_real_polarity_conflict_reaches_ignition_without_selecting_truth
+FAILED tests/test_duration_conflict_02515.py::test_ellipsis_transfers_role_without_collapsing_duration_values[\u2014]
+FAILED tests/test_duration_conflict_02515.py::test_ellipsis_transfers_role_without_collapsing_duration_values[\u2013]
+FAILED tests/test_duration_conflict_02515.py::test_ellipsis_transfers_role_without_collapsing_duration_values[-]
+15 failed, 4 passed in 4.28s

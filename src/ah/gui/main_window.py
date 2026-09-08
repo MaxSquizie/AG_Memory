@@ -438,11 +438,18 @@ class MainWindow(QMainWindow):
         self.acceptance_button.clicked.connect(self._run_acceptance_cases)
         self.m1_adversarial_button = QPushButton("M1: adversarial acceptance")
         self.m1_adversarial_button.setToolTip(
-            "36 EXACT breaker-cases: typo/noise, syntactic inversion, ellipsis и mixed.\n"
+            "Expanded breaker-cases: typo/noise, syntactic inversion, ellipsis и mixed.\n"
             "Cases: " + str(self.services.config.paths.data_dir / "acceptance_cases_m1_adversarial.txt")
             + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_oracle_m1_adversarial.json")
         )
         self.m1_adversarial_button.clicked.connect(self._run_m1_adversarial_acceptance)
+        self.m1_inversion_button = QPushButton("M1: inversion acceptance")
+        self.m1_inversion_button.setToolTip(
+            "Expanded order-independent semantic-role corpus.\n"
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_inversion" / "cases.txt")
+            + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_inversion" / "oracle.json")
+        )
+        self.m1_inversion_button.clicked.connect(self._run_m1_inversion_acceptance)
         self.m1_ellipsis_button = QPushButton("M1: ellipsis acceptance")
         self.m1_ellipsis_button.setToolTip(
             "Discourse reconstruction / ellipsis corpus.\n"
@@ -450,6 +457,13 @@ class MainWindow(QMainWindow):
             + "\\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_ellipsis" / "oracle.json")
         )
         self.m1_ellipsis_button.clicked.connect(self._run_m1_ellipsis_acceptance)
+        self.m1_typo_button = QPushButton("M1: typo/noise acceptance")
+        self.m1_typo_button.setToolTip(
+            "Lexical Recovery: edits, roles, inversion, ellipsis, protected OOV and ambiguity.\n"
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_typo" / "cases.txt")
+            + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_typo" / "oracle.json")
+        )
+        self.m1_typo_button.clicked.connect(self._run_m1_typo_acceptance)
         self.document_acceptance_button = QPushButton("Document acceptance")
         self.document_acceptance_button.setToolTip(
             "3 вручную написанных многоабзацных текста: причинные цепочки, distractors, "
@@ -473,8 +487,11 @@ class MainWindow(QMainWindow):
         chat_buttons = QHBoxLayout()
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
-        chat_buttons.addWidget(self.m1_adversarial_button)
-        chat_buttons.addWidget(self.m1_ellipsis_button)
+        m1_buttons = QHBoxLayout()
+        m1_buttons.addWidget(self.m1_adversarial_button)
+        m1_buttons.addWidget(self.m1_inversion_button)
+        m1_buttons.addWidget(self.m1_ellipsis_button)
+        m1_buttons.addWidget(self.m1_typo_button)
         diagnostic_buttons = QHBoxLayout()
         diagnostic_buttons.addWidget(self.document_acceptance_button)
         diagnostic_buttons.addWidget(self.hidden_valency_button)
@@ -482,6 +499,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.chat_history, 1)
         layout.addWidget(self.chat_input)
         layout.addLayout(chat_buttons)
+        layout.addLayout(m1_buttons)
         layout.addLayout(diagnostic_buttons)
 
         # A dock may be squeezed to a very small height by other panels. Keep the
@@ -844,6 +862,15 @@ class MainWindow(QMainWindow):
             title="M1 adversarial acceptance",
         )
 
+    def _run_m1_inversion_acceptance(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_inversion/cases.txt",
+            oracle_filename="acceptance_inversion/oracle.json",
+            runs_dirname="acceptance_runs_m1_inversion",
+            label="M1 inversion",
+            title="M1 inversion acceptance",
+        )
+
     def _run_m1_ellipsis_acceptance(self) -> None:
         self._run_acceptance_pair(
             cases_filename="acceptance_ellipsis/cases.txt",
@@ -851,6 +878,15 @@ class MainWindow(QMainWindow):
             runs_dirname="acceptance_runs_m1_ellipsis",
             label="M1 ellipsis",
             title="M1 ellipsis acceptance",
+        )
+
+    def _run_m1_typo_acceptance(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_typo/cases.txt",
+            oracle_filename="acceptance_typo/oracle.json",
+            runs_dirname="acceptance_runs_m1_typo",
+            label="M1 typo/noise",
+            title="M1 typo/noise acceptance",
         )
 
     def _run_acceptance_pair(
@@ -888,6 +924,9 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
         self.m1_adversarial_button.setEnabled(False)
+        self.m1_inversion_button.setEnabled(False)
+        self.m1_ellipsis_button.setEnabled(False)
+        self.m1_typo_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -957,6 +996,9 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
         self.m1_adversarial_button.setEnabled(True)
+        self.m1_inversion_button.setEnabled(True)
+        self.m1_ellipsis_button.setEnabled(True)
+        self.m1_typo_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -995,6 +1037,9 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
         self.m1_adversarial_button.setEnabled(False)
+        self.m1_inversion_button.setEnabled(False)
+        self.m1_ellipsis_button.setEnabled(False)
+        self.m1_typo_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -1053,6 +1098,9 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
         self.m1_adversarial_button.setEnabled(True)
+        self.m1_inversion_button.setEnabled(True)
+        self.m1_ellipsis_button.setEnabled(True)
+        self.m1_typo_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1080,6 +1128,9 @@ class MainWindow(QMainWindow):
         self.m2_acceptance_button.setEnabled(False)
         self.acceptance_button.setEnabled(False)
         self.m1_adversarial_button.setEnabled(False)
+        self.m1_inversion_button.setEnabled(False)
+        self.m1_ellipsis_button.setEnabled(False)
+        self.m1_typo_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.send_button.setEnabled(False)
@@ -1154,6 +1205,9 @@ class MainWindow(QMainWindow):
         self.m2_acceptance_button.setEnabled(True)
         self.acceptance_button.setEnabled(True)
         self.m1_adversarial_button.setEnabled(True)
+        self.m1_inversion_button.setEnabled(True)
+        self.m1_ellipsis_button.setEnabled(True)
+        self.m1_typo_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.send_button.setEnabled(True)
@@ -1174,6 +1228,9 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(False)
         self.acceptance_button.setEnabled(False)
         self.m1_adversarial_button.setEnabled(False)
+        self.m1_inversion_button.setEnabled(False)
+        self.m1_ellipsis_button.setEnabled(False)
+        self.m1_typo_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -1236,6 +1293,9 @@ class MainWindow(QMainWindow):
         self.chat_input.setEnabled(True)
         self.acceptance_button.setEnabled(True)
         self.m1_adversarial_button.setEnabled(True)
+        self.m1_inversion_button.setEnabled(True)
+        self.m1_ellipsis_button.setEnabled(True)
+        self.m1_typo_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1615,9 +1675,24 @@ class MainWindow(QMainWindow):
                 + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_oracle.json")
             )
             self.m1_adversarial_button.setToolTip(
-                "36 EXACT breaker-cases: typo/noise, syntactic inversion, ellipsis и mixed.\n"
+                "Expanded breaker-cases: typo/noise, syntactic inversion, ellipsis и mixed.\n"
                 "Cases: " + str(new_config.paths.data_dir / "acceptance_cases_m1_adversarial.txt")
                 + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_oracle_m1_adversarial.json")
+            )
+            self.m1_inversion_button.setToolTip(
+                "Expanded order-independent semantic-role corpus.\n"
+                "Cases: " + str(new_config.paths.data_dir / "acceptance_inversion" / "cases.txt")
+                + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_inversion" / "oracle.json")
+            )
+            self.m1_ellipsis_button.setToolTip(
+                "Discourse reconstruction / ellipsis corpus.\n"
+                "Cases: " + str(new_config.paths.data_dir / "acceptance_ellipsis" / "cases.txt")
+                + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_ellipsis" / "oracle.json")
+            )
+            self.m1_typo_button.setToolTip(
+                "Lexical Recovery: edits, roles, inversion, ellipsis, protected OOV and ambiguity.\n"
+                "Cases: " + str(new_config.paths.data_dir / "acceptance_typo" / "cases.txt")
+                + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_typo" / "oracle.json")
             )
         except Exception as exc:
             QMessageBox.critical(self, "Config apply", str(exc))

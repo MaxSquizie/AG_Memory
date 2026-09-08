@@ -100,6 +100,9 @@ class LLMConfig:
     perception_max_actants_per_act: int = 8
     perception_predicate_symbol_language: str = "en"
     perception_morphology_backend: str = "auto"
+    # Optional local embedding model used only after deterministic lexical
+    # narrowing leaves several close typo candidates. Empty disables reranking.
+    perception_embedding_model: str = ""
     perception: LLMRoleSettings = field(default_factory=lambda: LLMRoleSettings(max_new_tokens=192, temperature=0.0, top_p=1.0, top_k=0, repetition_penalty=1.0, no_repeat_ngram_size=0))
     agent_repair_attempts: int = 1
     agent_sanitize_context_echo: bool = True
@@ -513,6 +516,7 @@ def load_config(path: str | Path) -> AppConfig:
         perception_max_actants_per_act=int(llm_perception_raw.get("max_actants_per_act", 8)),
         perception_predicate_symbol_language=str(llm_perception_raw.get("predicate_symbol_language", "en")),
         perception_morphology_backend=str(llm_perception_raw.get("morphology_backend", "auto")),
+        perception_embedding_model=str(llm_perception_raw.get("embedding_model", "")),
         perception=LLMRoleSettings(
             max_new_tokens=int(llm_perception_raw.get("max_new_tokens", 96)),
             temperature=float(llm_perception_raw.get("temperature", 0.0)),

@@ -176,7 +176,9 @@ class IgnitionEngine:
             return seeds.resolved_symbol
         if reason is SeedReason.QUERY_RECALL:
             return seeds.query_recall
-        if reason is SeedReason.CORRECTION:
+        # A conflict is an addressable attention target emitted by Integration.
+        # Use the configured correction intensity without resolving its truth.
+        if reason in {SeedReason.CORRECTION, SeedReason.CONFLICT}:
             return seeds.correction
         if reason is SeedReason.PACEMAKER:
             return seeds.pacemaker
@@ -701,4 +703,3 @@ class IgnitionEngine:
         self.tick_index += 1
         self.core.store.set_lifetime_clock(self.tick_index)
         return result
-

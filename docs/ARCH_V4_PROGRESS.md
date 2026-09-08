@@ -261,3 +261,25 @@ CLI: `m1-score`, `m3-acceptance`, `tick-benchmark`. Полное описани�
 - Main agent/generic generation remains on OpenAI-compatible chat completions.
 - Reasoning content is never promoted to a protocol answer; empty message output still fails closed.
 
+## v0.25.19 — indexed Lexical Recovery и source transition operators
+
+- §18.8 закрыт отдельным pre-formalization слоем: dictionary-exact/OOV
+  classification, pruned DAWG Levenshtein search, weighted Damerau-Levenshtein,
+  morphology/source-frame constraints, optional local embedding shortlist и
+  четыре явных outcome. Слой не вызывает chat LLM, не создаёт UID/AH/H и
+  сохраняет raw spelling только как provenance.
+- Protected names/terms/acronyms/codes и редкие exact words не превращаются в
+  forced corrections; ambiguity блокирует semantic commit.
+- §20.6 закрыт source-to-canonical путём для
+  `START/STOP/CONTINUE/AGAIN/NO_LONGER`. Matrix shell нормализуется в operator над
+  proposition operand; ADVB/PRCL cue сначала отделяется от semantic actant role
+  общей bounded-классификацией, без marker dictionary.
+- Timed transition использует прежний атомарный `StateTracker`. Без TIME
+  materialize только `g_OP(P)` и не создаётся выдуманный interval.
+- Импортированы expanded corpora: adversarial 66, inversion 100, ellipsis 166;
+  добавлен typo/noise 81 с lexical-aware oracle и GUI entry point.
+- §20.7 остаётся PARTIAL: occurrence-level contract существует, но общий source
+  classifier `STATE/EVENT/PROCESS` ещё требует отдельного вертикального среза.
+
+Подробности: `VERSION_02519.md`, `docs/SLICE_25_19.md`,
+`docs/GENERALITY_AUDIT_02519.md`, `docs/ARCHITECTURE_V4_NEXT_02519.md`.

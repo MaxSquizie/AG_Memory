@@ -223,7 +223,9 @@ def test_builder_stops_locative_ellipsis_chain_at_nominative_only_nominal_predic
     assert second.ellipsis_source_clause_id == first.clause_id
     assert third.ellipsis_kind is EllipsisKind.FRAME
     assert third.ellipsis_source_clause_id == second.clause_id
-    assert fourth.ellipsis_kind is None
+    # A strong parallel shell and an independently valid nominal predication are
+    # retained together until complete-frame alignment can settle the reading.
+    assert fourth.ellipsis_kind is EllipsisKind.FRAME
     assert fourth.implicit_copula is True
 
 

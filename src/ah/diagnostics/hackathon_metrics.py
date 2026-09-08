@@ -4,6 +4,7 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from time import perf_counter
+import gc
 import json
 import re
 from typing import Any, Iterable, Mapping, Sequence
@@ -508,6 +509,9 @@ def run_tick_benchmark(
     for _ in range(warmup_ticks):
         engine.tick(include_pacemaker=False)
 
+    # Do not charge the benchmark for cyclic garbage left by unrelated callers.
+    # Garbage produced by measured ticks remains part of the measured workload.
+    gc.collect()
     samples: list[float] = []
     for _ in range(measured_ticks):
         started = perf_counter()

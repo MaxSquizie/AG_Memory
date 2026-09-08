@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "corpus_id": "m1-adversarial-v1",
-  "case_count": 36,
+  "corpus_id": "m1-adversarial-v2-inversion-expanded-66",
+  "case_count": 66,
   "policy": {
     "grade": "EXACT",
-    "purpose": "Hidden-corpus pressure derived from hackathon M1: typos, syntactic inversion and ellipsis.",
+    "purpose": "Hidden-corpus pressure derived from hackathon M1: typos, syntactic inversion and ellipsis. v2 expands pure inversion coverage while preserving all 36 v1 cases first.",
     "rule": "Oracle is written from intended semantics, never from current parser output."
   },
   "coverage": {
-    "m1_typo_noise": 10,
-    "m1_inversion": 10,
     "m1_ellipsis": 10,
-    "m1_mixed_noise": 6
+    "m1_inversion": 40,
+    "m1_mixed_noise": 6,
+    "m1_typo_noise": 10
   },
   "cases": [
     {
@@ -1505,7 +1505,1209 @@
         }
       },
       "scenario": "m1_adv_036"
+    },
+    {
+      "text": "Книгу Иван прочитал.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_037",
+      "equivalence_group": "read_book"
+    },
+    {
+      "text": "Прочитал Иван книгу.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_038",
+      "equivalence_group": "read_book"
+    },
+    {
+      "text": "Журнал купила Мария.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_039",
+      "equivalence_group": "buy_magazine"
+    },
+    {
+      "text": "Журнал Мария купила.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_040",
+      "equivalence_group": "buy_magazine"
+    },
+    {
+      "text": "Купила Мария журнал.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_041",
+      "equivalence_group": "buy_magazine"
+    },
+    {
+      "text": "Машину увидел Сергей.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "машина"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_042",
+      "equivalence_group": "see_car"
+    },
+    {
+      "text": "Машину Сергей увидел.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "машина"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_043",
+      "equivalence_group": "see_car"
+    },
+    {
+      "text": "Увидел Сергей машину.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "машина"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_044",
+      "equivalence_group": "see_car"
+    },
+    {
+      "text": "Письмо написала Анна.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_045",
+      "equivalence_group": "write_letter"
+    },
+    {
+      "text": "Письмо Анна написала.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_046",
+      "equivalence_group": "write_letter"
+    },
+    {
+      "text": "Написала Анна письмо.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_047",
+      "equivalence_group": "write_letter"
+    },
+    {
+      "text": "Газету продал Пётр.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "газета"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_048",
+      "equivalence_group": "sell_newspaper"
+    },
+    {
+      "text": "Газету Пётр продал.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "газета"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_049",
+      "equivalence_group": "sell_newspaper"
+    },
+    {
+      "text": "Продал Пётр газету.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "газета"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_050",
+      "equivalence_group": "sell_newspaper"
+    },
+    {
+      "text": "Письмо Анне передал Сергей.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_051",
+      "equivalence_group": "transfer_letter"
+    },
+    {
+      "text": "Анне Сергей передал письмо.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_052",
+      "equivalence_group": "transfer_letter"
+    },
+    {
+      "text": "Письмо Сергей передал Анне.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_053",
+      "equivalence_group": "transfer_letter"
+    },
+    {
+      "text": "Передал Сергей Анне письмо.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_054",
+      "equivalence_group": "transfer_letter"
+    },
+    {
+      "text": "Петру сообщение отправила Ольга.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_055",
+      "equivalence_group": "send_message"
+    },
+    {
+      "text": "Сообщение Петру отправила Ольга.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_056",
+      "equivalence_group": "send_message"
+    },
+    {
+      "text": "Петру Ольга отправила сообщение.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_057",
+      "equivalence_group": "send_message"
+    },
+    {
+      "text": "Сообщение Ольга отправила Петру.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_058",
+      "equivalence_group": "send_message"
+    },
+    {
+      "text": "Отправила Ольга Петру сообщение.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_059",
+      "equivalence_group": "send_message"
+    },
+    {
+      "text": "Ивану ключ передала Мария.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Иван",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_060",
+      "equivalence_group": "transfer_key"
+    },
+    {
+      "text": "Ключ Ивану передала Мария.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Иван",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_061",
+      "equivalence_group": "transfer_key"
+    },
+    {
+      "text": "Передала Мария Ивану ключ.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Иван",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_062",
+      "equivalence_group": "transfer_key"
+    },
+    {
+      "text": "Ключ Мария передала Ивану.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Иван",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_063",
+      "equivalence_group": "transfer_key"
+    },
+    {
+      "text": "Ивану Мария передала ключ.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "m1_adversarial_expansion",
+        "object",
+        "recipient",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": "Иван",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_064",
+      "equivalence_group": "transfer_key"
+    },
+    {
+      "text": "Книгу на стол положила Анна.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "location",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "LOCATION": "стол",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_065",
+      "equivalence_group": "put_book_table"
+    },
+    {
+      "text": "Книгу положила Анна на стол.",
+      "grade": "EXACT",
+      "family": "m1_inversion",
+      "tags": [
+        "inversion",
+        "location",
+        "m1_adversarial_expansion",
+        "object",
+        "subject"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "LOCATION": "стол",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_adv_066",
+      "equivalence_group": "put_book_table"
     }
   ],
-  "oracle_revision": "2026-09-06"
+  "oracle_revision": "2026-09-08"
 }

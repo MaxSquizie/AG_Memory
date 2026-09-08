@@ -63,7 +63,7 @@ def test_lexically_governed_modifier_with_internal_instrumental_pp_is_not_auto_a
     assert selected.kind.value == "PREDICATE"
 
 
-def test_pre_predicate_locative_pp_uses_event_location_normal_form_without_model_vote():
+def test_pre_predicate_locative_pp_requires_bounded_attachment_vote():
     text = "рама в дальней комнате то дрожала"
     morph = Morphology({
         "рама": (MorphInfo("рама", "NOUN", case="nomn", number="sing", gender="femn", score=1.0),),
@@ -79,7 +79,8 @@ def test_pre_predicate_locative_pp_uses_event_location_normal_form_without_model
 
         def generate(self, prompt, *, system="", override=None, role="generic"):
             self.calls.append((role, prompt))
-            raise AssertionError(f"unexpected model call {role}")
+            assert role == "perception_modifier_attachment"
+            return LLMResponse("EVENT", {})
 
     backend = NoCallBackend()
     parser = AdaptivePerceptionParser(
@@ -105,7 +106,8 @@ def test_pre_predicate_locative_pp_uses_event_location_normal_form_without_model
     )
     assert selected is not None
     assert selected.kind.value == "PREDICATE"
-    assert backend.calls == []
+    assert len(backend.calls) == 1
+    assert backend.calls[0][0] == "perception_modifier_attachment"
 
 
 def test_pre_predicate_locative_pp_uses_noun_head_case_not_ambiguous_adjective_case():
@@ -132,7 +134,8 @@ def test_pre_predicate_locative_pp_uses_noun_head_case_not_ambiguous_adjective_c
 
     class NoCallBackend:
         def generate(self, prompt, *, system="", override=None, role="generic"):
-            raise AssertionError(f"unexpected model call {role}")
+            assert role == "perception_modifier_attachment"
+            return LLMResponse("EVENT", {})
 
     parser = AdaptivePerceptionParser(
         NoCallBackend(),

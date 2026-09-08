@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields, replace
+from datetime import datetime
 from pathlib import Path
 from threading import RLock
 
@@ -119,6 +120,7 @@ class RuntimeServices:
                     max_actants_per_act=config.llm.perception_max_actants_per_act,
                     predicate_symbol_language=config.llm.perception_predicate_symbol_language,
                     morphology_backend=config.llm.perception_morphology_backend,
+                    embedding_model=config.llm.perception_embedding_model,
                 ),
             )
             if llm is not None
@@ -243,6 +245,7 @@ class RuntimeServices:
                     max_actants_per_act=new_config.llm.perception_max_actants_per_act,
                     predicate_symbol_language=new_config.llm.perception_predicate_symbol_language,
                     morphology_backend=new_config.llm.perception_morphology_backend,
+                    embedding_model=new_config.llm.perception_embedding_model,
                 ),
             )
             self.agent = LLMAgent(
@@ -405,8 +408,14 @@ class RuntimeServices:
         self,
         perception: PerceptionResult,
         context: InteractionContext | None = None,
+        *,
+        source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
-        commit = self.integration.integrate_external(perception, context or self.context)
+        commit = self.integration.integrate_external(
+            perception,
+            context or self.context,
+            source_timestamp=source_timestamp,
+        )
         self.ignition.apply_seed_requests(commit.activation_seeds)
         self.ignition.apply_refutation_requests(commit.refutations)
         return commit

@@ -93,16 +93,19 @@ three rules:
 3. never turn a current implementation failure into an expected GAP merely to
    improve the score.
 
-## M1 adversarial hidden-noise frontier (v0.25.0)
+## M1 adversarial hidden-noise frontier (v0.25.0, expanded v0.25.19)
 
 Отдельный corpus `data/acceptance_cases_m1_adversarial.txt` + `data/acceptance_oracle_m1_adversarial.json` не заменяет broad200. Он специально проверяет классы, явно перечисленные для скрытого M1 corpus постановки хакатона, но не имевшие отдельного систематического семейства в broad200:
 
 - 10 `m1_typo_noise`;
-- 10 `m1_inversion`;
+- 40 `m1_inversion`;
 - 10 `m1_ellipsis`;
 - 6 `m1_mixed_noise`.
 
-Все 36 cases имеют grade `EXACT`; oracle написан от ожидаемой семантики, а не от текущего parser output. Ellipsis cases требуют восстановления двух assertions. Mandatory M1 roles SUBJECT/OBJECT/LOCATION дополнены RECIPIENT/TOOL/MATERIAL/TIME/DURATION/SOURCE.
+Все 66 cases имеют grade `EXACT`; первые 36 сохранены, expansion добавляет 30
+inversion cases. Oracle написан от ожидаемой семантики, а не от текущего parser
+output. Ellipsis cases требуют восстановления двух assertions. Mandatory M1 roles
+SUBJECT/OBJECT/LOCATION дополнены RECIPIENT/TOOL/MATERIAL/TIME/DURATION/SOURCE.
 
 Запуск:
 
@@ -112,3 +115,21 @@ PYTHONPATH=src python -m ah.cli m1-score <acceptance_runs_m1_adversarial/...>
 ```
 
 Без подключённой реальной perception LLM этот corpus считается **не измеренным**, а не `PASS`. Unit tests проверяют только alignment/family/role invariants самого benchmark-а.
+
+## Expanded inversion, ellipsis and typo suites (v0.25.19)
+
+- `data/acceptance_inversion`: 100 scenario-isolated EXACT cases по девяти
+  semantic roles и перестановкам predicate/actants.
+- `data/acceptance_ellipsis`: 166 EXACT cases; прежние 100 сохранены, expansion
+  добавляет inversion, punctuation noise, scope/control, antecedent competition,
+  slot permutation, coreference chains и boundary guards.
+- `data/acceptance_typo`: 81 scenario-isolated EXACT case для отдельного Lexical
+  Recovery. Oracle проверяет не только итоговые assertions, но и token outcome;
+  `AMBIGUOUS` cases ожидают безопасный parser error и отсутствие Integration.
+
+Typo suite покрывает insertion/deletion/substitution/transposition, keyboard
+neighbours, `ё/е`, inflection, длину слов, все обязательные роли, inversion,
+ellipsis, несколько ошибок, protected OOV и конкурирующие исправления. Его можно
+запустить кнопкой `M1: typo/noise acceptance` либо тем же CLI, передав dedicated
+cases/oracle pair. Реальный процент объявляется только после запуска локальной
+модели; offline tests проверяют schema, indexed shortlist и safety invariants.

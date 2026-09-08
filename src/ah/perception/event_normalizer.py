@@ -43,7 +43,8 @@ class EventNormalizer:
       silently demoted to proposition-valued HOW_TO/OBJECT content;
     * a *perfective, preposed* gerund can establish source-order FOLLOW, while an
       imperfective gerund is kept independent without inventing temporal order;
-    * coordinated perfective predicates can establish a conservative FOLLOW edge;
+    * coordinated/serial perfective predicates expose only non-canonical temporal
+      hypotheses; aspect and source order do not entail a FOLLOW edge;
     * a passive full participle used inside an asserted subject NP can expose a
       result STATE without inventing the event or agent that produced that state;
     * weaker narrative adjacency is emitted only as a runtime hint and is never a
@@ -276,7 +277,6 @@ class EventNormalizer:
         diagnostics: list[str],
     ) -> None:
         by_head = self._assertion_by_head(tuple(assertions))
-        relation_keys = {self._relation_key(item) for item in relations}
         hint_keys = {self._hint_key(item) for item in hints}
         for group in self.graph.frame_graph.coordinations:
             members: list[AssertionCandidate] = []
@@ -302,37 +302,32 @@ class EventNormalizer:
                 right_token = self.graph.token(right_head)
                 if self._aspect(left_token) != "perf" or self._aspect(right_token) != "perf":
                     continue
-                key = ("FOLLOW", left.local_id, right.local_id)
-                if key not in relation_keys:
-                    relations.append(
-                        SituationRelationCandidate(
-                            "FOLLOW",
+                # Perfective aspect bounds both events, but neither coordination
+                # nor textual order says that the second event temporally follows
+                # the first in the represented world.  In particular, conjuncts
+                # may summarize overlapping activity or be ordered rhetorically.
+                # Keep the useful scheduling hypothesis runtime-only.  Do not add
+                # a causal hypothesis either: shared participants and conjunction
+                # are not source evidence for CAUSE.
+                hint_key = (
+                    SituationRelationHintKind.TEMPORAL_CANDIDATE.value,
+                    left.local_id,
+                    right.local_id,
+                )
+                if hint_key not in hint_keys:
+                    hints.append(
+                        SituationRelationHintCandidate(
+                            SituationRelationHintKind.TEMPORAL_CANDIDATE,
                             left.local_id,
                             right.local_id,
                             self._evidence_between(left, right),
+                            reason=(
+                                "coordinated perfective events; aspect and source order "
+                                "do not entail a directional temporal relation"
+                            ),
                         )
                     )
-                    relation_keys.add(key)
-                    diagnostics.append(
-                        f"event-normalizer: coordinated perfective events {left.local_id} FOLLOW {right.local_id}"
-                    )
-                if self._share_participant(left, right):
-                    hint_key = (
-                        SituationRelationHintKind.CAUSAL_CANDIDATE.value,
-                        left.local_id,
-                        right.local_id,
-                    )
-                    if hint_key not in hint_keys:
-                        hints.append(
-                            SituationRelationHintCandidate(
-                                SituationRelationHintKind.CAUSAL_CANDIDATE,
-                                left.local_id,
-                                right.local_id,
-                                self._evidence_between(left, right),
-                                reason="ordered perfective events share a participant; causality is not asserted",
-                            )
-                        )
-                        hint_keys.add(hint_key)
+                    hint_keys.add(hint_key)
 
     def _normalize_serial_perfective_events(
         self,
@@ -341,7 +336,7 @@ class EventNormalizer:
         hints: list[SituationRelationHintCandidate],
         diagnostics: list[str],
     ) -> None:
-        """Recover source-order FOLLOW outside explicit predicate groups.
+        """Expose a non-canonical temporal hypothesis outside predicate groups.
 
         The linguistic frame graph deliberately keeps conservative clause
         boundaries.  Literary coordination can therefore put two finite events in
@@ -350,13 +345,12 @@ class EventNormalizer:
         лампу``).  Those cases need not appear in ``frame_graph.coordinations`` even
         though their temporal order is written explicitly.
 
-        Add FOLLOW only for consecutive asserted *finite perfective* source events
-        inside one top-level sentence when either (a) an explicit additive
-        coordinator lies between them, or (b) a comma-separated serial chain keeps
-        exactly the same SUBJECT identity.  Adversative/disjunctive coordinators and
-        subordinate/relative clauses are excluded.  The rule establishes narration
-        order only; CAUSE remains a runtime candidate and still requires the later
-        semantic promotion gate.
+        Consecutive asserted *finite perfective* source events inside one top-level
+        sentence can be useful temporal candidates when an additive coordinator or
+        same-subject comma chain connects them.  This is still discourse ordering,
+        not an entailment of canonical FOLLOW.  Adversative/disjunctive coordinators
+        and subordinate/relative clauses are excluded.  No CAUSE candidate is
+        emitted from adjacency or participant continuity alone.
         """
         rows: list[tuple[int, AssertionCandidate, SourceToken, object]] = []
         for assertion in assertions:
@@ -381,7 +375,6 @@ class EventNormalizer:
             rows.append((token.index, assertion, token, clause))
         rows.sort(key=lambda item: item[0])
 
-        relation_keys = {self._relation_key(item) for item in relations}
         hint_keys = {self._hint_key(item) for item in hints}
 
         def subject_identity(item: AssertionCandidate) -> tuple[str, str] | None:
@@ -424,68 +417,25 @@ class EventNormalizer:
             if not explicit_additive and not (comma_serial and same_subject):
                 continue
 
-            key = ("FOLLOW", left.local_id, right.local_id)
-            if key not in relation_keys:
-                relations.append(
-                    SituationRelationCandidate(
-                        "FOLLOW",
+            hint_key = (
+                SituationRelationHintKind.TEMPORAL_CANDIDATE.value,
+                left.local_id,
+                right.local_id,
+            )
+            if hint_key not in hint_keys:
+                hints.append(
+                    SituationRelationHintCandidate(
+                        SituationRelationHintKind.TEMPORAL_CANDIDATE,
                         left.local_id,
                         right.local_id,
                         self._evidence_between(left, right),
+                        reason=(
+                            "serial perfective events; narration order is not a "
+                            "canonical temporal entailment"
+                        ),
                     )
                 )
-                relation_keys.add(key)
-                diagnostics.append(
-                    "event-normalizer: serial perfective events "
-                    f"{left.local_id} FOLLOW {right.local_id}"
-                )
-
-            # FOLLOW is temporal structure only.  Expose a causal hypothesis when
-            # there is already participant continuity, as before, or when the target
-            # subject is a passive-participle result description.  The latter is a
-            # common literary re-mention pattern (``ударил его, оглушенный матрос
-            # упал``) where local entity identity may still be split.  The hint is
-            # non-canonical; AdaptivePerceptionParser still requires source entailment
-            # before any CAUSE becomes L.
-            def passive_result_subject(item: AssertionCandidate) -> bool:
-                subjects = [a for a in item.actants if a.role is ActantRole.SUBJECT]
-                if len(subjects) != 1:
-                    return False
-                evidence = subjects[0].evidence
-                if evidence is None or evidence.start is None or evidence.end is None:
-                    return False
-                return any(
-                    any(info.pos == "PRTF" for info in material_analyses(token.analyses))
-                    for token in self.graph.tokens
-                    if token.start >= evidence.start and token.end <= evidence.end
-                )
-
-            causal_shape = self._share_participant(left, right) or passive_result_subject(right)
-            if causal_shape:
-                hint_key = (
-                    SituationRelationHintKind.CAUSAL_CANDIDATE.value,
-                    left.local_id,
-                    right.local_id,
-                )
-                if hint_key not in hint_keys:
-                    reason = (
-                        "serial perfective passive-result subject; source order does not "
-                        "by itself entail causality"
-                        if passive_result_subject(right) and not self._share_participant(left, right)
-                        else
-                        "serial perfective events share a participant; source order does not "
-                        "by itself entail causality"
-                    )
-                    hints.append(
-                        SituationRelationHintCandidate(
-                            SituationRelationHintKind.CAUSAL_CANDIDATE,
-                            left.local_id,
-                            right.local_id,
-                            self._evidence_between(left, right),
-                            reason=reason,
-                        )
-                    )
-                    hint_keys.add(hint_key)
+                hint_keys.add(hint_key)
 
     def _result_state_assertions(
         self,
@@ -675,7 +625,9 @@ class EventNormalizer:
             mutable_assertions, mutable_relations, hints, diagnostics
         )
         self._result_state_assertions(mutable_assertions, diagnostics)
-        self._narrative_adjacency_hints(mutable_assertions, mutable_relations, hints)
+        # Mere adjacency is intentionally not a CAUSE candidate.  Explicit source
+        # connectives are handled by the relation derivation pass; cross-turn
+        # discourse relations have their own bounded, source-grounded refiner.
 
         # Stable de-duplication keeps diagnostics reproducible when one structural
         # cue is discovered through more than one internal route.

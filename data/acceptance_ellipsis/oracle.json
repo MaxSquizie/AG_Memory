@@ -1,17 +1,21 @@
 {
   "version": 1,
-  "corpus_id": "ellipsis-v2-composite-100",
-  "case_count": 100,
+  "corpus_id": "ellipsis-v3-coverage-166",
+  "case_count": 166,
   "policy": {
     "grade": "EXACT",
-    "purpose": "Composite ellipsis/discourse reconstruction acceptance with coordination, polarity, role frames, time/location, scope, coreference, punctuation and noise interactions.",
-    "rule": "Oracle states intended semantics before implementation; expectations are not derived from parser output. Existing 22 v1 cases are preserved as the first 22 cases for longitudinal comparison."
+    "purpose": "Composite ellipsis/discourse reconstruction acceptance. v3 preserves all 100 v2 cases and adds inversion+ellipsis, punctuation-noise tolerance, scope/control completion, antecedent competition, slot permutation, cross-sentence coreference, and nominal-boundary guards.",
+    "rule": "Oracle states intended semantics before implementation; expectations are not derived from parser output. Existing 100 v2 cases are preserved as the first 100 cases for longitudinal comparison."
   },
   "coverage": {
+    "antecedent_competition": 8,
     "antecedent_reset": 10,
     "complex_chain": 12,
     "coordination_ellipsis": 12,
+    "coreference_chain_ellipsis": 6,
     "coreference_ellipsis": 2,
+    "ellipsis_boundary_guard": 6,
+    "inversion_ellipsis": 12,
     "locative_ellipsis": 2,
     "mixed_adversarial_ellipsis": 2,
     "polarity_chain": 10,
@@ -19,9 +23,12 @@
     "proposition_confirmation": 2,
     "proposition_negation": 4,
     "punctuation_ellipsis": 6,
+    "punctuation_noise_ellipsis": 12,
     "role_frame": 5,
     "role_rich_chain": 10,
+    "scope_control_ellipsis": 12,
     "scope_ellipsis": 4,
+    "slot_permutation_ellipsis": 10,
     "temporal_ellipsis": 3,
     "temporal_locative_combo": 10
   },
@@ -5764,6 +5771,3922 @@
         }
       },
       "scenario": "ellipsis_v2_100"
+    },
+    {
+      "text": "Книгу прочитал Иван, а журнал — Мария.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "object_fronting"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_101"
+    },
+    {
+      "text": "Дверь ключом открыл Пётр, а окно отвёрткой — Иван.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_102"
+    },
+    {
+      "text": "Письмо Анне передал Сергей, а посылку Ольге — Пётр.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Ольга",
+                "OBJECT": "посылка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_103"
+    },
+    {
+      "text": "На стол книгу положила Анна, а на полку журнал — Ольга.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_104"
+    },
+    {
+      "text": "Из дерева стол сделал мастер, а из металла стул — ученик.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "ученик",
+                "OBJECT": "стул",
+                "MATERIAL": "металл"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_105"
+    },
+    {
+      "text": "Утром в Москве работал Иван, а вечером в Казани — Мария.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "time",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "TIME": "утром",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "TIME": "вечером",
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_106"
+    },
+    {
+      "text": "Два часа книгу читал Иван, а три часа журнал — Пётр.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "duration"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга",
+                "DURATION": "два часа"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "журнал",
+                "DURATION": "три часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_107"
+    },
+    {
+      "text": "От Анны письмо получил Сергей, а от Ольги посылку — Пётр.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "письмо",
+                "SOURCE": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "посылка",
+                "SOURCE": "Ольга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_108"
+    },
+    {
+      "text": "В Москве живёт Иван, а в Казани — Мария.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_109"
+    },
+    {
+      "text": "Книгу Иван прочитал, а журнал Мария — тоже.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "confirmation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_110"
+    },
+    {
+      "text": "Книгу Иван прочитал, а журнал Мария — нет.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "negation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_111"
+    },
+    {
+      "text": "Книгу Анне передал Сергей, а посылку Петру — Ольга.",
+      "grade": "EXACT",
+      "family": "inversion_ellipsis",
+      "tags": [
+        "ellipsis",
+        "inversion",
+        "recipient",
+        "slot_order"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "посылка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_112"
+    },
+    {
+      "text": "Иван купил книгу а Мария журнал.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_comma",
+        "punctuation_noise"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_113"
+    },
+    {
+      "text": "Иван купил книгу Мария — журнал.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_boundary_punctuation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_114"
+    },
+    {
+      "text": "Книга лежит на столе журнал — на полке.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_115"
+    },
+    {
+      "text": "Иван живёт в Москве Мария — в Казани Пётр — в Париже.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "chain"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "LOCATION": "Казань"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "LOCATION": "Париж"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_116"
+    },
+    {
+      "text": "Сергей передал Анне письмо Пётр Ольге — посылку.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Ольга",
+                "OBJECT": "посылка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_117"
+    },
+    {
+      "text": "Иван открыл дверь ключом Мария окно — отвёрткой.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_118"
+    },
+    {
+      "text": "Иван купил книгу, а Мария - журнал.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "ascii_hyphen"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_119"
+    },
+    {
+      "text": "Иван купил книгу, а Мария – журнал.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "en_dash"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_120"
+    },
+    {
+      "text": "Иван купил книгу;Мария — журнал.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_space_after_semicolon"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_121"
+    },
+    {
+      "text": "Иван купил книгу.Мария — журнал.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_space_after_period"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_122"
+    },
+    {
+      "text": "Иван купил книгу , а Мария — журнал .",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "space_before_punctuation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_123"
+    },
+    {
+      "text": "Иван купил книгу,Мария — журнал,Пётр — газету.",
+      "grade": "EXACT",
+      "family": "punctuation_noise_ellipsis",
+      "tags": [
+        "ellipsis",
+        "missing_spaces",
+        "chain"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "газета"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_124"
+    },
+    {
+      "text": "Иван хочет прочитать книгу, а Мария — журнал.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "want"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "прочитать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_125"
+    },
+    {
+      "text": "Иван решил отправить письмо Сергею, а Ольга — сообщение Петру.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "decision",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "отправить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "сообщение",
+                "RECIPIENT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_126"
+    },
+    {
+      "text": "Анна начала писать письмо, а Мария — отчёт.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "phase"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "начать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "писать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "начать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "писать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "отчёт"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_127"
+    },
+    {
+      "text": "Иван хочет работать в Москве, а Мария — в Казани.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_128"
+    },
+    {
+      "text": "Анна начала работать утром, а Ольга — вечером.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "начать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "TIME": "утром"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "начать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_129"
+    },
+    {
+      "text": "Сергей решил открыть дверь ключом, а Пётр — окно отвёрткой.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_130"
+    },
+    {
+      "text": "Иван попросил Марию открыть дверь, а Пётр — Ольгу окно.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "object_control"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "открыть",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.RECIPIENT"
+                },
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_131"
+    },
+    {
+      "text": "Иван попросил Марию положить книгу на стол, а Пётр — Ольгу журнал на полку.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "object_control",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "положить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.RECIPIENT"
+                },
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_132"
+    },
+    {
+      "text": "Анна попросила Сергея отправить письмо Петру, а Ольга — Ивана сообщение Марии.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "object_control",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Сергей",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "письмо",
+                "RECIPIENT": "Пётр"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Иван",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "отправить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.RECIPIENT"
+                },
+                "OBJECT": "сообщение",
+                "RECIPIENT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_133"
+    },
+    {
+      "text": "Иван хочет сделать стол из дерева, а Пётр — стул из металла.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сделать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "сделать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "стул",
+                "MATERIAL": "металл"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_134"
+    },
+    {
+      "text": "Мария решила получить письмо от Анны, а Ольга — посылку от Сергея.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "получить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "письмо",
+                "SOURCE": "Анна"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "получить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "посылка",
+                "SOURCE": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_135"
+    },
+    {
+      "text": "Анна решила читать книгу два часа, а Ольга — отчёт три часа.",
+      "grade": "EXACT",
+      "family": "scope_control_ellipsis",
+      "tags": [
+        "ellipsis",
+        "scope",
+        "duration"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "книга",
+                "DURATION": "два часа"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "решить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": {
+                  "assertion": "a4"
+                }
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "читать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a3.SUBJECT"
+                },
+                "OBJECT": "отчёт",
+                "DURATION": "три часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_136"
+    },
+    {
+      "text": "Иван купил книгу, Мария — журнал; Пётр продал газету, Ольга — открытку.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "chain"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "газета"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "открытка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_137"
+    },
+    {
+      "text": "Иван работает в Москве, Мария — в Казани, но Пётр живёт в Париже, Ольга — в Лондоне.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "LOCATION": "Казань"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "LOCATION": "Париж"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "LOCATION": "Лондон"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_138"
+    },
+    {
+      "text": "Иван открыл дверь ключом, Мария — окно отвёрткой; Пётр закрыл ворота ломом, Сергей — калитку ключом.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "ворота",
+                "TOOL": "лом"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "калитка",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_139"
+    },
+    {
+      "text": "Анна отправила Ивану письмо, Ольга — Петру сообщение; Мария получила посылку от Сергея, Пётр — письмо от Анны.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "recipient",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Иван",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "посылка",
+                "SOURCE": "Сергей"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "письмо",
+                "SOURCE": "Анна"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_140"
+    },
+    {
+      "text": "Иван читал книгу утром, Мария — журнал вечером; Пётр писал отчёт ночью, Ольга — письмо утром.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга",
+                "TIME": "утром"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал",
+                "TIME": "вечером"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "писать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "отчёт",
+                "TIME": "ночью"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "писать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "письмо",
+                "TIME": "утром"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_141"
+    },
+    {
+      "text": "Мастер сделал стол из дерева, ученик — стул из металла; Иван открыл дверь ключом, Пётр — окно отвёрткой.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "material",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "ученик",
+                "OBJECT": "стул",
+                "MATERIAL": "металл"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_142"
+    },
+    {
+      "text": "Иван купил книгу, Мария — журнал. Пётр продал газету, Ольга — открытку.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "cross_sentence",
+        "antecedent_reset"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "газета"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "продать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "открытка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_143"
+    },
+    {
+      "text": "Книга лежит на столе, журнал — на полке. Письмо оказалось в ящике, открытка — в шкафу.",
+      "grade": "EXACT",
+      "family": "antecedent_competition",
+      "tags": [
+        "ellipsis",
+        "cross_sentence",
+        "antecedent_reset",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "оказаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "письмо",
+                "LOCATION": "ящик"
+              }
+            },
+            {
+              "key": "a4",
+              "predicate": "оказаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "открытка",
+                "LOCATION": "шкаф"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C",
+            "a4": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_144"
+    },
+    {
+      "text": "Сергей передал Анне письмо, а Пётр посылку Ольге.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "посылка",
+                "RECIPIENT": "Ольга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_145"
+    },
+    {
+      "text": "Анна отправила Сергею письмо, а Ольга Петру сообщение.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Сергей",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "сообщение"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_146"
+    },
+    {
+      "text": "Ольга положила на стол книгу, а Анна журнал на полку.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "LOCATION": "стол",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_147"
+    },
+    {
+      "text": "Пётр открыл ключом дверь, а Иван окно отвёрткой.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "TOOL": "ключ",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_148"
+    },
+    {
+      "text": "Мастер сделал из дерева стол, а ученик стул из металла.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "material"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "MATERIAL": "дерево",
+                "OBJECT": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "ученик",
+                "OBJECT": "стул",
+                "MATERIAL": "металл"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_149"
+    },
+    {
+      "text": "Иван работал утром в Москве, а Мария в Казани вечером.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "time",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "TIME": "утром",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "LOCATION": "Казань",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_150"
+    },
+    {
+      "text": "Сергей получил от Анны письмо, а Пётр посылку от Ольги.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "SOURCE": "Анна",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "посылка",
+                "SOURCE": "Ольга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_151"
+    },
+    {
+      "text": "Иван читал два часа книгу, а Пётр журнал три часа.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "duration"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "DURATION": "два часа",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "журнал",
+                "DURATION": "три часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_152"
+    },
+    {
+      "text": "Анна передала утром Петру письмо, а Ольга вечером Сергею посылку.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "time",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "TIME": "утром",
+                "RECIPIENT": "Пётр",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "TIME": "вечером",
+                "RECIPIENT": "Сергей",
+                "OBJECT": "посылка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_153"
+    },
+    {
+      "text": "В Москве утром работал Иван, а Мария вечером в Казани.",
+      "grade": "EXACT",
+      "family": "slot_permutation_ellipsis",
+      "tags": [
+        "ellipsis",
+        "slot_permutation",
+        "inversion",
+        "time",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва",
+                "TIME": "утром"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "TIME": "вечером",
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_154"
+    },
+    {
+      "text": "Иван купил книгу. Он положил её на стол, а Мария журнал — на полку.",
+      "grade": "EXACT",
+      "family": "coreference_chain_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_155"
+    },
+    {
+      "text": "Анна написала письмо. Она отправила его Сергею, а Ольга сообщение — Петру.",
+      "grade": "EXACT",
+      "family": "coreference_chain_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "recipient"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "RECIPIENT": "Сергей"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "сообщение",
+                "RECIPIENT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_156"
+    },
+    {
+      "text": "Пётр открыл дверь. Он закрыл её ключом, а Иван окно — отвёрткой.",
+      "grade": "EXACT",
+      "family": "coreference_chain_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "tool"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_157"
+    },
+    {
+      "text": "Ольга взяла книгу. Она положила её на стол, а Анна журнал — на полку.",
+      "grade": "EXACT",
+      "family": "coreference_chain_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_158"
+    },
+    {
+      "text": "Сергей получил письмо от Анны. Он положил его в ящик, а Пётр посылку — на стол.",
+      "grade": "EXACT",
+      "family": "coreference_chain_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "source",
+        "location"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "письмо",
+                "SOURCE": "Анна"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "ящик"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "посылка",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_159"
+    },
+    {
+      "text": "Мария купила журнал. Она прочитала его утром, а Анна книгу — вечером.",
+      "grade": "EXACT",
+      "family": "coreference_chain_ellipsis",
+      "tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "time"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "TIME": "утром"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "книга",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_160"
+    },
+    {
+      "text": "Иван работает в Москве, а Мария — инженер.",
+      "grade": "EXACT",
+      "family": "ellipsis_boundary_guard",
+      "tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "инженер",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_161"
+    },
+    {
+      "text": "Иван живёт в Москве, а Мария — врач.",
+      "grade": "EXACT",
+      "family": "ellipsis_boundary_guard",
+      "tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "врач",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_162"
+    },
+    {
+      "text": "Книга лежит на столе, а журнал — подарок.",
+      "grade": "EXACT",
+      "family": "ellipsis_boundary_guard",
+      "tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "подарок",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_163"
+    },
+    {
+      "text": "Иван купил книгу, а Мария — студент.",
+      "grade": "EXACT",
+      "family": "ellipsis_boundary_guard",
+      "tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "студент",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_164"
+    },
+    {
+      "text": "Анна отправила письмо Сергею, а Ольга — редактор.",
+      "grade": "EXACT",
+      "family": "ellipsis_boundary_guard",
+      "tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "редактор",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_165"
+    },
+    {
+      "text": "Пётр открыл дверь ключом, а Иван — мастер.",
+      "grade": "EXACT",
+      "family": "ellipsis_boundary_guard",
+      "tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "мастер",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "ellipsis_v3_166"
     }
-  ]
+  ],
+  "oracle_revision": "2026-09-08"
 }

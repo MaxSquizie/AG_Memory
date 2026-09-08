@@ -124,7 +124,7 @@ def test_imperfective_detached_gerund_does_not_invent_sequence_or_cause():
     ]
 
 
-def test_coordinated_perfective_events_get_follow_but_only_runtime_causal_candidate():
+def test_coordinated_perfective_events_remain_only_runtime_temporal_candidate():
     text = "Он поднял письмо и спрятал его."
     morph = StaticMorphology({
         "он": (mi("он", "NPRO", case="nomn", number="sing", gender="masc"),),
@@ -144,13 +144,11 @@ def test_coordinated_perfective_events_get_follow_but_only_runtime_causal_candid
     )
 
     outcome = EventNormalizer(graph, morph).normalize((lift, hide), ())
-    assert [(item.canonical_relation_id, item.source_ref, item.target_ref) for item in outcome.relations] == [
-        ("FOLLOW", "A1", "A2")
-    ]
+    assert outcome.relations == ()
     assert [(item.kind, item.source_ref, item.target_ref) for item in outcome.relation_hints] == [
-        (SituationRelationHintKind.CAUSAL_CANDIDATE, "A1", "A2")
+        (SituationRelationHintKind.TEMPORAL_CANDIDATE, "A1", "A2")
     ]
-    assert all(item.canonical_relation_id != "CAUSE" for item in outcome.relations)
+    assert all(item.kind is not SituationRelationHintKind.CAUSAL_CANDIDATE for item in outcome.relation_hints)
 
 
 def test_passive_participle_exposes_result_state_without_inventing_origin_event():

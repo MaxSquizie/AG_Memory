@@ -1,0 +1,2734 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF...FFFFFFFFFFFF.FFFFFFFFFFF..           [100%]
+=================================== FAILURES ===================================
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван прочитал книгу, а Мария — журнал.'
+expected = [('прочитать', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('журнал', (...T', 'иван')))] == [('прочитать'...T', 'иван')))]
+E         
+E         At index 0 diff: ('журнал', (('SUBJECT', 'мария'),)) != ('прочитать', (('OBJECT', 'журнал'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('купить', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb326537950>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=26, end=32), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='газету', evidence=EvidenceSpan(text='газету', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+expected = [('прочитать', {'SUBJECT': 'Анна', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Ольга', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'отчёт'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'письмо'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb327249010>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=30, end=36), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='отчёт', evidence=EvidenceSpan(text='отчёт', start=46, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+expected = [('открыть', {'SUBJECT': 'Пётр', 'OBJECT': 'дверь'}), ('открыть', {'SUBJECT': 'Иван', 'OBJECT': 'окно'}), ('открыть', {'SUBJECT': 'Сергей', 'OBJECT': 'ворота'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb32723daf0>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+predicate = PredicateCandidate(surface='окно', normalized_hint='окно', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='окно', start=26, end=30), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='ворота', evidence=EvidenceSpan(text='ворота', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван работает в Москве, а Мария — в Казани.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('казань', (...T', 'иван')))] == [('работать',...T', 'иван')))]
+E         
+E         At index 0 diff: ('казань', (('SUBJECT', 'мария'),)) != ('работать', (('LOCATION', 'казань'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'дом'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'офис'}), ('работать', {'SUBJECT': 'Пётр', 'LOCATION': 'школа'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3265e0fb0>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+predicate = PredicateCandidate(surface='офисе', normalized_hint='офис', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='офисе', start=30, end=35), template_candidate=None, template_selection=None)
+span = _Span(start_index=12, end_index=13, text='в школе', evidence=EvidenceSpan(text='в школе', start=44, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected = [('лежать', {'SUBJECT': 'книга', 'LOCATION': 'стол'}), ('лежать', {'SUBJECT': 'журнал', 'LOCATION': 'полка'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('лежать', (... 'журнал'),))] == [('лежать', (...', 'книга')))]
+E         
+E         At index 0 diff: ('лежать', (('LOCATION', 'стол'), ('SUBJECT', 'книга'))) != ('лежать', (('LOCATION', 'полка'), ('SUBJECT', 'журнал')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, а Пётр прочитал газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('журнал', (...T', 'пётр')))] == [('купить', (...T', 'пётр')))]
+E         
+E         At index 0 diff: ('журнал', (('SUBJECT', 'мария'),)) != ('купить', (('OBJECT', 'журнал'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария прочитала журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('газета', (...', 'мария')))] == [('купить', (...', 'мария')))]
+E         
+E         At index 0 diff: ('газета', (('SUBJECT', 'пётр'),)) != ('купить', (('OBJECT', 'книга'), ('SUBJECT', 'иван')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.'
+expected = [('жить', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('жить', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'}), ('жить', {'SUBJECT': 'Пётр', 'LOCATION': 'Париж'}), ('бродяга', {'SUBJECT': 'Слава'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1035: in parse
+    actants, _selected_spans = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8751: in _classify_role
+    return self._role_cue_probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8700: in _role_cue_probe
+    label = self._probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8868: in _probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_full_ellipsis_pipeline_02514.SemanticFixture object at 0x7fb326426270>
+prompt = 'TEXT:\nИван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.\nPREDICATE:\nбыть\nTARGET:\nбродяга...NT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 10, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_role_cue'
+
+    def generate(self, prompt, *, system='', override=None, role='generic'):
+        self.calls.append((role, prompt))
+        if role == 'perception_role_cue':
+            target = prompt.split('TARGET:\n', 1)[1].split('\n', 1)[0]
+            predicate = prompt.split('PREDICATE:\n', 1)[1].split('\n', 1)[0]
+            answer = ('ACTOR_OR_EXPERIENCER' if target in self.subjects or (predicate == 'лежит' and target == 'журнал')
+                      else 'AFFECTED_OR_CONTENT' if target in self.objects
+                      else 'PLACE' if target in self.places else None)
+            if answer is not None:
+                assert answer in prompt.split('CHOICES:\n')[1].split('\n\nTASK:')[0].splitlines()
+                return LLMResponse(answer, {})
+        if role == 'perception_lexeme_comparison' and 'TARGET:\nполку\n' in prompt:
+            for label in ('A', 'B'):
+                if f'{label} LEMMA:\nполка\n' in prompt:
+                    return LLMResponse(label, {})
+        if role == 'perception_modifier_attachment':
+            modifier = prompt.split('MODIFIER:\n', 1)[1].split('\n', 1)[0]
+            if modifier in self.places:
+                return LLMResponse('EVENT', {})
+>       raise AssertionError(f'Unspecified bounded fixture: {role}\n{prompt[:600]}')
+E       AssertionError: Unspecified bounded fixture: perception_role_cue
+E       TEXT:
+E       Иван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.
+E       PREDICATE:
+E       быть
+E       TARGET:
+E       бродяга
+E       CANDIDATE RELATIONS:
+E       AFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging
+E       RECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an obje
+
+tests/test_full_ellipsis_pipeline_02514.py:48: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+expected = [('положить', {'SUBJECT': 'Ольга', 'OBJECT': 'книга', 'LOCATION': 'стол'}), ('положить', {'SUBJECT': 'Анна', 'OBJECT': 'журнал', 'LOCATION': 'полка'}), ('положить', {'SUBJECT': 'Мария', 'OBJECT': 'письмо', 'LOCATION': 'ящик'})]
+dash = '—'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb326425ac0>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=37, end=43), template_candidate=None, template_selection=None)
+span = _Span(start_index=16, end_index=17, text='в ящик', evidence=EvidenceSpan(text='в ящик', start=69, end=75))
+used_roles = {<ActantRole.LOCATION: 'LOCATION'>, <ActantRole.SUBJECT: 'SUBJECT'>}
+forbidden_role = None, requested = False, allowed_roles = set()
+allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван прочитал книгу, а Мария — журнал.'
+expected = [('прочитать', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('журнал', (...T', 'иван')))] == [('прочитать'...T', 'иван')))]
+E         
+E         At index 0 diff: ('журнал', (('SUBJECT', 'мария'),)) != ('прочитать', (('OBJECT', 'журнал'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('купить', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb32644d580>
+text = 'Иван купил книгу, Мария – журнал, Пётр – газету.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=26, end=32), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='газету', evidence=EvidenceSpan(text='газету', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+expected = [('прочитать', {'SUBJECT': 'Анна', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Ольга', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'отчёт'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'письмо'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb32644f4d0>
+text = 'Анна прочитала книгу, Ольга – журнал, Мария – отчёт, а Пётр – письмо.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=30, end=36), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='отчёт', evidence=EvidenceSpan(text='отчёт', start=46, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+expected = [('открыть', {'SUBJECT': 'Пётр', 'OBJECT': 'дверь'}), ('открыть', {'SUBJECT': 'Иван', 'OBJECT': 'окно'}), ('открыть', {'SUBJECT': 'Сергей', 'OBJECT': 'ворота'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb326457a70>
+text = 'Пётр открыл дверь, Иван – окно, Сергей – ворота.'
+predicate = PredicateCandidate(surface='окно', normalized_hint='окно', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='окно', start=26, end=30), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='ворота', evidence=EvidenceSpan(text='ворота', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван работает в Москве, а Мария — в Казани.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('казань', (...T', 'иван')))] == [('работать',...T', 'иван')))]
+E         
+E         At index 0 diff: ('казань', (('SUBJECT', 'мария'),)) != ('работать', (('LOCATION', 'казань'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'дом'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'офис'}), ('работать', {'SUBJECT': 'Пётр', 'LOCATION': 'школа'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3264495e0>
+text = 'Иван работает дома, Мария – в офисе, Пётр – в школе.'
+predicate = PredicateCandidate(surface='офисе', normalized_hint='офис', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='офисе', start=30, end=35), template_candidate=None, template_selection=None)
+span = _Span(start_index=12, end_index=13, text='в школе', evidence=EvidenceSpan(text='в школе', start=44, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected = [('лежать', {'SUBJECT': 'книга', 'LOCATION': 'стол'}), ('лежать', {'SUBJECT': 'журнал', 'LOCATION': 'полка'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('лежать', (... 'журнал'),))] == [('лежать', (...', 'книга')))]
+E         
+E         At index 0 diff: ('лежать', (('LOCATION', 'стол'), ('SUBJECT', 'книга'))) != ('лежать', (('LOCATION', 'полка'), ('SUBJECT', 'журнал')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, а Пётр прочитал газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('журнал', (...T', 'пётр')))] == [('купить', (...T', 'пётр')))]
+E         
+E         At index 0 diff: ('журнал', (('SUBJECT', 'мария'),)) != ('купить', (('OBJECT', 'журнал'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария прочитала журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('газета', (...', 'мария')))] == [('купить', (...', 'мария')))]
+E         
+E         At index 0 diff: ('газета', (('SUBJECT', 'пётр'),)) != ('купить', (('OBJECT', 'книга'), ('SUBJECT', 'иван')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.'
+expected = [('жить', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('жить', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'}), ('жить', {'SUBJECT': 'Пётр', 'LOCATION': 'Париж'}), ('бродяга', {'SUBJECT': 'Слава'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1035: in parse
+    actants, _selected_spans = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8751: in _classify_role
+    return self._role_cue_probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8700: in _role_cue_probe
+    label = self._probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8868: in _probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_full_ellipsis_pipeline_02514.SemanticFixture object at 0x7fb3263f8f20>
+prompt = 'TEXT:\nИван живёт в Москве, Мария – в Казани, Пётр – в Париже, а Слава – бродяга.\nPREDICATE:\nбыть\nTARGET:\nбродяга...NT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 10, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_role_cue'
+
+    def generate(self, prompt, *, system='', override=None, role='generic'):
+        self.calls.append((role, prompt))
+        if role == 'perception_role_cue':
+            target = prompt.split('TARGET:\n', 1)[1].split('\n', 1)[0]
+            predicate = prompt.split('PREDICATE:\n', 1)[1].split('\n', 1)[0]
+            answer = ('ACTOR_OR_EXPERIENCER' if target in self.subjects or (predicate == 'лежит' and target == 'журнал')
+                      else 'AFFECTED_OR_CONTENT' if target in self.objects
+                      else 'PLACE' if target in self.places else None)
+            if answer is not None:
+                assert answer in prompt.split('CHOICES:\n')[1].split('\n\nTASK:')[0].splitlines()
+                return LLMResponse(answer, {})
+        if role == 'perception_lexeme_comparison' and 'TARGET:\nполку\n' in prompt:
+            for label in ('A', 'B'):
+                if f'{label} LEMMA:\nполка\n' in prompt:
+                    return LLMResponse(label, {})
+        if role == 'perception_modifier_attachment':
+            modifier = prompt.split('MODIFIER:\n', 1)[1].split('\n', 1)[0]
+            if modifier in self.places:
+                return LLMResponse('EVENT', {})
+>       raise AssertionError(f'Unspecified bounded fixture: {role}\n{prompt[:600]}')
+E       AssertionError: Unspecified bounded fixture: perception_role_cue
+E       TEXT:
+E       Иван живёт в Москве, Мария – в Казани, Пётр – в Париже, а Слава – бродяга.
+E       PREDICATE:
+E       быть
+E       TARGET:
+E       бродяга
+E       CANDIDATE RELATIONS:
+E       AFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging
+E       RECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an obje
+
+tests/test_full_ellipsis_pipeline_02514.py:48: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+expected = [('положить', {'SUBJECT': 'Ольга', 'OBJECT': 'книга', 'LOCATION': 'стол'}), ('положить', {'SUBJECT': 'Анна', 'OBJECT': 'журнал', 'LOCATION': 'полка'}), ('положить', {'SUBJECT': 'Мария', 'OBJECT': 'письмо', 'LOCATION': 'ящик'})]
+dash = '–'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3263e9f70>
+text = 'Ольга положила книгу на стол, Анна – журнал на полку, Мария – письмо в ящик.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=37, end=43), template_candidate=None, template_selection=None)
+span = _Span(start_index=16, end_index=17, text='в ящик', evidence=EvidenceSpan(text='в ящик', start=69, end=75))
+used_roles = {<ActantRole.LOCATION: 'LOCATION'>, <ActantRole.SUBJECT: 'SUBJECT'>}
+forbidden_role = None, requested = False, allowed_roles = set()
+allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван прочитал книгу, а Мария — журнал.'
+expected = [('прочитать', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('журнал', (...T', 'иван')))] == [('прочитать'...T', 'иван')))]
+E         
+E         At index 0 diff: ('журнал', (('SUBJECT', 'мария'),)) != ('прочитать', (('OBJECT', 'журнал'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('купить', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3263ebf80>
+text = 'Иван купил книгу, Мария - журнал, Пётр - газету.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=26, end=32), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='газету', evidence=EvidenceSpan(text='газету', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+expected = [('прочитать', {'SUBJECT': 'Анна', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Ольга', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'отчёт'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'письмо'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb326387020>
+text = 'Анна прочитала книгу, Ольга - журнал, Мария - отчёт, а Пётр - письмо.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=30, end=36), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='отчёт', evidence=EvidenceSpan(text='отчёт', start=46, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+expected = [('открыть', {'SUBJECT': 'Пётр', 'OBJECT': 'дверь'}), ('открыть', {'SUBJECT': 'Иван', 'OBJECT': 'окно'}), ('открыть', {'SUBJECT': 'Сергей', 'OBJECT': 'ворота'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3263eb920>
+text = 'Пётр открыл дверь, Иван - окно, Сергей - ворота.'
+predicate = PredicateCandidate(surface='окно', normalized_hint='окно', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='окно', start=26, end=30), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='ворота', evidence=EvidenceSpan(text='ворота', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван работает в Москве, а Мария — в Казани.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('казань', (...T', 'иван')))] == [('работать',...T', 'иван')))]
+E         
+E         At index 0 diff: ('казань', (('SUBJECT', 'мария'),)) != ('работать', (('LOCATION', 'казань'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'дом'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'офис'}), ('работать', {'SUBJECT': 'Пётр', 'LOCATION': 'школа'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3263fb1a0>
+text = 'Иван работает дома, Мария - в офисе, Пётр - в школе.'
+predicate = PredicateCandidate(surface='офисе', normalized_hint='офис', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='офисе', start=30, end=35), template_candidate=None, template_selection=None)
+span = _Span(start_index=12, end_index=13, text='в школе', evidence=EvidenceSpan(text='в школе', start=44, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected = [('лежать', {'SUBJECT': 'книга', 'LOCATION': 'стол'}), ('лежать', {'SUBJECT': 'журнал', 'LOCATION': 'полка'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('лежать', (... 'журнал'),))] == [('лежать', (...', 'книга')))]
+E         
+E         At index 0 diff: ('лежать', (('LOCATION', 'стол'), ('SUBJECT', 'книга'))) != ('лежать', (('LOCATION', 'полка'), ('SUBJECT', 'журнал')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, а Пётр прочитал газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('журнал', (...T', 'пётр')))] == [('купить', (...T', 'пётр')))]
+E         
+E         At index 0 diff: ('журнал', (('SUBJECT', 'мария'),)) != ('купить', (('OBJECT', 'журнал'), ('SUBJECT', 'мария')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария прочитала журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+        result = p.parse(text.replace('—', dash))
+        wanted = sorted((pred, tuple(sorted((role, value.casefold()) for role,value in roles.items())))
+                        for pred,roles in expected)
+>       assert normalized_frames(result.perception) == wanted
+E       AssertionError: assert [('газета', (...', 'мария')))] == [('купить', (...', 'мария')))]
+E         
+E         At index 0 diff: ('газета', (('SUBJECT', 'пётр'),)) != ('купить', (('OBJECT', 'книга'), ('SUBJECT', 'иван')))
+E         Use -v to get more diff
+
+tests/test_full_ellipsis_pipeline_02514.py:100: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.'
+expected = [('жить', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('жить', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'}), ('жить', {'SUBJECT': 'Пётр', 'LOCATION': 'Париж'}), ('бродяга', {'SUBJECT': 'Слава'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1035: in parse
+    actants, _selected_spans = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8751: in _classify_role
+    return self._role_cue_probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8700: in _role_cue_probe
+    label = self._probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8868: in _probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_full_ellipsis_pipeline_02514.SemanticFixture object at 0x7fb3263863f0>
+prompt = 'TEXT:\nИван живёт в Москве, Мария - в Казани, Пётр - в Париже, а Слава - бродяга.\nPREDICATE:\nбыть\nTARGET:\nбродяга...NT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 10, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_role_cue'
+
+    def generate(self, prompt, *, system='', override=None, role='generic'):
+        self.calls.append((role, prompt))
+        if role == 'perception_role_cue':
+            target = prompt.split('TARGET:\n', 1)[1].split('\n', 1)[0]
+            predicate = prompt.split('PREDICATE:\n', 1)[1].split('\n', 1)[0]
+            answer = ('ACTOR_OR_EXPERIENCER' if target in self.subjects or (predicate == 'лежит' and target == 'журнал')
+                      else 'AFFECTED_OR_CONTENT' if target in self.objects
+                      else 'PLACE' if target in self.places else None)
+            if answer is not None:
+                assert answer in prompt.split('CHOICES:\n')[1].split('\n\nTASK:')[0].splitlines()
+                return LLMResponse(answer, {})
+        if role == 'perception_lexeme_comparison' and 'TARGET:\nполку\n' in prompt:
+            for label in ('A', 'B'):
+                if f'{label} LEMMA:\nполка\n' in prompt:
+                    return LLMResponse(label, {})
+        if role == 'perception_modifier_attachment':
+            modifier = prompt.split('MODIFIER:\n', 1)[1].split('\n', 1)[0]
+            if modifier in self.places:
+                return LLMResponse('EVENT', {})
+>       raise AssertionError(f'Unspecified bounded fixture: {role}\n{prompt[:600]}')
+E       AssertionError: Unspecified bounded fixture: perception_role_cue
+E       TEXT:
+E       Иван живёт в Москве, Мария - в Казани, Пётр - в Париже, а Слава - бродяга.
+E       PREDICATE:
+E       быть
+E       TARGET:
+E       бродяга
+E       CANDIDATE RELATIONS:
+E       AFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging
+E       RECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an obje
+
+tests/test_full_ellipsis_pipeline_02514.py:48: AssertionError
+_ test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+expected = [('положить', {'SUBJECT': 'Ольга', 'OBJECT': 'книга', 'LOCATION': 'стол'}), ('положить', {'SUBJECT': 'Анна', 'OBJECT': 'журнал', 'LOCATION': 'полка'}), ('положить', {'SUBJECT': 'Мария', 'OBJECT': 'письмо', 'LOCATION': 'ящик'})]
+dash = '-'
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    def test_full_parse_preserves_ellipsis_after_nominal_rewrite(morph, text, expected, dash):
+        p = make_parser(morph)
+>       result = p.parse(text.replace('—', dash))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3263cdfd0>
+text = 'Ольга положила книгу на стол, Анна - журнал на полку, Мария - письмо в ящик.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=37, end=43), template_candidate=None, template_selection=None)
+span = _Span(start_index=16, end_index=17, text='в ящик', evidence=EvidenceSpan(text='в ящик', start=69, end=75))
+used_roles = {<ActantRole.LOCATION: 'LOCATION'>, <ActantRole.SUBJECT: 'SUBJECT'>}
+forbidden_role = None, requested = False, allowed_roles = set()
+allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+_ test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity0-subjects0] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, а Пётр — нет.'
+polarity = [False, False, True], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '—'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb326573370>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u043d\u0435\u0442, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435 \u043d\u0435\u0442.-polarity1-subjects1] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария — нет, Пётр — тоже нет.'
+polarity = [False, True, True], subjects = ['Иван', 'Мария', 'Пётр'], dash = '—'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb3264e3780>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u0442\u043e\u0436\u0435, \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity2-subjects2] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария тоже, Пётр — нет.'
+polarity = [False, False, True], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '—'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb32645d220>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435.-polarity3-subjects3] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — тоже.'
+polarity = [False, False, False], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '—'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb3264e1630>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity0-subjects0] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, а Пётр — нет.'
+polarity = [False, False, True], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '–'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb324ce06c0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u043d\u0435\u0442, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435 \u043d\u0435\u0442.-polarity1-subjects1] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария — нет, Пётр — тоже нет.'
+polarity = [False, True, True], subjects = ['Иван', 'Мария', 'Пётр'], dash = '–'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb32645d630>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u0442\u043e\u0436\u0435, \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity2-subjects2] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария тоже, Пётр — нет.'
+polarity = [False, False, True], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '–'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb3264e1a40>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435.-polarity3-subjects3] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — тоже.'
+polarity = [False, False, False], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '–'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb324ce12f0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity0-subjects0] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, а Пётр — нет.'
+polarity = [False, False, True], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '-'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb32645c930>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u043d\u0435\u0442, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435 \u043d\u0435\u0442.-polarity1-subjects1] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария — нет, Пётр — тоже нет.'
+polarity = [False, True, True], subjects = ['Иван', 'Мария', 'Пётр'], dash = '-'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb3264e0ee0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u0442\u043e\u0436\u0435, \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity2-subjects2] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, а Мария тоже, Пётр — нет.'
+polarity = [False, False, True], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '-'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb324ce0860>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435.-polarity3-subjects3] _
+
+morph = <ah.perception.morphology.Pymorphy3Morphology object at 0x7fb326c28a40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — тоже.'
+polarity = [False, False, False], subjects = ['Иван', 'Мария', 'Пётр']
+dash = '-'
+
+    @pytest.mark.parametrize('text,polarity,subjects', [
+        ('Иван купил книгу, Мария — журнал, а Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария — нет, Пётр — тоже нет.', [False,True,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, а Мария тоже, Пётр — нет.', [False,False,True], ['Иван','Мария','Пётр']),
+        ('Иван купил книгу, Мария — журнал, Пётр — тоже.', [False,False,False], ['Иван','Мария','Пётр']),
+    ])
+    @pytest.mark.parametrize('dash', ['—','–','-'])
+    def test_full_parse_polarity_chain(morph, text, polarity, subjects, dash):
+        result = make_parser(morph).parse(text.replace('—',dash))
+        assertions = result.perception.assertions
+        assert len(assertions) == len(subjects)
+        assert [a.negated for a in assertions] == polarity
+>       assert all(a.predicate.lookup_form == 'купить' for a in assertions)
+E       assert False
+E        +  where False = all(<generator object test_full_parse_polarity_chain.<locals>.<genexpr> at 0x7fb32643b510>)
+
+tests/test_full_ellipsis_pipeline_02514.py:127: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0] _
+
+text = 'Иван прочитал книгу, а Мария — журнал.'
+expected = [('прочитать', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+        parsed = perception.parse(text, context)
+        completed = TemplateCompletionService(integration, perception).complete(parsed)
+        commit = integration.integrate_external(completed, context)
+        actual = []
+        for item in commit.assertions:
+            node = core.store.get_hypernode(item.ref.uid)
+            template = core.store.get_template(node.template.uid)
+            symbol = core.store.get_symbol(template.predicate.uid)
+            roles = tuple(sorted((role.value, core.store.get_element_any_domain(ref.uid)
+                                  .properties['name'].value.casefold()) for role, ref in node.actants.items()))
+            actual.append((symbol, roles))
+        assert len(actual) == len(expected)
+        for predicate, expected_roles in expected:
+            roles = tuple(sorted((key,value.casefold()) for key,value in expected_roles.items()))
+>           assert any(predicate in symbol.forms and values == roles for symbol, values in actual)
+E           assert False
+E            +  where False = any(<generator object test_text_to_template_completion_to_canonical_ah.<locals>.<genexpr> at 0x7fb3239d27a0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:169: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1] _
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb3265f4d40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+>           parsed = parser.parse(text, structural_resolution=structural_resolution)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../baseline_02513/src/ah/perception/llm_parser.py:428: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3265f4710>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=26, end=32), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='газету', evidence=EvidenceSpan(text='газету', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+
+The above exception was the direct cause of the following exception:
+
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('купить', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+>       parsed = perception.parse(text, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb3265f4d40>
+text = 'Иван купил книгу, Мария — журнал, Пётр — газету.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            final_error = str(exc)
+            self._record_diagnostic(text, attempts, None, final_error)
+>           raise PerceptionParseError(final_error) from exc
+E           ah.perception.llm_parser.PerceptionParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/llm_parser.py:457: PerceptionParseError
+_ test_text_to_template_completion_to_canonical_ah[\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2] _
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb326449910>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+>           parsed = parser.parse(text, structural_resolution=structural_resolution)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../baseline_02513/src/ah/perception/llm_parser.py:428: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb326448290>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=30, end=36), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='отчёт', evidence=EvidenceSpan(text='отчёт', start=46, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+
+The above exception was the direct cause of the following exception:
+
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+expected = [('прочитать', {'SUBJECT': 'Анна', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Ольга', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'отчёт'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'письмо'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+>       parsed = perception.parse(text, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb326449910>
+text = 'Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            final_error = str(exc)
+            self._record_diagnostic(text, attempts, None, final_error)
+>           raise PerceptionParseError(final_error) from exc
+E           ah.perception.llm_parser.PerceptionParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/llm_parser.py:457: PerceptionParseError
+_ test_text_to_template_completion_to_canonical_ah[\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3] _
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb3265f4c50>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+>           parsed = parser.parse(text, structural_resolution=structural_resolution)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../baseline_02513/src/ah/perception/llm_parser.py:428: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb3265f4bf0>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+predicate = PredicateCandidate(surface='окно', normalized_hint='окно', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='окно', start=26, end=30), template_candidate=None, template_selection=None)
+span = _Span(start_index=11, end_index=11, text='ворота', evidence=EvidenceSpan(text='ворота', start=41, end=47))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+
+The above exception was the direct cause of the following exception:
+
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+expected = [('открыть', {'SUBJECT': 'Пётр', 'OBJECT': 'дверь'}), ('открыть', {'SUBJECT': 'Иван', 'OBJECT': 'окно'}), ('открыть', {'SUBJECT': 'Сергей', 'OBJECT': 'ворота'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+>       parsed = perception.parse(text, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb3265f4c50>
+text = 'Пётр открыл дверь, Иван — окно, Сергей — ворота.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            final_error = str(exc)
+            self._record_diagnostic(text, attempts, None, final_error)
+>           raise PerceptionParseError(final_error) from exc
+E           ah.perception.llm_parser.PerceptionParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/llm_parser.py:457: PerceptionParseError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4] _
+
+text = 'Иван работает в Москве, а Мария — в Казани.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+        parsed = perception.parse(text, context)
+        completed = TemplateCompletionService(integration, perception).complete(parsed)
+        commit = integration.integrate_external(completed, context)
+        actual = []
+        for item in commit.assertions:
+            node = core.store.get_hypernode(item.ref.uid)
+            template = core.store.get_template(node.template.uid)
+            symbol = core.store.get_symbol(template.predicate.uid)
+            roles = tuple(sorted((role.value, core.store.get_element_any_domain(ref.uid)
+                                  .properties['name'].value.casefold()) for role, ref in node.actants.items()))
+            actual.append((symbol, roles))
+        assert len(actual) == len(expected)
+        for predicate, expected_roles in expected:
+            roles = tuple(sorted((key,value.casefold()) for key,value in expected_roles.items()))
+>           assert any(predicate in symbol.forms and values == roles for symbol, values in actual)
+E           assert False
+E            +  where False = any(<generator object test_text_to_template_completion_to_canonical_ah.<locals>.<genexpr> at 0x7fb3238b4200>)
+
+tests/test_full_ellipsis_pipeline_02514.py:169: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5] _
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb3259766f0>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+>           parsed = parser.parse(text, structural_resolution=structural_resolution)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../baseline_02513/src/ah/perception/llm_parser.py:428: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb325977d70>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+predicate = PredicateCandidate(surface='офисе', normalized_hint='офис', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='офисе', start=30, end=35), template_candidate=None, template_selection=None)
+span = _Span(start_index=12, end_index=13, text='в школе', evidence=EvidenceSpan(text='в школе', start=44, end=51))
+used_roles = {<ActantRole.SUBJECT: 'SUBJECT'>}, forbidden_role = None
+requested = False, allowed_roles = set(), allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+
+The above exception was the direct cause of the following exception:
+
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+expected = [('работать', {'SUBJECT': 'Иван', 'LOCATION': 'дом'}), ('работать', {'SUBJECT': 'Мария', 'LOCATION': 'офис'}), ('работать', {'SUBJECT': 'Пётр', 'LOCATION': 'школа'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+>       parsed = perception.parse(text, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb3259766f0>
+text = 'Иван работает дома, Мария — в офисе, Пётр — в школе.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            final_error = str(exc)
+            self._record_diagnostic(text, attempts, None, final_error)
+>           raise PerceptionParseError(final_error) from exc
+E           ah.perception.llm_parser.PerceptionParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/llm_parser.py:457: PerceptionParseError
+_ test_text_to_template_completion_to_canonical_ah[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6] _
+
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected = [('лежать', {'SUBJECT': 'книга', 'LOCATION': 'стол'}), ('лежать', {'SUBJECT': 'журнал', 'LOCATION': 'полка'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+        parsed = perception.parse(text, context)
+        completed = TemplateCompletionService(integration, perception).complete(parsed)
+        commit = integration.integrate_external(completed, context)
+        actual = []
+        for item in commit.assertions:
+            node = core.store.get_hypernode(item.ref.uid)
+            template = core.store.get_template(node.template.uid)
+            symbol = core.store.get_symbol(template.predicate.uid)
+            roles = tuple(sorted((role.value, core.store.get_element_any_domain(ref.uid)
+                                  .properties['name'].value.casefold()) for role, ref in node.actants.items()))
+            actual.append((symbol, roles))
+        assert len(actual) == len(expected)
+        for predicate, expected_roles in expected:
+            roles = tuple(sorted((key,value.casefold()) for key,value in expected_roles.items()))
+>           assert any(predicate in symbol.forms and values == roles for symbol, values in actual)
+E           assert False
+E            +  where False = any(<generator object test_text_to_template_completion_to_canonical_ah.<locals>.<genexpr> at 0x7fb3227c35a0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:169: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7] _
+
+text = 'Иван купил книгу, Мария — журнал, а Пётр прочитал газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('купить', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+        parsed = perception.parse(text, context)
+        completed = TemplateCompletionService(integration, perception).complete(parsed)
+        commit = integration.integrate_external(completed, context)
+        actual = []
+        for item in commit.assertions:
+            node = core.store.get_hypernode(item.ref.uid)
+            template = core.store.get_template(node.template.uid)
+            symbol = core.store.get_symbol(template.predicate.uid)
+            roles = tuple(sorted((role.value, core.store.get_element_any_domain(ref.uid)
+                                  .properties['name'].value.casefold()) for role, ref in node.actants.items()))
+            actual.append((symbol, roles))
+        assert len(actual) == len(expected)
+        for predicate, expected_roles in expected:
+            roles = tuple(sorted((key,value.casefold()) for key,value in expected_roles.items()))
+>           assert any(predicate in symbol.forms and values == roles for symbol, values in actual)
+E           assert False
+E            +  where False = any(<generator object test_text_to_template_completion_to_canonical_ah.<locals>.<genexpr> at 0x7fb3238b6ea0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:169: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8] _
+
+text = 'Иван купил книгу, а Мария прочитала журнал, Пётр — газету.'
+expected = [('купить', {'SUBJECT': 'Иван', 'OBJECT': 'книга'}), ('прочитать', {'SUBJECT': 'Мария', 'OBJECT': 'журнал'}), ('прочитать', {'SUBJECT': 'Пётр', 'OBJECT': 'газета'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+        parsed = perception.parse(text, context)
+        completed = TemplateCompletionService(integration, perception).complete(parsed)
+        commit = integration.integrate_external(completed, context)
+        actual = []
+        for item in commit.assertions:
+            node = core.store.get_hypernode(item.ref.uid)
+            template = core.store.get_template(node.template.uid)
+            symbol = core.store.get_symbol(template.predicate.uid)
+            roles = tuple(sorted((role.value, core.store.get_element_any_domain(ref.uid)
+                                  .properties['name'].value.casefold()) for role, ref in node.actants.items()))
+            actual.append((symbol, roles))
+        assert len(actual) == len(expected)
+        for predicate, expected_roles in expected:
+            roles = tuple(sorted((key,value.casefold()) for key,value in expected_roles.items()))
+>           assert any(predicate in symbol.forms and values == roles for symbol, values in actual)
+E           assert False
+E            +  where False = any(<generator object test_text_to_template_completion_to_canonical_ah.<locals>.<genexpr> at 0x7fb32156cba0>)
+
+tests/test_full_ellipsis_pipeline_02514.py:169: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9] _
+
+text = 'Иван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.'
+expected = [('жить', {'SUBJECT': 'Иван', 'LOCATION': 'Москва'}), ('жить', {'SUBJECT': 'Мария', 'LOCATION': 'Казань'}), ('жить', {'SUBJECT': 'Пётр', 'LOCATION': 'Париж'}), ('бродяга', {'SUBJECT': 'Слава'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+>       parsed = perception.parse(text, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../baseline_02513/src/ah/perception/llm_parser.py:428: in _parse_adaptive
+    parsed = parser.parse(text, structural_resolution=structural_resolution)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../baseline_02513/src/ah/perception/adaptive_parser.py:1035: in parse
+    actants, _selected_spans = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8751: in _classify_role
+    return self._role_cue_probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8700: in _role_cue_probe
+    label = self._probe(
+../baseline_02513/src/ah/perception/adaptive_parser.py:8868: in _probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_full_ellipsis_pipeline_02514.SemanticFixture object at 0x7fb32386e000>
+prompt = 'TEXT:\nИван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.\nPREDICATE:\nбыть\nTARGET:\nбродяга...NT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 10, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_role_cue'
+
+    def generate(self, prompt, *, system='', override=None, role='generic'):
+        self.calls.append((role, prompt))
+        if role == 'perception_role_cue':
+            target = prompt.split('TARGET:\n', 1)[1].split('\n', 1)[0]
+            predicate = prompt.split('PREDICATE:\n', 1)[1].split('\n', 1)[0]
+            answer = ('ACTOR_OR_EXPERIENCER' if target in self.subjects or (predicate == 'лежит' and target == 'журнал')
+                      else 'AFFECTED_OR_CONTENT' if target in self.objects
+                      else 'PLACE' if target in self.places else None)
+            if answer is not None:
+                assert answer in prompt.split('CHOICES:\n')[1].split('\n\nTASK:')[0].splitlines()
+                return LLMResponse(answer, {})
+        if role == 'perception_lexeme_comparison' and 'TARGET:\nполку\n' in prompt:
+            for label in ('A', 'B'):
+                if f'{label} LEMMA:\nполка\n' in prompt:
+                    return LLMResponse(label, {})
+        if role == 'perception_modifier_attachment':
+            modifier = prompt.split('MODIFIER:\n', 1)[1].split('\n', 1)[0]
+            if modifier in self.places:
+                return LLMResponse('EVENT', {})
+>       raise AssertionError(f'Unspecified bounded fixture: {role}\n{prompt[:600]}')
+E       AssertionError: Unspecified bounded fixture: perception_role_cue
+E       TEXT:
+E       Иван живёт в Москве, Мария — в Казани, Пётр — в Париже, а Слава — бродяга.
+E       PREDICATE:
+E       быть
+E       TARGET:
+E       бродяга
+E       CANDIDATE RELATIONS:
+E       AFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging
+E       RECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an obje
+
+tests/test_full_ellipsis_pipeline_02514.py:48: AssertionError
+_ test_text_to_template_completion_to_canonical_ah[\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10] _
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb321f3dfd0>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+>           parsed = parser.parse(text, structural_resolution=structural_resolution)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../baseline_02513/src/ah/perception/llm_parser.py:428: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/adaptive_parser.py:1125: in parse
+    assertions, assertion_spans = self._recover_ellipsis_assertions(
+../baseline_02513/src/ah/perception/adaptive_parser.py:1300: in _recover_ellipsis_assertions
+    target_actants, _ = self._extract_actants(
+../baseline_02513/src/ah/perception/adaptive_parser.py:6266: in _extract_actants
+    role = self._classify_role(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.adaptive_parser.AdaptivePerceptionParser object at 0x7fb321f3e120>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+predicate = PredicateCandidate(surface='журнал', normalized_hint='журнал', sense_hint='NOMINAL_PREDICATION', evidence=EvidenceSpan(text='журнал', start=37, end=43), template_candidate=None, template_selection=None)
+span = _Span(start_index=16, end_index=17, text='в ящик', evidence=EvidenceSpan(text='в ящик', start=69, end=75))
+used_roles = {<ActantRole.LOCATION: 'LOCATION'>, <ActantRole.SUBJECT: 'SUBJECT'>}
+forbidden_role = None, requested = False, allowed_roles = set()
+allow_none = False
+
+    def _classify_role(
+        self,
+        text: str,
+        predicate: PredicateCandidate,
+        span: _Span,
+        used_roles: set[ActantRole],
+        forbidden_role: ActantRole | tuple[ActantRole, ...] | set[ActantRole] | None,
+        *,
+        requested: bool,
+        allowed_roles: set[ActantRole] | None = None,
+        allow_none: bool = False,
+    ) -> ActantRole | None:
+        if forbidden_role is None:
+            forbidden_roles: set[ActantRole] = set()
+        elif isinstance(forbidden_role, ActantRole):
+            forbidden_roles = {forbidden_role}
+        else:
+            forbidden_roles = set(forbidden_role)
+        candidates = {
+            role
+            for role in _TEMPLATE_ROLE_DESCRIPTIONS
+            if role not in used_roles
+            and role not in forbidden_roles
+            and (allowed_roles is None or role in allowed_roles)
+        }
+        if not candidates:
+>           raise AdaptiveParseError("no canonical roles remain available")
+E           ah.perception.adaptive_parser.AdaptiveParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/adaptive_parser.py:8742: AdaptiveParseError
+
+The above exception was the direct cause of the following exception:
+
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+expected = [('положить', {'SUBJECT': 'Ольга', 'OBJECT': 'книга', 'LOCATION': 'стол'}), ('положить', {'SUBJECT': 'Анна', 'OBJECT': 'журнал', 'LOCATION': 'полка'}), ('положить', {'SUBJECT': 'Мария', 'OBJECT': 'письмо', 'LOCATION': 'ящик'})]
+
+    @pytest.mark.parametrize('text,expected', CASES)
+    def test_text_to_template_completion_to_canonical_ah(text, expected):
+        from ah.integration.template_completion import TemplateCompletionService
+        from test_ellipsis_canonical_02513 import runtime
+        core, context, integration = runtime()
+        perception = production_perception()
+>       parsed = perception.parse(text, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_full_ellipsis_pipeline_02514.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../baseline_02513/src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.perception.llm_parser.LLMPerceptionService object at 0x7fb321f3dfd0>
+text = 'Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.'
+structural_resolution = None
+
+    def _parse_adaptive(
+        self, text: str, *, structural_resolution: str | None = None
+    ) -> PerceptionResult:
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            final_error = str(exc)
+            self._record_diagnostic(text, attempts, None, final_error)
+>           raise PerceptionParseError(final_error) from exc
+E           ah.perception.llm_parser.PerceptionParseError: no canonical roles remain available
+
+../baseline_02513/src/ah/perception/llm_parser.py:457: PerceptionParseError
+=========================== short test summary info ============================
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2014-\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[\u2013-\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_preserves_ellipsis_after_nominal_rewrite[--\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity0-subjects0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u043d\u0435\u0442, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435 \u043d\u0435\u0442.-polarity1-subjects1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u0442\u043e\u0436\u0435, \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity2-subjects2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2014-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435.-polarity3-subjects3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity0-subjects0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u043d\u0435\u0442, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435 \u043d\u0435\u0442.-polarity1-subjects1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u0442\u043e\u0436\u0435, \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity2-subjects2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[\u2013-\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435.-polarity3-subjects3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity0-subjects0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u043d\u0435\u0442, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435 \u043d\u0435\u0442.-polarity1-subjects1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u0442\u043e\u0436\u0435, \u041f\u0451\u0442\u0440 \u2014 \u043d\u0435\u0442.-polarity2-subjects2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_full_parse_polarity_chain[--\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0442\u043e\u0436\u0435.-polarity3-subjects3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b.-expected0]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected1]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0410\u043d\u043d\u0430 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u043a\u043d\u0438\u0433\u0443, \u041e\u043b\u044c\u0433\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u041c\u0430\u0440\u0438\u044f \u2014 \u043e\u0442\u0447\u0451\u0442, \u0430 \u041f\u0451\u0442\u0440 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e.-expected2]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u041f\u0451\u0442\u0440 \u043e\u0442\u043a\u0440\u044b\u043b \u0434\u0432\u0435\u0440\u044c, \u0418\u0432\u0430\u043d \u2014 \u043e\u043a\u043d\u043e, \u0421\u0435\u0440\u0433\u0435\u0439 \u2014 \u0432\u043e\u0440\u043e\u0442\u0430.-expected3]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u0430 \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438.-expected4]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e\u043c\u0430, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u043e\u0444\u0438\u0441\u0435, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u0448\u043a\u043e\u043b\u0435.-expected5]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-expected6]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u0436\u0443\u0440\u043d\u0430\u043b, \u0430 \u041f\u0451\u0442\u0440 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0433\u0430\u0437\u0435\u0442\u0443.-expected7]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u043a\u0443\u043f\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u0430 \u041c\u0430\u0440\u0438\u044f \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b\u0430 \u0436\u0443\u0440\u043d\u0430\u043b, \u041f\u0451\u0442\u0440 \u2014 \u0433\u0430\u0437\u0435\u0442\u0443.-expected8]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u0418\u0432\u0430\u043d \u0436\u0438\u0432\u0451\u0442 \u0432 \u041c\u043e\u0441\u043a\u0432\u0435, \u041c\u0430\u0440\u0438\u044f \u2014 \u0432 \u041a\u0430\u0437\u0430\u043d\u0438, \u041f\u0451\u0442\u0440 \u2014 \u0432 \u041f\u0430\u0440\u0438\u0436\u0435, \u0430 \u0421\u043b\u0430\u0432\u0430 \u2014 \u0431\u0440\u043e\u0434\u044f\u0433\u0430.-expected9]
+FAILED tests/test_full_ellipsis_pipeline_02514.py::test_text_to_template_completion_to_canonical_ah[\u041e\u043b\u044c\u0433\u0430 \u043f\u043e\u043b\u043e\u0436\u0438\u043b\u0430 \u043a\u043d\u0438\u0433\u0443 \u043d\u0430 \u0441\u0442\u043e\u043b, \u0410\u043d\u043d\u0430 \u2014 \u0436\u0443\u0440\u043d\u0430\u043b \u043d\u0430 \u043f\u043e\u043b\u043a\u0443, \u041c\u0430\u0440\u0438\u044f \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432 \u044f\u0449\u0438\u043a.-expected10]
+56 failed, 6 passed in 9.82s

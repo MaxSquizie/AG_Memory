@@ -10,8 +10,8 @@ def test_ellipsis_acceptance_corpus_schema_and_alignment():
     oracle_path = root / "data" / "acceptance_ellipsis" / "oracle.json"
     cases = load_acceptance_cases(cases_path)
     oracle = load_semantic_oracle(oracle_path)
-    assert len(cases) == 100
-    assert len(oracle) == 100
+    assert len(cases) == 166
+    assert len(oracle) == 166
     validate_oracle_alignment(cases, oracle)
 
 

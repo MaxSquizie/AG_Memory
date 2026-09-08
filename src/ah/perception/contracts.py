@@ -5,6 +5,7 @@ from enum import Enum
 
 from ah.model import ActantRole
 from ah.temporal.contracts import TemporalCandidate, TemporalMode, TransitionOperator
+from .lexical_recovery import TokenCandidate
 
 
 @dataclass(frozen=True, slots=True)
@@ -532,6 +533,9 @@ class PerceptionResult:
     conditionals: tuple[ConditionalCandidate, ...] = ()
     act_dependencies: tuple[ActDependencyCandidate, ...] = ()
     relation_hints: tuple[SituationRelationHintCandidate, ...] = ()
+    # Runtime preprocessing diagnostics.  These are source-provenance decisions,
+    # never canonical AH elements or authorization to write a fact.
+    lexical_recovery: tuple[TokenCandidate, ...] = ()
 
     @property
     def acts_count(self) -> int:

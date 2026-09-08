@@ -1,0 +1,3767 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "text": "Иван купл книгу.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "subject",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "купл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "купил"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_001"
+    },
+    {
+      "text": "Мария прочитала докмент.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "докмент",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "документ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_002"
+    },
+    {
+      "text": "Сергей передал Анне клю.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "recipient",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "клю",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "ключ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_003"
+    },
+    {
+      "text": "Ольга положила книгу на стл.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "стл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "стол"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_004"
+    },
+    {
+      "text": "Пётр открл дверь ключом.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "tool"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "открл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "открыл"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_005"
+    },
+    {
+      "text": "Анна отправила писмо Сергею.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "recipient"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "писмо",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "письмо"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_006"
+    },
+    {
+      "text": "Мастер сделал стол из дерва.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "material"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "дерва",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "дерева"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_007"
+    },
+    {
+      "text": "Иван приехал в Мскву.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "location",
+        "proper_candidate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Мскву",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "Москву"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_008"
+    },
+    {
+      "text": "Мария работала два чса.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "duration"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "чса",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "часа"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "два часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_009"
+    },
+    {
+      "text": "Турист остановился у рки вечером.",
+      "grade": "EXACT",
+      "family": "typo_baseline",
+      "tags": [
+        "typo",
+        "omission",
+        "location",
+        "time"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "рки",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "реки"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остановиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Турист",
+                "LOCATION": "река",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_010"
+    },
+    {
+      "text": "Вера закрыла окн.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "omission",
+        "short",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "окн",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "окно"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вера",
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_011"
+    },
+    {
+      "text": "Вера закрыла окнно.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "extra_letter",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "окнно",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "окно"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вера",
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_012"
+    },
+    {
+      "text": "Вера закрыла окнп.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "keyboard_neighbor",
+        "substitution",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "окнп",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "окно"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вера",
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_013"
+    },
+    {
+      "text": "Анна прчоитала отчёт.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "transposition",
+        "predicate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "прчоитала",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "прочитала"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "отчёт"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_014"
+    },
+    {
+      "text": "Вера открыла книгп.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "keyboard_neighbor",
+        "ending",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "книгп",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "книгу"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вера",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_015"
+    },
+    {
+      "text": "На столе лежали береёзы.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "yo_e",
+        "extra_letter",
+        "subject"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "береёзы",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "берёзы"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "берёза",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_016"
+    },
+    {
+      "text": "Мария прочитала документт.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "extra_letter",
+        "long",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "документт",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "документ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_017"
+    },
+    {
+      "text": "Иван работает в Москвк.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "ending",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Москвк",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "Москве"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_018"
+    },
+    {
+      "text": "Анна передала пакет курьерц.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "ending",
+        "recipient"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "курьерц",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "курьеру"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "пакет",
+                "RECIPIENT": "курьер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_019"
+    },
+    {
+      "text": "Турист пришёл вечром.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "omission",
+        "time"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "вечром",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "вечером"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Турист",
+                "TIME": "вечером"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_020"
+    },
+    {
+      "text": "Мария работала две минутыы.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "extra_letter",
+        "duration",
+        "ending"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "минутыы",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "минуты"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "две минуты"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_021"
+    },
+    {
+      "text": "Пётр ударил молоткм.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "omission",
+        "tool",
+        "ending"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "молоткм",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "молотком"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "ударить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "TOOL": "молоток"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_022"
+    },
+    {
+      "text": "Стол покрыли дервом.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "omission",
+        "material",
+        "ending"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "дервом",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "деревом"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "покрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_023"
+    },
+    {
+      "text": "Отчёт проверил инжнер.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "omission",
+        "subject",
+        "inversion"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "инжнер",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "инженер"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "инженер",
+                "OBJECT": "отчёт"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_024"
+    },
+    {
+      "text": "Инженер осмотрел электростанци.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "long",
+        "ending",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "электростанци",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "электростанцию"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "осмотреть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Инженер",
+                "OBJECT": "электростанция"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_025"
+    },
+    {
+      "text": "Анна заварила члй.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "substitution",
+        "short",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "члй",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "чай"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "заварить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "чай"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_026"
+    },
+    {
+      "text": "Сотрудник открыл архивп.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "extra_letter",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "архивп",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "архив"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сотрудник",
+                "OBJECT": "архив"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_027"
+    },
+    {
+      "text": "Мария купила журнла.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "transposition",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "журнла",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "журнал"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_028"
+    },
+    {
+      "text": "Анна проверрила отчёт.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "extra_letter",
+        "predicate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "проверрила",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "проверила"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "отчёт"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_029"
+    },
+    {
+      "text": "Анна отпраила письмо.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "omission",
+        "predicate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "отпраила",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "отправила"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_030"
+    },
+    {
+      "text": "Мария полочила письмо.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "substitution",
+        "predicate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "полочила",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "получила"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_031"
+    },
+    {
+      "text": "Иван живёт у станци.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "ending",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "станци",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "станции"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "жить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "станция"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_032"
+    },
+    {
+      "text": "Курьер приехал со склда.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "omission",
+        "source"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "склда",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "склада"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Курьер",
+                "SOURCE": "склад"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_033"
+    },
+    {
+      "text": "Анна передала отчёт мастреу.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "transposition",
+        "recipient"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "мастреу",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "мастеру"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "отчёт",
+                "RECIPIENT": "мастер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_034"
+    },
+    {
+      "text": "Пётр открыл дверь ключм.",
+      "grade": "EXACT",
+      "family": "typo_roles",
+      "tags": [
+        "typo",
+        "omission",
+        "tool"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "ключм",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "ключом"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_035"
+    },
+    {
+      "text": "Иван купил кнгу.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "omission",
+        "object",
+        "short"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "кнгу",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "книгу"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_036"
+    },
+    {
+      "text": "Пётр открыл дврь.",
+      "grade": "EXACT",
+      "family": "typo_edits",
+      "tags": [
+        "typo",
+        "omission",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "дврь",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "дверь"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_037"
+    },
+    {
+      "text": "Книгу прочитал инжнер.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "subject"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "инжнер",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "инженер"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "инженер",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_038"
+    },
+    {
+      "text": "Вчера документт Мария прочитала.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "object",
+        "time"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "документт",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "документ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "документ",
+                "TIME": "вчера"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_039"
+    },
+    {
+      "text": "Анне клю Сергей передал.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "recipient",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "клю",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "ключ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_040"
+    },
+    {
+      "text": "На стл книгу Ольга положила.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "стл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "стол"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_041"
+    },
+    {
+      "text": "Ключом дврь Пётр открыл.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "tool",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "дврь",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "дверь"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_042"
+    },
+    {
+      "text": "В Мскву Иван приехал.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Мскву",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "Москву"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_043"
+    },
+    {
+      "text": "У реки вечром турист остановился.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "time",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "вечром",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "вечером"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остановиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "турист",
+                "TIME": "вечером",
+                "LOCATION": "река"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_044"
+    },
+    {
+      "text": "Два чса Мария работала.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "duration"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "чса",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "часа"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "два часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_045"
+    },
+    {
+      "text": "Из дерва мастер сделал стол.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "material"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "дерва",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "дерева"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_046"
+    },
+    {
+      "text": "Со склда курьер принёс пакет.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "source"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "склда",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "склада"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "принести",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "курьер",
+                "OBJECT": "пакет",
+                "SOURCE": "склад"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_047"
+    },
+    {
+      "text": "Письмо Сергею отпраила Анна.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "recipient",
+        "predicate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "отпраила",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "отправила"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_048"
+    },
+    {
+      "text": "Отвёрткой окн открыл Пётр.",
+      "grade": "EXACT",
+      "family": "typo_inversion",
+      "tags": [
+        "typo",
+        "inversion",
+        "tool",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "окн",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "окно"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_049"
+    },
+    {
+      "text": "Иван купил кнгу, а Мария — журнал.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "кнгу",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "книгу"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_050"
+    },
+    {
+      "text": "Иван купл чай, а Мария — кофе.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "predicate"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "купл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "купил"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "чай"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "кофе"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_051"
+    },
+    {
+      "text": "Анна положила книгу на стл, а Мария — журнал на полку.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "стл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "стол"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_052"
+    },
+    {
+      "text": "Сергей передал Анне клю, а Пётр — Вере письмо.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "recipient",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "клю",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "ключ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "RECIPIENT": "Анна",
+                "OBJECT": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "RECIPIENT": "Вера",
+                "OBJECT": "письмо"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_053"
+    },
+    {
+      "text": "Мария работала два чса, а Анна — три часа.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "duration"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "чса",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "часа"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "два часа"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "DURATION": "три часа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_054"
+    },
+    {
+      "text": "Иван приехал в Мскву, а Пётр — в Казань.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Мскву",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "Москву"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "Москва"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "LOCATION": "Казань"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_055"
+    },
+    {
+      "text": "Мастер открл дверь ключом, а ученик — окно отвёрткой.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "predicate",
+        "tool"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "открл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "открыл"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мастер",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "ученик",
+                "OBJECT": "окно",
+                "TOOL": "отвёртка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_056"
+    },
+    {
+      "text": "Анна отпраила письмо Сергею, а Вера — отчёт Петру.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "predicate",
+        "recipient"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "отпраила",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "отправила"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вера",
+                "OBJECT": "отчёт",
+                "RECIPIENT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_057"
+    },
+    {
+      "text": "Книгу прочитала Мария, а докмент — Анна.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "inversion",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "докмент",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "документ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "документ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_058"
+    },
+    {
+      "text": "На стл книгу положила Ольга, а на полку журнал — Вера.",
+      "grade": "EXACT",
+      "family": "typo_ellipsis",
+      "tags": [
+        "typo",
+        "ellipsis",
+        "inversion",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "стл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "стол"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ольга",
+                "OBJECT": "книга",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Вера",
+                "OBJECT": "журнал",
+                "LOCATION": "полка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_059"
+    },
+    {
+      "text": "Вчера инжнер прочитал докмент.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "subject",
+        "object",
+        "time"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "инжнер",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "инженер"
+          },
+          {
+            "raw": "докмент",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "документ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "инженер",
+                "OBJECT": "документ",
+                "TIME": "вчера"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_060"
+    },
+    {
+      "text": "Пётр открл дврь ключм.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "object",
+        "tool"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "открл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "открыл"
+          },
+          {
+            "raw": "дврь",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "дверь"
+          },
+          {
+            "raw": "ключм",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "ключом"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "дверь",
+                "TOOL": "ключ"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_061"
+    },
+    {
+      "text": "Анна отпраила писмо Сергею.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "object",
+        "recipient"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "отпраила",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "отправила"
+          },
+          {
+            "raw": "писмо",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "письмо"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "письмо",
+                "RECIPIENT": "Сергей"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_062"
+    },
+    {
+      "text": "Турист вечром остановился у рки.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "time",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "вечром",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "вечером"
+          },
+          {
+            "raw": "рки",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "реки"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остановиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Турист",
+                "TIME": "вечером",
+                "LOCATION": "река"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_063"
+    },
+    {
+      "text": "Мастер сделал стл из дерва.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "object",
+        "material"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "стл",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "стол"
+          },
+          {
+            "raw": "дерва",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "дерева"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сделать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мастер",
+                "OBJECT": "стол",
+                "MATERIAL": "дерево"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_064"
+    },
+    {
+      "text": "Курьер принс пакетт со склда.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "object",
+        "source"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "принс",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "принёс"
+          },
+          {
+            "raw": "пакетт",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "пакет"
+          },
+          {
+            "raw": "склда",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "склада"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "принести",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Курьер",
+                "OBJECT": "пакет",
+                "SOURCE": "склад"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_065"
+    },
+    {
+      "text": "Мария работла два чса в офисе.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "duration",
+        "location"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "работла",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "работала"
+          },
+          {
+            "raw": "чса",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "часа"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "DURATION": "два часа",
+                "LOCATION": "офис"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_066"
+    },
+    {
+      "text": "В Мскве инжнер проверил докмент.",
+      "grade": "EXACT",
+      "family": "typo_multiple",
+      "tags": [
+        "typo",
+        "multiple_errors",
+        "inversion",
+        "location",
+        "subject",
+        "object"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Мскве",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "Москве"
+          },
+          {
+            "raw": "инжнер",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "инженер"
+          },
+          {
+            "raw": "докмент",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "normalized": "документ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "инженер",
+                "OBJECT": "документ",
+                "LOCATION": "Москва"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_067"
+    },
+    {
+      "text": "Ксентарий приехал в Москву.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "name",
+        "unknown_token"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Ксентарий",
+            "status": "UNKNOWN_TOKEN",
+            "normalized": "Ксентарий"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "приехать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Ксентарий",
+                "LOCATION": "Москва"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_068"
+    },
+    {
+      "text": "РКТ передал сигнал.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "acronym",
+        "unknown_token"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "РКТ",
+            "status": "UNKNOWN_TOKEN",
+            "normalized": "РКТ"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "РКТ",
+                "OBJECT": "сигнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_069"
+    },
+    {
+      "text": "Модуль обрабатывает «кванторий».",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "term",
+        "quoted",
+        "unknown_token"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "кванторий",
+            "status": "UNKNOWN_TOKEN",
+            "normalized": "кванторий"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "обрабатывать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Модуль",
+                "OBJECT": "кванторий"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_070"
+    },
+    {
+      "text": "Модуль использует QX17.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "code",
+        "alphanumeric",
+        "unknown_token"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "QX17",
+            "status": "UNKNOWN_TOKEN",
+            "normalized": "QX17"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "использовать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Модуль",
+                "OBJECT": "QX17"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_071"
+    },
+    {
+      "text": "Нейросфера анализирует сигнал.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "neologism",
+        "name",
+        "unknown_token"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Нейросфера",
+            "status": "UNKNOWN_TOKEN",
+            "normalized": "Нейросфера"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "анализировать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Нейросфера",
+                "OBJECT": "сигнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_072"
+    },
+    {
+      "text": "Система использует ZETA9.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "term",
+        "latin",
+        "unknown_token"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "ZETA9",
+            "status": "UNKNOWN_TOKEN",
+            "normalized": "ZETA9"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "использовать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Система",
+                "OBJECT": "ZETA9"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_073"
+    },
+    {
+      "text": "Орнитолог увидел выпь.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "rare_word",
+        "exact"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "выпь",
+            "status": "EXACT",
+            "normalized": "выпь"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Орнитолог",
+                "OBJECT": "выпь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_074"
+    },
+    {
+      "text": "Петр увидел елку.",
+      "grade": "EXACT",
+      "family": "typo_negative_oov",
+      "tags": [
+        "negative",
+        "yo_e",
+        "exact"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "Петр",
+            "status": "EXACT",
+            "normalized": "Петр"
+          },
+          {
+            "raw": "елку",
+            "status": "EXACT",
+            "normalized": "елку"
+          }
+        ],
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "ёлка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      },
+      "scenario": "m1_typo_075"
+    },
+    {
+      "text": "ктт",
+      "grade": "EXACT",
+      "family": "typo_ambiguous",
+      "tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "ктт",
+            "status": "AMBIGUOUS",
+            "normalized": null,
+            "alternatives_contain": [
+              "кот",
+              "кит"
+            ]
+          }
+        ],
+        "perception": {
+          "must_parse": false,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": false,
+          "safe_error_contains": "ambiguous lexical recovery"
+        }
+      },
+      "scenario": "m1_typo_076"
+    },
+    {
+      "text": "плн",
+      "grade": "EXACT",
+      "family": "typo_ambiguous",
+      "tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "плн",
+            "status": "AMBIGUOUS",
+            "normalized": null,
+            "alternatives_contain": [
+              "план",
+              "плен"
+            ]
+          }
+        ],
+        "perception": {
+          "must_parse": false,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": false,
+          "safe_error_contains": "ambiguous lexical recovery"
+        }
+      },
+      "scenario": "m1_typo_077"
+    },
+    {
+      "text": "стл",
+      "grade": "EXACT",
+      "family": "typo_ambiguous",
+      "tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "стл",
+            "status": "AMBIGUOUS",
+            "normalized": null,
+            "alternatives_contain": [
+              "стал",
+              "стыл"
+            ]
+          }
+        ],
+        "perception": {
+          "must_parse": false,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": false,
+          "safe_error_contains": "ambiguous lexical recovery"
+        }
+      },
+      "scenario": "m1_typo_078"
+    },
+    {
+      "text": "лкк",
+      "grade": "EXACT",
+      "family": "typo_ambiguous",
+      "tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "лкк",
+            "status": "AMBIGUOUS",
+            "normalized": null,
+            "alternatives_contain": [
+              "лук",
+              "лак"
+            ]
+          }
+        ],
+        "perception": {
+          "must_parse": false,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": false,
+          "safe_error_contains": "ambiguous lexical recovery"
+        }
+      },
+      "scenario": "m1_typo_079"
+    },
+    {
+      "text": "клю",
+      "grade": "EXACT",
+      "family": "typo_ambiguous",
+      "tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "клю",
+            "status": "AMBIGUOUS",
+            "normalized": null,
+            "alternatives_contain": [
+              "клюй",
+              "колю"
+            ]
+          }
+        ],
+        "perception": {
+          "must_parse": false,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": false,
+          "safe_error_contains": "ambiguous lexical recovery"
+        }
+      },
+      "scenario": "m1_typo_080"
+    },
+    {
+      "text": "писмо",
+      "grade": "EXACT",
+      "family": "typo_ambiguous",
+      "tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "expect": {
+        "lexical_recovery": [
+          {
+            "raw": "писмо",
+            "status": "AMBIGUOUS",
+            "normalized": null,
+            "alternatives_contain": [
+              "пасмо",
+              "письмо"
+            ]
+          }
+        ],
+        "perception": {
+          "must_parse": false,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": false,
+          "safe_error_contains": "ambiguous lexical recovery"
+        }
+      },
+      "scenario": "m1_typo_081"
+    }
+  ]
+}

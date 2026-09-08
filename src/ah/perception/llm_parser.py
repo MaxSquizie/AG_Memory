@@ -19,6 +19,7 @@ from .adaptive_parser import (
     AdaptiveSettings,
     AdaptiveStructuralClarificationRequired,
 )
+from .lexical_recovery import EmbeddingSemanticReranker
 
 from .contracts import (
     ActantCandidate,
@@ -66,6 +67,7 @@ class LLMPerceptionSettings:
     max_actants_per_act: int = 8
     predicate_symbol_language: str = "en"
     morphology_backend: str = "auto"
+    embedding_model: str = ""
 
     def __post_init__(self) -> None:
         if self.repair_attempts is not None:
@@ -412,6 +414,12 @@ class LLMPerceptionService:
     def _parse_adaptive(
         self, text: str, *, structural_resolution: str | None = None
     ) -> PerceptionResult:
+        semantic_reranker = (
+            EmbeddingSemanticReranker(self.backend)  # type: ignore[arg-type]
+            if self.settings.embedding_model.strip()
+            and callable(getattr(self.backend, "embed_texts", None))
+            else None
+        )
         parser = AdaptivePerceptionParser(
             self.backend,
             AdaptiveSettings(
@@ -423,6 +431,7 @@ class LLMPerceptionService:
                 morphology_backend=self.settings.morphology_backend,
                 verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
             ),
+            semantic_reranker=semantic_reranker,
         )
         try:
             parsed = parser.parse(text, structural_resolution=structural_resolution)

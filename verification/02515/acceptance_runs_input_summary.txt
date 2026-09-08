@@ -1,0 +1,234 @@
+Acceptance run: 20260907_054737_+0300
+Cases: 200 | RUNTIME OK: 197 | RUNTIME ERROR: 3
+SEMANTIC PASS: 173 | FAIL: 27 | GAP: 0
+SCENARIOS: 149 | isolated between scenarios
+
+Families:
+  basic_frames: PASS 5/5 | FAIL 0 | GAP 0
+  coordination: PASS 2/6 | FAIL 4 | GAP 0
+  coreference: PASS 1/2 | FAIL 1 | GAP 0
+  template_evolution_queries: PASS 7/7 | FAIL 0 | GAP 0
+  nested_content_control: PASS 3/3 | FAIL 0 | GAP 0
+  relative_clauses: PASS 2/2 | FAIL 0 | GAP 0
+  temporal_causal_conditional: PASS 7/7 | FAIL 0 | GAP 0
+  negation_voice: PASS 3/5 | FAIL 2 | GAP 0
+  reference_ambiguity: PASS 0/1 | FAIL 1 | GAP 0
+  structural_ambiguity: PASS 1/1 | FAIL 0 | GAP 0
+  personal_provenance: PASS 1/1 | FAIL 0 | GAP 0
+  lexical_basic_frames: PASS 10/10 | FAIL 0 | GAP 0
+  recipient_transfer: PASS 10/10 | FAIL 0 | GAP 0
+  adjunct_roles: PASS 9/10 | FAIL 1 | GAP 0
+  template_evolution_stress: PASS 8/10 | FAIL 2 | GAP 0
+  coordination_stress: PASS 4/10 | FAIL 6 | GAP 0
+  coreference_stress: PASS 7/10 | FAIL 3 | GAP 0
+  relative_clause_stress: PASS 9/10 | FAIL 1 | GAP 0
+  nested_content_stress: PASS 9/10 | FAIL 1 | GAP 0
+  temporal_causal_stress: PASS 10/10 | FAIL 0 | GAP 0
+  conditional_stress: PASS 10/10 | FAIL 0 | GAP 0
+  negation_stress: PASS 10/10 | FAIL 0 | GAP 0
+  passive_impersonal_stress: PASS 10/10 | FAIL 0 | GAP 0
+  query_role_stress: PASS 10/10 | FAIL 0 | GAP 0
+  personal_provenance_stress: PASS 10/10 | FAIL 0 | GAP 0
+  ambiguity_stress: PASS 5/10 | FAIL 5 | GAP 0
+  morphology_case_pressure: PASS 10/10 | FAIL 0 | GAP 0
+
+001 PASS (runtime=OK, scenario=regression40_frozen): Кошка спит.
+002 PASS (runtime=OK, scenario=regression40_frozen): Иван читает книгу.
+003 PASS (runtime=OK, scenario=regression40_frozen): Мария читает.
+004 PASS (runtime=OK, scenario=regression40_frozen): Иван купил хлеб и молоко.
+005 PASS (runtime=OK, scenario=regression40_frozen): Яблоки бывают зелёными или красными.
+006 FAIL (runtime=OK, scenario=regression40_frozen): Иван написал письмо и отправил его Марии. | perception.relations
+007 FAIL (runtime=OK, scenario=regression40_frozen): Лиза взяла книгу, открыла её и прочитала. | perception.relations
+008 FAIL (runtime=OK, scenario=regression40_frozen): Петя встал и вышел. | perception.relations
+009 FAIL (runtime=OK, scenario=regression40_frozen): Иван и Мария пришли и ушли. | perception.relations
+010 PASS (runtime=OK, scenario=regression40_frozen): Иван пришёл, а Мария ушла.
+011 PASS (runtime=OK, scenario=regression40_frozen): Иван написал письмо, а Мария отправила его Петру.
+012 FAIL (runtime=OK, scenario=regression40_frozen): Анна увидела Марию. Она улыбнулась. | perception.assertions.a2.alternative_count, integration.clarification.required, integration.clarification.options
+013 PASS (runtime=OK, scenario=regression40_frozen): Сергей положил ключ на стол. Потом он взял его.
+014 PASS (runtime=OK, scenario=regression40_frozen): Иван подарил книгу.
+015 PASS (runtime=OK, scenario=regression40_frozen): Иван подарил Марии книгу.
+016 PASS (runtime=OK, scenario=regression40_frozen): Кто подарил Марии книгу?
+017 PASS (runtime=OK, scenario=regression40_frozen): Что Иван подарил Марии?
+018 PASS (runtime=OK, scenario=regression40_frozen): Кому Иван подарил книгу?
+019 PASS (runtime=OK, scenario=regression40_frozen): Иван любит чай.
+020 PASS (runtime=OK, scenario=regression40_frozen): Кто любит чай?
+021 PASS (runtime=OK, scenario=regression40_frozen): Иван сказал, что Мария прочитала книгу.
+022 PASS (runtime=OK, scenario=regression40_frozen): Иван попросил Марию прочитать книгу.
+023 PASS (runtime=OK, scenario=regression40_frozen): Мария хочет купить билет.
+024 PASS (runtime=OK, scenario=regression40_frozen): Книга, которую Иван купил, лежит на столе.
+025 PASS (runtime=OK, scenario=regression40_frozen): Человек, который вошёл в комнату, сел на стул.
+026 PASS (runtime=OK, scenario=regression40_frozen): После того как Мария прочитала книгу, она написала отзыв.
+027 PASS (runtime=OK, scenario=regression40_frozen): Перед тем как Иван ушёл, он закрыл окно.
+028 PASS (runtime=OK, scenario=regression40_frozen): Иван открыл дверь, потому что Мария попросила его войти.
+029 PASS (runtime=OK, scenario=regression40_frozen): Иван остался дома, потому что шёл дождь.
+030 PASS (runtime=OK, scenario=regression40_frozen): Если Лиза получит советы, она прочитает документ и напишет текст.
+031 PASS (runtime=OK, scenario=regression40_frozen): Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.
+032 PASS (runtime=OK, scenario=regression40_frozen): Если Иван придёт, Мария прочитает документ и отправит его Петру.
+033 FAIL (runtime=ERROR, scenario=regression40_frozen): Иван не читает книгу. | integration.completed | runtime: ValueError: Unhandled seed reason: SeedReason.CONFLICT
+034 PASS (runtime=OK, scenario=regression40_frozen): Мария не пришла.
+035 FAIL (runtime=ERROR, scenario=regression40_frozen): Иван читает не книгу, а журнал. | integration.completed | runtime: ValueError: Unhandled seed reason: SeedReason.CONFLICT
+036 PASS (runtime=OK, scenario=regression40_frozen): Книга написана Иваном.
+037 PASS (runtime=OK, scenario=regression40_frozen): Мне дали книгу.
+038 FAIL (runtime=OK, scenario=regression40_frozen): Анна сказала Марии, что она победила. | integration.clarification.options
+039 PASS (runtime=OK, scenario=regression40_frozen): Иван увидел Петра с биноклем.
+040 PASS (runtime=OK, scenario=regression40_frozen): Я положил книгу рядом с журналом, который был новым.
+041 PASS (runtime=OK, scenario=case_041): Собака бежит.
+042 PASS (runtime=OK, scenario=case_042): Ольга закрыла дверь.
+043 PASS (runtime=OK, scenario=case_043): Лампа стоит на столе.
+044 PASS (runtime=OK, scenario=case_044): Небо стало тёмным.
+045 PASS (runtime=OK, scenario=case_045): Птица летит над домом.
+046 PASS (runtime=OK, scenario=case_046): Мальчик держит мяч.
+047 PASS (runtime=OK, scenario=case_047): Вода осталась холодной.
+048 PASS (runtime=OK, scenario=case_048): Книга лежит в шкафу.
+049 PASS (runtime=OK, scenario=case_049): Девочка открыла окно.
+050 PASS (runtime=OK, scenario=case_050): Поезд прибыл на станцию.
+051 PASS (runtime=OK, scenario=case_051): Ольга передала Сергею ключ.
+052 PASS (runtime=OK, scenario=case_052): Сергей отправил Анне письмо.
+053 PASS (runtime=OK, scenario=case_053): Анна показала Петру фотографию.
+054 PASS (runtime=OK, scenario=case_054): Пётр дал Ольге книгу.
+055 PASS (runtime=OK, scenario=case_055): Мария вернула Ивану билет.
+056 PASS (runtime=OK, scenario=case_056): Иван принёс Марии чай.
+057 PASS (runtime=OK, scenario=case_057): Ольга продала Сергею стол.
+058 PASS (runtime=OK, scenario=case_058): Сергей сообщил Анне новость.
+059 PASS (runtime=OK, scenario=case_059): Анна вручила Петру документ.
+060 PASS (runtime=OK, scenario=case_060): Пётр предложил Марии помощь.
+061 PASS (runtime=OK, scenario=case_061): Иван открыл дверь ключом.
+062 PASS (runtime=OK, scenario=case_062): Мария написала письмо карандашом.
+063 PASS (runtime=OK, scenario=case_063): Сергей получил письмо от Анны.
+064 PASS (runtime=OK, scenario=case_064): Ольга взяла книгу со стола.
+065 PASS (runtime=OK, scenario=case_065): Иван сделал стол из дерева.
+066 FAIL (runtime=OK, scenario=case_066): Мария ждала два часа. | perception.assertions.a1.roles.DURATION, canonical.assertions.a1.roles.DURATION
+067 PASS (runtime=OK, scenario=case_067): Иван пришёл утром.
+068 PASS (runtime=OK, scenario=case_068): Мария купила три книги.
+069 PASS (runtime=OK, scenario=case_069): Сергей открыл окно, чтобы проветрить комнату.
+070 PASS (runtime=OK, scenario=case_070): Иван сел, чтобы отдохнуть.
+071 PASS (runtime=OK, scenario=template_open_evolution): Пётр открыл сундук.
+072 PASS (runtime=OK, scenario=template_open_evolution): Пётр открыл сундук ключом.
+073 FAIL (runtime=OK, scenario=template_open_evolution): Пётр открыл сундук вечером. | canonical.assertions.a1.role_set
+074 PASS (runtime=OK, scenario=template_open_evolution): Мария открыла шкаф ключом утром.
+075 PASS (runtime=OK, scenario=template_put_evolution): Сергей положил папку на полку.
+076 PASS (runtime=OK, scenario=template_put_evolution): Сергей положил папку на полку вечером.
+077 PASS (runtime=OK, scenario=template_write_evolution): Анна написала записку.
+078 PASS (runtime=OK, scenario=template_write_evolution): Анна написала записку карандашом.
+079 FAIL (runtime=OK, scenario=template_write_evolution): Анна написала записку утром. | canonical.assertions.a1.role_set
+080 PASS (runtime=OK, scenario=template_write_evolution): Чем Анна написала записку?
+081 FAIL (runtime=OK, scenario=case_081): Иван открыл дверь и вошёл. | perception.relations
+082 FAIL (runtime=OK, scenario=case_082): Мария взяла книгу и положила её на стол. | perception.relations
+083 FAIL (runtime=OK, scenario=case_083): Анна написала письмо и отправила его Сергею. | perception.relations
+084 FAIL (runtime=OK, scenario=case_084): Сергей пришёл и сел на стул. | perception.relations
+085 PASS (runtime=OK, scenario=case_085): Ольга закрыла окно и дверь.
+086 PASS (runtime=OK, scenario=case_086): Иван купил чай или кофе.
+087 PASS (runtime=OK, scenario=case_087): Мария и Анна читают книгу.
+088 FAIL (runtime=OK, scenario=case_088): Иван и Пётр открыли окно и вышли. | perception.relations
+089 PASS (runtime=OK, scenario=case_089): Анна вошла, а Сергей вышел.
+090 FAIL (runtime=OK, scenario=case_090): Ольга взяла ключ, открыла дверь и вошла. | perception.relations
+091 PASS (runtime=OK, scenario=case_091): Иван взял мяч. Потом он бросил его.
+092 PASS (runtime=OK, scenario=case_092): Мария открыла книгу. Потом она закрыла её.
+093 PASS (runtime=OK, scenario=case_093): Анна дала Сергею письмо. Потом он прочитал его.
+094 PASS (runtime=OK, scenario=case_094): Пётр встретил Ольгу. Потом она ушла.
+095 PASS (runtime=OK, scenario=case_095): Сергей положил телефон на стол. Потом он взял телефон.
+096 PASS (runtime=OK, scenario=case_096): Ольга увидела Анну. Потом Ольга улыбнулась.
+097 FAIL (runtime=OK, scenario=case_097): Иван сказал Петру, что он опоздал. | integration.clarification.options
+098 FAIL (runtime=OK, scenario=case_098): Мария увидела Анну. Она ушла. | integration.clarification.options
+099 FAIL (runtime=OK, scenario=case_099): Сергей дал Петру ключ, и тот открыл дверь. | perception.relations
+100 PASS (runtime=OK, scenario=case_100): Анна взяла книгу, а затем положила её на стол.
+101 PASS (runtime=OK, scenario=case_101): Мальчик, который держит мяч, бежит.
+102 PASS (runtime=OK, scenario=case_102): Письмо, которое Мария написала, лежит на столе.
+103 PASS (runtime=OK, scenario=case_103): Дверь, которую Иван открыл, закрылась.
+104 PASS (runtime=OK, scenario=case_104): Ольга увидела человека, который вошёл в комнату.
+105 PASS (runtime=OK, scenario=case_105): Стол, который Сергей купил, стоит в комнате.
+106 PASS (runtime=OK, scenario=case_106): Человек, которого Мария встретила, улыбнулся.
+107 PASS (runtime=OK, scenario=case_107): Ключ, который лежит на столе, открыл дверь.
+108 PASS (runtime=OK, scenario=case_108): Комната, в которую вошёл Пётр, была пустой.
+109 FAIL (runtime=ERROR, scenario=case_109): Письмо, которое Сергей отправил Марии, пришло вчера. | integration.completed | runtime: UnresolvedTemporalReferenceError: Unresolved temporal reference(s) require an explicit/source/experience anchor before canonical commit: A2.TIME='вчера'
+110 PASS (runtime=OK, scenario=case_110): Книга, которую Иван положил на стол, лежит на столе.
+111 PASS (runtime=OK, scenario=case_111): Иван думает, что Мария придёт.
+112 PASS (runtime=OK, scenario=case_112): Мария знает, что Пётр читает книгу.
+113 PASS (runtime=OK, scenario=case_113): Анна хочет открыть окно.
+114 PASS (runtime=OK, scenario=case_114): Сергей решил купить билет.
+115 FAIL (runtime=OK, scenario=case_115): Ольга начала читать книгу. | perception.assertions.a2.status, canonical.assertions.a2.scoped
+116 PASS (runtime=OK, scenario=case_116): Иван попросил Петра закрыть дверь.
+117 PASS (runtime=OK, scenario=case_117): Мария сказала Анне открыть окно.
+118 PASS (runtime=OK, scenario=case_118): Сергей попросил Ольгу принести чай.
+119 PASS (runtime=OK, scenario=case_119): Анна хочет попросить Петра прийти.
+120 PASS (runtime=OK, scenario=case_120): Иван сказал Марии, что Пётр хочет купить книгу.
+121 PASS (runtime=OK, scenario=case_121): После того как Иван открыл дверь, он вошёл.
+122 PASS (runtime=OK, scenario=case_122): Перед тем как Мария ушла, она закрыла окно.
+123 PASS (runtime=OK, scenario=case_123): Анна улыбнулась, потому что Сергей пришёл.
+124 PASS (runtime=OK, scenario=case_124): Пётр остался дома, потому что заболел.
+125 PASS (runtime=OK, scenario=case_125): После того как Ольга купила книгу, она прочитала её.
+126 PASS (runtime=OK, scenario=case_126): Сергей закрыл дверь, потому что начался дождь.
+127 PASS (runtime=OK, scenario=case_127): Перед тем как Пётр сел, он снял пальто.
+128 PASS (runtime=OK, scenario=case_128): Мария написала письмо после того, как получила новость.
+129 PASS (runtime=OK, scenario=case_129): Иван ушёл после того, как Анна пришла.
+130 PASS (runtime=OK, scenario=case_130): Ольга открыла дверь, потому что Сергей позвонил.
+131 PASS (runtime=OK, scenario=case_131): Если Иван придёт, Мария уйдёт.
+132 PASS (runtime=OK, scenario=case_132): Если Мария купит книгу, она прочитает её.
+133 PASS (runtime=OK, scenario=case_133): Если Сергей найдёт ключ, он откроет дверь.
+134 PASS (runtime=OK, scenario=case_134): Если Анна придёт и Пётр останется, Мария улыбнётся.
+135 PASS (runtime=OK, scenario=case_135): Если Иван откроет дверь, Мария войдёт и Пётр выйдет.
+136 PASS (runtime=OK, scenario=case_136): Если Ольга получит письмо, она ответит Сергею.
+137 PASS (runtime=OK, scenario=case_137): Если Пётр купит билет, он поедет домой.
+138 PASS (runtime=OK, scenario=case_138): Если Мария не придёт, Иван уйдёт.
+139 PASS (runtime=OK, scenario=case_139): Если Иван придёт, Мария не уйдёт.
+140 PASS (runtime=OK, scenario=case_140): Если Иван и Мария придут, Пётр начнёт работу.
+141 PASS (runtime=OK, scenario=case_141): Ольга не открыла дверь.
+142 PASS (runtime=OK, scenario=case_142): Сергей не отправил письмо Марии.
+143 PASS (runtime=OK, scenario=case_143): Анна читает не журнал, а книгу.
+144 PASS (runtime=OK, scenario=case_144): Пётр купил не чай, а кофе.
+145 PASS (runtime=OK, scenario=case_145): Иван не пришёл и Мария не ушла.
+146 PASS (runtime=OK, scenario=case_146): Ольга не взяла ключ.
+147 PASS (runtime=OK, scenario=case_147): Книга не лежит на столе.
+148 PASS (runtime=OK, scenario=case_148): Сергей не дал Марии письмо.
+149 PASS (runtime=OK, scenario=case_149): Анна не сказала Петру правду.
+150 PASS (runtime=OK, scenario=case_150): Пётр читает не книгу, а письмо.
+151 PASS (runtime=OK, scenario=case_151): Письмо написано Марией.
+152 PASS (runtime=OK, scenario=case_152): Дверь открыта Иваном.
+153 PASS (runtime=OK, scenario=case_153): Книга прочитана Сергеем.
+154 PASS (runtime=OK, scenario=case_154): Документ подписан Анной.
+155 PASS (runtime=OK, scenario=case_155): Окно закрыто Петром.
+156 PASS (runtime=OK, scenario=case_156): Мне отправили письмо.
+157 PASS (runtime=OK, scenario=case_157): Марии дали ключ.
+158 PASS (runtime=OK, scenario=case_158): Петру показали документ.
+159 PASS (runtime=OK, scenario=case_159): Мне принесли чай.
+160 PASS (runtime=OK, scenario=case_160): Анне сообщили новость.
+161 PASS (runtime=OK, scenario=query_tool): Борис починил велосипед молотком.
+162 PASS (runtime=OK, scenario=query_tool): Чем Борис починил велосипед?
+163 PASS (runtime=OK, scenario=query_recipient): Елена отправила Николаю посылку.
+164 PASS (runtime=OK, scenario=query_recipient): Кому Елена отправила посылку?
+165 PASS (runtime=OK, scenario=query_source): Дмитрий получил подарок от Ирины.
+166 PASS (runtime=OK, scenario=query_source): От кого Дмитрий получил подарок?
+167 PASS (runtime=OK, scenario=query_time): Виктор встретил Алексея утром.
+168 PASS (runtime=OK, scenario=query_time): Когда Виктор встретил Алексея?
+169 PASS (runtime=OK, scenario=query_location): София положила вазу на полку.
+170 PASS (runtime=OK, scenario=query_location): Куда София положила вазу?
+171 PASS (runtime=OK, scenario=case_171): Я открыл окно.
+172 PASS (runtime=OK, scenario=case_172): Я положил телефон на стол.
+173 PASS (runtime=OK, scenario=case_173): Я взял телефон. Потом я положил его на стол.
+174 PASS (runtime=OK, scenario=case_174): Мне дали билет.
+175 PASS (runtime=OK, scenario=case_175): Я прочитал письмо.
+176 PASS (runtime=OK, scenario=case_176): Я сказал Марии, что прочитал письмо.
+177 PASS (runtime=OK, scenario=case_177): Я попросил Сергея открыть дверь.
+178 PASS (runtime=OK, scenario=case_178): Я увидел Анну. Она улыбнулась.
+179 PASS (runtime=OK, scenario=case_179): Мне отправили книгу. Я открыл её.
+180 PASS (runtime=OK, scenario=case_180): Я положил книгу рядом с журналом, который был старым.
+181 PASS (runtime=OK, scenario=case_181): Мария увидела Анну с зонтом.
+182 PASS (runtime=OK, scenario=case_182): Сергей встретил Петра с собакой.
+183 PASS (runtime=OK, scenario=case_183): Ольга сфотографировала Ивана с телефоном.
+184 PASS (runtime=OK, scenario=case_184): Пётр заметил Марию с зонтом.
+185 PASS (runtime=OK, scenario=case_185): Анна увидела Сергея с рюкзаком.
+186 FAIL (runtime=OK, scenario=case_186): Иван сказал Петру, что он устал. | integration.clarification.options
+187 FAIL (runtime=OK, scenario=case_187): Мария сообщила Анне, что она победила. | integration.clarification.options
+188 FAIL (runtime=OK, scenario=case_188): Сергей увидел Петра. Он улыбнулся. | perception.assertions.a2.alternative_count, integration.clarification.required, integration.clarification.options
+189 FAIL (runtime=OK, scenario=case_189): Ольга встретила Анну. Она улыбнулась. | perception.assertions.a2.alternative_count, integration.clarification.required, integration.clarification.options
+190 FAIL (runtime=OK, scenario=case_190): Анна увидела Марию. Она засмеялась. | integration.clarification.options
+191 PASS (runtime=OK, scenario=case_191): Мария увидела Сергея.
+192 PASS (runtime=OK, scenario=case_192): Сергей встретил Ивана.
+193 PASS (runtime=OK, scenario=case_193): Анна позвала Петра.
+194 PASS (runtime=OK, scenario=case_194): Иван заметил Алексея.
+195 PASS (runtime=OK, scenario=case_195): Пётр увидел учителя.
+196 PASS (runtime=OK, scenario=case_196): Ольга встретила врача.
+197 PASS (runtime=OK, scenario=case_197): Мария позвала брата.
+198 PASS (runtime=OK, scenario=case_198): Сергей увидел друга.
+199 PASS (runtime=OK, scenario=case_199): Анна встретила мальчика.
+200 PASS (runtime=OK, scenario=case_200): Иван заметил человека.

@@ -211,7 +211,7 @@ class LLMRoleTests(unittest.TestCase):
         parser = LLMPerceptionService(
             backend,
             LLMPerceptionSettings(
-                protocol="adaptive_v2",
+                protocol="adaptive_v2", morphology_backend="none",
                 probe_prompt_dir=PROJECT / "prompts/perception",
                 probe_retry_attempts=0,
             ),
@@ -255,7 +255,7 @@ class LLMRoleTests(unittest.TestCase):
 
         parser = LLMPerceptionService(
             Backend(),
-            LLMPerceptionSettings(protocol="adaptive_v2", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
+            LLMPerceptionSettings(protocol="adaptive_v2", morphology_backend="none", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
         )
         result = parser.parse("Кто любит чай?", InteractionContext())
         self.assertEqual(len(result.queries), 1)
@@ -282,7 +282,7 @@ class LLMRoleTests(unittest.TestCase):
 
         parser = LLMPerceptionService(
             Backend(),
-            LLMPerceptionSettings(protocol="adaptive_v2", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
+            LLMPerceptionSettings(protocol="adaptive_v2", morphology_backend="none", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
         )
         result = parser.parse("Открой дверь", InteractionContext())
         self.assertEqual(len(result.commands), 1)
@@ -311,7 +311,7 @@ class LLMRoleTests(unittest.TestCase):
         parser = LLMPerceptionService(
             Backend(),
             LLMPerceptionSettings(
-                protocol="adaptive_v2",
+                protocol="adaptive_v2", morphology_backend="none",
                 probe_prompt_dir=PROJECT / "prompts/perception",
                 probe_retry_attempts=0,
             ),
@@ -345,7 +345,7 @@ class LLMRoleTests(unittest.TestCase):
         parser = LLMPerceptionService(
             Backend(),
             LLMPerceptionSettings(
-                protocol="adaptive_v2",
+                protocol="adaptive_v2", morphology_backend="none",
                 probe_prompt_dir=PROJECT / "prompts/perception",
                 probe_retry_attempts=0,
             ),
@@ -376,7 +376,7 @@ class LLMRoleTests(unittest.TestCase):
         parser = LLMPerceptionService(
             backend,
             LLMPerceptionSettings(
-                protocol="adaptive_v2",
+                protocol="adaptive_v2", morphology_backend="none",
                 probe_prompt_dir=PROJECT / "prompts/perception",
                 probe_retry_attempts=1,
             ),
@@ -429,7 +429,7 @@ class LLMRoleTests(unittest.TestCase):
         parser = LLMPerceptionService(
             backend,
             LLMPerceptionSettings(
-                protocol="adaptive_v2",
+                protocol="adaptive_v2", morphology_backend="none",
                 probe_prompt_dir=PROJECT / "prompts/perception",
                 probe_retry_attempts=0,
             ),

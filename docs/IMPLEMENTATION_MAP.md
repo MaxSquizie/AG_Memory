@@ -88,6 +88,38 @@ GraphInspector / TraceView / RuntimeDiagnostics
 → never becomes AgentContext or H automatically
 ```
 
+## Lexical Recovery and transitions (v0.25.19)
+
+```text
+raw SourceToken + offsets
+→ dictionary/OOV classification
+→ pruned DAWG edit search
+→ weighted orthographic ranking
+→ morphology + source frame constraints
+→ optional local embedding shortlist
+→ normalized runtime SourceToken
+→ existing adaptive formalization
+```
+
+`TokenCandidate` and the linguistic candidate graph are diagnostics/runtime
+objects. Corrected text feeds final morphology and semantic identity; raw text
+continues to own evidence offsets. Neither candidate generation nor embedding
+reranking can mutate AH.
+
+```text
+oriented matrix → infinitive frame       explicit ADVB/PRCL operator cue
+                 \                         /
+                  bounded transition label
+                           ↓
+               occurrence TRANSITION + OP
+                           ↓
+             TIME present? ─ yes → StateTracker
+                    └─────── no  → g_OP(P) only
+```
+
+Operator labels are validated runtime protocol values. They are not lexical
+predicate tables and do not change global `T` identity.
+
 
 ## GUI observer / control plane
 

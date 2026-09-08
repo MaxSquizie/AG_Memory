@@ -1,0 +1,99 @@
+[
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_complete_contrastive_repeated_frames",
+    "condition_literals": ["-", "а", "но", "однако", "–", "—"]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_recover_ellipsis_assertions",
+    "condition_literals": ["A"]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_resolve_nominal_predication_modes",
+    "condition_literals": [
+      "!", ",", "-", ".", ";", "?", "NOUN", "VERB", "а", "где", "да",
+      "если", "и", "или", "когда", "куда", "либо", "но", "однако",
+      "откуда", "что", "чтобы", "это", "–", "—"
+    ]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_resolve_pronoun_coreferences",
+    "condition_literals": [
+      "NPRO", "UNCLEAR", "masc", "далее", "затем", "потом", "тогда"
+    ]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_make_actant",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_ambiguous_genitive_dependency",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_resolve_modifier_attachment",
+    "condition_literals": ["OBJECT_ATTACHMENT", "PREDICATE_ATTACHMENT", "UNCLEAR"]
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_next_implicit_copula_clause",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/perception/linguistic_candidates.py",
+    "function": "_clauses",
+    "condition_literals": [
+      "!", ",", "-", ".", ":", ";", "?", "CONJ", "INTJ", "NOUN",
+      "NPRO", "PRCL", "PREP", "\\w", "nomn", "а", "и", "нет", "тоже",
+      "это", "–", "—"
+    ]
+  },
+  {
+    "file": "src/ah/perception/event_normalizer.py",
+    "function": "_normalize_perfective_coordination",
+    "condition_literals": ["perf"]
+  },
+  {
+    "file": "src/ah/perception/event_normalizer.py",
+    "function": "_normalize_serial_perfective_events",
+    "condition_literals": [
+      ";", "VERB", "perf", "а", "или", "либо", "но", "однако"
+    ]
+  },
+  {
+    "file": "src/ah/perception/event_normalizer.py",
+    "function": "normalize",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/core/operations.py",
+    "function": "add_or_enrich_hypernode",
+    "condition_literals": ["dedup_exempt", "semantic_scope"]
+  },
+  {
+    "file": "src/ah/integration/service.py",
+    "function": "_clarification_member_label",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/integration/service.py",
+    "function": "integrate_external",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/agent/orchestrator.py",
+    "function": "handle_user_text",
+    "condition_literals": []
+  },
+  {
+    "file": "src/ah/diagnostics/hackathon_metrics.py",
+    "function": "run_tick_benchmark",
+    "condition_literals": []
+  }
+]

@@ -1,0 +1,16 @@
+Baseline: AG_Memory v0.25.17
+Modified production/prompt files checked: 2
+Added production/prompt lines checked: 114
+Acceptance case texts checked: 331
+Exact acceptance text hits in added production lines: 0
+Typo/fuzzy/Levenshtein/embedding recovery hits in added production lines: 0
+
+Decision review:
+- sequencing conditions use proposition-root topology, ellipsis-family identity,
+  source order, evidence offsets and cardinality;
+- nonfinite classification adds only the SCOPED_EVENT protocol outcome;
+- no participant, object, predicate, case id or complete acceptance sentence is
+  present in a production condition;
+- the post-predicate counterexample prevents blanket deletion of TIME markers.
+
+The machine-readable AST condition-literal inventory is control_literals.json.

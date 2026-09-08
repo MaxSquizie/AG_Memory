@@ -547,8 +547,17 @@ class IntegrationService:
         self,
         result: PerceptionResult,
         context: InteractionContext,
+        *,
+        source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
-        return self.integrate_plan(self.prepare_external_plan(result, context), context)
+        return self.integrate_plan(
+            self.prepare_external_plan(
+                result,
+                context,
+                source_timestamp=source_timestamp,
+            ),
+            context,
+        )
 
     def integrate_external_resolution(
         self,
@@ -933,18 +942,32 @@ class IntegrationService:
                     )
                     node = tx.store.get_hypernode(integrated.ref.uid)
                     time_ref = node.actants.get(ActantRole.TIME)
-                    if not isinstance(time_ref, Ref) or time_ref.kind is not RefKind.M:
-                        raise CandidateValidationError(
-                            f"Transition {candidate.local_id} requires an explicit/resolved TIME actant"
+                    if isinstance(time_ref, Ref) and time_ref.kind is RefKind.M:
+                        transition_ref = StateTracker(
+                            tx, default_weight=self.config.initial_hypernode_weight
+                        ).apply(
+                            integrated.ref,
+                            candidate.transition_operator,
+                            time_ref,
+                        ).transition_ref
+                        transition_created = True
+                    else:
+                        # The transition proposition itself is source-explicit even
+                        # when no calendar anchor is stated.  Materialize g_OP(P)
+                        # without inventing a TIME point or mutating state intervals;
+                        # StateTracker remains the sole authority for interval
+                        # effects once an explicit/resolved TIME exists.
+                        transition_g, transition_created = tx.ensure_function(
+                            integrated.domain,
+                            candidate.transition_operator.value,
+                            (integrated.ref,),
                         )
-                    transition = StateTracker(
-                        tx, default_weight=self.config.initial_hypernode_weight
-                    ).apply(integrated.ref, candidate.transition_operator, time_ref)
+                        transition_ref = tx.ref(transition_g.uid)
                     final = IntegratedAssertion(
                         local_id=integrated.local_id,
-                        ref=transition.transition_ref,
+                        ref=transition_ref,
                         domain=integrated.domain,
-                        created=True,
+                        created=integrated.created or transition_created,
                         ambiguous=integrated.ambiguous,
                     )
                     assertions.append(final)
@@ -2199,7 +2222,12 @@ class IntegrationService:
             details = [
                 f"{key}={prop.value}"
                 for key, prop in sorted(element.properties.items())
-                if key != "name" and isinstance(prop.value, (str, int, float, bool))
+                if key != "name"
+                # Morphosyntactic identity guards belong to canonical matching,
+                # not to the user-facing denotation.  Exposing them in a choice
+                # label makes a clarification depend on parser internals.
+                and not key.startswith("grammatical_")
+                and isinstance(prop.value, (str, int, float, bool))
             ]
             name = element.properties.get("name")
             if name is not None and str(name.value).strip():

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from contextlib import nullcontext
-from typing import Protocol
+from datetime import datetime
+from typing import Callable, Protocol
 import re
 from threading import RLock
 
@@ -135,6 +136,7 @@ class AgentOrchestrator:
         settings: OrchestratorSettings,
         persistence: JsonPersistence | None = None,
         runtime_lock: RLock | None = None,
+        turn_clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.context = context
         self.sensory = sensory
@@ -151,6 +153,7 @@ class AgentOrchestrator:
         self.settings = settings
         self.persistence = persistence
         self.runtime_lock = runtime_lock
+        self.turn_clock = turn_clock or (lambda: datetime.now().astimezone())
 
     def _settle_input_wave(self) -> tuple[TickResult, ...]:
         """Drain the current prompt's causal wave before freezing Workspace.
@@ -166,10 +169,18 @@ class AgentOrchestrator:
             for _ in range(self.settings.ticks_after_input)
         )
 
-    def _record_raw_external_experience(self, text: str, lock) -> IntegrationCommit:
+    def _record_raw_external_experience(
+        self,
+        text: str,
+        lock,
+        *,
+        source_timestamp: datetime,
+    ) -> IntegrationCommit:
         with lock:
             failed_turn = self.integration.integrate_external(
-                PerceptionResult(source_text=text), self.context
+                PerceptionResult(source_text=text),
+                self.context,
+                source_timestamp=source_timestamp,
             )
             self.ignition.apply_seed_requests(failed_turn.activation_seeds)
             return failed_turn
@@ -311,6 +322,7 @@ class AgentOrchestrator:
         selected_index: int,
         generate_response: bool,
         lock,
+        source_timestamp: datetime,
     ) -> AgentTurnResult:
         with lock:
             self.ignition.begin_prompt_epoch()
@@ -371,7 +383,11 @@ class AgentOrchestrator:
 
             # The user's clarification utterance is still an H experience. It is
             # not promoted to a standalone C/P assertion such as M("Мария").
-            integration = self.integration.integrate_external(perception, self.context)
+            integration = self.integration.integrate_external(
+                perception,
+                self.context,
+                source_timestamp=source_timestamp,
+            )
             self.ignition.apply_seed_requests(integration.activation_seeds)
             input_ticks = self._settle_input_wave()
             workspace = self.ignition.workspace_refs()
@@ -417,8 +433,20 @@ class AgentOrchestrator:
             clarification_resolution=resolution,
         )
 
-    def handle_user_text(self, text: str, *, generate_response: bool = True) -> AgentTurnResult:
+    def handle_user_text(
+        self,
+        text: str,
+        *,
+        generate_response: bool = True,
+        source_timestamp: datetime | None = None,
+    ) -> AgentTurnResult:
         lock = self.runtime_lock or nullcontext()
+        # Capture one timezone-aware source anchor for the complete external turn.
+        # It resolves only explicit relative temporal expressions; Integration does
+        # not copy it into facts that have no TIME role.
+        turn_timestamp = source_timestamp or self.turn_clock()
+        if turn_timestamp.tzinfo is None or turn_timestamp.utcoffset() is None:
+            raise ValueError("source_timestamp must be timezone-aware")
 
         if self.context.pending_clarification_refs:
             with lock:
@@ -432,6 +460,7 @@ class AgentOrchestrator:
                         selected_index=selected_index,
                         generate_response=generate_response,
                         lock=lock,
+                        source_timestamp=turn_timestamp,
                     )
                 # The utterance does not answer the pending choice.  Keep the
                 # unresolved K in dialogue state, but process this input normally.
@@ -454,7 +483,9 @@ class AgentOrchestrator:
             # Genuine structural ambiguity is not an error and must not be guessed.
             # Record the external utterance in H, persist only the pending structural
             # choice in H dialogue state, and return an explicit clarification path.
-            raw_commit = self._record_raw_external_experience(text, lock)
+            raw_commit = self._record_raw_external_experience(
+                text, lock, source_timestamp=turn_timestamp
+            )
             with lock:
                 request = self.integration.register_structural_clarification(
                     exc.spec, raw_commit.experience_ref
@@ -512,12 +543,18 @@ class AgentOrchestrator:
             # Semantic failure never erases the fact that the external communication
             # happened. Preserve only its raw H experience and re-raise the original
             # parse error; no failed semantic candidate is committed.
-            self._record_raw_external_experience(text, lock)
+            self._record_raw_external_experience(
+                text, lock, source_timestamp=turn_timestamp
+            )
             raise
 
         try:
             with lock:
-                integration = self.integration.integrate_external(perception, self.context)
+                integration = self.integration.integrate_external(
+                    perception,
+                    self.context,
+                    source_timestamp=turn_timestamp,
+                )
                 self.ignition.apply_seed_requests(integration.activation_seeds)
                 self.ignition.apply_refutation_requests(integration.refutations)
         except IntegrationError:
@@ -525,7 +562,9 @@ class AgentOrchestrator:
             # PerceptionResult. The source turn is still an experienced H event,
             # exactly as for a perception failure, while the failed semantic
             # transaction remains rolled back.
-            self._record_raw_external_experience(text, lock)
+            self._record_raw_external_experience(
+                text, lock, source_timestamp=turn_timestamp
+            )
             raise
 
         with lock:

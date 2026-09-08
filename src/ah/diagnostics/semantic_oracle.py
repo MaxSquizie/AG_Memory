@@ -133,6 +133,64 @@ def _check(checks: list[dict[str, Any]], name: str, ok: bool, *, expected: Any =
     checks.append(item)
 
 
+def _match_lexical_recovery(
+    checks: list[dict[str, Any]],
+    record: Mapping[str, Any],
+    expected: Sequence[Mapping[str, Any]],
+) -> None:
+    """Grade runtime token normalization even for an intentional fail-closed parse."""
+    graph = record.get("linguistic_candidate_graph")
+    raw_tokens = graph.get("tokens", []) if isinstance(graph, Mapping) else []
+    actual = [
+        item.get("recovery")
+        for item in raw_tokens
+        if isinstance(item, Mapping) and isinstance(item.get("recovery"), Mapping)
+    ]
+    for index, wanted in enumerate(expected, start=1):
+        raw = str(wanted.get("raw", ""))
+        matches = [
+            item for item in actual
+            if isinstance(item, Mapping) and _norm(item.get("raw_text")) == _norm(raw)
+        ]
+        _check(
+            checks,
+            f"lexical.{index}.unique_raw",
+            len(matches) == 1,
+            expected=raw,
+            actual=len(matches),
+        )
+        if len(matches) != 1:
+            continue
+        item = matches[0]
+        status = wanted.get("status")
+        if status is not None:
+            _check(
+                checks,
+                f"lexical.{index}.status",
+                str(item.get("status", "")) == str(status),
+                expected=status,
+                actual=item.get("status"),
+            )
+        if "normalized" in wanted:
+            normalized = wanted.get("normalized")
+            _check(
+                checks,
+                f"lexical.{index}.normalized",
+                _norm(item.get("normalized_text")) == _norm(normalized),
+                expected=normalized,
+                actual=item.get("normalized_text"),
+            )
+        alternatives = tuple(str(value) for value in item.get("alternatives", []) or [])
+        for value in wanted.get("alternatives_contain", []) or []:
+            _check(
+                checks,
+                f"lexical.{index}.alternative.{value}",
+                any(_norm(candidate) == _norm(value) for candidate in alternatives),
+                expected=value,
+                actual=alternatives,
+            )
+
+
 def _decoded_perception(record: Mapping[str, Any]) -> Mapping[str, Any] | None:
     direct = record.get("perception_result")
     if isinstance(direct, dict):
@@ -1117,6 +1175,9 @@ def evaluate_semantic_case(
     actual_perception = _decoded_perception(record)
     must_parse = bool(perception_expectation.get("must_parse", True))
     _check(checks, "perception.available", (actual_perception is not None) == must_parse, expected=must_parse, actual=actual_perception is not None)
+    lexical_expectation = expected.get("lexical_recovery", []) or []
+    if lexical_expectation:
+        _match_lexical_recovery(checks, record, lexical_expectation)
 
     # Document-scale diagnostics may intentionally grade the final canonical graph
     # instead of duplicating a complete sentence-level oracle for every bounded

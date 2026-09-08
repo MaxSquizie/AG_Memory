@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 import json
+import math
 import urllib.error
 import urllib.request
 
@@ -151,6 +152,69 @@ class LMStudioClient:
             body["enable_thinking"] = flag
             body["chat_template_kwargs"] = {"enable_thinking": flag}
         return self._request("POST", "/v1/chat/completions", body)
+
+    def embeddings(
+        self,
+        *,
+        model: str,
+        texts: tuple[str, ...],
+    ) -> tuple[tuple[float, ...], ...]:
+        """Return a batch from LM Studio's local OpenAI-compatible endpoint."""
+        if not str(model or "").strip():
+            raise ValueError("LM Studio embedding model key must not be empty")
+        if not texts:
+            return ()
+        payload = self._request(
+            "POST",
+            "/v1/embeddings",
+            {"model": model, "input": list(texts)},
+        )
+        raw = payload.get("data")
+        if not isinstance(raw, list) or len(raw) != len(texts):
+            raise LMStudioClientError(
+                "LM Studio embeddings response has unexpected batch size"
+            )
+        try:
+            indices = [
+                int(item["index"])
+                for item in raw
+                if isinstance(item, dict) and "index" in item
+            ]
+        except (TypeError, ValueError) as exc:
+            raise LMStudioClientError(
+                "LM Studio embeddings response contains an invalid index"
+            ) from exc
+        if sorted(indices) != list(range(len(texts))):
+            raise LMStudioClientError(
+                "LM Studio embeddings response has invalid or duplicate indices"
+            )
+        ordered = sorted(raw, key=lambda item: int(item["index"]))
+        vectors: list[tuple[float, ...]] = []
+        width: int | None = None
+        for item in ordered:
+            values = item.get("embedding") if isinstance(item, dict) else None
+            if not isinstance(values, list) or not values:
+                raise LMStudioClientError(
+                    "LM Studio embeddings response contains an invalid vector"
+                )
+            try:
+                vector = tuple(float(value) for value in values)
+            except (TypeError, ValueError) as exc:
+                raise LMStudioClientError(
+                    "LM Studio embeddings response contains a non-numeric vector"
+                ) from exc
+            if not all(math.isfinite(value) for value in vector):
+                raise LMStudioClientError(
+                    "LM Studio embeddings response contains a non-finite vector"
+                )
+            if width is None:
+                width = len(vector)
+            elif len(vector) != width:
+                raise LMStudioClientError(
+                    "LM Studio embeddings response contains inconsistent dimensions"
+                )
+            vectors.append(vector)
+        return tuple(vectors)
 
 
     def native_chat(

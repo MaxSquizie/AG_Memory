@@ -1,0 +1,3 @@
+Full regression suite
+Result: 1058 passed, 38 subtests passed in 79.47s
+Exit code: 0

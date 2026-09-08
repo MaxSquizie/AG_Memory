@@ -183,7 +183,7 @@ def _event(text: str, local_id: str, surface: str, lemma: str, subject: ActantCa
     )
 
 
-def test_serial_perfective_comma_chain_with_same_subject_gets_follow():
+def test_serial_perfective_comma_chain_is_only_a_temporal_candidate():
     text = "Холодный воздух прошёл по комнате, качнул пламя."
     morph = StaticMorphology({
         "холодный": (mi("холодный", "ADJF", case="nomn", number="sing", gender="masc"),),
@@ -201,12 +201,13 @@ def test_serial_perfective_comma_chain_with_same_subject_gets_follow():
         (_event(text, "A1", "прошёл", "пройти", subject1), _event(text, "A2", "качнул", "качнуть", subject2)),
         (),
     )
-    assert ("FOLLOW", "A1", "A2") in {
-        (r.canonical_relation_id, r.source_ref, r.target_ref) for r in outcome.relations
+    assert outcome.relations == ()
+    assert ("TEMPORAL_CANDIDATE", "A1", "A2") in {
+        (r.kind.value, r.source_ref, r.target_ref) for r in outcome.relation_hints
     }
 
 
-def test_serial_perfective_explicit_and_can_order_events_with_different_subjects():
+def test_serial_perfective_additive_coordination_is_not_canonical_order():
     text = "Занавеска коснулась стекла, и появилась точка."
     morph = StaticMorphology({
         "занавеска": (mi("занавеска", "NOUN", case="nomn", number="sing", gender="femn"),),
@@ -223,8 +224,9 @@ def test_serial_perfective_explicit_and_can_order_events_with_different_subjects
         (_event(text, "A1", "коснулась", "коснуться", a), _event(text, "A2", "появилась", "появиться", b)),
         (),
     )
-    assert ("FOLLOW", "A1", "A2") in {
-        (r.canonical_relation_id, r.source_ref, r.target_ref) for r in outcome.relations
+    assert outcome.relations == ()
+    assert ("TEMPORAL_CANDIDATE", "A1", "A2") in {
+        (r.kind.value, r.source_ref, r.target_ref) for r in outcome.relation_hints
     }
 
 

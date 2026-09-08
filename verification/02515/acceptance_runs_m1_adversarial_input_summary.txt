@@ -1,0 +1,47 @@
+Acceptance run: 20260907_054600_+0300
+Cases: 36 | RUNTIME OK: 36 | RUNTIME ERROR: 0
+SEMANTIC PASS: 17 | FAIL: 19 | GAP: 0
+SCENARIOS: 36 | isolated between scenarios
+
+Families:
+  m1_typo_noise: PASS 0/10 | FAIL 10 | GAP 0
+  m1_inversion: PASS 9/10 | FAIL 1 | GAP 0
+  m1_ellipsis: PASS 8/10 | FAIL 2 | GAP 0
+  m1_mixed_noise: PASS 0/6 | FAIL 6 | GAP 0
+
+001 FAIL (runtime=OK, scenario=m1_adv_001): Иван купл книгу. | perception.assertions.a1.predicate, canonical.assertions.a1.predicate, templates.купить.explicit_role_coverage
+002 FAIL (runtime=OK, scenario=m1_adv_002): Мария прочитала докмент. | perception.assertions.a1.roles.OBJECT, canonical.assertions.a1.roles.OBJECT
+003 FAIL (runtime=OK, scenario=m1_adv_003): Сергей передал Анне клю. | perception.assertions.a1.roles.OBJECT, canonical.assertions.a1.roles.OBJECT
+004 FAIL (runtime=OK, scenario=m1_adv_004): Ольга положила книгу на стл. | perception.assertions.a1.roles.LOCATION, canonical.assertions.a1.roles.LOCATION
+005 FAIL (runtime=OK, scenario=m1_adv_005): Пётр открл дверь ключом. | perception.assertions.a1.predicate, perception.assertions.a1.role_set, canonical.assertions.a1.predicate, canonical.assertions.a1.role_set, templates.открыть.explicit_role_coverage
+006 FAIL (runtime=OK, scenario=m1_adv_006): Анна отправила писмо Сергею. | perception.assertions.a1.roles.OBJECT, canonical.assertions.a1.roles.OBJECT
+007 FAIL (runtime=OK, scenario=m1_adv_007): Мастер сделал стол из дерва. | perception.assertions.a1.roles.MATERIAL, canonical.assertions.a1.roles.MATERIAL
+008 FAIL (runtime=OK, scenario=m1_adv_008): Иван приехал в Мскву. | perception.assertions.a1.roles.LOCATION, canonical.assertions.a1.roles.LOCATION
+009 FAIL (runtime=OK, scenario=m1_adv_009): Мария работала два чса. | perception.assertions.a1.role_set, perception.assertions.a1.roles.DURATION, canonical.assertions.a1.role_set, canonical.assertions.a1.roles.DURATION
+010 FAIL (runtime=OK, scenario=m1_adv_010): Турист остановился у рки вечером. | perception.assertions.a1.roles.LOCATION, canonical.assertions.a1.roles.LOCATION
+011 PASS (runtime=OK, scenario=m1_adv_011): Книгу прочитал Иван.
+012 PASS (runtime=OK, scenario=m1_adv_012): Анне письмо передал Сергей.
+013 PASS (runtime=OK, scenario=m1_adv_013): На стол книгу положила Анна.
+014 PASS (runtime=OK, scenario=m1_adv_014): Ключом дверь открыл Пётр.
+015 PASS (runtime=OK, scenario=m1_adv_015): Из дерева стол сделал мастер.
+016 PASS (runtime=OK, scenario=m1_adv_016): В Москву утром приехал Иван.
+017 PASS (runtime=OK, scenario=m1_adv_017): Сергею сообщение отправила Ольга.
+018 FAIL (runtime=OK, scenario=m1_adv_018): Два часа книгу читал Иван. | perception.assertions.a1.roles.DURATION, canonical.assertions.a1.roles.DURATION
+019 PASS (runtime=OK, scenario=m1_adv_019): В комнате книгу искала Мария.
+020 PASS (runtime=OK, scenario=m1_adv_020): От Сергея письмо получила Анна.
+021 PASS (runtime=OK, scenario=m1_adv_021): Иван прочитал книгу, а Мария — журнал.
+022 PASS (runtime=OK, scenario=m1_adv_022): Иван купил чай, а Мария — кофе.
+023 PASS (runtime=OK, scenario=m1_adv_023): Сергей передал Анне ключ, а Пётр Ольге — письмо.
+024 PASS (runtime=OK, scenario=m1_adv_024): Ольга положила книгу на стол, а Анна журнал — на полку.
+025 PASS (runtime=OK, scenario=m1_adv_025): Иван пришёл утром, а Мария — вечером.
+026 FAIL (runtime=OK, scenario=m1_adv_026): Книга лежит на столе, а журнал — на полке. | perception.assertion_count, perception.assertions.a2.roles.LOCATION, canonical.assertions.a2.roles.LOCATION
+027 PASS (runtime=OK, scenario=m1_adv_027): Иван работает в Москве, а Мария — в Казани.
+028 FAIL (runtime=OK, scenario=m1_adv_028): Мастер сделал стол из дерева, а ученик — стул из металла. | perception.assertion_count, perception.assertions.a1.role_set, perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.SUBJECT, perception.assertions.a2.roles.MATERIAL, ... (+8)
+029 PASS (runtime=OK, scenario=m1_adv_029): Пётр открыл дверь ключом, а Иван — окно отвёрткой.
+030 PASS (runtime=OK, scenario=m1_adv_030): Анна отправила письмо Сергею, а Ольга — сообщение Петру.
+031 FAIL (runtime=OK, scenario=m1_adv_031): Книгу Анне пердал Сергей. | perception.assertions.a1.predicate, canonical.assertions.a1.predicate, templates.передать.explicit_role_coverage
+032 FAIL (runtime=OK, scenario=m1_adv_032): На стл журнал положила Анна. | perception.assertions.a1.roles.LOCATION, canonical.assertions.a1.roles.LOCATION
+033 FAIL (runtime=OK, scenario=m1_adv_033): Иван купл чай, а Мария — кофе. | perception.assertions.a1.predicate, perception.assertions.a2.predicate, canonical.assertions.a1.predicate, canonical.assertions.a2.predicate, templates.купить.explicit_role_coverage
+034 FAIL (runtime=OK, scenario=m1_adv_034): Ключом дверь открл Пётр, а Иван — окно отвёрткой. | perception.assertion_count, perception.assertions.a1.predicate, perception.assertions.a1.role_set, perception.assertions.a1.roles.SUBJECT, integration.domains.a2, canonical.assertions.a1.predicate, ... (+4)
+035 FAIL (runtime=OK, scenario=m1_adv_035): Письмо Сергею отпраила Анна. | perception.assertions.a1.predicate, canonical.assertions.a1.predicate, templates.отправить.explicit_role_coverage
+036 FAIL (runtime=OK, scenario=m1_adv_036): В Мскве работает Иван, а в Казани — Мария. | perception.assertions.a1.roles.LOCATION, perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.SUBJECT, canonical.assertions.a1.roles.LOCATION, canonical.assertions.a2.predicate, ... (+3)

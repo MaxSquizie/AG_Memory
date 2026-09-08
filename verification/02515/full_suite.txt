@@ -1,0 +1,527 @@
+.................................................................... [  7%]
+......F................................................................. [ 14%]
+........................................................................ [ 22%]
+........................................................................ [ 30%]
+........................................................................ [ 37%]
+........................................................................ [ 45%]
+........................................................................ [ 53%]
+..........FF.FFFFF......................F............................... [ 60%]
+...................................................... [ 66%]
+.........................F.F............................................ [ 74%]
+..................F..................................................... [ 81%]
+........................................................................ [ 89%]
+........................................................ [ 95%]
+..........................................                               [100%]
+=================================== FAILURES ===================================
+_ ArchitectureAlignment1233Tests.test_worker_calibration_can_reverse_a_raw_continuation_prior _
+
+self = <test_architecture_alignment_1233.ArchitectureAlignment1233Tests testMethod=test_worker_calibration_can_reverse_a_raw_continuation_prior>
+
+    def test_worker_calibration_can_reverse_a_raw_continuation_prior(self):
+>       import torch
+E       ModuleNotFoundError: No module named 'torch'
+
+tests/test_architecture_alignment_1233.py:81: ModuleNotFoundError
+_ LLMRoleTests.test_adaptive_act_type_probe_puts_plain_options_before_task_and_does_not_show_tokens _
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_act_type_probe_puts_plain_options_before_task_and_does_not_show_tokens>
+
+    def test_adaptive_act_type_probe_puts_plain_options_before_task_and_does_not_show_tokens(self) -> None:
+        class Backend:
+            def __init__(self):
+                self.call = None
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                self.call = (prompt, system, role)
+                return LLMResponse("0", {})
+    
+        backend = Backend()
+        parser = LLMPerceptionService(
+            backend,
+            LLMPerceptionSettings(
+                protocol="adaptive_v2",
+                probe_prompt_dir=PROJECT / "prompts/perception",
+                probe_retry_attempts=0,
+            ),
+        )
+        parser.parse("Яблоки бывают зелёные", InteractionContext())
+>       prompt, system, role = backend.call
+        ^^^^^^^^^^^^^^^^^^^^
+E       TypeError: cannot unpack non-iterable NoneType object
+
+tests/test_llm_roles.py:438: TypeError
+_ LLMRoleTests.test_adaptive_command_uses_same_discrete_span_and_role_pipeline _
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_command_uses_same_discrete_span_and_role_pipeline>
+
+    def test_adaptive_command_uses_same_discrete_span_and_role_pipeline(self) -> None:
+        class Backend:
+            def __init__(self):
+                self.answers = {
+                    "perception_act_type": ["3", "0"],
+                    "perception_predicate_start": ["1"],
+                    "perception_predicate_end": ["1"],
+                    "perception_predicate_symbol": ["open"],
+                    "perception_actant_start": ["1"],
+                    "perception_role_cue": ["AFFECTED_OR_CONTENT"],
+                }
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                return LLMResponse(self.answers[role].pop(0), {})
+    
+        parser = LLMPerceptionService(
+            Backend(),
+            LLMPerceptionSettings(protocol="adaptive_v2", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
+        )
+        result = parser.parse("Открой дверь", InteractionContext())
+        self.assertEqual(len(result.commands), 1)
+        command = result.commands[0]
+>       self.assertEqual(command.predicate.lookup_form, "open")
+E       AssertionError: 'открыть' != 'open'
+E       - открыть
+E       + open
+
+tests/test_llm_roles.py:290: AssertionError
+_ LLMRoleTests.test_adaptive_numeric_normalization_does_not_extract_choice_from_prose _
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_numeric_normalization_does_not_extract_choice_from_prose>
+
+    def test_adaptive_numeric_normalization_does_not_extract_choice_from_prose(self) -> None:
+        class Backend:
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                return LLMResponse("I choose 1.", {})
+    
+        parser = LLMPerceptionService(
+            Backend(),
+            LLMPerceptionSettings(
+                protocol="adaptive_v2",
+                probe_prompt_dir=PROJECT / "prompts/perception",
+                probe_retry_attempts=0,
+            ),
+        )
+        with self.assertRaises(PerceptionParseError):
+            parser.parse("Яблоки бывают красные", InteractionContext())
+>       self.assertIn("expected one integer option number", parser.diagnostics()[-1].final_error or "")
+E       AssertionError: 'expected one integer option number' not found in 'lexeme_comparison expected exactly one of: A, B'
+
+tests/test_llm_roles.py:355: AssertionError
+__ LLMRoleTests.test_adaptive_numeric_probes_accept_terminal_punctuation_only __
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_numeric_probes_accept_terminal_punctuation_only>
+
+    def test_adaptive_numeric_probes_accept_terminal_punctuation_only(self) -> None:
+        class Backend:
+            def __init__(self):
+                self.answers = {
+                    "perception_act_type": ["1.", "0."],
+                    "perception_predicate_start": ["2."],
+                    "perception_predicate_end": ["2."],
+                    "perception_predicate_symbol": ["be."],
+                    "perception_actant_start": ["1.", "1."],
+                    # Binary semantic protocol is exact and intentionally does
+                    # not accept punctuation. This test keeps punctuation only on
+                    # the numeric/open-text probes it is meant to exercise.
+                    "perception_role_cue": ["ACTOR_OR_EXPERIENCER", "PREDICATED_STATE"],
+                }
+    
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                return LLMResponse(self.answers[role].pop(0), {})
+    
+        parser = LLMPerceptionService(
+            Backend(),
+            LLMPerceptionSettings(
+                protocol="adaptive_v2",
+                probe_prompt_dir=PROJECT / "prompts/perception",
+                probe_retry_attempts=0,
+            ),
+        )
+>       result = parser.parse("Яблоки бывают красные", InteractionContext())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_llm_roles.py:319: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/llm_parser.py:428: in _parse_adaptive
+    parsed = parser.parse(text, structural_resolution=structural_resolution)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/adaptive_parser.py:1035: in parse
+    actants, _selected_spans = self._extract_actants(
+src/ah/perception/adaptive_parser.py:6142: in _extract_actants
+    self._contextualize_nominal_span(text, predicate, state_span, tokens)
+src/ah/perception/adaptive_parser.py:6618: in _contextualize_nominal_span
+    chosen = self._resolve_binary_lexeme_hypotheses(
+src/ah/perception/adaptive_parser.py:6667: in _resolve_binary_lexeme_hypotheses
+    winner_ab = choose(a, b)
+                ^^^^^^^^^^^^
+src/ah/perception/adaptive_parser.py:6662: in choose
+    decision, _ = self._exact_choice_probe(
+src/ah/perception/adaptive_parser.py:8805: in _exact_choice_probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_llm_roles.LLMRoleTests.test_adaptive_numeric_probes_accept_terminal_punctuation_only.<locals>.Backend object at 0x7f8493118350>
+prompt = 'TEXT:\nЯблоки бывают красные\nPREDICATE:\nбывают\nTARGET:\nкрасные\nA LEMMA:\nкрасное\nA MORPHOLOGY:\nPOS=NOUN; CASE=...modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 8, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_lexeme_comparison'
+
+    def generate(self, prompt, *, system="", override=None, role="generic"):
+>       return LLMResponse(self.answers[role].pop(0), {})
+                           ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'perception_lexeme_comparison'
+
+tests/test_llm_roles.py:309: KeyError
+_ LLMRoleTests.test_adaptive_parser_uses_english_semantic_labels_and_numeric_token_choices _
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_parser_uses_english_semantic_labels_and_numeric_token_choices>
+
+    def test_adaptive_parser_uses_english_semantic_labels_and_numeric_token_choices(self) -> None:
+        class ScriptedBackend:
+            def __init__(self):
+                self.calls = []
+                self.answers = {
+                    "perception_act_type": ["ASSERTION", "NONE"],
+                    "perception_predicate_start": ["2"],
+                    "perception_predicate_end": ["2"],
+                    "perception_predicate_symbol": ["be"],
+                    "perception_actant_start": ["1", "1"],
+                    "perception_role_cue": ["ACTOR_OR_EXPERIENCER", "PREDICATED_STATE"],
+                }
+    
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                self.calls.append((role, prompt, system, dict(override or {})))
+                return LLMResponse(self.answers[role].pop(0), {})
+    
+        backend = ScriptedBackend()
+        parser = LLMPerceptionService(
+            backend,
+            LLMPerceptionSettings(
+                protocol="adaptive_v2",
+                probe_prompt_dir=PROJECT / "prompts/perception",
+                probe_retry_attempts=0,
+            ),
+        )
+>       result = parser.parse("Яблоки бывают красные", InteractionContext())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_llm_roles.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/llm_parser.py:428: in _parse_adaptive
+    parsed = parser.parse(text, structural_resolution=structural_resolution)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/adaptive_parser.py:1035: in parse
+    actants, _selected_spans = self._extract_actants(
+src/ah/perception/adaptive_parser.py:6142: in _extract_actants
+    self._contextualize_nominal_span(text, predicate, state_span, tokens)
+src/ah/perception/adaptive_parser.py:6618: in _contextualize_nominal_span
+    chosen = self._resolve_binary_lexeme_hypotheses(
+src/ah/perception/adaptive_parser.py:6667: in _resolve_binary_lexeme_hypotheses
+    winner_ab = choose(a, b)
+                ^^^^^^^^^^^^
+src/ah/perception/adaptive_parser.py:6662: in choose
+    decision, _ = self._exact_choice_probe(
+src/ah/perception/adaptive_parser.py:8805: in _exact_choice_probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_llm_roles.LLMRoleTests.test_adaptive_parser_uses_english_semantic_labels_and_numeric_token_choices.<locals>.ScriptedBackend object at 0x7f848b631550>
+prompt = 'TEXT:\nЯблоки бывают красные\nPREDICATE:\nбывают\nTARGET:\nкрасные\nA LEMMA:\nкрасное\nA MORPHOLOGY:\nPOS=NOUN; CASE=...modifiers to identify the lexeme. Return exactly A or B. Decide lexical identity only; do not assign roles or explain.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 8, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_lexeme_comparison'
+
+    def generate(self, prompt, *, system="", override=None, role="generic"):
+        self.calls.append((role, prompt, system, dict(override or {})))
+>       return LLMResponse(self.answers[role].pop(0), {})
+                           ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'perception_lexeme_comparison'
+
+tests/test_llm_roles.py:208: KeyError
+_ LLMRoleTests.test_adaptive_probe_retry_is_clean_and_never_receives_previous_bad_answer _
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_probe_retry_is_clean_and_never_receives_previous_bad_answer>
+
+    def test_adaptive_probe_retry_is_clean_and_never_receives_previous_bad_answer(self) -> None:
+        class RetryBackend:
+            def __init__(self):
+                self.calls = []
+                self.act_type_calls = 0
+    
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                self.calls.append((role, prompt, system))
+                if role == "perception_act_type":
+                    self.act_type_calls += 1
+                    if self.act_type_calls == 1:
+                        return LLMResponse("I choose 1", {})
+                    return LLMResponse("NONE", {})
+                fallback = legacy_semantic_answer(role, prompt)
+                if fallback is not None:
+                    return LLMResponse(str(fallback), {})
+                raise AssertionError(role)
+    
+        backend = RetryBackend()
+        parser = LLMPerceptionService(
+            backend,
+            LLMPerceptionSettings(
+                protocol="adaptive_v2",
+                probe_prompt_dir=PROJECT / "prompts/perception",
+                probe_retry_attempts=1,
+            ),
+        )
+>       result = parser.parse("привет", InteractionContext())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_llm_roles.py:384: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/perception/llm_parser.py:160: in parse
+    return self._parse_adaptive(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/llm_parser.py:428: in _parse_adaptive
+    parsed = parser.parse(text, structural_resolution=structural_resolution)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/adaptive_parser.py:874: in parse
+    predicate_start = self._probe(
+src/ah/perception/adaptive_parser.py:8894: in _probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_llm_roles.LLMRoleTests.test_adaptive_probe_retry_is_clean_and_never_receives_previous_bad_answer.<locals>.RetryBackend object at 0x7f848de00a70>
+prompt = 'TEXT:\nпривет\nTOKENS:\n[1] привет\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningf...:\nChoose the predicate head from OPTIONS. Reply only with the integer option number, without brackets or punctuation.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 4, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_predicate_start'
+
+    def generate(self, prompt, *, system="", override=None, role="generic"):
+        self.calls.append((role, prompt, system))
+        if role == "perception_act_type":
+            self.act_type_calls += 1
+            if self.act_type_calls == 1:
+                return LLMResponse("I choose 1", {})
+            return LLMResponse("NONE", {})
+        fallback = legacy_semantic_answer(role, prompt)
+        if fallback is not None:
+            return LLMResponse(str(fallback), {})
+>       raise AssertionError(role)
+E       AssertionError: perception_predicate_start
+
+tests/test_llm_roles.py:373: AssertionError
+___ LLMRoleTests.test_adaptive_query_fill_role_is_built_from_numeric_choices ___
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_adaptive_query_fill_role_is_built_from_numeric_choices>
+
+    def test_adaptive_query_fill_role_is_built_from_numeric_choices(self) -> None:
+        class Backend:
+            def __init__(self):
+                self.answers = {
+                    "perception_act_type": ["0"],
+                    "perception_predicate_start": ["2"],
+                    "perception_predicate_end": ["2"],
+                    "perception_predicate_symbol": ["love"],
+                    "perception_query_mode": ["2"],
+                    "perception_role_cue": ["AFFECTED_OR_CONTENT", "ACTOR_OR_EXPERIENCER"],
+                    "perception_actant_start": ["1"],
+                }
+            def generate(self, prompt, *, system="", override=None, role="generic"):
+                return LLMResponse(self.answers[role].pop(0), {})
+    
+        parser = LLMPerceptionService(
+            Backend(),
+            LLMPerceptionSettings(protocol="adaptive_v2", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
+        )
+        result = parser.parse("Кто любит чай?", InteractionContext())
+        self.assertEqual(len(result.queries), 1)
+        query = result.queries[0]
+>       self.assertEqual(query.predicate.lookup_form, "love")
+E       AssertionError: 'любить' != 'love'
+E       - любить
+E       + love
+
+tests/test_llm_roles.py:263: AssertionError
+__ LLMRoleTests.test_worker_fixed_choice_scoring_returns_only_allowed_option ___
+
+self = <test_llm_roles.LLMRoleTests testMethod=test_worker_fixed_choice_scoring_returns_only_allowed_option>
+
+    def test_worker_fixed_choice_scoring_returns_only_allowed_option(self) -> None:
+>       import torch
+E       ModuleNotFoundError: No module named 'torch'
+
+tests/test_llm_roles.py:41: ModuleNotFoundError
+_ test_integration_materializes_head_plus_possessor_link_not_flat_phrase_entity _
+
+    def test_integration_materializes_head_plus_possessor_link_not_flat_phrase_entity():
+        core, service, context = _service_and_context()
+        zurita = core.add_entity(Domain.C, {"name": Property("name", "Зурита", "str")})
+        context.pronoun_refs["он"] = core.ref(zurita.uid)
+    
+        subject = ActantCandidate(
+            ActantRole.SUBJECT,
+            mention="торжество его",
+            normalized_hint="торжество",
+            nominal_relations=(
+                NominalRelationCandidate(
+                    NominalRelationKind.POSSESSOR,
+                    head_mention="торжество",
+                    head_normalized_hint="торжество",
+                    dependent_mention="его",
+                ),
+            ),
+        )
+>       commit = service.integrate_external(PerceptionResult("Торжество его было недолгим.", assertions=(_state_assertion(subject),)), context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nominal_relations_v090.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7f8480f5d670>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='Торжество его было недолгим.', perception=PerceptionResult(source_t...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='торжество его'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_______ test_negated_assertion_does_not_leak_possession_into_world_graph _______
+
+    def test_negated_assertion_does_not_leak_possession_into_world_graph():
+        core, service, context = _service_and_context()
+        zurita = core.add_entity(Domain.C, {"name": Property("name", "Зурита", "str")})
+        context.pronoun_refs["он"] = core.ref(zurita.uid)
+        subject = ActantCandidate(
+            ActantRole.SUBJECT,
+            mention="торжество его",
+            normalized_hint="торжество",
+            nominal_relations=(
+                NominalRelationCandidate(
+                    NominalRelationKind.POSSESSOR,
+                    head_mention="торжество",
+                    head_normalized_hint="торжество",
+                    dependent_mention="его",
+                ),
+            ),
+        )
+        assertion = _state_assertion(subject)
+        assertion = AssertionCandidate(
+            assertion.local_id, assertion.predicate, assertion.actants, negated=True
+        )
+>       service.integrate_external(PerceptionResult("Торжество его не было недолгим.", assertions=(assertion,)), context)
+
+tests/test_nominal_relations_v090.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7f84860463f0>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='Торжество его не было недолгим.', perception=PerceptionResult(sourc...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='торжество его'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ StructuralNarrowing1258Tests.test_ambiguous_genitive_dative_nominal_is_not_absorbed_into_previous_np _
+
+self = <test_semantic_boundaries_1258.StructuralNarrowing1258Tests testMethod=test_ambiguous_genitive_dative_nominal_is_not_absorbed_into_previous_np>
+
+    def test_ambiguous_genitive_dative_nominal_is_not_absorbed_into_previous_np(self):
+        parser = make_parser()
+        text = "Сергей отправил письмо Марии."
+        tokens = parser._source_tokens(text)
+        parser._candidate_graph = LinguisticCandidateBuilder(parser.morphology).build(text)
+        predicate = parser._resolve_span(text, tokens, 2, 2)
+        subject = parser._resolve_span(text, tokens, 1, 1)
+>       candidates = parser._candidate_phrase_spans(text, tokens, predicate, [subject], requested_spans=())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_semantic_boundaries_1258.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/perception/adaptive_parser.py:7590: in _candidate_phrase_spans
+    end = self._nominal_phrase_end(tokens, start, clause_end, blocked)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ah/perception/adaptive_parser.py:7393: in _nominal_phrase_end
+    if not self._ambiguous_genitive_dependency(
+src/ah/perception/adaptive_parser.py:7251: in _ambiguous_genitive_dependency
+    decision, _margin = self._exact_choice_probe(
+src/ah/perception/adaptive_parser.py:8805: in _exact_choice_probe
+    response = self.backend.generate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_semantic_boundaries_1258.ScriptedBackend object at 0x7f84ade06d20>
+prompt = 'TEXT:\nСергей отправил письмо Марии.\nHEAD NOMINAL:\nписьмо\nFOLLOWING NOMINAL:\nМарии\nQUESTION:\nIn this exact text...r memory facts, entity identity, or unstated relations. If the text does not determine the attachment, return UNCLEAR.'
+system = 'Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; whe...xplicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.'
+override = {'max_new_tokens': 8, 'temperature': 0.0, 'repetition_penalty': 1.0, 'no_repeat_ngram_size': 0, ...}
+role = 'perception_nominal_genitive_attachment'
+
+    def generate(self, prompt, *, system="", override=None, role="generic"):
+        self.calls.append((role, prompt, dict(override or {})))
+        queue = self.answers.get(role)
+        if not queue:
+>           raise AssertionError(f"unexpected probe {role}\n{prompt}")
+E           AssertionError: unexpected probe perception_nominal_genitive_attachment
+E           TEXT:
+E           Сергей отправил письмо Марии.
+E           HEAD NOMINAL:
+E           письмо
+E           FOLLOWING NOMINAL:
+E           Марии
+E           QUESTION:
+E           In this exact text, is FOLLOWING NOMINAL a genitive dependent inside the same noun phrase headed by HEAD NOMINAL, or is it a separate participant/nominal?
+E           CHOICES:
+E           GENITIVE_DEP
+E           SEPARATE
+E           UNCLEAR
+E           
+E           TASK:
+E           Return exactly one allowed choice label. Decide only whether the displayed FOLLOWING NOMINAL is grammatically attached inside the same noun phrase as a genitive dependent of HEAD NOMINAL in the given TEXT. Do not infer memory facts, entity identity, or unstated relations. If the text does not determine the attachment, return UNCLEAR.
+
+tests/test_semantic_boundaries_1258.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_architecture_alignment_1233.py::ArchitectureAlignment1233Tests::test_worker_calibration_can_reverse_a_raw_continuation_prior
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_act_type_probe_puts_plain_options_before_task_and_does_not_show_tokens
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_command_uses_same_discrete_span_and_role_pipeline
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_numeric_normalization_does_not_extract_choice_from_prose
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_numeric_probes_accept_terminal_punctuation_only
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_parser_uses_english_semantic_labels_and_numeric_token_choices
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_probe_retry_is_clean_and_never_receives_previous_bad_answer
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_adaptive_query_fill_role_is_built_from_numeric_choices
+FAILED tests/test_llm_roles.py::LLMRoleTests::test_worker_fixed_choice_scoring_returns_only_allowed_option
+FAILED tests/test_nominal_relations_v090.py::test_integration_materializes_head_plus_possessor_link_not_flat_phrase_entity
+FAILED tests/test_nominal_relations_v090.py::test_negated_assertion_does_not_leak_possession_into_world_graph
+FAILED tests/test_semantic_boundaries_1258.py::StructuralNarrowing1258Tests::test_ambiguous_genitive_dative_nominal_is_not_absorbed_into_previous_np
+12 failed, 928 passed, 38 subtests passed in 90.76s (0:01:30)

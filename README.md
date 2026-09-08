@@ -1,4 +1,65 @@
-# AH Agent MVP — v0.25.13
+# AH Agent MVP — v0.25.19
+
+## v0.25.19 — Lexical Recovery и source transitions
+
+Закрыт отдельный pre-formalization слой для зашумлённого текста: exact dictionary
+membership отделён от продуктивного OOV-разбора, кандидаты ищутся on-demand
+Levenshtein-автоматом по compressed DAWG, ранжируются weighted
+Damerau-Levenshtein, морфологией и source-frame constraints. Локальные embeddings
+подключаются только для короткого остаточного shortlist; chat LLM для исправления
+слов не используется. Результат — `EXACT`, `CORRECTED_HIGH_CONFIDENCE`,
+`AMBIGUOUS` либо `UNKNOWN_TOKEN`. Raw spelling остаётся provenance и не попадает
+в canonical identity вместо уверенно исправленной формы.
+
+Adaptive perception теперь выводит occurrence-level
+`START / STOP / CONTINUE / AGAIN / NO_LONGER` из bounded source-only выбора. Matrix shell заменяется
+оператором над proposition operand; нематричный cue сначала явно отделяется от
+актантов. Без TIME materialize только `g_OP(P)` — календарный anchor и state
+interval не выдумываются.
+
+Обновлённый data-архив подключён: adversarial 66, inversion 100, ellipsis 166 и
+новый typo/noise corpus 81 EXACT case. Кнопки GUI используют те же реальные
+acceptance/oracle paths. Подробности: `VERSION_02519.md`,
+`TEST_RESULTS_02519.md`, `docs/SLICE_25_19.md`,
+`docs/GENERALITY_AUDIT_02519.md`; следующая точка архитектурного прохода —
+`docs/ARCHITECTURE_V4_NEXT_02519.md`.
+
+## v0.25.17 — инварианты событий и графовый эллипсис
+
+Убраны недоказанные `FOLLOW/CAUSE` из простой координации и повествовательного
+порядка; canonical enrichment теперь строго направлен от менее полного role map к
+более полному. Относительное время получает один timezone-aware anchor внешнего
+turn, а неоднозначная межпредложная кореференция сохраняет complete alternatives.
+
+Эллипсис продолжает рамку через точку/точку с запятой, переносит целый rooted
+matrix→embedded subgraph с remap ссылок и controller identity, выбирает корень
+среди нескольких исходных событий и обрабатывает сильно маркированный повтор
+конечного предиката. Именное чтение тире не удаляется без полного slot alignment.
+Quantified post-head phrase и TIME identity исправлены без словарей единиц или
+предметов; modifier attachment сформулирован как семантический вклад в событие.
+
+Acceptance/oracle не менялись, опечатки отложены. В production/prompt нет текстов
+331 проверенного acceptance-case и не добавлена fuzzy/embedding/Levenshtein
+логика. Подробности: `VERSION_02517.md`, `TEST_RESULTS_02517.md`,
+`docs/GENERALITY_AUDIT_02517.md`, `docs/ACCEPTANCE_REVIEW_02517.md`.
+
+## v0.25.16 — общие границы формализации
+
+Исправлены идентичность именной головы и зависимого местоимения, раннее однозначное сопоставление ролей эллипсиса, ограничения связывания и семантическая граница PP attachment. Добавлены 89 проверок; полный набор: 1029 PASS, 0 failures; целевой: 284 PASS. Test dependencies включают PyTorch. Полный запуск: `run_all_tests.bat`; целевой: `run_formalization_tests.bat`.
+
+Подробности: `VERSION_02516.md`, `TEST_RESULTS_02516.md`, `docs/GENERALITY_AUDIT_02516.md`, `docs/ACCEPTANCE_REVIEW_02516.md`. Нового живого acceptance нет; опечатки отложены.
+
+## v0.25.15 — длительность и внимание к конфликтам
+
+Сохраняется полное значение DURATION; исправлена обработка SeedReason.CONFLICT в Ignition без автоматического разрешения противоречия. Добавлены 19 регрессионных тестов. Опечатки отложены по указанию пользователя. Последние входные живые результаты: ellipsis 63/100, adversarial 17/36, общий 173/200; повторного живого прогона v0.25.15 нет.
+
+Подробности: `VERSION_02515.md`, `TEST_RESULTS_02515.md`, `docs/ACCEPTANCE_REVIEW_02515.md`.
+
+## v0.25.14 — сохранение эллипсиса между этапами парсера
+
+Исправлен повторный перевод актантов эллипсиса в именные предикаты после построения графа клауз. Добавлены 62 проверки полного парсера, публичного completion/integration и условного вывода. Целевой набор: 176 PASS; общий: 909 PASS и 12 прежних failures. Последний живой acceptance: 30/100, нового измерения пока нет.
+
+Подробности: `VERSION_02514.md`, `TEST_RESULTS_02514.md`, `docs/ACCEPTANCE_REVIEW_02514.md`. Запуск: `run_formalization_tests.bat`.
 
 ## v0.25.13 — границы эллипсиса и посылок М2
 

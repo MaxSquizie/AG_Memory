@@ -189,12 +189,14 @@ class AHCore:
         """Add one canonical proposition or monotonically enrich a unique match.
 
         Ordinary ``add_hypernode`` deduplicates only exact T+actant signatures.
-        Natural language often repeats the same proposition with a different amount
-        of source-grounded detail (``ветер усилился`` vs ``ветер усилился над
-        бухтой``).  When exactly one existing N with the same T/scope is compatible,
-        shares at least one identical role filler, and has no conflicting filler, the
-        two descriptions are one proposition under the existing AH semantics.  Reuse
-        its UID and add only the newly observed roles.
+        Natural language often repeats the same proposition with more
+        source-grounded detail.  Enrichment is safe only when the existing role map
+        is a strict subset of the new observation's role map and every shared filler
+        is identical.  Reuse that unique N and add only the newly observed roles.
+
+        A later less-specific observation and two observations with incomparable
+        optional roles are separate propositions.  Otherwise details from one event
+        would leak into another merely because both share a predicate and participant.
 
         The uniqueness guard is essential: ``Иван вошёл`` must not choose between
         existing ``Иван вошёл в дом`` and ``Иван вошёл в офис``.  In that case the
@@ -233,14 +235,19 @@ class AHCore:
                 continue
             if existing.meta.get("semantic_scope") != scope:
                 continue
-            shared = False
+            existing_roles = set(existing.actants)
+            new_roles = set(actants)
+            if not existing_roles < new_roles:
+                # Monotonic enrichment has a direction.  Equal signatures were
+                # handled above; supersets and incomparable descriptions must not
+                # donate hidden roles to the new proposition.
+                continue
             conflict = False
-            for role in set(existing.actants) & set(actants):
+            for role in existing_roles:
                 if existing.actants[role] != actants[role]:
                     conflict = True
                     break
-                shared = True
-            if conflict or not shared:
+            if conflict:
                 continue
             compatible.append(existing)
 

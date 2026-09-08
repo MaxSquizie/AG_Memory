@@ -129,6 +129,81 @@ def test_enrichment_refuses_to_choose_between_two_compatible_specific_events():
     assert len(core.store.find_hypernodes_by_template(template.uid)) == 3
 
 
+def test_incomparable_optional_roles_never_leak_between_repeated_events():
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    pred = core.add_abstract_symbol({"обработать"})
+    template = core.add_template(
+        Domain.C,
+        core.ref(pred.uid),
+        (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TOOL, ActantRole.TIME),
+    )
+    actor = core.add_entity(Domain.C, {"name": Property("name", "исполнитель", "str")})
+    obj = core.add_entity(Domain.C, {"name": Property("name", "деталь", "str")})
+    tool = core.add_entity(Domain.C, {"name": Property("name", "инструмент", "str")})
+    moment = core.add_entity(Domain.C, {"name": Property("name", "момент", "str")})
+
+    first, created = core.add_or_enrich_hypernode(
+        Domain.C,
+        core.ref(template.uid),
+        {
+            ActantRole.SUBJECT: core.ref(actor.uid),
+            ActantRole.OBJECT: core.ref(obj.uid),
+            ActantRole.TOOL: core.ref(tool.uid),
+        },
+        0.4,
+    )
+    assert created
+    second, created = core.add_or_enrich_hypernode(
+        Domain.C,
+        core.ref(template.uid),
+        {
+            ActantRole.SUBJECT: core.ref(actor.uid),
+            ActantRole.OBJECT: core.ref(obj.uid),
+            ActantRole.TIME: core.ref(moment.uid),
+        },
+        0.4,
+    )
+    assert created
+    assert second.uid != first.uid
+    assert set(first.actants) == {ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TOOL}
+    assert set(second.actants) == {ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.TIME}
+
+
+def test_less_specific_repeat_does_not_inherit_unstated_optional_roles():
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    pred = core.add_abstract_symbol({"переместить"})
+    template = core.add_template(
+        Domain.C,
+        core.ref(pred.uid),
+        (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.LOCATION),
+    )
+    actor = core.add_entity(Domain.C, {"name": Property("name", "оператор", "str")})
+    obj = core.add_entity(Domain.C, {"name": Property("name", "контейнер", "str")})
+    place = core.add_entity(Domain.C, {"name": Property("name", "площадка", "str")})
+    detailed, _ = core.add_or_enrich_hypernode(
+        Domain.C,
+        core.ref(template.uid),
+        {
+            ActantRole.SUBJECT: core.ref(actor.uid),
+            ActantRole.OBJECT: core.ref(obj.uid),
+            ActantRole.LOCATION: core.ref(place.uid),
+        },
+        0.4,
+    )
+    generic, created = core.add_or_enrich_hypernode(
+        Domain.C,
+        core.ref(template.uid),
+        {
+            ActantRole.SUBJECT: core.ref(actor.uid),
+            ActantRole.OBJECT: core.ref(obj.uid),
+        },
+        0.4,
+    )
+    assert created
+    assert generic.uid != detailed.uid
+    assert ActantRole.LOCATION not in generic.actants
+
+
 def test_narrative_causal_hint_is_promoted_only_for_structural_patient_to_subject_reaction():
     text = "Зурита ударил матроса, и матрос упал."
     morph = Morphology({

@@ -5,6 +5,7 @@ from enum import Enum
 import re
 
 from .contracts import EvidenceSpan
+from .lexical_recovery import LexicalRecovery, TokenCandidate
 from .morphology import MorphInfo, Morphology
 
 
@@ -44,6 +45,12 @@ class SourceToken:
     start: int
     end: int
     analyses: tuple[MorphInfo, ...] = ()
+    raw_text: str | None = None
+    recovery: TokenCandidate | None = None
+
+    @property
+    def provenance_text(self) -> str:
+        return self.raw_text if self.raw_text is not None else self.text
 
     def has_pos(self, *poses: str) -> bool:
         wanted = set(poses)
@@ -241,11 +248,49 @@ class LinguisticCandidateBuilder:
     only needed when this graph leaves more than one semantically valid choice.
     """
 
-    def __init__(self, morphology: Morphology) -> None:
+    def __init__(
+        self,
+        morphology: Morphology,
+        *,
+        lexical_recovery: LexicalRecovery | None = None,
+    ) -> None:
         self.morphology = morphology
+        self.lexical_recovery = lexical_recovery
 
     def build(self, text: str) -> LinguisticCandidateGraph:
         tokens = self._tokens(text)
+        preliminary = self._build_from_tokens(text, tokens)
+        if self.lexical_recovery is None:
+            return preliminary
+        decisions = self.lexical_recovery.recover(text, tokens, preliminary)
+        by_index = {item.token_index: item for item in decisions}
+        recovered: list[SourceToken] = []
+        for token in tokens:
+            decision = by_index.get(token.index)
+            normalized = (
+                token.text
+                if decision is None or decision.normalized_text is None
+                else decision.normalized_text
+            )
+            try:
+                analyses = self.morphology.analyze_all(normalized)
+            except AttributeError:
+                single = self.morphology.analyze(normalized)
+                analyses = () if single is None else (single,)
+            recovered.append(
+                replace(
+                    token,
+                    text=normalized,
+                    analyses=tuple(analyses),
+                    raw_text=token.provenance_text,
+                    recovery=decision,
+                )
+            )
+        return self._build_from_tokens(text, tuple(recovered))
+
+    def _build_from_tokens(
+        self, text: str, tokens: tuple[SourceToken, ...]
+    ) -> LinguisticCandidateGraph:
         predicates = self._predicate_heads(tokens)
         clauses = self._clauses(text, tokens, predicates)
         # A proposition-level ellipsis marker such as Russian ``нет`` may have a
@@ -298,7 +343,12 @@ class LinguisticCandidateBuilder:
             except AttributeError:
                 single = self.morphology.analyze(word)
                 analyses = (() if single is None else (single,))
-            result.append(SourceToken(i, word, match.start(), match.end(), analyses))
+            result.append(
+                SourceToken(
+                    i, word, match.start(), match.end(), analyses,
+                    raw_text=word,
+                )
+            )
         return tuple(result)
 
     @staticmethod
@@ -591,16 +641,14 @@ class LinguisticCandidateBuilder:
         def ellipsis_tail_candidate(index: int, coordinator: str) -> bool:
             """Recognize a conservative coordinated zero-predicate tail.
 
-            This is only a clause-boundary cue.  It does not reconstruct any
-            predicate or assign semantic roles.  We require an explicit comma
-            before the coordinator, an overt finite frame on the left, no overt
-            predicate on the right, and enough content in the tail to make an
-            omitted peer frame plausible.  ``и`` is admitted only for the very
-            explicit confirmation marker ``тоже`` so ordinary NP coordination is
-            not reclassified as ellipsis.
+            Punctuation is supporting evidence, not a hard permission bit.  A
+            missing comma before a clause coordinator may be ordinary input noise.
+            Without that comma we require stronger independent structure: an overt
+            finite frame on the left, no overt predicate on the right, a nominative
+            participant candidate in the tail, and at least one additional content
+            item.  ``и`` remains restricted to explicit proposition confirmation so
+            ordinary NP coordination is not promoted to ellipsis.
             """
-            if index <= 1 or tokens[index - 2].text != ",":
-                return False
             left, right = sentence_window(index)
             left_finite = [p for p in finite_positions if left <= p < index]
             right_predicates = [p for p in pred_positions if index < p <= right]
@@ -626,7 +674,18 @@ class LinguisticCandidateBuilder:
                 if poses and poses.issubset({"PRCL", "CONJ", "INTJ", "PREP"}):
                     continue
                 content.append(token)
-            return len(content) >= 2
+            if len(content) < 2:
+                return False
+            has_comma = index > 1 and tokens[index - 2].text == ","
+            if has_comma:
+                return True
+            return any(
+                any(
+                    item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
+                    for item in self._material_analyses(token)
+                )
+                for token in content
+            )
 
         implicit_peer_starts: set[int] = set()
 
@@ -678,7 +737,15 @@ class LinguisticCandidateBuilder:
             if first_word in (_CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR):
                 return False
 
-            if any(segment_start <= p <= segment_end for p in pred_positions):
+            segment_predicates = [p for p in pred_positions if segment_start <= p <= segment_end]
+            if any(tokens[p - 1].text.casefold() != "нет" for p in segment_predicates):
+                return False
+            if segment_predicates and not any(
+                tokens[i - 1].text in {"—", "–", "-"}
+                for i in range(segment_start, segment_end + 1)
+            ):
+                # Bare existential "денег нет" is an independent predicate.
+                # A marker reading needs the parallel dash shell as well.
                 return False
 
             words = [
@@ -729,6 +796,10 @@ class LinguisticCandidateBuilder:
                 for i in range(dash + 1, end + 1)
                 if re.search(r"\w", tokens[i - 1].text)
             ]
+            if after and after[0].text.casefold() == "это":
+                # Explicit copular linker inside the same dash shell, not a
+                # replacement actant of the preceding event.
+                after = after[1:]
             if len(after) != 1:
                 return False
             token = after[0]
@@ -739,7 +810,11 @@ class LinguisticCandidateBuilder:
             if not infos:
                 return False
             cases = {item.case for item in infos if item.case}
-            return bool(cases) and cases <= {"nomn"}
+            # NOM/ACC syncretism is common for inanimate Russian nouns.  Preserve
+            # zero-copula predication provisionally whenever a nominative reading
+            # exists; later frame-level bijective realization alignment decides
+            # whether the dash shell is actually ellipsis.
+            return "nomn" in cases
 
         for token in tokens:
             if token.text in _HARD_BOUNDARY:
@@ -817,6 +892,60 @@ class LinguisticCandidateBuilder:
                 if token.index > 1:
                     boundaries.add(token.index)
 
+        # Missing punctuation between parallel zero-predicate frames is common
+        # noise.  Detect only a strong dash shell: a new nominative participant, a
+        # dash later in the same predicate-free segment, and an overt finite frame
+        # somewhere to the left in the orthographic sentence.  This does not
+        # reconstruct a predicate; it only creates the same runtime boundary that a
+        # comma would have licensed.  Requiring the dash avoids splitting ordinary
+        # multi-actant clauses such as ``Иван купил книге Марии подарок``.
+        hard_positions = {token.index for token in tokens if token.text in _HARD_BOUNDARY}
+        for start in range(2, len(tokens) + 1):
+            if start in boundaries:
+                continue
+            token = tokens[start - 1]
+            if not re.search(r"\w", token.text):
+                continue
+            previous_token = tokens[start - 2]
+            if previous_token.text.casefold() in (
+                _CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR
+            ):
+                # The coordinator itself already owns the peer-clause boundary;
+                # keep its following material in the same clause.
+                continue
+            left, right = sentence_window(start)
+            if not any(left <= p < start for p in finite_positions):
+                continue
+            if any(start <= p <= right for p in pred_positions):
+                # A genuine overt predicate starts/occupies the right-hand clause;
+                # ordinary predicate-driven segmentation handles that case.
+                continue
+            if not any(
+                item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
+                for item in self._material_analyses(token)
+            ):
+                continue
+            next_existing = min((b for b in boundaries if b > start), default=right + 1)
+            segment_end = min(right, next_existing - 1)
+            dash = next(
+                (
+                    i for i in range(start + 1, segment_end + 1)
+                    if tokens[i - 1].text in {"—", "–", "-"}
+                ),
+                None,
+            )
+            if dash is None:
+                continue
+            words = [
+                tokens[i - 1]
+                for i in range(start, segment_end + 1)
+                if re.search(r"\w", tokens[i - 1].text)
+            ]
+            if len(words) < 2:
+                continue
+            boundaries.add(start)
+            implicit_peer_starts.add(start)
+
         ordered = sorted(b for b in boundaries if 1 <= b <= len(tokens) + 1)
         spans: list[tuple[int, int]] = []
         for left, right in zip(ordered, ordered[1:]):
@@ -889,13 +1018,14 @@ class LinguisticCandidateBuilder:
                 return None
 
             previous = previous_clause_same_sentence()
+            previous_peer = clauses[-1] if clauses else None
             marker_only_predicate = bool(heads) and all(
                 tokens[head.token_index - 1].text.casefold() in {"нет"}
                 for head in heads
             )
             if (
                 marker_only_predicate
-                and first_word in {"а", "и"}
+                and (first_word in {"а", "и"} or start in implicit_peer_starts)
                 and previous is not None
                 and (previous.predicate_heads or previous.ellipsis_kind is not None)
             ):
@@ -907,15 +1037,29 @@ class LinguisticCandidateBuilder:
                 heads = ()
                 implicit_copula = False
             previous_can_supply_frame = (
-                previous is not None
-                and (bool(previous.predicate_heads) or previous.ellipsis_kind is not None)
+                previous_peer is not None
+                and (
+                    bool(previous_peer.predicate_heads)
+                    or previous_peer.ellipsis_kind is not None
+                )
             )
-            structurally_parallel = first_word in {"а", "и"} or start in implicit_peer_starts
+            dash_shell = any(
+                tokens[i - 1].text in {"—", "–", "-"}
+                for i in range(start, end + 1)
+            )
+            structurally_parallel = (
+                first_word in {"а", "и"}
+                or start in implicit_peer_starts
+                # Strong punctuation can continue a parallel table/list without
+                # repeating the coordinator.  A dash only licenses an ellipsis
+                # candidate; semantic recovery later requires a bijective role-
+                # realization match and otherwise keeps nominal predication.
+                or dash_shell
+            )
             if (
                 not heads
                 and structurally_parallel
                 and previous_can_supply_frame
-                and not bare_dash_nominal_predication(start, end)
             ):
                 tail_lows = {
                     tokens[i - 1].text.casefold()
@@ -928,12 +1072,15 @@ class LinguisticCandidateBuilder:
                     ellipsis_kind = EllipsisKind.PROPOSITION_CONFIRMATION
                 else:
                     ellipsis_kind = EllipsisKind.FRAME
-                assert previous is not None
-                ellipsis_source_clause_id = previous.clause_id
+                assert previous_peer is not None
+                ellipsis_source_clause_id = previous_peer.clause_id
                 # The peer-frame interpretation owns this coordinated shell.  It
                 # must not be reintroduced later as an unrelated zero-copula
-                # predication (e.g. ``Мария журнал``).
-                implicit_copula = False
+                # predication.  When the shell is independently valid nominal
+                # predication, retain that parse provisionally; ellipsis recovery
+                # will replace it only after complete structural slot alignment.
+                if not bare_dash_nominal_predication(start, end):
+                    implicit_copula = False
 
             compound = compound_by_start.get(start)
             if quoted:

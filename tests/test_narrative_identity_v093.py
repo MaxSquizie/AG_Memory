@@ -185,7 +185,7 @@ def test_postnominal_possessive_is_not_swallowed_when_probe_selects_participant(
     assert backend.calls[0][0] == "perception_postnominal_possessive_attachment"
 
 
-def test_cross_sentence_personal_pronoun_can_select_previous_object_not_subject():
+def test_cross_sentence_personal_pronoun_preserves_all_compatible_antecedents():
     text = "Шум разбудил Павла. Он пришёл."
     morph = Morphology({
         "шум": (MorphInfo("шум", "NOUN", case="nomn", number="sing", gender="masc", animacy="inan", score=1.0),),
@@ -194,7 +194,7 @@ def test_cross_sentence_personal_pronoun_can_select_previous_object_not_subject(
         "он": (MorphInfo("он", "NPRO", case="nomn", number="sing", gender="masc", grammemes=frozenset({"NPRO", "3per"}), score=1.0),),
         "пришёл": (MorphInfo("прийти", "VERB", number="sing", gender="masc", mood="indc", score=1.0),),
     })
-    backend = ScriptedBackend({"perception_antecedent_choice": ["C2"]})
+    backend = ScriptedBackend()
     p = parser(morph, backend)
     p._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
     by_id = {
@@ -212,11 +212,20 @@ def test_cross_sentence_personal_pronoun_can_select_previous_object_not_subject(
     }
     p._resolve_pronoun_coreferences(by_id)
     pavel = next(a for a in by_id["A1"].actants if a.role is ActantRole.OBJECT)
-    pronoun = next(a for a in by_id["A2"].actants if a.role is ActantRole.SUBJECT)
     assert pavel.entity_ref is not None
-    assert pronoun.entity_ref == pavel.entity_ref
-    assert backend.calls[0][0] == "perception_antecedent_choice"
-    assert pavel.entity_ref not in backend.calls[0][1]
+    alternatives = by_id["A2"].alternatives
+    assert len(alternatives) == 2
+    possible = {
+        next(a for a in item.actants if a.role is ActantRole.SUBJECT).entity_ref
+        for item in alternatives
+    }
+    antecedents = {
+        a.entity_ref
+        for a in by_id["A1"].actants
+        if a.role in {ActantRole.SUBJECT, ActantRole.OBJECT}
+    }
+    assert possible == antecedents
+    assert backend.calls == []
 
 
 def test_explicit_coordinator_clause_inherits_omitted_subject():

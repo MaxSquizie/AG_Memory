@@ -25,6 +25,7 @@ from ah.perception.morphology import Morphology, build_morphology, material_anal
 from ah.perception.scoping import apply_speech_act_scoping
 
 from .candidate_validator import CandidateValidator
+from .deixis_resolver import DeixisResolver
 
 
 class BatchKind(str, Enum):
@@ -90,12 +91,15 @@ class DiscourseRef:
     source_start: int | None = None
     source_end: int | None = None
     candidate_entity_refs: tuple[str, ...] = ()
+    nominal_relation_index: int | None = None
 
     def __post_init__(self) -> None:
         if not self.local_id.strip() or not self.mention.strip() or not self.assertion_id.strip():
             raise ValueError("DiscourseRef identifiers/mention must be non-empty")
         if (self.source_start is None) != (self.source_end is None):
             raise ValueError("DiscourseRef source_start/source_end must be both set or both None")
+        if self.nominal_relation_index is not None and self.nominal_relation_index < 0:
+            raise ValueError("nominal_relation_index must be non-negative")
         if any(not value.strip() for value in self.candidate_entity_refs):
             raise ValueError("DiscourseRef candidate_entity_refs must be non-empty identifiers")
 
@@ -454,10 +458,30 @@ class SemanticConsolidator:
             )
         return tuple(actant for actant in assertion.actants if actant.role is role)
 
+    @staticmethod
+    def _referent_text(actant: ActantCandidate) -> str:
+        # A decomposed NP denotes its head; a dependent pronoun has a separate
+        # identity obligation. Never use the last modifier as the whole referent.
+        if actant.nominal_relations:
+            relation = actant.nominal_relations[0]
+            return (relation.head_mention or relation.head_normalized_hint or "").strip()
+        return (actant.mention or actant.normalized_hint or "").strip()
+
+    @staticmethod
+    def _dependent_candidate(actant: ActantCandidate, index: int) -> ActantCandidate:
+        relation = actant.nominal_relations[index]
+        return ActantCandidate(
+            role=actant.role,
+            mention=relation.dependent_mention,
+            normalized_hint=relation.dependent_normalized_hint,
+            entity_ref=relation.dependent_entity_ref,
+            evidence=relation.evidence,
+        )
+
     def _third_person_signature(self, actant: ActantCandidate) -> tuple[str | None, str | None] | None:
         if actant.candidate_ref is not None or actant.composition is not None or actant.proposition is not None:
             return None
-        text = (actant.mention or actant.normalized_hint or "").strip()
+        text = self._referent_text(actant)
         if not text:
             return None
         # Source grammar, not a keyword -> semantic operator table.  The closed
@@ -502,7 +526,7 @@ class SemanticConsolidator:
         probe may inspect.
         """
 
-        text = (actant.mention or actant.normalized_hint or "").strip()
+        text = self._referent_text(actant)
         if not text:
             return actant.grammatical_number, None
         import re
@@ -685,11 +709,14 @@ class SemanticConsolidator:
                 variants = self._actant_variants(assertion, role)
                 if not variants:
                     continue
-                # If every alternative already names a turn-local entity, the
-                # ambiguity is explicit and Integration can build k_AMBIGUOUS.
-                if all(item.entity_ref is not None for item in variants):
-                    continue
-                for actant in variants:
+                entries = []
+                for parent in variants:
+                    entries.append((parent, None))
+                    entries.extend(
+                        (self._dependent_candidate(parent, index), index)
+                        for index in range(len(parent.nominal_relations))
+                    )
+                for actant, relation_index in entries:
                     if actant.entity_ref is not None:
                         continue
                     signature = self._third_person_signature(actant)
@@ -698,13 +725,13 @@ class SemanticConsolidator:
                     # Existing dialogue anchors resolve at Integration through the
                     # ordinary DeixisResolver.  Do not report those as unresolved.
                     if context is not None:
-                        key = (actant.normalized_hint or actant.mention or "").strip().casefold()
-                        if key and context.resolve_pronoun(key) is not None:
+                        if DeixisResolver().resolve(actant, context) is not None:
                             continue
                     evidence = actant.evidence
                     identity = (
                         assertion.local_id,
                         role.value,
+                        relation_index,
                         None if evidence is None else evidence.start,
                         None if evidence is None else evidence.end,
                     )
@@ -732,6 +759,7 @@ class SemanticConsolidator:
                             source_start=None if evidence is None else evidence.start,
                             source_end=None if evidence is None else evidence.end,
                             candidate_entity_refs=compatible_refs,
+                            nominal_relation_index=relation_index,
                         )
                     )
         return tuple(refs)
@@ -820,7 +848,7 @@ class SemanticConsolidator:
         anchors = self._entity_anchor_candidates(plan.perception)
         if entity_ref not in anchors:
             raise ValueError(f"Unknown batch-local entity_ref: {entity_ref}")
-        if target.candidate_entity_refs and entity_ref not in target.candidate_entity_refs:
+        if entity_ref not in target.candidate_entity_refs:
             raise ValueError(
                 f"entity_ref {entity_ref!r} violates grammatical constraints for {discourse_ref_id}"
             )
@@ -848,11 +876,17 @@ class SemanticConsolidator:
                 nonlocal changed
                 actants: list[ActantCandidate] = []
                 for actant in variant.actants:
-                    if matches(actant):
-                        actants.append(replace(actant, entity_ref=entity_ref))
+                    index = target.nominal_relation_index
+                    if index is None and matches(actant):
+                        actant = replace(actant, entity_ref=entity_ref)
                         changed = True
-                    else:
-                        actants.append(actant)
+                    elif (index is not None and index < len(actant.nominal_relations)
+                          and matches(self._dependent_candidate(actant, index))):
+                        relations = list(actant.nominal_relations)
+                        relations[index] = replace(relations[index], dependent_entity_ref=entity_ref)
+                        actant = replace(actant, nominal_relations=tuple(relations))
+                        changed = True
+                    actants.append(actant)
                 return replace(variant, actants=tuple(actants))
 
             rewritten = rewrite_variant(assertion)

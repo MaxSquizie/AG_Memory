@@ -1,0 +1,22 @@
+[
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_derive_situation_relations",
+    "condition_literals": [
+      "", "\\w", "child", "parent", "поскольку", "потому_что", "так_как"
+    ],
+    "new_content_vocabulary": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_strip_structural_relation_actants",
+    "condition_literals": [""],
+    "new_content_vocabulary": []
+  },
+  {
+    "file": "src/ah/perception/adaptive_parser.py",
+    "function": "_classify_nonfinite_assertion_status",
+    "condition_literals": ["ASSERTED_EVENT", "INFN"],
+    "new_content_vocabulary": []
+  }
+]

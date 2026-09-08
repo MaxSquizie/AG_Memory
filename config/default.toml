@@ -51,6 +51,7 @@ ground_actants = true
 max_actants_per_act = 8
 predicate_symbol_language = "en"   # compatibility for adaptive_v1/v2; adaptive_v3 uses deterministic lexical S
 morphology_backend = "pymorphy3"    # deterministic Russian POS/lemma narrowing before LLM probes
+embedding_model = ""                 # optional local embedding key; empty = fail closed on lexical ambiguity
 max_new_tokens = 24                # hard upper bound; individual probes use smaller limits
 temperature = 0.0
 top_p = 1.0

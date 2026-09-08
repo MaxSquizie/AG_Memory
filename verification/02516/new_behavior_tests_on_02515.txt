@@ -1,0 +1,1394 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                       [100%]
+=================================== FAILURES ===================================
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0433\u043e-\u0434\u0432\u0435\u0440\u044c-femn] _
+
+head = 'дверь', gender = 'femn', pronoun = 'его'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('sing', 'masc') is None
+E        +  where ('sing', 'masc') = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дверь его', normalized_hint='дверь', semantic_hint=None...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb168d4ce0>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0433\u043e-\u0434\u043e\u043c-masc] _
+
+head = 'дом', gender = 'masc', pronoun = 'его'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('sing', 'masc') is None
+E        +  where ('sing', 'masc') = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дом его', normalized_hint='дом', semantic_hint=None, ca...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb16256ff0>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0433\u043e-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-neut] _
+
+head = 'торжество', gender = 'neut', pronoun = 'его'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('sing', 'masc') is None
+E        +  where ('sing', 'masc') = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='торжество его', normalized_hint='торжество', semantic_h...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb160671a0>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0451-\u0434\u0432\u0435\u0440\u044c-femn] _
+
+head = 'дверь', gender = 'femn', pronoun = 'её'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('sing', 'femn') is None
+E        +  where ('sing', 'femn') = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дверь её', normalized_hint='дверь', semantic_hint=None,...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb160731a0>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0451-\u0434\u043e\u043c-masc] _
+
+head = 'дом', gender = 'masc', pronoun = 'её'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('sing', 'femn') is None
+E        +  where ('sing', 'femn') = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дом её', normalized_hint='дом', semantic_hint=None, can...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb15f79eb0>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0451-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-neut] _
+
+head = 'торжество', gender = 'neut', pronoun = 'её'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('sing', 'femn') is None
+E        +  where ('sing', 'femn') = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='торжество её', normalized_hint='торжество', semantic_hi...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb15f81220>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0438\u0445-\u0434\u0432\u0435\u0440\u044c-femn] _
+
+head = 'дверь', gender = 'femn', pronoun = 'их'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('plur', None) is None
+E        +  where ('plur', None) = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дверь их', normalized_hint='дверь', semantic_hint=None,...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb15f873e0>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0438\u0445-\u0434\u043e\u043c-masc] _
+
+head = 'дом', gender = 'masc', pronoun = 'их'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('plur', None) is None
+E        +  where ('plur', None) = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дом их', normalized_hint='дом', semantic_hint=None, can...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb15f93110>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_head_grammar_is_independent_of_dependent_pronoun[\u0438\u0445-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-neut] _
+
+head = 'торжество', gender = 'neut', pronoun = 'их'
+
+    @pytest.mark.parametrize('head,gender', [('дверь','femn'), ('дом','masc'), ('торжество','neut')])
+    @pytest.mark.parametrize('pronoun', ['его', 'её', 'их'])
+    def test_head_grammar_is_independent_of_dependent_pronoun(head, gender, pronoun):
+        consolidator = SemanticConsolidator()
+        candidate = nominal(head, pronoun)
+>       assert consolidator._third_person_signature(candidate) is None
+E       AssertionError: assert ('plur', None) is None
+E        +  where ('plur', None) = _third_person_signature(ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='торжество их', normalized_hint='торжество', semantic_hi...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None))
+E        +    where _third_person_signature = <ah.integration.formalization.SemanticConsolidator object at 0x7fcb15f95910>._third_person_signature
+
+tests/test_general_formalization_02516.py:34: AssertionError
+_ test_known_possessor_is_resolved_separately_from_head[\u0435\u0433\u043e-\u043e\u043d-\u0434\u0432\u0435\u0440\u044c] _
+
+head = 'дверь', pronoun = 'его', anchor = 'он'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15f9f7a0>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='дверь его', perception=PerceptionResult(source_text='дверь его', as...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='дверь его'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0435\u0433\u043e-\u043e\u043d-\u0434\u043e\u043c] _
+
+head = 'дом', pronoun = 'его', anchor = 'он'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15fa5430>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='дом его', perception=PerceptionResult(source_text='дом его', assert...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='дом его'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0435\u0433\u043e-\u043e\u043d-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e] _
+
+head = 'торжество', pronoun = 'его', anchor = 'он'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15fb5970>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='торжество его', perception=PerceptionResult(source_text='торжество ...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='торжество его'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0435\u0451-\u043e\u043d\u0430-\u0434\u0432\u0435\u0440\u044c] _
+
+head = 'дверь', pronoun = 'её', anchor = 'она'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15fbf980>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='дверь её', perception=PerceptionResult(source_text='дверь её', asse...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='дверь её'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0435\u0451-\u043e\u043d\u0430-\u0434\u043e\u043c] _
+
+head = 'дом', pronoun = 'её', anchor = 'она'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15fc49b0>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='дом её', perception=PerceptionResult(source_text='дом её', assertio...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='дом её'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0435\u0451-\u043e\u043d\u0430-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e] _
+
+head = 'торжество', pronoun = 'её', anchor = 'она'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15fda750>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='торжество её', perception=PerceptionResult(source_text='торжество е...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='торжество её'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0438\u0445-\u043e\u043d\u0438-\u0434\u0432\u0435\u0440\u044c] _
+
+head = 'дверь', pronoun = 'их', anchor = 'они'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15fe3ce0>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='дверь их', perception=PerceptionResult(source_text='дверь их', asse...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='дверь их'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0438\u0445-\u043e\u043d\u0438-\u0434\u043e\u043c] _
+
+head = 'дом', pronoun = 'их', anchor = 'они'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15c69220>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='дом их', perception=PerceptionResult(source_text='дом их', assertio...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='дом их'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_known_possessor_is_resolved_separately_from_head[\u0438\u0445-\u043e\u043d\u0438-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e] _
+
+head = 'торжество', pronoun = 'их', anchor = 'они'
+
+    @pytest.mark.parametrize('head', ['дверь', 'дом', 'торжество'])
+    @pytest.mark.parametrize('pronoun,anchor', [('его','он'), ('её','она'), ('их','они')])
+    def test_known_possessor_is_resolved_separately_from_head(head, pronoun, anchor):
+        core, context, integration = runtime()
+        owner = core.add_entity(Domain.C, {'name': Property('name','Владелец','str')})
+        context.pronoun_refs[anchor] = core.ref(owner.uid)
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun)),))
+>       commit = integration.integrate_external(result, context)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_general_formalization_02516.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ah/integration/service.py:551: in integrate_external
+    return self.integrate_plan(self.prepare_external_plan(result, context), context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ah.integration.service.IntegrationService object at 0x7fcb15c6d550>
+plan = MutationPlan(candidate_ir=CandidateIR(source_text='торжество их', perception=PerceptionResult(source_text='торжество и...e_timestamp=None), forced_domain=None, speaker_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), existing_experience_ref=None)
+context = InteractionContext(self_ref=Ref(uid='M_1', kind=<RefKind.M: 'M'>), user_ref=Ref(uid='M_2', kind=<RefKind.M: 'M'>), now...M_3', kind=<RefKind.M: 'M'>)}, existential_pronoun_anchors={}, last_experience_ref=None, pending_clarification_refs=[])
+
+    def integrate_plan(
+        self,
+        plan: MutationPlan,
+        context: InteractionContext,
+    ) -> IntegrationCommit:
+        """Execute one immutable plan through a single canonical transaction.
+    
+        An unresolved ``DiscourseRef`` is staging state, not a semantic entity.
+        Failing closed here prevents an unbound personal pronoun from silently
+        becoming ``m_ОН``/``m_ОНА`` merely because EntityResolver needs a filler.
+        The caller may retain the plan for later document consolidation or request
+        clarification; no canonical mutation has happened yet.
+        """
+        if plan.candidate_ir.discourse_refs:
+>           raise UnresolvedDiscourseReferenceError(plan.candidate_ir.discourse_refs)
+E           ah.integration.errors.UnresolvedDiscourseReferenceError: Unresolved discourse reference(s) must be clarified/resolved before canonical commit: A1.SUBJECT='торжество их'
+
+src/ah/integration/service.py:541: UnresolvedDiscourseReferenceError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u0432\u0435\u0440\u044c-\u0435\u0433\u043e-POSSESSOR] _
+
+kind = <NominalRelationKind.POSSESSOR: 'POSSESSOR'>, head = 'дверь'
+pronoun = 'его'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'дверь его' == 'его'
+E         
+E         - его
+E         + дверь его
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u0432\u0435\u0440\u044c-\u0435\u0433\u043e-GENITIVE_DEP] _
+
+kind = <NominalRelationKind.GENITIVE_DEP: 'GENITIVE_DEP'>, head = 'дверь'
+pronoun = 'его'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'дверь его' == 'его'
+E         
+E         - его
+E         + дверь его
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u0432\u0435\u0440\u044c-\u0435\u0433\u043e-NOMINAL_MODIFIER] _
+
+kind = <NominalRelationKind.NOMINAL_MODIFIER: 'NOMINAL_MODIFIER'>
+head = 'дверь', pronoun = 'его'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'дверь его' == 'его'
+E         
+E         - его
+E         + дверь его
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u043e\u043c-\u0435\u0451-POSSESSOR] _
+
+kind = <NominalRelationKind.POSSESSOR: 'POSSESSOR'>, head = 'дом'
+pronoun = 'её'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'дом её' == 'её'
+E         
+E         - её
+E         + дом её
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u043e\u043c-\u0435\u0451-GENITIVE_DEP] _
+
+kind = <NominalRelationKind.GENITIVE_DEP: 'GENITIVE_DEP'>, head = 'дом'
+pronoun = 'её'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'дом её' == 'её'
+E         
+E         - её
+E         + дом её
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u043e\u043c-\u0435\u0451-NOMINAL_MODIFIER] _
+
+kind = <NominalRelationKind.NOMINAL_MODIFIER: 'NOMINAL_MODIFIER'>, head = 'дом'
+pronoun = 'её'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'дом её' == 'её'
+E         
+E         - её
+E         + дом её
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-\u0438\u0445-POSSESSOR] _
+
+kind = <NominalRelationKind.POSSESSOR: 'POSSESSOR'>, head = 'торжество'
+pronoun = 'их'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'торжество их' == 'их'
+E         
+E         - их
+E         + торжество их
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-\u0438\u0445-GENITIVE_DEP] _
+
+kind = <NominalRelationKind.GENITIVE_DEP: 'GENITIVE_DEP'>, head = 'торжество'
+pronoun = 'их'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'торжество их' == 'их'
+E         
+E         - их
+E         + торжество их
+
+tests/test_general_formalization_02516.py:61: AssertionError
+_ test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-\u0438\u0445-NOMINAL_MODIFIER] _
+
+kind = <NominalRelationKind.NOMINAL_MODIFIER: 'NOMINAL_MODIFIER'>
+head = 'торжество', pronoun = 'их'
+
+    @pytest.mark.parametrize('kind', list(NominalRelationKind))
+    @pytest.mark.parametrize('head,pronoun', [('дверь','его'), ('дом','её'), ('торжество','их')])
+    def test_unresolved_dependent_blocks_entire_commit_without_confusing_head(kind, head, pronoun):
+        core, context, integration = runtime()
+        result = PerceptionResult(f'{head} {pronoun}', assertions=(assertion(nominal(head,pronoun,kind)),))
+        before = set(core.store.all_uids())
+        plan = integration.prepare_external_plan(result, context)
+        assert len(plan.candidate_ir.discourse_refs) == 1
+        pending = plan.candidate_ir.discourse_refs[0]
+>       assert pending.mention == pronoun
+E       AssertionError: assert 'торжество их' == 'их'
+E         
+E         - их
+E         + торжество их
+
+tests/test_general_formalization_02516.py:61: AssertionError
+___ test_binding_dependent_reuses_local_owner_without_rebinding_nominal_head ___
+
+    def test_binding_dependent_reuses_local_owner_without_rebinding_nominal_head():
+        core, context, integration = runtime()
+        owner = ActantCandidate(ActantRole.SUBJECT, mention='Анна', normalized_hint='Анна', entity_ref='E1')
+        parent = nominal('дом', 'её')
+        result = PerceptionResult('Анна существует. Дом её существует.',
+            assertions=(assertion(owner,'A0'), assertion(parent)))
+        plan = integration.prepare_external_plan(result, context)
+        pending = plan.candidate_ir.discourse_refs[0]
+        assert pending.candidate_entity_refs == ('E1',)
+        bound = integration.bind_discourse_ref(plan, pending.local_id, 'E1', context=context)
+        assert bound.candidate_ir.discourse_refs == ()
+        dependent = bound.perception.assertions[1].actants[0]
+>       assert dependent.entity_ref is None
+E       AssertionError: assert 'E1' is None
+E        +  where 'E1' = ActantCandidate(role=<ActantRole.SUBJECT: 'SUBJECT'>, mention='дом её', normalized_hint='дом', semantic_hint=None, can...', dependent_normalized_hint=None, dependent_entity_ref=None, evidence=None),), grammatical_number=None, temporal=None).entity_ref
+
+tests/test_general_formalization_02516.py:80: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2014] _
+
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected_role = <ActantRole.LOCATION: 'LOCATION'>, expected = 'полка'
+dash = '—'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Книга лежит на столе, а журнал — на полке.', assertions=(AssertionCandidate(local_id='A1..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2013] _
+
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected_role = <ActantRole.LOCATION: 'LOCATION'>, expected = 'полка'
+dash = '–'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Книга лежит на столе, а журнал – на полке.', assertions=(AssertionCandidate(local_id='A1..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430--] _
+
+text = 'Книга лежит на столе, а журнал — на полке.'
+expected_role = <ActantRole.LOCATION: 'LOCATION'>, expected = 'полка'
+dash = '-'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Книга лежит на столе, а журнал - на полке.', assertions=(AssertionCandidate(local_id='A1..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0422\u0435\u0442\u0440\u0430\u0434\u044c \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2014] _
+
+text = 'Тетрадь лежит на столе, а журнал — на полке.'
+expected_role = <ActantRole.LOCATION: 'LOCATION'>, expected = 'полка'
+dash = '—'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Тетрадь лежит на столе, а журнал — на полке.', assertions=(AssertionCandidate(local_id='..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0422\u0435\u0442\u0440\u0430\u0434\u044c \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2013] _
+
+text = 'Тетрадь лежит на столе, а журнал — на полке.'
+expected_role = <ActantRole.LOCATION: 'LOCATION'>, expected = 'полка'
+dash = '–'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Тетрадь лежит на столе, а журнал – на полке.', assertions=(AssertionCandidate(local_id='..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0422\u0435\u0442\u0440\u0430\u0434\u044c \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430--] _
+
+text = 'Тетрадь лежит на столе, а журнал — на полке.'
+expected_role = <ActantRole.LOCATION: 'LOCATION'>, expected = 'полка'
+dash = '-'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='лежит', normalized_hint='лежать', sense_hint=...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Тетрадь лежит на столе, а журнал - на полке.', assertions=(AssertionCandidate(local_id='..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041c\u0430\u0441\u0442\u0435\u0440 \u0441\u0434\u0435\u043b\u0430\u043b \u0441\u0442\u043e\u043b \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u0443\u0447\u0435\u043d\u0438\u043a \u2014 \u0441\u0442\u0443\u043b \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2014] _
+
+text = 'Мастер сделал стол из дерева, а ученик — стул из металла.'
+expected_role = <ActantRole.MATERIAL: 'MATERIAL'>, expected = 'металл'
+dash = '—'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Мастер сделал стол из дерева, а ученик — стул из металла.', assertions=(AssertionCandida..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041c\u0430\u0441\u0442\u0435\u0440 \u0441\u0434\u0435\u043b\u0430\u043b \u0441\u0442\u043e\u043b \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u0443\u0447\u0435\u043d\u0438\u043a \u2014 \u0441\u0442\u0443\u043b \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2013] _
+
+text = 'Мастер сделал стол из дерева, а ученик — стул из металла.'
+expected_role = <ActantRole.MATERIAL: 'MATERIAL'>, expected = 'металл'
+dash = '–'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Мастер сделал стол из дерева, а ученик – стул из металла.', assertions=(AssertionCandida..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041c\u0430\u0441\u0442\u0435\u0440 \u0441\u0434\u0435\u043b\u0430\u043b \u0441\u0442\u043e\u043b \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u0443\u0447\u0435\u043d\u0438\u043a \u2014 \u0441\u0442\u0443\u043b \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b--] _
+
+text = 'Мастер сделал стол из дерева, а ученик — стул из металла.'
+expected_role = <ActantRole.MATERIAL: 'MATERIAL'>, expected = 'металл'
+dash = '-'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Мастер сделал стол из дерева, а ученик - стул из металла.', assertions=(AssertionCandida..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0420\u0430\u0431\u043e\u0447\u0438\u0439 \u0441\u0434\u0435\u043b\u0430\u043b \u044f\u0449\u0438\u043a \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u043f\u043b\u043e\u0442\u043d\u0438\u043a \u2014 \u0448\u043a\u0430\u0444 \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2014] _
+
+text = 'Рабочий сделал ящик из дерева, а плотник — шкаф из металла.'
+expected_role = <ActantRole.MATERIAL: 'MATERIAL'>, expected = 'металл'
+dash = '—'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', assertions=(AssertionCandi..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0420\u0430\u0431\u043e\u0447\u0438\u0439 \u0441\u0434\u0435\u043b\u0430\u043b \u044f\u0449\u0438\u043a \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u043f\u043b\u043e\u0442\u043d\u0438\u043a \u2014 \u0448\u043a\u0430\u0444 \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2013] _
+
+text = 'Рабочий сделал ящик из дерева, а плотник — шкаф из металла.'
+expected_role = <ActantRole.MATERIAL: 'MATERIAL'>, expected = 'металл'
+dash = '–'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Рабочий сделал ящик из дерева, а плотник – шкаф из металла.', assertions=(AssertionCandi..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0420\u0430\u0431\u043e\u0447\u0438\u0439 \u0441\u0434\u0435\u043b\u0430\u043b \u044f\u0449\u0438\u043a \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u043f\u043b\u043e\u0442\u043d\u0438\u043a \u2014 \u0448\u043a\u0430\u0444 \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b--] _
+
+text = 'Рабочий сделал ящик из дерева, а плотник — шкаф из металла.'
+expected_role = <ActantRole.MATERIAL: 'MATERIAL'>, expected = 'металл'
+dash = '-'
+
+    @pytest.mark.parametrize('dash', ['—', '–', '-'])
+    @pytest.mark.parametrize('text,expected_role,expected', [
+        ('Книга лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Тетрадь лежит на столе, а журнал — на полке.', ActantRole.LOCATION, 'полка'),
+        ('Мастер сделал стол из дерева, а ученик — стул из металла.', ActantRole.MATERIAL, 'металл'),
+        ('Рабочий сделал ящик из дерева, а плотник — шкаф из металла.', ActantRole.MATERIAL, 'металл'),
+    ])
+    def test_parallel_event_slot_survives_adversarial_nominal_attachment(text, expected_role, expected, dash):
+        core, context, integration = runtime()
+        backend = FrameFixture()
+        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol='adaptive_v3',
+            probe_prompt_dir=ROOT/'prompts/perception', probe_retry_attempts=0, morphology_backend='pymorphy3'))
+        parsed = service.parse(text.replace('—',dash), context)
+>       assert len(parsed.assertions) == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = len((AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)))
+E        +    where (AssertionCandidate(local_id='A1', predicate=PredicateCandidate(surface='сделал', normalized_hint='сделать', sense_hin...ated=False, status=<AssertionStatus.ASSERTED: 'ASSERTED'>, temporal_mode=None, transition_operator=None, quoted=False)) = PerceptionResult(source_text='Рабочий сделал ящик из дерева, а плотник - шкаф из металла.', assertions=(AssertionCandi..._ref='A3', evidence=None, reason='adjacent narrated events; requires semantic evidence before CAUSE materialization'))).assertions
+
+tests/test_general_formalization_02516.py:121: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[EVENT-\u041f\u0438\u0441\u044c\u043c\u043e \u0432 \u0433\u043e\u0440\u043e\u0434\u0435 \u043e\u0431\u0441\u0443\u0436\u0434\u0430\u043b\u0438.] _
+
+text = 'Письмо в городе обсуждали.', answer = 'EVENT'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+            with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+        else:
+            assert resolve().kind.value == ('PREDICATE' if answer=='EVENT' else 'NOMINAL')
+>       assert len(backend.calls) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+E        +    where [] = <test_general_formalization_02516.test_preverbal_locative_does_not_entail_event_location.<locals>.Backend object at 0x7fcb01f4b860>.calls
+
+tests/test_general_formalization_02516.py:194: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[EVENT-\u041f\u043e\u0441\u044b\u043b\u043a\u0443 \u0432 \u043f\u043e\u0440\u0442\u0443 \u043e\u0441\u043c\u0430\u0442\u0440\u0438\u0432\u0430\u043b\u0438.] _
+
+text = 'Посылку в порту осматривали.', answer = 'EVENT'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+            with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+        else:
+            assert resolve().kind.value == ('PREDICATE' if answer=='EVENT' else 'NOMINAL')
+>       assert len(backend.calls) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+E        +    where [] = <test_general_formalization_02516.test_preverbal_locative_does_not_entail_event_location.<locals>.Backend object at 0x7fcb01f92570>.calls
+
+tests/test_general_formalization_02516.py:194: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[EVENT-\u041a\u043d\u0438\u0433\u0443 \u0432 \u0448\u043a\u043e\u043b\u0435 \u0447\u0438\u0442\u0430\u043b\u0438.] _
+
+text = 'Книгу в школе читали.', answer = 'EVENT'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+            with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+        else:
+            assert resolve().kind.value == ('PREDICATE' if answer=='EVENT' else 'NOMINAL')
+>       assert len(backend.calls) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+E        +    where [] = <test_general_formalization_02516.test_preverbal_locative_does_not_entail_event_location.<locals>.Backend object at 0x7fcb011cff80>.calls
+
+tests/test_general_formalization_02516.py:194: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[NOMINAL_1-\u041f\u0438\u0441\u044c\u043c\u043e \u0432 \u0433\u043e\u0440\u043e\u0434\u0435 \u043e\u0431\u0441\u0443\u0436\u0434\u0430\u043b\u0438.] _
+
+text = 'Письмо в городе обсуждали.', answer = 'NOMINAL_1'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+            with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+        else:
+>           assert resolve().kind.value == ('PREDICATE' if answer=='EVENT' else 'NOMINAL')
+E           AssertionError: assert 'PREDICATE' == 'NOMINAL'
+E             
+E             - NOMINAL
+E             + PREDICATE
+
+tests/test_general_formalization_02516.py:193: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[NOMINAL_1-\u041f\u043e\u0441\u044b\u043b\u043a\u0443 \u0432 \u043f\u043e\u0440\u0442\u0443 \u043e\u0441\u043c\u0430\u0442\u0440\u0438\u0432\u0430\u043b\u0438.] _
+
+text = 'Посылку в порту осматривали.', answer = 'NOMINAL_1'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+            with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+        else:
+>           assert resolve().kind.value == ('PREDICATE' if answer=='EVENT' else 'NOMINAL')
+E           AssertionError: assert 'PREDICATE' == 'NOMINAL'
+E             
+E             - NOMINAL
+E             + PREDICATE
+
+tests/test_general_formalization_02516.py:193: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[NOMINAL_1-\u041a\u043d\u0438\u0433\u0443 \u0432 \u0448\u043a\u043e\u043b\u0435 \u0447\u0438\u0442\u0430\u043b\u0438.] _
+
+text = 'Книгу в школе читали.', answer = 'NOMINAL_1'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+            with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+        else:
+>           assert resolve().kind.value == ('PREDICATE' if answer=='EVENT' else 'NOMINAL')
+E           AssertionError: assert 'PREDICATE' == 'NOMINAL'
+E             
+E             - NOMINAL
+E             + PREDICATE
+
+tests/test_general_formalization_02516.py:193: AssertionError
+_ test_preverbal_locative_does_not_entail_event_location[UNCLEAR-\u041f\u0438\u0441\u044c\u043c\u043e \u0432 \u0433\u043e\u0440\u043e\u0434\u0435 \u043e\u0431\u0441\u0443\u0436\u0434\u0430\u043b\u0438.] _
+
+text = 'Письмо в городе обсуждали.', answer = 'UNCLEAR'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+>           with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE AdaptiveStructuralClarificationRequired
+
+tests/test_general_formalization_02516.py:191: Failed
+_ test_preverbal_locative_does_not_entail_event_location[UNCLEAR-\u041f\u043e\u0441\u044b\u043b\u043a\u0443 \u0432 \u043f\u043e\u0440\u0442\u0443 \u043e\u0441\u043c\u0430\u0442\u0440\u0438\u0432\u0430\u043b\u0438.] _
+
+text = 'Посылку в порту осматривали.', answer = 'UNCLEAR'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+>           with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE AdaptiveStructuralClarificationRequired
+
+tests/test_general_formalization_02516.py:191: Failed
+_ test_preverbal_locative_does_not_entail_event_location[UNCLEAR-\u041a\u043d\u0438\u0433\u0443 \u0432 \u0448\u043a\u043e\u043b\u0435 \u0447\u0438\u0442\u0430\u043b\u0438.] _
+
+text = 'Книгу в школе читали.', answer = 'UNCLEAR'
+
+    @pytest.mark.parametrize('text', ['Письмо в городе обсуждали.', 'Посылку в порту осматривали.', 'Книгу в школе читали.'])
+    @pytest.mark.parametrize('answer', ['EVENT','NOMINAL_1','UNCLEAR'])
+    def test_preverbal_locative_does_not_entail_event_location(text, answer):
+        from ah.perception.adaptive_parser import AdaptiveStructuralClarificationRequired
+        from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+        class Backend:
+            def __init__(self): self.calls=[]
+            def generate(self, prompt, *, system='', override=None, role='generic'):
+                self.calls.append((role,prompt))
+                assert role == 'perception_modifier_attachment'
+                return LLMResponse(answer,{})
+        backend = Backend()
+        morph = Pymorphy3Morphology()
+        parser = make_parser(morph,backend)
+        parser._candidate_graph = LinguisticCandidateBuilder(morph).build(text)
+        tokens = parser._source_tokens(text)
+        predicate = parser._resolve_span(text,tokens,4,4)
+        modifier = parser._resolve_span(text,tokens,2,3)
+        def resolve():
+            return parser._resolve_modifier_attachment(text,tokens,predicate,PredicateCandidate(predicate.text),modifier)
+        if answer == 'UNCLEAR':
+>           with pytest.raises(AdaptiveStructuralClarificationRequired): resolve()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE AdaptiveStructuralClarificationRequired
+
+tests/test_general_formalization_02516.py:191: Failed
+__ test_incompatible_local_owner_cannot_be_bound_when_candidate_set_is_empty ___
+
+    def test_incompatible_local_owner_cannot_be_bound_when_candidate_set_is_empty():
+        core, context, integration = runtime()
+        owner = ActantCandidate(ActantRole.SUBJECT,mention='Анна',entity_ref='E1')
+        result = PerceptionResult('Анна существует. Дом их существует.',
+            assertions=(assertion(owner,'A0'),assertion(nominal('дом','их'))))
+        plan = integration.prepare_external_plan(result,context)
+        pending = plan.candidate_ir.discourse_refs[0]
+        assert pending.candidate_entity_refs == ()
+        before = set(core.store.all_uids())
+>       with pytest.raises(ValueError,match='grammatical constraints'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_general_formalization_02516.py:206: Failed
+=========================== short test summary info ============================
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0433\u043e-\u0434\u0432\u0435\u0440\u044c-femn]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0433\u043e-\u0434\u043e\u043c-masc]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0433\u043e-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-neut]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0451-\u0434\u0432\u0435\u0440\u044c-femn]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0451-\u0434\u043e\u043c-masc]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0435\u0451-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-neut]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0438\u0445-\u0434\u0432\u0435\u0440\u044c-femn]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0438\u0445-\u0434\u043e\u043c-masc]
+FAILED tests/test_general_formalization_02516.py::test_head_grammar_is_independent_of_dependent_pronoun[\u0438\u0445-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-neut]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0435\u0433\u043e-\u043e\u043d-\u0434\u0432\u0435\u0440\u044c]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0435\u0433\u043e-\u043e\u043d-\u0434\u043e\u043c]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0435\u0433\u043e-\u043e\u043d-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0435\u0451-\u043e\u043d\u0430-\u0434\u0432\u0435\u0440\u044c]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0435\u0451-\u043e\u043d\u0430-\u0434\u043e\u043c]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0435\u0451-\u043e\u043d\u0430-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0438\u0445-\u043e\u043d\u0438-\u0434\u0432\u0435\u0440\u044c]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0438\u0445-\u043e\u043d\u0438-\u0434\u043e\u043c]
+FAILED tests/test_general_formalization_02516.py::test_known_possessor_is_resolved_separately_from_head[\u0438\u0445-\u043e\u043d\u0438-\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u0432\u0435\u0440\u044c-\u0435\u0433\u043e-POSSESSOR]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u0432\u0435\u0440\u044c-\u0435\u0433\u043e-GENITIVE_DEP]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u0432\u0435\u0440\u044c-\u0435\u0433\u043e-NOMINAL_MODIFIER]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u043e\u043c-\u0435\u0451-POSSESSOR]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u043e\u043c-\u0435\u0451-GENITIVE_DEP]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0434\u043e\u043c-\u0435\u0451-NOMINAL_MODIFIER]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-\u0438\u0445-POSSESSOR]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-\u0438\u0445-GENITIVE_DEP]
+FAILED tests/test_general_formalization_02516.py::test_unresolved_dependent_blocks_entire_commit_without_confusing_head[\u0442\u043e\u0440\u0436\u0435\u0441\u0442\u0432\u043e-\u0438\u0445-NOMINAL_MODIFIER]
+FAILED tests/test_general_formalization_02516.py::test_binding_dependent_reuses_local_owner_without_rebinding_nominal_head
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2014]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2013]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041a\u043d\u0438\u0433\u0430 \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430--]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0422\u0435\u0442\u0440\u0430\u0434\u044c \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2014]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0422\u0435\u0442\u0440\u0430\u0434\u044c \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430-\u2013]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0422\u0435\u0442\u0440\u0430\u0434\u044c \u043b\u0435\u0436\u0438\u0442 \u043d\u0430 \u0441\u0442\u043e\u043b\u0435, \u0430 \u0436\u0443\u0440\u043d\u0430\u043b \u2014 \u043d\u0430 \u043f\u043e\u043b\u043a\u0435.-LOCATION-\u043f\u043e\u043b\u043a\u0430--]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041c\u0430\u0441\u0442\u0435\u0440 \u0441\u0434\u0435\u043b\u0430\u043b \u0441\u0442\u043e\u043b \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u0443\u0447\u0435\u043d\u0438\u043a \u2014 \u0441\u0442\u0443\u043b \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2014]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041c\u0430\u0441\u0442\u0435\u0440 \u0441\u0434\u0435\u043b\u0430\u043b \u0441\u0442\u043e\u043b \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u0443\u0447\u0435\u043d\u0438\u043a \u2014 \u0441\u0442\u0443\u043b \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2013]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u041c\u0430\u0441\u0442\u0435\u0440 \u0441\u0434\u0435\u043b\u0430\u043b \u0441\u0442\u043e\u043b \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u0443\u0447\u0435\u043d\u0438\u043a \u2014 \u0441\u0442\u0443\u043b \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b--]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0420\u0430\u0431\u043e\u0447\u0438\u0439 \u0441\u0434\u0435\u043b\u0430\u043b \u044f\u0449\u0438\u043a \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u043f\u043b\u043e\u0442\u043d\u0438\u043a \u2014 \u0448\u043a\u0430\u0444 \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2014]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0420\u0430\u0431\u043e\u0447\u0438\u0439 \u0441\u0434\u0435\u043b\u0430\u043b \u044f\u0449\u0438\u043a \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u043f\u043b\u043e\u0442\u043d\u0438\u043a \u2014 \u0448\u043a\u0430\u0444 \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b-\u2013]
+FAILED tests/test_general_formalization_02516.py::test_parallel_event_slot_survives_adversarial_nominal_attachment[\u0420\u0430\u0431\u043e\u0447\u0438\u0439 \u0441\u0434\u0435\u043b\u0430\u043b \u044f\u0449\u0438\u043a \u0438\u0437 \u0434\u0435\u0440\u0435\u0432\u0430, \u0430 \u043f\u043b\u043e\u0442\u043d\u0438\u043a \u2014 \u0448\u043a\u0430\u0444 \u0438\u0437 \u043c\u0435\u0442\u0430\u043b\u043b\u0430.-MATERIAL-\u043c\u0435\u0442\u0430\u043b\u043b--]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[EVENT-\u041f\u0438\u0441\u044c\u043c\u043e \u0432 \u0433\u043e\u0440\u043e\u0434\u0435 \u043e\u0431\u0441\u0443\u0436\u0434\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[EVENT-\u041f\u043e\u0441\u044b\u043b\u043a\u0443 \u0432 \u043f\u043e\u0440\u0442\u0443 \u043e\u0441\u043c\u0430\u0442\u0440\u0438\u0432\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[EVENT-\u041a\u043d\u0438\u0433\u0443 \u0432 \u0448\u043a\u043e\u043b\u0435 \u0447\u0438\u0442\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[NOMINAL_1-\u041f\u0438\u0441\u044c\u043c\u043e \u0432 \u0433\u043e\u0440\u043e\u0434\u0435 \u043e\u0431\u0441\u0443\u0436\u0434\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[NOMINAL_1-\u041f\u043e\u0441\u044b\u043b\u043a\u0443 \u0432 \u043f\u043e\u0440\u0442\u0443 \u043e\u0441\u043c\u0430\u0442\u0440\u0438\u0432\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[NOMINAL_1-\u041a\u043d\u0438\u0433\u0443 \u0432 \u0448\u043a\u043e\u043b\u0435 \u0447\u0438\u0442\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[UNCLEAR-\u041f\u0438\u0441\u044c\u043c\u043e \u0432 \u0433\u043e\u0440\u043e\u0434\u0435 \u043e\u0431\u0441\u0443\u0436\u0434\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[UNCLEAR-\u041f\u043e\u0441\u044b\u043b\u043a\u0443 \u0432 \u043f\u043e\u0440\u0442\u0443 \u043e\u0441\u043c\u0430\u0442\u0440\u0438\u0432\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_preverbal_locative_does_not_entail_event_location[UNCLEAR-\u041a\u043d\u0438\u0433\u0443 \u0432 \u0448\u043a\u043e\u043b\u0435 \u0447\u0438\u0442\u0430\u043b\u0438.]
+FAILED tests/test_general_formalization_02516.py::test_incompatible_local_owner_cannot_be_bound_when_candidate_set_is_empty
+50 failed, 39 deselected in 6.05s

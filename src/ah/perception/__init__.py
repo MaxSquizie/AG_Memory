@@ -38,6 +38,13 @@ from .llm_parser import (
     PerceptionClarificationRequired,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
+from .lexical_recovery import (
+    EmbeddingSemanticReranker,
+    LexicalRecovery,
+    LexicalRecoveryStatus,
+    TokenCandidate,
+    weighted_damerau_levenshtein,
+)
 
 __all__ = [
     "ActDependencyCandidate",
@@ -79,6 +86,11 @@ __all__ = [
     "TemporalCandidate",
     "TemporalMode",
     "TransitionOperator",
+    "EmbeddingSemanticReranker",
+    "LexicalRecovery",
+    "LexicalRecoveryStatus",
+    "TokenCandidate",
+    "weighted_damerau_levenshtein",
     "apply_speech_act_scoping",
     "GoalSemanticService",
 ]

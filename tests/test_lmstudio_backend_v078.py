@@ -29,6 +29,7 @@ def test_lmstudio_config_builds_http_backend_without_local_model_dir():
     assert cfg.llm.backend == "lmstudio"
     assert cfg.llm.lmstudio_base_url == "http://127.0.0.1:1234"
     assert isinstance(build_llm_backend(cfg), LMStudioBackend)
+    assert cfg.llm.perception_embedding_model == "text-embedding-nomic-embed-text-v1.5"
 
 
 def test_lmstudio_start_auto_selects_the_only_loaded_llm():
@@ -114,6 +115,56 @@ def test_lmstudio_client_forces_nonstreaming_openai_chat_completions():
     assert captured["path"] == "/v1/chat/completions"
     assert captured["body"]["stream"] is False
     assert client.base_url == "http://127.0.0.1:1234"
+
+
+def test_lmstudio_embeddings_are_batched_and_ordered_by_response_index():
+    client = LMStudioClient("http://127.0.0.1:1234")
+    captured = {}
+
+    def fake_request(method, path, body=None):
+        captured.update({"method": method, "path": path, "body": body})
+        return {
+            "data": [
+                {"index": 1, "embedding": [0, 1]},
+                {"index": 0, "embedding": [1, 0]},
+            ]
+        }
+
+    with patch.object(client, "_request", side_effect=fake_request):
+        vectors = client.embeddings(model="embedding-key", texts=("context", "candidate"))
+
+    assert captured == {
+        "method": "POST",
+        "path": "/v1/embeddings",
+        "body": {"model": "embedding-key", "input": ["context", "candidate"]},
+    }
+    assert vectors == ((1.0, 0.0), (0.0, 1.0))
+
+
+@pytest.mark.parametrize(
+    ("data", "message"),
+    (
+        (
+            {"data": [
+                {"index": 0, "embedding": [1, 0]},
+                {"index": 0, "embedding": [0, 1]},
+            ]},
+            "invalid or duplicate indices",
+        ),
+        (
+            {"data": [
+                {"index": 0, "embedding": [1, float("nan")]},
+                {"index": 1, "embedding": [0, 1]},
+            ]},
+            "non-finite vector",
+        ),
+    ),
+)
+def test_lmstudio_embeddings_reject_malformed_batches(data, message):
+    client = LMStudioClient("http://127.0.0.1:1234")
+    with patch.object(client, "_request", return_value=data):
+        with pytest.raises(LMStudioClientError, match=message):
+            client.embeddings(model="embedding-key", texts=("context", "candidate"))
 
 
 def test_lmstudio_client_discovers_models_via_openai_compatible_endpoint():
