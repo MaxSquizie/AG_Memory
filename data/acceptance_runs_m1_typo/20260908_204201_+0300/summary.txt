@@ -1,0 +1,96 @@
+Acceptance run: 20260908_204201_+0300
+Cases: 81 | RUNTIME OK: 39 | RUNTIME ERROR: 42
+SEMANTIC PASS: 43 | FAIL: 38 | GAP: 0
+SCENARIOS: 81 | isolated between scenarios
+
+Families:
+  typo_baseline: PASS 4/10 | FAIL 6 | GAP 0
+  typo_edits: PASS 7/15 | FAIL 8 | GAP 0
+  typo_roles: PASS 6/12 | FAIL 6 | GAP 0
+  typo_inversion: PASS 6/12 | FAIL 6 | GAP 0
+  typo_ellipsis: PASS 3/10 | FAIL 7 | GAP 0
+  typo_multiple: PASS 3/8 | FAIL 5 | GAP 0
+  typo_negative_oov: PASS 8/8 | FAIL 0 | GAP 0
+  typo_ambiguous: PASS 6/6 | FAIL 0 | GAP 0
+
+001 FAIL (runtime=ERROR, scenario=m1_typo_001): Иван купл книгу. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: купл -> купал, купил, щупл, купи
+002 PASS (runtime=OK, scenario=m1_typo_002): Мария прочитала докмент.
+003 FAIL (runtime=ERROR, scenario=m1_typo_003): Сергей передал Анне клю. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю
+004 FAIL (runtime=ERROR, scenario=m1_typo_004): Ольга положила книгу на стл. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс
+005 PASS (runtime=OK, scenario=m1_typo_005): Пётр открл дверь ключом.
+006 PASS (runtime=OK, scenario=m1_typo_006): Анна отправила писмо Сергею.
+007 FAIL (runtime=ERROR, scenario=m1_typo_007): Мастер сделал стол из дерва. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: дерва -> древа, дерева, дерка, деева, нерва
+008 PASS (runtime=OK, scenario=m1_typo_008): Иван приехал в Мскву.
+009 FAIL (runtime=ERROR, scenario=m1_typo_009): Мария работала два чса. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса
+010 FAIL (runtime=ERROR, scenario=m1_typo_010): Турист остановился у рки вечером. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: рки -> реки, арки, урки, руки, раки, ярки, рики, юрки
+011 FAIL (runtime=ERROR, scenario=m1_typo_011): Вера закрыла окн. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: окн -> окно, окна, окне, окну, окон, кон, кн, око
+012 PASS (runtime=OK, scenario=m1_typo_012): Вера закрыла окнно.
+013 FAIL (runtime=ERROR, scenario=m1_typo_013): Вера закрыла окнп. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: окнп -> окоп, окна, окне, окно, окуп, окну
+014 PASS (runtime=OK, scenario=m1_typo_014): Анна прчоитала отчёт.
+015 FAIL (runtime=OK, scenario=m1_typo_015): Вера открыла книгп. | lexical.1.normalized
+016 PASS (runtime=OK, scenario=m1_typo_016): На столе лежали береёзы.
+017 PASS (runtime=OK, scenario=m1_typo_017): Мария прочитала документт.
+018 FAIL (runtime=ERROR, scenario=m1_typo_018): Иван работает в Москвк. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: Москвк -> Москву, Москве
+019 FAIL (runtime=ERROR, scenario=m1_typo_019): Анна передала пакет курьерц. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: курьерц -> курьеру, курьере
+020 PASS (runtime=OK, scenario=m1_typo_020): Турист пришёл вечром.
+021 PASS (runtime=OK, scenario=m1_typo_021): Мария работала две минутыы.
+022 FAIL (runtime=OK, scenario=m1_typo_022): Пётр ударил молоткм. | lexical.1.normalized
+023 FAIL (runtime=ERROR, scenario=m1_typo_023): Стол покрыли дервом. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: дервом -> деревом, древом, дерком, нервом, первом
+024 PASS (runtime=OK, scenario=m1_typo_024): Отчёт проверил инжнер.
+025 PASS (runtime=OK, scenario=m1_typo_025): Инженер осмотрел электростанци.
+026 FAIL (runtime=ERROR, scenario=m1_typo_026): Анна заварила члй. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: члй -> чай, чей, чий
+027 FAIL (runtime=ERROR, scenario=m1_typo_027): Сотрудник открыл архивп. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: архивп -> архив, архива, архиве, архивы, архиву
+028 PASS (runtime=OK, scenario=m1_typo_028): Мария купила журнла.
+029 PASS (runtime=OK, scenario=m1_typo_029): Анна проверрила отчёт.
+030 FAIL (runtime=ERROR, scenario=m1_typo_030): Анна отпраила письмо. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила
+031 FAIL (runtime=ERROR, scenario=m1_typo_031): Мария полочила письмо. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: полочила -> половила, волочила, полечила, положила, поломила, полошила, получила, помочила
+032 FAIL (runtime=ERROR, scenario=m1_typo_032): Иван живёт у станци. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: станци -> станций, станции, станиц
+033 PASS (runtime=OK, scenario=m1_typo_033): Курьер приехал со склда.
+034 PASS (runtime=OK, scenario=m1_typo_034): Анна передала отчёт мастреу.
+035 FAIL (runtime=ERROR, scenario=m1_typo_035): Пётр открыл дверь ключм. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу
+036 FAIL (runtime=ERROR, scenario=m1_typo_036): Иван купил кнгу. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: кнгу -> книгу, кунгу, ангу, кугу, юнгу, ингу
+037 PASS (runtime=OK, scenario=m1_typo_037): Пётр открыл дврь.
+038 PASS (runtime=OK, scenario=m1_typo_038): Книгу прочитал инжнер.
+039 PASS (runtime=OK, scenario=m1_typo_039): Вчера документт Мария прочитала.
+040 FAIL (runtime=ERROR, scenario=m1_typo_040): Анне клю Сергей передал. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю
+041 FAIL (runtime=ERROR, scenario=m1_typo_041): На стл книгу Ольга положила. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс
+042 PASS (runtime=OK, scenario=m1_typo_042): Ключом дврь Пётр открыл.
+043 PASS (runtime=OK, scenario=m1_typo_043): В Мскву Иван приехал.
+044 PASS (runtime=OK, scenario=m1_typo_044): У реки вечром турист остановился.
+045 FAIL (runtime=ERROR, scenario=m1_typo_045): Два чса Мария работала. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса
+046 FAIL (runtime=ERROR, scenario=m1_typo_046): Из дерва мастер сделал стол. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: дерва -> древа, дерева, дерка, деева, нерва
+047 PASS (runtime=OK, scenario=m1_typo_047): Со склда курьер принёс пакет.
+048 FAIL (runtime=ERROR, scenario=m1_typo_048): Письмо Сергею отпраила Анна. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила
+049 FAIL (runtime=ERROR, scenario=m1_typo_049): Отвёрткой окн открыл Пётр. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: окн -> окно, окна, окне, окну, окон, кон, кн, око
+050 FAIL (runtime=ERROR, scenario=m1_typo_050): Иван купил кнгу, а Мария — журнал. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: кнгу -> книгу, кунгу, ангу, кугу, юнгу, ингу
+051 FAIL (runtime=ERROR, scenario=m1_typo_051): Иван купл чай, а Мария — кофе. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: купл -> купал, купил, щупл, купи
+052 FAIL (runtime=ERROR, scenario=m1_typo_052): Анна положила книгу на стл, а Мария — журнал на полку. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс
+053 FAIL (runtime=ERROR, scenario=m1_typo_053): Сергей передал Анне клю, а Пётр — Вере письмо. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю
+054 FAIL (runtime=ERROR, scenario=m1_typo_054): Мария работала два чса, а Анна — три часа. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса
+055 PASS (runtime=OK, scenario=m1_typo_055): Иван приехал в Мскву, а Пётр — в Казань.
+056 PASS (runtime=OK, scenario=m1_typo_056): Мастер открл дверь ключом, а ученик — окно отвёрткой.
+057 FAIL (runtime=ERROR, scenario=m1_typo_057): Анна отпраила письмо Сергею, а Вера — отчёт Петру. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила
+058 PASS (runtime=OK, scenario=m1_typo_058): Книгу прочитала Мария, а докмент — Анна.
+059 FAIL (runtime=ERROR, scenario=m1_typo_059): На стл книгу положила Ольга, а на полку журнал — Вера. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс
+060 PASS (runtime=OK, scenario=m1_typo_060): Вчера инжнер прочитал докмент.
+061 FAIL (runtime=ERROR, scenario=m1_typo_061): Пётр открл дврь ключм. | perception.available, lexical.3.status, lexical.3.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу
+062 FAIL (runtime=ERROR, scenario=m1_typo_062): Анна отпраила писмо Сергею. | perception.available, lexical.1.status, lexical.1.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила
+063 FAIL (runtime=ERROR, scenario=m1_typo_063): Турист вечром остановился у рки. | perception.available, lexical.2.status, lexical.2.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: рки -> реки, арки, урки, руки, раки, ярки, рики, юрки
+064 FAIL (runtime=ERROR, scenario=m1_typo_064): Мастер сделал стл из дерва. | perception.available, lexical.1.status, lexical.1.normalized, lexical.2.status, lexical.2.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, стел, ст, сто, сил, стр, сал; дерва -> древа, дерева, дерка, деева, нерва
+065 PASS (runtime=OK, scenario=m1_typo_065): Курьер принс пакетт со склда.
+066 FAIL (runtime=ERROR, scenario=m1_typo_066): Мария работла два чса в офисе. | perception.available, lexical.2.status, lexical.2.normalized, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса
+067 PASS (runtime=OK, scenario=m1_typo_067): В Мскве инжнер проверил докмент.
+068 PASS (runtime=OK, scenario=m1_typo_068): Ксентарий приехал в Москву.
+069 PASS (runtime=OK, scenario=m1_typo_069): РКТ передал сигнал.
+070 PASS (runtime=OK, scenario=m1_typo_070): Модуль обрабатывает «кванторий».
+071 PASS (runtime=OK, scenario=m1_typo_071): Модуль использует QX17.
+072 PASS (runtime=OK, scenario=m1_typo_072): Нейросфера анализирует сигнал.
+073 PASS (runtime=OK, scenario=m1_typo_073): Система использует ZETA9.
+074 PASS (runtime=OK, scenario=m1_typo_074): Орнитолог увидел выпь.
+075 PASS (runtime=OK, scenario=m1_typo_075): Петр увидел елку.
+076 PASS (runtime=ERROR, scenario=m1_typo_076): ктт | runtime: PerceptionParseError: ambiguous lexical recovery: ктт -> кутт, кот, кто, кит, ттт, кет, кут, кэт
+077 PASS (runtime=ERROR, scenario=m1_typo_077): плн | runtime: PerceptionParseError: ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли
+078 PASS (runtime=ERROR, scenario=m1_typo_078): стл | runtime: PerceptionParseError: ambiguous lexical recovery: стл -> стал, стыл, утл, сел
+079 PASS (runtime=ERROR, scenario=m1_typo_079): лкк | runtime: PerceptionParseError: ambiguous lexical recovery: лкк -> юкк, лук, лак, лек, лык, лик, люк
+080 PASS (runtime=ERROR, scenario=m1_typo_080): клю | runtime: PerceptionParseError: ambiguous lexical recovery: клю -> калю, клюй, клюю, колю, клею, длю, злю, кую
+081 PASS (runtime=ERROR, scenario=m1_typo_081): писмо | runtime: PerceptionParseError: ambiguous lexical recovery: писмо -> письмо, пасмо

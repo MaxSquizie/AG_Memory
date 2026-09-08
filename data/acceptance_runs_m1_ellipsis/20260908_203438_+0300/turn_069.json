@@ -1,0 +1,2274 @@
+{
+  "index": 69,
+  "input": "Вчера книга лежала на столе, сегодня — на полке.",
+  "status": "OK",
+  "scenario_id": "ellipsis_v2_069",
+  "linguistic_candidate_graph": {
+    "text": "Вчера книга лежала на столе, сегодня — на полке.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Вчера",
+        "start": 0,
+        "end": 5,
+        "analyses": [
+          {
+            "normal_form": "вчера",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Вчера",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Вчера",
+          "normalized_text": "Вчера",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "книга",
+        "start": 6,
+        "end": 11,
+        "analyses": [
+          {
+            "normal_form": "книга",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "NOUN",
+              "inan",
+              "nomn"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "книга",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "книга",
+          "normalized_text": "книга",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 3,
+        "text": "лежала",
+        "start": 12,
+        "end": 18,
+        "analyses": [
+          {
+            "normal_form": "лежать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "femn",
+              "impf",
+              "sing",
+              "VERB",
+              "intr",
+              "past",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "лежала",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "лежала",
+          "normalized_text": "лежала",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 4,
+        "text": "на",
+        "start": 19,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "на",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.998961
+          },
+          {
+            "normal_form": "на",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000849
+          },
+          {
+            "normal_form": "на",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000188
+          }
+        ],
+        "raw_text": "на",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": "на",
+          "normalized_text": "на",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 5,
+        "text": "столе",
+        "start": 22,
+        "end": 27,
+        "analyses": [
+          {
+            "normal_form": "стол",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "sing",
+              "NOUN",
+              "inan",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "столе",
+        "recovery": {
+          "token_index": 5,
+          "raw_text": "столе",
+          "normalized_text": "столе",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 6,
+        "text": ",",
+        "start": 27,
+        "end": 28,
+        "analyses": [],
+        "raw_text": ",",
+        "recovery": {
+          "token_index": 6,
+          "raw_text": ",",
+          "normalized_text": ",",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      },
+      {
+        "index": 7,
+        "text": "сегодня",
+        "start": 29,
+        "end": 36,
+        "analyses": [
+          {
+            "normal_form": "сегодня",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "сегодня",
+        "recovery": {
+          "token_index": 7,
+          "raw_text": "сегодня",
+          "normalized_text": "сегодня",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 8,
+        "text": "—",
+        "start": 37,
+        "end": 38,
+        "analyses": [],
+        "raw_text": "—",
+        "recovery": {
+          "token_index": 8,
+          "raw_text": "—",
+          "normalized_text": "—",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      },
+      {
+        "index": 9,
+        "text": "на",
+        "start": 39,
+        "end": 41,
+        "analyses": [
+          {
+            "normal_form": "на",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.998961
+          },
+          {
+            "normal_form": "на",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000849
+          },
+          {
+            "normal_form": "на",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000188
+          }
+        ],
+        "raw_text": "на",
+        "recovery": {
+          "token_index": 9,
+          "raw_text": "на",
+          "normalized_text": "на",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 10,
+        "text": "полке",
+        "start": 42,
+        "end": 47,
+        "analyses": [
+          {
+            "normal_form": "полка",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "loct",
+              "sing",
+              "NOUN",
+              "inan"
+            ],
+            "score": 0.571428
+          },
+          {
+            "normal_form": "полка",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "datv",
+              "sing",
+              "NOUN",
+              "inan"
+            ],
+            "score": 0.142857
+          },
+          {
+            "normal_form": "полок",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "sing",
+              "NOUN",
+              "inan",
+              "masc"
+            ],
+            "score": 0.142857
+          },
+          {
+            "normal_form": "полк",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "sing",
+              "NOUN",
+              "inan",
+              "masc"
+            ],
+            "score": 0.142857
+          }
+        ],
+        "raw_text": "полке",
+        "recovery": {
+          "token_index": 10,
+          "raw_text": "полке",
+          "normalized_text": "полке",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 11,
+        "text": ".",
+        "start": 47,
+        "end": 48,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 11,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 5,
+          "text": "Вчера книга лежала на столе",
+          "evidence": {
+            "text": "Вчера книга лежала на столе",
+            "start": 0,
+            "end": 27
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 3,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "лежать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "вчера",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 7,
+          "end_index": 10,
+          "text": "сегодня — на полке",
+          "evidence": {
+            "text": "сегодня — на полке",
+            "start": 29,
+            "end": 47
+          }
+        },
+        "predicate_heads": [],
+        "marker": "сегодня",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": "FRAME",
+        "ellipsis_source_clause_id": "CL1"
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 3,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "лежать"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Вчера книга лежала на столе, сегодня — на полке.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "лежала",
+          "normalized_hint": "лежать",
+          "sense_hint": null,
+          "evidence": {
+            "text": "лежала",
+            "start": 12,
+            "end": 18
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "LOCATION",
+              "TIME"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "книга",
+            "normalized_hint": "книга",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "книга",
+              "start": 6,
+              "end": 11
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "TIME",
+            "mention": "Вчера",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Вчера",
+              "start": 0,
+              "end": 5
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": null,
+            "temporal": null
+          },
+          {
+            "role": "LOCATION",
+            "mention": "столе",
+            "normalized_hint": "стол",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "на столе",
+              "start": 19,
+              "end": 27
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          }
+        ],
+        "evidence": {
+          "text": "Вчера книга лежала на столе",
+          "start": 0,
+          "end": 27
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "temporal_mode": null,
+        "transition_operator": null,
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "лежала",
+          "normalized_hint": "лежать",
+          "sense_hint": null,
+          "evidence": {
+            "text": "лежала",
+            "start": 12,
+            "end": 18
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "LOCATION",
+              "TIME"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "книга",
+            "normalized_hint": "книга",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": "E1",
+            "evidence": {
+              "text": "книга",
+              "start": 6,
+              "end": 11
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "TIME",
+            "mention": "сегодня",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "сегодня",
+              "start": 29,
+              "end": 36
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": null,
+            "temporal": null
+          },
+          {
+            "role": "LOCATION",
+            "mention": "полке",
+            "normalized_hint": "полка",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "на полке",
+              "start": 39,
+              "end": 47
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          }
+        ],
+        "evidence": {
+          "text": "сегодня — на полке",
+          "start": 29,
+          "end": 47
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "temporal_mode": null,
+        "transition_operator": null,
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [],
+    "relation_hints": [],
+    "lexical_recovery": [
+      {
+        "token_index": 1,
+        "raw_text": "Вчера",
+        "normalized_text": "Вчера",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 2,
+        "raw_text": "книга",
+        "normalized_text": "книга",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 3,
+        "raw_text": "лежала",
+        "normalized_text": "лежала",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 4,
+        "raw_text": "на",
+        "normalized_text": "на",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 5,
+        "raw_text": "столе",
+        "normalized_text": "столе",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 6,
+        "raw_text": ",",
+        "normalized_text": ",",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      },
+      {
+        "token_index": 7,
+        "raw_text": "сегодня",
+        "normalized_text": "сегодня",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 8,
+        "raw_text": "—",
+        "normalized_text": "—",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      },
+      {
+        "token_index": 9,
+        "raw_text": "на",
+        "normalized_text": "на",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 10,
+        "raw_text": "полке",
+        "normalized_text": "полке",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 11,
+        "raw_text": ".",
+        "normalized_text": ".",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_b37d0ab93cb54f5585e29dacceb062ec",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null,
+        "nominal_relations": []
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_d91257a3e4c946a8983fd5f074df1d37",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null,
+        "nominal_relations": []
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_6b343c646f404c10837cdc0dfdad339a",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_b37d0ab93cb54f5585e29dacceb062ec",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_d91257a3e4c946a8983fd5f074df1d37",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_6b343c646f404c10837cdc0dfdad339a",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_937cba8a33694ebf9b1999f77f39ab23",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": [],
+    "existentials": [],
+    "conflicts": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Вчера книга лежала на столе, сегодня — на полке.",
+    "workspace_blocks": [],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nВчера книга лежала на столе, сегодня — на полке.",
+    "source_workspace_refs": [
+      {
+        "uid": "M_f6aac05269424683b670556ed1242916",
+        "kind": "M"
+      },
+      {
+        "uid": "N_6b343c646f404c10837cdc0dfdad339a",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b37d0ab93cb54f5585e29dacceb062ec",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d91257a3e4c946a8983fd5f074df1d37",
+        "kind": "N"
+      },
+      {
+        "uid": "S_937cba8a33694ebf9b1999f77f39ab23",
+        "kind": "S"
+      },
+      {
+        "uid": "T_4660d44694d14baf9abdbbfdd1f116e8",
+        "kind": "T"
+      }
+    ],
+    "source_scope_ref": null,
+    "estimated_tokens": 14
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 3,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_f6aac05269424683b670556ed1242916",
+          "kind": "M"
+        },
+        "semantic": "[M_f6aac05269424683b670556ed1242916] книга {grammatical_number='sing'}",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.5187201300937572,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "N_6b343c646f404c10837cdc0dfdad339a",
+          "kind": "N"
+        },
+        "semantic": "[N_6b343c646f404c10837cdc0dfdad339a] реплика пользователя: Вчера книга лежала на столе, сегодня — на полке.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "N_b37d0ab93cb54f5585e29dacceb062ec",
+          "kind": "N"
+        },
+        "semantic": "[N_b37d0ab93cb54f5585e29dacceb062ec] [S_937cba8a33694ebf9b1999f77f39ab23] лежала(SUBJECT=[M_f6aac05269424683b670556ed1242916] книга, LOCATION=[M_59f903e04ed044df8164eb74e4318328] стол, TIME=[M_47a555c14e8b431a815b697ec99e2f7c] Вчера)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "N_d91257a3e4c946a8983fd5f074df1d37",
+          "kind": "N"
+        },
+        "semantic": "[N_d91257a3e4c946a8983fd5f074df1d37] [S_937cba8a33694ebf9b1999f77f39ab23] лежала(SUBJECT=[M_f6aac05269424683b670556ed1242916] книга, LOCATION=[M_298c03b92d0945aeab03399e77fbd2d2] полка, TIME=[M_9c7095f3a74f4e9f8e29e26a487393e9] сегодня)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "S_937cba8a33694ebf9b1999f77f39ab23",
+          "kind": "S"
+        },
+        "semantic": "[S_937cba8a33694ebf9b1999f77f39ab23] лежала",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "T_4660d44694d14baf9abdbbfdd1f116e8",
+          "kind": "T"
+        },
+        "semantic": "[T_4660d44694d14baf9abdbbfdd1f116e8] predicate=[S_937cba8a33694ebf9b1999f77f39ab23] лежала; roles=[SUBJECT, LOCATION, TIME]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 69,
+      "source_text": "Вчера книга лежала на столе, сегодня — на полке.",
+      "attempts": [
+        {
+          "role": "predicate_ownership",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "CLAUSE:CL2\nTEXT:сегодня — на полке",
+          "normalized_answer": "ELLIPSIS:preserved",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nTOKENS:\n[1] Вчера\n[2] книга\n[3] лежала\n[4] на\n[5] столе\n[6] ,\n[7] сегодня\n[8] —\n[9] на\n[10] полке\n[11] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[3] token 3: лежала; morphology=VERB",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nTOKENS:\n[1] Вчера\n[2] книга\n[3] лежала\n[4] на\n[5] столе\n[6] ,\n[7] сегодня\n[8] —\n[9] на\n[10] полке\n[11] .\nPREDICATE_START: [3] лежала\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[3] end at token 3: лежала",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе\nTARGET:\nлежала\nRUSSIAN_LEMMA:\nлежать",
+          "normalized_answer": "лежать",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе\nPREDICATE:\nлежала\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Вчера\n[2] книга\n[3] на столе",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nQUESTION_WORD:\nкнига",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nALREADY_SELECTED:\nкнига\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Вчера\n[2] на столе",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "TIME_POINT",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nTARGET:\nВчера\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nTRANSITION_OPERATOR: TARGET is not an actant; it explicitly marks that the predicate occurrence begins, ends, continues, repeats, or no longer holds\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\nTRANSITION_OPERATOR\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "TIME_POINT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nALREADY_SELECTED:\nкнига | Вчера\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] на столе",
+          "normalized_answer": "4-5",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "PLACE",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nTARGET:\nна столе\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "PLACE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nALREADY_SELECTED:\nкнига | Вчера | на столе\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] сегодня\n[2] на полке",
+          "normalized_answer": "7",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nQUESTION_WORD:\nсегодня",
+          "normalized_answer": "TIME",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nALREADY_SELECTED:\nсегодня\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] на полке",
+          "normalized_answer": "9-10",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nQUESTION_WORD:\nна полке",
+          "normalized_answer": "LOCATION",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nALREADY_SELECTED:\nсегодня | на полке\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "frame_completion",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE:A1\nTARGET_CLAUSE:сегодня — на полке\nINHERITED:SUBJECT",
+          "normalized_answer": "root=лежать; frames=1",
+          "retry_index": 0
+        },
+        {
+          "role": "ellipsis_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE:A1\nTARGET_CLAUSE:сегодня — на полке\nMODE:FRAME",
+          "normalized_answer": "A2; replaced=LOCATION,TIME; inherited=SUBJECT; negated=false; frames=1",
+          "retry_index": 0
+        },
+        {
+          "role": "source_coreference",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE_SPAN:\n6:11",
+          "normalized_answer": "E1",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Вчера книга лежала на столе, сегодня — на полке.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "лежала",
+              "normalized_hint": "лежать",
+              "sense_hint": null,
+              "evidence": {
+                "text": "лежала",
+                "start": 12,
+                "end": 18
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "книга",
+                "normalized_hint": "книга",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "книга",
+                  "start": 6,
+                  "end": 11
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "TIME",
+                "mention": "Вчера",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Вчера",
+                  "start": 0,
+                  "end": 5
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": null,
+                "temporal": null
+              },
+              {
+                "role": "LOCATION",
+                "mention": "столе",
+                "normalized_hint": "стол",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "на столе",
+                  "start": 19,
+                  "end": 27
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              }
+            ],
+            "evidence": {
+              "text": "Вчера книга лежала на столе",
+              "start": 0,
+              "end": 27
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "temporal_mode": null,
+            "transition_operator": null,
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "лежала",
+              "normalized_hint": "лежать",
+              "sense_hint": null,
+              "evidence": {
+                "text": "лежала",
+                "start": 12,
+                "end": 18
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "книга",
+                "normalized_hint": "книга",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": "E1",
+                "evidence": {
+                  "text": "книга",
+                  "start": 6,
+                  "end": 11
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "TIME",
+                "mention": "сегодня",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "сегодня",
+                  "start": 29,
+                  "end": 36
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": null,
+                "temporal": null
+              },
+              {
+                "role": "LOCATION",
+                "mention": "полке",
+                "normalized_hint": "полка",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "на полке",
+                  "start": 39,
+                  "end": 47
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              }
+            ],
+            "evidence": {
+              "text": "сегодня — на полке",
+              "start": 29,
+              "end": 47
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "temporal_mode": null,
+            "transition_operator": null,
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [],
+        "relation_hints": [],
+        "lexical_recovery": [
+          {
+            "token_index": 1,
+            "raw_text": "Вчера",
+            "normalized_text": "Вчера",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 2,
+            "raw_text": "книга",
+            "normalized_text": "книга",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 3,
+            "raw_text": "лежала",
+            "normalized_text": "лежала",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 4,
+            "raw_text": "на",
+            "normalized_text": "на",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 5,
+            "raw_text": "столе",
+            "normalized_text": "столе",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 6,
+            "raw_text": ",",
+            "normalized_text": ",",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          },
+          {
+            "token_index": 7,
+            "raw_text": "сегодня",
+            "normalized_text": "сегодня",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 8,
+            "raw_text": "—",
+            "normalized_text": "—",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          },
+          {
+            "token_index": 9,
+            "raw_text": "на",
+            "normalized_text": "на",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 10,
+            "raw_text": "полке",
+            "normalized_text": "полке",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 11,
+            "raw_text": ".",
+            "normalized_text": ".",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 304,
+      "req_id": "6c2d9be197184145bcf6c98ffa5ff761",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nTARGET:\nВчера\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nTRANSITION_OPERATOR: TARGET is not an actant; it explicitly marks that the predicate occurrence begins, ends, continues, repeats, or no longer holds\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\nTRANSITION_OPERATOR\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "TIME_POINT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nTARGET:\nВчера\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nTRANSITION_OPERATOR: TARGET is not an actant; it explicitly marks that the predicate occurrence begins, ends, continues, repeats, or no longer holds\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\nTRANSITION_OPERATOR\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 608,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 305,
+      "req_id": "d3fc30b231a14e9b99d8d0ddf37ab0fe",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nTARGET:\nна столе\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "PLACE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера книга лежала на столе, сегодня — на полке.\nPREDICATE:\nлежала\nTARGET:\nна столе\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 944,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_71a3414e99164e7ab1c4d557346e28ae": {
+        "uid": "K_71a3414e99164e7ab1c4d557346e28ae",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_b37d0ab93cb54f5585e29dacceb062ec",
+            "kind": "N"
+          },
+          {
+            "uid": "N_d91257a3e4c946a8983fd5f074df1d37",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "M_298c03b92d0945aeab03399e77fbd2d2": {
+        "uid": "M_298c03b92d0945aeab03399e77fbd2d2",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "полка",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_47a555c14e8b431a815b697ec99e2f7c": {
+        "uid": "M_47a555c14e8b431a815b697ec99e2f7c",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "end": {
+            "name": "end",
+            "value": "",
+            "type_name": "str",
+            "unit": null
+          },
+          "kind": {
+            "name": "kind",
+            "value": "POINT",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "Вчера",
+            "type_name": "str",
+            "unit": null
+          },
+          "precision": {
+            "name": "precision",
+            "value": "DAY",
+            "type_name": "str",
+            "unit": null
+          },
+          "source_text": {
+            "name": "source_text",
+            "value": "Вчера",
+            "type_name": "str",
+            "unit": null
+          },
+          "start": {
+            "name": "start",
+            "value": "2026-09-07",
+            "type_name": "str",
+            "unit": null
+          },
+          "temporal_key": {
+            "name": "temporal_key",
+            "value": "POINT|2026-09-07||DAY|+03:00",
+            "type_name": "str",
+            "unit": null
+          },
+          "timezone": {
+            "name": "timezone",
+            "value": "+03:00",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "semantic_time": true,
+          "gc_auto_created": true
+        }
+      },
+      "M_59f903e04ed044df8164eb74e4318328": {
+        "uid": "M_59f903e04ed044df8164eb74e4318328",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "стол",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_9c7095f3a74f4e9f8e29e26a487393e9": {
+        "uid": "M_9c7095f3a74f4e9f8e29e26a487393e9",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "end": {
+            "name": "end",
+            "value": "",
+            "type_name": "str",
+            "unit": null
+          },
+          "kind": {
+            "name": "kind",
+            "value": "POINT",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "сегодня",
+            "type_name": "str",
+            "unit": null
+          },
+          "precision": {
+            "name": "precision",
+            "value": "DAY",
+            "type_name": "str",
+            "unit": null
+          },
+          "source_text": {
+            "name": "source_text",
+            "value": "сегодня",
+            "type_name": "str",
+            "unit": null
+          },
+          "start": {
+            "name": "start",
+            "value": "2026-09-08",
+            "type_name": "str",
+            "unit": null
+          },
+          "temporal_key": {
+            "name": "temporal_key",
+            "value": "POINT|2026-09-08||DAY|+03:00",
+            "type_name": "str",
+            "unit": null
+          },
+          "timezone": {
+            "name": "timezone",
+            "value": "+03:00",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "semantic_time": true,
+          "gc_auto_created": true
+        }
+      },
+      "M_f6aac05269424683b670556ed1242916": {
+        "uid": "M_f6aac05269424683b670556ed1242916",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "книга",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "N_6b343c646f404c10837cdc0dfdad339a": {
+        "uid": "N_6b343c646f404c10837cdc0dfdad339a",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_bad6379efb894b94b3b41234d4cd9d93",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_71a3414e99164e7ab1c4d557346e28ae",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Вчера книга лежала на столе, сегодня — на полке.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "N_b37d0ab93cb54f5585e29dacceb062ec": {
+        "uid": "N_b37d0ab93cb54f5585e29dacceb062ec",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_4660d44694d14baf9abdbbfdd1f116e8",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_f6aac05269424683b670556ed1242916",
+            "kind": "M"
+          },
+          "TIME": {
+            "uid": "M_47a555c14e8b431a815b697ec99e2f7c",
+            "kind": "M"
+          },
+          "LOCATION": {
+            "uid": "M_59f903e04ed044df8164eb74e4318328",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 0,
+          "expires_tick": 40,
+          "last_qualifying_tick": 0,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_d91257a3e4c946a8983fd5f074df1d37": {
+        "uid": "N_d91257a3e4c946a8983fd5f074df1d37",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_4660d44694d14baf9abdbbfdd1f116e8",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_f6aac05269424683b670556ed1242916",
+            "kind": "M"
+          },
+          "TIME": {
+            "uid": "M_9c7095f3a74f4e9f8e29e26a487393e9",
+            "kind": "M"
+          },
+          "LOCATION": {
+            "uid": "M_298c03b92d0945aeab03399e77fbd2d2",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 0,
+          "expires_tick": 40,
+          "last_qualifying_tick": 0,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_027e1bb33ff14f6fb7d03a2b8211f778": {
+        "uid": "S_027e1bb33ff14f6fb7d03a2b8211f778",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "S_937cba8a33694ebf9b1999f77f39ab23": {
+        "uid": "S_937cba8a33694ebf9b1999f77f39ab23",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "лежала",
+          "лежать"
+        ]
+      },
+      "T_4660d44694d14baf9abdbbfdd1f116e8": {
+        "uid": "T_4660d44694d14baf9abdbbfdd1f116e8",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_937cba8a33694ebf9b1999f77f39ab23",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "LOCATION",
+          "TIME"
+        ]
+      },
+      "T_bad6379efb894b94b3b41234d4cd9d93": {
+        "uid": "T_bad6379efb894b94b3b41234d4cd9d93",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_027e1bb33ff14f6fb7d03a2b8211f778",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 3,
+    "workspace_uids": [
+      "M_f6aac05269424683b670556ed1242916",
+      "N_6b343c646f404c10837cdc0dfdad339a",
+      "N_b37d0ab93cb54f5585e29dacceb062ec",
+      "N_d91257a3e4c946a8983fd5f074df1d37",
+      "S_937cba8a33694ebf9b1999f77f39ab23",
+      "T_4660d44694d14baf9abdbbfdd1f116e8"
+    ],
+    "workspace": {
+      "M_f6aac05269424683b670556ed1242916": {
+        "semantic": "книга",
+        "excitation": 0.5187201300937572
+      },
+      "N_6b343c646f404c10837cdc0dfdad339a": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_71a3414e99164e7ab1c4d557346e28ae[лежала(SUBJECT=книга, LOCATION=стол, TIME=Вчера); лежала(SUBJECT=книга, LOCATION=полка, TIME=сегодня)])",
+        "excitation": 0.49704875845222196
+      },
+      "N_b37d0ab93cb54f5585e29dacceb062ec": {
+        "semantic": "лежала(SUBJECT=книга, LOCATION=стол, TIME=Вчера)",
+        "excitation": 1.0
+      },
+      "N_d91257a3e4c946a8983fd5f074df1d37": {
+        "semantic": "лежала(SUBJECT=книга, LOCATION=полка, TIME=сегодня)",
+        "excitation": 1.0
+      },
+      "S_937cba8a33694ebf9b1999f77f39ab23": {
+        "semantic": "лежала",
+        "excitation": 0.9443926410592216
+      },
+      "T_4660d44694d14baf9abdbbfdd1f116e8": {
+        "semantic": "лежала",
+        "excitation": 0.9476617761328255
+      }
+    },
+    "pending_incoming": {
+      "M_f6aac05269424683b670556ed1242916": 0.3040000000000001,
+      "M_47a555c14e8b431a815b697ec99e2f7c": 0.15200000000000005,
+      "M_59f903e04ed044df8164eb74e4318328": 0.15200000000000005,
+      "M_9c7095f3a74f4e9f8e29e26a487393e9": 0.15200000000000005,
+      "M_298c03b92d0945aeab03399e77fbd2d2": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "она": {
+        "uid": "M_f6aac05269424683b670556ed1242916",
+        "kind": "M"
+      }
+    },
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_6b343c646f404c10837cdc0dfdad339a",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 2,
+      "actual": 2
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "лежать",
+      "actual": "лежать"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "книга"
+      },
+      "actual": "книга"
+    },
+    {
+      "name": "perception.assertions.a1.roles.LOCATION",
+      "ok": true,
+      "expected": {
+        "text": "стол"
+      },
+      "actual": "стол"
+    },
+    {
+      "name": "perception.assertions.a1.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "вчера"
+      },
+      "actual": "Вчера"
+    },
+    {
+      "name": "perception.assertions.a2.predicate",
+      "ok": true,
+      "expected": "лежать",
+      "actual": "лежать"
+    },
+    {
+      "name": "perception.assertions.a2.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "perception.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "книга"
+      },
+      "actual": "книга"
+    },
+    {
+      "name": "perception.assertions.a2.roles.LOCATION",
+      "ok": true,
+      "expected": {
+        "text": "полка"
+      },
+      "actual": "полка"
+    },
+    {
+      "name": "perception.assertions.a2.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "сегодня"
+      },
+      "actual": "сегодня"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.domains.a1",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "integration.domains.a2",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "лежать",
+      "actual": [
+        "лежала",
+        "лежать"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "книга"
+      },
+      "actual": "книга"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.LOCATION",
+      "ok": true,
+      "expected": {
+        "text": "стол"
+      },
+      "actual": "стол"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "вчера"
+      },
+      "actual": "Вчера"
+    },
+    {
+      "name": "canonical.assertions.a2.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a2.predicate",
+      "ok": true,
+      "expected": "лежать",
+      "actual": [
+        "лежала",
+        "лежать"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "книга"
+      },
+      "actual": "книга"
+    },
+    {
+      "name": "canonical.assertions.a2.roles.LOCATION",
+      "ok": true,
+      "expected": {
+        "text": "полка"
+      },
+      "actual": "полка"
+    },
+    {
+      "name": "canonical.assertions.a2.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "сегодня"
+      },
+      "actual": "сегодня"
+    },
+    {
+      "name": "templates.лежать.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "LOCATION",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        [
+          "LOCATION",
+          "SUBJECT",
+          "TIME"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "temporal_locative_combo",
+  "semantic_tags": [
+    "ellipsis",
+    "discourse_reconstruction",
+    "temporal",
+    "locative",
+    "shared_subject"
+  ]
+}

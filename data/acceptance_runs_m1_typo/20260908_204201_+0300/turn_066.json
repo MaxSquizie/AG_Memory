@@ -1,0 +1,766 @@
+{
+  "index": 66,
+  "input": "Мария работла два чса в офисе.",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_066",
+  "linguistic_candidate_graph": {
+    "text": "Мария работла два чса в офисе.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Мария",
+        "start": 0,
+        "end": 5,
+        "analyses": [
+          {
+            "normal_form": "мария",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "Name",
+              "NOUN",
+              "nomn",
+              "anim"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Мария",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Мария",
+          "normalized_text": "Мария",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "работала",
+        "start": 6,
+        "end": 13,
+        "analyses": [
+          {
+            "normal_form": "работать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "femn",
+              "impf",
+              "sing",
+              "VERB",
+              "intr",
+              "past",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "работла",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "работла",
+          "normalized_text": "работала",
+          "status": "CORRECTED_HIGH_CONFIDENCE",
+          "alternatives": [
+            "работала",
+            "работна"
+          ],
+          "confidence": 0.88,
+          "reason": "contextual noisy-channel dominance"
+        }
+      },
+      {
+        "index": 3,
+        "text": "два",
+        "start": 14,
+        "end": 17,
+        "analyses": [
+          {
+            "normal_form": "два",
+            "pos": "NUMR",
+            "case": "nomn",
+            "number": null,
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "masc",
+              "nomn",
+              "NUMR"
+            ],
+            "score": 0.4
+          },
+          {
+            "normal_form": "два",
+            "pos": "NUMR",
+            "case": "accs",
+            "number": null,
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "masc",
+              "inan",
+              "NUMR",
+              "accs"
+            ],
+            "score": 0.2
+          },
+          {
+            "normal_form": "два",
+            "pos": "NUMR",
+            "case": "nomn",
+            "number": null,
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "nomn",
+              "neut",
+              "NUMR"
+            ],
+            "score": 0.2
+          },
+          {
+            "normal_form": "два",
+            "pos": "NUMR",
+            "case": "accs",
+            "number": null,
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "inan",
+              "neut",
+              "NUMR",
+              "accs"
+            ],
+            "score": 0.2
+          }
+        ],
+        "raw_text": "два",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "два",
+          "normalized_text": "два",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 4,
+        "text": "чса",
+        "start": 18,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "чса",
+            "pos": null,
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "UNKN"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "чса",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": "чса",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "часа",
+            "чёса",
+            "яса",
+            "фса",
+            "юса",
+            "аса",
+            "уса",
+            "пса"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      },
+      {
+        "index": 5,
+        "text": "в",
+        "start": 22,
+        "end": 23,
+        "analyses": [
+          {
+            "normal_form": "в",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.999327
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "Abbr",
+              "NOUN",
+              "gent",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.000249
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 5.7e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "Abbr",
+              "NOUN",
+              "nomn",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "datv",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Abbr",
+              "NOUN",
+              "plur",
+              "nomn",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Abbr",
+              "NOUN",
+              "gent",
+              "inan",
+              "plur",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "datv",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          },
+          {
+            "normal_form": "в",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 1.9e-05
+          }
+        ],
+        "raw_text": "в",
+        "recovery": {
+          "token_index": 5,
+          "raw_text": "в",
+          "normalized_text": "в",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 6,
+        "text": "офисе",
+        "start": 24,
+        "end": 29,
+        "analyses": [
+          {
+            "normal_form": "офис",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "sing",
+              "NOUN",
+              "inan",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "офисе",
+        "recovery": {
+          "token_index": 6,
+          "raw_text": "офисе",
+          "normalized_text": "офисе",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 7,
+        "text": ".",
+        "start": 29,
+        "end": 30,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 7,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 6,
+          "text": "Мария работла два чса в офисе",
+          "evidence": {
+            "text": "Мария работла два чса в офисе",
+            "start": 0,
+            "end": 29
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "работать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "мария",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "работать"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 232,
+      "source_text": "Мария работла два чса в офисе.",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:2\nRAW:работла\nCANDIDATES:работала,работна",
+          "normalized_answer": "работала",
+          "retry_index": 0
+        },
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:4\nRAW:чса\nCANDIDATES:часа,чёса,яса,фса,юса,аса,уса,пса",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_c95153648d0149fd81b9ece64547bd11": {
+        "uid": "N_c95153648d0149fd81b9ece64547bd11",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_d273123d8f6544a590cda4dfca8e05ea",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Мария работла два чса в офисе.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_676349bd3e8c4be38b9a833eabf79784": {
+        "uid": "S_676349bd3e8c4be38b9a833eabf79784",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_d273123d8f6544a590cda4dfca8e05ea": {
+        "uid": "T_d273123d8f6544a590cda4dfca8e05ea",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_676349bd3e8c4be38b9a833eabf79784",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_c95153648d0149fd81b9ece64547bd11": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_c95153648d0149fd81b9ece64547bd11",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "работла",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": true,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "CORRECTED_HIGH_CONFIDENCE"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": true,
+      "expected": "работала",
+      "actual": "работала"
+    },
+    {
+      "name": "lexical.2.unique_raw",
+      "ok": true,
+      "expected": "чса",
+      "actual": 1
+    },
+    {
+      "name": "lexical.2.status",
+      "ok": false,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.2.normalized",
+      "ok": false,
+      "expected": "часа"
+    },
+    {
+      "name": "integration.completed",
+      "ok": false,
+      "expected": "OK",
+      "actual": "ERROR"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_multiple",
+  "semantic_tags": [
+    "typo",
+    "multiple_errors",
+    "predicate",
+    "duration",
+    "location"
+  ]
+}

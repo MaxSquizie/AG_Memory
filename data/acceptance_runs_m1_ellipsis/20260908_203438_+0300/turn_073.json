@@ -1,0 +1,2903 @@
+{
+  "index": 73,
+  "input": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+  "status": "OK",
+  "scenario_id": "ellipsis_v2_073",
+  "linguistic_candidate_graph": {
+    "text": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Вчера",
+        "start": 0,
+        "end": 5,
+        "analyses": [
+          {
+            "normal_form": "вчера",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Вчера",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Вчера",
+          "normalized_text": "Вчера",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "мастер",
+        "start": 6,
+        "end": 12,
+        "analyses": [
+          {
+            "normal_form": "мастер",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "nomn",
+              "anim",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "мастер",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "мастер",
+          "normalized_text": "мастер",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 3,
+        "text": "сделал",
+        "start": 13,
+        "end": 19,
+        "analyses": [
+          {
+            "normal_form": "сделать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "sing",
+              "VERB",
+              "masc",
+              "perf",
+              "past",
+              "tran",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "сделал",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "сделал",
+          "normalized_text": "сделал",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 4,
+        "text": "стол",
+        "start": 20,
+        "end": 24,
+        "analyses": [
+          {
+            "normal_form": "стол",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "sing",
+              "NOUN",
+              "inan",
+              "masc"
+            ],
+            "score": 0.529411
+          },
+          {
+            "normal_form": "стол",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "nomn",
+              "inan",
+              "masc"
+            ],
+            "score": 0.470588
+          }
+        ],
+        "raw_text": "стол",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": "стол",
+          "normalized_text": "стол",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 5,
+        "text": "из",
+        "start": 25,
+        "end": 27,
+        "analyses": [
+          {
+            "normal_form": "из",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.999673
+          },
+          {
+            "normal_form": "иза",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "Name",
+              "NOUN",
+              "plur",
+              "gent",
+              "anim"
+            ],
+            "score": 0.000163
+          },
+          {
+            "normal_form": "иза",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "accs",
+              "Name",
+              "NOUN",
+              "plur",
+              "anim"
+            ],
+            "score": 0.000163
+          }
+        ],
+        "raw_text": "из",
+        "recovery": {
+          "token_index": 5,
+          "raw_text": "из",
+          "normalized_text": "из",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 6,
+        "text": "дерева",
+        "start": 28,
+        "end": 34,
+        "analyses": [
+          {
+            "normal_form": "дерево",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "gent",
+              "inan",
+              "neut"
+            ],
+            "score": 0.933333
+          },
+          {
+            "normal_form": "дерево",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Litr",
+              "Arch",
+              "plur",
+              "NOUN",
+              "inan",
+              "neut",
+              "nomn"
+            ],
+            "score": 0.033333
+          },
+          {
+            "normal_form": "дерево",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Litr",
+              "accs",
+              "Arch",
+              "plur",
+              "NOUN",
+              "inan",
+              "neut"
+            ],
+            "score": 0.033333
+          }
+        ],
+        "raw_text": "дерева",
+        "recovery": {
+          "token_index": 6,
+          "raw_text": "дерева",
+          "normalized_text": "дерева",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 7,
+        "text": ",",
+        "start": 34,
+        "end": 35,
+        "analyses": [],
+        "raw_text": ",",
+        "recovery": {
+          "token_index": 7,
+          "raw_text": ",",
+          "normalized_text": ",",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      },
+      {
+        "index": 8,
+        "text": "а",
+        "start": 36,
+        "end": 37,
+        "analyses": [
+          {
+            "normal_form": "а",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 0.997155
+          },
+          {
+            "normal_form": "а",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.001706
+          },
+          {
+            "normal_form": "а",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.001137
+          }
+        ],
+        "raw_text": "а",
+        "recovery": {
+          "token_index": 8,
+          "raw_text": "а",
+          "normalized_text": "а",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 9,
+        "text": "сегодня",
+        "start": 38,
+        "end": 45,
+        "analyses": [
+          {
+            "normal_form": "сегодня",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "сегодня",
+        "recovery": {
+          "token_index": 9,
+          "raw_text": "сегодня",
+          "normalized_text": "сегодня",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 10,
+        "text": "ученик",
+        "start": 46,
+        "end": 52,
+        "analyses": [
+          {
+            "normal_form": "ученик",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "nomn",
+              "anim",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "ученик",
+        "recovery": {
+          "token_index": 10,
+          "raw_text": "ученик",
+          "normalized_text": "ученик",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 11,
+        "text": "—",
+        "start": 53,
+        "end": 54,
+        "analyses": [],
+        "raw_text": "—",
+        "recovery": {
+          "token_index": 11,
+          "raw_text": "—",
+          "normalized_text": "—",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      },
+      {
+        "index": 12,
+        "text": "стул",
+        "start": 55,
+        "end": 59,
+        "analyses": [
+          {
+            "normal_form": "стул",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "nomn",
+              "inan",
+              "masc"
+            ],
+            "score": 0.25
+          },
+          {
+            "normal_form": "стул",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "sing",
+              "NOUN",
+              "inan",
+              "masc"
+            ],
+            "score": 0.25
+          }
+        ],
+        "raw_text": "стул",
+        "recovery": {
+          "token_index": 12,
+          "raw_text": "стул",
+          "normalized_text": "стул",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 13,
+        "text": "из",
+        "start": 60,
+        "end": 62,
+        "analyses": [
+          {
+            "normal_form": "из",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.999673
+          },
+          {
+            "normal_form": "иза",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "Name",
+              "NOUN",
+              "plur",
+              "gent",
+              "anim"
+            ],
+            "score": 0.000163
+          },
+          {
+            "normal_form": "иза",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "accs",
+              "Name",
+              "NOUN",
+              "plur",
+              "anim"
+            ],
+            "score": 0.000163
+          }
+        ],
+        "raw_text": "из",
+        "recovery": {
+          "token_index": 13,
+          "raw_text": "из",
+          "normalized_text": "из",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 14,
+        "text": "металла",
+        "start": 63,
+        "end": 70,
+        "analyses": [
+          {
+            "normal_form": "металл",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "gent",
+              "inan",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "металла",
+        "recovery": {
+          "token_index": 14,
+          "raw_text": "металла",
+          "normalized_text": "металла",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 15,
+        "text": ".",
+        "start": 70,
+        "end": 71,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 15,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 6,
+          "text": "Вчера мастер сделал стол из дерева",
+          "evidence": {
+            "text": "Вчера мастер сделал стол из дерева",
+            "start": 0,
+            "end": 34
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 3,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "сделать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "вчера",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 8,
+          "end_index": 14,
+          "text": "а сегодня ученик — стул из металла",
+          "evidence": {
+            "text": "а сегодня ученик — стул из металла",
+            "start": 36,
+            "end": 70
+          }
+        },
+        "predicate_heads": [],
+        "marker": "а",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": "FRAME",
+        "ellipsis_source_clause_id": "CL1"
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 3,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "сделать"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "сделал",
+          "normalized_hint": "сделать",
+          "sense_hint": null,
+          "evidence": {
+            "text": "сделал",
+            "start": 13,
+            "end": 19
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "OBJECT",
+              "TIME",
+              "MATERIAL"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "TIME",
+            "mention": "Вчера",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Вчера",
+              "start": 0,
+              "end": 5
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": null,
+            "temporal": null
+          },
+          {
+            "role": "SUBJECT",
+            "mention": "мастер",
+            "normalized_hint": "мастер",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "мастер",
+              "start": 6,
+              "end": 12
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "стол",
+            "normalized_hint": "стол",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "стол",
+              "start": 20,
+              "end": 24
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "MATERIAL",
+            "mention": "дерева",
+            "normalized_hint": "дерево",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "из дерева",
+              "start": 25,
+              "end": 34
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": null,
+            "temporal": null
+          }
+        ],
+        "evidence": {
+          "text": "Вчера мастер сделал стол из дерева",
+          "start": 0,
+          "end": 34
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "temporal_mode": null,
+        "transition_operator": null,
+        "quoted": false
+      },
+      {
+        "local_id": "A2",
+        "predicate": {
+          "surface": "сделал",
+          "normalized_hint": "сделать",
+          "sense_hint": null,
+          "evidence": {
+            "text": "сделал",
+            "start": 13,
+            "end": 19
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "OBJECT",
+              "TIME",
+              "MATERIAL"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "TIME",
+            "mention": "сегодня",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "сегодня",
+              "start": 38,
+              "end": 45
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": null,
+            "temporal": null
+          },
+          {
+            "role": "SUBJECT",
+            "mention": "ученик",
+            "normalized_hint": "ученик",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "ученик",
+              "start": 46,
+              "end": 52
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "стул",
+            "normalized_hint": "стул",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "стул",
+              "start": 55,
+              "end": 59
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "MATERIAL",
+            "mention": "металла",
+            "normalized_hint": "металл",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "из металла",
+              "start": 60,
+              "end": 70
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          }
+        ],
+        "evidence": {
+          "text": "а сегодня ученик — стул из металла",
+          "start": 36,
+          "end": 70
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "temporal_mode": null,
+        "transition_operator": null,
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [],
+    "relation_hints": [],
+    "lexical_recovery": [
+      {
+        "token_index": 1,
+        "raw_text": "Вчера",
+        "normalized_text": "Вчера",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 2,
+        "raw_text": "мастер",
+        "normalized_text": "мастер",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 3,
+        "raw_text": "сделал",
+        "normalized_text": "сделал",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 4,
+        "raw_text": "стол",
+        "normalized_text": "стол",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 5,
+        "raw_text": "из",
+        "normalized_text": "из",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 6,
+        "raw_text": "дерева",
+        "normalized_text": "дерева",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 7,
+        "raw_text": ",",
+        "normalized_text": ",",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      },
+      {
+        "token_index": 8,
+        "raw_text": "а",
+        "normalized_text": "а",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 9,
+        "raw_text": "сегодня",
+        "normalized_text": "сегодня",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 10,
+        "raw_text": "ученик",
+        "normalized_text": "ученик",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 11,
+        "raw_text": "—",
+        "normalized_text": "—",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      },
+      {
+        "token_index": 12,
+        "raw_text": "стул",
+        "normalized_text": "стул",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 13,
+        "raw_text": "из",
+        "normalized_text": "из",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 14,
+        "raw_text": "металла",
+        "normalized_text": "металла",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 15,
+        "raw_text": ".",
+        "normalized_text": ".",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_9e0d38392c8a4a6b81972b82cff2a263",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null,
+        "nominal_relations": []
+      },
+      {
+        "local_id": "A2",
+        "ref": {
+          "uid": "N_bdc3a2624f6f4bd48306bf27282d00f3",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null,
+        "nominal_relations": []
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_ce2e66fb084a4891aba889a850674606",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_9e0d38392c8a4a6b81972b82cff2a263",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_bdc3a2624f6f4bd48306bf27282d00f3",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_ce2e66fb084a4891aba889a850674606",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_fe4e92d8d1294074bbcc0ffbb5deff3a",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": [],
+    "existentials": [],
+    "conflicts": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+    "workspace_blocks": [],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+    "source_workspace_refs": [
+      {
+        "uid": "N_9e0d38392c8a4a6b81972b82cff2a263",
+        "kind": "N"
+      },
+      {
+        "uid": "N_bdc3a2624f6f4bd48306bf27282d00f3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ce2e66fb084a4891aba889a850674606",
+        "kind": "N"
+      },
+      {
+        "uid": "S_fe4e92d8d1294074bbcc0ffbb5deff3a",
+        "kind": "S"
+      },
+      {
+        "uid": "T_bd0861c3dad843e5a3ff6e2b9f0c88fb",
+        "kind": "T"
+      }
+    ],
+    "source_scope_ref": null,
+    "estimated_tokens": 18
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 3,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "N_9e0d38392c8a4a6b81972b82cff2a263",
+          "kind": "N"
+        },
+        "semantic": "[N_9e0d38392c8a4a6b81972b82cff2a263] [S_fe4e92d8d1294074bbcc0ffbb5deff3a] сделал(SUBJECT=[M_b273166119ae4227aef211aa5c077ab7] мастер, OBJECT=[M_b794c5a48f6e457ebba3a8c46da2a250] стол, TIME=[M_f8960b6d53c14526b0d1ccd358a49142] Вчера, MATERIAL=[M_1b271c4112644cb982b3e4186d8786c4] дерево)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "N_bdc3a2624f6f4bd48306bf27282d00f3",
+          "kind": "N"
+        },
+        "semantic": "[N_bdc3a2624f6f4bd48306bf27282d00f3] [S_fe4e92d8d1294074bbcc0ffbb5deff3a] сделал(SUBJECT=[M_0660ed23fcc74605af458bb3e2425422] ученик, OBJECT=[M_33fdbc3abd974929b837fd741970862e] стул, TIME=[M_d65aa187c81c478382c9bb8a71883cea] сегодня, MATERIAL=[M_eac6d4fc2d2843ae953f81d34fb6f38f] металл)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "N_ce2e66fb084a4891aba889a850674606",
+          "kind": "N"
+        },
+        "semantic": "[N_ce2e66fb084a4891aba889a850674606] реплика пользователя: Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "S_fe4e92d8d1294074bbcc0ffbb5deff3a",
+          "kind": "S"
+        },
+        "semantic": "[S_fe4e92d8d1294074bbcc0ffbb5deff3a] сделал",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "T_bd0861c3dad843e5a3ff6e2b9f0c88fb",
+          "kind": "T"
+        },
+        "semantic": "[T_bd0861c3dad843e5a3ff6e2b9f0c88fb] predicate=[S_fe4e92d8d1294074bbcc0ffbb5deff3a] сделал; roles=[SUBJECT, OBJECT, TIME, MATERIAL]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 73,
+      "source_text": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+      "attempts": [
+        {
+          "role": "predicate_ownership",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "CLAUSE:CL2\nTEXT:а сегодня ученик — стул из металла",
+          "normalized_answer": "ELLIPSIS:preserved",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nTOKENS:\n[1] Вчера\n[2] мастер\n[3] сделал\n[4] стол\n[5] из\n[6] дерева\n[7] ,\n[8] а\n[9] сегодня\n[10] ученик\n[11] —\n[12] стул\n[13] из\n[14] металла\n[15] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[3] token 3: сделал; morphology=VERB",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nTOKENS:\n[1] Вчера\n[2] мастер\n[3] сделал\n[4] стол\n[5] из\n[6] дерева\n[7] ,\n[8] а\n[9] сегодня\n[10] ученик\n[11] —\n[12] стул\n[13] из\n[14] металла\n[15] .\nPREDICATE_START: [3] сделал\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[3] end at token 3: сделал",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева\nTARGET:\nсделал\nRUSSIAN_LEMMA:\nсделать",
+          "normalized_answer": "сделать",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева\nPREDICATE:\nсделал\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Вчера\n[2] мастер\n[3] стол\n[4] из дерева",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "TIME_POINT",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nВчера\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nTRANSITION_OPERATOR: TARGET is not an actant; it explicitly marks that the predicate occurrence begins, ends, continues, repeats, or no longer holds\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\nTRANSITION_OPERATOR\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "TIME_POINT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nALREADY_SELECTED:\nВчера\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] мастер\n[2] стол\n[3] из дерева",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "ACTOR_OR_EXPERIENCER",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nмастер\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "ACTOR_OR_EXPERIENCER",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nALREADY_SELECTED:\nВчера | мастер\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] стол\n[2] из дерева",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "AFFECTED_OR_CONTENT",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nстол\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "AFFECTED_OR_CONTENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nALREADY_SELECTED:\nВчера | мастер | стол\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] из дерева",
+          "normalized_answer": "5-6",
+          "retry_index": 0
+        },
+        {
+          "role": "modifier_attachment",
+          "raw_text": "EVENT",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nMODIFIER:\nиз дерева\nPOSSIBLE READINGS:\nEVENT: MODIFIER fills a semantic relation of this PREDICATE occurrence, even if its surface position is next to a nominal\nNOMINAL_1: MODIFIER describes only the source nominal 'стол' and does not fill a semantic relation of this PREDICATE occurrence\nQUESTION:\nWhich semantic contribution is determined by the whole sentence? Syntactic adjacency alone does not decide this choice. Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means MODIFIER fills a semantic relation of PREDICATE, including through an affected or resulting participant. NOMINAL_n means it only describes that nominal and adds no event role. Adjacency alone does not decide. Use UNCLEAR only if the complete text permits multiple listed readings. Return only the label.",
+          "normalized_answer": "EVENT",
+          "retry_index": 0
+        },
+        {
+          "role": "structural_attachment",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "ATTACHMENT: из дерева",
+          "normalized_answer": "ATTACH:PRED:5-6",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "CONSTITUENT_MATERIAL",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nиз дерева\nCANDIDATE RELATIONS:\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "CONSTITUENT_MATERIAL",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nALREADY_SELECTED:\nВчера | мастер | стол | из дерева\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] сегодня\n[2] ученик\n[3] стул\n[4] из металла",
+          "normalized_answer": "9",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nQUESTION_WORD:\nсегодня",
+          "normalized_answer": "TIME",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nALREADY_SELECTED:\nсегодня\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] ученик\n[2] стул\n[3] из металла",
+          "normalized_answer": "10",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nQUESTION_WORD:\nученик",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nALREADY_SELECTED:\nсегодня | ученик\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] стул\n[2] из металла",
+          "normalized_answer": "12",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nQUESTION_WORD:\nстул",
+          "normalized_answer": "OBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nALREADY_SELECTED:\nсегодня | ученик | стул\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] из металла",
+          "normalized_answer": "13-14",
+          "retry_index": 0
+        },
+        {
+          "role": "ellipsis_attachment",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "из металла",
+          "normalized_answer": "MATERIAL",
+          "retry_index": 0
+        },
+        {
+          "role": "structural_attachment",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "ATTACHMENT: из металла",
+          "normalized_answer": "ATTACH:PRED:13-14",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nQUESTION_WORD:\nиз металла",
+          "normalized_answer": "MATERIAL",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nALREADY_SELECTED:\nсегодня | ученик | стул | из металла\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "frame_completion",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE:A1\nTARGET_CLAUSE:а сегодня ученик — стул из металла\nINHERITED:-",
+          "normalized_answer": "root=сделать; frames=1",
+          "retry_index": 0
+        },
+        {
+          "role": "ellipsis_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "SOURCE:A1\nTARGET_CLAUSE:а сегодня ученик — стул из металла\nMODE:FRAME",
+          "normalized_answer": "A2; replaced=MATERIAL,OBJECT,SUBJECT,TIME; inherited=-; negated=false; frames=1",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "сделал",
+              "normalized_hint": "сделать",
+              "sense_hint": null,
+              "evidence": {
+                "text": "сделал",
+                "start": 13,
+                "end": 19
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "TIME",
+                "mention": "Вчера",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Вчера",
+                  "start": 0,
+                  "end": 5
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": null,
+                "temporal": null
+              },
+              {
+                "role": "SUBJECT",
+                "mention": "мастер",
+                "normalized_hint": "мастер",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "мастер",
+                  "start": 6,
+                  "end": 12
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "стол",
+                "normalized_hint": "стол",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "стол",
+                  "start": 20,
+                  "end": 24
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "MATERIAL",
+                "mention": "дерева",
+                "normalized_hint": "дерево",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "из дерева",
+                  "start": 25,
+                  "end": 34
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": null,
+                "temporal": null
+              }
+            ],
+            "evidence": {
+              "text": "Вчера мастер сделал стол из дерева",
+              "start": 0,
+              "end": 34
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "temporal_mode": null,
+            "transition_operator": null,
+            "quoted": false
+          },
+          {
+            "local_id": "A2",
+            "predicate": {
+              "surface": "сделал",
+              "normalized_hint": "сделать",
+              "sense_hint": null,
+              "evidence": {
+                "text": "сделал",
+                "start": 13,
+                "end": 19
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "TIME",
+                "mention": "сегодня",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "сегодня",
+                  "start": 38,
+                  "end": 45
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": null,
+                "temporal": null
+              },
+              {
+                "role": "SUBJECT",
+                "mention": "ученик",
+                "normalized_hint": "ученик",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "ученик",
+                  "start": 46,
+                  "end": 52
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "стул",
+                "normalized_hint": "стул",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "стул",
+                  "start": 55,
+                  "end": 59
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "MATERIAL",
+                "mention": "металла",
+                "normalized_hint": "металл",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "из металла",
+                  "start": 60,
+                  "end": 70
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              }
+            ],
+            "evidence": {
+              "text": "а сегодня ученик — стул из металла",
+              "start": 36,
+              "end": 70
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "temporal_mode": null,
+            "transition_operator": null,
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [],
+        "relation_hints": [],
+        "lexical_recovery": [
+          {
+            "token_index": 1,
+            "raw_text": "Вчера",
+            "normalized_text": "Вчера",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 2,
+            "raw_text": "мастер",
+            "normalized_text": "мастер",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 3,
+            "raw_text": "сделал",
+            "normalized_text": "сделал",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 4,
+            "raw_text": "стол",
+            "normalized_text": "стол",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 5,
+            "raw_text": "из",
+            "normalized_text": "из",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 6,
+            "raw_text": "дерева",
+            "normalized_text": "дерева",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 7,
+            "raw_text": ",",
+            "normalized_text": ",",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          },
+          {
+            "token_index": 8,
+            "raw_text": "а",
+            "normalized_text": "а",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 9,
+            "raw_text": "сегодня",
+            "normalized_text": "сегодня",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 10,
+            "raw_text": "ученик",
+            "normalized_text": "ученик",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 11,
+            "raw_text": "—",
+            "normalized_text": "—",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          },
+          {
+            "token_index": 12,
+            "raw_text": "стул",
+            "normalized_text": "стул",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 13,
+            "raw_text": "из",
+            "normalized_text": "из",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 14,
+            "raw_text": "металла",
+            "normalized_text": "металла",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 15,
+            "raw_text": ".",
+            "normalized_text": ".",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 318,
+      "req_id": "d117e53cdd234eb4b858d9a935ae98e3",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nВчера\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nTRANSITION_OPERATOR: TARGET is not an actant; it explicitly marks that the predicate occurrence begins, ends, continues, repeats, or no longer holds\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\nTRANSITION_OPERATOR\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "TIME_POINT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nВчера\nCANDIDATE RELATIONS:\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nTRANSITION_OPERATOR: TARGET is not an actant; it explicitly marks that the predicate occurrence begins, ends, continues, repeats, or no longer holds\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\nTRANSITION_OPERATOR\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 614,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 319,
+      "req_id": "d7b82efc5e5b4f1fad243b177ca12cc4",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nмастер\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nмастер\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 1010,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 320,
+      "req_id": "a082d482967c4ee1840da820af41296e",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nстол\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nстол\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 950,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 321,
+      "req_id": "5c2ebcdf51b04f00b1f842a372539ab4",
+      "role": "perception_modifier_attachment",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nMODIFIER:\nиз дерева\nPOSSIBLE READINGS:\nEVENT: MODIFIER fills a semantic relation of this PREDICATE occurrence, even if its surface position is next to a nominal\nNOMINAL_1: MODIFIER describes only the source nominal 'стол' and does not fill a semantic relation of this PREDICATE occurrence\nQUESTION:\nWhich semantic contribution is determined by the whole sentence? Syntactic adjacency alone does not decide this choice. Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means MODIFIER fills a semantic relation of PREDICATE, including through an affected or resulting participant. NOMINAL_n means it only describes that nominal and adds no event role. Adjacency alone does not decide. Use UNCLEAR only if the complete text permits multiple listed readings. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "EVENT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nMODIFIER:\nиз дерева\nPOSSIBLE READINGS:\nEVENT: MODIFIER fills a semantic relation of this PREDICATE occurrence, even if its surface position is next to a nominal\nNOMINAL_1: MODIFIER describes only the source nominal 'стол' and does not fill a semantic relation of this PREDICATE occurrence\nQUESTION:\nWhich semantic contribution is determined by the whole sentence? Syntactic adjacency alone does not decide this choice. Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means MODIFIER fills a semantic relation of PREDICATE, including through an affected or resulting participant. NOMINAL_n means it only describes that nominal and adds no event role. Adjacency alone does not decide. Use UNCLEAR only if the complete text permits multiple listed readings. Return only the label.",
+      "input_tokens": 315,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 322,
+      "req_id": "b823c01f109f40a498e3d2f04e40636e",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nиз дерева\nCANDIDATE RELATIONS:\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "CONSTITUENT_MATERIAL",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nTARGET:\nиз дерева\nCANDIDATE RELATIONS:\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 866,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 323,
+      "req_id": "8911148039f84038b175986392fbb6fd",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nSEMANTIC ARGUMENTS:\nSUBJECT = мастер\nOBJECT = стол\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='мастер' IS-A OBJECT='стол'\nR2: OBJECT='стол' IS-A SUBJECT='мастер'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nSEMANTIC ARGUMENTS:\nSUBJECT = мастер\nOBJECT = стол\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='мастер' IS-A OBJECT='стол'\nR2: OBJECT='стол' IS-A SUBJECT='мастер'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 313,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 324,
+      "req_id": "631c398b00bf47af9b57e3c371aebeef",
+      "role": "perception_act_relation",
+      "prompt": "TEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nSEMANTIC ARGUMENTS:\nSUBJECT = ученик\nOBJECT = стул\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='ученик' IS-A OBJECT='стул'\nR2: OBJECT='стул' IS-A SUBJECT='ученик'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NONE",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nВчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.\nPREDICATE:\nсделал\nSEMANTIC ARGUMENTS:\nSUBJECT = ученик\nOBJECT = стул\nQUESTION:\nDoes this semantic act itself state or ask that one listed referent is an instance/member/subtype of another listed class/type? Do not choose IS-A for a temporary state, job/role, attribute, location, possession, event participation, comparison, naming, or ordinary predicate.\nCHOICES:\nNONE: this act does not state/ask a taxonomic class-membership or subtype relation\nR1: SUBJECT='ученик' IS-A OBJECT='стул'\nR2: OBJECT='стул' IS-A SUBJECT='ученик'\n\nTASK:\nChoose exactly one label from CHOICES. Select IS-A only when the parsed act says one listed referent is an instance/member/subtype of another listed class/type. Reject temporary states, jobs/roles, attributes, locations, possession, naming, comparison, and ordinary events. Surface wording is evidence only. Return only the label.",
+      "input_tokens": 318,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "K_3856bea439964224bacc5fbf05b23e63": {
+        "uid": "K_3856bea439964224bacc5fbf05b23e63",
+        "kind": "K",
+        "domain": "H",
+        "members": [
+          {
+            "uid": "N_9e0d38392c8a4a6b81972b82cff2a263",
+            "kind": "N"
+          },
+          {
+            "uid": "N_bdc3a2624f6f4bd48306bf27282d00f3",
+            "kind": "N"
+          }
+        ],
+        "properties": {},
+        "meta": {
+          "type": "UTTERANCE_CONTENT",
+          "gc_auto_created": true
+        }
+      },
+      "M_0660ed23fcc74605af458bb3e2425422": {
+        "uid": "M_0660ed23fcc74605af458bb3e2425422",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "ученик",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_1b271c4112644cb982b3e4186d8786c4": {
+        "uid": "M_1b271c4112644cb982b3e4186d8786c4",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "дерево",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_33fdbc3abd974929b837fd741970862e": {
+        "uid": "M_33fdbc3abd974929b837fd741970862e",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "стул",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_b273166119ae4227aef211aa5c077ab7": {
+        "uid": "M_b273166119ae4227aef211aa5c077ab7",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "мастер",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_b794c5a48f6e457ebba3a8c46da2a250": {
+        "uid": "M_b794c5a48f6e457ebba3a8c46da2a250",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "стол",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_d65aa187c81c478382c9bb8a71883cea": {
+        "uid": "M_d65aa187c81c478382c9bb8a71883cea",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "end": {
+            "name": "end",
+            "value": "",
+            "type_name": "str",
+            "unit": null
+          },
+          "kind": {
+            "name": "kind",
+            "value": "POINT",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "сегодня",
+            "type_name": "str",
+            "unit": null
+          },
+          "precision": {
+            "name": "precision",
+            "value": "DAY",
+            "type_name": "str",
+            "unit": null
+          },
+          "source_text": {
+            "name": "source_text",
+            "value": "сегодня",
+            "type_name": "str",
+            "unit": null
+          },
+          "start": {
+            "name": "start",
+            "value": "2026-09-08",
+            "type_name": "str",
+            "unit": null
+          },
+          "temporal_key": {
+            "name": "temporal_key",
+            "value": "POINT|2026-09-08||DAY|+03:00",
+            "type_name": "str",
+            "unit": null
+          },
+          "timezone": {
+            "name": "timezone",
+            "value": "+03:00",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "semantic_time": true,
+          "gc_auto_created": true
+        }
+      },
+      "M_eac6d4fc2d2843ae953f81d34fb6f38f": {
+        "uid": "M_eac6d4fc2d2843ae953f81d34fb6f38f",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "металл",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_f8960b6d53c14526b0d1ccd358a49142": {
+        "uid": "M_f8960b6d53c14526b0d1ccd358a49142",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "end": {
+            "name": "end",
+            "value": "",
+            "type_name": "str",
+            "unit": null
+          },
+          "kind": {
+            "name": "kind",
+            "value": "POINT",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "Вчера",
+            "type_name": "str",
+            "unit": null
+          },
+          "precision": {
+            "name": "precision",
+            "value": "DAY",
+            "type_name": "str",
+            "unit": null
+          },
+          "source_text": {
+            "name": "source_text",
+            "value": "Вчера",
+            "type_name": "str",
+            "unit": null
+          },
+          "start": {
+            "name": "start",
+            "value": "2026-09-07",
+            "type_name": "str",
+            "unit": null
+          },
+          "temporal_key": {
+            "name": "temporal_key",
+            "value": "POINT|2026-09-07||DAY|+03:00",
+            "type_name": "str",
+            "unit": null
+          },
+          "timezone": {
+            "name": "timezone",
+            "value": "+03:00",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "semantic_time": true,
+          "gc_auto_created": true
+        }
+      },
+      "N_9e0d38392c8a4a6b81972b82cff2a263": {
+        "uid": "N_9e0d38392c8a4a6b81972b82cff2a263",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_bd0861c3dad843e5a3ff6e2b9f0c88fb",
+          "kind": "T"
+        },
+        "actants": {
+          "TIME": {
+            "uid": "M_f8960b6d53c14526b0d1ccd358a49142",
+            "kind": "M"
+          },
+          "SUBJECT": {
+            "uid": "M_b273166119ae4227aef211aa5c077ab7",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "M_b794c5a48f6e457ebba3a8c46da2a250",
+            "kind": "M"
+          },
+          "MATERIAL": {
+            "uid": "M_1b271c4112644cb982b3e4186d8786c4",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 0,
+          "expires_tick": 40,
+          "last_qualifying_tick": 0,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_bdc3a2624f6f4bd48306bf27282d00f3": {
+        "uid": "N_bdc3a2624f6f4bd48306bf27282d00f3",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_bd0861c3dad843e5a3ff6e2b9f0c88fb",
+          "kind": "T"
+        },
+        "actants": {
+          "TIME": {
+            "uid": "M_d65aa187c81c478382c9bb8a71883cea",
+            "kind": "M"
+          },
+          "SUBJECT": {
+            "uid": "M_0660ed23fcc74605af458bb3e2425422",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "M_33fdbc3abd974929b837fd741970862e",
+            "kind": "M"
+          },
+          "MATERIAL": {
+            "uid": "M_eac6d4fc2d2843ae953f81d34fb6f38f",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 0,
+          "expires_tick": 40,
+          "last_qualifying_tick": 0,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_ce2e66fb084a4891aba889a850674606": {
+        "uid": "N_ce2e66fb084a4891aba889a850674606",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_2606238054d54eb587b9944c175b4611",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "K_3856bea439964224bacc5fbf05b23e63",
+            "kind": "K"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_e5c7c9371d97469c8d857f0b4a7393bf": {
+        "uid": "S_e5c7c9371d97469c8d857f0b4a7393bf",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "S_fe4e92d8d1294074bbcc0ffbb5deff3a": {
+        "uid": "S_fe4e92d8d1294074bbcc0ffbb5deff3a",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "сделал",
+          "сделать"
+        ]
+      },
+      "T_2606238054d54eb587b9944c175b4611": {
+        "uid": "T_2606238054d54eb587b9944c175b4611",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_e5c7c9371d97469c8d857f0b4a7393bf",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      },
+      "T_bd0861c3dad843e5a3ff6e2b9f0c88fb": {
+        "uid": "T_bd0861c3dad843e5a3ff6e2b9f0c88fb",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_fe4e92d8d1294074bbcc0ffbb5deff3a",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME",
+          "MATERIAL"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 3,
+    "workspace_uids": [
+      "N_9e0d38392c8a4a6b81972b82cff2a263",
+      "N_bdc3a2624f6f4bd48306bf27282d00f3",
+      "N_ce2e66fb084a4891aba889a850674606",
+      "S_fe4e92d8d1294074bbcc0ffbb5deff3a",
+      "T_bd0861c3dad843e5a3ff6e2b9f0c88fb"
+    ],
+    "workspace": {
+      "N_9e0d38392c8a4a6b81972b82cff2a263": {
+        "semantic": "сделал(SUBJECT=мастер, OBJECT=стол, TIME=Вчера, MATERIAL=дерево)",
+        "excitation": 1.0
+      },
+      "N_bdc3a2624f6f4bd48306bf27282d00f3": {
+        "semantic": "сделал(SUBJECT=ученик, OBJECT=стул, TIME=сегодня, MATERIAL=металл)",
+        "excitation": 1.0
+      },
+      "N_ce2e66fb084a4891aba889a850674606": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_3856bea439964224bacc5fbf05b23e63[сделал(SUBJECT=мастер, OBJECT=стол, TIME=Вчера, MATERIAL=дерево); сделал(SUBJECT=ученик, OBJECT=стул, TIME=сегодня, MATERIAL=металл)])",
+        "excitation": 0.49704875845222196
+      },
+      "S_fe4e92d8d1294074bbcc0ffbb5deff3a": {
+        "semantic": "сделал",
+        "excitation": 0.9443926410592216
+      },
+      "T_bd0861c3dad843e5a3ff6e2b9f0c88fb": {
+        "semantic": "сделал",
+        "excitation": 0.9476617761328255
+      }
+    },
+    "pending_incoming": {
+      "M_f8960b6d53c14526b0d1ccd358a49142": 0.15200000000000005,
+      "M_b273166119ae4227aef211aa5c077ab7": 0.15200000000000005,
+      "M_b794c5a48f6e457ebba3a8c46da2a250": 0.15200000000000005,
+      "M_1b271c4112644cb982b3e4186d8786c4": 0.15200000000000005,
+      "M_d65aa187c81c478382c9bb8a71883cea": 0.15200000000000005,
+      "M_0660ed23fcc74605af458bb3e2425422": 0.15200000000000005,
+      "M_33fdbc3abd974929b837fd741970862e": 0.15200000000000005,
+      "M_eac6d4fc2d2843ae953f81d34fb6f38f": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_0660ed23fcc74605af458bb3e2425422",
+        "kind": "M"
+      }
+    },
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_ce2e66fb084a4891aba889a850674606",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 2,
+      "actual": 2
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "сделать",
+      "actual": "сделать"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "мастер"
+      },
+      "actual": "мастер"
+    },
+    {
+      "name": "perception.assertions.a1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "стол"
+      },
+      "actual": "стол"
+    },
+    {
+      "name": "perception.assertions.a1.roles.MATERIAL",
+      "ok": true,
+      "expected": {
+        "text": "дерево"
+      },
+      "actual": "дерево"
+    },
+    {
+      "name": "perception.assertions.a1.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "вчера"
+      },
+      "actual": "Вчера"
+    },
+    {
+      "name": "perception.assertions.a2.predicate",
+      "ok": true,
+      "expected": "сделать",
+      "actual": "сделать"
+    },
+    {
+      "name": "perception.assertions.a2.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "perception.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "ученик"
+      },
+      "actual": "ученик"
+    },
+    {
+      "name": "perception.assertions.a2.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "стул"
+      },
+      "actual": "стул"
+    },
+    {
+      "name": "perception.assertions.a2.roles.MATERIAL",
+      "ok": true,
+      "expected": {
+        "text": "металл"
+      },
+      "actual": "металл"
+    },
+    {
+      "name": "perception.assertions.a2.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "сегодня"
+      },
+      "actual": "сегодня"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.domains.a1",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "integration.domains.a2",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "сделать",
+      "actual": [
+        "сделал",
+        "сделать"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "мастер"
+      },
+      "actual": "мастер"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "стол"
+      },
+      "actual": "стол"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.MATERIAL",
+      "ok": true,
+      "expected": {
+        "text": "дерево"
+      },
+      "actual": "дерево"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "вчера"
+      },
+      "actual": "Вчера"
+    },
+    {
+      "name": "canonical.assertions.a2.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a2.predicate",
+      "ok": true,
+      "expected": "сделать",
+      "actual": [
+        "сделал",
+        "сделать"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a2.role_set",
+      "ok": true,
+      "expected": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a2.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "ученик"
+      },
+      "actual": "ученик"
+    },
+    {
+      "name": "canonical.assertions.a2.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "стул"
+      },
+      "actual": "стул"
+    },
+    {
+      "name": "canonical.assertions.a2.roles.MATERIAL",
+      "ok": true,
+      "expected": {
+        "text": "металл"
+      },
+      "actual": "металл"
+    },
+    {
+      "name": "canonical.assertions.a2.roles.TIME",
+      "ok": true,
+      "expected": {
+        "text": "сегодня"
+      },
+      "actual": "сегодня"
+    },
+    {
+      "name": "templates.сделать.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "MATERIAL",
+        "OBJECT",
+        "SUBJECT",
+        "TIME"
+      ],
+      "actual": [
+        [
+          "MATERIAL",
+          "OBJECT",
+          "SUBJECT",
+          "TIME"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "temporal_locative_combo",
+  "semantic_tags": [
+    "ellipsis",
+    "discourse_reconstruction",
+    "temporal",
+    "material"
+  ]
+}

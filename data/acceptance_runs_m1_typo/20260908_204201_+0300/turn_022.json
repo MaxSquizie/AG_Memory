@@ -1,0 +1,1174 @@
+{
+  "index": 22,
+  "input": "Пётр ударил молоткм.",
+  "status": "OK",
+  "scenario_id": "m1_typo_022",
+  "linguistic_candidate_graph": {
+    "text": "Пётр ударил молоткм.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Пётр",
+        "start": 0,
+        "end": 4,
+        "analyses": [
+          {
+            "normal_form": "пётр",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Name",
+              "sing",
+              "NOUN",
+              "nomn",
+              "anim",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Пётр",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Пётр",
+          "normalized_text": "Пётр",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "ударил",
+        "start": 5,
+        "end": 11,
+        "analyses": [
+          {
+            "normal_form": "ударить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "sing",
+              "VERB",
+              "masc",
+              "perf",
+              "past",
+              "tran",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "ударил",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "ударил",
+          "normalized_text": "ударил",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 3,
+        "text": "молотки",
+        "start": 12,
+        "end": 19,
+        "analyses": [
+          {
+            "normal_form": "молоток",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc"
+            ],
+            "score": 0.666666
+          },
+          {
+            "normal_form": "молоток",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "plur",
+              "nomn",
+              "inan",
+              "masc"
+            ],
+            "score": 0.333333
+          }
+        ],
+        "raw_text": "молоткм",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "молоткм",
+          "normalized_text": "молотки",
+          "status": "CORRECTED_HIGH_CONFIDENCE",
+          "alternatives": [
+            "молотки",
+            "молоткам",
+            "молотком",
+            "молотам",
+            "молотка",
+            "молотке",
+            "молотку",
+            "молотом"
+          ],
+          "confidence": 0.89,
+          "reason": "same-lexeme grammatical form dominance"
+        }
+      },
+      {
+        "index": 4,
+        "text": ".",
+        "start": 19,
+        "end": 20,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 3,
+          "text": "Пётр ударил молоткм",
+          "evidence": {
+            "text": "Пётр ударил молоткм",
+            "start": 0,
+            "end": 19
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "ударить"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "пётр",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "ударить"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Пётр ударил молоткм.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "ударил",
+          "normalized_hint": "ударить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "ударил",
+            "start": 5,
+            "end": 11
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "TOOL"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Пётр",
+            "normalized_hint": "Пётр",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Пётр",
+              "start": 0,
+              "end": 4
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "sing",
+            "temporal": null
+          },
+          {
+            "role": "TOOL",
+            "mention": "молотки",
+            "normalized_hint": "молоток",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "молоткм",
+              "start": 12,
+              "end": 19
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null,
+            "nominal_relations": [],
+            "grammatical_number": "plur",
+            "temporal": null
+          }
+        ],
+        "evidence": {
+          "text": "Пётр ударил молоткм",
+          "start": 0,
+          "end": 19
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "temporal_mode": null,
+        "transition_operator": null,
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "act_relations": [],
+    "conditionals": [],
+    "act_dependencies": [],
+    "relation_hints": [],
+    "lexical_recovery": [
+      {
+        "token_index": 1,
+        "raw_text": "Пётр",
+        "normalized_text": "Пётр",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 2,
+        "raw_text": "ударил",
+        "normalized_text": "ударил",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "dictionary exact"
+      },
+      {
+        "token_index": 3,
+        "raw_text": "молоткм",
+        "normalized_text": "молотки",
+        "status": "CORRECTED_HIGH_CONFIDENCE",
+        "alternatives": [
+          "молотки",
+          "молоткам",
+          "молотком",
+          "молотам",
+          "молотка",
+          "молотке",
+          "молотку",
+          "молотом"
+        ],
+        "confidence": 0.89,
+        "reason": "same-lexeme grammatical form dominance"
+      },
+      {
+        "token_index": 4,
+        "raw_text": ".",
+        "normalized_text": ".",
+        "status": "EXACT",
+        "alternatives": [],
+        "confidence": 1.0,
+        "reason": "non-lexical token"
+      }
+    ]
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null,
+        "nominal_relations": []
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_aa3d31868733432d87d30cfaee52a274",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_aa3d31868733432d87d30cfaee52a274",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_37e10a0046584dbd8f17a72ea829d9c9",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": [],
+    "existentials": [],
+    "conflicts": []
+  },
+  "queries": [],
+  "proofs": [],
+  "agent_context": {
+    "current_input": "Пётр ударил молоткм.",
+    "workspace_blocks": [],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nПётр ударил молоткм.",
+    "source_workspace_refs": [
+      {
+        "uid": "N_aa3d31868733432d87d30cfaee52a274",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+        "kind": "N"
+      },
+      {
+        "uid": "S_37e10a0046584dbd8f17a72ea829d9c9",
+        "kind": "S"
+      },
+      {
+        "uid": "T_abc6c3eaa269475099e05a436fd39c90",
+        "kind": "T"
+      }
+    ],
+    "source_scope_ref": null,
+    "estimated_tokens": 7
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 3,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "N_aa3d31868733432d87d30cfaee52a274",
+          "kind": "N"
+        },
+        "semantic": "[N_aa3d31868733432d87d30cfaee52a274] реплика пользователя: Пётр ударил молоткм.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49704875845222196,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+          "kind": "N"
+        },
+        "semantic": "[N_ab10b670cc1c4450aa8fd06338f7d1a4] [S_37e10a0046584dbd8f17a72ea829d9c9] ударил(SUBJECT=[M_13d767ca46354a97abe329e9acef893c] Пётр, TOOL=[M_17b12f94f2e04201b5ee2ccce3185b49] молоток)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "S_37e10a0046584dbd8f17a72ea829d9c9",
+          "kind": "S"
+        },
+        "semantic": "[S_37e10a0046584dbd8f17a72ea829d9c9] ударил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9443926410592216,
+        "output": 0.0,
+        "decay_age": 2,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "T_abc6c3eaa269475099e05a436fd39c90",
+          "kind": "T"
+        },
+        "semantic": "[T_abc6c3eaa269475099e05a436fd39c90] predicate=[S_37e10a0046584dbd8f17a72ea829d9c9] ударил; roles=[SUBJECT, TOOL]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 3
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 188,
+      "source_text": "Пётр ударил молоткм.",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:3\nRAW:молоткм\nCANDIDATES:молотки,молоткам,молотком,молотам,молотка,молотке,молотку,молотом",
+          "normalized_answer": "молотки",
+          "retry_index": 0
+        },
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nTOKENS:\n[1] Пётр\n[2] ударил\n[3] молотки\n[4] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: ударил; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nTOKENS:\n[1] Пётр\n[2] ударил\n[3] молотки\n[4] .\nPREDICATE_START: [2] ударил\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: ударил",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм\nTARGET:\nударил\nRUSSIAN_LEMMA:\nударить",
+          "normalized_answer": "ударить",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм\nPREDICATE:\nударил\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Пётр\n[2] молоткм",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "ACTOR_OR_EXPERIENCER",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nTARGET:\nПётр\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "ACTOR_OR_EXPERIENCER",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nALREADY_SELECTED:\nПётр\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] молоткм",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "INSTRUMENT",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nTARGET:\nмолотки\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "INSTRUMENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nALREADY_SELECTED:\nПётр | молоткм\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Пётр ударил молоткм.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "ударил",
+              "normalized_hint": "ударить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "ударил",
+                "start": 5,
+                "end": 11
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Пётр",
+                "normalized_hint": "Пётр",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Пётр",
+                  "start": 0,
+                  "end": 4
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "sing",
+                "temporal": null
+              },
+              {
+                "role": "TOOL",
+                "mention": "молотки",
+                "normalized_hint": "молоток",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "молоткм",
+                  "start": 12,
+                  "end": 19
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null,
+                "nominal_relations": [],
+                "grammatical_number": "plur",
+                "temporal": null
+              }
+            ],
+            "evidence": {
+              "text": "Пётр ударил молоткм",
+              "start": 0,
+              "end": 19
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "temporal_mode": null,
+            "transition_operator": null,
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "act_relations": [],
+        "conditionals": [],
+        "act_dependencies": [],
+        "relation_hints": [],
+        "lexical_recovery": [
+          {
+            "token_index": 1,
+            "raw_text": "Пётр",
+            "normalized_text": "Пётр",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 2,
+            "raw_text": "ударил",
+            "normalized_text": "ударил",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "dictionary exact"
+          },
+          {
+            "token_index": 3,
+            "raw_text": "молоткм",
+            "normalized_text": "молотки",
+            "status": "CORRECTED_HIGH_CONFIDENCE",
+            "alternatives": [
+              "молотки",
+              "молоткам",
+              "молотком",
+              "молотам",
+              "молотка",
+              "молотке",
+              "молотку",
+              "молотом"
+            ],
+            "confidence": 0.89,
+            "reason": "same-lexeme grammatical form dominance"
+          },
+          {
+            "token_index": 4,
+            "raw_text": ".",
+            "normalized_text": ".",
+            "status": "EXACT",
+            "alternatives": [],
+            "confidence": 1.0,
+            "reason": "non-lexical token"
+          }
+        ]
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 917,
+      "req_id": "3188a05eea91484f98ae75e39773917f",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nTARGET:\nПётр\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nTARGET:\nПётр\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 1030,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 918,
+      "req_id": "962e37b505ac458ea792ff491cdf254d",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nTARGET:\nмолотки\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "INSTRUMENT",
+      "rendered_prompt": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.\n\nTEXT:\nПётр ударил молоткм.\nPREDICATE:\nударил\nTARGET:\nмолотки\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person (for example, someone is summoned/selected/seen), not when the person is merely the addressee contacted by speech, telephone, or messaging\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; this includes the person being addressed or contacted by speech, telephone, or messaging even when no separate message OBJECT is stated; mere personhood does not make TARGET a RECIPIENT, and a person directly seen/met/summoned/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Distinguish AFFECTED_OR_CONTENT from CONSTITUENT_MATERIAL strictly: MATERIAL means TARGET is a substance/component incorporated into a different affected or resulting entity; if TARGET is itself the affected/content/result entity, it is not MATERIAL. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "input_tokens": 971,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "M_13d767ca46354a97abe329e9acef893c": {
+        "uid": "M_13d767ca46354a97abe329e9acef893c",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "sing",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "Пётр",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "sing"
+        }
+      },
+      "M_17b12f94f2e04201b5ee2ccce3185b49": {
+        "uid": "M_17b12f94f2e04201b5ee2ccce3185b49",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "grammatical_number": {
+            "name": "grammatical_number",
+            "value": "plur",
+            "type_name": "str",
+            "unit": null
+          },
+          "name": {
+            "name": "name",
+            "value": "молоток",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true,
+          "grammatical_number": "plur"
+        }
+      },
+      "N_aa3d31868733432d87d30cfaee52a274": {
+        "uid": "N_aa3d31868733432d87d30cfaee52a274",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_5fce5153e4c24864935da14bb8f8ed7a",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+            "kind": "N"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Пётр ударил молоткм.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [
+            "ASSERTION"
+          ],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "N_ab10b670cc1c4450aa8fd06338f7d1a4": {
+        "uid": "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_abc6c3eaa269475099e05a436fd39c90",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_13d767ca46354a97abe329e9acef893c",
+            "kind": "M"
+          },
+          "TOOL": {
+            "uid": "M_17b12f94f2e04201b5ee2ccce3185b49",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 0,
+          "expires_tick": 40,
+          "last_qualifying_tick": 0,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_1b5af35abe374538b8d18706b9032a46": {
+        "uid": "S_1b5af35abe374538b8d18706b9032a46",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "S_37e10a0046584dbd8f17a72ea829d9c9": {
+        "uid": "S_37e10a0046584dbd8f17a72ea829d9c9",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "ударил",
+          "ударить"
+        ]
+      },
+      "T_5fce5153e4c24864935da14bb8f8ed7a": {
+        "uid": "T_5fce5153e4c24864935da14bb8f8ed7a",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_1b5af35abe374538b8d18706b9032a46",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      },
+      "T_abc6c3eaa269475099e05a436fd39c90": {
+        "uid": "T_abc6c3eaa269475099e05a436fd39c90",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_37e10a0046584dbd8f17a72ea829d9c9",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "TOOL"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 3,
+    "workspace_uids": [
+      "N_aa3d31868733432d87d30cfaee52a274",
+      "N_ab10b670cc1c4450aa8fd06338f7d1a4",
+      "S_37e10a0046584dbd8f17a72ea829d9c9",
+      "T_abc6c3eaa269475099e05a436fd39c90"
+    ],
+    "workspace": {
+      "N_aa3d31868733432d87d30cfaee52a274": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=ударил(SUBJECT=Пётр, TOOL=молоток))",
+        "excitation": 0.49704875845222196
+      },
+      "N_ab10b670cc1c4450aa8fd06338f7d1a4": {
+        "semantic": "ударил(SUBJECT=Пётр, TOOL=молоток)",
+        "excitation": 1.0
+      },
+      "S_37e10a0046584dbd8f17a72ea829d9c9": {
+        "semantic": "ударил",
+        "excitation": 0.9443926410592216
+      },
+      "T_abc6c3eaa269475099e05a436fd39c90": {
+        "semantic": "ударил",
+        "excitation": 0.9476617761328255
+      }
+    },
+    "pending_incoming": {
+      "M_13d767ca46354a97abe329e9acef893c": 0.15200000000000005,
+      "M_17b12f94f2e04201b5ee2ccce3185b49": 0.15200000000000005
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {
+      "он": {
+        "uid": "M_13d767ca46354a97abe329e9acef893c",
+        "kind": "M"
+      }
+    },
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_aa3d31868733432d87d30cfaee52a274",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "молоткм",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": true,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "CORRECTED_HIGH_CONFIDENCE"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": false,
+      "expected": "молотком",
+      "actual": "молотки"
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "ударить",
+      "actual": "ударить"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT",
+        "TOOL"
+      ],
+      "actual": [
+        "SUBJECT",
+        "TOOL"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "Пётр"
+      },
+      "actual": "Пётр"
+    },
+    {
+      "name": "perception.assertions.a1.roles.TOOL",
+      "ok": true,
+      "expected": {
+        "text": "молоток"
+      },
+      "actual": "молоток"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.domains.a1",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "ударить",
+      "actual": [
+        "ударил",
+        "ударить"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "SUBJECT",
+        "TOOL"
+      ],
+      "actual": [
+        "SUBJECT",
+        "TOOL"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "Пётр"
+      },
+      "actual": "Пётр"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.TOOL",
+      "ok": true,
+      "expected": {
+        "text": "молоток"
+      },
+      "actual": "молоток"
+    },
+    {
+      "name": "templates.ударить.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "SUBJECT",
+        "TOOL"
+      ],
+      "actual": [
+        [
+          "SUBJECT",
+          "TOOL"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_roles",
+  "semantic_tags": [
+    "typo",
+    "omission",
+    "tool",
+    "ending"
+  ]
+}

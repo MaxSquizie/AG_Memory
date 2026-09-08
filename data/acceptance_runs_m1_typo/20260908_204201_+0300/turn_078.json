@@ -1,0 +1,254 @@
+{
+  "index": 78,
+  "input": "стл",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_078",
+  "linguistic_candidate_graph": {
+    "text": "стл",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "стл",
+        "start": 0,
+        "end": 3,
+        "analyses": [
+          {
+            "normal_form": "стл",
+            "pos": null,
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "UNKN"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "стл",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "стл",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "стал",
+            "стыл",
+            "утл",
+            "сел"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 1,
+          "text": "стл",
+          "evidence": {
+            "text": "стл",
+            "start": 0,
+            "end": 3
+          }
+        },
+        "predicate_heads": [],
+        "marker": "стл",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стал, стыл, утл, сел",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: стл -> стал, стыл, утл, сел\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: стл -> стал, стыл, утл, сел\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 244,
+      "source_text": "стл",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:1\nRAW:стл\nCANDIDATES:стал,стыл,утл,сел",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: стл -> стал, стыл, утл, сел"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_7e51153453b24af4b4dc52f74d93d363": {
+        "uid": "N_7e51153453b24af4b4dc52f74d93d363",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_1bb2544bb5614eb58aa8dce78d3719fa",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "стл",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_50145405ba94482db24d90f772496489": {
+        "uid": "S_50145405ba94482db24d90f772496489",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_1bb2544bb5614eb58aa8dce78d3719fa": {
+        "uid": "T_1bb2544bb5614eb58aa8dce78d3719fa",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_50145405ba94482db24d90f772496489",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_7e51153453b24af4b4dc52f74d93d363": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_7e51153453b24af4b4dc52f74d93d363",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "стл",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": true,
+      "expected": "AMBIGUOUS",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": true
+    },
+    {
+      "name": "lexical.1.alternative.стал",
+      "ok": true,
+      "expected": "стал",
+      "actual": [
+        "стал",
+        "стыл",
+        "утл",
+        "сел"
+      ]
+    },
+    {
+      "name": "lexical.1.alternative.стыл",
+      "ok": true,
+      "expected": "стыл",
+      "actual": [
+        "стал",
+        "стыл",
+        "утл",
+        "сел"
+      ]
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "ERROR",
+      "actual": "ERROR"
+    },
+    {
+      "name": "integration.safe_error",
+      "ok": true,
+      "expected": "ambiguous lexical recovery",
+      "actual": "PerceptionParseError: ambiguous lexical recovery: стл -> стал, стыл, утл, сел"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_ambiguous",
+  "semantic_tags": [
+    "typo",
+    "ambiguous",
+    "fail_closed"
+  ]
+}

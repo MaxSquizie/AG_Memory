@@ -1596,6 +1596,60 @@ class AdaptivePerceptionParser:
                 return ("text", item.lookup_text.casefold())
             return None
 
+        def alternative_identity_roles(
+            component: tuple[AssertionCandidate, ...],
+        ) -> set[ActantRole] | None:
+            """Return roles whose *identity* varies across otherwise stable readings.
+
+            Pronoun resolution may preserve several complete AssertionCandidate
+            readings.  Frame completion only needs to stop when those alternatives
+            alter predicate/topology, or when an ambiguous inherited filler would
+            be copied into the target.  If the target explicitly replaces every
+            varying role, the ambiguity is irrelevant to the recovered proposition
+            and must not veto ellipsis.
+            """
+            varying: set[ActantRole] = set()
+            for item in component:
+                if not item.alternatives:
+                    continue
+                base_roles = {actant.role: actant for actant in item.actants}
+                if len(base_roles) != len(item.actants):
+                    return None
+                base_structure = {
+                    role: (
+                        actant.candidate_ref is not None,
+                        actant.proposition is not None,
+                        actant.composition is not None,
+                    )
+                    for role, actant in base_roles.items()
+                }
+                for alternative in item.alternatives:
+                    if (
+                        alternative.predicate.lookup_form != item.predicate.lookup_form
+                        or alternative.negated != item.negated
+                        or alternative.status is not item.status
+                    ):
+                        return None
+                    alt_roles = {actant.role: actant for actant in alternative.actants}
+                    if len(alt_roles) != len(alternative.actants):
+                        return None
+                    if set(alt_roles) != set(base_roles):
+                        return None
+                    alt_structure = {
+                        role: (
+                            actant.candidate_ref is not None,
+                            actant.proposition is not None,
+                            actant.composition is not None,
+                        )
+                        for role, actant in alt_roles.items()
+                    }
+                    if alt_structure != base_structure:
+                        return None
+                    for role, base_actant in base_roles.items():
+                        if actant_identity(base_actant) != actant_identity(alt_roles[role]):
+                            varying.add(role)
+            return varying
+
         def direct_slots(component: tuple[AssertionCandidate, ...]) -> dict[ActantRole, ActantCandidate]:
             """Choose one visible source slot per role, root before descendants.
 
@@ -1775,8 +1829,9 @@ class AdaptivePerceptionParser:
             if not component:
                 unresolved(clause, "source_frame_not_unique_or_unavailable")
 
-            if any(item.alternatives for item in component):
-                unresolved(clause, "source_has_unresolved_alternatives")
+            ambiguous_source_roles = alternative_identity_roles(component)
+            if ambiguous_source_roles is None:
+                unresolved(clause, "source_alternatives_change_frame_topology")
             source_slots = direct_slots(component)
             source_roles = set(source_slots)
             if not source_roles:
@@ -1947,6 +2002,13 @@ class AdaptivePerceptionParser:
                 unresolved(clause, "duplicate_target_roles")
             if not set(explicit_by_role) <= source_roles:
                 unresolved(clause, "target_role_outside_source_frame")
+            unresolved_inherited = set(ambiguous_source_roles or ()) - set(explicit_by_role)
+            if unresolved_inherited:
+                unresolved(
+                    clause,
+                    "source_identity_ambiguity_would_be_inherited:"
+                    + ",".join(sorted(role.value for role in unresolved_inherited)),
+                )
             replacement_by_identity: dict[tuple[object, ...], ActantCandidate] = {}
             for role, replacement in explicit_by_role.items():
                 source_slot = source_slots.get(role)
@@ -7694,9 +7756,10 @@ class AdaptivePerceptionParser:
             token = tokens[index - 1]
             if token.index in self._contextual_nominal_lemmas:
                 continue
+            recovery = self._lexical_recovery_for_token(token)
             if (
-                getattr(token, "recovery", None) is not None
-                and getattr(token, "recovery").status is LexicalRecoveryStatus.UNKNOWN_TOKEN
+                recovery is not None
+                and recovery.status is LexicalRecoveryStatus.UNKNOWN_TOKEN
             ):
                 # Lexical Recovery intentionally protected this surface as an
                 # unknown name/term/code. Productive morphology may still provide
@@ -9230,7 +9293,7 @@ class AdaptivePerceptionParser:
         # participant; it does not canonicalize the token itself.
         if predicate_span is not None and not passive and span.start_index == span.end_index:
             target_token = tokens[span.start_index - 1]
-            recovery = getattr(target_token, "recovery", None)
+            recovery = self._lexical_recovery_for_token(target_token)
             if (
                 recovery is not None
                 and recovery.status is LexicalRecoveryStatus.UNKNOWN_TOKEN
@@ -10397,6 +10460,28 @@ class AdaptivePerceptionParser:
             values = self._morph_all(token)
             self._morph_cache[key] = values[0] if values else None
         return self._morph_cache[key]
+
+    def _lexical_recovery_for_token(
+        self, token: _SourceToken
+    ) -> TokenCandidate | None:
+        """Return the monotonic Lexical Recovery decision for a parser token.
+
+        ``_SourceToken`` intentionally contains only normalized source offsets,
+        while recovery/provenance lives on ``LinguisticCandidateGraph.tokens``.
+        Reading ``token.recovery`` therefore never worked on the real parser path
+        and allowed productive morphology to reopen a protected UNKNOWN.  Keep the
+        ownership boundary explicit and index the runtime graph instead.
+        """
+        direct = getattr(token, "recovery", None)
+        if direct is not None:
+            return direct
+        graph = self._candidate_graph
+        if graph is None:
+            return None
+        try:
+            return graph.token(token.index).recovery
+        except (IndexError, KeyError, TypeError, ValueError):
+            return None
 
     def _material_morph_analyses(
         self, token: _SourceToken, *, apply_context: bool = True

@@ -1,0 +1,437 @@
+{
+  "index": 41,
+  "input": "На стл книгу Ольга положила.",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_041",
+  "linguistic_candidate_graph": {
+    "text": "На стл книгу Ольга положила.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "На",
+        "start": 0,
+        "end": 2,
+        "analyses": [
+          {
+            "normal_form": "на",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.998961
+          },
+          {
+            "normal_form": "на",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000849
+          },
+          {
+            "normal_form": "на",
+            "pos": "INTJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "INTJ"
+            ],
+            "score": 0.000188
+          }
+        ],
+        "raw_text": "На",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "На",
+          "normalized_text": "На",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "стл",
+        "start": 3,
+        "end": 6,
+        "analyses": [
+          {
+            "normal_form": "стл",
+            "pos": null,
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "UNKN"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "стл",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "стл",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "стол",
+            "стул",
+            "ст",
+            "сто",
+            "стр",
+            "стс"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      },
+      {
+        "index": 3,
+        "text": "книгу",
+        "start": 7,
+        "end": 12,
+        "analyses": [
+          {
+            "normal_form": "книга",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "accs",
+              "sing",
+              "NOUN",
+              "inan"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "книгу",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "книгу",
+          "normalized_text": "книгу",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 4,
+        "text": "Ольга",
+        "start": 13,
+        "end": 18,
+        "analyses": [
+          {
+            "normal_form": "ольга",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "Name",
+              "NOUN",
+              "nomn",
+              "anim"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Ольга",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": "Ольга",
+          "normalized_text": "Ольга",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 5,
+        "text": "положила",
+        "start": 19,
+        "end": 27,
+        "analyses": [
+          {
+            "normal_form": "положить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "femn",
+              "sing",
+              "VERB",
+              "perf",
+              "past",
+              "tran",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "положила",
+        "recovery": {
+          "token_index": 5,
+          "raw_text": "положила",
+          "normalized_text": "положила",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 6,
+        "text": ".",
+        "start": 27,
+        "end": 28,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 6,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 5,
+          "text": "На стл книгу Ольга положила",
+          "evidence": {
+            "text": "На стл книгу Ольга положила",
+            "start": 0,
+            "end": 27
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 5,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "положить"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "на",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 5,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "положить"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 207,
+      "source_text": "На стл книгу Ольга положила.",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:2\nRAW:стл\nCANDIDATES:стол,стул,ст,сто,стр,стс",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_f34d869ed37945e698d0deff1e3416fd": {
+        "uid": "N_f34d869ed37945e698d0deff1e3416fd",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_e064344be2ff4a82a621565c244fa3d1",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "На стл книгу Ольга положила.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_82d1420077f3401299298cdd1b56b042": {
+        "uid": "S_82d1420077f3401299298cdd1b56b042",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_e064344be2ff4a82a621565c244fa3d1": {
+        "uid": "T_e064344be2ff4a82a621565c244fa3d1",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_82d1420077f3401299298cdd1b56b042",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_f34d869ed37945e698d0deff1e3416fd": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_f34d869ed37945e698d0deff1e3416fd",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "стл",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": false,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": false,
+      "expected": "стол"
+    },
+    {
+      "name": "integration.completed",
+      "ok": false,
+      "expected": "OK",
+      "actual": "ERROR"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_inversion",
+  "semantic_tags": [
+    "typo",
+    "inversion",
+    "location"
+  ]
+}

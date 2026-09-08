@@ -1,0 +1,524 @@
+{
+  "index": 40,
+  "input": "Анне клю Сергей передал.",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_040",
+  "linguistic_candidate_graph": {
+    "text": "Анне клю Сергей передал.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Анне",
+        "start": 0,
+        "end": 4,
+        "analyses": [
+          {
+            "normal_form": "анне",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "femn",
+              "Name",
+              "sing",
+              "NOUN",
+              "nomn",
+              "anim",
+              "Fixd"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анне",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "femn",
+              "Name",
+              "sing",
+              "NOUN",
+              "gent",
+              "anim",
+              "Fixd"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анне",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "femn",
+              "datv",
+              "Name",
+              "sing",
+              "NOUN",
+              "anim",
+              "Fixd"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анне",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "femn",
+              "accs",
+              "sing",
+              "Name",
+              "NOUN",
+              "anim",
+              "Fixd"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анне",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "femn",
+              "ablt",
+              "sing",
+              "Name",
+              "NOUN",
+              "anim",
+              "Fixd"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анне",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "femn",
+              "loct",
+              "Name",
+              "sing",
+              "NOUN",
+              "anim",
+              "Fixd"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анна",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "datv",
+              "sing",
+              "Name",
+              "NOUN",
+              "anim"
+            ],
+            "score": 0.125
+          },
+          {
+            "normal_form": "анна",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "loct",
+              "sing",
+              "Name",
+              "NOUN",
+              "anim"
+            ],
+            "score": 0.125
+          }
+        ],
+        "raw_text": "Анне",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Анне",
+          "normalized_text": "Анне",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "клю",
+        "start": 5,
+        "end": 8,
+        "analyses": [
+          {
+            "normal_form": "клю",
+            "pos": null,
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "UNKN"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "клю",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "клю",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "клюк",
+            "кулю",
+            "килю",
+            "клею",
+            "клаю",
+            "каю"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      },
+      {
+        "index": 3,
+        "text": "Сергей",
+        "start": 9,
+        "end": 15,
+        "analyses": [
+          {
+            "normal_form": "сергей",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Name",
+              "sing",
+              "NOUN",
+              "nomn",
+              "anim",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Сергей",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "Сергей",
+          "normalized_text": "Сергей",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 4,
+        "text": "передал",
+        "start": 16,
+        "end": 23,
+        "analyses": [
+          {
+            "normal_form": "передать",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "sing",
+              "VERB",
+              "masc",
+              "perf",
+              "past",
+              "tran",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "передал",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": "передал",
+          "normalized_text": "передал",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 5,
+        "text": ".",
+        "start": 23,
+        "end": 24,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 5,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 4,
+          "text": "Анне клю Сергей передал",
+          "evidence": {
+            "text": "Анне клю Сергей передал",
+            "start": 0,
+            "end": 23
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 4,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "передать"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "анне",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 4,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "передать"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 206,
+      "source_text": "Анне клю Сергей передал.",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:2\nRAW:клю\nCANDIDATES:клюк,кулю,килю,клею,клаю,каю",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_92a28fe1ff12405e939ac1aba70af455": {
+        "uid": "N_92a28fe1ff12405e939ac1aba70af455",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_3cafba8860614778a27954bd2c841ed9",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Анне клю Сергей передал.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_da0a06af15f24eecbd373af87465ba45": {
+        "uid": "S_da0a06af15f24eecbd373af87465ba45",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_3cafba8860614778a27954bd2c841ed9": {
+        "uid": "T_3cafba8860614778a27954bd2c841ed9",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_da0a06af15f24eecbd373af87465ba45",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_92a28fe1ff12405e939ac1aba70af455": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_92a28fe1ff12405e939ac1aba70af455",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "клю",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": false,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": false,
+      "expected": "ключ"
+    },
+    {
+      "name": "integration.completed",
+      "ok": false,
+      "expected": "OK",
+      "actual": "ERROR"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_inversion",
+  "semantic_tags": [
+    "typo",
+    "inversion",
+    "recipient",
+    "object"
+  ]
+}

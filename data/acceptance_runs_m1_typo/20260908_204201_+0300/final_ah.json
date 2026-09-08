@@ -1,0 +1,87 @@
+{
+  "M_31e3df15a0044cfebdb1f686e9f0fd03": {
+    "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "АГент",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "SELF"
+    }
+  },
+  "M_b960709c60114d3d94660d785e5c632d": {
+    "uid": "M_b960709c60114d3d94660d785e5c632d",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Пользователь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "USER"
+    }
+  },
+  "N_5d08a5a50a004214b2909b673a5b1ba8": {
+    "uid": "N_5d08a5a50a004214b2909b673a5b1ba8",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_2a6f3828f9134152b09bccd6a5122de7",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_b960709c60114d3d94660d785e5c632d",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "писмо",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [],
+      "batch_kind": "MESSAGE",
+      "dedup_exempt": true
+    }
+  },
+  "S_0691c0e804b649febb21e82dc726ddd0": {
+    "uid": "S_0691c0e804b649febb21e82dc726ddd0",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "высказать"
+    ]
+  },
+  "T_2a6f3828f9134152b09bccd6a5122de7": {
+    "uid": "T_2a6f3828f9134152b09bccd6a5122de7",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_0691c0e804b649febb21e82dc726ddd0",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TIME"
+    ]
+  }
+}

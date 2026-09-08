@@ -39,10 +39,10 @@ def decisions(text: str, morphology, reranker=None):
 
 def test_weighted_damerau_levenshtein_covers_all_edit_families() -> None:
     assert weighted_damerau_levenshtein("стол", "стол") == 0.0
-    assert weighted_damerau_levenshtein("стол", "сто") == 1.0
-    assert weighted_damerau_levenshtein("стоол", "стол") == 1.0
-    assert weighted_damerau_levenshtein("стол", "стул") == 1.0
-    assert weighted_damerau_levenshtein("стло", "стол") == pytest.approx(0.65)
+    assert weighted_damerau_levenshtein("стол", "сто") == pytest.approx(0.72)
+    assert weighted_damerau_levenshtein("стоол", "стол") == pytest.approx(0.45)
+    assert weighted_damerau_levenshtein("стол", "стул") == pytest.approx(0.80)
+    assert weighted_damerau_levenshtein("стло", "стол") == pytest.approx(0.70)
     assert weighted_damerau_levenshtein("елка", "ёлка") == pytest.approx(0.15)
     assert weighted_damerau_levenshtein("книгп", "книга") < 1.0
 
@@ -79,11 +79,12 @@ def test_morphosyntax_selects_finite_predicate_without_a_verb_list(morphology) -
 def test_order_does_not_change_local_recovery_constraints(morphology) -> None:
     _left, normal = decisions("Инженер прочитал докмент.", morphology)
     _right, inverted = decisions("Докмент прочитал инженер.", morphology)
-    # Sentence-initial title case is protected as a possible name/term.  The same
-    # typo is safely recoverable when source syntax proves it is not such a token;
-    # recovery never assigns SUBJECT/OBJECT from position.
+    # Sentence-initial title case is protected by default, but independent frame
+    # evidence can prove that another participant fills the subject slot.  This is
+    # still order-independent: recovery chooses a surface form, not an AH role.
     assert normal["докмент"].normalized_text == "документ"
-    assert inverted["Докмент"].status is LexicalRecoveryStatus.UNKNOWN_TOKEN
+    assert inverted["Докмент"].status is LexicalRecoveryStatus.CORRECTED_HIGH_CONFIDENCE
+    assert inverted["Докмент"].normalized_text == "Документ"
 
 
 def test_names_terms_acronyms_and_codes_are_not_forced_to_dictionary_words(morphology) -> None:

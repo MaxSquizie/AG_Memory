@@ -1,0 +1,2963 @@
+{
+  "cases_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\acceptance_ellipsis\\cases.txt",
+  "output_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\acceptance_runs_m1_ellipsis\\20260908_203438_+0300",
+  "total": 166,
+  "succeeded": 162,
+  "failed": 4,
+  "semantic_passed": 160,
+  "semantic_failed": 6,
+  "semantic_gaps": 0,
+  "semantic_families": {
+    "predicate_frame": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "gaps": 0
+    },
+    "role_frame": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "gaps": 0
+    },
+    "proposition_negation": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "gaps": 0
+    },
+    "proposition_confirmation": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "gaps": 0
+    },
+    "temporal_ellipsis": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "gaps": 0
+    },
+    "locative_ellipsis": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "gaps": 0
+    },
+    "complex_chain": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "gaps": 0
+    },
+    "coordination_ellipsis": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "gaps": 0
+    },
+    "polarity_chain": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "role_rich_chain": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "temporal_locative_combo": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "antecedent_reset": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "punctuation_ellipsis": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "gaps": 0
+    },
+    "scope_ellipsis": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "gaps": 0
+    },
+    "coreference_ellipsis": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "gaps": 0
+    },
+    "mixed_adversarial_ellipsis": {
+      "total": 2,
+      "passed": 1,
+      "failed": 1,
+      "gaps": 0
+    },
+    "inversion_ellipsis": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "gaps": 0
+    },
+    "punctuation_noise_ellipsis": {
+      "total": 12,
+      "passed": 10,
+      "failed": 2,
+      "gaps": 0
+    },
+    "scope_control_ellipsis": {
+      "total": 12,
+      "passed": 10,
+      "failed": 2,
+      "gaps": 0
+    },
+    "antecedent_competition": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "gaps": 0
+    },
+    "slot_permutation_ellipsis": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "coreference_chain_ellipsis": {
+      "total": 6,
+      "passed": 5,
+      "failed": 1,
+      "gaps": 0
+    },
+    "ellipsis_boundary_guard": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "gaps": 0
+    }
+  },
+  "oracle_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\acceptance_ellipsis\\oracle.json",
+  "scenario_isolation": true,
+  "scenario_count": 166,
+  "cases": [
+    {
+      "index": 1,
+      "input": "Иван купил книгу, а Мария журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "predicate_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v1_001",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_001.json"
+    },
+    {
+      "index": 2,
+      "input": "Иван прочитал книгу, а Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "predicate_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v1_002",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_002.json"
+    },
+    {
+      "index": 3,
+      "input": "Пётр открыл дверь, а Иван окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "predicate_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v1_003",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_003.json"
+    },
+    {
+      "index": 4,
+      "input": "Анна написала письмо, а Ольга сообщение.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "predicate_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v1_004",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_004.json"
+    },
+    {
+      "index": 5,
+      "input": "Сергей увидел машину, а Пётр автобус.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "predicate_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v1_005",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_005.json"
+    },
+    {
+      "index": 6,
+      "input": "Иван любит музыку, а Мария театр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "predicate_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v1_006",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_006.json"
+    },
+    {
+      "index": 7,
+      "input": "Сергей передал Анне письмо, а Пётр Ольге посылку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v1_007",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_007.json"
+    },
+    {
+      "index": 8,
+      "input": "Ольга положила книгу на стол, а Анна журнал — на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v1_008",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_008.json"
+    },
+    {
+      "index": 9,
+      "input": "Пётр открыл дверь ключом, а Иван окно отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v1_009",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_009.json"
+    },
+    {
+      "index": 10,
+      "input": "Мастер сделал стол из дерева, а ученик стул из металла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v1_010",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_010.json"
+    },
+    {
+      "index": 11,
+      "input": "Анна отправила письмо Сергею, а Ольга сообщение Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_frame",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v1_011",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_011.json"
+    },
+    {
+      "index": 12,
+      "input": "Иван купил книгу, а Мария — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "proposition_negation",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v1_012",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_012.json"
+    },
+    {
+      "index": 13,
+      "input": "Иван прочитал книгу, а Мария — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "proposition_negation",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v1_013",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_013.json"
+    },
+    {
+      "index": 14,
+      "input": "Анна знает ответ, а Пётр — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "proposition_negation",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v1_014",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_014.json"
+    },
+    {
+      "index": 15,
+      "input": "Сергей открыл дверь, а Иван — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "proposition_negation",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v1_015",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_015.json"
+    },
+    {
+      "index": 16,
+      "input": "Иван купил книгу, а Мария тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "proposition_confirmation",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation"
+      ],
+      "scenario_id": "ellipsis_v1_016",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_016.json"
+    },
+    {
+      "index": 17,
+      "input": "Анна прочитала отчёт, и Ольга тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "proposition_confirmation",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation"
+      ],
+      "scenario_id": "ellipsis_v1_017",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_017.json"
+    },
+    {
+      "index": 18,
+      "input": "Вчера Иван прочитал книгу, а сегодня журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal_ellipsis"
+      ],
+      "scenario_id": "ellipsis_v1_018",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_018.json"
+    },
+    {
+      "index": 19,
+      "input": "Утром Пётр работал в офисе, а вечером дома.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal_ellipsis"
+      ],
+      "scenario_id": "ellipsis_v1_019",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_019.json"
+    },
+    {
+      "index": 20,
+      "input": "Иван пришёл утром, а Мария — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal_ellipsis"
+      ],
+      "scenario_id": "ellipsis_v1_020",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_020.json"
+    },
+    {
+      "index": 21,
+      "input": "Книга лежит на столе, а журнал — на полке.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "locative_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "locative_ellipsis"
+      ],
+      "scenario_id": "ellipsis_v1_021",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_021.json"
+    },
+    {
+      "index": 22,
+      "input": "Иван работает в Москве, а Мария — в Казани.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "locative_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "locative_ellipsis"
+      ],
+      "scenario_id": "ellipsis_v1_022",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_022.json"
+    },
+    {
+      "index": 23,
+      "input": "Иван купил журнал, а Мария и Пётр - нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "proposition_negation",
+        "hyphen"
+      ],
+      "scenario_id": "ellipsis_v2_023",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_023.json"
+    },
+    {
+      "index": 24,
+      "input": "Иван живёт в Москве, Мария - в Казани, Пётр - в Париже, а Слава - бродяга.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "locative",
+        "nominal_predication",
+        "ellipsis_boundary",
+        "hyphen"
+      ],
+      "scenario_id": "ellipsis_v2_024",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_024.json"
+    },
+    {
+      "index": 25,
+      "input": "Иван живёт в Москве, Мария — в Казани, а Пётр работает в Париже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "antecedent_reset",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_025",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_025.json"
+    },
+    {
+      "index": 26,
+      "input": "Иван купил книгу, Мария — журнал, Пётр — газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v2_026",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_026.json"
+    },
+    {
+      "index": 27,
+      "input": "Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v2_027",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_027.json"
+    },
+    {
+      "index": 28,
+      "input": "Пётр открыл дверь, Иван — окно, Сергей — ворота.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v2_028",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_028.json"
+    },
+    {
+      "index": 29,
+      "input": "Иван работает дома, Мария — в офисе, Пётр — в школе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_029",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_029.json"
+    },
+    {
+      "index": 30,
+      "input": "Книга лежит на столе, журнал — на полке, тетрадь — в ящике.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_030",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_030.json"
+    },
+    {
+      "index": 31,
+      "input": "Иван пришёл утром, Мария — днём, Пётр — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "temporal"
+      ],
+      "scenario_id": "ellipsis_v2_031",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_031.json"
+    },
+    {
+      "index": 32,
+      "input": "Вчера Иван читал книгу, сегодня — журнал, завтра — газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "temporal",
+        "shared_subject"
+      ],
+      "scenario_id": "ellipsis_v2_032",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_032.json"
+    },
+    {
+      "index": 33,
+      "input": "Иван купил книгу, Мария — журнал, а Пётр прочитал газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "antecedent_reset"
+      ],
+      "scenario_id": "ellipsis_v2_033",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_033.json"
+    },
+    {
+      "index": 34,
+      "input": "Иван купил книгу, а Мария прочитала журнал, Пётр — газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "complex_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_clause",
+        "nearest_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_034",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_034.json"
+    },
+    {
+      "index": 35,
+      "input": "Иван и Пётр купили книгу, а Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "subject_composition"
+      ],
+      "scenario_id": "ellipsis_v2_035",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_035.json"
+    },
+    {
+      "index": 36,
+      "input": "Иван купил книгу, а Мария и Пётр — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "subject_composition"
+      ],
+      "scenario_id": "ellipsis_v2_036",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_036.json"
+    },
+    {
+      "index": 37,
+      "input": "Иван и Пётр купили книгу, а Мария и Анна — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "subject_composition"
+      ],
+      "scenario_id": "ellipsis_v2_037",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_037.json"
+    },
+    {
+      "index": 38,
+      "input": "Иван купил хлеб и молоко, а Мария — чай и кофе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "object_composition"
+      ],
+      "scenario_id": "ellipsis_v2_038",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_038.json"
+    },
+    {
+      "index": 39,
+      "input": "Иван купил хлеб и молоко, а Мария — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "object_composition",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v2_039",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_039.json"
+    },
+    {
+      "index": 40,
+      "input": "Иван и Пётр купили хлеб, а Мария и Анна — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "subject_composition",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v2_040",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_040.json"
+    },
+    {
+      "index": 41,
+      "input": "Иван и Пётр пришли утром, а Мария — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "temporal"
+      ],
+      "scenario_id": "ellipsis_v2_041",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_041.json"
+    },
+    {
+      "index": 42,
+      "input": "Иван пришёл утром, а Мария и Пётр — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "temporal"
+      ],
+      "scenario_id": "ellipsis_v2_042",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_042.json"
+    },
+    {
+      "index": 43,
+      "input": "Книга и журнал лежат на столе, а тетрадь — на полке.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_043",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_043.json"
+    },
+    {
+      "index": 44,
+      "input": "Книга лежит на столе, а журнал и тетрадь — на полке.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_044",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_044.json"
+    },
+    {
+      "index": 45,
+      "input": "Анна отправила письмо Сергею, а Ольга и Мария — сообщение Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v2_045",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_045.json"
+    },
+    {
+      "index": 46,
+      "input": "Сергей передал Анне книгу и журнал, а Пётр — Ольге письмо и открытку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "role_frame",
+        "object_composition"
+      ],
+      "scenario_id": "ellipsis_v2_046",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_046.json"
+    },
+    {
+      "index": 47,
+      "input": "Иван купил книгу, Мария — журнал, а Пётр — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation",
+        "nearest_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_047",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_047.json"
+    },
+    {
+      "index": 48,
+      "input": "Иван купил книгу, а Мария — нет, Пётр — тоже нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_048",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_048.json"
+    },
+    {
+      "index": 49,
+      "input": "Иван купил книгу, а Мария тоже, Пётр — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v2_049",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_049.json"
+    },
+    {
+      "index": 50,
+      "input": "Иван купил книгу, Мария — журнал, Пётр — тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation",
+        "nearest_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_050",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_050.json"
+    },
+    {
+      "index": 51,
+      "input": "Анна знает ответ, Ольга — нет, а Пётр тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation",
+        "negative_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_051",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_051.json"
+    },
+    {
+      "index": 52,
+      "input": "Анна знает ответ, Ольга — тоже, а Пётр — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v2_052",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_052.json"
+    },
+    {
+      "index": 53,
+      "input": "Иван открыл дверь, Мария — окно, а Пётр — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_negation",
+        "nearest_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_053",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_053.json"
+    },
+    {
+      "index": 54,
+      "input": "Иван открыл дверь, а Мария и Пётр тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "proposition_confirmation",
+        "coordination"
+      ],
+      "scenario_id": "ellipsis_v2_054",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_054.json"
+    },
+    {
+      "index": 55,
+      "input": "Иван не купил книгу, а Мария — тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "explicit_negation",
+        "proposition_confirmation"
+      ],
+      "scenario_id": "ellipsis_v2_055",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_055.json"
+    },
+    {
+      "index": 56,
+      "input": "Иван не купил книгу, а Мария — купила.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "polarity_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "explicit_negation",
+        "polarity_reset"
+      ],
+      "scenario_id": "ellipsis_v2_056",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_056.json"
+    },
+    {
+      "index": 57,
+      "input": "Иван открыл дверь ключом, Мария — окно отвёрткой, Пётр — ворота ломом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "tool",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_057",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_057.json"
+    },
+    {
+      "index": 58,
+      "input": "Анна отправила Ивану письмо, Ольга — Петру посылку, Мария — Сергею открытку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "recipient",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_058",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_058.json"
+    },
+    {
+      "index": 59,
+      "input": "Мастер сделал стол из дерева, ученик — стул из металла, подмастерье — шкаф из пластика.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "material",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_059",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_059.json"
+    },
+    {
+      "index": 60,
+      "input": "Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "location",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_060",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_060.json"
+    },
+    {
+      "index": 61,
+      "input": "Иван открыл дверь ключом, а Мария — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "tool",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v2_061",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_061.json"
+    },
+    {
+      "index": 62,
+      "input": "Анна отправила письмо Сергею, а Ольга — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "recipient",
+        "proposition_negation"
+      ],
+      "scenario_id": "ellipsis_v2_062",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_062.json"
+    },
+    {
+      "index": 63,
+      "input": "Мастер сделал стол из дерева, а ученик — стул из металла, подмастерье — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "material",
+        "proposition_negation",
+        "nearest_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_063",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_063.json"
+    },
+    {
+      "index": 64,
+      "input": "Пётр открыл дверь ключом, а Иван окно — отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "tool",
+        "dash"
+      ],
+      "scenario_id": "ellipsis_v2_064",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_064.json"
+    },
+    {
+      "index": 65,
+      "input": "Сергей передал Анне письмо утром, а Пётр Ольге посылку вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "recipient",
+        "temporal"
+      ],
+      "scenario_id": "ellipsis_v2_065",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_065.json"
+    },
+    {
+      "index": 66,
+      "input": "Ольга положила книгу на стол утром, а Анна журнал — на полку вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "role_rich_chain",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "location",
+        "temporal",
+        "dash"
+      ],
+      "scenario_id": "ellipsis_v2_066",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_066.json"
+    },
+    {
+      "index": 67,
+      "input": "Вчера Иван работал в Москве, а сегодня — в Казани.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "locative",
+        "shared_subject"
+      ],
+      "scenario_id": "ellipsis_v2_067",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_067.json"
+    },
+    {
+      "index": 68,
+      "input": "Утром Иван работал дома, Мария — в офисе, а вечером Пётр — в кафе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "locative",
+        "time_inheritance"
+      ],
+      "scenario_id": "ellipsis_v2_068",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_068.json"
+    },
+    {
+      "index": 69,
+      "input": "Вчера книга лежала на столе, сегодня — на полке.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "locative",
+        "shared_subject"
+      ],
+      "scenario_id": "ellipsis_v2_069",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_069.json"
+    },
+    {
+      "index": 70,
+      "input": "Иван был в Москве утром, Мария — в Казани вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_070",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_070.json"
+    },
+    {
+      "index": 71,
+      "input": "Иван пришёл утром, Мария — вечером, а Пётр — ночью.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_071",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_071.json"
+    },
+    {
+      "index": 72,
+      "input": "Утром Анна отправила письмо Ивану, а вечером Ольга — посылку Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v2_072",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_072.json"
+    },
+    {
+      "index": 73,
+      "input": "Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "temporal",
+        "material"
+      ],
+      "scenario_id": "ellipsis_v2_073",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_073.json"
+    },
+    {
+      "index": 74,
+      "input": "Иван работал в Москве два года, а Мария — в Казани три года.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "locative",
+        "duration"
+      ],
+      "scenario_id": "ellipsis_v2_074",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_074.json"
+    },
+    {
+      "index": 75,
+      "input": "Два часа книгу читал Иван, а три часа — журнал Пётр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "duration",
+        "inversion"
+      ],
+      "scenario_id": "ellipsis_v2_075",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_075.json"
+    },
+    {
+      "index": 76,
+      "input": "В Москве Иван работал утром, а в Казани Мария — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_locative_combo",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "locative",
+        "temporal",
+        "inversion"
+      ],
+      "scenario_id": "ellipsis_v2_076",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_076.json"
+    },
+    {
+      "index": 77,
+      "input": "Иван купил книгу, Мария — журнал, а Пётр продал газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset"
+      ],
+      "scenario_id": "ellipsis_v2_077",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_077.json"
+    },
+    {
+      "index": 78,
+      "input": "Иван купил книгу, а Мария продала журнал, Пётр — газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset",
+        "nearest_antecedent"
+      ],
+      "scenario_id": "ellipsis_v2_078",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_078.json"
+    },
+    {
+      "index": 79,
+      "input": "Иван живёт в Москве, Мария — в Казани, а Пётр учится в Париже, Ольга — в Лондоне.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset",
+        "locative",
+        "multi_chain"
+      ],
+      "scenario_id": "ellipsis_v2_079",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_079.json"
+    },
+    {
+      "index": 80,
+      "input": "Иван открыл дверь, Мария — окно, а Пётр закрыл ворота, Сергей — калитку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset",
+        "multi_chain"
+      ],
+      "scenario_id": "ellipsis_v2_080",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_080.json"
+    },
+    {
+      "index": 81,
+      "input": "Анна отправила письмо Сергею, Ольга — сообщение Петру, а Мария получила посылку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v2_081",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_081.json"
+    },
+    {
+      "index": 82,
+      "input": "Иван купил книгу, а Мария — журнал, но Пётр книгу продал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset",
+        "contrastive_conjunction"
+      ],
+      "scenario_id": "ellipsis_v2_082",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_082.json"
+    },
+    {
+      "index": 83,
+      "input": "Иван работает в Москве, Мария — в Казани, а Пётр — инженер.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "nominal_predication",
+        "ellipsis_boundary"
+      ],
+      "scenario_id": "ellipsis_v2_083",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_083.json"
+    },
+    {
+      "index": 84,
+      "input": "Книга лежит на столе, журнал — на полке, а тетрадь упала на пол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "predicate_reset",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_084",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_084.json"
+    },
+    {
+      "index": 85,
+      "input": "Иван купил книгу и журнал, а Мария продала газету и открытку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coordination",
+        "explicit_boundary"
+      ],
+      "scenario_id": "ellipsis_v2_085",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_085.json"
+    },
+    {
+      "index": 86,
+      "input": "Иван купил книгу, Мария — журнал; затем Пётр прочитал газету, а Ольга — письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_reset",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "multi_chain",
+        "semicolon",
+        "predicate_reset"
+      ],
+      "scenario_id": "ellipsis_v2_086",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_086.json"
+    },
+    {
+      "index": 87,
+      "input": "Иван купил книгу; Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "semicolon"
+      ],
+      "scenario_id": "ellipsis_v2_087",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_087.json"
+    },
+    {
+      "index": 88,
+      "input": "Иван купил книгу; Мария — журнал; Пётр — газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "semicolon",
+        "multi_clause"
+      ],
+      "scenario_id": "ellipsis_v2_088",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_088.json"
+    },
+    {
+      "index": 89,
+      "input": "Иван купил книгу. Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "cross_sentence"
+      ],
+      "scenario_id": "ellipsis_v2_089",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_089.json"
+    },
+    {
+      "index": 90,
+      "input": "Иван купил книгу. А Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "cross_sentence",
+        "conjunction"
+      ],
+      "scenario_id": "ellipsis_v2_090",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_090.json"
+    },
+    {
+      "index": 91,
+      "input": "Книга лежит на столе; журнал — на полке.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "semicolon",
+        "locative"
+      ],
+      "scenario_id": "ellipsis_v2_091",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_091.json"
+    },
+    {
+      "index": 92,
+      "input": "Анна отправила письмо Сергею; Ольга — сообщение Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "semicolon",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v2_092",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_092.json"
+    },
+    {
+      "index": 93,
+      "input": "Иван хочет купить книгу, а Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "scope",
+        "control",
+        "embedded"
+      ],
+      "scenario_id": "ellipsis_v2_093",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_093.json"
+    },
+    {
+      "index": 94,
+      "input": "Анна начала читать книгу, а Ольга — отчёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "scope",
+        "control",
+        "embedded"
+      ],
+      "scenario_id": "ellipsis_v2_094",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_094.json"
+    },
+    {
+      "index": 95,
+      "input": "Сергей решил купить билет, а Пётр — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "scope",
+        "control",
+        "embedded"
+      ],
+      "scenario_id": "ellipsis_v2_095",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_095.json"
+    },
+    {
+      "index": 96,
+      "input": "Иван попросил Марию прочитать книгу, а Пётр — Ольгу журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "scope",
+        "control",
+        "recipient",
+        "embedded"
+      ],
+      "scenario_id": "ellipsis_v2_096",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_096.json"
+    },
+    {
+      "index": 97,
+      "input": "Иван купил книгу и положил её на стол, а Мария — журнал на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coreference",
+        "nearest_antecedent",
+        "role_frame"
+      ],
+      "scenario_id": "ellipsis_v2_097",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_097.json"
+    },
+    {
+      "index": 98,
+      "input": "Анна написала письмо и отправила его Сергею, а Ольга — сообщение Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "coreference",
+        "nearest_antecedent",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v2_098",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_098.json"
+    },
+    {
+      "index": 99,
+      "input": "Книгу купил Иван, а журнал — Мария.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "mixed_adversarial_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "inversion",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v2_099",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_099.json"
+    },
+    {
+      "index": 100,
+      "input": "Иван купил кнгу, а Мария — журнал.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "mixed_adversarial_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "discourse_reconstruction",
+        "typo_noise",
+        "lexical_recovery",
+        "predicate_frame"
+      ],
+      "scenario_id": "ellipsis_v2_100",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: кнгу -> книгу, кунгу, ангу, кугу, юнгу, ингу",
+      "file": "turn_100.json"
+    },
+    {
+      "index": 101,
+      "input": "Книгу прочитал Иван, а журнал — Мария.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "object_fronting"
+      ],
+      "scenario_id": "ellipsis_v3_101",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_101.json"
+    },
+    {
+      "index": 102,
+      "input": "Дверь ключом открыл Пётр, а окно отвёрткой — Иван.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_102",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_102.json"
+    },
+    {
+      "index": 103,
+      "input": "Письмо Анне передал Сергей, а посылку Ольге — Пётр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_103",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_103.json"
+    },
+    {
+      "index": 104,
+      "input": "На стол книгу положила Анна, а на полку журнал — Ольга.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_104",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_104.json"
+    },
+    {
+      "index": 105,
+      "input": "Из дерева стол сделал мастер, а из металла стул — ученик.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "material"
+      ],
+      "scenario_id": "ellipsis_v3_105",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_105.json"
+    },
+    {
+      "index": 106,
+      "input": "Утром в Москве работал Иван, а вечером в Казани — Мария.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "time",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_106",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_106.json"
+    },
+    {
+      "index": 107,
+      "input": "Два часа книгу читал Иван, а три часа журнал — Пётр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "duration"
+      ],
+      "scenario_id": "ellipsis_v3_107",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_107.json"
+    },
+    {
+      "index": 108,
+      "input": "От Анны письмо получил Сергей, а от Ольги посылку — Пётр.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "source"
+      ],
+      "scenario_id": "ellipsis_v3_108",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_108.json"
+    },
+    {
+      "index": 109,
+      "input": "В Москве живёт Иван, а в Казани — Мария.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_109",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_109.json"
+    },
+    {
+      "index": 110,
+      "input": "Книгу Иван прочитал, а журнал Мария — тоже.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "confirmation"
+      ],
+      "scenario_id": "ellipsis_v3_110",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_110.json"
+    },
+    {
+      "index": 111,
+      "input": "Книгу Иван прочитал, а журнал Мария — нет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "negation"
+      ],
+      "scenario_id": "ellipsis_v3_111",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_111.json"
+    },
+    {
+      "index": 112,
+      "input": "Книгу Анне передал Сергей, а посылку Петру — Ольга.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "inversion_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "inversion",
+        "recipient",
+        "slot_order"
+      ],
+      "scenario_id": "ellipsis_v3_112",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_112.json"
+    },
+    {
+      "index": 113,
+      "input": "Иван купил книгу а Мария журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_comma",
+        "punctuation_noise"
+      ],
+      "scenario_id": "ellipsis_v3_113",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_113.json"
+    },
+    {
+      "index": 114,
+      "input": "Иван купил книгу Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_boundary_punctuation"
+      ],
+      "scenario_id": "ellipsis_v3_114",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_114.json"
+    },
+    {
+      "index": 115,
+      "input": "Книга лежит на столе журнал — на полке.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_115",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a2.predicate",
+        "perception.assertions.a2.role_set",
+        "perception.assertions.a2.roles.LOCATION",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a2.predicate",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.LOCATION"
+      ],
+      "error": null,
+      "file": "turn_115.json"
+    },
+    {
+      "index": 116,
+      "input": "Иван живёт в Москве Мария — в Казани Пётр — в Париже.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "chain"
+      ],
+      "scenario_id": "ellipsis_v3_116",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: no canonical roles remain available",
+      "file": "turn_116.json"
+    },
+    {
+      "index": 117,
+      "input": "Сергей передал Анне письмо Пётр Ольге — посылку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_117",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_117.json"
+    },
+    {
+      "index": 118,
+      "input": "Иван открыл дверь ключом Мария окно — отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_boundary_punctuation",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_118",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_118.json"
+    },
+    {
+      "index": 119,
+      "input": "Иван купил книгу, а Мария - журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "ascii_hyphen"
+      ],
+      "scenario_id": "ellipsis_v3_119",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_119.json"
+    },
+    {
+      "index": 120,
+      "input": "Иван купил книгу, а Мария – журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "en_dash"
+      ],
+      "scenario_id": "ellipsis_v3_120",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_120.json"
+    },
+    {
+      "index": 121,
+      "input": "Иван купил книгу;Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_space_after_semicolon"
+      ],
+      "scenario_id": "ellipsis_v3_121",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_121.json"
+    },
+    {
+      "index": 122,
+      "input": "Иван купил книгу.Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_space_after_period"
+      ],
+      "scenario_id": "ellipsis_v3_122",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_122.json"
+    },
+    {
+      "index": 123,
+      "input": "Иван купил книгу , а Мария — журнал .",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "space_before_punctuation"
+      ],
+      "scenario_id": "ellipsis_v3_123",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_123.json"
+    },
+    {
+      "index": 124,
+      "input": "Иван купил книгу,Мария — журнал,Пётр — газету.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "punctuation_noise_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "missing_spaces",
+        "chain"
+      ],
+      "scenario_id": "ellipsis_v3_124",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_124.json"
+    },
+    {
+      "index": 125,
+      "input": "Иван хочет прочитать книгу, а Мария — журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "want"
+      ],
+      "scenario_id": "ellipsis_v3_125",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_125.json"
+    },
+    {
+      "index": 126,
+      "input": "Иван решил отправить письмо Сергею, а Ольга — сообщение Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "decision",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_126",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_126.json"
+    },
+    {
+      "index": 127,
+      "input": "Анна начала писать письмо, а Мария — отчёт.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "phase"
+      ],
+      "scenario_id": "ellipsis_v3_127",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "perception.assertions.a1.predicate",
+        "perception.assertions.a1.roles.OBJECT",
+        "perception.assertions.a2.status",
+        "perception.assertions.a2.roles.OBJECT",
+        "integration.domains.a3",
+        "integration.domains.a4",
+        "canonical.assertions.a1.predicate",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.OBJECT",
+        "canonical.assertions.a2.scoped",
+        "canonical.assertions.a2.predicate",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.SUBJECT",
+        "canonical.assertions.a2.roles.OBJECT",
+        "canonical.assertions.a3.integrated",
+        "canonical.assertions.a4.integrated",
+        "templates.начать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_127.json"
+    },
+    {
+      "index": 128,
+      "input": "Иван хочет работать в Москве, а Мария — в Казани.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_128",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_128.json"
+    },
+    {
+      "index": 129,
+      "input": "Анна начала работать утром, а Ольга — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "time"
+      ],
+      "scenario_id": "ellipsis_v3_129",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_129.json"
+    },
+    {
+      "index": 130,
+      "input": "Сергей решил открыть дверь ключом, а Пётр — окно отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_130",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_130.json"
+    },
+    {
+      "index": 131,
+      "input": "Иван попросил Марию открыть дверь, а Пётр — Ольгу окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "object_control"
+      ],
+      "scenario_id": "ellipsis_v3_131",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_131.json"
+    },
+    {
+      "index": 132,
+      "input": "Иван попросил Марию положить книгу на стол, а Пётр — Ольгу журнал на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "object_control",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_132",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_132.json"
+    },
+    {
+      "index": 133,
+      "input": "Анна попросила Сергея отправить письмо Петру, а Ольга — Ивана сообщение Марии.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "object_control",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_133",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: no canonical roles remain available",
+      "file": "turn_133.json"
+    },
+    {
+      "index": 134,
+      "input": "Иван хочет сделать стол из дерева, а Пётр — стул из металла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "material"
+      ],
+      "scenario_id": "ellipsis_v3_134",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_134.json"
+    },
+    {
+      "index": 135,
+      "input": "Мария решила получить письмо от Анны, а Ольга — посылку от Сергея.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "source"
+      ],
+      "scenario_id": "ellipsis_v3_135",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_135.json"
+    },
+    {
+      "index": 136,
+      "input": "Анна решила читать книгу два часа, а Ольга — отчёт три часа.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "scope_control_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "scope",
+        "duration"
+      ],
+      "scenario_id": "ellipsis_v3_136",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_136.json"
+    },
+    {
+      "index": 137,
+      "input": "Иван купил книгу, Мария — журнал; Пётр продал газету, Ольга — открытку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "chain"
+      ],
+      "scenario_id": "ellipsis_v3_137",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_137.json"
+    },
+    {
+      "index": 138,
+      "input": "Иван работает в Москве, Мария — в Казани, но Пётр живёт в Париже, Ольга — в Лондоне.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_138",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_138.json"
+    },
+    {
+      "index": 139,
+      "input": "Иван открыл дверь ключом, Мария — окно отвёрткой; Пётр закрыл ворота ломом, Сергей — калитку ключом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_139",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_139.json"
+    },
+    {
+      "index": 140,
+      "input": "Анна отправила Ивану письмо, Ольга — Петру сообщение; Мария получила посылку от Сергея, Пётр — письмо от Анны.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "recipient",
+        "source"
+      ],
+      "scenario_id": "ellipsis_v3_140",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_140.json"
+    },
+    {
+      "index": 141,
+      "input": "Иван читал книгу утром, Мария — журнал вечером; Пётр писал отчёт ночью, Ольга — письмо утром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "time"
+      ],
+      "scenario_id": "ellipsis_v3_141",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_141.json"
+    },
+    {
+      "index": 142,
+      "input": "Мастер сделал стол из дерева, ученик — стул из металла; Иван открыл дверь ключом, Пётр — окно отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "antecedent_reset",
+        "material",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_142",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_142.json"
+    },
+    {
+      "index": 143,
+      "input": "Иван купил книгу, Мария — журнал. Пётр продал газету, Ольга — открытку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "cross_sentence",
+        "antecedent_reset"
+      ],
+      "scenario_id": "ellipsis_v3_143",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_143.json"
+    },
+    {
+      "index": 144,
+      "input": "Книга лежит на столе, журнал — на полке. Письмо оказалось в ящике, открытка — в шкафу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "antecedent_competition",
+      "semantic_tags": [
+        "ellipsis",
+        "cross_sentence",
+        "antecedent_reset",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_144",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_144.json"
+    },
+    {
+      "index": 145,
+      "input": "Сергей передал Анне письмо, а Пётр посылку Ольге.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_145",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_145.json"
+    },
+    {
+      "index": 146,
+      "input": "Анна отправила Сергею письмо, а Ольга Петру сообщение.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_146",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_146.json"
+    },
+    {
+      "index": 147,
+      "input": "Ольга положила на стол книгу, а Анна журнал на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_147",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_147.json"
+    },
+    {
+      "index": 148,
+      "input": "Пётр открыл ключом дверь, а Иван окно отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_148",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_148.json"
+    },
+    {
+      "index": 149,
+      "input": "Мастер сделал из дерева стол, а ученик стул из металла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "material"
+      ],
+      "scenario_id": "ellipsis_v3_149",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_149.json"
+    },
+    {
+      "index": 150,
+      "input": "Иван работал утром в Москве, а Мария в Казани вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "time",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_150",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_150.json"
+    },
+    {
+      "index": 151,
+      "input": "Сергей получил от Анны письмо, а Пётр посылку от Ольги.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "source"
+      ],
+      "scenario_id": "ellipsis_v3_151",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_151.json"
+    },
+    {
+      "index": 152,
+      "input": "Иван читал два часа книгу, а Пётр журнал три часа.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "duration"
+      ],
+      "scenario_id": "ellipsis_v3_152",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_152.json"
+    },
+    {
+      "index": 153,
+      "input": "Анна передала утром Петру письмо, а Ольга вечером Сергею посылку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "time",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_153",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_153.json"
+    },
+    {
+      "index": 154,
+      "input": "В Москве утром работал Иван, а Мария вечером в Казани.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "slot_permutation_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "slot_permutation",
+        "inversion",
+        "time",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_154",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_154.json"
+    },
+    {
+      "index": 155,
+      "input": "Иван купил книгу. Он положил её на стол, а Мария журнал — на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_chain_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence"
+      ],
+      "scenario_id": "ellipsis_v3_155",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_155.json"
+    },
+    {
+      "index": 156,
+      "input": "Анна написала письмо. Она отправила его Сергею, а Ольга сообщение — Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_chain_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "recipient"
+      ],
+      "scenario_id": "ellipsis_v3_156",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_156.json"
+    },
+    {
+      "index": 157,
+      "input": "Пётр открыл дверь. Он закрыл её ключом, а Иван окно — отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_chain_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "tool"
+      ],
+      "scenario_id": "ellipsis_v3_157",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_157.json"
+    },
+    {
+      "index": 158,
+      "input": "Ольга взяла книгу. Она положила её на стол, а Анна журнал — на полку.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "coreference_chain_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_158",
+      "semantic_failures": [
+        "integration.completed"
+      ],
+      "error": "CandidateValidationError: Correlated runtime alternatives across several roles are not yet canonicalizable: A2",
+      "file": "turn_158.json"
+    },
+    {
+      "index": 159,
+      "input": "Сергей получил письмо от Анны. Он положил его в ящик, а Пётр посылку — на стол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_chain_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "source",
+        "location"
+      ],
+      "scenario_id": "ellipsis_v3_159",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_159.json"
+    },
+    {
+      "index": 160,
+      "input": "Мария купила журнал. Она прочитала его утром, а Анна книгу — вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_chain_ellipsis",
+      "semantic_tags": [
+        "ellipsis",
+        "coreference",
+        "cross_sentence",
+        "time"
+      ],
+      "scenario_id": "ellipsis_v3_160",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_160.json"
+    },
+    {
+      "index": 161,
+      "input": "Иван работает в Москве, а Мария — инженер.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ellipsis_boundary_guard",
+      "semantic_tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "scenario_id": "ellipsis_v3_161",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_161.json"
+    },
+    {
+      "index": 162,
+      "input": "Иван живёт в Москве, а Мария — врач.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ellipsis_boundary_guard",
+      "semantic_tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "scenario_id": "ellipsis_v3_162",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_162.json"
+    },
+    {
+      "index": 163,
+      "input": "Книга лежит на столе, а журнал — подарок.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ellipsis_boundary_guard",
+      "semantic_tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "scenario_id": "ellipsis_v3_163",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_163.json"
+    },
+    {
+      "index": 164,
+      "input": "Иван купил книгу, а Мария — студент.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ellipsis_boundary_guard",
+      "semantic_tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "scenario_id": "ellipsis_v3_164",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_164.json"
+    },
+    {
+      "index": 165,
+      "input": "Анна отправила письмо Сергею, а Ольга — редактор.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ellipsis_boundary_guard",
+      "semantic_tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "scenario_id": "ellipsis_v3_165",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_165.json"
+    },
+    {
+      "index": 166,
+      "input": "Пётр открыл дверь ключом, а Иван — мастер.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ellipsis_boundary_guard",
+      "semantic_tags": [
+        "ellipsis",
+        "boundary_guard",
+        "nominal_predication"
+      ],
+      "scenario_id": "ellipsis_v3_166",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_166.json"
+    }
+  ]
+}

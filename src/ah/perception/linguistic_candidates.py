@@ -6,7 +6,7 @@ import re
 
 from .contracts import EvidenceSpan
 from .lexical_recovery import LexicalRecovery, TokenCandidate
-from .morphology import MorphInfo, Morphology
+from .morphology import MorphInfo, Morphology, stable_transitivity
 
 
 class CoordinationKind(str, Enum):
@@ -259,34 +259,47 @@ class LinguisticCandidateBuilder:
 
     def build(self, text: str) -> LinguisticCandidateGraph:
         tokens = self._tokens(text)
-        preliminary = self._build_from_tokens(text, tokens)
+        graph = self._build_from_tokens(text, tokens)
         if self.lexical_recovery is None:
-            return preliminary
-        decisions = self.lexical_recovery.recover(text, tokens, preliminary)
-        by_index = {item.token_index: item for item in decisions}
-        recovered: list[SourceToken] = []
-        for token in tokens:
-            decision = by_index.get(token.index)
-            normalized = (
-                token.text
-                if decision is None or decision.normalized_text is None
-                else decision.normalized_text
-            )
-            try:
-                analyses = self.morphology.analyze_all(normalized)
-            except AttributeError:
-                single = self.morphology.analyze(normalized)
-                analyses = () if single is None else (single,)
-            recovered.append(
-                replace(
-                    token,
-                    text=normalized,
-                    analyses=tuple(analyses),
-                    raw_text=token.provenance_text,
-                    recovery=decision,
+            return graph
+
+        # Bounded recurrent lexical recovery.  A first safe correction can expose a
+        # predicate/frame that makes another OOV resolvable on the next pass. Stable
+        # EXACT/CORRECTED/UNKNOWN decisions remain monotonic inside LexicalRecovery;
+        # only AMBIGUOUS tokens are reconsidered.  Four passes bound runtime while
+        # covering the short dependency chains expected from ordinary typing noise.
+        for _pass in range(4):
+            decisions = self.lexical_recovery.recover(text, tokens, graph)
+            by_index = {item.token_index: item for item in decisions}
+            recovered: list[SourceToken] = []
+            changed = False
+            for token in tokens:
+                decision = by_index.get(token.index)
+                normalized = (
+                    token.text
+                    if decision is None or decision.normalized_text is None
+                    else decision.normalized_text
                 )
-            )
-        return self._build_from_tokens(text, tuple(recovered))
+                changed = changed or normalized != token.text
+                try:
+                    analyses = self.morphology.analyze_all(normalized)
+                except AttributeError:
+                    single = self.morphology.analyze(normalized)
+                    analyses = () if single is None else (single,)
+                recovered.append(
+                    replace(
+                        token,
+                        text=normalized,
+                        analyses=tuple(analyses),
+                        raw_text=token.provenance_text,
+                        recovery=decision,
+                    )
+                )
+            tokens = tuple(recovered)
+            graph = self._build_from_tokens(text, tokens)
+            if not changed:
+                break
+        return graph
 
     def _build_from_tokens(
         self, text: str, tokens: tuple[SourceToken, ...]
@@ -810,11 +823,48 @@ class LinguisticCandidateBuilder:
             if not infos:
                 return False
             cases = {item.case for item in infos if item.case}
-            # NOM/ACC syncretism is common for inanimate Russian nouns.  Preserve
-            # zero-copula predication provisionally whenever a nominative reading
-            # exists; later frame-level bijective realization alignment decides
-            # whether the dash shell is actually ellipsis.
-            return "nomn" in cases
+            if not cases or "nomn" not in cases:
+                return False
+
+            left, _right = sentence_window(start)
+            previous_finite = [p for p in finite_positions if left <= p < start]
+            source_transitivity = (
+                stable_transitivity(tokens[max(previous_finite) - 1].analyses)
+                if previous_finite else None
+            )
+
+            # A transitive antecedent plus an overt object/oblique realization
+            # *before* the dash is the characteristic inverted peer shell
+            # ``..., а на полку журнал — Ольга``.  A nominative-only word after the
+            # dash is then a perfectly ordinary postposed subject, not evidence for
+            # a new copula.
+            before_dash = [
+                tokens[i - 1]
+                for i in range(start, dash)
+                if re.search(r"\w", tokens[i - 1].text)
+            ]
+            pre_dash_non_subject = any(
+                any(info.pos in {"PREP", "ADVB"} for info in self._material_analyses(item))
+                or any(
+                    info.pos in {"NOUN", "NPRO", "ADJF", "PRTF", "NUMR"}
+                    and info.case not in {None, "nomn"}
+                    for info in self._material_analyses(item)
+                )
+                for item in before_dash
+            )
+            if source_transitivity == "tran" and pre_dash_non_subject:
+                return False
+
+            if cases <= {"nomn"}:
+                return True
+
+            # NOM/ACC syncretism alone is not enough to manufacture a copula in a
+            # transitive ellipsis chain: ``Мария — журнал`` is exactly the ordinary
+            # surface shape of SUBJECT+OBJECT frame completion.  Conversely an
+            # intransitive antecedent cannot consume a bare accusative replacement,
+            # so keeping the nominal-predication reading is conservative
+            # (``журнал — подарок`` after a locative/intransitive frame).
+            return source_transitivity != "tran"
 
         for token in tokens:
             if token.text in _HARD_BOUNDARY:
@@ -881,8 +931,24 @@ class LinguisticCandidateBuilder:
                     right_predicate = min(right_finite)
                     if explicit_subject_before_right_predicate(token.index, right_predicate):
                         boundaries.add(token.index)
-                elif low == "и" and ellipsis_tail_candidate(token.index, low):
-                    boundaries.add(token.index)
+                elif low == "и":
+                    # Inside an already licensed zero-predicate peer, ``и`` first
+                    # coordinates nominal members: ``..., а Мария и Пётр тоже``.
+                    # Starting another proposition here would split one coordinated
+                    # subject into two ellipsis frames.  A comma before ``и`` creates
+                    # a fresh boundary at the coordinator itself and therefore still
+                    # licenses ``Мария тоже, и Пётр тоже`` below.
+                    owner_start = max(b for b in boundaries if b <= token.index)
+                    owner_is_open_peer = (
+                        owner_start < token.index
+                        and not any(owner_start <= p < token.index for p in local_finite)
+                        and (
+                            owner_start in implicit_peer_starts
+                            or tokens[owner_start - 1].text.casefold() in _CLAUSE_COORDINATORS
+                        )
+                    )
+                    if not owner_is_open_peer and ellipsis_tail_candidate(token.index, low):
+                        boundaries.add(token.index)
                 continue
 
             if low in _SUBORDINATORS and any(p >= token.index for p in local_preds):
@@ -893,58 +959,100 @@ class LinguisticCandidateBuilder:
                     boundaries.add(token.index)
 
         # Missing punctuation between parallel zero-predicate frames is common
-        # noise.  Detect only a strong dash shell: a new nominative participant, a
-        # dash later in the same predicate-free segment, and an overt finite frame
-        # somewhere to the left in the orthographic sentence.  This does not
-        # reconstruct a predicate; it only creates the same runtime boundary that a
-        # comma would have licensed.  Requiring the dash avoids splitting ordinary
-        # multi-actant clauses such as ``Иван купил книге Марии подарок``.
-        hard_positions = {token.index for token in tokens if token.text in _HARD_BOUNDARY}
-        for start in range(2, len(tokens) + 1):
-            if start in boundaries:
-                continue
-            token = tokens[start - 1]
-            if not re.search(r"\w", token.text):
-                continue
-            previous_token = tokens[start - 2]
-            if previous_token.text.casefold() in (
-                _CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR
-            ):
-                # The coordinator itself already owns the peer-clause boundary;
-                # keep its following material in the same clause.
-                continue
-            left, right = sentence_window(start)
-            if not any(left <= p < start for p in finite_positions):
-                continue
-            if any(start <= p <= right for p in pred_positions):
-                # A genuine overt predicate starts/occupies the right-hand clause;
-                # ordinary predicate-driven segmentation handles that case.
-                continue
-            if not any(
-                item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
-                for item in self._material_analyses(token)
-            ):
-                continue
-            next_existing = min((b for b in boundaries if b > start), default=right + 1)
-            segment_end = min(right, next_existing - 1)
-            dash = next(
-                (
-                    i for i in range(start + 1, segment_end + 1)
-                    if tokens[i - 1].text in {"—", "–", "-"}
-                ),
-                None,
+        # noise, but an unrestricted scan for *any* nominative reading badly
+        # over-segments Russian NOM/ACC syncretism (``письмо``, ``окно``) and even
+        # weak productive-name parses.  Treat the dash as a shell cue and choose at
+        # most one strongly nominative start for that shell.  Existing comma/
+        # coordinator peer boundaries own their whole predicate-free segment and
+        # are never split again here.
+        def nominative_dominance(item: SourceToken) -> float:
+            nominal = tuple(
+                info for info in self._material_analyses(item)
+                if info.pos in {"NOUN", "NPRO"} and info.case is not None
             )
-            if dash is None:
+            if not nominal:
+                return 0.0
+            cases = {info.case for info in nominal}
+            if cases <= {"nomn"}:
+                return 1.0
+            positive = [max(0.0, info.score) for info in nominal]
+            total = sum(positive)
+            if total <= 0.0:
+                return sum(info.case == "nomn" for info in nominal) / len(nominal)
+            return sum(
+                max(0.0, info.score) for info in nominal if info.case == "nomn"
+            ) / total
+
+        def has_non_subject_realization(start: int, dash: int, end: int) -> bool:
+            for index in range(start, end + 1):
+                if index == start:
+                    continue
+                item = tokens[index - 1]
+                if item.text in {"—", "–", "-", ",", ";"}:
+                    continue
+                low = item.text.casefold()
+                if low in (_CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR):
+                    continue
+                material = self._material_analyses(item)
+                if any(info.pos in {"PREP", "ADVB"} for info in material):
+                    return True
+                if any(
+                    info.pos in {"NOUN", "NPRO", "ADJF", "PRTF", "NUMR"}
+                    and info.case not in {None, "nomn"}
+                    for info in material
+                ):
+                    return True
+            return False
+
+        for dash_token in tokens:
+            if dash_token.text not in {"—", "–", "-"}:
                 continue
-            words = [
-                tokens[i - 1]
-                for i in range(start, segment_end + 1)
-                if re.search(r"\w", tokens[i - 1].text)
-            ]
-            if len(words) < 2:
+            dash = dash_token.index
+            left, right = sentence_window(dash)
+            prior_finite = [p for p in finite_positions if left <= p < dash]
+            if not prior_finite:
                 continue
-            boundaries.add(start)
-            implicit_peer_starts.add(start)
+
+            owner_start = max(b for b in boundaries if b <= dash)
+            if owner_start > left:
+                owner_first = tokens[owner_start - 1].text.casefold()
+                if (
+                    owner_start in implicit_peer_starts
+                    or owner_first in (_CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR)
+                    or not any(owner_start <= p < dash for p in finite_positions)
+                ):
+                    # A punctuation/coordinator boundary already licensed the
+                    # predicate-free peer.  Splitting inside it caused nested
+                    # frames such as ``а Анна`` + ``журнал — на полку``.
+                    continue
+
+            last_finite = max(prior_finite)
+            candidates: list[tuple[float, int]] = []
+            for index in range(last_finite + 1, dash):
+                if index in boundaries:
+                    continue
+                item = tokens[index - 1]
+                if not re.search(r"\w", item.text):
+                    continue
+                dominance = nominative_dominance(item)
+                if dominance < 0.75:
+                    continue
+                if not has_non_subject_realization(index, dash, right):
+                    continue
+                candidates.append((dominance, index))
+            if not candidates:
+                continue
+
+            # Exact/near-exact nominative evidence outranks syncretic candidates;
+            # on a true tie the later candidate is safer because a post-verbal
+            # source subject may precede the new peer in punctuation-free input.
+            best_strength = max(score for score, _index in candidates)
+            best_start = max(
+                index for score, index in candidates
+                if best_strength - score <= 0.05
+            )
+            boundaries.add(best_start)
+            implicit_peer_starts.add(best_start)
 
         ordered = sorted(b for b in boundaries if 1 <= b <= len(tokens) + 1)
         spans: list[tuple[int, int]] = []

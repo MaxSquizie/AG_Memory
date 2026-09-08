@@ -1,0 +1,196 @@
+Acceptance run: 20260908_203438_+0300
+Cases: 166 | RUNTIME OK: 162 | RUNTIME ERROR: 4
+SEMANTIC PASS: 160 | FAIL: 6 | GAP: 0
+SCENARIOS: 166 | isolated between scenarios
+
+Families:
+  predicate_frame: PASS 6/6 | FAIL 0 | GAP 0
+  role_frame: PASS 5/5 | FAIL 0 | GAP 0
+  proposition_negation: PASS 4/4 | FAIL 0 | GAP 0
+  proposition_confirmation: PASS 2/2 | FAIL 0 | GAP 0
+  temporal_ellipsis: PASS 3/3 | FAIL 0 | GAP 0
+  locative_ellipsis: PASS 2/2 | FAIL 0 | GAP 0
+  complex_chain: PASS 12/12 | FAIL 0 | GAP 0
+  coordination_ellipsis: PASS 12/12 | FAIL 0 | GAP 0
+  polarity_chain: PASS 10/10 | FAIL 0 | GAP 0
+  role_rich_chain: PASS 10/10 | FAIL 0 | GAP 0
+  temporal_locative_combo: PASS 10/10 | FAIL 0 | GAP 0
+  antecedent_reset: PASS 10/10 | FAIL 0 | GAP 0
+  punctuation_ellipsis: PASS 6/6 | FAIL 0 | GAP 0
+  scope_ellipsis: PASS 4/4 | FAIL 0 | GAP 0
+  coreference_ellipsis: PASS 2/2 | FAIL 0 | GAP 0
+  mixed_adversarial_ellipsis: PASS 1/2 | FAIL 1 | GAP 0
+  inversion_ellipsis: PASS 12/12 | FAIL 0 | GAP 0
+  punctuation_noise_ellipsis: PASS 10/12 | FAIL 2 | GAP 0
+  scope_control_ellipsis: PASS 10/12 | FAIL 2 | GAP 0
+  antecedent_competition: PASS 8/8 | FAIL 0 | GAP 0
+  slot_permutation_ellipsis: PASS 10/10 | FAIL 0 | GAP 0
+  coreference_chain_ellipsis: PASS 5/6 | FAIL 1 | GAP 0
+  ellipsis_boundary_guard: PASS 6/6 | FAIL 0 | GAP 0
+
+001 PASS (runtime=OK, scenario=ellipsis_v1_001): Иван купил книгу, а Мария журнал.
+002 PASS (runtime=OK, scenario=ellipsis_v1_002): Иван прочитал книгу, а Мария — журнал.
+003 PASS (runtime=OK, scenario=ellipsis_v1_003): Пётр открыл дверь, а Иван окно.
+004 PASS (runtime=OK, scenario=ellipsis_v1_004): Анна написала письмо, а Ольга сообщение.
+005 PASS (runtime=OK, scenario=ellipsis_v1_005): Сергей увидел машину, а Пётр автобус.
+006 PASS (runtime=OK, scenario=ellipsis_v1_006): Иван любит музыку, а Мария театр.
+007 PASS (runtime=OK, scenario=ellipsis_v1_007): Сергей передал Анне письмо, а Пётр Ольге посылку.
+008 PASS (runtime=OK, scenario=ellipsis_v1_008): Ольга положила книгу на стол, а Анна журнал — на полку.
+009 PASS (runtime=OK, scenario=ellipsis_v1_009): Пётр открыл дверь ключом, а Иван окно отвёрткой.
+010 PASS (runtime=OK, scenario=ellipsis_v1_010): Мастер сделал стол из дерева, а ученик стул из металла.
+011 PASS (runtime=OK, scenario=ellipsis_v1_011): Анна отправила письмо Сергею, а Ольга сообщение Петру.
+012 PASS (runtime=OK, scenario=ellipsis_v1_012): Иван купил книгу, а Мария — нет.
+013 PASS (runtime=OK, scenario=ellipsis_v1_013): Иван прочитал книгу, а Мария — нет.
+014 PASS (runtime=OK, scenario=ellipsis_v1_014): Анна знает ответ, а Пётр — нет.
+015 PASS (runtime=OK, scenario=ellipsis_v1_015): Сергей открыл дверь, а Иван — нет.
+016 PASS (runtime=OK, scenario=ellipsis_v1_016): Иван купил книгу, а Мария тоже.
+017 PASS (runtime=OK, scenario=ellipsis_v1_017): Анна прочитала отчёт, и Ольга тоже.
+018 PASS (runtime=OK, scenario=ellipsis_v1_018): Вчера Иван прочитал книгу, а сегодня журнал.
+019 PASS (runtime=OK, scenario=ellipsis_v1_019): Утром Пётр работал в офисе, а вечером дома.
+020 PASS (runtime=OK, scenario=ellipsis_v1_020): Иван пришёл утром, а Мария — вечером.
+021 PASS (runtime=OK, scenario=ellipsis_v1_021): Книга лежит на столе, а журнал — на полке.
+022 PASS (runtime=OK, scenario=ellipsis_v1_022): Иван работает в Москве, а Мария — в Казани.
+023 PASS (runtime=OK, scenario=ellipsis_v2_023): Иван купил журнал, а Мария и Пётр - нет.
+024 PASS (runtime=OK, scenario=ellipsis_v2_024): Иван живёт в Москве, Мария - в Казани, Пётр - в Париже, а Слава - бродяга.
+025 PASS (runtime=OK, scenario=ellipsis_v2_025): Иван живёт в Москве, Мария — в Казани, а Пётр работает в Париже.
+026 PASS (runtime=OK, scenario=ellipsis_v2_026): Иван купил книгу, Мария — журнал, Пётр — газету.
+027 PASS (runtime=OK, scenario=ellipsis_v2_027): Анна прочитала книгу, Ольга — журнал, Мария — отчёт, а Пётр — письмо.
+028 PASS (runtime=OK, scenario=ellipsis_v2_028): Пётр открыл дверь, Иван — окно, Сергей — ворота.
+029 PASS (runtime=OK, scenario=ellipsis_v2_029): Иван работает дома, Мария — в офисе, Пётр — в школе.
+030 PASS (runtime=OK, scenario=ellipsis_v2_030): Книга лежит на столе, журнал — на полке, тетрадь — в ящике.
+031 PASS (runtime=OK, scenario=ellipsis_v2_031): Иван пришёл утром, Мария — днём, Пётр — вечером.
+032 PASS (runtime=OK, scenario=ellipsis_v2_032): Вчера Иван читал книгу, сегодня — журнал, завтра — газету.
+033 PASS (runtime=OK, scenario=ellipsis_v2_033): Иван купил книгу, Мария — журнал, а Пётр прочитал газету.
+034 PASS (runtime=OK, scenario=ellipsis_v2_034): Иван купил книгу, а Мария прочитала журнал, Пётр — газету.
+035 PASS (runtime=OK, scenario=ellipsis_v2_035): Иван и Пётр купили книгу, а Мария — журнал.
+036 PASS (runtime=OK, scenario=ellipsis_v2_036): Иван купил книгу, а Мария и Пётр — журнал.
+037 PASS (runtime=OK, scenario=ellipsis_v2_037): Иван и Пётр купили книгу, а Мария и Анна — журнал.
+038 PASS (runtime=OK, scenario=ellipsis_v2_038): Иван купил хлеб и молоко, а Мария — чай и кофе.
+039 PASS (runtime=OK, scenario=ellipsis_v2_039): Иван купил хлеб и молоко, а Мария — нет.
+040 PASS (runtime=OK, scenario=ellipsis_v2_040): Иван и Пётр купили хлеб, а Мария и Анна — нет.
+041 PASS (runtime=OK, scenario=ellipsis_v2_041): Иван и Пётр пришли утром, а Мария — вечером.
+042 PASS (runtime=OK, scenario=ellipsis_v2_042): Иван пришёл утром, а Мария и Пётр — вечером.
+043 PASS (runtime=OK, scenario=ellipsis_v2_043): Книга и журнал лежат на столе, а тетрадь — на полке.
+044 PASS (runtime=OK, scenario=ellipsis_v2_044): Книга лежит на столе, а журнал и тетрадь — на полке.
+045 PASS (runtime=OK, scenario=ellipsis_v2_045): Анна отправила письмо Сергею, а Ольга и Мария — сообщение Петру.
+046 PASS (runtime=OK, scenario=ellipsis_v2_046): Сергей передал Анне книгу и журнал, а Пётр — Ольге письмо и открытку.
+047 PASS (runtime=OK, scenario=ellipsis_v2_047): Иван купил книгу, Мария — журнал, а Пётр — нет.
+048 PASS (runtime=OK, scenario=ellipsis_v2_048): Иван купил книгу, а Мария — нет, Пётр — тоже нет.
+049 PASS (runtime=OK, scenario=ellipsis_v2_049): Иван купил книгу, а Мария тоже, Пётр — нет.
+050 PASS (runtime=OK, scenario=ellipsis_v2_050): Иван купил книгу, Мария — журнал, Пётр — тоже.
+051 PASS (runtime=OK, scenario=ellipsis_v2_051): Анна знает ответ, Ольга — нет, а Пётр тоже.
+052 PASS (runtime=OK, scenario=ellipsis_v2_052): Анна знает ответ, Ольга — тоже, а Пётр — нет.
+053 PASS (runtime=OK, scenario=ellipsis_v2_053): Иван открыл дверь, Мария — окно, а Пётр — нет.
+054 PASS (runtime=OK, scenario=ellipsis_v2_054): Иван открыл дверь, а Мария и Пётр тоже.
+055 PASS (runtime=OK, scenario=ellipsis_v2_055): Иван не купил книгу, а Мария — тоже.
+056 PASS (runtime=OK, scenario=ellipsis_v2_056): Иван не купил книгу, а Мария — купила.
+057 PASS (runtime=OK, scenario=ellipsis_v2_057): Иван открыл дверь ключом, Мария — окно отвёрткой, Пётр — ворота ломом.
+058 PASS (runtime=OK, scenario=ellipsis_v2_058): Анна отправила Ивану письмо, Ольга — Петру посылку, Мария — Сергею открытку.
+059 PASS (runtime=OK, scenario=ellipsis_v2_059): Мастер сделал стол из дерева, ученик — стул из металла, подмастерье — шкаф из пластика.
+060 PASS (runtime=OK, scenario=ellipsis_v2_060): Ольга положила книгу на стол, Анна — журнал на полку, Мария — письмо в ящик.
+061 PASS (runtime=OK, scenario=ellipsis_v2_061): Иван открыл дверь ключом, а Мария — нет.
+062 PASS (runtime=OK, scenario=ellipsis_v2_062): Анна отправила письмо Сергею, а Ольга — нет.
+063 PASS (runtime=OK, scenario=ellipsis_v2_063): Мастер сделал стол из дерева, а ученик — стул из металла, подмастерье — нет.
+064 PASS (runtime=OK, scenario=ellipsis_v2_064): Пётр открыл дверь ключом, а Иван окно — отвёрткой.
+065 PASS (runtime=OK, scenario=ellipsis_v2_065): Сергей передал Анне письмо утром, а Пётр Ольге посылку вечером.
+066 PASS (runtime=OK, scenario=ellipsis_v2_066): Ольга положила книгу на стол утром, а Анна журнал — на полку вечером.
+067 PASS (runtime=OK, scenario=ellipsis_v2_067): Вчера Иван работал в Москве, а сегодня — в Казани.
+068 PASS (runtime=OK, scenario=ellipsis_v2_068): Утром Иван работал дома, Мария — в офисе, а вечером Пётр — в кафе.
+069 PASS (runtime=OK, scenario=ellipsis_v2_069): Вчера книга лежала на столе, сегодня — на полке.
+070 PASS (runtime=OK, scenario=ellipsis_v2_070): Иван был в Москве утром, Мария — в Казани вечером.
+071 PASS (runtime=OK, scenario=ellipsis_v2_071): Иван пришёл утром, Мария — вечером, а Пётр — ночью.
+072 PASS (runtime=OK, scenario=ellipsis_v2_072): Утром Анна отправила письмо Ивану, а вечером Ольга — посылку Петру.
+073 PASS (runtime=OK, scenario=ellipsis_v2_073): Вчера мастер сделал стол из дерева, а сегодня ученик — стул из металла.
+074 PASS (runtime=OK, scenario=ellipsis_v2_074): Иван работал в Москве два года, а Мария — в Казани три года.
+075 PASS (runtime=OK, scenario=ellipsis_v2_075): Два часа книгу читал Иван, а три часа — журнал Пётр.
+076 PASS (runtime=OK, scenario=ellipsis_v2_076): В Москве Иван работал утром, а в Казани Мария — вечером.
+077 PASS (runtime=OK, scenario=ellipsis_v2_077): Иван купил книгу, Мария — журнал, а Пётр продал газету.
+078 PASS (runtime=OK, scenario=ellipsis_v2_078): Иван купил книгу, а Мария продала журнал, Пётр — газету.
+079 PASS (runtime=OK, scenario=ellipsis_v2_079): Иван живёт в Москве, Мария — в Казани, а Пётр учится в Париже, Ольга — в Лондоне.
+080 PASS (runtime=OK, scenario=ellipsis_v2_080): Иван открыл дверь, Мария — окно, а Пётр закрыл ворота, Сергей — калитку.
+081 PASS (runtime=OK, scenario=ellipsis_v2_081): Анна отправила письмо Сергею, Ольга — сообщение Петру, а Мария получила посылку.
+082 PASS (runtime=OK, scenario=ellipsis_v2_082): Иван купил книгу, а Мария — журнал, но Пётр книгу продал.
+083 PASS (runtime=OK, scenario=ellipsis_v2_083): Иван работает в Москве, Мария — в Казани, а Пётр — инженер.
+084 PASS (runtime=OK, scenario=ellipsis_v2_084): Книга лежит на столе, журнал — на полке, а тетрадь упала на пол.
+085 PASS (runtime=OK, scenario=ellipsis_v2_085): Иван купил книгу и журнал, а Мария продала газету и открытку.
+086 PASS (runtime=OK, scenario=ellipsis_v2_086): Иван купил книгу, Мария — журнал; затем Пётр прочитал газету, а Ольга — письмо.
+087 PASS (runtime=OK, scenario=ellipsis_v2_087): Иван купил книгу; Мария — журнал.
+088 PASS (runtime=OK, scenario=ellipsis_v2_088): Иван купил книгу; Мария — журнал; Пётр — газету.
+089 PASS (runtime=OK, scenario=ellipsis_v2_089): Иван купил книгу. Мария — журнал.
+090 PASS (runtime=OK, scenario=ellipsis_v2_090): Иван купил книгу. А Мария — журнал.
+091 PASS (runtime=OK, scenario=ellipsis_v2_091): Книга лежит на столе; журнал — на полке.
+092 PASS (runtime=OK, scenario=ellipsis_v2_092): Анна отправила письмо Сергею; Ольга — сообщение Петру.
+093 PASS (runtime=OK, scenario=ellipsis_v2_093): Иван хочет купить книгу, а Мария — журнал.
+094 PASS (runtime=OK, scenario=ellipsis_v2_094): Анна начала читать книгу, а Ольга — отчёт.
+095 PASS (runtime=OK, scenario=ellipsis_v2_095): Сергей решил купить билет, а Пётр — журнал.
+096 PASS (runtime=OK, scenario=ellipsis_v2_096): Иван попросил Марию прочитать книгу, а Пётр — Ольгу журнал.
+097 PASS (runtime=OK, scenario=ellipsis_v2_097): Иван купил книгу и положил её на стол, а Мария — журнал на полку.
+098 PASS (runtime=OK, scenario=ellipsis_v2_098): Анна написала письмо и отправила его Сергею, а Ольга — сообщение Петру.
+099 PASS (runtime=OK, scenario=ellipsis_v2_099): Книгу купил Иван, а журнал — Мария.
+100 FAIL (runtime=ERROR, scenario=ellipsis_v2_100): Иван купил кнгу, а Мария — журнал. | perception.available, integration.completed | runtime: PerceptionParseError: ambiguous lexical recovery: кнгу -> книгу, кунгу, ангу, кугу, юнгу, ингу
+101 PASS (runtime=OK, scenario=ellipsis_v3_101): Книгу прочитал Иван, а журнал — Мария.
+102 PASS (runtime=OK, scenario=ellipsis_v3_102): Дверь ключом открыл Пётр, а окно отвёрткой — Иван.
+103 PASS (runtime=OK, scenario=ellipsis_v3_103): Письмо Анне передал Сергей, а посылку Ольге — Пётр.
+104 PASS (runtime=OK, scenario=ellipsis_v3_104): На стол книгу положила Анна, а на полку журнал — Ольга.
+105 PASS (runtime=OK, scenario=ellipsis_v3_105): Из дерева стол сделал мастер, а из металла стул — ученик.
+106 PASS (runtime=OK, scenario=ellipsis_v3_106): Утром в Москве работал Иван, а вечером в Казани — Мария.
+107 PASS (runtime=OK, scenario=ellipsis_v3_107): Два часа книгу читал Иван, а три часа журнал — Пётр.
+108 PASS (runtime=OK, scenario=ellipsis_v3_108): От Анны письмо получил Сергей, а от Ольги посылку — Пётр.
+109 PASS (runtime=OK, scenario=ellipsis_v3_109): В Москве живёт Иван, а в Казани — Мария.
+110 PASS (runtime=OK, scenario=ellipsis_v3_110): Книгу Иван прочитал, а журнал Мария — тоже.
+111 PASS (runtime=OK, scenario=ellipsis_v3_111): Книгу Иван прочитал, а журнал Мария — нет.
+112 PASS (runtime=OK, scenario=ellipsis_v3_112): Книгу Анне передал Сергей, а посылку Петру — Ольга.
+113 PASS (runtime=OK, scenario=ellipsis_v3_113): Иван купил книгу а Мария журнал.
+114 PASS (runtime=OK, scenario=ellipsis_v3_114): Иван купил книгу Мария — журнал.
+115 FAIL (runtime=OK, scenario=ellipsis_v3_115): Книга лежит на столе журнал — на полке. | perception.assertions.a1.role_set, perception.assertions.a2.predicate, perception.assertions.a2.role_set, perception.assertions.a2.roles.LOCATION, canonical.assertions.a1.role_set, canonical.assertions.a2.predicate, ... (+2)
+116 FAIL (runtime=ERROR, scenario=ellipsis_v3_116): Иван живёт в Москве Мария — в Казани Пётр — в Париже. | perception.available, integration.completed | runtime: PerceptionParseError: no canonical roles remain available
+117 PASS (runtime=OK, scenario=ellipsis_v3_117): Сергей передал Анне письмо Пётр Ольге — посылку.
+118 PASS (runtime=OK, scenario=ellipsis_v3_118): Иван открыл дверь ключом Мария окно — отвёрткой.
+119 PASS (runtime=OK, scenario=ellipsis_v3_119): Иван купил книгу, а Мария - журнал.
+120 PASS (runtime=OK, scenario=ellipsis_v3_120): Иван купил книгу, а Мария – журнал.
+121 PASS (runtime=OK, scenario=ellipsis_v3_121): Иван купил книгу;Мария — журнал.
+122 PASS (runtime=OK, scenario=ellipsis_v3_122): Иван купил книгу.Мария — журнал.
+123 PASS (runtime=OK, scenario=ellipsis_v3_123): Иван купил книгу , а Мария — журнал .
+124 PASS (runtime=OK, scenario=ellipsis_v3_124): Иван купил книгу,Мария — журнал,Пётр — газету.
+125 PASS (runtime=OK, scenario=ellipsis_v3_125): Иван хочет прочитать книгу, а Мария — журнал.
+126 PASS (runtime=OK, scenario=ellipsis_v3_126): Иван решил отправить письмо Сергею, а Ольга — сообщение Петру.
+127 FAIL (runtime=OK, scenario=ellipsis_v3_127): Анна начала писать письмо, а Мария — отчёт. | perception.assertion_count, perception.assertions.a1.predicate, perception.assertions.a1.roles.OBJECT, perception.assertions.a2.status, perception.assertions.a2.roles.OBJECT, integration.domains.a3, ... (+13)
+128 PASS (runtime=OK, scenario=ellipsis_v3_128): Иван хочет работать в Москве, а Мария — в Казани.
+129 PASS (runtime=OK, scenario=ellipsis_v3_129): Анна начала работать утром, а Ольга — вечером.
+130 PASS (runtime=OK, scenario=ellipsis_v3_130): Сергей решил открыть дверь ключом, а Пётр — окно отвёрткой.
+131 PASS (runtime=OK, scenario=ellipsis_v3_131): Иван попросил Марию открыть дверь, а Пётр — Ольгу окно.
+132 PASS (runtime=OK, scenario=ellipsis_v3_132): Иван попросил Марию положить книгу на стол, а Пётр — Ольгу журнал на полку.
+133 FAIL (runtime=ERROR, scenario=ellipsis_v3_133): Анна попросила Сергея отправить письмо Петру, а Ольга — Ивана сообщение Марии. | perception.available, integration.completed | runtime: PerceptionParseError: no canonical roles remain available
+134 PASS (runtime=OK, scenario=ellipsis_v3_134): Иван хочет сделать стол из дерева, а Пётр — стул из металла.
+135 PASS (runtime=OK, scenario=ellipsis_v3_135): Мария решила получить письмо от Анны, а Ольга — посылку от Сергея.
+136 PASS (runtime=OK, scenario=ellipsis_v3_136): Анна решила читать книгу два часа, а Ольга — отчёт три часа.
+137 PASS (runtime=OK, scenario=ellipsis_v3_137): Иван купил книгу, Мария — журнал; Пётр продал газету, Ольга — открытку.
+138 PASS (runtime=OK, scenario=ellipsis_v3_138): Иван работает в Москве, Мария — в Казани, но Пётр живёт в Париже, Ольга — в Лондоне.
+139 PASS (runtime=OK, scenario=ellipsis_v3_139): Иван открыл дверь ключом, Мария — окно отвёрткой; Пётр закрыл ворота ломом, Сергей — калитку ключом.
+140 PASS (runtime=OK, scenario=ellipsis_v3_140): Анна отправила Ивану письмо, Ольга — Петру сообщение; Мария получила посылку от Сергея, Пётр — письмо от Анны.
+141 PASS (runtime=OK, scenario=ellipsis_v3_141): Иван читал книгу утром, Мария — журнал вечером; Пётр писал отчёт ночью, Ольга — письмо утром.
+142 PASS (runtime=OK, scenario=ellipsis_v3_142): Мастер сделал стол из дерева, ученик — стул из металла; Иван открыл дверь ключом, Пётр — окно отвёрткой.
+143 PASS (runtime=OK, scenario=ellipsis_v3_143): Иван купил книгу, Мария — журнал. Пётр продал газету, Ольга — открытку.
+144 PASS (runtime=OK, scenario=ellipsis_v3_144): Книга лежит на столе, журнал — на полке. Письмо оказалось в ящике, открытка — в шкафу.
+145 PASS (runtime=OK, scenario=ellipsis_v3_145): Сергей передал Анне письмо, а Пётр посылку Ольге.
+146 PASS (runtime=OK, scenario=ellipsis_v3_146): Анна отправила Сергею письмо, а Ольга Петру сообщение.
+147 PASS (runtime=OK, scenario=ellipsis_v3_147): Ольга положила на стол книгу, а Анна журнал на полку.
+148 PASS (runtime=OK, scenario=ellipsis_v3_148): Пётр открыл ключом дверь, а Иван окно отвёрткой.
+149 PASS (runtime=OK, scenario=ellipsis_v3_149): Мастер сделал из дерева стол, а ученик стул из металла.
+150 PASS (runtime=OK, scenario=ellipsis_v3_150): Иван работал утром в Москве, а Мария в Казани вечером.
+151 PASS (runtime=OK, scenario=ellipsis_v3_151): Сергей получил от Анны письмо, а Пётр посылку от Ольги.
+152 PASS (runtime=OK, scenario=ellipsis_v3_152): Иван читал два часа книгу, а Пётр журнал три часа.
+153 PASS (runtime=OK, scenario=ellipsis_v3_153): Анна передала утром Петру письмо, а Ольга вечером Сергею посылку.
+154 PASS (runtime=OK, scenario=ellipsis_v3_154): В Москве утром работал Иван, а Мария вечером в Казани.
+155 PASS (runtime=OK, scenario=ellipsis_v3_155): Иван купил книгу. Он положил её на стол, а Мария журнал — на полку.
+156 PASS (runtime=OK, scenario=ellipsis_v3_156): Анна написала письмо. Она отправила его Сергею, а Ольга сообщение — Петру.
+157 PASS (runtime=OK, scenario=ellipsis_v3_157): Пётр открыл дверь. Он закрыл её ключом, а Иван окно — отвёрткой.
+158 FAIL (runtime=ERROR, scenario=ellipsis_v3_158): Ольга взяла книгу. Она положила её на стол, а Анна журнал — на полку. | integration.completed | runtime: CandidateValidationError: Correlated runtime alternatives across several roles are not yet canonicalizable: A2
+159 PASS (runtime=OK, scenario=ellipsis_v3_159): Сергей получил письмо от Анны. Он положил его в ящик, а Пётр посылку — на стол.
+160 PASS (runtime=OK, scenario=ellipsis_v3_160): Мария купила журнал. Она прочитала его утром, а Анна книгу — вечером.
+161 PASS (runtime=OK, scenario=ellipsis_v3_161): Иван работает в Москве, а Мария — инженер.
+162 PASS (runtime=OK, scenario=ellipsis_v3_162): Иван живёт в Москве, а Мария — врач.
+163 PASS (runtime=OK, scenario=ellipsis_v3_163): Книга лежит на столе, а журнал — подарок.
+164 PASS (runtime=OK, scenario=ellipsis_v3_164): Иван купил книгу, а Мария — студент.
+165 PASS (runtime=OK, scenario=ellipsis_v3_165): Анна отправила письмо Сергею, а Ольга — редактор.
+166 PASS (runtime=OK, scenario=ellipsis_v3_166): Пётр открыл дверь ключом, а Иван — мастер.

@@ -1,0 +1,437 @@
+{
+  "index": 31,
+  "input": "Мария полочила письмо.",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_031",
+  "linguistic_candidate_graph": {
+    "text": "Мария полочила письмо.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Мария",
+        "start": 0,
+        "end": 5,
+        "analyses": [
+          {
+            "normal_form": "мария",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "Name",
+              "NOUN",
+              "nomn",
+              "anim"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Мария",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Мария",
+          "normalized_text": "Мария",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "полочила",
+        "start": 6,
+        "end": 14,
+        "analyses": [
+          {
+            "normal_form": "полочил",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "gent",
+              "inan",
+              "masc"
+            ],
+            "score": 0.503448275862069
+          },
+          {
+            "normal_form": "полочить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "femn",
+              "sing",
+              "VERB",
+              "perf",
+              "past",
+              "tran",
+              "indc"
+            ],
+            "score": 0.4551724137931034
+          },
+          {
+            "normal_form": "полочило",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "gent",
+              "inan",
+              "neut"
+            ],
+            "score": 0.013793103448275862
+          },
+          {
+            "normal_form": "полочило",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "plur",
+              "nomn",
+              "neut",
+              "inan"
+            ],
+            "score": 0.013793103448275862
+          },
+          {
+            "normal_form": "полочило",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "NOUN",
+              "plur",
+              "inan",
+              "neut"
+            ],
+            "score": 0.013793103448275862
+          }
+        ],
+        "raw_text": "полочила",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "полочила",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "половила",
+            "волочила",
+            "полечила",
+            "положила",
+            "поломила",
+            "полошила",
+            "получила",
+            "помочила"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      },
+      {
+        "index": 3,
+        "text": "письмо",
+        "start": 15,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "письмо",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "sing",
+              "NOUN",
+              "inan",
+              "neut"
+            ],
+            "score": 0.714285
+          },
+          {
+            "normal_form": "письмо",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "NOUN",
+              "nomn",
+              "neut",
+              "inan"
+            ],
+            "score": 0.285714
+          }
+        ],
+        "raw_text": "письмо",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "письмо",
+          "normalized_text": "письмо",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 4,
+        "text": ".",
+        "start": 21,
+        "end": 22,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 3,
+          "text": "Мария полочила письмо",
+          "evidence": {
+            "text": "Мария полочила письмо",
+            "start": 0,
+            "end": 21
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "полочить"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "мария",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "полочить"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: полочила -> половила, волочила, полечила, положила, поломила, полошила, получила, помочила",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: полочила -> половила, волочила, полечила, положила, поломила, полошила, получила, помочила\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: полочила -> половила, волочила, полечила, положила, поломила, полошила, получила, помочила\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 197,
+      "source_text": "Мария полочила письмо.",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:2\nRAW:полочила\nCANDIDATES:половила,волочила,полечила,положила,поломила,полошила,получила,помочила",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: полочила -> половила, волочила, полечила, положила, поломила, полошила, получила, помочила"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_5adfadfb42c1427faeb4a98bc089a12b": {
+        "uid": "N_5adfadfb42c1427faeb4a98bc089a12b",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_ce26082b3c9a4224a35709c30cc941c3",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Мария полочила письмо.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_435e8fa708d8472f8659d5e29a3fff21": {
+        "uid": "S_435e8fa708d8472f8659d5e29a3fff21",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_ce26082b3c9a4224a35709c30cc941c3": {
+        "uid": "T_ce26082b3c9a4224a35709c30cc941c3",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_435e8fa708d8472f8659d5e29a3fff21",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_5adfadfb42c1427faeb4a98bc089a12b": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_5adfadfb42c1427faeb4a98bc089a12b",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "полочила",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": false,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": false,
+      "expected": "получила"
+    },
+    {
+      "name": "integration.completed",
+      "ok": false,
+      "expected": "OK",
+      "actual": "ERROR"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_edits",
+  "semantic_tags": [
+    "typo",
+    "substitution",
+    "predicate"
+  ]
+}

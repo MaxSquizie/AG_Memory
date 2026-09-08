@@ -1,0 +1,679 @@
+{
+  "index": 61,
+  "input": "Пётр открл дврь ключм.",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_061",
+  "linguistic_candidate_graph": {
+    "text": "Пётр открл дврь ключм.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Пётр",
+        "start": 0,
+        "end": 4,
+        "analyses": [
+          {
+            "normal_form": "пётр",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Name",
+              "sing",
+              "NOUN",
+              "nomn",
+              "anim",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "Пётр",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "Пётр",
+          "normalized_text": "Пётр",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "dictionary exact"
+        }
+      },
+      {
+        "index": 2,
+        "text": "открыл",
+        "start": 5,
+        "end": 10,
+        "analyses": [
+          {
+            "normal_form": "открыть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "sing",
+              "VERB",
+              "masc",
+              "perf",
+              "past",
+              "tran",
+              "indc"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "открл",
+        "recovery": {
+          "token_index": 2,
+          "raw_text": "открл",
+          "normalized_text": "открыл",
+          "status": "CORRECTED_HIGH_CONFIDENCE",
+          "alternatives": [
+            "открыл"
+          ],
+          "confidence": 0.97,
+          "reason": "unique orthographic+morphosyntactic candidate"
+        }
+      },
+      {
+        "index": 3,
+        "text": "дверь",
+        "start": 11,
+        "end": 15,
+        "analyses": [
+          {
+            "normal_form": "дверь",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "accs",
+              "sing",
+              "NOUN",
+              "inan"
+            ],
+            "score": 0.612903
+          },
+          {
+            "normal_form": "дверь",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "NOUN",
+              "inan",
+              "nomn"
+            ],
+            "score": 0.387096
+          }
+        ],
+        "raw_text": "дврь",
+        "recovery": {
+          "token_index": 3,
+          "raw_text": "дврь",
+          "normalized_text": "дверь",
+          "status": "CORRECTED_HIGH_CONFIDENCE",
+          "alternatives": [
+            "дверь",
+            "дурь"
+          ],
+          "confidence": 0.88,
+          "reason": "contextual noisy-channel dominance"
+        }
+      },
+      {
+        "index": 4,
+        "text": "ключм",
+        "start": 16,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "Abbr",
+              "NOUN",
+              "nomn",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "Abbr",
+              "NOUN",
+              "gent",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "datv",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "sing",
+              "Abbr",
+              "NOUN",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Abbr",
+              "NOUN",
+              "plur",
+              "nomn",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Abbr",
+              "NOUN",
+              "gent",
+              "inan",
+              "plur",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "datv",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "accs",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          },
+          {
+            "normal_form": "ключм",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "loct",
+              "Abbr",
+              "NOUN",
+              "plur",
+              "inan",
+              "masc",
+              "Fixd"
+            ],
+            "score": 0.08333333333333331
+          }
+        ],
+        "raw_text": "ключм",
+        "recovery": {
+          "token_index": 4,
+          "raw_text": "ключм",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "ключам",
+            "ключом",
+            "ключа",
+            "ключе",
+            "ключу"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      },
+      {
+        "index": 5,
+        "text": ".",
+        "start": 21,
+        "end": 22,
+        "analyses": [],
+        "raw_text": ".",
+        "recovery": {
+          "token_index": 5,
+          "raw_text": ".",
+          "normalized_text": ".",
+          "status": "EXACT",
+          "alternatives": [],
+          "confidence": 1.0,
+          "reason": "non-lexical token"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 4,
+          "text": "Пётр открл дврь ключм",
+          "evidence": {
+            "text": "Пётр открл дврь ключм",
+            "start": 0,
+            "end": 21
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "открыть"
+            ],
+            "nominal_predicative": false
+          }
+        ],
+        "marker": "пётр",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "открыть"
+        ],
+        "nominal_predicative": false
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 227,
+      "source_text": "Пётр открл дврь ключм.",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:2\nRAW:открл\nCANDIDATES:открыл",
+          "normalized_answer": "открыл",
+          "retry_index": 0
+        },
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:3\nRAW:дврь\nCANDIDATES:дверь,дурь",
+          "normalized_answer": "дверь",
+          "retry_index": 0
+        },
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:4\nRAW:ключм\nCANDIDATES:ключам,ключом,ключа,ключе,ключу",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_fb747e5b4fd64b8991f355b56aa3cbf6": {
+        "uid": "N_fb747e5b4fd64b8991f355b56aa3cbf6",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_3fabd2caf7bc412593e855f5814b31c6",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Пётр открл дврь ключм.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_5515f04250f04a6e905c2cf70c554d23": {
+        "uid": "S_5515f04250f04a6e905c2cf70c554d23",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_3fabd2caf7bc412593e855f5814b31c6": {
+        "uid": "T_3fabd2caf7bc412593e855f5814b31c6",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_5515f04250f04a6e905c2cf70c554d23",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_fb747e5b4fd64b8991f355b56aa3cbf6": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_fb747e5b4fd64b8991f355b56aa3cbf6",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "открл",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": true,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "CORRECTED_HIGH_CONFIDENCE"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": true,
+      "expected": "открыл",
+      "actual": "открыл"
+    },
+    {
+      "name": "lexical.2.unique_raw",
+      "ok": true,
+      "expected": "дврь",
+      "actual": 1
+    },
+    {
+      "name": "lexical.2.status",
+      "ok": true,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "CORRECTED_HIGH_CONFIDENCE"
+    },
+    {
+      "name": "lexical.2.normalized",
+      "ok": true,
+      "expected": "дверь",
+      "actual": "дверь"
+    },
+    {
+      "name": "lexical.3.unique_raw",
+      "ok": true,
+      "expected": "ключм",
+      "actual": 1
+    },
+    {
+      "name": "lexical.3.status",
+      "ok": false,
+      "expected": "CORRECTED_HIGH_CONFIDENCE",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.3.normalized",
+      "ok": false,
+      "expected": "ключом"
+    },
+    {
+      "name": "integration.completed",
+      "ok": false,
+      "expected": "OK",
+      "actual": "ERROR"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_multiple",
+  "semantic_tags": [
+    "typo",
+    "multiple_errors",
+    "predicate",
+    "object",
+    "tool"
+  ]
+}

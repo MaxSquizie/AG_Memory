@@ -1,0 +1,266 @@
+{
+  "index": 77,
+  "input": "плн",
+  "status": "ERROR",
+  "scenario_id": "m1_typo_077",
+  "linguistic_candidate_graph": {
+    "text": "плн",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "плн",
+        "start": 0,
+        "end": 3,
+        "analyses": [
+          {
+            "normal_form": "плн",
+            "pos": null,
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "UNKN"
+            ],
+            "score": 1.0
+          }
+        ],
+        "raw_text": "плн",
+        "recovery": {
+          "token_index": 1,
+          "raw_text": "плн",
+          "normalized_text": null,
+          "status": "AMBIGUOUS",
+          "alternatives": [
+            "план",
+            "плен",
+            "пл",
+            "пн",
+            "млн",
+            "алн",
+            "пан",
+            "пли"
+          ],
+          "confidence": 0.0,
+          "reason": "no safe deterministic or embedding margin"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 1,
+          "text": "плн",
+          "evidence": {
+            "text": "плн",
+            "start": 0,
+            "end": 3
+          }
+        },
+        "predicate_heads": [],
+        "marker": "плн",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false,
+        "ellipsis_kind": null,
+        "ellipsis_source_clause_id": null
+      }
+    ],
+    "predicates": [],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 437, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 860, in parse\n    raise AdaptiveParseError(\n        f\"ambiguous lexical recovery: {details}\", tuple(self._traces)\n    )\nah.perception.adaptive_parser.AdaptiveParseError: ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 379, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 478, in handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 162, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 466, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 243,
+      "source_text": "плн",
+      "attempts": [
+        {
+          "role": "lexical_recovery",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TOKEN:1\nRAW:плн\nCANDIDATES:план,плен,пл,пн,млн,алн,пан,пли",
+          "normalized_answer": "AMBIGUOUS",
+          "retry_index": 0
+        }
+      ],
+      "decoded": null,
+      "final_error": "ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли"
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "N_b21e7a97e47c4201aac2f6cbd3e67f09": {
+        "uid": "N_b21e7a97e47c4201aac2f6cbd3e67f09",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_20d08f4ec6fd4a3b9c070cd730f5bd90",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_b960709c60114d3d94660d785e5c632d",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "плн",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "speech_act_kinds": [],
+          "batch_kind": "MESSAGE",
+          "dedup_exempt": true
+        }
+      },
+      "S_134886fc0ea749129f58fefaea7f7461": {
+        "uid": "S_134886fc0ea749129f58fefaea7f7461",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "высказать"
+        ]
+      },
+      "T_20d08f4ec6fd4a3b9c070cd730f5bd90": {
+        "uid": "T_20d08f4ec6fd4a3b9c070cd730f5bd90",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_134886fc0ea749129f58fefaea7f7461",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT",
+          "TIME"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 0,
+    "workspace_uids": [],
+    "workspace": {},
+    "pending_incoming": {
+      "N_b21e7a97e47c4201aac2f6cbd3e67f09": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "existential_pronoun_anchors": {},
+    "last_experience_ref": {
+      "uid": "N_b21e7a97e47c4201aac2f6cbd3e67f09",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "lexical.1.unique_raw",
+      "ok": true,
+      "expected": "плн",
+      "actual": 1
+    },
+    {
+      "name": "lexical.1.status",
+      "ok": true,
+      "expected": "AMBIGUOUS",
+      "actual": "AMBIGUOUS"
+    },
+    {
+      "name": "lexical.1.normalized",
+      "ok": true
+    },
+    {
+      "name": "lexical.1.alternative.план",
+      "ok": true,
+      "expected": "план",
+      "actual": [
+        "план",
+        "плен",
+        "пл",
+        "пн",
+        "млн",
+        "алн",
+        "пан",
+        "пли"
+      ]
+    },
+    {
+      "name": "lexical.1.alternative.плен",
+      "ok": true,
+      "expected": "плен",
+      "actual": [
+        "план",
+        "плен",
+        "пл",
+        "пн",
+        "млн",
+        "алн",
+        "пан",
+        "пли"
+      ]
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "ERROR",
+      "actual": "ERROR"
+    },
+    {
+      "name": "integration.safe_error",
+      "ok": true,
+      "expected": "ambiguous lexical recovery",
+      "actual": "PerceptionParseError: ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "typo_ambiguous",
+  "semantic_tags": [
+    "typo",
+    "ambiguous",
+    "fail_closed"
+  ]
+}

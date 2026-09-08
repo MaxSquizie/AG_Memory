@@ -1,0 +1,1593 @@
+{
+  "cases_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\acceptance_typo\\cases.txt",
+  "output_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\acceptance_runs_m1_typo\\20260908_204201_+0300",
+  "total": 81,
+  "succeeded": 39,
+  "failed": 42,
+  "semantic_passed": 43,
+  "semantic_failed": 38,
+  "semantic_gaps": 0,
+  "semantic_families": {
+    "typo_baseline": {
+      "total": 10,
+      "passed": 4,
+      "failed": 6,
+      "gaps": 0
+    },
+    "typo_edits": {
+      "total": 15,
+      "passed": 7,
+      "failed": 8,
+      "gaps": 0
+    },
+    "typo_roles": {
+      "total": 12,
+      "passed": 6,
+      "failed": 6,
+      "gaps": 0
+    },
+    "typo_inversion": {
+      "total": 12,
+      "passed": 6,
+      "failed": 6,
+      "gaps": 0
+    },
+    "typo_ellipsis": {
+      "total": 10,
+      "passed": 3,
+      "failed": 7,
+      "gaps": 0
+    },
+    "typo_multiple": {
+      "total": 8,
+      "passed": 3,
+      "failed": 5,
+      "gaps": 0
+    },
+    "typo_negative_oov": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "gaps": 0
+    },
+    "typo_ambiguous": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "gaps": 0
+    }
+  },
+  "oracle_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\acceptance_typo\\oracle.json",
+  "scenario_isolation": true,
+  "scenario_count": 81,
+  "cases": [
+    {
+      "index": 1,
+      "input": "Иван купл книгу.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "subject",
+        "object"
+      ],
+      "scenario_id": "m1_typo_001",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: купл -> купал, купил, щупл, купи",
+      "file": "turn_001.json"
+    },
+    {
+      "index": 2,
+      "input": "Мария прочитала докмент.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "object"
+      ],
+      "scenario_id": "m1_typo_002",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_002.json"
+    },
+    {
+      "index": 3,
+      "input": "Сергей передал Анне клю.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "recipient",
+        "object"
+      ],
+      "scenario_id": "m1_typo_003",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю",
+      "file": "turn_003.json"
+    },
+    {
+      "index": 4,
+      "input": "Ольга положила книгу на стл.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "location"
+      ],
+      "scenario_id": "m1_typo_004",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс",
+      "file": "turn_004.json"
+    },
+    {
+      "index": 5,
+      "input": "Пётр открл дверь ключом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "tool"
+      ],
+      "scenario_id": "m1_typo_005",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_005.json"
+    },
+    {
+      "index": 6,
+      "input": "Анна отправила писмо Сергею.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "recipient"
+      ],
+      "scenario_id": "m1_typo_006",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_006.json"
+    },
+    {
+      "index": 7,
+      "input": "Мастер сделал стол из дерва.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "material"
+      ],
+      "scenario_id": "m1_typo_007",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: дерва -> древа, дерева, дерка, деева, нерва",
+      "file": "turn_007.json"
+    },
+    {
+      "index": 8,
+      "input": "Иван приехал в Мскву.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "location",
+        "proper_candidate"
+      ],
+      "scenario_id": "m1_typo_008",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_008.json"
+    },
+    {
+      "index": 9,
+      "input": "Мария работала два чса.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "duration"
+      ],
+      "scenario_id": "m1_typo_009",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса",
+      "file": "turn_009.json"
+    },
+    {
+      "index": 10,
+      "input": "Турист остановился у рки вечером.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_baseline",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "location",
+        "time"
+      ],
+      "scenario_id": "m1_typo_010",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: рки -> реки, арки, урки, руки, раки, ярки, рики, юрки",
+      "file": "turn_010.json"
+    },
+    {
+      "index": 11,
+      "input": "Вера закрыла окн.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "short",
+        "object"
+      ],
+      "scenario_id": "m1_typo_011",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: окн -> окно, окна, окне, окну, окон, кон, кн, око",
+      "file": "turn_011.json"
+    },
+    {
+      "index": 12,
+      "input": "Вера закрыла окнно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "extra_letter",
+        "object"
+      ],
+      "scenario_id": "m1_typo_012",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_012.json"
+    },
+    {
+      "index": 13,
+      "input": "Вера закрыла окнп.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "keyboard_neighbor",
+        "substitution",
+        "object"
+      ],
+      "scenario_id": "m1_typo_013",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: окнп -> окоп, окна, окне, окно, окуп, окну",
+      "file": "turn_013.json"
+    },
+    {
+      "index": 14,
+      "input": "Анна прчоитала отчёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "transposition",
+        "predicate"
+      ],
+      "scenario_id": "m1_typo_014",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_014.json"
+    },
+    {
+      "index": 15,
+      "input": "Вера открыла книгп.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "keyboard_neighbor",
+        "ending",
+        "object"
+      ],
+      "scenario_id": "m1_typo_015",
+      "semantic_failures": [
+        "lexical.1.normalized"
+      ],
+      "error": null,
+      "file": "turn_015.json"
+    },
+    {
+      "index": 16,
+      "input": "На столе лежали береёзы.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "yo_e",
+        "extra_letter",
+        "subject"
+      ],
+      "scenario_id": "m1_typo_016",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_016.json"
+    },
+    {
+      "index": 17,
+      "input": "Мария прочитала документт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "extra_letter",
+        "long",
+        "object"
+      ],
+      "scenario_id": "m1_typo_017",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_017.json"
+    },
+    {
+      "index": 18,
+      "input": "Иван работает в Москвк.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "ending",
+        "location"
+      ],
+      "scenario_id": "m1_typo_018",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: Москвк -> Москву, Москве",
+      "file": "turn_018.json"
+    },
+    {
+      "index": 19,
+      "input": "Анна передала пакет курьерц.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "ending",
+        "recipient"
+      ],
+      "scenario_id": "m1_typo_019",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: курьерц -> курьеру, курьере",
+      "file": "turn_019.json"
+    },
+    {
+      "index": 20,
+      "input": "Турист пришёл вечром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "time"
+      ],
+      "scenario_id": "m1_typo_020",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_020.json"
+    },
+    {
+      "index": 21,
+      "input": "Мария работала две минутыы.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "extra_letter",
+        "duration",
+        "ending"
+      ],
+      "scenario_id": "m1_typo_021",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_021.json"
+    },
+    {
+      "index": 22,
+      "input": "Пётр ударил молоткм.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "tool",
+        "ending"
+      ],
+      "scenario_id": "m1_typo_022",
+      "semantic_failures": [
+        "lexical.1.normalized"
+      ],
+      "error": null,
+      "file": "turn_022.json"
+    },
+    {
+      "index": 23,
+      "input": "Стол покрыли дервом.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "material",
+        "ending"
+      ],
+      "scenario_id": "m1_typo_023",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: дервом -> деревом, древом, дерком, нервом, первом",
+      "file": "turn_023.json"
+    },
+    {
+      "index": 24,
+      "input": "Отчёт проверил инжнер.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "subject",
+        "inversion"
+      ],
+      "scenario_id": "m1_typo_024",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_024.json"
+    },
+    {
+      "index": 25,
+      "input": "Инженер осмотрел электростанци.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "long",
+        "ending",
+        "object"
+      ],
+      "scenario_id": "m1_typo_025",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_025.json"
+    },
+    {
+      "index": 26,
+      "input": "Анна заварила члй.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "substitution",
+        "short",
+        "object"
+      ],
+      "scenario_id": "m1_typo_026",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: члй -> чай, чей, чий",
+      "file": "turn_026.json"
+    },
+    {
+      "index": 27,
+      "input": "Сотрудник открыл архивп.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "extra_letter",
+        "object"
+      ],
+      "scenario_id": "m1_typo_027",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: архивп -> архив, архива, архиве, архивы, архиву",
+      "file": "turn_027.json"
+    },
+    {
+      "index": 28,
+      "input": "Мария купила журнла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "transposition",
+        "object"
+      ],
+      "scenario_id": "m1_typo_028",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_028.json"
+    },
+    {
+      "index": 29,
+      "input": "Анна проверрила отчёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "extra_letter",
+        "predicate"
+      ],
+      "scenario_id": "m1_typo_029",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_029.json"
+    },
+    {
+      "index": 30,
+      "input": "Анна отпраила письмо.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "predicate"
+      ],
+      "scenario_id": "m1_typo_030",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила",
+      "file": "turn_030.json"
+    },
+    {
+      "index": 31,
+      "input": "Мария полочила письмо.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "substitution",
+        "predicate"
+      ],
+      "scenario_id": "m1_typo_031",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: полочила -> половила, волочила, полечила, положила, поломила, полошила, получила, помочила",
+      "file": "turn_031.json"
+    },
+    {
+      "index": 32,
+      "input": "Иван живёт у станци.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "ending",
+        "location"
+      ],
+      "scenario_id": "m1_typo_032",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: станци -> станций, станции, станиц",
+      "file": "turn_032.json"
+    },
+    {
+      "index": 33,
+      "input": "Курьер приехал со склда.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "source"
+      ],
+      "scenario_id": "m1_typo_033",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_033.json"
+    },
+    {
+      "index": 34,
+      "input": "Анна передала отчёт мастреу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "transposition",
+        "recipient"
+      ],
+      "scenario_id": "m1_typo_034",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_034.json"
+    },
+    {
+      "index": 35,
+      "input": "Пётр открыл дверь ключм.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_roles",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "tool"
+      ],
+      "scenario_id": "m1_typo_035",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу",
+      "file": "turn_035.json"
+    },
+    {
+      "index": 36,
+      "input": "Иван купил кнгу.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "object",
+        "short"
+      ],
+      "scenario_id": "m1_typo_036",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: кнгу -> книгу, кунгу, ангу, кугу, юнгу, ингу",
+      "file": "turn_036.json"
+    },
+    {
+      "index": 37,
+      "input": "Пётр открыл дврь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_edits",
+      "semantic_tags": [
+        "typo",
+        "omission",
+        "object"
+      ],
+      "scenario_id": "m1_typo_037",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_037.json"
+    },
+    {
+      "index": 38,
+      "input": "Книгу прочитал инжнер.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "subject"
+      ],
+      "scenario_id": "m1_typo_038",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_038.json"
+    },
+    {
+      "index": 39,
+      "input": "Вчера документт Мария прочитала.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "object",
+        "time"
+      ],
+      "scenario_id": "m1_typo_039",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_039.json"
+    },
+    {
+      "index": 40,
+      "input": "Анне клю Сергей передал.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "recipient",
+        "object"
+      ],
+      "scenario_id": "m1_typo_040",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю",
+      "file": "turn_040.json"
+    },
+    {
+      "index": 41,
+      "input": "На стл книгу Ольга положила.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "location"
+      ],
+      "scenario_id": "m1_typo_041",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс",
+      "file": "turn_041.json"
+    },
+    {
+      "index": 42,
+      "input": "Ключом дврь Пётр открыл.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "tool",
+        "object"
+      ],
+      "scenario_id": "m1_typo_042",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_042.json"
+    },
+    {
+      "index": 43,
+      "input": "В Мскву Иван приехал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "location"
+      ],
+      "scenario_id": "m1_typo_043",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_043.json"
+    },
+    {
+      "index": 44,
+      "input": "У реки вечром турист остановился.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "time",
+        "location"
+      ],
+      "scenario_id": "m1_typo_044",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_044.json"
+    },
+    {
+      "index": 45,
+      "input": "Два чса Мария работала.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "duration"
+      ],
+      "scenario_id": "m1_typo_045",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса",
+      "file": "turn_045.json"
+    },
+    {
+      "index": 46,
+      "input": "Из дерва мастер сделал стол.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "material"
+      ],
+      "scenario_id": "m1_typo_046",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: дерва -> древа, дерева, дерка, деева, нерва",
+      "file": "turn_046.json"
+    },
+    {
+      "index": 47,
+      "input": "Со склда курьер принёс пакет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "source"
+      ],
+      "scenario_id": "m1_typo_047",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_047.json"
+    },
+    {
+      "index": 48,
+      "input": "Письмо Сергею отпраила Анна.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "recipient",
+        "predicate"
+      ],
+      "scenario_id": "m1_typo_048",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила",
+      "file": "turn_048.json"
+    },
+    {
+      "index": 49,
+      "input": "Отвёрткой окн открыл Пётр.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_inversion",
+      "semantic_tags": [
+        "typo",
+        "inversion",
+        "tool",
+        "object"
+      ],
+      "scenario_id": "m1_typo_049",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: окн -> окно, окна, окне, окну, окон, кон, кн, око",
+      "file": "turn_049.json"
+    },
+    {
+      "index": 50,
+      "input": "Иван купил кнгу, а Мария — журнал.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "object"
+      ],
+      "scenario_id": "m1_typo_050",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: кнгу -> книгу, кунгу, ангу, кугу, юнгу, ингу",
+      "file": "turn_050.json"
+    },
+    {
+      "index": 51,
+      "input": "Иван купл чай, а Мария — кофе.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "predicate"
+      ],
+      "scenario_id": "m1_typo_051",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: купл -> купал, купил, щупл, купи",
+      "file": "turn_051.json"
+    },
+    {
+      "index": 52,
+      "input": "Анна положила книгу на стл, а Мария — журнал на полку.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "location"
+      ],
+      "scenario_id": "m1_typo_052",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс",
+      "file": "turn_052.json"
+    },
+    {
+      "index": 53,
+      "input": "Сергей передал Анне клю, а Пётр — Вере письмо.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "recipient",
+        "object"
+      ],
+      "scenario_id": "m1_typo_053",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: клю -> клюк, кулю, килю, клею, клаю, каю",
+      "file": "turn_053.json"
+    },
+    {
+      "index": 54,
+      "input": "Мария работала два чса, а Анна — три часа.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "duration"
+      ],
+      "scenario_id": "m1_typo_054",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса",
+      "file": "turn_054.json"
+    },
+    {
+      "index": 55,
+      "input": "Иван приехал в Мскву, а Пётр — в Казань.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "location"
+      ],
+      "scenario_id": "m1_typo_055",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_055.json"
+    },
+    {
+      "index": 56,
+      "input": "Мастер открл дверь ключом, а ученик — окно отвёрткой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "predicate",
+        "tool"
+      ],
+      "scenario_id": "m1_typo_056",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_056.json"
+    },
+    {
+      "index": 57,
+      "input": "Анна отпраила письмо Сергею, а Вера — отчёт Петру.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "predicate",
+        "recipient"
+      ],
+      "scenario_id": "m1_typo_057",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила",
+      "file": "turn_057.json"
+    },
+    {
+      "index": 58,
+      "input": "Книгу прочитала Мария, а докмент — Анна.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "inversion",
+        "object"
+      ],
+      "scenario_id": "m1_typo_058",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_058.json"
+    },
+    {
+      "index": 59,
+      "input": "На стл книгу положила Ольга, а на полку журнал — Вера.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_ellipsis",
+      "semantic_tags": [
+        "typo",
+        "ellipsis",
+        "inversion",
+        "location"
+      ],
+      "scenario_id": "m1_typo_059",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, ст, сто, стр, стс",
+      "file": "turn_059.json"
+    },
+    {
+      "index": 60,
+      "input": "Вчера инжнер прочитал докмент.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "subject",
+        "object",
+        "time"
+      ],
+      "scenario_id": "m1_typo_060",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_060.json"
+    },
+    {
+      "index": 61,
+      "input": "Пётр открл дврь ключм.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "object",
+        "tool"
+      ],
+      "scenario_id": "m1_typo_061",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.3.status",
+        "lexical.3.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: ключм -> ключам, ключом, ключа, ключе, ключу",
+      "file": "turn_061.json"
+    },
+    {
+      "index": 62,
+      "input": "Анна отпраила писмо Сергею.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "object",
+        "recipient"
+      ],
+      "scenario_id": "m1_typo_062",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: отпраила -> отправила, отпарила, отдраила",
+      "file": "turn_062.json"
+    },
+    {
+      "index": 63,
+      "input": "Турист вечром остановился у рки.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "time",
+        "location"
+      ],
+      "scenario_id": "m1_typo_063",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.2.status",
+        "lexical.2.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: рки -> реки, арки, урки, руки, раки, ярки, рики, юрки",
+      "file": "turn_063.json"
+    },
+    {
+      "index": 64,
+      "input": "Мастер сделал стл из дерва.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "object",
+        "material"
+      ],
+      "scenario_id": "m1_typo_064",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.1.status",
+        "lexical.1.normalized",
+        "lexical.2.status",
+        "lexical.2.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стол, стул, стел, ст, сто, сил, стр, сал; дерва -> древа, дерева, дерка, деева, нерва",
+      "file": "turn_064.json"
+    },
+    {
+      "index": 65,
+      "input": "Курьер принс пакетт со склда.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "object",
+        "source"
+      ],
+      "scenario_id": "m1_typo_065",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_065.json"
+    },
+    {
+      "index": 66,
+      "input": "Мария работла два чса в офисе.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "predicate",
+        "duration",
+        "location"
+      ],
+      "scenario_id": "m1_typo_066",
+      "semantic_failures": [
+        "perception.available",
+        "lexical.2.status",
+        "lexical.2.normalized",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: ambiguous lexical recovery: чса -> часа, чёса, яса, фса, юса, аса, уса, пса",
+      "file": "turn_066.json"
+    },
+    {
+      "index": 67,
+      "input": "В Мскве инжнер проверил докмент.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_multiple",
+      "semantic_tags": [
+        "typo",
+        "multiple_errors",
+        "inversion",
+        "location",
+        "subject",
+        "object"
+      ],
+      "scenario_id": "m1_typo_067",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_067.json"
+    },
+    {
+      "index": 68,
+      "input": "Ксентарий приехал в Москву.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "name",
+        "unknown_token"
+      ],
+      "scenario_id": "m1_typo_068",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_068.json"
+    },
+    {
+      "index": 69,
+      "input": "РКТ передал сигнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "acronym",
+        "unknown_token"
+      ],
+      "scenario_id": "m1_typo_069",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_069.json"
+    },
+    {
+      "index": 70,
+      "input": "Модуль обрабатывает «кванторий».",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "term",
+        "quoted",
+        "unknown_token"
+      ],
+      "scenario_id": "m1_typo_070",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_070.json"
+    },
+    {
+      "index": 71,
+      "input": "Модуль использует QX17.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "code",
+        "alphanumeric",
+        "unknown_token"
+      ],
+      "scenario_id": "m1_typo_071",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_071.json"
+    },
+    {
+      "index": 72,
+      "input": "Нейросфера анализирует сигнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "neologism",
+        "name",
+        "unknown_token"
+      ],
+      "scenario_id": "m1_typo_072",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_072.json"
+    },
+    {
+      "index": 73,
+      "input": "Система использует ZETA9.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "term",
+        "latin",
+        "unknown_token"
+      ],
+      "scenario_id": "m1_typo_073",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_073.json"
+    },
+    {
+      "index": 74,
+      "input": "Орнитолог увидел выпь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "rare_word",
+        "exact"
+      ],
+      "scenario_id": "m1_typo_074",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_074.json"
+    },
+    {
+      "index": 75,
+      "input": "Петр увидел елку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_negative_oov",
+      "semantic_tags": [
+        "negative",
+        "yo_e",
+        "exact"
+      ],
+      "scenario_id": "m1_typo_075",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_075.json"
+    },
+    {
+      "index": 76,
+      "input": "ктт",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ambiguous",
+      "semantic_tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "scenario_id": "m1_typo_076",
+      "semantic_failures": [],
+      "error": "PerceptionParseError: ambiguous lexical recovery: ктт -> кутт, кот, кто, кит, ттт, кет, кут, кэт",
+      "file": "turn_076.json"
+    },
+    {
+      "index": 77,
+      "input": "плн",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ambiguous",
+      "semantic_tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "scenario_id": "m1_typo_077",
+      "semantic_failures": [],
+      "error": "PerceptionParseError: ambiguous lexical recovery: плн -> план, плен, пл, пн, млн, алн, пан, пли",
+      "file": "turn_077.json"
+    },
+    {
+      "index": 78,
+      "input": "стл",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ambiguous",
+      "semantic_tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "scenario_id": "m1_typo_078",
+      "semantic_failures": [],
+      "error": "PerceptionParseError: ambiguous lexical recovery: стл -> стал, стыл, утл, сел",
+      "file": "turn_078.json"
+    },
+    {
+      "index": 79,
+      "input": "лкк",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ambiguous",
+      "semantic_tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "scenario_id": "m1_typo_079",
+      "semantic_failures": [],
+      "error": "PerceptionParseError: ambiguous lexical recovery: лкк -> юкк, лук, лак, лек, лык, лик, люк",
+      "file": "turn_079.json"
+    },
+    {
+      "index": 80,
+      "input": "клю",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ambiguous",
+      "semantic_tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "scenario_id": "m1_typo_080",
+      "semantic_failures": [],
+      "error": "PerceptionParseError: ambiguous lexical recovery: клю -> калю, клюй, клюю, колю, клею, длю, злю, кую",
+      "file": "turn_080.json"
+    },
+    {
+      "index": 81,
+      "input": "писмо",
+      "status": "ERROR",
+      "semantic_status": "PASS",
+      "semantic_family": "typo_ambiguous",
+      "semantic_tags": [
+        "typo",
+        "ambiguous",
+        "fail_closed"
+      ],
+      "scenario_id": "m1_typo_081",
+      "semantic_failures": [],
+      "error": "PerceptionParseError: ambiguous lexical recovery: писмо -> письмо, пасмо",
+      "file": "turn_081.json"
+    }
+  ]
+}

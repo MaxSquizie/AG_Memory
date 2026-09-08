@@ -147,6 +147,9 @@ _PREPOSITION_CASES: dict[str, frozenset[str]] = {
 }
 
 _PROPER_GRAMMEMES = frozenset({"Name", "Surn", "Patr", "Geox", "Orgn", "Trad"})
+_MARKED_LEXEME_GRAMMEMES = frozenset({
+    "Arch", "Litr", "Infr", "Slng", "Vulg", "Erro", "Dist", "Ques", "Obsc"
+})
 
 # Russian ЙЦУКЕН physical-key neighbourhood.  It changes only substitution cost;
 # it is never a lexical/semantic word list.
@@ -166,32 +169,45 @@ for _row_index, _row in enumerate(_KEYBOARD_ROWS):
 
 
 def weighted_damerau_levenshtein(left: str, right: str) -> float:
-    """Optimal-string-alignment distance with Russian keyboard weights."""
+    """Optimal-string-alignment distance with a conservative typing-error model.
+
+    Search spellcheckers treat edit types as a noisy channel rather than as equally
+    likely operations.  Missing/extra characters and adjacent transpositions are
+    common; keyboard-neighbour substitutions are plausible but should not outrank a
+    clean omission by default.  ``е/ё`` remains a near-equivalence.
+    """
 
     source = left.casefold()
     target = right.casefold()
     if source == target:
         return 0.0
     if not source:
-        return float(len(target))
+        return 0.72 * len(target)
     if not target:
-        return float(len(source))
+        return 0.72 * len(source)
 
-    rows: list[list[float]] = [[float(index) for index in range(len(target) + 1)]]
+    rows: list[list[float]] = [[0.72 * index for index in range(len(target) + 1)]]
     for i, source_char in enumerate(source, start=1):
-        current = [float(i)]
+        current = [0.72 * i]
         for j, target_char in enumerate(target, start=1):
             if source_char == target_char:
                 substitution = 0.0
             elif {source_char, target_char} == {"е", "ё"}:
                 substitution = 0.15
-            elif target_char in _KEYBOARD_NEIGHBOURS.get(source_char, ()): 
-                substitution = 0.55
+            elif target_char in _KEYBOARD_NEIGHBOURS.get(source_char, ()):
+                substitution = 0.80
             else:
                 substitution = 1.0
+
+            insertion_cost = 0.45 if target_char in {"ь", "ъ"} else 0.72
+            duplicated = (
+                (i > 1 and source_char == source[i - 2])
+                or (i < len(source) and source_char == source[i])
+            )
+            deletion_cost = 0.45 if duplicated else 0.72
             value = min(
-                current[j - 1] + 1.0,       # insertion
-                rows[i - 1][j] + 1.0,       # deletion
+                current[j - 1] + insertion_cost,
+                rows[i - 1][j] + deletion_cost,
                 rows[i - 1][j - 1] + substitution,
             )
             if (
@@ -200,7 +216,7 @@ def weighted_damerau_levenshtein(left: str, right: str) -> float:
                 and source_char == target[j - 2]
                 and source[i - 2] == target_char
             ):
-                value = min(value, rows[i - 2][j - 2] + 0.65)
+                value = min(value, rows[i - 2][j - 2] + 0.70)
             current.append(value)
         rows.append(current)
     return rows[-1][-1]
@@ -317,6 +333,69 @@ class LexicalRecovery:
         )
 
     @staticmethod
+    def _error_channel_bonus(raw: str, candidate: str) -> float:
+        """Cheap prior for common single-keystroke error mechanisms.
+
+        The value is intentionally too small to force a standalone correction; it
+        only breaks ties after dictionary, morphology and clause structure have
+        narrowed the candidate set.  No word identities are encoded here.
+        """
+        source = raw.casefold()
+        target = candidate.casefold()
+        if source == target:
+            return 0.0
+
+        # One character omitted by the writer (candidate is longer).
+        if len(target) == len(source) + 1:
+            for i in range(len(target)):
+                if target[:i] + target[i + 1 :] == source:
+                    return 0.20 if target[i] in {"ь", "ъ"} else 0.14
+
+        # One extra character in the observed token. Repeated-key errors are
+        # especially common and safe as a weak prior.
+        if len(source) == len(target) + 1:
+            for i in range(len(source)):
+                if source[:i] + source[i + 1 :] == target:
+                    duplicated = (
+                        (i > 0 and source[i] == source[i - 1])
+                        or (i + 1 < len(source) and source[i] == source[i + 1])
+                    )
+                    return 0.18 if duplicated else 0.12
+
+        # Adjacent transposition.
+        if len(source) == len(target):
+            differing = [i for i, (a, b) in enumerate(zip(source, target)) if a != b]
+            if (
+                len(differing) == 2
+                and differing[1] == differing[0] + 1
+                and source[differing[0]] == target[differing[1]]
+                and source[differing[1]] == target[differing[0]]
+            ):
+                return 0.12
+            if len(differing) == 1:
+                i = differing[0]
+                if {source[i], target[i]} == {"е", "ё"}:
+                    return 0.16
+                if target[i] in _KEYBOARD_NEIGHBOURS.get(source[i], ()):
+                    return 0.08
+        return 0.0
+
+    @staticmethod
+    def _marked_lexeme_penalty(analyses: tuple[MorphInfo, ...]) -> float:
+        """Penalize a candidate only when every material reading is marked.
+
+        This distinguishes ordinary vocabulary from archaic/colloquial/error
+        dictionary entries without making corpus frequency authoritative.  One
+        normal reading is enough to remove the penalty.
+        """
+        material = material_analyses(analyses)
+        if not material:
+            return 0.0
+        if all(item.grammemes & _MARKED_LEXEME_GRAMMEMES for item in material):
+            return 0.14
+        return 0.0
+
+    @staticmethod
     def _morphology_continuity(
         raw_analyses: tuple[MorphInfo, ...], candidate_analyses: tuple[MorphInfo, ...]
     ) -> float:
@@ -352,6 +431,40 @@ class LexicalRecovery:
                     score += 0.05
                 best = max(best, score)
         return min(1.0, best)
+
+    @staticmethod
+    def _subject_agrees_surface(
+        token: "SourceToken", head: object, graph: "LinguisticCandidateGraph"
+    ) -> bool:
+        """Conservative agreement check used only to avoid counting the subject as an object."""
+        subject_infos = tuple(
+            item for item in material_analyses(token.analyses)
+            if item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
+        )
+        if not subject_infos:
+            return False
+        try:
+            predicate_infos = material_analyses(graph.token(int(getattr(head, "token_index"))).analyses)
+        except (IndexError, TypeError, ValueError):
+            return False
+        finite = tuple(item for item in predicate_infos if item.pos in {"VERB", "PRED", "PRTS", "ADJS"})
+        if not finite:
+            return False
+        for predicate in finite:
+            for subject in subject_infos:
+                if predicate.number and subject.number and predicate.number != subject.number:
+                    continue
+                if (
+                    "past" in predicate.grammemes
+                    and predicate.number == "sing"
+                    and predicate.gender and subject.gender
+                    and predicate.gender != subject.gender
+                ):
+                    continue
+                if subject.pos == "NOUN" and predicate.grammemes & {"1per", "2per"}:
+                    continue
+                return True
+        return False
 
     def _structural_object_bias(
         self,
@@ -395,16 +508,43 @@ class LexicalRecovery:
         if not overt_subject:
             return 0.0
         material = material_analyses(analyses)
-        has_acc = any(
-            item.pos in {"NOUN", "NPRO", "ADJF", "PRTF", "NUMR"}
-            and item.case == "accs"
+        nominal_poses = {"NOUN", "NPRO", "ADJF", "PRTF", "NUMR"}
+        has_acc = any(item.pos in nominal_poses and item.case == "accs" for item in material)
+        has_nom = any(item.pos in nominal_poses and item.case == "nomn" for item in material)
+        has_oblique = any(
+            item.pos in nominal_poses
+            and item.case in {"datv", "ablt", "gent", "gen1", "gen2", "loct", "loc1", "loc2"}
             for item in material
         )
-        has_nom = any(
-            item.pos in {"NOUN", "NPRO", "ADJF", "PRTF", "NUMR"}
-            and item.case == "nomn"
-            for item in material
-        )
+
+        # If another known bare participant already supplies the accusative-shaped
+        # direct slot, an additional complement is structurally more likely to keep
+        # an oblique surface form.  This does NOT decide RECIPIENT/TOOL/etc.; it
+        # merely prevents lexical recovery from collapsing every complement to ACC.
+        other_direct_shaped = False
+        for other in tokens[clause.span.start_index - 1 : clause.span.end_index]:
+            if other.index == token.index:
+                continue
+            if callable(is_known) and not bool(is_known(other.text)):
+                continue
+            previous = self._previous_word(tokens, other.index)
+            if previous is not None and any(
+                info.pos == "PREP" for info in material_analyses(previous.analyses)
+            ):
+                continue
+            infos = material_analyses(other.analyses)
+            other_acc = any(info.pos in nominal_poses and info.case == "accs" for info in infos)
+            other_nom = any(info.pos in {"NOUN", "NPRO"} and info.case == "nomn" for info in infos)
+            if other_acc and not (other_nom and self._subject_agrees_surface(other, transitive_heads[0], graph)):
+                other_direct_shaped = True
+                break
+
+        if other_direct_shaped:
+            if has_oblique and not has_acc:
+                return 0.34
+            if has_nom or has_acc:
+                return -0.10
+            return 0.0
         if has_acc:
             return 0.30
         if has_nom:
@@ -574,7 +714,18 @@ class LexicalRecovery:
         elif raw_was_predicate and (
             not clause_has_finite or structurally_linked_predicate
         ):
-            compatible = tuple(item for item in material if item.pos in verbal)
+            verbal_candidates = tuple(item for item in material if item.pos in verbal)
+            finite_candidates = tuple(
+                item for item in verbal_candidates
+                if item.pos in finite and agrees_with_overt_subject(item)
+            )
+            # If the candidate is finite, agreement with an independently overt
+            # subject is a hard local syntactic constraint.  Non-finite readings
+            # stay available for genuinely non-finite source shells.
+            compatible = tuple(
+                item for item in verbal_candidates
+                if item.pos not in finite or item in finite_candidates
+            )
             grammar = 1.0 if compatible else -1.0
         elif not clause_has_finite and self._has_pos(material, finite):
             compatible = tuple(
@@ -603,7 +754,7 @@ class LexicalRecovery:
         # merely because a name paradigm has a high morphology probability.
         # This is a morphology-class constraint, not a private name list; a
         # title-cased raw token keeps those candidates fully available.
-        if not token.text[:1].isupper() and compatible:
+        if not token.provenance_text[:1].isupper() and compatible:
             if all(item.grammemes & _PROPER_GRAMMEMES for item in compatible):
                 grammar -= 0.25
 
@@ -617,27 +768,28 @@ class LexicalRecovery:
         tokens: tuple["SourceToken", ...],
         graph: "LinguisticCandidateGraph",
     ) -> str:
+        """Natural local Russian context for the optional embedding reranker.
+
+        Embedding models are substantially more useful on the original linguistic
+        neighbourhood than on an English metadata protocol.  The target is replaced
+        by one neutral gap marker; already recovered neighbouring tokens stay in the
+        context, so later lexical-recovery passes can benefit from earlier ones.
+        """
         clause = graph.clause_for_token(token.index)
         selected = (
             tokens
             if clause is None
             else tokens[clause.span.start_index - 1 : clause.span.end_index]
         )
-        values = [
-            item.text
-            for item in selected
-            if item.index != token.index and self._is_word(item.text)
-        ]
-        predicate_lemmas: list[str] = []
-        if clause is not None:
-            for head in clause.predicate_heads:
-                predicate_lemmas.extend(head.lemma_candidates)
-        parts = []
-        if predicate_lemmas:
-            parts.append("PREDICATE " + " ".join(dict.fromkeys(predicate_lemmas)))
-        if values:
-            parts.append("CONTEXT " + " ".join(values))
-        return " | ".join(parts)
+        values: list[str] = []
+        for item in selected:
+            if item.index == token.index:
+                values.append("…")
+            elif self._is_word(item.text):
+                values.append(item.text)
+            elif item.text in {",", ";", ":", "—", "-"}:
+                values.append(item.text)
+        return " ".join(values).strip()
 
     def _rank_candidates(
         self,
@@ -652,9 +804,11 @@ class LexicalRecovery:
             grammar, morph_score = self._grammar_score(
                 token, analyses, tokens, graph
             )
-            distance = weighted_damerau_levenshtein(token.text, candidate)
+            distance = weighted_damerau_levenshtein(token.provenance_text, candidate)
             frequency = self._weak_frequency(candidate)
             continuity = self._morphology_continuity(token.analyses, analyses)
+            error_bonus = self._error_channel_bonus(token.provenance_text, candidate)
+            marked_penalty = self._marked_lexeme_penalty(analyses)
             length = max(len(token.text), len(candidate), 1)
             score = (
                 1.0
@@ -663,6 +817,8 @@ class LexicalRecovery:
                 + 0.08 * morph_score
                 + 0.04 * frequency
                 + 0.10 * continuity
+                + error_bonus
+                - marked_penalty
             )
             ranked.append(
                 _RankedCandidate(
@@ -695,7 +851,7 @@ class LexicalRecovery:
         graph: "LinguisticCandidateGraph",
         ranked: tuple[_RankedCandidate, ...],
     ) -> bool:
-        raw = token.text
+        raw = token.provenance_text
         neighbours = {
             tokens[position].text
             for position in (token.index - 2, token.index)
@@ -747,6 +903,55 @@ class LexicalRecovery:
                 return False
         return True
 
+    @staticmethod
+    def _has_lexical_context(
+        token: "SourceToken",
+        tokens: tuple["SourceToken", ...],
+        graph: "LinguisticCandidateGraph",
+    ) -> bool:
+        clause = graph.clause_for_token(token.index)
+        if clause is None:
+            return False
+        return any(
+            item.index != token.index and _WORD_PART.search(item.text)
+            for item in tokens[clause.span.start_index - 1 : clause.span.end_index]
+        )
+
+    @staticmethod
+    def _candidate_lemmas(candidate: _RankedCandidate) -> frozenset[str]:
+        return frozenset(
+            item.normal_form.casefold()
+            for item in material_analyses(candidate.analyses)
+            if item.normal_form
+        )
+
+    @classmethod
+    def _same_lexeme_family(
+        cls, left: _RankedCandidate, right: _RankedCandidate
+    ) -> bool:
+        left_lemmas = cls._candidate_lemmas(left)
+        right_lemmas = cls._candidate_lemmas(right)
+        return bool(left_lemmas and right_lemmas and left_lemmas & right_lemmas)
+
+    @classmethod
+    def _noisy_channel_dominates(
+        cls, raw: str, best: _RankedCandidate, runner_up: _RankedCandidate
+    ) -> bool:
+        """A common typing mechanism may break a contextual near-tie.
+
+        This is intentionally unavailable for a standalone token.  It only says
+        that one dictionary candidate is materially more plausible under the
+        generic keyboard-error channel while not being grammatically worse.
+        """
+        best_bonus = cls._error_channel_bonus(raw, best.text)
+        other_bonus = cls._error_channel_bonus(raw, runner_up.text)
+        return (
+            best_bonus >= 0.12
+            and best_bonus - other_bonus >= 0.04
+            and runner_up.distance - best.distance >= 0.05
+            and best.grammar_score >= runner_up.grammar_score - 0.10
+        )
+
     def recover(
         self,
         text: str,
@@ -771,7 +976,20 @@ class LexicalRecovery:
         indexed_candidates = getattr(self.morphology, "indexed_candidates")
         decisions: list[TokenCandidate] = []
         for token in tokens:
-            raw = token.text
+            raw = token.provenance_text
+
+            # Recovery is monotonic across bounded passes.  Stable decisions are
+            # never reopened by later morphology; only AMBIGUOUS tokens may be
+            # reconsidered after neighbouring corrections changed the frame graph.
+            prior = token.recovery
+            if prior is not None and prior.status in {
+                LexicalRecoveryStatus.EXACT,
+                LexicalRecoveryStatus.CORRECTED_HIGH_CONFIDENCE,
+                LexicalRecoveryStatus.UNKNOWN_TOKEN,
+            }:
+                decisions.append(prior)
+                continue
+
             if not self._is_word(raw):
                 word_like = bool(re.search(r"\w", raw, flags=re.UNICODE))
                 decisions.append(
@@ -846,31 +1064,42 @@ class LexicalRecovery:
             selected = best
             confidence = 0.0
             reason = ""
+            has_context = self._has_lexical_context(token, tokens, graph)
             if len(ranked) == 1:
                 confidence = 0.97
                 reason = "unique orthographic+morphosyntactic candidate"
-            elif base_margin >= 0.20:
+            elif has_context and base_margin >= 0.20:
                 confidence = min(0.96, 0.84 + base_margin / 2.0)
                 reason = "morphosyntactic margin"
-            elif (
+            elif has_context and (
+                self._same_lexeme_family(best, ranked[1])
+                and best.grammar_score - ranked[1].grammar_score >= 0.22
+                and best.distance <= ranked[1].distance + 0.20
+            ):
+                confidence = 0.89
+                reason = "same-lexeme grammatical form dominance"
+            elif has_context and (
                 best.grammar_score - ranked[1].grammar_score >= 0.35
                 and best.distance <= ranked[1].distance + 0.25
             ):
                 confidence = 0.88
                 reason = "strong grammatical dominance"
-            elif (
+            elif has_context and (
                 ranked[1].distance - best.distance >= 0.45
                 and best.grammar_score >= ranked[1].grammar_score - 0.10
             ):
                 confidence = 0.87
                 reason = "weighted orthographic dominance"
+            elif has_context and self._noisy_channel_dominates(raw, best, ranked[1]):
+                confidence = 0.88
+                reason = "contextual noisy-channel dominance"
             else:
                 close = tuple(
                     item for item in ranked[:8]
                     if best.base_score - item.base_score <= 0.20
                 )
                 semantic_scores: dict[str, float] = {}
-                if self.semantic_reranker is not None and len(close) >= 2:
+                if has_context and self.semantic_reranker is not None and len(close) >= 2:
                     try:
                         semantic_scores = self.semantic_reranker.rank(
                             self._context_text(token, tokens, graph),

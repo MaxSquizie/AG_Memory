@@ -1,0 +1,14 @@
+104: clauses=2 tail=FRAME :: а на полку журнал — Ольга
+105: clauses=2 tail=FRAME :: а из металла стул — ученик
+107: clauses=2 tail=FRAME :: а три часа журнал — Пётр
+110: clauses=2 tail=PROPOSITION_CONFIRMATION :: а журнал Мария — тоже
+114: clauses=2 tail=FRAME :: Мария — журнал
+117: clauses=2 tail=FRAME :: Пётр Ольге — посылку
+118: clauses=2 tail=FRAME :: Мария окно — отвёрткой
+133: clauses=2 tail=FRAME :: а Ольга — Ивана сообщение Марии
+155: clauses=3 tail=FRAME :: а Мария журнал — на полку
+156: clauses=3 tail=FRAME :: а Ольга сообщение — Петру
+157: clauses=3 tail=FRAME :: а Иван окно — отвёрткой
+158: clauses=3 tail=FRAME :: а Анна журнал — на полку
+159: clauses=3 tail=FRAME :: а Пётр посылку — на стол
+OK 13/13 structural replays

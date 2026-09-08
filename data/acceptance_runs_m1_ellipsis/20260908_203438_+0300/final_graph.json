@@ -1,0 +1,357 @@
+{
+  "tick": 3,
+  "workspace_uids": [
+    "N_14f314d9ff0b4153b109e2d3d904b976",
+    "N_870adda3e81e4eb295a11cbab6d03730",
+    "N_cfac8d3f984f413bba10d9289be375a2",
+    "S_11b5eb74a3e941338f863860f0051928",
+    "S_58780e72cacd4c1aac877f7c3403e568",
+    "T_804861298442461690065ed32c85c9eb",
+    "T_a64c1e1cbb15448d9692f604bd50b100"
+  ],
+  "workspace_semantics": {
+    "N_14f314d9ff0b4153b109e2d3d904b976": "реплика пользователя: Пётр открыл дверь ключом, а Иван — мастер.",
+    "N_870adda3e81e4eb295a11cbab6d03730": "открыл(SUBJECT=Пётр, OBJECT=дверь, TOOL=ключ)",
+    "N_cfac8d3f984f413bba10d9289be375a2": "мастер(SUBJECT=Иван)",
+    "S_11b5eb74a3e941338f863860f0051928": "открыл",
+    "S_58780e72cacd4c1aac877f7c3403e568": "мастер",
+    "T_804861298442461690065ed32c85c9eb": "predicate=открыл; roles=[SUBJECT, OBJECT, TOOL]",
+    "T_a64c1e1cbb15448d9692f604bd50b100": "predicate=мастер; roles=[SUBJECT]"
+  },
+  "nodes": [
+    {
+      "uid": "K_4f87d111095a4b2992854e8963c783d5",
+      "kind": "K",
+      "domain": "H",
+      "semantic": "K_4f87d111095a4b2992854e8963c783d5[открыл(SUBJECT=Пётр, OBJECT=дверь, TOOL=ключ); мастер(SUBJECT=Иван)]",
+      "creation_sequence": 13,
+      "first_excitation_tick": 1,
+      "excitation": 0.14963080675781457,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M",
+      "domain": "P",
+      "semantic": "АГент",
+      "creation_sequence": 1,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_3820ee65edb544bb8aa147e099c38d4f",
+      "kind": "M",
+      "domain": "C",
+      "semantic": "Иван",
+      "creation_sequence": 11,
+      "first_excitation_tick": 1,
+      "excitation": 0.2593600650468786,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M",
+      "domain": "P",
+      "semantic": "Пользователь",
+      "creation_sequence": 2,
+      "first_excitation_tick": 1,
+      "excitation": 0.14963080675781457,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_c3f445fc341f41ab8ae85b4439a00963",
+      "kind": "M",
+      "domain": "C",
+      "semantic": "ключ",
+      "creation_sequence": 7,
+      "first_excitation_tick": 1,
+      "excitation": 0.2593600650468786,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_ce7133c73fb44d8fbca2542733cceaa0",
+      "kind": "M",
+      "domain": "C",
+      "semantic": "дверь",
+      "creation_sequence": 6,
+      "first_excitation_tick": 1,
+      "excitation": 0.2593600650468786,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_d10c6800e11e48b7a45bd0997088ea41",
+      "kind": "M",
+      "domain": "C",
+      "semantic": "Пётр",
+      "creation_sequence": 5,
+      "first_excitation_tick": 1,
+      "excitation": 0.2593600650468786,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "N_14f314d9ff0b4153b109e2d3d904b976",
+      "kind": "N",
+      "domain": "H",
+      "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_4f87d111095a4b2992854e8963c783d5[открыл(SUBJECT=Пётр, OBJECT=дверь, TOOL=ключ); мастер(SUBJECT=Иван)])",
+      "creation_sequence": 16,
+      "first_excitation_tick": 0,
+      "excitation": 0.49704875845222196,
+      "associative_weight": 0.3,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 2,
+      "lifecycle_state": null,
+      "in_workspace": true
+    },
+    {
+      "uid": "N_870adda3e81e4eb295a11cbab6d03730",
+      "kind": "N",
+      "domain": "C",
+      "semantic": "открыл(SUBJECT=Пётр, OBJECT=дверь, TOOL=ключ)",
+      "creation_sequence": 8,
+      "first_excitation_tick": 0,
+      "excitation": 1.0,
+      "associative_weight": 0.4,
+      "output": 0.3800000000000001,
+      "activation_event": true,
+      "decay_age": 0,
+      "lifecycle_state": "NEW",
+      "in_workspace": true
+    },
+    {
+      "uid": "N_cfac8d3f984f413bba10d9289be375a2",
+      "kind": "N",
+      "domain": "C",
+      "semantic": "мастер(SUBJECT=Иван)",
+      "creation_sequence": 12,
+      "first_excitation_tick": 0,
+      "excitation": 1.0,
+      "associative_weight": 0.4,
+      "output": 0.3800000000000001,
+      "activation_event": true,
+      "decay_age": 0,
+      "lifecycle_state": "NEW",
+      "in_workspace": true
+    },
+    {
+      "uid": "S_11b5eb74a3e941338f863860f0051928",
+      "kind": "S",
+      "domain": null,
+      "semantic": "открыл",
+      "creation_sequence": 3,
+      "first_excitation_tick": 0,
+      "excitation": 0.9443926410592216,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 2,
+      "lifecycle_state": null,
+      "in_workspace": true
+    },
+    {
+      "uid": "S_2308bd10ed23481a8ae186cdced3f74d",
+      "kind": "S",
+      "domain": null,
+      "semantic": "высказать",
+      "creation_sequence": 14,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "S_58780e72cacd4c1aac877f7c3403e568",
+      "kind": "S",
+      "domain": null,
+      "semantic": "мастер",
+      "creation_sequence": 9,
+      "first_excitation_tick": 0,
+      "excitation": 0.9443926410592216,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 2,
+      "lifecycle_state": null,
+      "in_workspace": true
+    },
+    {
+      "uid": "T_804861298442461690065ed32c85c9eb",
+      "kind": "T",
+      "domain": "C",
+      "semantic": "открыл",
+      "creation_sequence": 4,
+      "first_excitation_tick": 1,
+      "excitation": 0.9476617761328255,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": true
+    },
+    {
+      "uid": "T_a64c1e1cbb15448d9692f604bd50b100",
+      "kind": "T",
+      "domain": "C",
+      "semantic": "мастер",
+      "creation_sequence": 10,
+      "first_excitation_tick": 1,
+      "excitation": 0.9476617761328255,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 1,
+      "lifecycle_state": null,
+      "in_workspace": true
+    },
+    {
+      "uid": "T_f64c9e2642c84b9384c1abf5a357f1eb",
+      "kind": "T",
+      "domain": "C",
+      "semantic": "высказать",
+      "creation_sequence": 15,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    }
+  ],
+  "links": [],
+  "structural_edges": [
+    {
+      "source_uid": "K_4f87d111095a4b2992854e8963c783d5",
+      "target_uid": "N_870adda3e81e4eb295a11cbab6d03730",
+      "relation_id": "MEMBER:0",
+      "edge_kind": "K->MEMBER"
+    },
+    {
+      "source_uid": "K_4f87d111095a4b2992854e8963c783d5",
+      "target_uid": "N_cfac8d3f984f413bba10d9289be375a2",
+      "relation_id": "MEMBER:1",
+      "edge_kind": "K->MEMBER"
+    },
+    {
+      "source_uid": "N_14f314d9ff0b4153b109e2d3d904b976",
+      "target_uid": "K_4f87d111095a4b2992854e8963c783d5",
+      "relation_id": "OBJECT",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_14f314d9ff0b4153b109e2d3d904b976",
+      "target_uid": "M_b960709c60114d3d94660d785e5c632d",
+      "relation_id": "SUBJECT",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_14f314d9ff0b4153b109e2d3d904b976",
+      "target_uid": "T_f64c9e2642c84b9384c1abf5a357f1eb",
+      "relation_id": "TEMPLATE",
+      "edge_kind": "N->T"
+    },
+    {
+      "source_uid": "N_870adda3e81e4eb295a11cbab6d03730",
+      "target_uid": "M_c3f445fc341f41ab8ae85b4439a00963",
+      "relation_id": "TOOL",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_870adda3e81e4eb295a11cbab6d03730",
+      "target_uid": "M_ce7133c73fb44d8fbca2542733cceaa0",
+      "relation_id": "OBJECT",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_870adda3e81e4eb295a11cbab6d03730",
+      "target_uid": "M_d10c6800e11e48b7a45bd0997088ea41",
+      "relation_id": "SUBJECT",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_870adda3e81e4eb295a11cbab6d03730",
+      "target_uid": "T_804861298442461690065ed32c85c9eb",
+      "relation_id": "TEMPLATE",
+      "edge_kind": "N->T"
+    },
+    {
+      "source_uid": "N_cfac8d3f984f413bba10d9289be375a2",
+      "target_uid": "M_3820ee65edb544bb8aa147e099c38d4f",
+      "relation_id": "SUBJECT",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_cfac8d3f984f413bba10d9289be375a2",
+      "target_uid": "T_a64c1e1cbb15448d9692f604bd50b100",
+      "relation_id": "TEMPLATE",
+      "edge_kind": "N->T"
+    },
+    {
+      "source_uid": "T_804861298442461690065ed32c85c9eb",
+      "target_uid": "S_11b5eb74a3e941338f863860f0051928",
+      "relation_id": "PREDICATE",
+      "edge_kind": "T->S"
+    },
+    {
+      "source_uid": "T_a64c1e1cbb15448d9692f604bd50b100",
+      "target_uid": "S_58780e72cacd4c1aac877f7c3403e568",
+      "relation_id": "PREDICATE",
+      "edge_kind": "T->S"
+    },
+    {
+      "source_uid": "T_f64c9e2642c84b9384c1abf5a357f1eb",
+      "target_uid": "S_2308bd10ed23481a8ae186cdced3f74d",
+      "relation_id": "PREDICATE",
+      "edge_kind": "T->S"
+    }
+  ],
+  "pending_incoming": {
+    "M_d10c6800e11e48b7a45bd0997088ea41": 0.15200000000000005,
+    "M_ce7133c73fb44d8fbca2542733cceaa0": 0.15200000000000005,
+    "M_c3f445fc341f41ab8ae85b4439a00963": 0.15200000000000005,
+    "M_3820ee65edb544bb8aa147e099c38d4f": 0.15200000000000005
+  },
+  "pending_refutations": []
+}

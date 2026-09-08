@@ -1,0 +1,193 @@
+{
+  "source_path": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\config\\lmstudio.toml",
+  "paths": {
+    "project_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory",
+    "llm_model_dir": null,
+    "tokenizer_dir": null,
+    "adapter_dir": null,
+    "system_prompt_path": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\prompts\\agent.txt",
+    "agent_prompt_path": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\prompts\\agent.txt",
+    "perception_prompt_path": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\prompts\\perception.txt",
+    "perception_prompt_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\prompts\\perception",
+    "data_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data",
+    "persistence_file": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\data\\ah_memory.json",
+    "logs_dir": "C:\\Users\\Ilya\\PycharmProjects\\AG_Memory\\logs"
+  },
+  "llm": {
+    "enabled": true,
+    "backend": "lmstudio",
+    "ollama_base_url": "http://127.0.0.1:11434",
+    "ollama_model": "",
+    "lmstudio_base_url": "http://127.0.0.1:1234",
+    "lmstudio_model": "qwen3.8-27b-nvfp4-q5k-no-mtp",
+    "lmstudio_api_key": "",
+    "loader_type": "auto",
+    "device_map": "auto",
+    "dtype": "auto",
+    "local_files_only": true,
+    "trust_remote_code": true,
+    "use_4bit": false,
+    "ctx_total": 0,
+    "max_new_tokens": 256,
+    "temperature": 0.2,
+    "top_p": 0.9,
+    "top_k": 40,
+    "repetition_penalty": 1.05,
+    "no_repeat_ngram_size": 0,
+    "enable_thinking": false,
+    "strip_thinking": true,
+    "startup_timeout_seconds": 600.0,
+    "request_timeout_seconds": 240.0,
+    "engine_script": null,
+    "history_messages": 0,
+    "perception_protocol": "adaptive_v3",
+    "perception_probe_retry_attempts": 1,
+    "perception_ground_actants": true,
+    "perception_max_actants_per_act": 8,
+    "perception_predicate_symbol_language": "en",
+    "perception_morphology_backend": "pymorphy3",
+    "perception_embedding_model": "text-embedding-nomic-embed-text-v1.5",
+    "perception": {
+      "max_new_tokens": 24,
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": 0,
+      "repetition_penalty": 1.0,
+      "no_repeat_ngram_size": 0,
+      "use_cache": false
+    },
+    "agent_repair_attempts": 1,
+    "agent_sanitize_context_echo": true,
+    "agent": {
+      "max_new_tokens": 384,
+      "temperature": 0.2,
+      "top_p": 0.9,
+      "top_k": 40,
+      "repetition_penalty": 1.05,
+      "no_repeat_ngram_size": 0,
+      "use_cache": true
+    }
+  },
+  "integration": {
+    "initial_hypernode_weight": 0.4,
+    "experience_hypernode_weight": 0.3,
+    "follow_link_weight": 0.2,
+    "cause_link_weight": 0.2,
+    "is_a_link_weight": 0.2,
+    "nominal_relation_link_weight": 0.2,
+    "initial_inferred_link_weight": 0.25
+  },
+  "ignition": {
+    "tick_interval_seconds": 1.0,
+    "nu": 1.0,
+    "x_max": 1.0,
+    "activation": {
+      "kind": "additive_clamp",
+      "gain": 1.0,
+      "epsilon": 1e-09
+    },
+    "decay": {
+      "kind": "sigmoid_epoch",
+      "alpha": 0.6,
+      "midpoint_ticks": 12.0,
+      "steepness": 0.35,
+      "half_life_ticks": 12.0,
+      "reactivation_reset_ratio": 1.0,
+      "reactivation_min_input": 0.05
+    },
+    "plasticity": {
+      "enabled": true,
+      "link_kind": "additive_hebb",
+      "hypernode_kind": "additive_confirmation_refutation",
+      "link_hebb_increment": 0.015,
+      "link_async_decrement": 0.002,
+      "link_weight_floor": 0.02,
+      "ignore_pacemaker_only_events": true,
+      "hypernode_confirmation_increment": 0.01,
+      "hypernode_refutation_decrement": 0.15
+    },
+    "seeds": {
+      "new_fact": 0.65,
+      "reactivated_fact": 0.55,
+      "experience": 0.5,
+      "sensory_symbol": 0.85,
+      "resolved_symbol": 0.95,
+      "query_recall": 0.8,
+      "correction": 0.65,
+      "pacemaker": 0.08
+    },
+    "pacemaker": {
+      "enabled": true,
+      "target_policy": "round_robin",
+      "include_symbols": true,
+      "domains": [
+        "C",
+        "P",
+        "H"
+      ],
+      "random_seed": 0
+    }
+  },
+  "workspace": {
+    "threshold": 0.35
+  },
+  "lifecycle": {
+    "initial_lifetime_ticks": 40,
+    "reinforced_lifetime_ticks": 1000,
+    "min_spacing_1_ticks": 20,
+    "min_spacing_2_ticks": 50,
+    "gc_enabled": true,
+    "orphan_cleanup": true
+  },
+  "inference": {
+    "max_depth": 6,
+    "max_expanded_states": 5000
+  },
+  "context": {
+    "max_tokens": 8192,
+    "include_structural_uids": true,
+    "include_mt": false,
+    "max_dependency_depth": 8,
+    "overflow_policy": "error"
+  },
+  "persistence": {
+    "enabled": true,
+    "load_on_start": true,
+    "autosave_every_ticks": 200,
+    "save_runtime_state": true,
+    "save_pending_impulses": true
+  },
+  "identity": {
+    "agent_name": "АГент",
+    "user_name": "Пользователь"
+  },
+  "gui": {
+    "refresh_hz": 30,
+    "render_mode": "2.5d",
+    "show_labels": true,
+    "max_labels": 120,
+    "node_size_min": 7.0,
+    "node_size_max": 24.0,
+    "domain_z_spacing": 5.0,
+    "excitation_gamma": 0.7,
+    "propagation_duration_seconds": 0.9,
+    "show_structural_edges": true,
+    "show_relation_edges": true,
+    "hover_enabled": true,
+    "hover_pick_hz": 30,
+    "focus_line_width": 3.0,
+    "focus_node_scale": 1.35,
+    "focus_neighbor_scale": 1.18,
+    "edge_pick_radius_px": 8.0,
+    "propagation_cycles_per_second": 1.25,
+    "propagation_tail_points": 4,
+    "propagation_tail_spacing": 0.055,
+    "propagation_edge_width": 2.4
+  },
+  "orchestrator": {
+    "ticks_after_input": 3,
+    "ticks_after_response": 1,
+    "auto_materialize_inference": true,
+    "parse_agent_response_to_h": false
+  }
+}

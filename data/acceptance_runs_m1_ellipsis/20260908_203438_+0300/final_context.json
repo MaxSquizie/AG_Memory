@@ -1,0 +1,19 @@
+{
+  "self_ref": {
+    "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+    "kind": "M"
+  },
+  "user_ref": {
+    "uid": "M_b960709c60114d3d94660d785e5c632d",
+    "kind": "M"
+  },
+  "now_ref": null,
+  "active_location_ref": null,
+  "pronoun_refs": {},
+  "existential_pronoun_anchors": {},
+  "last_experience_ref": {
+    "uid": "N_14f314d9ff0b4153b109e2d3d904b976",
+    "kind": "N"
+  },
+  "pending_clarification_refs": []
+}

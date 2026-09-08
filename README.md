@@ -1,4 +1,31 @@
-# AH Agent MVP — v0.25.19
+# AH Agent MVP — v0.25.21
+
+## v0.25.21 — iterative lexical recovery и ellipsis robustness
+
+После живых M1-прогонов v0.25.20 усилены общие deterministic contracts без
+частных правил под слова acceptance. Lexical Recovery теперь выполняет до четырёх
+ограниченных проходов: стабильные `EXACT` / `CORRECTED_HIGH_CONFIDENCE` /
+`UNKNOWN_TOKEN` не переоткрываются, а только `AMBIGUOUS` пересматривается после
+того, как безопасная соседняя коррекция перестроила clause/frame graph.
+
+Noisy-channel ranking различает пропуск, лишний/повторный символ, перестановку,
+keyboard-neighbour substitution и `е/ё`; morphology agreement и surface-form
+constraints могут разрешить форму, но не назначают semantic role. Embedding rerank
+остаётся только последним bounded слоем и получает естественный локальный русский
+контекст вместо служебного metadata-протокола. Standalone ambiguity остаётся
+fail-closed.
+
+В ellipsis segmentation устранена агрессивная нарезка punctuation-free dash-shell:
+NOM/ACC-синкретизм сам по себе больше не создаёт peer clause, coordinator/comma
+boundary владеет своим predicate-free tail, а coordinated confirmation не дробится
+на две proposition. Инвертированный target перед тире отделён от provisional
+zero-copula nominal predication структурно, без словарей. Ambiguity source-frame
+теперь блокирует completion только если меняет topology либо identity реально
+наследуемого slot; ambiguity роли, явно заменённой target, не является veto.
+
+Подробности: `VERSION_02521.md`, `TEST_RESULTS_02521.md`, `DIFF_02521.patch`.
+Нового live acceptance для v0.25.21 ещё нет; последний приложенный прогон относится
+к v0.25.20.
 
 ## v0.25.19 — Lexical Recovery и source transitions
 

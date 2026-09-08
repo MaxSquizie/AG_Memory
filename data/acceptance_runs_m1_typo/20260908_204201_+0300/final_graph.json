@@ -1,0 +1,107 @@
+{
+  "tick": 0,
+  "workspace_uids": [],
+  "workspace_semantics": {},
+  "nodes": [
+    {
+      "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+      "kind": "M",
+      "domain": "P",
+      "semantic": "АГент",
+      "creation_sequence": 1,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "M_b960709c60114d3d94660d785e5c632d",
+      "kind": "M",
+      "domain": "P",
+      "semantic": "Пользователь",
+      "creation_sequence": 2,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "N_5d08a5a50a004214b2909b673a5b1ba8",
+      "kind": "N",
+      "domain": "H",
+      "semantic": "высказать(SUBJECT=Пользователь)",
+      "creation_sequence": 5,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": 0.3,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "S_0691c0e804b649febb21e82dc726ddd0",
+      "kind": "S",
+      "domain": null,
+      "semantic": "высказать",
+      "creation_sequence": 3,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    },
+    {
+      "uid": "T_2a6f3828f9134152b09bccd6a5122de7",
+      "kind": "T",
+      "domain": "C",
+      "semantic": "высказать",
+      "creation_sequence": 4,
+      "first_excitation_tick": null,
+      "excitation": 0.0,
+      "associative_weight": null,
+      "output": 0.0,
+      "activation_event": false,
+      "decay_age": 0,
+      "lifecycle_state": null,
+      "in_workspace": false
+    }
+  ],
+  "links": [],
+  "structural_edges": [
+    {
+      "source_uid": "N_5d08a5a50a004214b2909b673a5b1ba8",
+      "target_uid": "M_b960709c60114d3d94660d785e5c632d",
+      "relation_id": "SUBJECT",
+      "edge_kind": "N->ACTANT"
+    },
+    {
+      "source_uid": "N_5d08a5a50a004214b2909b673a5b1ba8",
+      "target_uid": "T_2a6f3828f9134152b09bccd6a5122de7",
+      "relation_id": "TEMPLATE",
+      "edge_kind": "N->T"
+    },
+    {
+      "source_uid": "T_2a6f3828f9134152b09bccd6a5122de7",
+      "target_uid": "S_0691c0e804b649febb21e82dc726ddd0",
+      "relation_id": "PREDICATE",
+      "edge_kind": "T->S"
+    }
+  ],
+  "pending_incoming": {
+    "N_5d08a5a50a004214b2909b673a5b1ba8": 0.5
+  },
+  "pending_refutations": []
+}

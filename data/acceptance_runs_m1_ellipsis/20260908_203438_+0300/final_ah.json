@@ -1,0 +1,306 @@
+{
+  "K_4f87d111095a4b2992854e8963c783d5": {
+    "uid": "K_4f87d111095a4b2992854e8963c783d5",
+    "kind": "K",
+    "domain": "H",
+    "members": [
+      {
+        "uid": "N_870adda3e81e4eb295a11cbab6d03730",
+        "kind": "N"
+      },
+      {
+        "uid": "N_cfac8d3f984f413bba10d9289be375a2",
+        "kind": "N"
+      }
+    ],
+    "properties": {},
+    "meta": {
+      "type": "UTTERANCE_CONTENT",
+      "gc_auto_created": true
+    }
+  },
+  "M_31e3df15a0044cfebdb1f686e9f0fd03": {
+    "uid": "M_31e3df15a0044cfebdb1f686e9f0fd03",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "АГент",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "SELF"
+    }
+  },
+  "M_3820ee65edb544bb8aa147e099c38d4f": {
+    "uid": "M_3820ee65edb544bb8aa147e099c38d4f",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "grammatical_number": {
+        "name": "grammatical_number",
+        "value": "sing",
+        "type_name": "str",
+        "unit": null
+      },
+      "name": {
+        "name": "name",
+        "value": "Иван",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true,
+      "grammatical_number": "sing"
+    }
+  },
+  "M_b960709c60114d3d94660d785e5c632d": {
+    "uid": "M_b960709c60114d3d94660d785e5c632d",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Пользователь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "USER"
+    }
+  },
+  "M_c3f445fc341f41ab8ae85b4439a00963": {
+    "uid": "M_c3f445fc341f41ab8ae85b4439a00963",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "grammatical_number": {
+        "name": "grammatical_number",
+        "value": "sing",
+        "type_name": "str",
+        "unit": null
+      },
+      "name": {
+        "name": "name",
+        "value": "ключ",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true,
+      "grammatical_number": "sing"
+    }
+  },
+  "M_ce7133c73fb44d8fbca2542733cceaa0": {
+    "uid": "M_ce7133c73fb44d8fbca2542733cceaa0",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "grammatical_number": {
+        "name": "grammatical_number",
+        "value": "sing",
+        "type_name": "str",
+        "unit": null
+      },
+      "name": {
+        "name": "name",
+        "value": "дверь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true,
+      "grammatical_number": "sing"
+    }
+  },
+  "M_d10c6800e11e48b7a45bd0997088ea41": {
+    "uid": "M_d10c6800e11e48b7a45bd0997088ea41",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "grammatical_number": {
+        "name": "grammatical_number",
+        "value": "sing",
+        "type_name": "str",
+        "unit": null
+      },
+      "name": {
+        "name": "name",
+        "value": "Пётр",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true,
+      "grammatical_number": "sing"
+    }
+  },
+  "N_14f314d9ff0b4153b109e2d3d904b976": {
+    "uid": "N_14f314d9ff0b4153b109e2d3d904b976",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_f64c9e2642c84b9384c1abf5a357f1eb",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_b960709c60114d3d94660d785e5c632d",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "K_4f87d111095a4b2992854e8963c783d5",
+        "kind": "K"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Пётр открыл дверь ключом, а Иван — мастер.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "speech_act_kinds": [
+        "ASSERTION"
+      ],
+      "batch_kind": "MESSAGE",
+      "dedup_exempt": true
+    }
+  },
+  "N_870adda3e81e4eb295a11cbab6d03730": {
+    "uid": "N_870adda3e81e4eb295a11cbab6d03730",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_804861298442461690065ed32c85c9eb",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_d10c6800e11e48b7a45bd0997088ea41",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_ce7133c73fb44d8fbca2542733cceaa0",
+        "kind": "M"
+      },
+      "TOOL": {
+        "uid": "M_c3f445fc341f41ab8ae85b4439a00963",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 40,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_cfac8d3f984f413bba10d9289be375a2": {
+    "uid": "N_cfac8d3f984f413bba10d9289be375a2",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_a64c1e1cbb15448d9692f604bd50b100",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_3820ee65edb544bb8aa147e099c38d4f",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 0,
+      "expires_tick": 40,
+      "last_qualifying_tick": 0,
+      "qualifying_reactivations": 0
+    }
+  },
+  "S_11b5eb74a3e941338f863860f0051928": {
+    "uid": "S_11b5eb74a3e941338f863860f0051928",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "открыл",
+      "открыть"
+    ]
+  },
+  "S_2308bd10ed23481a8ae186cdced3f74d": {
+    "uid": "S_2308bd10ed23481a8ae186cdced3f74d",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "высказать"
+    ]
+  },
+  "S_58780e72cacd4c1aac877f7c3403e568": {
+    "uid": "S_58780e72cacd4c1aac877f7c3403e568",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "мастер"
+    ]
+  },
+  "T_804861298442461690065ed32c85c9eb": {
+    "uid": "T_804861298442461690065ed32c85c9eb",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_11b5eb74a3e941338f863860f0051928",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TOOL"
+    ]
+  },
+  "T_a64c1e1cbb15448d9692f604bd50b100": {
+    "uid": "T_a64c1e1cbb15448d9692f604bd50b100",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_58780e72cacd4c1aac877f7c3403e568",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_f64c9e2642c84b9384c1abf5a357f1eb": {
+    "uid": "T_f64c9e2642c84b9384c1abf5a357f1eb",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_2308bd10ed23481a8ae186cdced3f74d",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TIME"
+    ]
+  }
+}
