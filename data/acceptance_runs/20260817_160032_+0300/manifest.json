@@ -1,0 +1,395 @@
+{
+  "cases_file": "C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\data\\acceptance_cases.txt",
+  "output_dir": "C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\data\\acceptance_runs\\20260817_160032_+0300",
+  "total": 40,
+  "succeeded": 35,
+  "failed": 5,
+  "semantic_passed": 34,
+  "semantic_failed": 6,
+  "semantic_gaps": 0,
+  "oracle_file": "C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\data\\acceptance_oracle.json",
+  "cases": [
+    {
+      "index": 1,
+      "input": "Кошка спит.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_001.json"
+    },
+    {
+      "index": 2,
+      "input": "Иван читает книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_002.json"
+    },
+    {
+      "index": 3,
+      "input": "Мария читает.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_003.json"
+    },
+    {
+      "index": 4,
+      "input": "Иван купил хлеб и молоко.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_004.json"
+    },
+    {
+      "index": 5,
+      "input": "Яблоки бывают зелёными или красными.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_005.json"
+    },
+    {
+      "index": 6,
+      "input": "Иван написал письмо и отправил его Марии.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_006.json"
+    },
+    {
+      "index": 7,
+      "input": "Лиза взяла книгу, открыла её и прочитала.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_007.json"
+    },
+    {
+      "index": 8,
+      "input": "Петя встал и вышел.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_008.json"
+    },
+    {
+      "index": 9,
+      "input": "Иван и Мария пришли и ушли.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_009.json"
+    },
+    {
+      "index": 10,
+      "input": "Иван пришёл, а Мария ушла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_010.json"
+    },
+    {
+      "index": 11,
+      "input": "Иван написал письмо, а Мария отправила его Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_011.json"
+    },
+    {
+      "index": 12,
+      "input": "Анна увидела Марию. Она улыбнулась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_012.json"
+    },
+    {
+      "index": 13,
+      "input": "Сергей положил ключ на стол. Потом он взял его.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_013.json"
+    },
+    {
+      "index": 14,
+      "input": "Иван подарил книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_014.json"
+    },
+    {
+      "index": 15,
+      "input": "Иван подарил Марии книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_015.json"
+    },
+    {
+      "index": 16,
+      "input": "Кто подарил Марии книгу?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_016.json"
+    },
+    {
+      "index": 17,
+      "input": "Что Иван подарил Марии?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_017.json"
+    },
+    {
+      "index": 18,
+      "input": "Кому Иван подарил книгу?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_018.json"
+    },
+    {
+      "index": 19,
+      "input": "Иван любит чай.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_019.json"
+    },
+    {
+      "index": 20,
+      "input": "Кто любит чай?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_020.json"
+    },
+    {
+      "index": 21,
+      "input": "Иван сказал, что Мария прочитала книгу.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT",
+      "file": "turn_021.json"
+    },
+    {
+      "index": 22,
+      "input": "Иван попросил Марию прочитать книгу.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT",
+      "file": "turn_022.json"
+    },
+    {
+      "index": 23,
+      "input": "Мария хочет купить билет.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT",
+      "file": "turn_023.json"
+    },
+    {
+      "index": 24,
+      "input": "Книга, которую Иван купил, лежит на столе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_024.json"
+    },
+    {
+      "index": 25,
+      "input": "Человек, который вошёл в комнату, сел на стул.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_025.json"
+    },
+    {
+      "index": 26,
+      "input": "После того как Мария прочитала книгу, она написала отзыв.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_026.json"
+    },
+    {
+      "index": 27,
+      "input": "Перед тем как Иван ушёл, он закрыл окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_027.json"
+    },
+    {
+      "index": 28,
+      "input": "Иван открыл дверь, потому что Мария попросила его войти.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT",
+      "file": "turn_028.json"
+    },
+    {
+      "index": 29,
+      "input": "Иван остался дома, потому что шёл дождь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_029.json"
+    },
+    {
+      "index": 30,
+      "input": "Если Лиза получит советы, она прочитает документ и напишет текст.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_030.json"
+    },
+    {
+      "index": 31,
+      "input": "Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_031.json"
+    },
+    {
+      "index": 32,
+      "input": "Если Иван придёт, Мария прочитает документ и отправит его Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_032.json"
+    },
+    {
+      "index": 33,
+      "input": "Иван не читает книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_033.json"
+    },
+    {
+      "index": 34,
+      "input": "Мария не пришла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_034.json"
+    },
+    {
+      "index": 35,
+      "input": "Иван читает не книгу, а журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_035.json"
+    },
+    {
+      "index": 36,
+      "input": "Книга написана Иваном.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_036.json"
+    },
+    {
+      "index": 37,
+      "input": "Мне дали книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_037.json"
+    },
+    {
+      "index": 38,
+      "input": "Анна сказала Марии, что она победила.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT",
+      "file": "turn_038.json"
+    },
+    {
+      "index": 39,
+      "input": "Иван увидел Петра с биноклем.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_039.json"
+    },
+    {
+      "index": 40,
+      "input": "Я положил книгу рядом с журналом, который был новым.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_040.json"
+    }
+  ]
+}

@@ -26,6 +26,7 @@ lmstudio_api_key = ""            # optional; LM Studio auth is disabled by defau
 
 ollama_base_url = "http://127.0.0.1:11434"
 ollama_model = "qwen2.5:7b"       # builtin_process; внешний backend можно добавить без изменения AH Core
+# ollama_embed_model = "nomic-embed-text"  # optional; empty = ollama_model
 loader_type = "causal_lm"        # text-only; image_text_to_text only for future vision input
 device_map = "cuda:0"            # cuda:0 = строго GPU 0; auto может offload в RAM
 dtype = "auto"                   # auto | bfloat16 | float16 | float32

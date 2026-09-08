@@ -22,6 +22,7 @@ backend = "lmstudio"
 # LM Studio owns model loading/offload. AH only attaches to its local server.
 lmstudio_base_url = "http://127.0.0.1:1234"
 lmstudio_model = "qwen3.8-27b-nvfp4-q5k-no-mtp"  # exact key returned by LM Studio /v1/models
+# lmstudio_embed_model = ""  # optional; empty = lmstudio_model
 lmstudio_api_key = ""            # optional; local LM Studio auth is disabled by default
 
 # Generic per-request generation defaults. The LM Studio backend maps these to

@@ -1,0 +1,1758 @@
+{
+  "version": 1,
+  "policy": {
+    "purpose": "Semantic correctness oracle. PASS means the runtime interpretation, canonical integration, query result and explicit role coverage match the curated expectation; no-exception alone is never PASS.",
+    "template_rule": "A canonical T must cover every role explicitly observed or requested so far. The oracle does not require speculative hidden roles.",
+    "gap_rule": "ARCHITECTURE_GAP is not a pass. It marks an input whose required canonical semantics/clarification mechanism is not defined by Architecture_v3 yet."
+  },
+  "cases": [
+    {
+      "text": "Кошка спит.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "спать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Кошка"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван читает книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Мария читает.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван купил хлеб и молоко.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "хлеб",
+                      "молоко"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Яблоки бывают зелёными или красными.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "бывать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Яблоко",
+                "STATE": {
+                  "composition": {
+                    "operator": "OR",
+                    "members": [
+                      "зелёными",
+                      "красными"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван написал письмо и отправил его Марии.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "RECIPIENT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Лиза взяла книгу, открыла её и прочитала.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Лиза",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Петя встал и вышел.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "встать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Петя"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "выйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван и Мария пришли и ушли.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "Иван",
+                      "Мария"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "composition": {
+                    "operator": "AND",
+                    "members": [
+                      "Иван",
+                      "Мария"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван пришёл, а Мария ушла.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван написал письмо, а Мария отправила его Петру.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "письмо"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "RECIPIENT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Анна увидела Марию. Она улыбнулась.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "улыбнуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.OBJECT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Анна",
+              "Мария"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "text": "Сергей положил ключ на стол. Потом он взял его.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Сергей",
+                "OBJECT": "ключ",
+                "LOCATION": "стол"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "взять",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a1.OBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван подарил книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "подарить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван подарил Марии книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "подарить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Кто подарил Марии книгу?",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "подарить",
+              "mode": "FILL_ROLE",
+              "requested_role": "SUBJECT",
+              "roles": {
+                "RECIPIENT": "Мария",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "SUBJECT",
+              "value": "Иван"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      }
+    },
+    {
+      "text": "Что Иван подарил Марии?",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "подарить",
+              "mode": "FILL_ROLE",
+              "requested_role": "OBJECT",
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "OBJECT",
+              "value": "книга"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      }
+    },
+    {
+      "text": "Кому Иван подарил книгу?",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "подарить",
+              "mode": "FILL_ROLE",
+              "requested_role": "RECIPIENT",
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "RECIPIENT",
+              "value": "Мария"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      }
+    },
+    {
+      "text": "Иван любит чай.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "любить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "чай"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Кто любит чай?",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [
+            {
+              "predicate": "любить",
+              "mode": "FILL_ROLE",
+              "requested_role": "SUBJECT",
+              "roles": {
+                "OBJECT": "чай"
+              }
+            }
+          ],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "query_outcomes": [
+            {
+              "status": "PROVED",
+              "role": "SUBJECT",
+              "value": "Иван"
+            }
+          ],
+          "world_assertion_count": 0
+        }
+      }
+    },
+    {
+      "text": "Иван сказал, что Мария прочитала книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван попросил Марию прочитать книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "RECIPIENT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.RECIPIENT"
+                },
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "note": "Control complement is proposition/content (OBJECT); addressee is RECIPIENT. PURPOSE is reserved for actual goal clauses."
+    },
+    {
+      "text": "Мария хочет купить билет.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "билет"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      },
+      "note": "Desired situation is nested OBJECT content, not PURPOSE."
+    },
+    {
+      "text": "Книга, которую Иван купил, лежит на столе.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "купить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "Книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.OBJECT"
+                },
+                "LOCATION": "стол"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Человек, который вошёл в комнату, сел на стул.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Человек",
+                "LOCATION": "комната"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "сесть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "LOCATION": "стул"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "После того как Мария прочитала книгу, она написала отзыв.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прочитать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "отзыв"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a1",
+              "target": "a2"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Перед тем как Иван ушёл, он закрыл окно.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "закрыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "окно"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "FOLLOW",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван открыл дверь, потому что Мария попросила его войти.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "попросить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "RECIPIENT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": {
+                  "assertion": "a3"
+                }
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C",
+            "a3": "C"
+          }
+        }
+      },
+      "note": "Nested requested action is OBJECT content; Иван is RECIPIENT/addressee of попросить."
+    },
+    {
+      "text": "Иван остался дома, потому что шёл дождь.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "остаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "LOCATION": "дом"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "идти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "дождь"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [
+            {
+              "id": "CAUSE",
+              "source": "a2",
+              "target": "a1"
+            }
+          ],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Если Лиза получит советы, она прочитает документ и напишет текст.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Лиза",
+                "OBJECT": "совет"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "документ"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "написать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "текст"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2",
+                "a3"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "получить"
+              ],
+              "then": [
+                "прочитать",
+                "написать"
+              ]
+            }
+          ]
+        }
+      },
+      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND."
+    },
+    {
+      "text": "Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "принести",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "документ"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "начать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр",
+                "OBJECT": "работа"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1",
+                "a2"
+              ],
+              "then": [
+                "a3"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти",
+                "принести"
+              ],
+              "then": [
+                "начать"
+              ]
+            }
+          ]
+        }
+      },
+      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND."
+    },
+    {
+      "text": "Если Иван придёт, Мария прочитает документ и отправит его Петру.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прочитать",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": "документ"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "отправить",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a2.SUBJECT"
+                },
+                "OBJECT": {
+                  "same_as": "a2.OBJECT"
+                },
+                "RECIPIENT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2",
+                "a3"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "прочитать",
+                "отправить"
+              ]
+            }
+          ]
+        }
+      },
+      "note": "Canonical conditional semantics is g_IF over scoped proposition operands; conjunction on either side is represented by g_AND."
+    },
+    {
+      "text": "Иван не читает книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Мария не пришла.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван читает не книгу, а журнал.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "читать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "журнал"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Книга написана Иваном.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "написать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "Книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          }
+        }
+      }
+    },
+    {
+      "text": "Мне дали книгу.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "дать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "RECIPIENT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "книга"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P"
+          }
+        }
+      }
+    },
+    {
+      "text": "Анна сказала Марии, что она победила.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "RECIPIENT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "победить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "any": true
+                }
+              },
+              "alternatives": [
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.SUBJECT"
+                    }
+                  }
+                },
+                {
+                  "roles": {
+                    "SUBJECT": {
+                      "same_as": "a1.RECIPIENT"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C",
+            "a2": "C"
+          },
+          "clarification": {
+            "required": true,
+            "options": [
+              "Анна",
+              "Мария"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "text": "Иван увидел Петра с биноклем.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "clarification": {
+            "required": true,
+            "kind": "STRUCTURAL",
+            "options": [
+              "«с биноклем» относится к действию «увидел»",
+              "«с биноклем» описывает «Петра»"
+            ],
+            "pending_armed": false
+          },
+          "cp_semantic_addition_count": 0
+        }
+      },
+      "note": "Genuine attachment ambiguity is a successful structural-clarification outcome: H experience is preserved and no C/P reading is committed before the user chooses."
+    },
+    {
+      "text": "Я положил книгу рядом с журналом, который был новым.",
+      "grade": "EXACT",
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "Я",
+                  "canonical_name": "Пользователь"
+                },
+                "OBJECT": "книга",
+                "LOCATION": "журнал"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "быть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.LOCATION"
+                },
+                "STATE": "новым"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "P",
+            "a2": "P"
+          }
+        }
+      },
+      "note": "The concrete journal is introduced inside the user-personal event, so both the action and its object-specific state belong to P."
+    }
+  ]
+}

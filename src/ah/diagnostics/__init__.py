@@ -47,8 +47,19 @@ from .hackathon_metrics import (
     M1Report, M2QuestionObservation, M2ScoreReport, M3Report, M4Report, M5Report, TickBenchmarkReport,
     RoleMetric, run_m3_gc_acceptance, score_m1_acceptance_bundle, score_m1_role_f1,
     score_m2_explainability, score_m4_comparison, score_m5_robustness, run_tick_benchmark, write_metric_report,
+    M3_RUNS_DIRNAME,
 )
-
+from .m4_acceptance import (
+    DEFAULT_M4_QUESTIONS,
+    InjectedAhAnswer,
+    M4AcceptanceError,
+    M4AcceptanceReport,
+    M4CaseRecord,
+    M4Question,
+    M4_RUNS_DIRNAME,
+    load_m4_questions,
+    run_m4_acceptance,
+)
 from .propagation_audit import (
     FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
 )
@@ -112,10 +123,20 @@ __all__ = [
     "score_m1_acceptance_bundle",
     "score_m2_explainability",
     "run_m3_gc_acceptance",
+    "M3_RUNS_DIRNAME",
     "score_m4_comparison",
     "score_m5_robustness",
     "run_tick_benchmark",
     "write_metric_report",
+    "DEFAULT_M4_QUESTIONS",
+    "InjectedAhAnswer",
+    "M4AcceptanceError",
+    "M4AcceptanceReport",
+    "M4CaseRecord",
+    "M4Question",
+    "M4_RUNS_DIRNAME",
+    "load_m4_questions",
+    "run_m4_acceptance",
     "FanoutAudit",
     "PropagationAudit",
     "PropagationEdgeAudit",

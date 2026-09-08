@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from threading import Lock
-from typing import Any
+from typing import Any, Sequence
 import re
 import uuid
 
@@ -265,6 +265,15 @@ class LMStudioBackend:
     def restart(self) -> None:
         self.stop()
         self.start()
+
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        model = (self.config.llm.lmstudio_embed_model or self._active_model or self.config.llm.lmstudio_model).strip()
+        if not model:
+            raise RuntimeError("LM Studio embedding model is not configured")
+        try:
+            return self._client.embed(model=model, texts=texts)
+        except LMStudioClientError as exc:
+            raise RuntimeError(str(exc)) from exc
 
     def _generation_options(self, override: dict[str, Any]) -> dict[str, Any]:
         return {

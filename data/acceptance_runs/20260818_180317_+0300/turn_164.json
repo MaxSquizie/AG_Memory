@@ -1,0 +1,1940 @@
+{
+  "index": 164,
+  "input": "Кому Елена отправила посылку?",
+  "status": "OK",
+  "scenario_id": "query_recipient",
+  "linguistic_candidate_graph": {
+    "text": "Кому Елена отправила посылку?",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Кому",
+        "start": 0,
+        "end": 4,
+        "analyses": [
+          {
+            "normal_form": "кто",
+            "pos": "NPRO",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "masc",
+              "NPRO",
+              "datv",
+              "sing"
+            ],
+            "score": 0.984
+          },
+          {
+            "normal_form": "кома",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "accs",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.008
+          },
+          {
+            "normal_form": "ком",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "datv",
+              "sing",
+              "masc",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.008
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "Елена",
+        "start": 5,
+        "end": 10,
+        "analyses": [
+          {
+            "normal_form": "елена",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "anim",
+              "sing",
+              "Name",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "отправила",
+        "start": 11,
+        "end": 20,
+        "analyses": [
+          {
+            "normal_form": "отправить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "femn",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "past",
+              "femn",
+              "VERB",
+              "tran",
+              "sing",
+              "indc",
+              "perf"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "посылку",
+        "start": 21,
+        "end": 28,
+        "analyses": [
+          {
+            "normal_form": "посылка",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "accs",
+              "inan",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "?",
+        "start": 28,
+        "end": 29,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 4,
+          "text": "Кому Елена отправила посылку",
+          "evidence": {
+            "text": "Кому Елена отправила посылку",
+            "start": 0,
+            "end": 28
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 3,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "отправить"
+            ]
+          }
+        ],
+        "marker": "кому",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 3,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "отправить"
+        ]
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Кому Елена отправила посылку?",
+    "assertions": [],
+    "queries": [
+      {
+        "predicate": {
+          "surface": "отправила",
+          "normalized_hint": "отправить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "отправила",
+            "start": 11,
+            "end": 20
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_0bb11c4ed5044292a1489a99752880e3",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "RECIPIENT",
+            "mention": "Елена",
+            "normalized_hint": "Елена",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Елена",
+              "start": 5,
+              "end": 10
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "посылку",
+            "normalized_hint": "посылка",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "посылку",
+              "start": 21,
+              "end": 28
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "requested_role": "AUXILLIARY",
+        "requested_roles": [
+          "AUXILLIARY"
+        ],
+        "query_mode": "FILL_ROLE",
+        "local_id": "Q1",
+        "quoted": false
+      }
+    ],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "conditionals": [],
+    "act_dependencies": []
+  },
+  "integration_commit": {
+    "assertions": [],
+    "experience_ref": {
+      "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_e807004d60e94079ad6532b9df053ce8",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [
+      {
+        "predicate": {
+          "surface": "отправила",
+          "normalized_hint": "отправить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "отправила",
+            "start": 11,
+            "end": 20
+          },
+          "template_candidate": null,
+          "template_selection": {
+            "existing_template_uid": "T_0bb11c4ed5044292a1489a99752880e3",
+            "create_new": false
+          }
+        },
+        "actants": [
+          {
+            "role": "RECIPIENT",
+            "mention": "Елена",
+            "normalized_hint": "Елена",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Елена",
+              "start": 5,
+              "end": 10
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "посылку",
+            "normalized_hint": "посылка",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "посылку",
+              "start": 21,
+              "end": 28
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "requested_role": "AUXILLIARY",
+        "requested_roles": [
+          "AUXILLIARY"
+        ],
+        "query_mode": "FILL_ROLE",
+        "local_id": "Q1",
+        "quoted": false
+      }
+    ],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [
+    {
+      "outcome": {
+        "status": "UNKNOWN",
+        "stop_reason": "SEARCH_EXHAUSTED",
+        "conclusion": null,
+        "premise_refs": [],
+        "uid_trace": [],
+        "conclusion_domain": null,
+        "expanded_states": 0,
+        "diagnostics": []
+      },
+      "materialization": {
+        "ref": null,
+        "domain": null,
+        "created": false
+      },
+      "diagnostics": []
+    }
+  ],
+  "agent_context": {
+    "current_input": "Кому Елена отправила посылку?",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Кошка спит.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что делает кошка?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Хорошо, Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Кто любит чай?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Все, кто ценит хороший напиток! А вы любите чай? 😊»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что любит Иван»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что любит Иван?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Что любит Иван»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5e639de5d17340dca3bf37bd7422669f",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Елена отправила Николаю посылку.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nКому Елена отправила посылку?\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Кошка спит.»\n- Ранее пользователь сказал: «Что делает кошка?»\n- Ранее агент ответил: «Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **»\n- Ранее пользователь сказал: «Иван любит чай.»\n- Пользователь ранее сказал: «Иван любит чай.»\n- Ранее агент ответил: «Хорошо, Иван любит чай.»\n- Ранее пользователь сказал: «Кто любит чай?»\n- Ранее агент ответил: «Все, кто ценит хороший напиток! А вы любите чай? 😊»\n- Ранее агент ответил: «Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?»\n- Ранее пользователь сказал: «Что любит Иван»\n- Ранее пользователь сказал: «Что любит Иван?»\n- Пользователь ранее сказал: «Что любит Иван»\n- Пользователь ранее сказал: «Елена отправила Николаю посылку.»",
+    "source_workspace_refs": [
+      {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      },
+      {
+        "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+        "kind": "M"
+      },
+      {
+        "uid": "M_7bd2a0bf92214988ae24aa28a25af941",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      },
+      {
+        "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_cdf91b472f4e472ea35468153c2e7305",
+        "kind": "M"
+      },
+      {
+        "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+        "kind": "M"
+      },
+      {
+        "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_166d80888d044995b32991772e3d4ac0",
+        "kind": "N"
+      },
+      {
+        "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1ca1c4e829754256a693a0d61d7280f3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_222258eee8e04f26bf5735d408209c9d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_3608162f8a8242b6a0297fb29b74622d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5c78f6012ee042d2940d294336169c7b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5e639de5d17340dca3bf37bd7422669f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_82353b674761408a98159bcaa210550b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+        "kind": "N"
+      },
+      {
+        "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+        "kind": "N"
+      },
+      {
+        "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e1689bb122194fd89aa74765d5412fd9",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+        "kind": "N"
+      },
+      {
+        "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+        "kind": "S"
+      },
+      {
+        "uid": "S_3613c2e3388149fead3b711dec79c9d5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+        "kind": "S"
+      },
+      {
+        "uid": "S_e807004d60e94079ad6532b9df053ce8",
+        "kind": "S"
+      },
+      {
+        "uid": "T_0bb11c4ed5044292a1489a99752880e3",
+        "kind": "T"
+      },
+      {
+        "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 106,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "M_5b420d5c902a4051a351540d4c04c251",
+          "kind": "M"
+        },
+        "semantic": "[M_5b420d5c902a4051a351540d4c04c251] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 1.0,
+        "output": 0.16291937965483538,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+          "kind": "M"
+        },
+        "semantic": "[M_62356d38f31b4e11998ff39a775d8b61] Иван",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3320000000000001,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_7bd2a0bf92214988ae24aa28a25af941",
+          "kind": "M"
+        },
+        "semantic": "[M_7bd2a0bf92214988ae24aa28a25af941] посылка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 1.0,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+          "kind": "M"
+        },
+        "semantic": "[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.8624732586504418,
+        "output": 0.006000000000000005,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+          "kind": "M"
+        },
+        "semantic": "[M_a4a27a9e5230469ab269034b14a1e4d5] чай",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8335607446074073,
+        "output": 0.16000000000000003,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_cdf91b472f4e472ea35468153c2e7305",
+          "kind": "M"
+        },
+        "semantic": "[M_cdf91b472f4e472ea35468153c2e7305] Елена",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 1.0,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+          "kind": "M"
+        },
+        "semantic": "[M_fc69b4786a6b4fce93342f330f8d03af] Кошка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.6215575748478401,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+          "kind": "N"
+        },
+        "semantic": "[N_0bae3cf6a9a14be4a4100a6af1d5e16d] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.006450000000000067,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "semantic": "[N_166d80888d044995b32991772e3d4ac0] реплика пользователя: Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6201498560998928,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "semantic": "[N_16acd6e90eb54438beb2cc4488a8f89d] реплика пользователя: Что делает кошка?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.607139888083746,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "semantic": "[N_1b292003b75b48a886b0a0ecdff89b93] реплика агента: Хорошо, Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6304207347418911,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "N_1ca1c4e829754256a693a0d61d7280f3",
+          "kind": "N"
+        },
+        "semantic": "[N_1ca1c4e829754256a693a0d61d7280f3] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.3807824721467672,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "semantic": "[N_222258eee8e04f26bf5735d408209c9d] реплика агента: Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6927640242235007,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_3608162f8a8242b6a0297fb29b74622d",
+          "kind": "N"
+        },
+        "semantic": "[N_3608162f8a8242b6a0297fb29b74622d] реплика пользователя: Елена отправила Николаю посылку.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5027447429765696,
+        "output": 0.0040000000000000036,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+          "kind": "N"
+        },
+        "semantic": "[N_4bb9facf12c24b19a4668bf513b653f2] реплика пользователя: Что любит Иван?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6183652024976306,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "semantic": "[N_5762396d099c4b3795b9b8c61f98f50c] реплика пользователя: Кто любит чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6650805261212995,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "N_5c78f6012ee042d2940d294336169c7b",
+          "kind": "N"
+        },
+        "semantic": "[N_5c78f6012ee042d2940d294336169c7b] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5970637637158734,
+        "output": 1.375955493321257e-05,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "N_5e639de5d17340dca3bf37bd7422669f",
+          "kind": "N"
+        },
+        "semantic": "[N_5e639de5d17340dca3bf37bd7422669f] [S_e807004d60e94079ad6532b9df053ce8] отправила(SUBJECT=[M_cdf91b472f4e472ea35468153c2e7305] Елена, OBJECT=[M_7bd2a0bf92214988ae24aa28a25af941] посылка, RECIPIENT=[M_215f4a9f76c84aeb981d0866a8e0b652] Николай)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.8,
+        "output": 0.15000000000000002,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "semantic": "[N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.6330093905414212,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+          "kind": "N"
+        },
+        "semantic": "[N_9652ca2b78434c53a55fd22d679fdd25] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6232797748212537,
+        "output": 0.004944999999999977,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+          "kind": "N"
+        },
+        "semantic": "[N_967c54d7c8c1479688f99f4c69d03a5b] реплика агента: Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.521963810143379,
+        "output": 0.004622499999999974,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "semantic": "[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+          "kind": "N"
+        },
+        "semantic": "[N_c45d8a0d9901424c89a131b5d6ed0461] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.3785652477026466,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "semantic": "[N_cf5dab81b6774a929d4b64d870af289c] реплика агента: Все, кто ценит хороший напиток! А вы любите чай? 😊",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6905706487193797,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "semantic": "[N_d6fa4f8c6d0f4222aede7b4143bb17d8] реплика агента: Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6126105910201748,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+          "kind": "N"
+        },
+        "semantic": "[N_db79000de35946ad81f0fb14ba605aa5] реплика пользователя: Кто любит чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6979857144492108,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "N_e1689bb122194fd89aa74765d5412fd9",
+          "kind": "N"
+        },
+        "semantic": "[N_e1689bb122194fd89aa74765d5412fd9] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4963811903734048,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 28,
+        "root": {
+          "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+          "kind": "N"
+        },
+        "semantic": "[N_e7b3db32345e427a805884d0a9a4bccf] реплика пользователя: Кому Елена отправила посылку?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5,
+        "output": 0.5,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 29,
+        "root": {
+          "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+          "kind": "S"
+        },
+        "semantic": "[S_0a3a560a311b4473808065c3aa0ed334] любит",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 30,
+        "root": {
+          "uid": "S_3613c2e3388149fead3b711dec79c9d5",
+          "kind": "S"
+        },
+        "semantic": "[S_3613c2e3388149fead3b711dec79c9d5] Кто",
+        "kind": "S",
+        "domain": null,
+        "excitation": 1.0,
+        "output": 0.8499999999999999,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 31,
+        "root": {
+          "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+          "kind": "S"
+        },
+        "semantic": "[S_46d5e122600740c8aacdb87ba32d7fa5] Что",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 32,
+        "root": {
+          "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+          "kind": "S"
+        },
+        "semantic": "[S_c5a3cd90fe2e4d40a3dd7c1aa2e05482] Иван",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 33,
+        "root": {
+          "uid": "S_e807004d60e94079ad6532b9df053ce8",
+          "kind": "S"
+        },
+        "semantic": "[S_e807004d60e94079ad6532b9df053ce8] отправила",
+        "kind": "S",
+        "domain": null,
+        "excitation": 1.0,
+        "output": 1.0,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 34,
+        "root": {
+          "uid": "T_0bb11c4ed5044292a1489a99752880e3",
+          "kind": "T"
+        },
+        "semantic": "[T_0bb11c4ed5044292a1489a99752880e3] predicate=[S_e807004d60e94079ad6532b9df053ce8] отправила; roles=[SUBJECT, OBJECT, AUXILLIARY, RECIPIENT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.95,
+        "output": 0.95,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 35,
+        "root": {
+          "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+          "kind": "T"
+        },
+        "semantic": "[T_1d42488e4536454999a4ed3b83e836b8] predicate=[S_0a3a560a311b4473808065c3aa0ed334] любит; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 1
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 165,
+      "source_text": "Кому Елена отправила посылку?",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "QUERY",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nTOKENS:\n[1] Кому\n[2] Елена\n[3] отправила\n[4] посылку\n[5] ?\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[3] token 3: отправила; morphology=VERB",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nTOKENS:\n[1] Кому\n[2] Елена\n[3] отправила\n[4] посылку\n[5] ?\nPREDICATE_START: [3] отправила\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[3] end at token 3: отправила",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку\nTARGET:\nотправила\nRUSSIAN_LEMMA:\nотправить",
+          "normalized_answer": "отправить",
+          "retry_index": 0
+        },
+        {
+          "role": "query_mode",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nOPTIONS:\nUNKNOWN: cannot determine the question type reliably\nEXISTS: asks whether the proposition is true / exists (yes-no)\nFILL_ROLE: asks for one or more missing participants, properties, circumstances, places, times, causes, purposes, manners, or amounts",
+          "normalized_answer": "FILL_ROLE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nQUESTION_PLACEHOLDERS:\nКому\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Елена\n[2] посылку",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "RECEIVER_OR_ADDRESSEE",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nTARGET:\nЕлена\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "RECEIVER_OR_ADDRESSEE",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nALREADY_SELECTED:\nЕлена\nQUESTION_PLACEHOLDERS:\nКому\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] посылку",
+          "normalized_answer": "4",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "AFFECTED_OR_CONTENT",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nTARGET:\nпосылку\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "AFFECTED_OR_CONTENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nALREADY_SELECTED:\nЕлена | посылку\nQUESTION_PLACEHOLDERS:\nКому\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "SECONDARY_PARTICIPANT",
+          "error": null,
+          "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nMISSING INFORMATION:\nКому\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "SECONDARY_PARTICIPANT",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Кому Елена отправила посылку?",
+        "assertions": [],
+        "queries": [
+          {
+            "predicate": {
+              "surface": "отправила",
+              "normalized_hint": "отправить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "отправила",
+                "start": 11,
+                "end": 20
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "RECIPIENT",
+                "mention": "Елена",
+                "normalized_hint": "Елена",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Елена",
+                  "start": 5,
+                  "end": 10
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "посылку",
+                "normalized_hint": "посылка",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "посылку",
+                  "start": 21,
+                  "end": 28
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "requested_role": "AUXILLIARY",
+            "requested_roles": [
+              "AUXILLIARY"
+            ],
+            "query_mode": "FILL_ROLE",
+            "local_id": "Q1",
+            "quoted": false
+          }
+        ],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "conditionals": [],
+        "act_dependencies": []
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 578,
+      "req_id": "1a04e9563454446e901a23af85a7fe6e",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nTARGET:\nЕлена\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "RECEIVER_OR_ADDRESSEE",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 579,
+      "req_id": "2fd56b7b3bc341f2b10b992c470cb7ec",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nTARGET:\nпосылку\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 580,
+      "req_id": "85a72c5342774d4295347a436d72bce5",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nMISSING INFORMATION:\nКому\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "SECONDARY_PARTICIPANT",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 581,
+      "req_id": "2db9a87c8cb94cd887095d4c1a5a897f",
+      "role": "perception_template_sense",
+      "prompt": "TEXT:\nКому Елена отправила посылку?\nPREDICATE:\nотправила\nNORMALIZED PREDICATE:\nотправить\nCURRENT SENSE CUE:\nnone\nCURRENT SEMANTIC ROLES:\nRECIPIENT, OBJECT, AUXILLIARY\nCURRENT ROLE BINDINGS:\nRECIPIENT = Елена\nOBJECT = посылка\nEXISTING SENSE OPTIONS:\nC1 = roles: SUBJECT, OBJECT, RECIPIENT; observed uses: SUBJECT=Елена, RECIPIENT=Николай, OBJECT=посылка\nQUESTION:\nWhich existing option has the same predicate meaning in this text? Different optional participants or circumstances (for example TIME, TOOL, LOCATION) do not by themselves create a new predicate sense; they may extend the valency of the same option. Answer NEW only when the predicate meaning itself is distinct from every existing option. Answer UNCLEAR if the text does not determine this safely.\nCHOICES:\nC1\nNEW\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. Different optional roles/circumstances do not by themselves create a new sense; select an existing option when predicate meaning is unchanged and let valency expand. Use NEW only for a distinct predicate meaning and UNCLEAR when text does not decide safely. Return only the label. Do not explain.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "C1",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "L_d08136da0f154d9ca94863e611da6d8b": {
+        "uid": "L_d08136da0f154d9ca94863e611da6d8b",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.21500000000000002,
+        "source": {
+          "uid": "N_3608162f8a8242b6a0297fb29b74622d",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+          "kind": "N"
+        }
+      },
+      "N_e7b3db32345e427a805884d0a9a4bccf": {
+        "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_e5333a288009442882fd9698dfd42d3f",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_5b420d5c902a4051a351540d4c04c251",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Кому Елена отправила посылку?",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 105,
+          "expires_tick": 305,
+          "last_qualifying_tick": 105,
+          "qualifying_reactivations": 0
+        }
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_93b58ef6e5fd4dea8c103039daa89085": {
+        "before": {
+          "uid": "L_93b58ef6e5fd4dea8c103039daa89085",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_93b58ef6e5fd4dea8c103039daa89085",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24300000000000005,
+          "source": {
+            "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+            "kind": "N"
+          }
+        }
+      },
+      "L_ab177f9f608441b7b86af5736cebfd4f": {
+        "before": {
+          "uid": "L_ab177f9f608441b7b86af5736cebfd4f",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.21500000000000002,
+          "source": {
+            "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_3608162f8a8242b6a0297fb29b74622d",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_ab177f9f608441b7b86af5736cebfd4f",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.23000000000000004,
+          "source": {
+            "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_3608162f8a8242b6a0297fb29b74622d",
+            "kind": "N"
+          }
+        }
+      },
+      "L_e0748f46823049ef8601af51932285ec": {
+        "before": {
+          "uid": "L_e0748f46823049ef8601af51932285ec",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.23000000000000004,
+          "source": {
+            "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_e0748f46823049ef8601af51932285ec",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+            "kind": "N"
+          }
+        }
+      },
+      "T_0bb11c4ed5044292a1489a99752880e3": {
+        "before": {
+          "uid": "T_0bb11c4ed5044292a1489a99752880e3",
+          "kind": "T",
+          "domain": "C",
+          "predicate": {
+            "uid": "S_e807004d60e94079ad6532b9df053ce8",
+            "kind": "S"
+          },
+          "roles": [
+            "SUBJECT",
+            "OBJECT",
+            "RECIPIENT"
+          ]
+        },
+        "after": {
+          "uid": "T_0bb11c4ed5044292a1489a99752880e3",
+          "kind": "T",
+          "domain": "C",
+          "predicate": {
+            "uid": "S_e807004d60e94079ad6532b9df053ce8",
+            "kind": "S"
+          },
+          "roles": [
+            "SUBJECT",
+            "OBJECT",
+            "AUXILLIARY",
+            "RECIPIENT"
+          ]
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 106,
+    "workspace_uids": [
+      "M_5b420d5c902a4051a351540d4c04c251",
+      "M_62356d38f31b4e11998ff39a775d8b61",
+      "M_7bd2a0bf92214988ae24aa28a25af941",
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "M_a4a27a9e5230469ab269034b14a1e4d5",
+      "M_cdf91b472f4e472ea35468153c2e7305",
+      "M_fc69b4786a6b4fce93342f330f8d03af",
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+      "N_166d80888d044995b32991772e3d4ac0",
+      "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "N_1b292003b75b48a886b0a0ecdff89b93",
+      "N_1ca1c4e829754256a693a0d61d7280f3",
+      "N_222258eee8e04f26bf5735d408209c9d",
+      "N_3608162f8a8242b6a0297fb29b74622d",
+      "N_4bb9facf12c24b19a4668bf513b653f2",
+      "N_5762396d099c4b3795b9b8c61f98f50c",
+      "N_5c78f6012ee042d2940d294336169c7b",
+      "N_5e639de5d17340dca3bf37bd7422669f",
+      "N_82353b674761408a98159bcaa210550b",
+      "N_9652ca2b78434c53a55fd22d679fdd25",
+      "N_967c54d7c8c1479688f99f4c69d03a5b",
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+      "N_c45d8a0d9901424c89a131b5d6ed0461",
+      "N_cf5dab81b6774a929d4b64d870af289c",
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "N_db79000de35946ad81f0fb14ba605aa5",
+      "N_e1689bb122194fd89aa74765d5412fd9",
+      "N_e7b3db32345e427a805884d0a9a4bccf",
+      "S_0a3a560a311b4473808065c3aa0ed334",
+      "S_3613c2e3388149fead3b711dec79c9d5",
+      "S_46d5e122600740c8aacdb87ba32d7fa5",
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+      "S_e807004d60e94079ad6532b9df053ce8",
+      "T_0bb11c4ed5044292a1489a99752880e3",
+      "T_1d42488e4536454999a4ed3b83e836b8"
+    ],
+    "workspace": {
+      "M_5b420d5c902a4051a351540d4c04c251": {
+        "semantic": "Пользователь",
+        "excitation": 1.0
+      },
+      "M_62356d38f31b4e11998ff39a775d8b61": {
+        "semantic": "Иван",
+        "excitation": 1.0
+      },
+      "M_7bd2a0bf92214988ae24aa28a25af941": {
+        "semantic": "посылка",
+        "excitation": 1.0
+      },
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+        "semantic": "АГент",
+        "excitation": 0.8624732586504418
+      },
+      "M_a4a27a9e5230469ab269034b14a1e4d5": {
+        "semantic": "чай",
+        "excitation": 0.8335607446074073
+      },
+      "M_cdf91b472f4e472ea35468153c2e7305": {
+        "semantic": "Елена",
+        "excitation": 1.0
+      },
+      "M_fc69b4786a6b4fce93342f330f8d03af": {
+        "semantic": "Кошка",
+        "excitation": 0.6215575748478401
+      },
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d": {
+        "semantic": "любит(SUBJECT=Иван)",
+        "excitation": 0.9975387117187637
+      },
+      "N_166d80888d044995b32991772e3d4ac0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+        "excitation": 0.6201498560998928
+      },
+      "N_16acd6e90eb54438beb2cc4488a8f89d": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.607139888083746
+      },
+      "N_1b292003b75b48a886b0a0ecdff89b93": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6304207347418911
+      },
+      "N_1ca1c4e829754256a693a0d61d7280f3": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3807824721467672
+      },
+      "N_222258eee8e04f26bf5735d408209c9d": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6927640242235007
+      },
+      "N_3608162f8a8242b6a0297fb29b74622d": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=отправила(SUBJECT=Елена, OBJECT=посылка, RECIPIENT=Николай))",
+        "excitation": 0.5027447429765696
+      },
+      "N_4bb9facf12c24b19a4668bf513b653f2": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6183652024976306
+      },
+      "N_5762396d099c4b3795b9b8c61f98f50c": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6650805261212995
+      },
+      "N_5c78f6012ee042d2940d294336169c7b": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5970637637158734
+      },
+      "N_5e639de5d17340dca3bf37bd7422669f": {
+        "semantic": "отправила(SUBJECT=Елена, OBJECT=посылка, RECIPIENT=Николай)",
+        "excitation": 0.8
+      },
+      "N_82353b674761408a98159bcaa210550b": {
+        "semantic": "спит(SUBJECT=Кошка)",
+        "excitation": 0.6330093905414212
+      },
+      "N_9652ca2b78434c53a55fd22d679fdd25": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван))",
+        "excitation": 0.6232797748212537
+      },
+      "N_967c54d7c8c1479688f99f4c69d03a5b": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.521963810143379
+      },
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+        "semantic": "любит(SUBJECT=Иван, OBJECT=чай)",
+        "excitation": 0.9975387117187637
+      },
+      "N_c45d8a0d9901424c89a131b5d6ed0461": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3785652477026466
+      },
+      "N_cf5dab81b6774a929d4b64d870af289c": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6905706487193797
+      },
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6126105910201748
+      },
+      "N_db79000de35946ad81f0fb14ba605aa5": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6979857144492108
+      },
+      "N_e1689bb122194fd89aa74765d5412fd9": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.4963811903734048
+      },
+      "N_e7b3db32345e427a805884d0a9a4bccf": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5
+      },
+      "S_0a3a560a311b4473808065c3aa0ed334": {
+        "semantic": "любит",
+        "excitation": 0.9926342940659647
+      },
+      "S_3613c2e3388149fead3b711dec79c9d5": {
+        "semantic": "Кто",
+        "excitation": 1.0
+      },
+      "S_46d5e122600740c8aacdb87ba32d7fa5": {
+        "semantic": "Что",
+        "excitation": 0.9926342940659647
+      },
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482": {
+        "semantic": "Иван",
+        "excitation": 0.9926342940659647
+      },
+      "S_e807004d60e94079ad6532b9df053ce8": {
+        "semantic": "отправила",
+        "excitation": 1.0
+      },
+      "T_0bb11c4ed5044292a1489a99752880e3": {
+        "semantic": "отправила",
+        "excitation": 0.95
+      },
+      "T_1d42488e4536454999a4ed3b83e836b8": {
+        "semantic": "любит",
+        "excitation": 0.9950834813775309
+      }
+    },
+    "pending_incoming": {
+      "N_4bb9facf12c24b19a4668bf513b653f2": 3.1371785247724663e-06,
+      "N_967c54d7c8c1479688f99f4c69d03a5b": 0.0011373499999999949,
+      "N_3608162f8a8242b6a0297fb29b74622d": 0.0009938374999999946,
+      "N_e7b3db32345e427a805884d0a9a4bccf": 0.0008000000000000008,
+      "T_0bb11c4ed5044292a1489a99752880e3": 1.0,
+      "N_5e639de5d17340dca3bf37bd7422669f": 0.3812,
+      "M_62356d38f31b4e11998ff39a775d8b61": 0.0025800000000000267,
+      "M_cdf91b472f4e472ea35468153c2e7305": 0.06000000000000001,
+      "M_215f4a9f76c84aeb981d0866a8e0b652": 0.06000000000000001,
+      "M_7bd2a0bf92214988ae24aa28a25af941": 0.06000000000000001,
+      "M_5b420d5c902a4051a351540d4c04c251": 0.15268762786647996,
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d": 0.001483499999999993,
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": 0.0013867499999999922
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_5b420d5c902a4051a351540d4c04c251",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "last_experience_ref": {
+      "uid": "N_e7b3db32345e427a805884d0a9a4bccf",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "perception.queries.q1.predicate",
+      "ok": true,
+      "expected": "отправить",
+      "actual": "отправить"
+    },
+    {
+      "name": "perception.queries.q1.mode",
+      "ok": true,
+      "expected": "FILL_ROLE",
+      "actual": "FILL_ROLE"
+    },
+    {
+      "name": "perception.queries.q1.requested_roles",
+      "ok": false,
+      "expected": [
+        "RECIPIENT"
+      ],
+      "actual": [
+        "AUXILLIARY"
+      ]
+    },
+    {
+      "name": "perception.queries.q1.role_set",
+      "ok": false,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "RECIPIENT"
+      ]
+    },
+    {
+      "name": "perception.queries.q1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "посылка"
+      },
+      "actual": "посылка"
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.world_assertion_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "inference.q1.status",
+      "ok": false,
+      "expected": "PROVED",
+      "actual": "UNKNOWN"
+    },
+    {
+      "name": "inference.q1.role",
+      "ok": false,
+      "expected": "RECIPIENT"
+    },
+    {
+      "name": "inference.q1.value",
+      "ok": false,
+      "expected": "Николай"
+    },
+    {
+      "name": "templates.отправить.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "RECIPIENT",
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "AUXILLIARY",
+          "OBJECT",
+          "RECIPIENT",
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "query_role_stress",
+  "semantic_tags": [
+    "query",
+    "recipient"
+  ]
+}

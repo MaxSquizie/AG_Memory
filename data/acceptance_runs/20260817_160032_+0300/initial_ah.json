@@ -1,0 +1,962 @@
+{
+  "L_1c96e0e898ed4d3ba9677c385563979e": {
+    "uid": "L_1c96e0e898ed4d3ba9677c385563979e",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 1.0,
+    "source": {
+      "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_166d80888d044995b32991772e3d4ac0",
+      "kind": "N"
+    }
+  },
+  "L_1dbf842819c7470f9388dc8f9585542f": {
+    "uid": "L_1dbf842819c7470f9388dc8f9585542f",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.04199999999999987,
+    "source": {
+      "uid": "N_efc68b95b06247c7a8548601935c6393",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_07e962ffa60a410a99819efa6106b60b",
+      "kind": "N"
+    }
+  },
+  "L_2dc9d17b904b4e7da77f7f6032de92d6": {
+    "uid": "L_2dc9d17b904b4e7da77f7f6032de92d6",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.2,
+    "source": {
+      "uid": "N_d8abe0aaaa0c487f81fd0433e25b9c6a",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_943d549f236446f0971e305e3677e0ea",
+      "kind": "N"
+    }
+  },
+  "L_3d145658e64a45d897929aeb821a627e": {
+    "uid": "L_3d145658e64a45d897929aeb821a627e",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 1.0,
+    "source": {
+      "uid": "N_166d80888d044995b32991772e3d4ac0",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+      "kind": "N"
+    }
+  },
+  "L_43f7452d231e43a9ab0aff2a5557286d": {
+    "uid": "L_43f7452d231e43a9ab0aff2a5557286d",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.24500000000000005,
+    "source": {
+      "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+      "kind": "N"
+    }
+  },
+  "L_596154113282477ca7347a6f094781c3": {
+    "uid": "L_596154113282477ca7347a6f094781c3",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.23000000000000004,
+    "source": {
+      "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_222258eee8e04f26bf5735d408209c9d",
+      "kind": "N"
+    }
+  },
+  "L_90444a6d16e54a519d77fc22b43535da": {
+    "uid": "L_90444a6d16e54a519d77fc22b43535da",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 1.0,
+    "source": {
+      "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+      "kind": "N"
+    }
+  },
+  "L_9c0a446a50a941acba6292b670847b7b": {
+    "uid": "L_9c0a446a50a941acba6292b670847b7b",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21500000000000002,
+    "source": {
+      "uid": "N_222258eee8e04f26bf5735d408209c9d",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_254a295ed7b34753b00e5ad991ec610e",
+      "kind": "N"
+    }
+  },
+  "L_afa4961767f847f3862d5edb135a6dd7": {
+    "uid": "L_afa4961767f847f3862d5edb135a6dd7",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 1.0,
+    "source": {
+      "uid": "N_07e962ffa60a410a99819efa6106b60b",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "kind": "N"
+    }
+  },
+  "L_cd89ea2084584a85ab17f8624c30f75b": {
+    "uid": "L_cd89ea2084584a85ab17f8624c30f75b",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 1.0,
+    "source": {
+      "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "kind": "N"
+    }
+  },
+  "L_d471a6e4b9474999bf0959fc1a0a49a3": {
+    "uid": "L_d471a6e4b9474999bf0959fc1a0a49a3",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 1.0,
+    "source": {
+      "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+      "kind": "N"
+    }
+  },
+  "L_f0f66ad42cc944eabe441ec19f24a321": {
+    "uid": "L_f0f66ad42cc944eabe441ec19f24a321",
+    "kind": "L",
+    "domain": null,
+    "relation_id": "FOLLOW",
+    "weight": 0.21500000000000002,
+    "source": {
+      "uid": "N_254a295ed7b34753b00e5ad991ec610e",
+      "kind": "N"
+    },
+    "target": {
+      "uid": "N_d8abe0aaaa0c487f81fd0433e25b9c6a",
+      "kind": "N"
+    }
+  },
+  "M_5b420d5c902a4051a351540d4c04c251": {
+    "uid": "M_5b420d5c902a4051a351540d4c04c251",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Пользователь",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "USER"
+    }
+  },
+  "M_62356d38f31b4e11998ff39a775d8b61": {
+    "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Иван",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+    "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+    "kind": "M",
+    "domain": "P",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "АГент",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "identity_role": "SELF"
+    }
+  },
+  "M_a4a27a9e5230469ab269034b14a1e4d5": {
+    "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "чай",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "M_fc69b4786a6b4fce93342f330f8d03af": {
+    "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+    "kind": "M",
+    "domain": "C",
+    "properties": {
+      "name": {
+        "name": "name",
+        "value": "Кошка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "gc_auto_created": true
+    }
+  },
+  "N_07e962ffa60a410a99819efa6106b60b": {
+    "uid": "N_07e962ffa60a410a99819efa6106b60b",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Как мило! Надеюсь, ей хорошо.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 1,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 71,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_166d80888d044995b32991772e3d4ac0": {
+    "uid": "N_166d80888d044995b32991772e3d4ac0",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "OBJECT": {
+        "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+        "kind": "N"
+      },
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Иван любит чай.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 4,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 74,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_16acd6e90eb54438beb2cc4488a8f89d": {
+    "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Что делает кошка?",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 2,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 72,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_1b292003b75b48a886b0a0ecdff89b93": {
+    "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Хорошо, Иван любит чай.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 5,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 75,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_222258eee8e04f26bf5735d408209c9d": {
+    "uid": "N_222258eee8e04f26bf5735d408209c9d",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 78,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "expires_tick": 278,
+      "last_qualifying_tick": 78,
+      "lifecycle_state": "NEW",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_22ccebca6e0b4fc5ba2081f8ab771113": {
+    "uid": "N_22ccebca6e0b4fc5ba2081f8ab771113",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_7022c4ecbade4ac1a671008704f1d4dd",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "occurrence_count": 1,
+      "lifecycle_state": "NEW",
+      "created_tick": 79,
+      "expires_tick": 279,
+      "last_qualifying_tick": 79,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_254a295ed7b34753b00e5ad991ec610e": {
+    "uid": "N_254a295ed7b34753b00e5ad991ec610e",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Проверка",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 79,
+      "expires_tick": 279,
+      "last_qualifying_tick": 79,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_5762396d099c4b3795b9b8c61f98f50c": {
+    "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Кто любит чай?",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 6,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 76,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_82353b674761408a98159bcaa210550b": {
+    "uid": "N_82353b674761408a98159bcaa210550b",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_108e6823ed274a6591ca24ef16b1ed89",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "created_tick": 0,
+      "last_qualifying_tick": 70,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_943d549f236446f0971e305e3677e0ea": {
+    "uid": "N_943d549f236446f0971e305e3677e0ea",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Иван решил выпить чаю",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "dedup_exempt": true
+    }
+  },
+  "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+    "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+    "kind": "N",
+    "domain": "C",
+    "weight": 0.4,
+    "template": {
+      "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+      "kind": "T"
+    },
+    "actants": {
+      "OBJECT": {
+        "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+        "kind": "M"
+      },
+      "SUBJECT": {
+        "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+        "kind": "M"
+      }
+    },
+    "properties": {},
+    "meta": {
+      "created_tick": 4,
+      "last_qualifying_tick": 74,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_cf5dab81b6774a929d4b64d870af289c": {
+    "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Все, кто ценит хороший напиток! А вы любите чай? 😊",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 7,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 77,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+    "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 3,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "last_qualifying_tick": 73,
+      "lifecycle_state": "CONSOLIDATED",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 2
+    }
+  },
+  "N_d8abe0aaaa0c487f81fd0433e25b9c6a": {
+    "uid": "N_d8abe0aaaa0c487f81fd0433e25b9c6a",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      },
+      "OBJECT": {
+        "uid": "N_22ccebca6e0b4fc5ba2081f8ab771113",
+        "kind": "N"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Иван съел кошку",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "occurrence_count": 1,
+      "event_instance": true,
+      "dedup_exempt": true,
+      "lifecycle_state": "NEW",
+      "created_tick": 79,
+      "expires_tick": 279,
+      "last_qualifying_tick": 79,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_db79000de35946ad81f0fb14ba605aa5": {
+    "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Кто любит чай?",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 77,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "expires_tick": 277,
+      "last_qualifying_tick": 77,
+      "lifecycle_state": "NEW",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 0
+    }
+  },
+  "N_efc68b95b06247c7a8548601935c6393": {
+    "uid": "N_efc68b95b06247c7a8548601935c6393",
+    "kind": "N",
+    "domain": "H",
+    "weight": 0.3,
+    "template": {
+      "uid": "T_e5333a288009442882fd9698dfd42d3f",
+      "kind": "T"
+    },
+    "actants": {
+      "OBJECT": {
+        "uid": "N_82353b674761408a98159bcaa210550b",
+        "kind": "N"
+      },
+      "SUBJECT": {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      }
+    },
+    "properties": {
+      "text": {
+        "name": "text",
+        "value": "Кошка спит.",
+        "type_name": "str",
+        "unit": null
+      }
+    },
+    "meta": {
+      "created_tick": 0,
+      "dedup_exempt": true,
+      "event_instance": true,
+      "expires_tick": 200,
+      "last_qualifying_tick": 0,
+      "lifecycle_state": "NEW",
+      "occurrence_count": 1,
+      "qualifying_reactivations": 0
+    }
+  },
+  "S_0a3a560a311b4473808065c3aa0ed334": {
+    "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "любит",
+      "любить"
+    ]
+  },
+  "S_182409a0809f4c93b982a1c82127d4ec": {
+    "uid": "S_182409a0809f4c93b982a1c82127d4ec",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "решил",
+      "решить"
+    ]
+  },
+  "S_3613c2e3388149fead3b711dec79c9d5": {
+    "uid": "S_3613c2e3388149fead3b711dec79c9d5",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "Кто"
+    ]
+  },
+  "S_46d5e122600740c8aacdb87ba32d7fa5": {
+    "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "Что"
+    ]
+  },
+  "S_4d1948dc41ef43cf9d254a38a50027c8": {
+    "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "спать",
+      "спит"
+    ]
+  },
+  "S_6fa067dbd0ca46a9881214d3d58a98f2": {
+    "uid": "S_6fa067dbd0ca46a9881214d3d58a98f2",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "съел",
+      "съесть"
+    ]
+  },
+  "S_a5e98c55200041f0b5a4afdf282e80c3": {
+    "uid": "S_a5e98c55200041f0b5a4afdf282e80c3",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "выпить"
+    ]
+  },
+  "S_bbcdf184ff50433d91e6c41d4bab8c75": {
+    "uid": "S_bbcdf184ff50433d91e6c41d4bab8c75",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "Кошка",
+      "кошка",
+      "кошку"
+    ]
+  },
+  "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482": {
+    "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "Иван"
+    ]
+  },
+  "S_e4e3f811631d419896d1e50ffe89431e": {
+    "uid": "S_e4e3f811631d419896d1e50ffe89431e",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "чай",
+      "чаю"
+    ]
+  },
+  "S_efd036926f0e41f6894045fe6472ab99": {
+    "uid": "S_efd036926f0e41f6894045fe6472ab99",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "высказать"
+    ]
+  },
+  "S_f50f7e62edcc4f4bb9bf7ae21d201d31": {
+    "uid": "S_f50f7e62edcc4f4bb9bf7ae21d201d31",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "Проверка"
+    ]
+  },
+  "S_fa4228cb39134064a0f736346593e3ad": {
+    "uid": "S_fa4228cb39134064a0f736346593e3ad",
+    "kind": "S",
+    "domain": null,
+    "forms": [
+      "делает",
+      "делать"
+    ]
+  },
+  "T_108e6823ed274a6591ca24ef16b1ed89": {
+    "uid": "T_108e6823ed274a6591ca24ef16b1ed89",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT"
+    ]
+  },
+  "T_1d42488e4536454999a4ed3b83e836b8": {
+    "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_5fb03e804f294769aa131f4fae1177ad": {
+    "uid": "T_5fb03e804f294769aa131f4fae1177ad",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_fa4228cb39134064a0f736346593e3ad",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_7022c4ecbade4ac1a671008704f1d4dd": {
+    "uid": "T_7022c4ecbade4ac1a671008704f1d4dd",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_6fa067dbd0ca46a9881214d3d58a98f2",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT"
+    ]
+  },
+  "T_e5333a288009442882fd9698dfd42d3f": {
+    "uid": "T_e5333a288009442882fd9698dfd42d3f",
+    "kind": "T",
+    "domain": "C",
+    "predicate": {
+      "uid": "S_efd036926f0e41f6894045fe6472ab99",
+      "kind": "S"
+    },
+    "roles": [
+      "SUBJECT",
+      "OBJECT",
+      "TIME"
+    ]
+  }
+}

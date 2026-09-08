@@ -23,10 +23,12 @@ from ah.perception import (
     AssertionCandidate,
     AssertionStatus,
     PerceptionResult,
+    PredicateCandidate,
     PropositionExprCandidate,
     PropositionOperator,
     StructuralClarificationSpec,
     NominalRelationKind,
+    TemplateCandidate,
     TemplateSelection,
 )
 
@@ -669,6 +671,7 @@ class IntegrationService:
         relations: list[IntegratedRelation] = []
         conditionals: list[IntegratedConditional] = []
         existentials: list[IntegratedExistential] = []
+        universals: list[IntegratedExistential] = []
         conflicts: list[IntegratedConflict] = []
         local_refs: dict[str, Ref] = {}
         entity_local_refs: dict[str, Ref] = {}
@@ -676,25 +679,46 @@ class IntegrationService:
         existential_bindings = {
             item.entity_ref: item for item in plan.candidate_ir.existential_bindings
         }
+        universal_bindings = {
+            item.entity_ref: item for item in plan.candidate_ir.universal_bindings
+        }
         existential_vars = {
             item.entity_ref: BoundVar(item.variable_id, item.sort)
             for item in plan.candidate_ir.existential_bindings
         }
+        universal_vars = {
+            item.entity_ref: BoundVar(item.variable_id, item.sort)
+            for item in plan.candidate_ir.universal_bindings
+        }
+        bound_vars = {**existential_vars, **universal_vars}
 
-        def candidate_existential_refs(candidate: AssertionCandidate) -> tuple[str, ...]:
+        def candidate_bound_refs(
+            candidate: AssertionCandidate, mapping: dict[str, BoundVar]
+        ) -> tuple[str, ...]:
             refs: list[str] = []
             variants = candidate.alternatives or (candidate,)
             for variant in variants:
                 for actant in variant.actants:
-                    if actant.entity_ref in existential_vars and actant.entity_ref not in refs:
+                    if actant.entity_ref in mapping and actant.entity_ref not in refs:
                         refs.append(actant.entity_ref)
             return tuple(refs)
 
         existential_assertion_vars = {
-            candidate.local_id: candidate_existential_refs(candidate)
+            candidate.local_id: candidate_bound_refs(candidate, existential_vars)
             for candidate in ordered
-            if candidate_existential_refs(candidate)
+            if candidate_bound_refs(candidate, existential_vars)
         }
+        universal_assertion_vars = {
+            candidate.local_id: candidate_bound_refs(candidate, universal_vars)
+            for candidate in ordered
+            if candidate_bound_refs(candidate, universal_vars)
+        }
+        overlap = set(existential_assertion_vars) & set(universal_assertion_vars)
+        if overlap:
+            raise CandidateValidationError(
+                "One assertion cannot mix existential and universal participants: "
+                + ", ".join(sorted(overlap))
+            )
         experience_ref: Ref | None = None
         resolved_queries = []
         resolved_commands = []
@@ -788,18 +812,22 @@ class IntegrationService:
                 )
 
             for candidate in ordered:
-                if candidate.local_id in existential_assertion_vars:
-                    # A genuinely unknown participant is not a semantic entity.
-                    # Source assertions that mention it become QUANTIFIED pattern N
-                    # and are asserted only through an EXISTS formula built after
-                    # all members of the connected existential component exist.
+                quantified = (
+                    candidate.local_id in existential_assertion_vars
+                    or candidate.local_id in universal_assertion_vars
+                )
+                if quantified:
+                    # A quantified participant is not a semantic entity. Source
+                    # assertions become QUANTIFIED pattern N and are asserted only
+                    # through EXISTS/FORALL formulae built after the connected
+                    # component exists.
                     if (
                         candidate.quoted
                         or candidate.status is not AssertionStatus.ASSERTED
                         or candidate.transition_operator is not None
                     ):
                         raise CandidateValidationError(
-                            "Existential discourse participants are currently supported only "
+                            "Quantified discourse participants are currently supported only "
                             "in ordinary asserted, non-transition propositions"
                         )
                     integrated = self._integrate_assertion(
@@ -814,7 +842,7 @@ class IntegrationService:
                         addressee_ref=addressee_ref,
                         count_occurrence=False,
                         semantic_scope="QUANTIFIED",
-                        existential_vars=existential_vars,
+                        existential_vars=bound_vars,
                     )
                     proposition_ref = integrated.ref
                     created = integrated.created
@@ -1081,7 +1109,108 @@ class IntegrationService:
                         )
                         body_ref = tx.ref(exists_g.uid)
                         created_any = created_any or exists_created
+                    if any(existential_bindings[item].negative for item in variable_refs):
+                        if not all(existential_bindings[item].negative for item in variable_refs):
+                            raise CandidateValidationError(
+                                "Cannot mix «никто» with a positive existential in one scope"
+                            )
+                        not_g, not_created = tx.ensure_function(domain, "NOT", (body_ref,))
+                        body_ref = tx.ref(not_g.uid)
+                        created_any = created_any or not_created
                     existentials.append(
+                        IntegratedExistential(
+                            ref=body_ref,
+                            member_refs=member_refs,
+                            variable_ids=tuple(item.local_id for item in ordered_vars),
+                            created=created_any,
+                        )
+                    )
+                    seeds.append(
+                        ActivationSeedRequest(
+                            body_ref,
+                            SeedReason.NEW_FACT if created_any else SeedReason.REACTIVATED_FACT,
+                        )
+                    )
+
+            if universal_assertion_vars:
+                parent = {key: key for key in universal_vars}
+
+                def ufind(key: str) -> str:
+                    while parent[key] != key:
+                        parent[key] = parent[parent[key]]
+                        key = parent[key]
+                    return key
+
+                def uunion(left: str, right: str) -> None:
+                    lroot, rroot = ufind(left), ufind(right)
+                    if lroot != rroot:
+                        parent[rroot] = lroot
+
+                for refs in universal_assertion_vars.values():
+                    if refs:
+                        for ref_id in refs[1:]:
+                            uunion(refs[0], ref_id)
+
+                u_components: dict[str, set[str]] = {}
+                for ref_id in universal_vars:
+                    u_components.setdefault(ufind(ref_id), set()).add(ref_id)
+
+                for root_id in sorted(u_components, key=lambda item: universal_vars[item].local_id):
+                    variable_refs = u_components[root_id]
+                    member_ids = tuple(
+                        candidate.local_id
+                        for candidate in ordered
+                        if variable_refs.intersection(universal_assertion_vars.get(candidate.local_id, ()))
+                    )
+                    if not member_ids:
+                        continue
+                    member_refs = tuple(local_refs[item] for item in member_ids)
+                    domain = (
+                        forced_domain
+                        if forced_domain is not None
+                        else DomainRouter(tx).route_external(member_refs)
+                    )
+                    body_ref = member_refs[0]
+                    created_any = False
+                    if len(member_refs) > 1:
+                        and_g, and_created = tx.ensure_function(domain, "AND", member_refs)
+                        body_ref = tx.ref(and_g.uid)
+                        created_any = created_any or and_created
+                    ordered_vars = tuple(
+                        sorted((universal_vars[item] for item in variable_refs), key=lambda var: var.local_id)
+                    )
+                    negate_quantifier = any(
+                        universal_bindings[item].negate_quantifier for item in variable_refs
+                    )
+                    if negate_quantifier and len(ordered_vars) > 1:
+                        raise CandidateValidationError(
+                            "«не все» is supported only for a single quantified variable"
+                        )
+                    for variable in reversed(ordered_vars):
+                        handle = next(
+                            item for item in variable_refs if universal_vars[item].local_id == variable.local_id
+                        )
+                        restriction = self._ensure_class_pattern(
+                            tx,
+                            universal_bindings[handle].restriction_lemma,
+                            variable,
+                            domain,
+                        )
+                        implies_g, implies_created = tx.ensure_function(
+                            domain, "IMPLIES", (restriction, body_ref)
+                        )
+                        body_ref = tx.ref(implies_g.uid)
+                        created_any = created_any or implies_created
+                        forall_g, forall_created = tx.ensure_function(
+                            domain, "FORALL", (variable, body_ref)
+                        )
+                        body_ref = tx.ref(forall_g.uid)
+                        created_any = created_any or forall_created
+                    if negate_quantifier:
+                        not_g, not_created = tx.ensure_function(domain, "NOT", (body_ref,))
+                        body_ref = tx.ref(not_g.uid)
+                        created_any = created_any or not_created
+                    universals.append(
                         IntegratedExistential(
                             ref=body_ref,
                             member_refs=member_refs,
@@ -1287,6 +1416,7 @@ class IntegrationService:
                 tuple(item.ref for item in assertions if item.semantic_scope != "QUANTIFIED")
                 + tuple(item.ref for item in conditionals)
                 + tuple(item.ref for item in existentials)
+                + tuple(item.ref for item in universals)
             )
             if existing_experience_ref is None:
                 experience = mapper.record_turn(
@@ -1376,6 +1506,8 @@ class IntegrationService:
                     collect_predicate_symbols(item.ref)
                 for item in existentials:
                     collect_predicate_symbols(item.ref)
+                for item in universals:
+                    collect_predicate_symbols(item.ref)
                 for semantic_act in (*resolved_queries, *resolved_commands):
                     selection = semantic_act.predicate.template_selection
                     if selection is not None and selection.existing_template_uid:
@@ -1406,6 +1538,7 @@ class IntegrationService:
             relations=tuple(relations),
             conditionals=tuple(conditionals),
             existentials=tuple(existentials),
+            universals=tuple(universals),
             conflicts=tuple(conflicts),
         )
 
@@ -1667,7 +1800,7 @@ class IntegrationService:
                     if actant.role is not ActantRole.SUBJECT or actant.entity_ref is None:
                         continue
                     binding = bindings.get(actant.entity_ref)
-                    if binding is None:
+                    if binding is None or binding.negative:
                         continue
                     signature = self._subject_discourse_signature(candidate, actant)
                     pronoun = _NOMINATIVE_PRONOUN_BY_SIGNATURE.get(signature)
@@ -2311,6 +2444,36 @@ class IntegrationService:
             if remove_old and core.store.has_uid(old.uid):
                 core.supports.rewire_ref(old, new)
                 core.store._remove_uid(old.uid)
+
+    def _ensure_class_pattern(
+        self,
+        core: AHCore,
+        lemma: str,
+        variable: BoundVar,
+        domain: Domain,
+    ) -> Ref:
+        """Materialize CLASS($var) as a QUANTIFIED unary pattern, not a factual N."""
+
+        lookup = str(lemma or "").strip()
+        if not lookup:
+            raise CandidateValidationError("Universal restriction class is empty")
+        predicate = PredicateCandidate(
+            lookup,
+            lookup,
+            template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+        )
+        template = TemplateResolver(core, template_domain=domain).resolve(
+            predicate, (ActantRole.SUBJECT,)
+        ).template
+        node, _created = core.add_or_enrich_hypernode(
+            domain,
+            core.ref(template.uid),
+            {ActantRole.SUBJECT: variable},
+            weight=self.config.initial_hypernode_weight,
+            meta={"semantic_scope": "QUANTIFIED"},
+            count_occurrence=False,
+        )
+        return core.ref(node.uid)
 
     @staticmethod
     def _entity_anchors(result: PerceptionResult) -> dict[str, ActantCandidate]:

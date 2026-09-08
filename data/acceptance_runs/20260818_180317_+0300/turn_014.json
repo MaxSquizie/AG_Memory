@@ -1,0 +1,3617 @@
+{
+  "index": 14,
+  "input": "Иван подарил книгу.",
+  "status": "OK",
+  "scenario_id": "regression40_frozen",
+  "linguistic_candidate_graph": {
+    "text": "Иван подарил книгу.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Иван",
+        "start": 0,
+        "end": 4,
+        "analyses": [
+          {
+            "normal_form": "иван",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "anim",
+              "sing",
+              "Name",
+              "nomn",
+              "masc",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "подарил",
+        "start": 5,
+        "end": 12,
+        "analyses": [
+          {
+            "normal_form": "подарить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "past",
+              "VERB",
+              "tran",
+              "sing",
+              "indc",
+              "masc",
+              "perf"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "книгу",
+        "start": 13,
+        "end": 18,
+        "analyses": [
+          {
+            "normal_form": "книга",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "accs",
+              "inan",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": ".",
+        "start": 18,
+        "end": 19,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 3,
+          "text": "Иван подарил книгу",
+          "evidence": {
+            "text": "Иван подарил книгу",
+            "start": 0,
+            "end": 18
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "подарить"
+            ]
+          }
+        ],
+        "marker": "иван",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "подарить"
+        ]
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Иван подарил книгу.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "подарил",
+          "normalized_hint": "подарить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "подарил",
+            "start": 5,
+            "end": 12
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "OBJECT"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "SUBJECT",
+            "mention": "Иван",
+            "normalized_hint": "Иван",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Иван",
+              "start": 0,
+              "end": 4
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          },
+          {
+            "role": "OBJECT",
+            "mention": "книгу",
+            "normalized_hint": "книга",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "книгу",
+              "start": 13,
+              "end": 18
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Иван подарил книгу",
+          "start": 0,
+          "end": 18
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "conditionals": [],
+    "act_dependencies": []
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "N_8e7c651be505444298872ed8e01cecff",
+          "kind": "N"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_8e7c651be505444298872ed8e01cecff",
+          "kind": "N"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_56ebc35c4afc4f9ca7247cbcedd64d72",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [],
+  "agent_context": {
+    "current_input": "Иван подарил книгу.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Кошка спит.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что делает кошка?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Хорошо, Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Кто любит чай?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Все, кто ценит хороший напиток! А вы любите чай? 😊»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что любит Иван»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что любит Иван?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Что любит Иван»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_1ffa92616610480c8852e307cef54917",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван читает книгу.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_24b168f8b9534e9b8def046e418ddaf0",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Мария читает.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_f3752e015a4d426baf94ddb6aff220ec",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "(хлеб) AND (молоко)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_f5f00bf4e845441882c6e28c14251c69",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван купил хлеб и молоко.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_bbc1ed30d5f649fba932ac34d3addcdb",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Яблоко: бывать (состояние: зелёными).",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d9c2050cafa341d4aeca9af1d6d9e77f",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Яблоко: бывать (состояние: красными).",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_098de8764ce7443fa2ab91867726e60c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Яблоки бывают зелёными или красными.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d155f1502e664739b53e965364c75ab8",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван написал письмо и отправил его Марии.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_c8f70b7a76bc4b1a809e04be0e73cc3e",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Лиза взяла книгу, открыла её и прочитала.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_c62d55c35d3841ed9e445981f50d3ddc",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Петя встал и вышел.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_4af0776e50d3483eb5d5f1f6d5d0b884",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "(Иван) AND (Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5e69cfa4d1aa4905a0f033ae5081a0aa",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван и Мария пришли и ушли.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_20aeae11ff1b4c9592ed55a5cdb3e978",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван пришёл, а Мария ушла.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_6f7ce907821642048adcbf00b612661a",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван написал письмо, а Мария отправила его Петру.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_f318d90e48de45e38aa3daf6694a8b14",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Анна увидела Марию. Она улыбнулась.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_7f1d3d1c8a6c4acc9a8a3ede86dced19",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Сергей положил ключ на стол. Потом он взял его.»",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nИван подарил книгу.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Кошка спит.»\n- Ранее пользователь сказал: «Что делает кошка?»\n- Ранее агент ответил: «Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **»\n- Ранее пользователь сказал: «Иван любит чай.»\n- Пользователь ранее сказал: «Иван любит чай.»\n- Ранее агент ответил: «Хорошо, Иван любит чай.»\n- Ранее пользователь сказал: «Кто любит чай?»\n- Ранее агент ответил: «Все, кто ценит хороший напиток! А вы любите чай? 😊»\n- Ранее агент ответил: «Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?»\n- Ранее пользователь сказал: «Что любит Иван»\n- Ранее пользователь сказал: «Что любит Иван?»\n- Пользователь ранее сказал: «Что любит Иван»\n- Пользователь ранее сказал: «Иван читает книгу.»\n- Пользователь ранее сказал: «Мария читает.»\n- (хлеб) AND (молоко)\n- Пользователь ранее сказал: «Иван купил хлеб и молоко.»\n- Яблоко: бывать (состояние: зелёными).\n- Яблоко: бывать (состояние: красными).\n- (бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))\n- Ранее пользователь сказал: «Яблоки бывают зелёными или красными.»\n- Пользователь ранее сказал: «Иван написал письмо и отправил его Марии.»\n- Пользователь ранее сказал: «Лиза взяла книгу, открыла её и прочитала.»\n- Пользователь ранее сказал: «Петя встал и вышел.»\n- (Иван) AND (Мария)\n- Пользователь ранее сказал: «Иван и Мария пришли и ушли.»\n- Пользователь ранее сказал: «Иван пришёл, а Мария ушла.»\n- Пользователь ранее сказал: «Иван написал письмо, а Мария отправила его Петру.»\n- Пользователь ранее сказал: «Анна увидела Марию. Она улыбнулась.»\n- Пользователь ранее сказал: «Сергей положил ключ на стол. Потом он взял его.»",
+    "source_workspace_refs": [
+      {
+        "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+        "kind": "G"
+      },
+      {
+        "uid": "G_4af0776e50d3483eb5d5f1f6d5d0b884",
+        "kind": "G"
+      },
+      {
+        "uid": "G_f3752e015a4d426baf94ddb6aff220ec",
+        "kind": "G"
+      },
+      {
+        "uid": "M_59292620118e478a831c04e1b2f74b44",
+        "kind": "M"
+      },
+      {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      },
+      {
+        "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+        "kind": "M"
+      },
+      {
+        "uid": "M_6e6b6792f17b4abe8bae6e0c6efe50c6",
+        "kind": "M"
+      },
+      {
+        "uid": "M_78ee0e3061444041bf5b0f758f7c226b",
+        "kind": "M"
+      },
+      {
+        "uid": "M_8886594cd3924845b8b316fbd64fa63d",
+        "kind": "M"
+      },
+      {
+        "uid": "M_91a118f6b1564278a67729cd6901a1de",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9661eafadd614d8985ce72d44d65aeff",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      },
+      {
+        "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_e7a1abe133d1491ba5d55189767a1c14",
+        "kind": "M"
+      },
+      {
+        "uid": "M_f87a17b453394add85fb3ddb9fb3b8aa",
+        "kind": "M"
+      },
+      {
+        "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+        "kind": "M"
+      },
+      {
+        "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+        "kind": "N"
+      },
+      {
+        "uid": "N_098de8764ce7443fa2ab91867726e60c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+        "kind": "N"
+      },
+      {
+        "uid": "N_166d80888d044995b32991772e3d4ac0",
+        "kind": "N"
+      },
+      {
+        "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1c3b22ee094842faae6c627db0e3b4fe",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1ca1c4e829754256a693a0d61d7280f3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1ffa92616610480c8852e307cef54917",
+        "kind": "N"
+      },
+      {
+        "uid": "N_20aeae11ff1b4c9592ed55a5cdb3e978",
+        "kind": "N"
+      },
+      {
+        "uid": "N_222258eee8e04f26bf5735d408209c9d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_24b168f8b9534e9b8def046e418ddaf0",
+        "kind": "N"
+      },
+      {
+        "uid": "N_270eca9c9f804e91be9bc62f0c3a8f94",
+        "kind": "N"
+      },
+      {
+        "uid": "N_300dc23c6eec4805bbde9245e359ac69",
+        "kind": "N"
+      },
+      {
+        "uid": "N_378eb4c1de4c4820a047f82c688ff22b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_3cf082cfcddc4895985472d1a7904cf7",
+        "kind": "N"
+      },
+      {
+        "uid": "N_402448a2f4424be9b6288d03f22532fe",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5c78f6012ee042d2940d294336169c7b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5c96619218a8448893f6da00b005be30",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5e69cfa4d1aa4905a0f033ae5081a0aa",
+        "kind": "N"
+      },
+      {
+        "uid": "N_62640b81d540417da97f3e9e7c58616e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6eca197534354fd0aaa5819311d9e621",
+        "kind": "N"
+      },
+      {
+        "uid": "N_6f7ce907821642048adcbf00b612661a",
+        "kind": "N"
+      },
+      {
+        "uid": "N_7f1d3d1c8a6c4acc9a8a3ede86dced19",
+        "kind": "N"
+      },
+      {
+        "uid": "N_82353b674761408a98159bcaa210550b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_8e7c651be505444298872ed8e01cecff",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+        "kind": "N"
+      },
+      {
+        "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_b243b83b9a8e489588890a5d1f43e4d1",
+        "kind": "N"
+      },
+      {
+        "uid": "N_bbc1ed30d5f649fba932ac34d3addcdb",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c36c47cf0c944628a29ce0a2814107ac",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c62d55c35d3841ed9e445981f50d3ddc",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c8f70b7a76bc4b1a809e04be0e73cc3e",
+        "kind": "N"
+      },
+      {
+        "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d155f1502e664739b53e965364c75ab8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d2a17dd449f44b5397fda1a2a9cf4254",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d867f96aa3a34d4086b8c78bc45eda3c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d9c2050cafa341d4aeca9af1d6d9e77f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_db6153dc05bc4390ac2e8e0e4e639b10",
+        "kind": "N"
+      },
+      {
+        "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e0696bc5c5654042981d33601f2835fa",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e1689bb122194fd89aa74765d5412fd9",
+        "kind": "N"
+      },
+      {
+        "uid": "N_ec0c9d72e30341b4a11d811c2a2de525",
+        "kind": "N"
+      },
+      {
+        "uid": "N_f318d90e48de45e38aa3daf6694a8b14",
+        "kind": "N"
+      },
+      {
+        "uid": "N_f5c634ae212643ff88c1742cd6582c87",
+        "kind": "N"
+      },
+      {
+        "uid": "N_f5f00bf4e845441882c6e28c14251c69",
+        "kind": "N"
+      },
+      {
+        "uid": "N_fa0964d723104ff18e67053ac59f46a0",
+        "kind": "N"
+      },
+      {
+        "uid": "N_fa1445511c8e41f780650e553ac0026f",
+        "kind": "N"
+      },
+      {
+        "uid": "S_03698b75719e4a01aa055eea036204d2",
+        "kind": "S"
+      },
+      {
+        "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+        "kind": "S"
+      },
+      {
+        "uid": "S_2474fa0e4fba4b73917beb9ced0fb61a",
+        "kind": "S"
+      },
+      {
+        "uid": "S_2fce9935bfef4e2ca7cf66e53c8edb69",
+        "kind": "S"
+      },
+      {
+        "uid": "S_32d14475d7ee450c8ef0d9b29e115484",
+        "kind": "S"
+      },
+      {
+        "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+        "kind": "S"
+      },
+      {
+        "uid": "S_56ebc35c4afc4f9ca7247cbcedd64d72",
+        "kind": "S"
+      },
+      {
+        "uid": "S_59d298df871b447fbab3555d2c6c8033",
+        "kind": "S"
+      },
+      {
+        "uid": "S_74508847c53c46d9b1b6c8ea28758b64",
+        "kind": "S"
+      },
+      {
+        "uid": "S_7bf4b26777bd4e9ab8d544d47c88bbff",
+        "kind": "S"
+      },
+      {
+        "uid": "S_7fd9dfc6c16f471ca6e4ae17b2e66c91",
+        "kind": "S"
+      },
+      {
+        "uid": "S_8a5ac409c3d243a7aff485f1f583ce89",
+        "kind": "S"
+      },
+      {
+        "uid": "S_8ca20bc8d2ce45cfa5f82bb198a3100d",
+        "kind": "S"
+      },
+      {
+        "uid": "S_972eac0bacb34399a140dcb8026bb356",
+        "kind": "S"
+      },
+      {
+        "uid": "S_bbcdf184ff50433d91e6c41d4bab8c75",
+        "kind": "S"
+      },
+      {
+        "uid": "S_bc28488b1ca74efabeb96bfbafe6d073",
+        "kind": "S"
+      },
+      {
+        "uid": "S_bdbf47662ecb4ce1b0befb2aea791d72",
+        "kind": "S"
+      },
+      {
+        "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+        "kind": "S"
+      },
+      {
+        "uid": "S_dd067555487f4fe4b126940a9c0c9183",
+        "kind": "S"
+      },
+      {
+        "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+        "kind": "S"
+      },
+      {
+        "uid": "T_108e6823ed274a6591ca24ef16b1ed89",
+        "kind": "T"
+      },
+      {
+        "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+        "kind": "T"
+      },
+      {
+        "uid": "T_2363085264e2458faf6172e7e212fd47",
+        "kind": "T"
+      },
+      {
+        "uid": "T_2f3e121fdbd4470eafae390cd2fd576d",
+        "kind": "T"
+      },
+      {
+        "uid": "T_3684051e90454c4cb40cf98703937cf2",
+        "kind": "T"
+      },
+      {
+        "uid": "T_48cedcecdf9b47e292492c25e0d80541",
+        "kind": "T"
+      },
+      {
+        "uid": "T_5b605b60fa8c4bfaae6b3b2deb9558b5",
+        "kind": "T"
+      },
+      {
+        "uid": "T_5d33296a6aa74e85b3875087dec07bdd",
+        "kind": "T"
+      },
+      {
+        "uid": "T_742e31db64da44abb67e92f7dc78966f",
+        "kind": "T"
+      },
+      {
+        "uid": "T_76de36dea013461884be7ee5861871af",
+        "kind": "T"
+      },
+      {
+        "uid": "T_93f3f0886e0b4a659167da7b4080dfe1",
+        "kind": "T"
+      },
+      {
+        "uid": "T_b21c36b493a548a19f20d581d1d36a3e",
+        "kind": "T"
+      },
+      {
+        "uid": "T_c7cd48bc7b0045bb82d309056683c0de",
+        "kind": "T"
+      },
+      {
+        "uid": "T_d915b79be8e145e0bd6e1dbd47ae06c7",
+        "kind": "T"
+      },
+      {
+        "uid": "T_dc48776d7852471c9b2d3f90a29e1bfb",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e7dfe8e6e37d4e14b2747bf5b06855fa",
+        "kind": "T"
+      },
+      {
+        "uid": "T_fe2690bfb952457d9d8b5a5099bca99f",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 118,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+          "kind": "G"
+        },
+        "semantic": "[G_1984bb033c62491c9b2fd175ce0f2349] ([N_bbc1ed30d5f649fba932ac34d3addcdb] [S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать(SUBJECT=[M_800670f285fd468ebbcecc30ce271197] Яблоко, STATE=[M_4bd1b246579d4a2b86ebaeaa41bc12da] зелёными)) OR ([N_d9c2050cafa341d4aeca9af1d6d9e77f] [S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать(SUBJECT=[M_800670f285fd468ebbcecc30ce271197] Яблоко, STATE=[M_7f84998382eb4c218e937ef25f18e86d] красными))",
+        "kind": "G",
+        "domain": "C",
+        "excitation": 0.7843855019245733,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "G_4af0776e50d3483eb5d5f1f6d5d0b884",
+          "kind": "G"
+        },
+        "semantic": "[G_4af0776e50d3483eb5d5f1f6d5d0b884] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "G",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "G_f3752e015a4d426baf94ddb6aff220ec",
+          "kind": "G"
+        },
+        "semantic": "[G_f3752e015a4d426baf94ddb6aff220ec] ([M_841a3c00305c4d54a52896bf48e9f9f3] хлеб) AND ([M_70757a181b0445f1acbf102b21ba9f50] молоко)",
+        "kind": "G",
+        "domain": "C",
+        "excitation": 0.4639330140411956,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_59292620118e478a831c04e1b2f74b44",
+          "kind": "M"
+        },
+        "semantic": "[M_59292620118e478a831c04e1b2f74b44] ключ",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.52,
+        "output": 0.52,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_5b420d5c902a4051a351540d4c04c251",
+          "kind": "M"
+        },
+        "semantic": "[M_5b420d5c902a4051a351540d4c04c251] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 1.0,
+        "output": 0.1499999999999999,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+          "kind": "M"
+        },
+        "semantic": "[M_62356d38f31b4e11998ff39a775d8b61] Иван",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.8000000000000003,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_6e6b6792f17b4abe8bae6e0c6efe50c6",
+          "kind": "M"
+        },
+        "semantic": "[M_6e6b6792f17b4abe8bae6e0c6efe50c6] Пётр",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4193600650468786,
+        "output": 0.16000000000000003,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_78ee0e3061444041bf5b0f758f7c226b",
+          "kind": "M"
+        },
+        "semantic": "[M_78ee0e3061444041bf5b0f758f7c226b] Сергей",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.52,
+        "output": 0.52,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "M_8886594cd3924845b8b316fbd64fa63d",
+          "kind": "M"
+        },
+        "semantic": "[M_8886594cd3924845b8b316fbd64fa63d] книга",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "M_91a118f6b1564278a67729cd6901a1de",
+          "kind": "M"
+        },
+        "semantic": "[M_91a118f6b1564278a67729cd6901a1de] Петя",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8166602155494753,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "M_9661eafadd614d8985ce72d44d65aeff",
+          "kind": "M"
+        },
+        "semantic": "[M_9661eafadd614d8985ce72d44d65aeff] Лиза",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+          "kind": "M"
+        },
+        "semantic": "[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.8390140026442887,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+          "kind": "M"
+        },
+        "semantic": "[M_a4a27a9e5230469ab269034b14a1e4d5] чай",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8092717034984285,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "M_e7a1abe133d1491ba5d55189767a1c14",
+          "kind": "M"
+        },
+        "semantic": "[M_e7a1abe133d1491ba5d55189767a1c14] письмо",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9876901728216163,
+        "output": 0.32000000000000006,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "M_f87a17b453394add85fb3ddb9fb3b8aa",
+          "kind": "M"
+        },
+        "semantic": "[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.48,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+          "kind": "M"
+        },
+        "semantic": "[M_fc69b4786a6b4fce93342f330f8d03af] Кошка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.975689301748964,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+          "kind": "N"
+        },
+        "semantic": "[N_07e5b45ae905481a8d841349c1196ea9] реплика пользователя: Иван подарил книгу.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5,
+        "output": 0.5,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "N_098de8764ce7443fa2ab91867726e60c",
+          "kind": "N"
+        },
+        "semantic": "[N_098de8764ce7443fa2ab91867726e60c] реплика пользователя: Яблоки бывают зелёными или красными.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.489041649453405,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+          "kind": "N"
+        },
+        "semantic": "[N_0bae3cf6a9a14be4a4100a6af1d5e16d] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9699066976760744,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+          "kind": "N"
+        },
+        "semantic": "[N_0cebf7e679084d3fb18448e01c6689a7] реплика пользователя: Мария читает.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4868415715411607,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "semantic": "[N_166d80888d044995b32991772e3d4ac0] реплика пользователя: Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6020793729995499,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "semantic": "[N_16acd6e90eb54438beb2cc4488a8f89d] реплика пользователя: Что делает кошка?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5894485011080884,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "semantic": "[N_1b292003b75b48a886b0a0ecdff89b93] реплика агента: Хорошо, Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6120509695614179,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "N_1c3b22ee094842faae6c627db0e3b4fe",
+          "kind": "N"
+        },
+        "semantic": "[N_1c3b22ee094842faae6c627db0e3b4fe] [S_03698b75719e4a01aa055eea036204d2] взял(SUBJECT=[M_78ee0e3061444041bf5b0f758f7c226b] Сергей, OBJECT=[M_59292620118e478a831c04e1b2f74b44] ключ)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.78,
+        "output": 0.13,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "N_1ca1c4e829754256a693a0d61d7280f3",
+          "kind": "N"
+        },
+        "semantic": "[N_1ca1c4e829754256a693a0d61d7280f3] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.3696868907156773,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "N_1ffa92616610480c8852e307cef54917",
+          "kind": "N"
+        },
+        "semantic": "[N_1ffa92616610480c8852e307cef54917] [S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_8886594cd3924845b8b316fbd64fa63d] книга)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9780652466669136,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "N_20aeae11ff1b4c9592ed55a5cdb3e978",
+          "kind": "N"
+        },
+        "semantic": "[N_20aeae11ff1b4c9592ed55a5cdb3e978] [S_2fce9935bfef4e2ca7cf66e53c8edb69] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 28,
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "semantic": "[N_222258eee8e04f26bf5735d408209c9d] реплика агента: Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6725776443201249,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 29,
+        "root": {
+          "uid": "N_24b168f8b9534e9b8def046e418ddaf0",
+          "kind": "N"
+        },
+        "semantic": "[N_24b168f8b9534e9b8def046e418ddaf0] [S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает(SUBJECT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9780692995702821,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 30,
+        "root": {
+          "uid": "N_270eca9c9f804e91be9bc62f0c3a8f94",
+          "kind": "N"
+        },
+        "semantic": "[N_270eca9c9f804e91be9bc62f0c3a8f94] реплика пользователя: Кошка спит.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4893103188230565,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 31,
+        "root": {
+          "uid": "N_300dc23c6eec4805bbde9245e359ac69",
+          "kind": "N"
+        },
+        "semantic": "[N_300dc23c6eec4805bbde9245e359ac69] реплика пользователя: Иван написал письмо, а Мария отправила его Петру.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49631714743806055,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 32,
+        "root": {
+          "uid": "N_378eb4c1de4c4820a047f82c688ff22b",
+          "kind": "N"
+        },
+        "semantic": "[N_378eb4c1de4c4820a047f82c688ff22b] реплика пользователя: Лиза взяла книгу, открыла её и прочитала.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49144922425952753,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 33,
+        "root": {
+          "uid": "N_3cf082cfcddc4895985472d1a7904cf7",
+          "kind": "N"
+        },
+        "semantic": "[N_3cf082cfcddc4895985472d1a7904cf7] реплика пользователя: Анна увидела Марию. Она улыбнулась.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49754174068876544,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 34,
+        "root": {
+          "uid": "N_402448a2f4424be9b6288d03f22532fe",
+          "kind": "N"
+        },
+        "semantic": "[N_402448a2f4424be9b6288d03f22532fe] реплика пользователя: Сергей положил ключ на стол. Потом он взял его.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49876935585938187,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 35,
+        "root": {
+          "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+          "kind": "N"
+        },
+        "semantic": "[N_4bb9facf12c24b19a4668bf513b653f2] реплика пользователя: Что любит Иван?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6003497567278017,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 36,
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "semantic": "[N_5762396d099c4b3795b9b8c61f98f50c] реплика пользователя: Кто любит чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6457008128319583,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 37,
+        "root": {
+          "uid": "N_5c78f6012ee042d2940d294336169c7b",
+          "kind": "N"
+        },
+        "semantic": "[N_5c78f6012ee042d2940d294336169c7b] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5796659838955119,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 38,
+        "root": {
+          "uid": "N_5c96619218a8448893f6da00b005be30",
+          "kind": "N"
+        },
+        "semantic": "[N_5c96619218a8448893f6da00b005be30] реплика пользователя: Иван читает книгу.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48647005123864334,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 39,
+        "root": {
+          "uid": "N_5e69cfa4d1aa4905a0f033ae5081a0aa",
+          "kind": "N"
+        },
+        "semantic": "[N_5e69cfa4d1aa4905a0f033ae5081a0aa] [S_2fce9935bfef4e2ca7cf66e53c8edb69] прийти(SUBJECT=[G_4af0776e50d3483eb5d5f1f6d5d0b884] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_f87a17b453394add85fb3ddb9fb3b8aa] Мария))",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 40,
+        "root": {
+          "uid": "N_62640b81d540417da97f3e9e7c58616e",
+          "kind": "N"
+        },
+        "semantic": "[N_62640b81d540417da97f3e9e7c58616e] [S_8ca20bc8d2ce45cfa5f82bb198a3100d] улыбнулась(SUBJECT=[K_c6ffe98fdafa44f3a05de0ce119150d5] K_c6ffe98fdafa44f3a05de0ce119150d5[[M_5d3b6457f0d249c0a6346203a1c5efb5] Анна; [M_f87a17b453394add85fb3ddb9fb3b8aa] Мария])",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 41,
+        "root": {
+          "uid": "N_6eca197534354fd0aaa5819311d9e621",
+          "kind": "N"
+        },
+        "semantic": "[N_6eca197534354fd0aaa5819311d9e621] [S_bdbf47662ecb4ce1b0befb2aea791d72] прочитала(SUBJECT=[M_9661eafadd614d8985ce72d44d65aeff] Лиза, OBJECT=[M_8886594cd3924845b8b316fbd64fa63d] книга)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.987753989073888,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 42,
+        "root": {
+          "uid": "N_6f7ce907821642048adcbf00b612661a",
+          "kind": "N"
+        },
+        "semantic": "[N_6f7ce907821642048adcbf00b612661a] [S_7bf4b26777bd4e9ab8d544d47c88bbff] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_e7a1abe133d1491ba5d55189767a1c14] письмо)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 43,
+        "root": {
+          "uid": "N_7f1d3d1c8a6c4acc9a8a3ede86dced19",
+          "kind": "N"
+        },
+        "semantic": "[N_7f1d3d1c8a6c4acc9a8a3ede86dced19] [S_972eac0bacb34399a140dcb8026bb356] положил(SUBJECT=[M_78ee0e3061444041bf5b0f758f7c226b] Сергей, OBJECT=[M_59292620118e478a831c04e1b2f74b44] ключ, LOCATION=[M_16eca65b6c05459b818bffe08ae1ac8d] стол)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.6484001626171965,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 44,
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "semantic": "[N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.973332864139447,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 45,
+        "root": {
+          "uid": "N_8e7c651be505444298872ed8e01cecff",
+          "kind": "N"
+        },
+        "semantic": "[N_8e7c651be505444298872ed8e01cecff] [S_56ebc35c4afc4f9ca7247cbcedd64d72] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_8886594cd3924845b8b316fbd64fa63d] книга)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.65,
+        "output": 0.65,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 46,
+        "root": {
+          "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+          "kind": "N"
+        },
+        "semantic": "[N_9652ca2b78434c53a55fd22d679fdd25] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.605118828541028,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 47,
+        "root": {
+          "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+          "kind": "N"
+        },
+        "semantic": "[N_967c54d7c8c1479688f99f4c69d03a5b] реплика агента: Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5078546623942874,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 48,
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "semantic": "[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9684715334315399,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 49,
+        "root": {
+          "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+          "kind": "N"
+        },
+        "semantic": "[N_a1cd48aaf8ca468f923d5e52334cb02f] реплика пользователя: Иван купил хлеб и молоко.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.48787281141648675,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 50,
+        "root": {
+          "uid": "N_b243b83b9a8e489588890a5d1f43e4d1",
+          "kind": "N"
+        },
+        "semantic": "[N_b243b83b9a8e489588890a5d1f43e4d1] [S_2474fa0e4fba4b73917beb9ced0fb61a] открыла(SUBJECT=[M_9661eafadd614d8985ce72d44d65aeff] Лиза, OBJECT=[M_8886594cd3924845b8b316fbd64fa63d] книга)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.987753989073888,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 51,
+        "root": {
+          "uid": "N_bbc1ed30d5f649fba932ac34d3addcdb",
+          "kind": "N"
+        },
+        "semantic": "[N_bbc1ed30d5f649fba932ac34d3addcdb] [S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать(SUBJECT=[M_800670f285fd468ebbcecc30ce271197] Яблоко, STATE=[M_4bd1b246579d4a2b86ebaeaa41bc12da] зелёными)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.3735011177130314,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 52,
+        "root": {
+          "uid": "N_c36c47cf0c944628a29ce0a2814107ac",
+          "kind": "N"
+        },
+        "semantic": "[N_c36c47cf0c944628a29ce0a2814107ac] [S_59d298df871b447fbab3555d2c6c8033] выйти(SUBJECT=[M_91a118f6b1564278a67729cd6901a1de] Петя)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 53,
+        "root": {
+          "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+          "kind": "N"
+        },
+        "semantic": "[N_c45d8a0d9901424c89a131b5d6ed0461] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.3675342737474002,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 54,
+        "root": {
+          "uid": "N_c62d55c35d3841ed9e445981f50d3ddc",
+          "kind": "N"
+        },
+        "semantic": "[N_c62d55c35d3841ed9e445981f50d3ddc] [S_74508847c53c46d9b1b6c8ea28758b64] встал(SUBJECT=[M_91a118f6b1564278a67729cd6901a1de] Петя)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 55,
+        "root": {
+          "uid": "N_c8f70b7a76bc4b1a809e04be0e73cc3e",
+          "kind": "N"
+        },
+        "semantic": "[N_c8f70b7a76bc4b1a809e04be0e73cc3e] [S_03698b75719e4a01aa055eea036204d2] взял(SUBJECT=[M_9661eafadd614d8985ce72d44d65aeff] Лиза, OBJECT=[M_8886594cd3924845b8b316fbd64fa63d] книга)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.987753989073888,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 56,
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "semantic": "[N_cf5dab81b6774a929d4b64d870af289c] реплика агента: Все, кто ценит хороший напиток! А вы любите чай? 😊",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.670448181360028,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 57,
+        "root": {
+          "uid": "N_d155f1502e664739b53e965364c75ab8",
+          "kind": "N"
+        },
+        "semantic": "[N_d155f1502e664739b53e965364c75ab8] [S_7bf4b26777bd4e9ab8d544d47c88bbff] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_e7a1abe133d1491ba5d55189767a1c14] письмо, RECIPIENT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 58,
+        "root": {
+          "uid": "N_d2a17dd449f44b5397fda1a2a9cf4254",
+          "kind": "N"
+        },
+        "semantic": "[N_d2a17dd449f44b5397fda1a2a9cf4254] [S_32d14475d7ee450c8ef0d9b29e115484] уйти(SUBJECT=[G_4af0776e50d3483eb5d5f1f6d5d0b884] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_f87a17b453394add85fb3ddb9fb3b8aa] Мария))",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 59,
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "semantic": "[N_d6fa4f8c6d0f4222aede7b4143bb17d8] реплика агента: Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5947597937923221,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 60,
+        "root": {
+          "uid": "N_d867f96aa3a34d4086b8c78bc45eda3c",
+          "kind": "N"
+        },
+        "semantic": "[N_d867f96aa3a34d4086b8c78bc45eda3c] реплика пользователя: Петя встал и вышел.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49266150069578774,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 61,
+        "root": {
+          "uid": "N_d9c2050cafa341d4aeca9af1d6d9e77f",
+          "kind": "N"
+        },
+        "semantic": "[N_d9c2050cafa341d4aeca9af1d6d9e77f] [S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать(SUBJECT=[M_800670f285fd468ebbcecc30ce271197] Яблоко, STATE=[M_7f84998382eb4c218e937ef25f18e86d] красными)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.3735011177130314,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 62,
+        "root": {
+          "uid": "N_db6153dc05bc4390ac2e8e0e4e639b10",
+          "kind": "N"
+        },
+        "semantic": "[N_db6153dc05bc4390ac2e8e0e4e639b10] [S_8a5ac409c3d243a7aff485f1f583ce89] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, RECIPIENT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 63,
+        "root": {
+          "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+          "kind": "N"
+        },
+        "semantic": "[N_db79000de35946ad81f0fb14ba605aa5] реплика пользователя: Кто любит чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6776471802494967,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 64,
+        "root": {
+          "uid": "N_e0696bc5c5654042981d33601f2835fa",
+          "kind": "N"
+        },
+        "semantic": "[N_e0696bc5c5654042981d33601f2835fa] реплика пользователя: Иван пришёл, а Мария ушла.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4950955709075393,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 65,
+        "root": {
+          "uid": "N_e1689bb122194fd89aa74765d5412fd9",
+          "kind": "N"
+        },
+        "semantic": "[N_e1689bb122194fd89aa74765d5412fd9] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4819171897391355,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 66,
+        "root": {
+          "uid": "N_ec0c9d72e30341b4a11d811c2a2de525",
+          "kind": "N"
+        },
+        "semantic": "[N_ec0c9d72e30341b4a11d811c2a2de525] [S_8a5ac409c3d243a7aff485f1f583ce89] отправил(SUBJECT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария, OBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, RECIPIENT=[M_6e6b6792f17b4abe8bae6e0c6efe50c6] Пётр)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 67,
+        "root": {
+          "uid": "N_f318d90e48de45e38aa3daf6694a8b14",
+          "kind": "N"
+        },
+        "semantic": "[N_f318d90e48de45e38aa3daf6694a8b14] [S_bc28488b1ca74efabeb96bfbafe6d073] увидела(SUBJECT=[M_5d3b6457f0d249c0a6346203a1c5efb5] Анна, OBJECT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.3800000000000001,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 68,
+        "root": {
+          "uid": "N_f5c634ae212643ff88c1742cd6582c87",
+          "kind": "N"
+        },
+        "semantic": "[N_f5c634ae212643ff88c1742cd6582c87] реплика пользователя: Иван написал письмо и отправил его Марии.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4902411045796814,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 69,
+        "root": {
+          "uid": "N_f5f00bf4e845441882c6e28c14251c69",
+          "kind": "N"
+        },
+        "semantic": "[N_f5f00bf4e845441882c6e28c14251c69] [S_dd067555487f4fe4b126940a9c0c9183] купил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[G_f3752e015a4d426baf94ddb6aff220ec] ([M_841a3c00305c4d54a52896bf48e9f9f3] хлеб) AND ([M_70757a181b0445f1acbf102b21ba9f50] молоко))",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9804794186834143,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 70,
+        "root": {
+          "uid": "N_fa0964d723104ff18e67053ac59f46a0",
+          "kind": "N"
+        },
+        "semantic": "[N_fa0964d723104ff18e67053ac59f46a0] [S_32d14475d7ee450c8ef0d9b29e115484] уйти(SUBJECT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 71,
+        "root": {
+          "uid": "N_fa1445511c8e41f780650e553ac0026f",
+          "kind": "N"
+        },
+        "semantic": "[N_fa1445511c8e41f780650e553ac0026f] реплика пользователя: Иван и Мария пришли и ушли.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4938770111164661,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 72,
+        "root": {
+          "uid": "S_03698b75719e4a01aa055eea036204d2",
+          "kind": "S"
+        },
+        "semantic": "[S_03698b75719e4a01aa055eea036204d2] взял",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 73,
+        "root": {
+          "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+          "kind": "S"
+        },
+        "semantic": "[S_0a3a560a311b4473808065c3aa0ed334] любит",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9637100251020925,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 74,
+        "root": {
+          "uid": "S_2474fa0e4fba4b73917beb9ced0fb61a",
+          "kind": "S"
+        },
+        "semantic": "[S_2474fa0e4fba4b73917beb9ced0fb61a] открыла",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9337527942825785,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 75,
+        "root": {
+          "uid": "S_2fce9935bfef4e2ca7cf66e53c8edb69",
+          "kind": "S"
+        },
+        "semantic": "[S_2fce9935bfef4e2ca7cf66e53c8edb69] прийти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 76,
+        "root": {
+          "uid": "S_32d14475d7ee450c8ef0d9b29e115484",
+          "kind": "S"
+        },
+        "semantic": "[S_32d14475d7ee450c8ef0d9b29e115484] уйти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 77,
+        "root": {
+          "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+          "kind": "S"
+        },
+        "semantic": "[S_46d5e122600740c8aacdb87ba32d7fa5] Что",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9637100251020925,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 78,
+        "root": {
+          "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+          "kind": "S"
+        },
+        "semantic": "[S_4d1948dc41ef43cf9d254a38a50027c8] спит",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9684715334315399,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 79,
+        "root": {
+          "uid": "S_56ebc35c4afc4f9ca7247cbcedd64d72",
+          "kind": "S"
+        },
+        "semantic": "[S_56ebc35c4afc4f9ca7247cbcedd64d72] подарил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.95,
+        "output": 0.95,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 80,
+        "root": {
+          "uid": "S_59d298df871b447fbab3555d2c6c8033",
+          "kind": "S"
+        },
+        "semantic": "[S_59d298df871b447fbab3555d2c6c8033] выйти",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9360566996680442,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 81,
+        "root": {
+          "uid": "S_74508847c53c46d9b1b6c8ea28758b64",
+          "kind": "S"
+        },
+        "semantic": "[S_74508847c53c46d9b1b6c8ea28758b64] встал",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9360566996680442,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 82,
+        "root": {
+          "uid": "S_7bf4b26777bd4e9ab8d544d47c88bbff",
+          "kind": "S"
+        },
+        "semantic": "[S_7bf4b26777bd4e9ab8d544d47c88bbff] написал",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 83,
+        "root": {
+          "uid": "S_7fd9dfc6c16f471ca6e4ae17b2e66c91",
+          "kind": "S"
+        },
+        "semantic": "[S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9732565674699463,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 84,
+        "root": {
+          "uid": "S_8a5ac409c3d243a7aff485f1f583ce89",
+          "kind": "S"
+        },
+        "semantic": "[S_8a5ac409c3d243a7aff485f1f583ce89] отправил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 85,
+        "root": {
+          "uid": "S_8ca20bc8d2ce45cfa5f82bb198a3100d",
+          "kind": "S"
+        },
+        "semantic": "[S_8ca20bc8d2ce45cfa5f82bb198a3100d] улыбнулась",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9453293073086544,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 86,
+        "root": {
+          "uid": "S_972eac0bacb34399a140dcb8026bb356",
+          "kind": "S"
+        },
+        "semantic": "[S_972eac0bacb34399a140dcb8026bb356] положил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 87,
+        "root": {
+          "uid": "S_bbcdf184ff50433d91e6c41d4bab8c75",
+          "kind": "S"
+        },
+        "semantic": "[S_bbcdf184ff50433d91e6c41d4bab8c75] Кошка",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.8639285970835312,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 88,
+        "root": {
+          "uid": "S_bc28488b1ca74efabeb96bfbafe6d073",
+          "kind": "S"
+        },
+        "semantic": "[S_bc28488b1ca74efabeb96bfbafe6d073] увидела",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9453293073086544,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 89,
+        "root": {
+          "uid": "S_bdbf47662ecb4ce1b0befb2aea791d72",
+          "kind": "S"
+        },
+        "semantic": "[S_bdbf47662ecb4ce1b0befb2aea791d72] прочитала",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9337527942825785,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 90,
+        "root": {
+          "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+          "kind": "S"
+        },
+        "semantic": "[S_c5a3cd90fe2e4d40a3dd7c1aa2e05482] Иван",
+        "kind": "S",
+        "domain": null,
+        "excitation": 1.0,
+        "output": 0.8500000000000001,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 91,
+        "root": {
+          "uid": "S_dd067555487f4fe4b126940a9c0c9183",
+          "kind": "S"
+        },
+        "semantic": "[S_dd067555487f4fe4b126940a9c0c9183] купил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9268750457848093,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 92,
+        "root": {
+          "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+          "kind": "S"
+        },
+        "semantic": "[S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9291619812807057,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 93,
+        "root": {
+          "uid": "T_108e6823ed274a6591ca24ef16b1ed89",
+          "kind": "T"
+        },
+        "semantic": "[T_108e6823ed274a6591ca24ef16b1ed89] predicate=[S_4d1948dc41ef43cf9d254a38a50027c8] спит; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9708611024857963,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 94,
+        "root": {
+          "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+          "kind": "T"
+        },
+        "semantic": "[T_1d42488e4536454999a4ed3b83e836b8] predicate=[S_0a3a560a311b4473808065c3aa0ed334] любит; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9660878457955939,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 95,
+        "root": {
+          "uid": "T_2363085264e2458faf6172e7e212fd47",
+          "kind": "T"
+        },
+        "semantic": "[T_2363085264e2458faf6172e7e212fd47] predicate=[S_8ca20bc8d2ce45cfa5f82bb198a3100d] улыбнулась; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 96,
+        "root": {
+          "uid": "T_2f3e121fdbd4470eafae390cd2fd576d",
+          "kind": "T"
+        },
+        "semantic": "[T_2f3e121fdbd4470eafae390cd2fd576d] predicate=[S_74508847c53c46d9b1b6c8ea28758b64] встал; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9383662896201935,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 97,
+        "root": {
+          "uid": "T_3684051e90454c4cb40cf98703937cf2",
+          "kind": "T"
+        },
+        "semantic": "[T_3684051e90454c4cb40cf98703937cf2] predicate=[S_59d298df871b447fbab3555d2c6c8033] выйти; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9383662896201935,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 98,
+        "root": {
+          "uid": "T_48cedcecdf9b47e292492c25e0d80541",
+          "kind": "T"
+        },
+        "semantic": "[T_48cedcecdf9b47e292492c25e0d80541] predicate=[S_2fce9935bfef4e2ca7cf66e53c8edb69] прийти; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 99,
+        "root": {
+          "uid": "T_5b605b60fa8c4bfaae6b3b2deb9558b5",
+          "kind": "T"
+        },
+        "semantic": "[T_5b605b60fa8c4bfaae6b3b2deb9558b5] predicate=[S_bc28488b1ca74efabeb96bfbafe6d073] увидела; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 100,
+        "root": {
+          "uid": "T_5d33296a6aa74e85b3875087dec07bdd",
+          "kind": "T"
+        },
+        "semantic": "[T_5d33296a6aa74e85b3875087dec07bdd] predicate=[S_8a5ac409c3d243a7aff485f1f583ce89] отправил; roles=[SUBJECT, OBJECT, RECIPIENT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 101,
+        "root": {
+          "uid": "T_742e31db64da44abb67e92f7dc78966f",
+          "kind": "T"
+        },
+        "semantic": "[T_742e31db64da44abb67e92f7dc78966f] predicate=[S_32d14475d7ee450c8ef0d9b29e115484] уйти; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 102,
+        "root": {
+          "uid": "T_76de36dea013461884be7ee5861871af",
+          "kind": "T"
+        },
+        "semantic": "[T_76de36dea013461884be7ee5861871af] predicate=[S_972eac0bacb34399a140dcb8026bb356] положил; roles=[SUBJECT, OBJECT, LOCATION]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.95,
+        "output": 0.95,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 103,
+        "root": {
+          "uid": "T_93f3f0886e0b4a659167da7b4080dfe1",
+          "kind": "T"
+        },
+        "semantic": "[T_93f3f0886e0b4a659167da7b4080dfe1] predicate=[S_7bf4b26777bd4e9ab8d544d47c88bbff] написал; roles=[SUBJECT, OBJECT, RECIPIENT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 104,
+        "root": {
+          "uid": "T_b21c36b493a548a19f20d581d1d36a3e",
+          "kind": "T"
+        },
+        "semantic": "[T_b21c36b493a548a19f20d581d1d36a3e] predicate=[S_2474fa0e4fba4b73917beb9ced0fb61a] открыла; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9360566996680442,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 105,
+        "root": {
+          "uid": "T_c7cd48bc7b0045bb82d309056683c0de",
+          "kind": "T"
+        },
+        "semantic": "[T_c7cd48bc7b0045bb82d309056683c0de] predicate=[S_03698b75719e4a01aa055eea036204d2] взял; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.9999999999999999,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 106,
+        "root": {
+          "uid": "T_d915b79be8e145e0bd6e1dbd47ae06c7",
+          "kind": "T"
+        },
+        "semantic": "[T_d915b79be8e145e0bd6e1dbd47ae06c7] predicate=[S_bdbf47662ecb4ce1b0befb2aea791d72] прочитала; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9360566996680442,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 107,
+        "root": {
+          "uid": "T_dc48776d7852471c9b2d3f90a29e1bfb",
+          "kind": "T"
+        },
+        "semantic": "[T_dc48776d7852471c9b2d3f90a29e1bfb] predicate=[S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать; roles=[SUBJECT, STATE]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9314545594724393,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 108,
+        "root": {
+          "uid": "T_e7dfe8e6e37d4e14b2747bf5b06855fa",
+          "kind": "T"
+        },
+        "semantic": "[T_e7dfe8e6e37d4e14b2747bf5b06855fa] predicate=[S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9756579429313783,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 109,
+        "root": {
+          "uid": "T_fe2690bfb952457d9d8b5a5099bca99f",
+          "kind": "T"
+        },
+        "semantic": "[T_fe2690bfb952457d9d8b5a5099bca99f] predicate=[S_dd067555487f4fe4b126940a9c0c9183] купил; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9291619812807057,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 1
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 15,
+      "source_text": "Иван подарил книгу.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nTOKENS:\n[1] Иван\n[2] подарил\n[3] книгу\n[4] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: подарил; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nTOKENS:\n[1] Иван\n[2] подарил\n[3] книгу\n[4] .\nPREDICATE_START: [2] подарил\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: подарил",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу\nTARGET:\nподарил\nRUSSIAN_LEMMA:\nподарить",
+          "normalized_answer": "подарить",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу\nPREDICATE:\nподарил\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] Иван\n[2] книгу",
+          "normalized_answer": "1",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "ACTOR_OR_EXPERIENCER",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nTARGET:\nИван\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "ACTOR_OR_EXPERIENCER",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nALREADY_SELECTED:\nИван\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] книгу",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "role_cue",
+          "raw_text": "AFFECTED_OR_CONTENT",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nTARGET:\nкнигу\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+          "normalized_answer": "AFFECTED_OR_CONTENT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nALREADY_SELECTED:\nИван | книгу\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Иван подарил книгу.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "подарил",
+              "normalized_hint": "подарить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "подарил",
+                "start": 5,
+                "end": 12
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "SUBJECT",
+                "mention": "Иван",
+                "normalized_hint": "Иван",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Иван",
+                  "start": 0,
+                  "end": 4
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              },
+              {
+                "role": "OBJECT",
+                "mention": "книгу",
+                "normalized_hint": "книга",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "книгу",
+                  "start": 13,
+                  "end": 18
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Иван подарил книгу",
+              "start": 0,
+              "end": 18
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "conditionals": [],
+        "act_dependencies": []
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 46,
+      "req_id": "36c32c4765664bc989e823d384df447e",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nTARGET:\nИван\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 47,
+      "req_id": "7532439335a54d70803c7ab63a5c75fa",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nИван подарил книгу.\nPREDICATE:\nподарил\nTARGET:\nкнигу\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "L_4fe90371bb8044c2b0ee4e86ab632d73": {
+        "uid": "L_4fe90371bb8044c2b0ee4e86ab632d73",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.198,
+        "source": {
+          "uid": "N_402448a2f4424be9b6288d03f22532fe",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+          "kind": "N"
+        }
+      },
+      "N_07e5b45ae905481a8d841349c1196ea9": {
+        "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_e5333a288009442882fd9698dfd42d3f",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_5b420d5c902a4051a351540d4c04c251",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "N_8e7c651be505444298872ed8e01cecff",
+            "kind": "N"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Иван подарил книгу.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 117,
+          "expires_tick": 317,
+          "last_qualifying_tick": 117,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_8e7c651be505444298872ed8e01cecff": {
+        "uid": "N_8e7c651be505444298872ed8e01cecff",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_862e713474744a2689d1c56dae6bcbc6",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "M_8886594cd3924845b8b316fbd64fa63d",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1,
+          "lifecycle_state": "NEW",
+          "created_tick": 117,
+          "expires_tick": 317,
+          "last_qualifying_tick": 117,
+          "qualifying_reactivations": 0
+        }
+      },
+      "S_56ebc35c4afc4f9ca7247cbcedd64d72": {
+        "uid": "S_56ebc35c4afc4f9ca7247cbcedd64d72",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "подарил",
+          "подарить"
+        ]
+      },
+      "T_862e713474744a2689d1c56dae6bcbc6": {
+        "uid": "T_862e713474744a2689d1c56dae6bcbc6",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_56ebc35c4afc4f9ca7247cbcedd64d72",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "OBJECT"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_606b8047e1864bb291e63f3d170c59f9": {
+        "before": {
+          "uid": "L_606b8047e1864bb291e63f3d170c59f9",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.21500000000000002,
+          "source": {
+            "uid": "N_7f1d3d1c8a6c4acc9a8a3ede86dced19",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_1c3b22ee094842faae6c627db0e3b4fe",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_606b8047e1864bb291e63f3d170c59f9",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.21300000000000002,
+          "source": {
+            "uid": "N_7f1d3d1c8a6c4acc9a8a3ede86dced19",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_1c3b22ee094842faae6c627db0e3b4fe",
+            "kind": "N"
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 118,
+    "workspace_uids": [
+      "G_1984bb033c62491c9b2fd175ce0f2349",
+      "G_4af0776e50d3483eb5d5f1f6d5d0b884",
+      "G_f3752e015a4d426baf94ddb6aff220ec",
+      "M_59292620118e478a831c04e1b2f74b44",
+      "M_5b420d5c902a4051a351540d4c04c251",
+      "M_62356d38f31b4e11998ff39a775d8b61",
+      "M_6e6b6792f17b4abe8bae6e0c6efe50c6",
+      "M_78ee0e3061444041bf5b0f758f7c226b",
+      "M_8886594cd3924845b8b316fbd64fa63d",
+      "M_91a118f6b1564278a67729cd6901a1de",
+      "M_9661eafadd614d8985ce72d44d65aeff",
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "M_a4a27a9e5230469ab269034b14a1e4d5",
+      "M_e7a1abe133d1491ba5d55189767a1c14",
+      "M_f87a17b453394add85fb3ddb9fb3b8aa",
+      "M_fc69b4786a6b4fce93342f330f8d03af",
+      "N_07e5b45ae905481a8d841349c1196ea9",
+      "N_098de8764ce7443fa2ab91867726e60c",
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+      "N_0cebf7e679084d3fb18448e01c6689a7",
+      "N_166d80888d044995b32991772e3d4ac0",
+      "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "N_1b292003b75b48a886b0a0ecdff89b93",
+      "N_1c3b22ee094842faae6c627db0e3b4fe",
+      "N_1ca1c4e829754256a693a0d61d7280f3",
+      "N_1ffa92616610480c8852e307cef54917",
+      "N_20aeae11ff1b4c9592ed55a5cdb3e978",
+      "N_222258eee8e04f26bf5735d408209c9d",
+      "N_24b168f8b9534e9b8def046e418ddaf0",
+      "N_270eca9c9f804e91be9bc62f0c3a8f94",
+      "N_300dc23c6eec4805bbde9245e359ac69",
+      "N_378eb4c1de4c4820a047f82c688ff22b",
+      "N_3cf082cfcddc4895985472d1a7904cf7",
+      "N_402448a2f4424be9b6288d03f22532fe",
+      "N_4bb9facf12c24b19a4668bf513b653f2",
+      "N_5762396d099c4b3795b9b8c61f98f50c",
+      "N_5c78f6012ee042d2940d294336169c7b",
+      "N_5c96619218a8448893f6da00b005be30",
+      "N_5e69cfa4d1aa4905a0f033ae5081a0aa",
+      "N_62640b81d540417da97f3e9e7c58616e",
+      "N_6eca197534354fd0aaa5819311d9e621",
+      "N_6f7ce907821642048adcbf00b612661a",
+      "N_7f1d3d1c8a6c4acc9a8a3ede86dced19",
+      "N_82353b674761408a98159bcaa210550b",
+      "N_8e7c651be505444298872ed8e01cecff",
+      "N_9652ca2b78434c53a55fd22d679fdd25",
+      "N_967c54d7c8c1479688f99f4c69d03a5b",
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+      "N_a1cd48aaf8ca468f923d5e52334cb02f",
+      "N_b243b83b9a8e489588890a5d1f43e4d1",
+      "N_bbc1ed30d5f649fba932ac34d3addcdb",
+      "N_c36c47cf0c944628a29ce0a2814107ac",
+      "N_c45d8a0d9901424c89a131b5d6ed0461",
+      "N_c62d55c35d3841ed9e445981f50d3ddc",
+      "N_c8f70b7a76bc4b1a809e04be0e73cc3e",
+      "N_cf5dab81b6774a929d4b64d870af289c",
+      "N_d155f1502e664739b53e965364c75ab8",
+      "N_d2a17dd449f44b5397fda1a2a9cf4254",
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "N_d867f96aa3a34d4086b8c78bc45eda3c",
+      "N_d9c2050cafa341d4aeca9af1d6d9e77f",
+      "N_db6153dc05bc4390ac2e8e0e4e639b10",
+      "N_db79000de35946ad81f0fb14ba605aa5",
+      "N_e0696bc5c5654042981d33601f2835fa",
+      "N_e1689bb122194fd89aa74765d5412fd9",
+      "N_ec0c9d72e30341b4a11d811c2a2de525",
+      "N_f318d90e48de45e38aa3daf6694a8b14",
+      "N_f5c634ae212643ff88c1742cd6582c87",
+      "N_f5f00bf4e845441882c6e28c14251c69",
+      "N_fa0964d723104ff18e67053ac59f46a0",
+      "N_fa1445511c8e41f780650e553ac0026f",
+      "S_03698b75719e4a01aa055eea036204d2",
+      "S_0a3a560a311b4473808065c3aa0ed334",
+      "S_2474fa0e4fba4b73917beb9ced0fb61a",
+      "S_2fce9935bfef4e2ca7cf66e53c8edb69",
+      "S_32d14475d7ee450c8ef0d9b29e115484",
+      "S_46d5e122600740c8aacdb87ba32d7fa5",
+      "S_4d1948dc41ef43cf9d254a38a50027c8",
+      "S_56ebc35c4afc4f9ca7247cbcedd64d72",
+      "S_59d298df871b447fbab3555d2c6c8033",
+      "S_74508847c53c46d9b1b6c8ea28758b64",
+      "S_7bf4b26777bd4e9ab8d544d47c88bbff",
+      "S_7fd9dfc6c16f471ca6e4ae17b2e66c91",
+      "S_8a5ac409c3d243a7aff485f1f583ce89",
+      "S_8ca20bc8d2ce45cfa5f82bb198a3100d",
+      "S_972eac0bacb34399a140dcb8026bb356",
+      "S_bbcdf184ff50433d91e6c41d4bab8c75",
+      "S_bc28488b1ca74efabeb96bfbafe6d073",
+      "S_bdbf47662ecb4ce1b0befb2aea791d72",
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+      "S_dd067555487f4fe4b126940a9c0c9183",
+      "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+      "T_108e6823ed274a6591ca24ef16b1ed89",
+      "T_1d42488e4536454999a4ed3b83e836b8",
+      "T_2363085264e2458faf6172e7e212fd47",
+      "T_2f3e121fdbd4470eafae390cd2fd576d",
+      "T_3684051e90454c4cb40cf98703937cf2",
+      "T_48cedcecdf9b47e292492c25e0d80541",
+      "T_5b605b60fa8c4bfaae6b3b2deb9558b5",
+      "T_5d33296a6aa74e85b3875087dec07bdd",
+      "T_742e31db64da44abb67e92f7dc78966f",
+      "T_76de36dea013461884be7ee5861871af",
+      "T_93f3f0886e0b4a659167da7b4080dfe1",
+      "T_b21c36b493a548a19f20d581d1d36a3e",
+      "T_c7cd48bc7b0045bb82d309056683c0de",
+      "T_d915b79be8e145e0bd6e1dbd47ae06c7",
+      "T_dc48776d7852471c9b2d3f90a29e1bfb",
+      "T_e7dfe8e6e37d4e14b2747bf5b06855fa",
+      "T_fe2690bfb952457d9d8b5a5099bca99f"
+    ],
+    "workspace": {
+      "G_1984bb033c62491c9b2fd175ce0f2349": {
+        "semantic": "(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))",
+        "excitation": 0.7843855019245733
+      },
+      "G_4af0776e50d3483eb5d5f1f6d5d0b884": {
+        "semantic": "(Иван) AND (Мария)",
+        "excitation": 0.9975387117187637
+      },
+      "G_f3752e015a4d426baf94ddb6aff220ec": {
+        "semantic": "(хлеб) AND (молоко)",
+        "excitation": 0.4639330140411956
+      },
+      "M_59292620118e478a831c04e1b2f74b44": {
+        "semantic": "ключ",
+        "excitation": 0.52
+      },
+      "M_5b420d5c902a4051a351540d4c04c251": {
+        "semantic": "Пользователь",
+        "excitation": 1.0
+      },
+      "M_62356d38f31b4e11998ff39a775d8b61": {
+        "semantic": "Иван",
+        "excitation": 1.0
+      },
+      "M_6e6b6792f17b4abe8bae6e0c6efe50c6": {
+        "semantic": "Пётр",
+        "excitation": 0.4193600650468786
+      },
+      "M_78ee0e3061444041bf5b0f758f7c226b": {
+        "semantic": "Сергей",
+        "excitation": 0.52
+      },
+      "M_8886594cd3924845b8b316fbd64fa63d": {
+        "semantic": "книга",
+        "excitation": 0.990191134910427
+      },
+      "M_91a118f6b1564278a67729cd6901a1de": {
+        "semantic": "Петя",
+        "excitation": 0.8166602155494753
+      },
+      "M_9661eafadd614d8985ce72d44d65aeff": {
+        "semantic": "Лиза",
+        "excitation": 0.990191134910427
+      },
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+        "semantic": "АГент",
+        "excitation": 0.8390140026442887
+      },
+      "M_a4a27a9e5230469ab269034b14a1e4d5": {
+        "semantic": "чай",
+        "excitation": 0.8092717034984285
+      },
+      "M_e7a1abe133d1491ba5d55189767a1c14": {
+        "semantic": "письмо",
+        "excitation": 0.9876901728216163
+      },
+      "M_f87a17b453394add85fb3ddb9fb3b8aa": {
+        "semantic": "Мария",
+        "excitation": 1.0
+      },
+      "M_fc69b4786a6b4fce93342f330f8d03af": {
+        "semantic": "Кошка",
+        "excitation": 0.975689301748964
+      },
+      "N_07e5b45ae905481a8d841349c1196ea9": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=подарил(SUBJECT=Иван, OBJECT=книга))",
+        "excitation": 0.5
+      },
+      "N_098de8764ce7443fa2ab91867726e60c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными)))",
+        "excitation": 0.489041649453405
+      },
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d": {
+        "semantic": "любит(SUBJECT=Иван)",
+        "excitation": 0.9699066976760744
+      },
+      "N_0cebf7e679084d3fb18448e01c6689a7": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=читает(SUBJECT=Мария))",
+        "excitation": 0.4868415715411607
+      },
+      "N_166d80888d044995b32991772e3d4ac0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+        "excitation": 0.6020793729995499
+      },
+      "N_16acd6e90eb54438beb2cc4488a8f89d": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5894485011080884
+      },
+      "N_1b292003b75b48a886b0a0ecdff89b93": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6120509695614179
+      },
+      "N_1c3b22ee094842faae6c627db0e3b4fe": {
+        "semantic": "взял(SUBJECT=Сергей, OBJECT=ключ)",
+        "excitation": 0.78
+      },
+      "N_1ca1c4e829754256a693a0d61d7280f3": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3696868907156773
+      },
+      "N_1ffa92616610480c8852e307cef54917": {
+        "semantic": "читает(SUBJECT=Иван, OBJECT=книга)",
+        "excitation": 0.9780652466669136
+      },
+      "N_20aeae11ff1b4c9592ed55a5cdb3e978": {
+        "semantic": "прийти(SUBJECT=Иван)",
+        "excitation": 0.9950834813775309
+      },
+      "N_222258eee8e04f26bf5735d408209c9d": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6725776443201249
+      },
+      "N_24b168f8b9534e9b8def046e418ddaf0": {
+        "semantic": "читает(SUBJECT=Мария)",
+        "excitation": 0.9780692995702821
+      },
+      "N_270eca9c9f804e91be9bc62f0c3a8f94": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=спит(SUBJECT=Кошка))",
+        "excitation": 0.4893103188230565
+      },
+      "N_300dc23c6eec4805bbde9245e359ac69": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_cd9f3db2a9a14eab82a84d0a998685c0[написал(SUBJECT=Иван, OBJECT=письмо); отправил(SUBJECT=Мария, OBJECT=Иван, RECIPIENT=Пётр)])",
+        "excitation": 0.49631714743806055
+      },
+      "N_378eb4c1de4c4820a047f82c688ff22b": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_9231072700534906900f907a2f5c87dd[взял(SUBJECT=Лиза, OBJECT=книга); открыла(SUBJECT=Лиза, OBJECT=книга); прочитала(SUBJECT=Лиза, OBJECT=книга)])",
+        "excitation": 0.49144922425952753
+      },
+      "N_3cf082cfcddc4895985472d1a7904cf7": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_8ff1974b49fe4a529c8b0e332d6d00c4[увидела(SUBJECT=Анна, OBJECT=Мария); улыбнулась(SUBJECT=K_c6ffe98fdafa44f3a05de0ce119150d5[Анна; Мария])])",
+        "excitation": 0.49754174068876544
+      },
+      "N_402448a2f4424be9b6288d03f22532fe": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_751a86f8f0dd4c3490f9bae467ac6003[положил(SUBJECT=Сергей, OBJECT=ключ, LOCATION=стол); взял(SUBJECT=Сергей, OBJECT=ключ)])",
+        "excitation": 0.49876935585938187
+      },
+      "N_4bb9facf12c24b19a4668bf513b653f2": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6003497567278017
+      },
+      "N_5762396d099c4b3795b9b8c61f98f50c": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6457008128319583
+      },
+      "N_5c78f6012ee042d2940d294336169c7b": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5796659838955119
+      },
+      "N_5c96619218a8448893f6da00b005be30": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=читает(SUBJECT=Иван, OBJECT=книга))",
+        "excitation": 0.48647005123864334
+      },
+      "N_5e69cfa4d1aa4905a0f033ae5081a0aa": {
+        "semantic": "прийти(SUBJECT=(Иван) AND (Мария))",
+        "excitation": 0.9950834813775309
+      },
+      "N_62640b81d540417da97f3e9e7c58616e": {
+        "semantic": "улыбнулась(SUBJECT=K_c6ffe98fdafa44f3a05de0ce119150d5[Анна; Мария])",
+        "excitation": 1.0
+      },
+      "N_6eca197534354fd0aaa5819311d9e621": {
+        "semantic": "прочитала(SUBJECT=Лиза, OBJECT=книга)",
+        "excitation": 0.987753989073888
+      },
+      "N_6f7ce907821642048adcbf00b612661a": {
+        "semantic": "написал(SUBJECT=Иван, OBJECT=письмо)",
+        "excitation": 0.9975387117187637
+      },
+      "N_7f1d3d1c8a6c4acc9a8a3ede86dced19": {
+        "semantic": "положил(SUBJECT=Сергей, OBJECT=ключ, LOCATION=стол)",
+        "excitation": 0.6484001626171965
+      },
+      "N_82353b674761408a98159bcaa210550b": {
+        "semantic": "спит(SUBJECT=Кошка)",
+        "excitation": 0.973332864139447
+      },
+      "N_8e7c651be505444298872ed8e01cecff": {
+        "semantic": "подарил(SUBJECT=Иван, OBJECT=книга)",
+        "excitation": 0.65
+      },
+      "N_9652ca2b78434c53a55fd22d679fdd25": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван))",
+        "excitation": 0.605118828541028
+      },
+      "N_967c54d7c8c1479688f99f4c69d03a5b": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.5078546623942874
+      },
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+        "semantic": "любит(SUBJECT=Иван, OBJECT=чай)",
+        "excitation": 0.9684715334315399
+      },
+      "N_a1cd48aaf8ca468f923d5e52334cb02f": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=купил(SUBJECT=Иван, OBJECT=(хлеб) AND (молоко)))",
+        "excitation": 0.48787281141648675
+      },
+      "N_b243b83b9a8e489588890a5d1f43e4d1": {
+        "semantic": "открыла(SUBJECT=Лиза, OBJECT=книга)",
+        "excitation": 0.987753989073888
+      },
+      "N_bbc1ed30d5f649fba932ac34d3addcdb": {
+        "semantic": "бывать(SUBJECT=Яблоко, STATE=зелёными)",
+        "excitation": 0.3735011177130314
+      },
+      "N_c36c47cf0c944628a29ce0a2814107ac": {
+        "semantic": "выйти(SUBJECT=Петя)",
+        "excitation": 0.990191134910427
+      },
+      "N_c45d8a0d9901424c89a131b5d6ed0461": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3675342737474002
+      },
+      "N_c62d55c35d3841ed9e445981f50d3ddc": {
+        "semantic": "встал(SUBJECT=Петя)",
+        "excitation": 0.990191134910427
+      },
+      "N_c8f70b7a76bc4b1a809e04be0e73cc3e": {
+        "semantic": "взял(SUBJECT=Лиза, OBJECT=книга)",
+        "excitation": 0.987753989073888
+      },
+      "N_cf5dab81b6774a929d4b64d870af289c": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.670448181360028
+      },
+      "N_d155f1502e664739b53e965364c75ab8": {
+        "semantic": "написал(SUBJECT=Иван, OBJECT=письмо, RECIPIENT=Мария)",
+        "excitation": 0.9975387117187637
+      },
+      "N_d2a17dd449f44b5397fda1a2a9cf4254": {
+        "semantic": "уйти(SUBJECT=(Иван) AND (Мария))",
+        "excitation": 0.9950834813775309
+      },
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.5947597937923221
+      },
+      "N_d867f96aa3a34d4086b8c78bc45eda3c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_bfcbb1cc9c4841cf95b0a70b151bf41a[встал(SUBJECT=Петя); выйти(SUBJECT=Петя)])",
+        "excitation": 0.49266150069578774
+      },
+      "N_d9c2050cafa341d4aeca9af1d6d9e77f": {
+        "semantic": "бывать(SUBJECT=Яблоко, STATE=красными)",
+        "excitation": 0.3735011177130314
+      },
+      "N_db6153dc05bc4390ac2e8e0e4e639b10": {
+        "semantic": "отправил(SUBJECT=Иван, OBJECT=Иван, RECIPIENT=Мария)",
+        "excitation": 0.9975387117187637
+      },
+      "N_db79000de35946ad81f0fb14ba605aa5": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6776471802494967
+      },
+      "N_e0696bc5c5654042981d33601f2835fa": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_09f1d485578f4c68b02c4196dff45ab0[прийти(SUBJECT=Иван); уйти(SUBJECT=Мария)])",
+        "excitation": 0.4950955709075393
+      },
+      "N_e1689bb122194fd89aa74765d5412fd9": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.4819171897391355
+      },
+      "N_ec0c9d72e30341b4a11d811c2a2de525": {
+        "semantic": "отправил(SUBJECT=Мария, OBJECT=Иван, RECIPIENT=Пётр)",
+        "excitation": 0.9975387117187637
+      },
+      "N_f318d90e48de45e38aa3daf6694a8b14": {
+        "semantic": "увидела(SUBJECT=Анна, OBJECT=Мария)",
+        "excitation": 1.0
+      },
+      "N_f5c634ae212643ff88c1742cd6582c87": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_d61f06ee40ac44079d0aecdda6ba4dfd[написал(SUBJECT=Иван, OBJECT=письмо, RECIPIENT=Мария); отправил(SUBJECT=Иван, OBJECT=Иван, RECIPIENT=Мария)])",
+        "excitation": 0.4902411045796814
+      },
+      "N_f5f00bf4e845441882c6e28c14251c69": {
+        "semantic": "купил(SUBJECT=Иван, OBJECT=(хлеб) AND (молоко))",
+        "excitation": 0.9804794186834143
+      },
+      "N_fa0964d723104ff18e67053ac59f46a0": {
+        "semantic": "уйти(SUBJECT=Мария)",
+        "excitation": 0.9950834813775309
+      },
+      "N_fa1445511c8e41f780650e553ac0026f": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_fd9031ab6e814c128ea0574f1dc0d8f2[прийти(SUBJECT=(Иван) AND (Мария)); уйти(SUBJECT=(Иван) AND (Мария))])",
+        "excitation": 0.4938770111164661
+      },
+      "S_03698b75719e4a01aa055eea036204d2": {
+        "semantic": "взял",
+        "excitation": 0.9975387117187637
+      },
+      "S_0a3a560a311b4473808065c3aa0ed334": {
+        "semantic": "любит",
+        "excitation": 0.9637100251020925
+      },
+      "S_2474fa0e4fba4b73917beb9ced0fb61a": {
+        "semantic": "открыла",
+        "excitation": 0.9337527942825785
+      },
+      "S_2fce9935bfef4e2ca7cf66e53c8edb69": {
+        "semantic": "прийти",
+        "excitation": 0.990191134910427
+      },
+      "S_32d14475d7ee450c8ef0d9b29e115484": {
+        "semantic": "уйти",
+        "excitation": 0.990191134910427
+      },
+      "S_46d5e122600740c8aacdb87ba32d7fa5": {
+        "semantic": "Что",
+        "excitation": 0.9637100251020925
+      },
+      "S_4d1948dc41ef43cf9d254a38a50027c8": {
+        "semantic": "спит",
+        "excitation": 0.9684715334315399
+      },
+      "S_56ebc35c4afc4f9ca7247cbcedd64d72": {
+        "semantic": "подарил",
+        "excitation": 0.95
+      },
+      "S_59d298df871b447fbab3555d2c6c8033": {
+        "semantic": "выйти",
+        "excitation": 0.9360566996680442
+      },
+      "S_74508847c53c46d9b1b6c8ea28758b64": {
+        "semantic": "встал",
+        "excitation": 0.9360566996680442
+      },
+      "S_7bf4b26777bd4e9ab8d544d47c88bbff": {
+        "semantic": "написал",
+        "excitation": 0.9926342940659647
+      },
+      "S_7fd9dfc6c16f471ca6e4ae17b2e66c91": {
+        "semantic": "читает",
+        "excitation": 0.9732565674699463
+      },
+      "S_8a5ac409c3d243a7aff485f1f583ce89": {
+        "semantic": "отправил",
+        "excitation": 0.9926342940659647
+      },
+      "S_8ca20bc8d2ce45cfa5f82bb198a3100d": {
+        "semantic": "улыбнулась",
+        "excitation": 0.9453293073086544
+      },
+      "S_972eac0bacb34399a140dcb8026bb356": {
+        "semantic": "положил",
+        "excitation": 0.9476617761328255
+      },
+      "S_bbcdf184ff50433d91e6c41d4bab8c75": {
+        "semantic": "Кошка",
+        "excitation": 0.8639285970835312
+      },
+      "S_bc28488b1ca74efabeb96bfbafe6d073": {
+        "semantic": "увидела",
+        "excitation": 0.9453293073086544
+      },
+      "S_bdbf47662ecb4ce1b0befb2aea791d72": {
+        "semantic": "прочитала",
+        "excitation": 0.9337527942825785
+      },
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482": {
+        "semantic": "Иван",
+        "excitation": 1.0
+      },
+      "S_dd067555487f4fe4b126940a9c0c9183": {
+        "semantic": "купил",
+        "excitation": 0.9268750457848093
+      },
+      "S_f5e1b9c5ff7a48c58d4308726ba7988c": {
+        "semantic": "бывать",
+        "excitation": 0.9291619812807057
+      },
+      "T_108e6823ed274a6591ca24ef16b1ed89": {
+        "semantic": "спит",
+        "excitation": 0.9708611024857963
+      },
+      "T_1d42488e4536454999a4ed3b83e836b8": {
+        "semantic": "любит",
+        "excitation": 0.9660878457955939
+      },
+      "T_2363085264e2458faf6172e7e212fd47": {
+        "semantic": "улыбнулась",
+        "excitation": 0.9476617761328255
+      },
+      "T_2f3e121fdbd4470eafae390cd2fd576d": {
+        "semantic": "встал",
+        "excitation": 0.9383662896201935
+      },
+      "T_3684051e90454c4cb40cf98703937cf2": {
+        "semantic": "выйти",
+        "excitation": 0.9383662896201935
+      },
+      "T_48cedcecdf9b47e292492c25e0d80541": {
+        "semantic": "прийти",
+        "excitation": 0.9926342940659647
+      },
+      "T_5b605b60fa8c4bfaae6b3b2deb9558b5": {
+        "semantic": "увидела",
+        "excitation": 0.9476617761328255
+      },
+      "T_5d33296a6aa74e85b3875087dec07bdd": {
+        "semantic": "отправил",
+        "excitation": 0.9950834813775309
+      },
+      "T_742e31db64da44abb67e92f7dc78966f": {
+        "semantic": "уйти",
+        "excitation": 0.9926342940659647
+      },
+      "T_76de36dea013461884be7ee5861871af": {
+        "semantic": "положил",
+        "excitation": 0.95
+      },
+      "T_93f3f0886e0b4a659167da7b4080dfe1": {
+        "semantic": "написал",
+        "excitation": 0.9950834813775309
+      },
+      "T_b21c36b493a548a19f20d581d1d36a3e": {
+        "semantic": "открыла",
+        "excitation": 0.9360566996680442
+      },
+      "T_c7cd48bc7b0045bb82d309056683c0de": {
+        "semantic": "взял",
+        "excitation": 1.0
+      },
+      "T_d915b79be8e145e0bd6e1dbd47ae06c7": {
+        "semantic": "прочитала",
+        "excitation": 0.9360566996680442
+      },
+      "T_dc48776d7852471c9b2d3f90a29e1bfb": {
+        "semantic": "бывать",
+        "excitation": 0.9314545594724393
+      },
+      "T_e7dfe8e6e37d4e14b2747bf5b06855fa": {
+        "semantic": "читает",
+        "excitation": 0.9756579429313783
+      },
+      "T_fe2690bfb952457d9d8b5a5099bca99f": {
+        "semantic": "купил",
+        "excitation": 0.9291619812807057
+      }
+    },
+    "pending_incoming": {
+      "N_c8f70b7a76bc4b1a809e04be0e73cc3e": 0.39999999999999997,
+      "N_1c3b22ee094842faae6c627db0e3b4fe": 0.39999999999999997,
+      "N_7f1d3d1c8a6c4acc9a8a3ede86dced19": 0.38,
+      "T_862e713474744a2689d1c56dae6bcbc6": 0.95,
+      "M_5d3b6457f0d249c0a6346203a1c5efb5": 0.15200000000000005,
+      "M_f87a17b453394add85fb3ddb9fb3b8aa": 0.15200000000000005,
+      "K_c6ffe98fdafa44f3a05de0ce119150d5": 0.15200000000000005,
+      "M_78ee0e3061444041bf5b0f758f7c226b": 0.052000000000000005,
+      "M_59292620118e478a831c04e1b2f74b44": 0.052000000000000005,
+      "M_62356d38f31b4e11998ff39a775d8b61": 0.26,
+      "M_8886594cd3924845b8b316fbd64fa63d": 0.26,
+      "M_5b420d5c902a4051a351540d4c04c251": 0.15,
+      "N_8e7c651be505444298872ed8e01cecff": 0.15
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_5b420d5c902a4051a351540d4c04c251",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "last_experience_ref": {
+      "uid": "N_07e5b45ae905481a8d841349c1196ea9",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "подарить",
+      "actual": "подарить"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "Иван"
+      },
+      "actual": "Иван"
+    },
+    {
+      "name": "perception.assertions.a1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "книга"
+      },
+      "actual": "книга"
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.domains.a1",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "подарить",
+      "actual": [
+        "подарил",
+        "подарить"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "canonical.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "Иван"
+      },
+      "actual": "Иван"
+    },
+    {
+      "name": "canonical.assertions.a1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "книга"
+      },
+      "actual": "книга"
+    },
+    {
+      "name": "templates.подарить.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "OBJECT",
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "template_evolution_queries",
+  "semantic_tags": [
+    "regression40"
+  ]
+}

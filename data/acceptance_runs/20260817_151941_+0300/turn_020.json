@@ -1,0 +1,3551 @@
+{
+  "index": 20,
+  "input": "Кто любит чай?",
+  "status": "OK",
+  "linguistic_candidate_graph": {
+    "text": "Кто любит чай?",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Кто",
+        "start": 0,
+        "end": 3,
+        "analyses": [
+          {
+            "normal_form": "кто",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "nomn",
+              "NPRO",
+              "sing",
+              "masc"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "любит",
+        "start": 4,
+        "end": 9,
+        "analyses": [
+          {
+            "normal_form": "любить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": null,
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "3per",
+              "tran",
+              "pres",
+              "VERB",
+              "indc",
+              "sing",
+              "impf"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "чай",
+        "start": 10,
+        "end": 13,
+        "analyses": [
+          {
+            "normal_form": "чай",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "nomn",
+              "inan",
+              "sing",
+              "masc"
+            ],
+            "score": 0.571428
+          },
+          {
+            "normal_form": "чай",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "NOUN",
+              "accs",
+              "inan",
+              "sing",
+              "masc"
+            ],
+            "score": 0.285714
+          },
+          {
+            "normal_form": "чаять",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": null,
+            "mood": "impr",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "impf",
+              "tran",
+              "VERB",
+              "sing",
+              "impr",
+              "excl"
+            ],
+            "score": 0.142857
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "?",
+        "start": 13,
+        "end": 14,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 3,
+          "text": "Кто любит чай",
+          "evidence": {
+            "text": "Кто любит чай",
+            "start": 0,
+            "end": 13
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "любить"
+            ]
+          }
+        ],
+        "marker": "кто",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "любить"
+        ]
+      }
+    ],
+    "coordinations": []
+  },
+  "perception_result": {
+    "source_text": "Кто любит чай?",
+    "assertions": [],
+    "queries": [
+      {
+        "predicate": {
+          "surface": "любит",
+          "normalized_hint": "любить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "любит",
+            "start": 4,
+            "end": 9
+          },
+          "template_candidate": null
+        },
+        "actants": [
+          {
+            "role": "OBJECT",
+            "mention": "чай",
+            "normalized_hint": "чай",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "чай",
+              "start": 10,
+              "end": 13
+            },
+            "parser_confidence": null,
+            "composition": null
+          }
+        ],
+        "requested_role": "SUBJECT",
+        "query_mode": "FILL_ROLE"
+      }
+    ],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "integration_commit": {
+    "assertions": [],
+    "experience_ref": {
+      "uid": "N_dbcf7694a4a94fc4b158de4d4201d379",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "N_dbcf7694a4a94fc4b158de4d4201d379",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [
+      {
+        "predicate": {
+          "surface": "любит",
+          "normalized_hint": "любить",
+          "sense_hint": null,
+          "evidence": {
+            "text": "любит",
+            "start": 4,
+            "end": 9
+          },
+          "template_candidate": null
+        },
+        "actants": [
+          {
+            "role": "OBJECT",
+            "mention": "чай",
+            "normalized_hint": "чай",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "чай",
+              "start": 10,
+              "end": 13
+            },
+            "parser_confidence": null,
+            "composition": null
+          }
+        ],
+        "requested_role": "SUBJECT",
+        "query_mode": "FILL_ROLE"
+      }
+    ],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [
+    {
+      "outcome": {
+        "status": "PROVED",
+        "stop_reason": "GOAL_SATISFIED",
+        "conclusion": {
+          "role": "SUBJECT",
+          "value": {
+            "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+            "kind": "M"
+          },
+          "fact": {
+            "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+            "kind": "N"
+          }
+        },
+        "premise_refs": [
+          {
+            "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+            "kind": "N"
+          }
+        ],
+        "uid_trace": [
+          {
+            "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+            "kind": "N"
+          },
+          {
+            "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+            "kind": "M"
+          }
+        ],
+        "conclusion_domain": "C",
+        "expanded_states": 1,
+        "diagnostics": []
+      },
+      "materialization": {
+        "ref": {
+          "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+          "kind": "M"
+        },
+        "domain": "C",
+        "created": false
+      },
+      "diagnostics": []
+    }
+  ],
+  "agent_context": {
+    "current_input": "Кто любит чай?",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "G_69b2dde6bdc34a15b163949b3c1b8939",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_b3045fc72fa44ac39f6201ef3fbb6897",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[G_b3045fc72fa44ac39f6201ef3fbb6897] ([M_038e0fc0c64e4c6385195b3d3928ef20] хлеб) AND ([M_d51aed4e435d4c8b811a01b6a4e03771] молоко)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_e80bc6077c574b16937b00f9c4771ea5",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[G_e80bc6077c574b16937b00f9c4771ea5] ([N_d5d55b3921024b23ae1535ee823991af] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_59ee2f0f1b5640cd97eb07f4e88b0705] зелёными)) OR ([N_a09b579c194748caa71bfffc6f820ede] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_43f8ab99c03e4dd5be50476abb90810f] красными))",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_148e7f7aabf542d6bc3094f989d36c4c",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_148e7f7aabf542d6bc3094f989d36c4c] K_148e7f7aabf542d6bc3094f989d36c4c = group[[N_321d32278f06442c9ad158379a3612e5] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_896290ca03464c7281961af76d8f4883] [S_a735143d0429400f9d48b8a22a03a411] открыла(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_af6ba905b5194712aeecc2371bd9e4ed] [S_d4469a3dddeb4ea7921614a2b578db39] прочитала(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_82b9ba8ca6bc47e58100aaa92480d8c3",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_82b9ba8ca6bc47e58100aaa92480d8c3] K_82b9ba8ca6bc47e58100aaa92480d8c3 = group[[N_cb9e55545ac74c69964b532d0aff88f4] [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя); [N_a7c8abe08c844700b434d0c9c13fb13e] [S_da1ef130f8b6421bb3134a8841fac235] выйти(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_83b5f4564b1e49f4898fab0ec1f6e9d7",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7 = group[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_a9cf985623ab40b5b64da68e370a8b5a",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_a9cf985623ab40b5b64da68e370a8b5a] K_a9cf985623ab40b5b64da68e370a8b5a = group[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_cfad48ff0aeb41958660e8c53f21ad40] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_a270391e2e0d4014a955b4572944c542] Пётр)]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_bcd618e1c13e4600bc50e82a4db2579a",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_bcd618e1c13e4600bc50e82a4db2579a] K_bcd618e1c13e4600bc50e82a4db2579a = group[[N_b4f04d23df8e472f8af86684b77818f9] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)); [N_4fac093d99da47d2ae8cac388b3ed562] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_d230be7b2afb4083afe8ed43afe46818",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_d230be7b2afb4083afe8ed43afe46818] K_d230be7b2afb4083afe8ed43afe46818 = group[[N_8c6bd4bafc874a948996a5965c22f0f3] [S_7615be76c48444d79344978692f06472] положил(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ, LOCATION=[M_44b55c08669f4135a9464153cb8f6e73] стол); [N_09c73c3bf6054f4181c4670c4fe0ea97] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ)]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_d7ab606e681b4675a34ce0c9c8cc59d1",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_d7ab606e681b4675a34ce0c9c8cc59d1] K_d7ab606e681b4675a34ce0c9c8cc59d1 = group[[N_fabd4c456fc94fefa0efcffafa61e07c] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван); [N_3d7135ebe4f44956826b9c4b1e31034a] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_d8f4cd51b0364b809dcf5b91c655a73a",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_d8f4cd51b0364b809dcf5b91c655a73a] K_d8f4cd51b0364b809dcf5b91c655a73a = group[[N_07f7e0e95e2440c19497fa0e6d166613] [S_46c65e5640af49628a5f609ca504680e] увидела(SUBJECT=[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна, OBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария); [N_dafa5a0643d440a5a7d515741cda83e6] [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась(SUBJECT=[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария])]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "K_e49271f8bd064e0bb616058737a65fb4",
+          "kind": "K"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[K_e49271f8bd064e0bb616058737a65fb4] K_e49271f8bd064e0bb616058737a65fb4 = group[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_b93666bc42a94b4b8b70050e9664294c] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "M_39f931ae57fd40e6bd7b1fdc97abe8ba",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Анна",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_3e0f67de5f5c4d5f876a61ad7e0104be",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Мария",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_44b55c08669f4135a9464153cb8f6e73",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_44b55c08669f4135a9464153cb8f6e73] стол",
+        "properties": [
+          {
+            "name": "name",
+            "value": "стол",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_47579c166a02418dbfc0d19133bbdf7d",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_47579c166a02418dbfc0d19133bbdf7d] книга",
+        "properties": [
+          {
+            "name": "name",
+            "value": "книга",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_5b420d5c902a4051a351540d4c04c251",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_5b420d5c902a4051a351540d4c04c251] Пользователь",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Пользователь",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_5bbd5025082a4ef8b5e951a0b3a0bb3b",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Петя",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_6157310730de47448728ec4aa7f1ced7",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_6157310730de47448728ec4aa7f1ced7] ключ",
+        "properties": [
+          {
+            "name": "name",
+            "value": "ключ",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_62356d38f31b4e11998ff39a775d8b61] Иван",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Иван",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_824abfd243c94228b4e58a4d7b67d524",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_824abfd243c94228b4e58a4d7b67d524] Сергей",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Сергей",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_863ed2b48eec4378b8ae3cbabf21e82c",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Лиза",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент",
+        "properties": [
+          {
+            "name": "name",
+            "value": "АГент",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_a270391e2e0d4014a955b4572944c542",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_a270391e2e0d4014a955b4572944c542] Пётр",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Пётр",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_a4a27a9e5230469ab269034b14a1e4d5] чай",
+        "properties": [
+          {
+            "name": "name",
+            "value": "чай",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_f56681f8d1944c4f9d71e605cdf400b8",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_f56681f8d1944c4f9d71e605cdf400b8] письмо",
+        "properties": [
+          {
+            "name": "name",
+            "value": "письмо",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+          "kind": "M"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[M_fc69b4786a6b4fce93342f330f8d03af] Кошка",
+        "properties": [
+          {
+            "name": "name",
+            "value": "Кошка",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_0529adbcfaeb4f08bdc036764f18ed08",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_0529adbcfaeb4f08bdc036764f18ed08] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кому Иван подарил книгу?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кому Иван подарил книгу?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_056aaf0c97c1420a999ce4fedba28bed",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_056aaf0c97c1420a999ce4fedba28bed] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_d230be7b2afb4083afe8ed43afe46818] K_d230be7b2afb4083afe8ed43afe46818[[N_8c6bd4bafc874a948996a5965c22f0f3] [S_7615be76c48444d79344978692f06472] положил(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ, LOCATION=[M_44b55c08669f4135a9464153cb8f6e73] стол); [N_09c73c3bf6054f4181c4670c4fe0ea97] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ)]) {text='Сергей положил ключ на стол. Потом он взял его.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Сергей положил ключ на стол. Потом он взял его.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_07f7e0e95e2440c19497fa0e6d166613",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_07f7e0e95e2440c19497fa0e6d166613] [S_46c65e5640af49628a5f609ca504680e] увидела(SUBJECT=[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна, OBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_09c73c3bf6054f4181c4670c4fe0ea97",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_09c73c3bf6054f4181c4670c4fe0ea97] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_13c9ce95488f43f9bb27a039afe02130",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_13c9ce95488f43f9bb27a039afe02130] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто подарил Марии книгу?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кто подарил Марии книгу?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_166d80888d044995b32991772e3d4ac0] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)) {text='Иван любит чай.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван любит чай.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_16acd6e90eb54438beb2cc4488a8f89d] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Что делает кошка?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Что делает кошка?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_1b292003b75b48a886b0a0ecdff89b93] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Хорошо, Иван любит чай.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Хорошо, Иван любит чай.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_222258eee8e04f26bf5735d408209c9d] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_223178171fa14845b58b8e5039915c06",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_223178171fa14845b58b8e5039915c06] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_ac3cc9e7940945f0893eb7bb43417242] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)) {text='Иван подарил Марии книгу.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван подарил Марии книгу.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_31951efd6605446984133aa9ef8939cf",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_31951efd6605446984133aa9ef8939cf] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_148e7f7aabf542d6bc3094f989d36c4c] K_148e7f7aabf542d6bc3094f989d36c4c[[N_321d32278f06442c9ad158379a3612e5] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_896290ca03464c7281961af76d8f4883] [S_a735143d0429400f9d48b8a22a03a411] открыла(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_af6ba905b5194712aeecc2371bd9e4ed] [S_d4469a3dddeb4ea7921614a2b578db39] прочитала(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)]) {text='Лиза взяла книгу, открыла её и прочитала.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Лиза взяла книгу, открыла её и прочитала.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_321d32278f06442c9ad158379a3612e5",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_321d32278f06442c9ad158379a3612e5] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_3d7135ebe4f44956826b9c4b1e31034a",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_3d7135ebe4f44956826b9c4b1e31034a] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_409e92c58d054cbb91c92f04e1085969",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_409e92c58d054cbb91c92f04e1085969] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_bcd618e1c13e4600bc50e82a4db2579a] K_bcd618e1c13e4600bc50e82a4db2579a[[N_b4f04d23df8e472f8af86684b77818f9] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)); [N_4fac093d99da47d2ae8cac388b3ed562] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))]) {text='Иван и Мария пришли и ушли.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван и Мария пришли и ушли.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_4137998594fa47a595217c86ae0cb6a2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_4137998594fa47a595217c86ae0cb6a2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)) {text='Иван любит чай.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван любит чай.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_4efa267fd582409c8880c4121664f752",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_4efa267fd582409c8880c4121664f752] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_d8f4cd51b0364b809dcf5b91c655a73a] K_d8f4cd51b0364b809dcf5b91c655a73a[[N_07f7e0e95e2440c19497fa0e6d166613] [S_46c65e5640af49628a5f609ca504680e] увидела(SUBJECT=[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна, OBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария); [N_dafa5a0643d440a5a7d515741cda83e6] [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась(SUBJECT=[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария])]) {text='Анна увидела Марию. Она улыбнулась.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Анна увидела Марию. Она улыбнулась.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_4fac093d99da47d2ae8cac388b3ed562",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_4fac093d99da47d2ae8cac388b3ed562] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_5762396d099c4b3795b9b8c61f98f50c] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто любит чай?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кто любит чай?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_675ac44b29174695a5d64ed44e879c85",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_675ac44b29174695a5d64ed44e879c85] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_6c1892a47d9449c2a50c49975b205ff2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_6c1892a47d9449c2a50c49975b205ff2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_a9cf985623ab40b5b64da68e370a8b5a] K_a9cf985623ab40b5b64da68e370a8b5a[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_cfad48ff0aeb41958660e8c53f21ad40] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_a270391e2e0d4014a955b4572944c542] Пётр)]) {text='Иван написал письмо, а Мария отправила его Петру.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван написал письмо, а Мария отправила его Петру.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_74e84ade543947b69e2568755e151ca2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_74e84ade543947b69e2568755e151ca2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Что Иван подарил Марии?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Что Иван подарил Марии?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_7994c217d7794c17a7fa481ccd6de766",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_7994c217d7794c17a7fa481ccd6de766] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)) {text='Кошка спит.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кошка спит.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_7fa561d020084a3ab57ca03066fe716e",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_7fa561d020084a3ab57ca03066fe716e] [S_390bf1827cd24d77931ed539bc036cbf] купил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[G_b3045fc72fa44ac39f6201ef3fbb6897] ([M_038e0fc0c64e4c6385195b3d3928ef20] хлеб) AND ([M_d51aed4e435d4c8b811a01b6a4e03771] молоко))",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_896290ca03464c7281961af76d8f4883",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_896290ca03464c7281961af76d8f4883] [S_a735143d0429400f9d48b8a22a03a411] открыла(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_8c6bd4bafc874a948996a5965c22f0f3",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_8c6bd4bafc874a948996a5965c22f0f3] [S_7615be76c48444d79344978692f06472] положил(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ, LOCATION=[M_44b55c08669f4135a9464153cb8f6e73] стол)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_9b2b9235ac3b4751a20cb7858956df7a",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_9b2b9235ac3b4751a20cb7858956df7a] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_e49271f8bd064e0bb616058737a65fb4] K_e49271f8bd064e0bb616058737a65fb4[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_b93666bc42a94b4b8b70050e9664294c] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]) {text='Иван написал письмо и отправил его Марии.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван написал письмо и отправил его Марии.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_a020d2bd4aa645a6a56bb4480a18edfd",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_a020d2bd4aa645a6a56bb4480a18edfd] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[G_e80bc6077c574b16937b00f9c4771ea5] ([N_d5d55b3921024b23ae1535ee823991af] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_59ee2f0f1b5640cd97eb07f4e88b0705] зелёными)) OR ([N_a09b579c194748caa71bfffc6f820ede] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_43f8ab99c03e4dd5be50476abb90810f] красными))) {text='Яблоки бывают зелёными или красными.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Яблоки бывают зелёными или красными.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_a7c8abe08c844700b434d0c9c13fb13e",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_a7c8abe08c844700b434d0c9c13fb13e] [S_da1ef130f8b6421bb3134a8841fac235] выйти(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_ac3cc9e7940945f0893eb7bb43417242",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_ac3cc9e7940945f0893eb7bb43417242] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_af6ba905b5194712aeecc2371bd9e4ed",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_af6ba905b5194712aeecc2371bd9e4ed] [S_d4469a3dddeb4ea7921614a2b578db39] прочитала(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_b1867019c3a8439a87674a6a1c1ab348",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_b1867019c3a8439a87674a6a1c1ab348] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_d7ab606e681b4675a34ce0c9c8cc59d1] K_d7ab606e681b4675a34ce0c9c8cc59d1[[N_fabd4c456fc94fefa0efcffafa61e07c] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван); [N_3d7135ebe4f44956826b9c4b1e31034a] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]) {text='Иван пришёл, а Мария ушла.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван пришёл, а Мария ушла.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_b4f04d23df8e472f8af86684b77818f9",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_b4f04d23df8e472f8af86684b77818f9] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_b93666bc42a94b4b8b70050e9664294c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_b93666bc42a94b4b8b70050e9664294c] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_be8f1c4179ac4b33b5bce393270da24d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_be8f1c4179ac4b33b5bce393270da24d] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_c00018588c79416fb110547f5f33b218",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_c00018588c79416fb110547f5f33b218] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_82b9ba8ca6bc47e58100aaa92480d8c3] K_82b9ba8ca6bc47e58100aaa92480d8c3[[N_cb9e55545ac74c69964b532d0aff88f4] [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя); [N_a7c8abe08c844700b434d0c9c13fb13e] [S_da1ef130f8b6421bb3134a8841fac235] выйти(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)]) {text='Петя встал и вышел.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Петя встал и вышел.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_c6bca5b1f8e04710a0072ee196942f9f",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_c6bca5b1f8e04710a0072ee196942f9f] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_be8f1c4179ac4b33b5bce393270da24d] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)) {text='Иван подарил книгу.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван подарил книгу.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_c72fa10cc6644873b0f61e330ccb705b",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_c72fa10cc6644873b0f61e330ccb705b] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_cb9e55545ac74c69964b532d0aff88f4",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_cb9e55545ac74c69964b532d0aff88f4] [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_cf5dab81b6774a929d4b64d870af289c] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Все, кто ценит хороший напиток! А вы любите чай? 😊'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Все, кто ценит хороший напиток! А вы любите чай? 😊",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_cfad48ff0aeb41958660e8c53f21ad40",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_cfad48ff0aeb41958660e8c53f21ad40] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_a270391e2e0d4014a955b4572944c542] Пётр)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d4dc7e3b7787480199368d9c5332ca49",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_d6fa4f8c6d0f4222aede7b4143bb17d8] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\\n\\nОбычно кошки:\\n\\n*   **Спят или дремлют** (это их основное занятие).\\n*   **Играют** с игрушками или другими животными.\\n*   **Охотятся** (даже если это просто игра с мышкой).\\n*   **'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_dafa5a0643d440a5a7d515741cda83e6",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_dafa5a0643d440a5a7d515741cda83e6] [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась(SUBJECT=[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария])",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_db79000de35946ad81f0fb14ba605aa5] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто любит чай?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кто любит чай?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_dbcf7694a4a94fc4b158de4d4201d379",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_dbcf7694a4a94fc4b158de4d4201d379] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто любит чай?'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Кто любит чай?",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_ddb559d12ad84abfbfaa1521e22b86a2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_ddb559d12ad84abfbfaa1521e22b86a2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_7fa561d020084a3ab57ca03066fe716e] [S_390bf1827cd24d77931ed539bc036cbf] купил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[G_b3045fc72fa44ac39f6201ef3fbb6897] ([M_038e0fc0c64e4c6385195b3d3928ef20] хлеб) AND ([M_d51aed4e435d4c8b811a01b6a4e03771] молоко))) {text='Иван купил хлеб и молоко.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван купил хлеб и молоко.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_e9e3b8924e47436796973813d25fcec8",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_e9e3b8924e47436796973813d25fcec8] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_675ac44b29174695a5d64ed44e879c85] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)) {text='Иван читает книгу.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Иван читает книгу.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "N_fabd4c456fc94fefa0efcffafa61e07c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_fabd4c456fc94fefa0efcffafa61e07c] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван)",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_fd588afed46d474783f1cffd16cea389",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[N_fd588afed46d474783f1cffd16cea389] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_c72fa10cc6644873b0f61e330ccb705b] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)) {text='Мария читает.'}",
+        "properties": [
+          {
+            "name": "text",
+            "value": "Мария читает.",
+            "type_name": "str",
+            "unit": null
+          }
+        ]
+      },
+      {
+        "root": {
+          "uid": "S_0173b32cd07e4b41beba30814500c1c9",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_0173b32cd07e4b41beba30814500c1c9] взял",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_066a7a4b3bf44d328ba13f3f8e585a99",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_066a7a4b3bf44d328ba13f3f8e585a99] стол",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_0a3a560a311b4473808065c3aa0ed334] любит",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_0c6f64612de445f782b2ff10b4f13fef",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_0c6f64612de445f782b2ff10b4f13fef] написал",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_0d4cca7d1cae41a4b8f767e99da4c7a7",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_1a683e5eb137477d9b336cfbd8641f05",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_1a683e5eb137477d9b336cfbd8641f05] Анна",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_1d0fd1ed7b2f4104bf4baac403a2ae0e",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_1d2c96849727415bae30c6f41a4804f1",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_1d2c96849727415bae30c6f41a4804f1] или",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_26ad5b962bc94401a72ad2ca1d712dcf",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_26ad5b962bc94401a72ad2ca1d712dcf] Сергей",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_3613c2e3388149fead3b711dec79c9d5",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_3613c2e3388149fead3b711dec79c9d5] Кто",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_37ee54d2da624882b45dee16017faf5c",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_37ee54d2da624882b45dee16017faf5c] её",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_390bf1827cd24d77931ed539bc036cbf",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_390bf1827cd24d77931ed539bc036cbf] купил",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_3a6d8ac4085347d08a9036a5f13a1729",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_3a6d8ac4085347d08a9036a5f13a1729] Потом",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_46c65e5640af49628a5f609ca504680e",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_46c65e5640af49628a5f609ca504680e] увидела",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_46d5e122600740c8aacdb87ba32d7fa5] Что",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_4d1948dc41ef43cf9d254a38a50027c8] спит",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_4f75f91f30a04501b419991c22085437",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_4f75f91f30a04501b419991c22085437] Яблоки",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_4fc60bbfd6d04f339113b763180a989f",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_4fc60bbfd6d04f339113b763180a989f] отправил",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_55a6e2f23b384cdcb82864f76d0a7536",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_55a6e2f23b384cdcb82864f76d0a7536] и",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_58f18e00fca342539935482125cf5cf2",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_58f18e00fca342539935482125cf5cf2] книга",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_5b38602c862949fb90a7a592ed23b54d",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_5b38602c862949fb90a7a592ed23b54d] Она",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_6d77cb43b6d8464499e758c855414d4b",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_6d77cb43b6d8464499e758c855414d4b] Петя",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_6d957a454cda4218b43a6989fd04adb9",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_6d957a454cda4218b43a6989fd04adb9] молоко",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_74971e57b79744f39eb61c80fc2d2e70",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_74971e57b79744f39eb61c80fc2d2e70] Марии",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_7615be76c48444d79344978692f06472",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_7615be76c48444d79344978692f06472] положил",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_7b9139cac7d0483f9fbb09f4d899a7cd",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_7b9139cac7d0483f9fbb09f4d899a7cd] Пётр",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_8692d43b66214caba0ac4b765a745716",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_8692d43b66214caba0ac4b765a745716] ключ",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_8a113f049b8342c0967e59b5c628bd86",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_8a113f049b8342c0967e59b5c628bd86] уйти",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_8c51b6b316c7488787fef1c9c174e361",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_8c51b6b316c7488787fef1c9c174e361] он",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_9d851be9e96d495db9f58b3c4ce4fc9b",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_9d851be9e96d495db9f58b3c4ce4fc9b] читает",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_a1b909c31ef04f2289fed4bdad3badef",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_a1b909c31ef04f2289fed4bdad3badef] прийти",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_a32475c466d54147bf4ae624a3eddd55",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_a32475c466d54147bf4ae624a3eddd55] красный",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_a735143d0429400f9d48b8a22a03a411",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_a735143d0429400f9d48b8a22a03a411] открыла",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_b695646fd379418583b65f29ebecc813",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_b695646fd379418583b65f29ebecc813] Лиза",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_ba2ebb580a23426e9694124a226cd2a0",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_ba2ebb580a23426e9694124a226cd2a0] письмо",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_bbcdf184ff50433d91e6c41d4bab8c75",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_bbcdf184ff50433d91e6c41d4bab8c75] Кошка",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_c5a3cd90fe2e4d40a3dd7c1aa2e05482] Иван",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_cf8df43fc1aa47948a1e02bf7ed6e2b3",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_cf8df43fc1aa47948a1e02bf7ed6e2b3] хлеб",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_d0e36586b16c4283a1e31f4b04d892f9",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_d4469a3dddeb4ea7921614a2b578db39",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_d4469a3dddeb4ea7921614a2b578db39] прочитала",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_d6106e497f4e4340a97a5746096934fd",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_d6106e497f4e4340a97a5746096934fd] бывать",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_da1ef130f8b6421bb3134a8841fac235",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_da1ef130f8b6421bb3134a8841fac235] выйти",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_e4ae41185d744e4bba2c1e2d482263d7",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_e4ae41185d744e4bba2c1e2d482263d7] зелёный",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_e4e3f811631d419896d1e50ffe89431e",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_e4e3f811631d419896d1e50ffe89431e] чай",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_ea82c7ffb028443c9056e9de6a6c0c06",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_ea82c7ffb028443c9056e9de6a6c0c06] а",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "S_f0871d7633cf4e9cae10d47e5ff8b386",
+          "kind": "S"
+        },
+        "mode": "ACTIVE",
+        "semantic": "[S_f0871d7633cf4e9cae10d47e5ff8b386] на",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [
+      {
+        "root": {
+          "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+          "kind": "M"
+        },
+        "mode": "INFERENCE",
+        "semantic": "SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван; supported_by=[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)",
+        "properties": []
+      }
+    ],
+    "rendered": "# CURRENT INPUT\nКто любит чай?\n\n# ACTIVE MEMORY\n- [G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)\n- [G_b3045fc72fa44ac39f6201ef3fbb6897] ([M_038e0fc0c64e4c6385195b3d3928ef20] хлеб) AND ([M_d51aed4e435d4c8b811a01b6a4e03771] молоко)\n- [G_e80bc6077c574b16937b00f9c4771ea5] ([N_d5d55b3921024b23ae1535ee823991af] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_59ee2f0f1b5640cd97eb07f4e88b0705] зелёными)) OR ([N_a09b579c194748caa71bfffc6f820ede] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_43f8ab99c03e4dd5be50476abb90810f] красными))\n- [K_148e7f7aabf542d6bc3094f989d36c4c] K_148e7f7aabf542d6bc3094f989d36c4c = group[[N_321d32278f06442c9ad158379a3612e5] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_896290ca03464c7281961af76d8f4883] [S_a735143d0429400f9d48b8a22a03a411] открыла(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_af6ba905b5194712aeecc2371bd9e4ed] [S_d4469a3dddeb4ea7921614a2b578db39] прочитала(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)]\n- [K_82b9ba8ca6bc47e58100aaa92480d8c3] K_82b9ba8ca6bc47e58100aaa92480d8c3 = group[[N_cb9e55545ac74c69964b532d0aff88f4] [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя); [N_a7c8abe08c844700b434d0c9c13fb13e] [S_da1ef130f8b6421bb3134a8841fac235] выйти(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)]\n- [K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7 = group[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария]\n- [K_a9cf985623ab40b5b64da68e370a8b5a] K_a9cf985623ab40b5b64da68e370a8b5a = group[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_cfad48ff0aeb41958660e8c53f21ad40] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_a270391e2e0d4014a955b4572944c542] Пётр)]\n- [K_bcd618e1c13e4600bc50e82a4db2579a] K_bcd618e1c13e4600bc50e82a4db2579a = group[[N_b4f04d23df8e472f8af86684b77818f9] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)); [N_4fac093d99da47d2ae8cac388b3ed562] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))]\n- [K_d230be7b2afb4083afe8ed43afe46818] K_d230be7b2afb4083afe8ed43afe46818 = group[[N_8c6bd4bafc874a948996a5965c22f0f3] [S_7615be76c48444d79344978692f06472] положил(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ, LOCATION=[M_44b55c08669f4135a9464153cb8f6e73] стол); [N_09c73c3bf6054f4181c4670c4fe0ea97] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ)]\n- [K_d7ab606e681b4675a34ce0c9c8cc59d1] K_d7ab606e681b4675a34ce0c9c8cc59d1 = group[[N_fabd4c456fc94fefa0efcffafa61e07c] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван); [N_3d7135ebe4f44956826b9c4b1e31034a] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]\n- [K_d8f4cd51b0364b809dcf5b91c655a73a] K_d8f4cd51b0364b809dcf5b91c655a73a = group[[N_07f7e0e95e2440c19497fa0e6d166613] [S_46c65e5640af49628a5f609ca504680e] увидела(SUBJECT=[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна, OBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария); [N_dafa5a0643d440a5a7d515741cda83e6] [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась(SUBJECT=[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария])]\n- [K_e49271f8bd064e0bb616058737a65fb4] K_e49271f8bd064e0bb616058737a65fb4 = group[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_b93666bc42a94b4b8b70050e9664294c] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]\n- [M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна\n- [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария\n- [M_44b55c08669f4135a9464153cb8f6e73] стол\n- [M_47579c166a02418dbfc0d19133bbdf7d] книга\n- [M_5b420d5c902a4051a351540d4c04c251] Пользователь\n- [M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя\n- [M_6157310730de47448728ec4aa7f1ced7] ключ\n- [M_62356d38f31b4e11998ff39a775d8b61] Иван\n- [M_824abfd243c94228b4e58a4d7b67d524] Сергей\n- [M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза\n- [M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент\n- [M_a270391e2e0d4014a955b4572944c542] Пётр\n- [M_a4a27a9e5230469ab269034b14a1e4d5] чай\n- [M_f56681f8d1944c4f9d71e605cdf400b8] письмо\n- [M_fc69b4786a6b4fce93342f330f8d03af] Кошка\n- [N_0529adbcfaeb4f08bdc036764f18ed08] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кому Иван подарил книгу?'}\n- [N_056aaf0c97c1420a999ce4fedba28bed] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_d230be7b2afb4083afe8ed43afe46818] K_d230be7b2afb4083afe8ed43afe46818[[N_8c6bd4bafc874a948996a5965c22f0f3] [S_7615be76c48444d79344978692f06472] положил(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ, LOCATION=[M_44b55c08669f4135a9464153cb8f6e73] стол); [N_09c73c3bf6054f4181c4670c4fe0ea97] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ)]) {text='Сергей положил ключ на стол. Потом он взял его.'}\n- [N_07f7e0e95e2440c19497fa0e6d166613] [S_46c65e5640af49628a5f609ca504680e] увидела(SUBJECT=[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна, OBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)\n- [N_09c73c3bf6054f4181c4670c4fe0ea97] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ)\n- [N_13c9ce95488f43f9bb27a039afe02130] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто подарил Марии книгу?'}\n- [N_166d80888d044995b32991772e3d4ac0] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)) {text='Иван любит чай.'}\n- [N_16acd6e90eb54438beb2cc4488a8f89d] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Что делает кошка?'}\n- [N_1b292003b75b48a886b0a0ecdff89b93] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Хорошо, Иван любит чай.'}\n- [N_222258eee8e04f26bf5735d408209c9d] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?'}\n- [N_223178171fa14845b58b8e5039915c06] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_ac3cc9e7940945f0893eb7bb43417242] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)) {text='Иван подарил Марии книгу.'}\n- [N_31951efd6605446984133aa9ef8939cf] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_148e7f7aabf542d6bc3094f989d36c4c] K_148e7f7aabf542d6bc3094f989d36c4c[[N_321d32278f06442c9ad158379a3612e5] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_896290ca03464c7281961af76d8f4883] [S_a735143d0429400f9d48b8a22a03a411] открыла(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга); [N_af6ba905b5194712aeecc2371bd9e4ed] [S_d4469a3dddeb4ea7921614a2b578db39] прочитала(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)]) {text='Лиза взяла книгу, открыла её и прочитала.'}\n- [N_321d32278f06442c9ad158379a3612e5] [S_0173b32cd07e4b41beba30814500c1c9] взял(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)\n- [N_3d7135ebe4f44956826b9c4b1e31034a] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)\n- [N_409e92c58d054cbb91c92f04e1085969] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_bcd618e1c13e4600bc50e82a4db2579a] K_bcd618e1c13e4600bc50e82a4db2579a[[N_b4f04d23df8e472f8af86684b77818f9] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)); [N_4fac093d99da47d2ae8cac388b3ed562] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))]) {text='Иван и Мария пришли и ушли.'}\n- [N_4137998594fa47a595217c86ae0cb6a2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)) {text='Иван любит чай.'}\n- [N_4efa267fd582409c8880c4121664f752] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_d8f4cd51b0364b809dcf5b91c655a73a] K_d8f4cd51b0364b809dcf5b91c655a73a[[N_07f7e0e95e2440c19497fa0e6d166613] [S_46c65e5640af49628a5f609ca504680e] увидела(SUBJECT=[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна, OBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария); [N_dafa5a0643d440a5a7d515741cda83e6] [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась(SUBJECT=[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария])]) {text='Анна увидела Марию. Она улыбнулась.'}\n- [N_4fac093d99da47d2ae8cac388b3ed562] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))\n- [N_5762396d099c4b3795b9b8c61f98f50c] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто любит чай?'}\n- [N_675ac44b29174695a5d64ed44e879c85] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)\n- [N_6c1892a47d9449c2a50c49975b205ff2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_a9cf985623ab40b5b64da68e370a8b5a] K_a9cf985623ab40b5b64da68e370a8b5a[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_cfad48ff0aeb41958660e8c53f21ad40] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_a270391e2e0d4014a955b4572944c542] Пётр)]) {text='Иван написал письмо, а Мария отправила его Петру.'}\n- [N_74e84ade543947b69e2568755e151ca2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Что Иван подарил Марии?'}\n- [N_7994c217d7794c17a7fa481ccd6de766] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)) {text='Кошка спит.'}\n- [N_7fa561d020084a3ab57ca03066fe716e] [S_390bf1827cd24d77931ed539bc036cbf] купил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[G_b3045fc72fa44ac39f6201ef3fbb6897] ([M_038e0fc0c64e4c6385195b3d3928ef20] хлеб) AND ([M_d51aed4e435d4c8b811a01b6a4e03771] молоко))\n- [N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)\n- [N_896290ca03464c7281961af76d8f4883] [S_a735143d0429400f9d48b8a22a03a411] открыла(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)\n- [N_8c6bd4bafc874a948996a5965c22f0f3] [S_7615be76c48444d79344978692f06472] положил(SUBJECT=[M_824abfd243c94228b4e58a4d7b67d524] Сергей, OBJECT=[M_6157310730de47448728ec4aa7f1ced7] ключ, LOCATION=[M_44b55c08669f4135a9464153cb8f6e73] стол)\n- [N_9b2b9235ac3b4751a20cb7858956df7a] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_e49271f8bd064e0bb616058737a65fb4] K_e49271f8bd064e0bb616058737a65fb4[[N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо); [N_b93666bc42a94b4b8b70050e9664294c] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]) {text='Иван написал письмо и отправил его Марии.'}\n- [N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)\n- [N_a020d2bd4aa645a6a56bb4480a18edfd] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[G_e80bc6077c574b16937b00f9c4771ea5] ([N_d5d55b3921024b23ae1535ee823991af] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_59ee2f0f1b5640cd97eb07f4e88b0705] зелёными)) OR ([N_a09b579c194748caa71bfffc6f820ede] [S_d6106e497f4e4340a97a5746096934fd] бывать(SUBJECT=[M_c482d271e0b74f7d878dac6c22d1caa7] Яблоко, STATE=[M_43f8ab99c03e4dd5be50476abb90810f] красными))) {text='Яблоки бывают зелёными или красными.'}\n- [N_a7c8abe08c844700b434d0c9c13fb13e] [S_da1ef130f8b6421bb3134a8841fac235] выйти(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)\n- [N_ac3cc9e7940945f0893eb7bb43417242] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)\n- [N_af6ba905b5194712aeecc2371bd9e4ed] [S_d4469a3dddeb4ea7921614a2b578db39] прочитала(SUBJECT=[M_863ed2b48eec4378b8ae3cbabf21e82c] Лиза, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)\n- [N_b1867019c3a8439a87674a6a1c1ab348] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_d7ab606e681b4675a34ce0c9c8cc59d1] K_d7ab606e681b4675a34ce0c9c8cc59d1[[N_fabd4c456fc94fefa0efcffafa61e07c] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван); [N_3d7135ebe4f44956826b9c4b1e31034a] [S_8a113f049b8342c0967e59b5c628bd86] уйти(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)]) {text='Иван пришёл, а Мария ушла.'}\n- [N_b4f04d23df8e472f8af86684b77818f9] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[G_69b2dde6bdc34a15b163949b3c1b8939] ([M_62356d38f31b4e11998ff39a775d8b61] Иван) AND ([M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария))\n- [N_b93666bc42a94b4b8b70050e9664294c] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)\n- [N_be8f1c4179ac4b33b5bce393270da24d] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)\n- [N_c00018588c79416fb110547f5f33b218] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[K_82b9ba8ca6bc47e58100aaa92480d8c3] K_82b9ba8ca6bc47e58100aaa92480d8c3[[N_cb9e55545ac74c69964b532d0aff88f4] [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя); [N_a7c8abe08c844700b434d0c9c13fb13e] [S_da1ef130f8b6421bb3134a8841fac235] выйти(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)]) {text='Петя встал и вышел.'}\n- [N_c6bca5b1f8e04710a0072ee196942f9f] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_be8f1c4179ac4b33b5bce393270da24d] [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)) {text='Иван подарил книгу.'}\n- [N_c72fa10cc6644873b0f61e330ccb705b] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)\n- [N_cb9e55545ac74c69964b532d0aff88f4] [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал(SUBJECT=[M_5bbd5025082a4ef8b5e951a0b3a0bb3b] Петя)\n- [N_cf5dab81b6774a929d4b64d870af289c] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Все, кто ценит хороший напиток! А вы любите чай? 😊'}\n- [N_cfad48ff0aeb41958660e8c53f21ad40] [S_4fc60bbfd6d04f339113b763180a989f] отправил(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо, RECIPIENT=[M_a270391e2e0d4014a955b4572944c542] Пётр)\n- [N_d4dc7e3b7787480199368d9c5332ca49] [S_0c6f64612de445f782b2ff10b4f13fef] написал(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_f56681f8d1944c4f9d71e605cdf400b8] письмо)\n- [N_d6fa4f8c6d0f4222aede7b4143bb17d8] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент) {text='Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\\n\\nОбычно кошки:\\n\\n*   **Спят или дремлют** (это их основное занятие).\\n*   **Играют** с игрушками или другими животными.\\n*   **Охотятся** (даже если это просто игра с мышкой).\\n*   **'}\n- [N_dafa5a0643d440a5a7d515741cda83e6] [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась(SUBJECT=[K_83b5f4564b1e49f4898fab0ec1f6e9d7] K_83b5f4564b1e49f4898fab0ec1f6e9d7[[M_39f931ae57fd40e6bd7b1fdc97abe8ba] Анна; [M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария])\n- [N_db79000de35946ad81f0fb14ba605aa5] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто любит чай?'}\n- [N_dbcf7694a4a94fc4b158de4d4201d379] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь) {text='Кто любит чай?'}\n- [N_ddb559d12ad84abfbfaa1521e22b86a2] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_7fa561d020084a3ab57ca03066fe716e] [S_390bf1827cd24d77931ed539bc036cbf] купил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[G_b3045fc72fa44ac39f6201ef3fbb6897] ([M_038e0fc0c64e4c6385195b3d3928ef20] хлеб) AND ([M_d51aed4e435d4c8b811a01b6a4e03771] молоко))) {text='Иван купил хлеб и молоко.'}\n- [N_e9e3b8924e47436796973813d25fcec8] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_675ac44b29174695a5d64ed44e879c85] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_47579c166a02418dbfc0d19133bbdf7d] книга)) {text='Иван читает книгу.'}\n- [N_fabd4c456fc94fefa0efcffafa61e07c] [S_a1b909c31ef04f2289fed4bdad3badef] прийти(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван)\n- [N_fd588afed46d474783f1cffd16cea389] [S_efd036926f0e41f6894045fe6472ab99] высказать(SUBJECT=[M_5b420d5c902a4051a351540d4c04c251] Пользователь, OBJECT=[N_c72fa10cc6644873b0f61e330ccb705b] [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает(SUBJECT=[M_3e0f67de5f5c4d5f876a61ad7e0104be] Мария)) {text='Мария читает.'}\n- [S_0173b32cd07e4b41beba30814500c1c9] взял\n- [S_066a7a4b3bf44d328ba13f3f8e585a99] стол\n- [S_0a3a560a311b4473808065c3aa0ed334] любит\n- [S_0c6f64612de445f782b2ff10b4f13fef] написал\n- [S_0d4cca7d1cae41a4b8f767e99da4c7a7] встал\n- [S_1a683e5eb137477d9b336cfbd8641f05] Анна\n- [S_1d0fd1ed7b2f4104bf4baac403a2ae0e] подарил\n- [S_1d2c96849727415bae30c6f41a4804f1] или\n- [S_26ad5b962bc94401a72ad2ca1d712dcf] Сергей\n- [S_3613c2e3388149fead3b711dec79c9d5] Кто\n- [S_37ee54d2da624882b45dee16017faf5c] её\n- [S_390bf1827cd24d77931ed539bc036cbf] купил\n- [S_3a6d8ac4085347d08a9036a5f13a1729] Потом\n- [S_46c65e5640af49628a5f609ca504680e] увидела\n- [S_46d5e122600740c8aacdb87ba32d7fa5] Что\n- [S_4d1948dc41ef43cf9d254a38a50027c8] спит\n- [S_4f75f91f30a04501b419991c22085437] Яблоки\n- [S_4fc60bbfd6d04f339113b763180a989f] отправил\n- [S_55a6e2f23b384cdcb82864f76d0a7536] и\n- [S_58f18e00fca342539935482125cf5cf2] книга\n- [S_5b38602c862949fb90a7a592ed23b54d] Она\n- [S_6d77cb43b6d8464499e758c855414d4b] Петя\n- [S_6d957a454cda4218b43a6989fd04adb9] молоко\n- [S_74971e57b79744f39eb61c80fc2d2e70] Марии\n- [S_7615be76c48444d79344978692f06472] положил\n- [S_7b9139cac7d0483f9fbb09f4d899a7cd] Пётр\n- [S_8692d43b66214caba0ac4b765a745716] ключ\n- [S_8a113f049b8342c0967e59b5c628bd86] уйти\n- [S_8c51b6b316c7488787fef1c9c174e361] он\n- [S_9d851be9e96d495db9f58b3c4ce4fc9b] читает\n- [S_a1b909c31ef04f2289fed4bdad3badef] прийти\n- [S_a32475c466d54147bf4ae624a3eddd55] красный\n- [S_a735143d0429400f9d48b8a22a03a411] открыла\n- [S_b695646fd379418583b65f29ebecc813] Лиза\n- [S_ba2ebb580a23426e9694124a226cd2a0] письмо\n- [S_bbcdf184ff50433d91e6c41d4bab8c75] Кошка\n- [S_c5a3cd90fe2e4d40a3dd7c1aa2e05482] Иван\n- [S_cf8df43fc1aa47948a1e02bf7ed6e2b3] хлеб\n- [S_d0e36586b16c4283a1e31f4b04d892f9] улыбнулась\n- [S_d4469a3dddeb4ea7921614a2b578db39] прочитала\n- [S_d6106e497f4e4340a97a5746096934fd] бывать\n- [S_da1ef130f8b6421bb3134a8841fac235] выйти\n- [S_e4ae41185d744e4bba2c1e2d482263d7] зелёный\n- [S_e4e3f811631d419896d1e50ffe89431e] чай\n- [S_ea82c7ffb028443c9056e9de6a6c0c06] а\n- [S_f0871d7633cf4e9cae10d47e5ff8b386] на\n\n# INFERENCE RESULTS\n- SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван; supported_by=[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)"
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 20,
+      "source_text": "Кто любит чай?",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "QUERY",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nTOKENS:\n[1] Кто\n[2] любит\n[3] чай\n[4] ?\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: любит; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nTOKENS:\n[1] Кто\n[2] любит\n[3] чай\n[4] ?\nPREDICATE_START: [2] любит\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: любит",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай\nTARGET:\nлюбит\nRUSSIAN_LEMMA:\nлюбить",
+          "normalized_answer": "любить",
+          "retry_index": 0
+        },
+        {
+          "role": "query_mode",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nPREDICATE:\nлюбит\nOPTIONS:\nUNKNOWN: cannot determine the question type reliably\nEXISTS: asks whether the proposition is true / exists (yes-no)\nFILL_ROLE: asks for one missing participant, property, circumstance, place, time, cause, purpose, manner, or amount",
+          "normalized_answer": "FILL_ROLE",
+          "retry_index": 0
+        },
+        {
+          "role": "requested_role",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nPREDICATE:\nлюбит\nQUESTION_WORD:\nКто",
+          "normalized_answer": "SUBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nPREDICATE:\nлюбит\nQUESTION_PLACEHOLDER:\nКто\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains\n[1] чай",
+          "normalized_answer": "3",
+          "retry_index": 0
+        },
+        {
+          "role": "role_family",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nPREDICATE:\nлюбит\nQUESTION_WORD:\nчай",
+          "normalized_answer": "OBJECT",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nКто любит чай?\nPREDICATE:\nлюбит\nALREADY_SELECTED:\nчай\nQUESTION_PLACEHOLDER:\nКто\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Кто любит чай?",
+        "assertions": [],
+        "queries": [
+          {
+            "predicate": {
+              "surface": "любит",
+              "normalized_hint": "любить",
+              "sense_hint": null,
+              "evidence": {
+                "text": "любит",
+                "start": 4,
+                "end": 9
+              },
+              "template_candidate": null
+            },
+            "actants": [
+              {
+                "role": "OBJECT",
+                "mention": "чай",
+                "normalized_hint": "чай",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "чай",
+                  "start": 10,
+                  "end": 13
+                },
+                "parser_confidence": null,
+                "composition": null
+              }
+            ],
+            "requested_role": "SUBJECT",
+            "query_mode": "FILL_ROLE"
+          }
+        ],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "conditionals": []
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "L_359038e880d24ca9af88d8cd50504101": {
+        "uid": "L_359038e880d24ca9af88d8cd50504101",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.21500000000000002,
+        "source": {
+          "uid": "N_4137998594fa47a595217c86ae0cb6a2",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_dbcf7694a4a94fc4b158de4d4201d379",
+          "kind": "N"
+        }
+      },
+      "N_dbcf7694a4a94fc4b158de4d4201d379": {
+        "uid": "N_dbcf7694a4a94fc4b158de4d4201d379",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_e5333a288009442882fd9698dfd42d3f",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_5b420d5c902a4051a351540d4c04c251",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Кто любит чай?",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 98,
+          "expires_tick": 298,
+          "last_qualifying_tick": 98,
+          "qualifying_reactivations": 0
+        }
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_382c0cf762c54d57ab6867704584ae28": {
+        "before": {
+          "uid": "L_382c0cf762c54d57ab6867704584ae28",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.23000000000000004,
+          "source": {
+            "uid": "N_74e84ade543947b69e2568755e151ca2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_0529adbcfaeb4f08bdc036764f18ed08",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_382c0cf762c54d57ab6867704584ae28",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_74e84ade543947b69e2568755e151ca2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_0529adbcfaeb4f08bdc036764f18ed08",
+            "kind": "N"
+          }
+        }
+      },
+      "L_3ff346c1f70d4674aaf6fdb3c43c5bf1": {
+        "before": {
+          "uid": "L_3ff346c1f70d4674aaf6fdb3c43c5bf1",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.4100000000000002,
+          "source": {
+            "uid": "N_a020d2bd4aa645a6a56bb4480a18edfd",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_9b2b9235ac3b4751a20cb7858956df7a",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_3ff346c1f70d4674aaf6fdb3c43c5bf1",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.4250000000000002,
+          "source": {
+            "uid": "N_a020d2bd4aa645a6a56bb4480a18edfd",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_9b2b9235ac3b4751a20cb7858956df7a",
+            "kind": "N"
+          }
+        }
+      },
+      "L_42fed5a7d57c46c4816d2fb7f650e896": {
+        "before": {
+          "uid": "L_42fed5a7d57c46c4816d2fb7f650e896",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.26000000000000006,
+          "source": {
+            "uid": "N_223178171fa14845b58b8e5039915c06",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_13c9ce95488f43f9bb27a039afe02130",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_42fed5a7d57c46c4816d2fb7f650e896",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.2750000000000001,
+          "source": {
+            "uid": "N_223178171fa14845b58b8e5039915c06",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_13c9ce95488f43f9bb27a039afe02130",
+            "kind": "N"
+          }
+        }
+      },
+      "L_43f7452d231e43a9ab0aff2a5557286d": {
+        "before": {
+          "uid": "L_43f7452d231e43a9ab0aff2a5557286d",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.5150000000000002,
+          "source": {
+            "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_43f7452d231e43a9ab0aff2a5557286d",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.5300000000000002,
+          "source": {
+            "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+            "kind": "N"
+          }
+        }
+      },
+      "L_596154113282477ca7347a6f094781c3": {
+        "before": {
+          "uid": "L_596154113282477ca7347a6f094781c3",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.5000000000000002,
+          "source": {
+            "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_222258eee8e04f26bf5735d408209c9d",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_596154113282477ca7347a6f094781c3",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.5150000000000002,
+          "source": {
+            "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_222258eee8e04f26bf5735d408209c9d",
+            "kind": "N"
+          }
+        }
+      },
+      "L_5b9ee6df0bc247fa932eadde0443e082": {
+        "before": {
+          "uid": "L_5b9ee6df0bc247fa932eadde0443e082",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.4400000000000002,
+          "source": {
+            "uid": "N_fd588afed46d474783f1cffd16cea389",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_ddb559d12ad84abfbfaa1521e22b86a2",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_5b9ee6df0bc247fa932eadde0443e082",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.45500000000000024,
+          "source": {
+            "uid": "N_fd588afed46d474783f1cffd16cea389",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_ddb559d12ad84abfbfaa1521e22b86a2",
+            "kind": "N"
+          }
+        }
+      },
+      "L_6cdcc9e9864744d6b04db9e95ba0909d": {
+        "before": {
+          "uid": "L_6cdcc9e9864744d6b04db9e95ba0909d",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.21500000000000002,
+          "source": {
+            "uid": "N_0529adbcfaeb4f08bdc036764f18ed08",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_4137998594fa47a595217c86ae0cb6a2",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_6cdcc9e9864744d6b04db9e95ba0909d",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.23000000000000004,
+          "source": {
+            "uid": "N_0529adbcfaeb4f08bdc036764f18ed08",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_4137998594fa47a595217c86ae0cb6a2",
+            "kind": "N"
+          }
+        }
+      },
+      "L_71f6dcdd4e1d4d53a7d770baa489bfee": {
+        "before": {
+          "uid": "L_71f6dcdd4e1d4d53a7d770baa489bfee",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.36500000000000016,
+          "source": {
+            "uid": "N_c00018588c79416fb110547f5f33b218",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_409e92c58d054cbb91c92f04e1085969",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_71f6dcdd4e1d4d53a7d770baa489bfee",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.38000000000000017,
+          "source": {
+            "uid": "N_c00018588c79416fb110547f5f33b218",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_409e92c58d054cbb91c92f04e1085969",
+            "kind": "N"
+          }
+        }
+      },
+      "L_7393472aaf854820b5a18c81b20b3bf1": {
+        "before": {
+          "uid": "L_7393472aaf854820b5a18c81b20b3bf1",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.4250000000000002,
+          "source": {
+            "uid": "N_ddb559d12ad84abfbfaa1521e22b86a2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_a020d2bd4aa645a6a56bb4480a18edfd",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_7393472aaf854820b5a18c81b20b3bf1",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.4400000000000002,
+          "source": {
+            "uid": "N_ddb559d12ad84abfbfaa1521e22b86a2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_a020d2bd4aa645a6a56bb4480a18edfd",
+            "kind": "N"
+          }
+        }
+      },
+      "L_73f74a4e69bb47d19b758799a0cb3721": {
+        "before": {
+          "uid": "L_73f74a4e69bb47d19b758799a0cb3721",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.3050000000000001,
+          "source": {
+            "uid": "N_4efa267fd582409c8880c4121664f752",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_056aaf0c97c1420a999ce4fedba28bed",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_73f74a4e69bb47d19b758799a0cb3721",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.3200000000000001,
+          "source": {
+            "uid": "N_4efa267fd582409c8880c4121664f752",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_056aaf0c97c1420a999ce4fedba28bed",
+            "kind": "N"
+          }
+        }
+      },
+      "L_8183031169114df98d1ec74f8213edb4": {
+        "before": {
+          "uid": "L_8183031169114df98d1ec74f8213edb4",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.3200000000000001,
+          "source": {
+            "uid": "N_6c1892a47d9449c2a50c49975b205ff2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_4efa267fd582409c8880c4121664f752",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_8183031169114df98d1ec74f8213edb4",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.33500000000000013,
+          "source": {
+            "uid": "N_6c1892a47d9449c2a50c49975b205ff2",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_4efa267fd582409c8880c4121664f752",
+            "kind": "N"
+          }
+        }
+      },
+      "L_8233963df241421882ebdaa991835e85": {
+        "before": {
+          "uid": "L_8233963df241421882ebdaa991835e85",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.2750000000000001,
+          "source": {
+            "uid": "N_c6bca5b1f8e04710a0072ee196942f9f",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_223178171fa14845b58b8e5039915c06",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_8233963df241421882ebdaa991835e85",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.2900000000000001,
+          "source": {
+            "uid": "N_c6bca5b1f8e04710a0072ee196942f9f",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_223178171fa14845b58b8e5039915c06",
+            "kind": "N"
+          }
+        }
+      },
+      "L_946d09f28e904f68b3d0a58426ea37bb": {
+        "before": {
+          "uid": "L_946d09f28e904f68b3d0a58426ea37bb",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.2900000000000001,
+          "source": {
+            "uid": "N_056aaf0c97c1420a999ce4fedba28bed",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_c6bca5b1f8e04710a0072ee196942f9f",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_946d09f28e904f68b3d0a58426ea37bb",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.3050000000000001,
+          "source": {
+            "uid": "N_056aaf0c97c1420a999ce4fedba28bed",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_c6bca5b1f8e04710a0072ee196942f9f",
+            "kind": "N"
+          }
+        }
+      },
+      "L_9c6a61091c0149bf810b88dcfb4afecc": {
+        "before": {
+          "uid": "L_9c6a61091c0149bf810b88dcfb4afecc",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.203,
+          "source": {
+            "uid": "N_8c6bd4bafc874a948996a5965c22f0f3",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_09c73c3bf6054f4181c4670c4fe0ea97",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_9c6a61091c0149bf810b88dcfb4afecc",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.201,
+          "source": {
+            "uid": "N_8c6bd4bafc874a948996a5965c22f0f3",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_09c73c3bf6054f4181c4670c4fe0ea97",
+            "kind": "N"
+          }
+        }
+      },
+      "L_ab99136e67aa4cbea0e3d61e2fbb9ca0": {
+        "before": {
+          "uid": "L_ab99136e67aa4cbea0e3d61e2fbb9ca0",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.3950000000000002,
+          "source": {
+            "uid": "N_9b2b9235ac3b4751a20cb7858956df7a",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_31951efd6605446984133aa9ef8939cf",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_ab99136e67aa4cbea0e3d61e2fbb9ca0",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.4100000000000002,
+          "source": {
+            "uid": "N_9b2b9235ac3b4751a20cb7858956df7a",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_31951efd6605446984133aa9ef8939cf",
+            "kind": "N"
+          }
+        }
+      },
+      "L_aec109ba3df6477d9e34152c84741216": {
+        "before": {
+          "uid": "L_aec109ba3df6477d9e34152c84741216",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.45500000000000024,
+          "source": {
+            "uid": "N_e9e3b8924e47436796973813d25fcec8",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_fd588afed46d474783f1cffd16cea389",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_aec109ba3df6477d9e34152c84741216",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.47000000000000025,
+          "source": {
+            "uid": "N_e9e3b8924e47436796973813d25fcec8",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_fd588afed46d474783f1cffd16cea389",
+            "kind": "N"
+          }
+        }
+      },
+      "L_b3b6677cf7f5449191dc11b901923ea0": {
+        "before": {
+          "uid": "L_b3b6677cf7f5449191dc11b901923ea0",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.47000000000000025,
+          "source": {
+            "uid": "N_7994c217d7794c17a7fa481ccd6de766",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_e9e3b8924e47436796973813d25fcec8",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_b3b6677cf7f5449191dc11b901923ea0",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.48500000000000026,
+          "source": {
+            "uid": "N_7994c217d7794c17a7fa481ccd6de766",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_e9e3b8924e47436796973813d25fcec8",
+            "kind": "N"
+          }
+        }
+      },
+      "L_c7f73181e0974d969b9bdfc78863715c": {
+        "before": {
+          "uid": "L_c7f73181e0974d969b9bdfc78863715c",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.38000000000000017,
+          "source": {
+            "uid": "N_31951efd6605446984133aa9ef8939cf",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_c00018588c79416fb110547f5f33b218",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_c7f73181e0974d969b9bdfc78863715c",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.3950000000000002,
+          "source": {
+            "uid": "N_31951efd6605446984133aa9ef8939cf",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_c00018588c79416fb110547f5f33b218",
+            "kind": "N"
+          }
+        }
+      },
+      "L_d560fcb303cf4e59a7aa5a70e1cc6217": {
+        "before": {
+          "uid": "L_d560fcb303cf4e59a7aa5a70e1cc6217",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_13c9ce95488f43f9bb27a039afe02130",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_74e84ade543947b69e2568755e151ca2",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_d560fcb303cf4e59a7aa5a70e1cc6217",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.26000000000000006,
+          "source": {
+            "uid": "N_13c9ce95488f43f9bb27a039afe02130",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_74e84ade543947b69e2568755e151ca2",
+            "kind": "N"
+          }
+        }
+      },
+      "L_ed2c582c77c54aefa80401f9fb706616": {
+        "before": {
+          "uid": "L_ed2c582c77c54aefa80401f9fb706616",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.35000000000000014,
+          "source": {
+            "uid": "N_409e92c58d054cbb91c92f04e1085969",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_b1867019c3a8439a87674a6a1c1ab348",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_ed2c582c77c54aefa80401f9fb706616",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.36500000000000016,
+          "source": {
+            "uid": "N_409e92c58d054cbb91c92f04e1085969",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_b1867019c3a8439a87674a6a1c1ab348",
+            "kind": "N"
+          }
+        }
+      },
+      "L_f619dcef8b694bbe9919a8a1ee3affd0": {
+        "before": {
+          "uid": "L_f619dcef8b694bbe9919a8a1ee3affd0",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.48500000000000026,
+          "source": {
+            "uid": "N_222258eee8e04f26bf5735d408209c9d",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_7994c217d7794c17a7fa481ccd6de766",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_f619dcef8b694bbe9919a8a1ee3affd0",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.5000000000000002,
+          "source": {
+            "uid": "N_222258eee8e04f26bf5735d408209c9d",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_7994c217d7794c17a7fa481ccd6de766",
+            "kind": "N"
+          }
+        }
+      },
+      "L_fa506dff5fd34c8191a3ef139f04038a": {
+        "before": {
+          "uid": "L_fa506dff5fd34c8191a3ef139f04038a",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.33500000000000013,
+          "source": {
+            "uid": "N_b1867019c3a8439a87674a6a1c1ab348",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_6c1892a47d9449c2a50c49975b205ff2",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_fa506dff5fd34c8191a3ef139f04038a",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.35000000000000014,
+          "source": {
+            "uid": "N_b1867019c3a8439a87674a6a1c1ab348",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_6c1892a47d9449c2a50c49975b205ff2",
+            "kind": "N"
+          }
+        }
+      },
+      "N_222258eee8e04f26bf5735d408209c9d": {
+        "before": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N",
+          "domain": "H",
+          "weight": 0.3,
+          "template": {
+            "uid": "T_e5333a288009442882fd9698dfd42d3f",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+              "kind": "M"
+            }
+          },
+          "properties": {
+            "text": {
+              "name": "text",
+              "value": "Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+              "type_name": "str",
+              "unit": null
+            }
+          },
+          "meta": {
+            "created_tick": 78,
+            "dedup_exempt": true,
+            "event_instance": true,
+            "expires_tick": 278,
+            "last_qualifying_tick": 78,
+            "lifecycle_state": "NEW",
+            "occurrence_count": 1,
+            "qualifying_reactivations": 0
+          }
+        },
+        "after": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N",
+          "domain": "H",
+          "weight": 0.3,
+          "template": {
+            "uid": "T_e5333a288009442882fd9698dfd42d3f",
+            "kind": "T"
+          },
+          "actants": {
+            "SUBJECT": {
+              "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+              "kind": "M"
+            }
+          },
+          "properties": {
+            "text": {
+              "name": "text",
+              "value": "Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+              "type_name": "str",
+              "unit": null
+            }
+          },
+          "meta": {
+            "created_tick": 78,
+            "dedup_exempt": true,
+            "event_instance": true,
+            "expires_tick": 1098,
+            "last_qualifying_tick": 98,
+            "lifecycle_state": "REINFORCED",
+            "occurrence_count": 1,
+            "qualifying_reactivations": 1
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 99,
+    "workspace_uids": [
+      "G_69b2dde6bdc34a15b163949b3c1b8939",
+      "G_b3045fc72fa44ac39f6201ef3fbb6897",
+      "G_e80bc6077c574b16937b00f9c4771ea5",
+      "K_148e7f7aabf542d6bc3094f989d36c4c",
+      "K_82b9ba8ca6bc47e58100aaa92480d8c3",
+      "K_83b5f4564b1e49f4898fab0ec1f6e9d7",
+      "K_a9cf985623ab40b5b64da68e370a8b5a",
+      "K_bcd618e1c13e4600bc50e82a4db2579a",
+      "K_d230be7b2afb4083afe8ed43afe46818",
+      "K_d7ab606e681b4675a34ce0c9c8cc59d1",
+      "K_d8f4cd51b0364b809dcf5b91c655a73a",
+      "K_e49271f8bd064e0bb616058737a65fb4",
+      "M_39f931ae57fd40e6bd7b1fdc97abe8ba",
+      "M_3e0f67de5f5c4d5f876a61ad7e0104be",
+      "M_44b55c08669f4135a9464153cb8f6e73",
+      "M_47579c166a02418dbfc0d19133bbdf7d",
+      "M_5b420d5c902a4051a351540d4c04c251",
+      "M_5bbd5025082a4ef8b5e951a0b3a0bb3b",
+      "M_6157310730de47448728ec4aa7f1ced7",
+      "M_62356d38f31b4e11998ff39a775d8b61",
+      "M_824abfd243c94228b4e58a4d7b67d524",
+      "M_863ed2b48eec4378b8ae3cbabf21e82c",
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "M_a270391e2e0d4014a955b4572944c542",
+      "M_a4a27a9e5230469ab269034b14a1e4d5",
+      "M_f56681f8d1944c4f9d71e605cdf400b8",
+      "M_fc69b4786a6b4fce93342f330f8d03af",
+      "N_0529adbcfaeb4f08bdc036764f18ed08",
+      "N_056aaf0c97c1420a999ce4fedba28bed",
+      "N_07f7e0e95e2440c19497fa0e6d166613",
+      "N_09c73c3bf6054f4181c4670c4fe0ea97",
+      "N_13c9ce95488f43f9bb27a039afe02130",
+      "N_166d80888d044995b32991772e3d4ac0",
+      "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "N_1b292003b75b48a886b0a0ecdff89b93",
+      "N_222258eee8e04f26bf5735d408209c9d",
+      "N_223178171fa14845b58b8e5039915c06",
+      "N_31951efd6605446984133aa9ef8939cf",
+      "N_321d32278f06442c9ad158379a3612e5",
+      "N_3d7135ebe4f44956826b9c4b1e31034a",
+      "N_409e92c58d054cbb91c92f04e1085969",
+      "N_4137998594fa47a595217c86ae0cb6a2",
+      "N_4efa267fd582409c8880c4121664f752",
+      "N_4fac093d99da47d2ae8cac388b3ed562",
+      "N_5762396d099c4b3795b9b8c61f98f50c",
+      "N_675ac44b29174695a5d64ed44e879c85",
+      "N_6c1892a47d9449c2a50c49975b205ff2",
+      "N_74e84ade543947b69e2568755e151ca2",
+      "N_7994c217d7794c17a7fa481ccd6de766",
+      "N_7fa561d020084a3ab57ca03066fe716e",
+      "N_82353b674761408a98159bcaa210550b",
+      "N_896290ca03464c7281961af76d8f4883",
+      "N_8c6bd4bafc874a948996a5965c22f0f3",
+      "N_9b2b9235ac3b4751a20cb7858956df7a",
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+      "N_a020d2bd4aa645a6a56bb4480a18edfd",
+      "N_a7c8abe08c844700b434d0c9c13fb13e",
+      "N_ac3cc9e7940945f0893eb7bb43417242",
+      "N_af6ba905b5194712aeecc2371bd9e4ed",
+      "N_b1867019c3a8439a87674a6a1c1ab348",
+      "N_b4f04d23df8e472f8af86684b77818f9",
+      "N_b93666bc42a94b4b8b70050e9664294c",
+      "N_be8f1c4179ac4b33b5bce393270da24d",
+      "N_c00018588c79416fb110547f5f33b218",
+      "N_c6bca5b1f8e04710a0072ee196942f9f",
+      "N_c72fa10cc6644873b0f61e330ccb705b",
+      "N_cb9e55545ac74c69964b532d0aff88f4",
+      "N_cf5dab81b6774a929d4b64d870af289c",
+      "N_cfad48ff0aeb41958660e8c53f21ad40",
+      "N_d4dc7e3b7787480199368d9c5332ca49",
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "N_dafa5a0643d440a5a7d515741cda83e6",
+      "N_db79000de35946ad81f0fb14ba605aa5",
+      "N_dbcf7694a4a94fc4b158de4d4201d379",
+      "N_ddb559d12ad84abfbfaa1521e22b86a2",
+      "N_e9e3b8924e47436796973813d25fcec8",
+      "N_fabd4c456fc94fefa0efcffafa61e07c",
+      "N_fd588afed46d474783f1cffd16cea389",
+      "S_0173b32cd07e4b41beba30814500c1c9",
+      "S_066a7a4b3bf44d328ba13f3f8e585a99",
+      "S_0a3a560a311b4473808065c3aa0ed334",
+      "S_0c6f64612de445f782b2ff10b4f13fef",
+      "S_0d4cca7d1cae41a4b8f767e99da4c7a7",
+      "S_1a683e5eb137477d9b336cfbd8641f05",
+      "S_1d0fd1ed7b2f4104bf4baac403a2ae0e",
+      "S_1d2c96849727415bae30c6f41a4804f1",
+      "S_26ad5b962bc94401a72ad2ca1d712dcf",
+      "S_3613c2e3388149fead3b711dec79c9d5",
+      "S_37ee54d2da624882b45dee16017faf5c",
+      "S_390bf1827cd24d77931ed539bc036cbf",
+      "S_3a6d8ac4085347d08a9036a5f13a1729",
+      "S_46c65e5640af49628a5f609ca504680e",
+      "S_46d5e122600740c8aacdb87ba32d7fa5",
+      "S_4d1948dc41ef43cf9d254a38a50027c8",
+      "S_4f75f91f30a04501b419991c22085437",
+      "S_4fc60bbfd6d04f339113b763180a989f",
+      "S_55a6e2f23b384cdcb82864f76d0a7536",
+      "S_58f18e00fca342539935482125cf5cf2",
+      "S_5b38602c862949fb90a7a592ed23b54d",
+      "S_6d77cb43b6d8464499e758c855414d4b",
+      "S_6d957a454cda4218b43a6989fd04adb9",
+      "S_74971e57b79744f39eb61c80fc2d2e70",
+      "S_7615be76c48444d79344978692f06472",
+      "S_7b9139cac7d0483f9fbb09f4d899a7cd",
+      "S_8692d43b66214caba0ac4b765a745716",
+      "S_8a113f049b8342c0967e59b5c628bd86",
+      "S_8c51b6b316c7488787fef1c9c174e361",
+      "S_9d851be9e96d495db9f58b3c4ce4fc9b",
+      "S_a1b909c31ef04f2289fed4bdad3badef",
+      "S_a32475c466d54147bf4ae624a3eddd55",
+      "S_a735143d0429400f9d48b8a22a03a411",
+      "S_b695646fd379418583b65f29ebecc813",
+      "S_ba2ebb580a23426e9694124a226cd2a0",
+      "S_bbcdf184ff50433d91e6c41d4bab8c75",
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+      "S_cf8df43fc1aa47948a1e02bf7ed6e2b3",
+      "S_d0e36586b16c4283a1e31f4b04d892f9",
+      "S_d4469a3dddeb4ea7921614a2b578db39",
+      "S_d6106e497f4e4340a97a5746096934fd",
+      "S_da1ef130f8b6421bb3134a8841fac235",
+      "S_e4ae41185d744e4bba2c1e2d482263d7",
+      "S_e4e3f811631d419896d1e50ffe89431e",
+      "S_ea82c7ffb028443c9056e9de6a6c0c06",
+      "S_f0871d7633cf4e9cae10d47e5ff8b386"
+    ],
+    "workspace": {
+      "G_69b2dde6bdc34a15b163949b3c1b8939": {
+        "semantic": "(Иван) AND (Мария)",
+        "excitation": 1.0
+      },
+      "G_b3045fc72fa44ac39f6201ef3fbb6897": {
+        "semantic": "(хлеб) AND (молоко)",
+        "excitation": 1.0
+      },
+      "G_e80bc6077c574b16937b00f9c4771ea5": {
+        "semantic": "(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))",
+        "excitation": 1.0
+      },
+      "K_148e7f7aabf542d6bc3094f989d36c4c": {
+        "semantic": "K_148e7f7aabf542d6bc3094f989d36c4c[взял(SUBJECT=Лиза, OBJECT=книга); открыла(SUBJECT=Лиза, OBJECT=книга); прочитала(SUBJECT=Лиза, OBJECT=книга)]",
+        "excitation": 1.0
+      },
+      "K_82b9ba8ca6bc47e58100aaa92480d8c3": {
+        "semantic": "K_82b9ba8ca6bc47e58100aaa92480d8c3[встал(SUBJECT=Петя); выйти(SUBJECT=Петя)]",
+        "excitation": 1.0
+      },
+      "K_83b5f4564b1e49f4898fab0ec1f6e9d7": {
+        "semantic": "K_83b5f4564b1e49f4898fab0ec1f6e9d7[Анна; Мария]",
+        "excitation": 1.0
+      },
+      "K_a9cf985623ab40b5b64da68e370a8b5a": {
+        "semantic": "K_a9cf985623ab40b5b64da68e370a8b5a[написал(SUBJECT=Иван, OBJECT=письмо); отправил(SUBJECT=Мария, OBJECT=письмо, RECIPIENT=Пётр)]",
+        "excitation": 1.0
+      },
+      "K_bcd618e1c13e4600bc50e82a4db2579a": {
+        "semantic": "K_bcd618e1c13e4600bc50e82a4db2579a[прийти(SUBJECT=(Иван) AND (Мария)); уйти(SUBJECT=(Иван) AND (Мария))]",
+        "excitation": 1.0
+      },
+      "K_d230be7b2afb4083afe8ed43afe46818": {
+        "semantic": "K_d230be7b2afb4083afe8ed43afe46818[положил(SUBJECT=Сергей, OBJECT=ключ, LOCATION=стол); взял(SUBJECT=Сергей, OBJECT=ключ)]",
+        "excitation": 1.0
+      },
+      "K_d7ab606e681b4675a34ce0c9c8cc59d1": {
+        "semantic": "K_d7ab606e681b4675a34ce0c9c8cc59d1[прийти(SUBJECT=Иван); уйти(SUBJECT=Мария)]",
+        "excitation": 1.0
+      },
+      "K_d8f4cd51b0364b809dcf5b91c655a73a": {
+        "semantic": "K_d8f4cd51b0364b809dcf5b91c655a73a[увидела(SUBJECT=Анна, OBJECT=Мария); улыбнулась(SUBJECT=K_83b5f4564b1e49f4898fab0ec1f6e9d7[Анна; Мария])]",
+        "excitation": 1.0
+      },
+      "K_e49271f8bd064e0bb616058737a65fb4": {
+        "semantic": "K_e49271f8bd064e0bb616058737a65fb4[написал(SUBJECT=Иван, OBJECT=письмо); отправил(SUBJECT=Иван, OBJECT=письмо, RECIPIENT=Мария)]",
+        "excitation": 1.0
+      },
+      "M_39f931ae57fd40e6bd7b1fdc97abe8ba": {
+        "semantic": "Анна",
+        "excitation": 1.0
+      },
+      "M_3e0f67de5f5c4d5f876a61ad7e0104be": {
+        "semantic": "Мария",
+        "excitation": 1.0
+      },
+      "M_44b55c08669f4135a9464153cb8f6e73": {
+        "semantic": "стол",
+        "excitation": 1.0
+      },
+      "M_47579c166a02418dbfc0d19133bbdf7d": {
+        "semantic": "книга",
+        "excitation": 1.0
+      },
+      "M_5b420d5c902a4051a351540d4c04c251": {
+        "semantic": "Пользователь",
+        "excitation": 1.0
+      },
+      "M_5bbd5025082a4ef8b5e951a0b3a0bb3b": {
+        "semantic": "Петя",
+        "excitation": 1.0
+      },
+      "M_6157310730de47448728ec4aa7f1ced7": {
+        "semantic": "ключ",
+        "excitation": 1.0
+      },
+      "M_62356d38f31b4e11998ff39a775d8b61": {
+        "semantic": "Иван",
+        "excitation": 1.0
+      },
+      "M_824abfd243c94228b4e58a4d7b67d524": {
+        "semantic": "Сергей",
+        "excitation": 1.0
+      },
+      "M_863ed2b48eec4378b8ae3cbabf21e82c": {
+        "semantic": "Лиза",
+        "excitation": 1.0
+      },
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+        "semantic": "АГент",
+        "excitation": 1.0
+      },
+      "M_a270391e2e0d4014a955b4572944c542": {
+        "semantic": "Пётр",
+        "excitation": 1.0
+      },
+      "M_a4a27a9e5230469ab269034b14a1e4d5": {
+        "semantic": "чай",
+        "excitation": 1.0
+      },
+      "M_f56681f8d1944c4f9d71e605cdf400b8": {
+        "semantic": "письмо",
+        "excitation": 1.0
+      },
+      "M_fc69b4786a6b4fce93342f330f8d03af": {
+        "semantic": "Кошка",
+        "excitation": 1.0
+      },
+      "N_0529adbcfaeb4f08bdc036764f18ed08": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.796178343949224
+      },
+      "N_056aaf0c97c1420a999ce4fedba28bed": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_d230be7b2afb4083afe8ed43afe46818[положил(SUBJECT=Сергей, OBJECT=ключ, LOCATION=стол); взял(SUBJECT=Сергей, OBJECT=ключ)])",
+        "excitation": 1.0
+      },
+      "N_07f7e0e95e2440c19497fa0e6d166613": {
+        "semantic": "увидела(SUBJECT=Анна, OBJECT=Мария)",
+        "excitation": 0.6211396815485092
+      },
+      "N_09c73c3bf6054f4181c4670c4fe0ea97": {
+        "semantic": "взял(SUBJECT=Сергей, OBJECT=ключ)",
+        "excitation": 1.0
+      },
+      "N_13c9ce95488f43f9bb27a039afe02130": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 1.0
+      },
+      "N_166d80888d044995b32991772e3d4ac0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+        "excitation": 1.0
+      },
+      "N_16acd6e90eb54438beb2cc4488a8f89d": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 1.0
+      },
+      "N_1b292003b75b48a886b0a0ecdff89b93": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 1.0
+      },
+      "N_222258eee8e04f26bf5735d408209c9d": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 1.0
+      },
+      "N_223178171fa14845b58b8e5039915c06": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=подарил(SUBJECT=Иван, OBJECT=книга, RECIPIENT=Мария))",
+        "excitation": 1.0
+      },
+      "N_31951efd6605446984133aa9ef8939cf": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_148e7f7aabf542d6bc3094f989d36c4c[взял(SUBJECT=Лиза, OBJECT=книга); открыла(SUBJECT=Лиза, OBJECT=книга); прочитала(SUBJECT=Лиза, OBJECT=книга)])",
+        "excitation": 1.0
+      },
+      "N_321d32278f06442c9ad158379a3612e5": {
+        "semantic": "взял(SUBJECT=Лиза, OBJECT=книга)",
+        "excitation": 0.603756367523061
+      },
+      "N_3d7135ebe4f44956826b9c4b1e31034a": {
+        "semantic": "уйти(SUBJECT=Мария)",
+        "excitation": 0.6141270893345917
+      },
+      "N_409e92c58d054cbb91c92f04e1085969": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_bcd618e1c13e4600bc50e82a4db2579a[прийти(SUBJECT=(Иван) AND (Мария)); уйти(SUBJECT=(Иван) AND (Мария))])",
+        "excitation": 1.0
+      },
+      "N_4137998594fa47a595217c86ae0cb6a2": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+        "excitation": 0.6250000000000008
+      },
+      "N_4efa267fd582409c8880c4121664f752": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_d8f4cd51b0364b809dcf5b91c655a73a[увидела(SUBJECT=Анна, OBJECT=Мария); улыбнулась(SUBJECT=K_83b5f4564b1e49f4898fab0ec1f6e9d7[Анна; Мария])])",
+        "excitation": 1.0
+      },
+      "N_4fac093d99da47d2ae8cac388b3ed562": {
+        "semantic": "уйти(SUBJECT=(Иван) AND (Мария))",
+        "excitation": 0.6106505385758032
+      },
+      "N_5762396d099c4b3795b9b8c61f98f50c": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 1.0
+      },
+      "N_675ac44b29174695a5d64ed44e879c85": {
+        "semantic": "читает(SUBJECT=Иван, OBJECT=книга)",
+        "excitation": 1.0
+      },
+      "N_6c1892a47d9449c2a50c49975b205ff2": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_a9cf985623ab40b5b64da68e370a8b5a[написал(SUBJECT=Иван, OBJECT=письмо); отправил(SUBJECT=Мария, OBJECT=письмо, RECIPIENT=Пётр)])",
+        "excitation": 1.0
+      },
+      "N_74e84ade543947b69e2568755e151ca2": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 1.0
+      },
+      "N_7994c217d7794c17a7fa481ccd6de766": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=спит(SUBJECT=Кошка))",
+        "excitation": 1.0
+      },
+      "N_7fa561d020084a3ab57ca03066fe716e": {
+        "semantic": "купил(SUBJECT=Иван, OBJECT=(хлеб) AND (молоко))",
+        "excitation": 1.0
+      },
+      "N_82353b674761408a98159bcaa210550b": {
+        "semantic": "спит(SUBJECT=Кошка)",
+        "excitation": 1.0
+      },
+      "N_896290ca03464c7281961af76d8f4883": {
+        "semantic": "открыла(SUBJECT=Лиза, OBJECT=книга)",
+        "excitation": 0.603756367523061
+      },
+      "N_8c6bd4bafc874a948996a5965c22f0f3": {
+        "semantic": "положил(SUBJECT=Сергей, OBJECT=ключ, LOCATION=стол)",
+        "excitation": 0.6246759490121185
+      },
+      "N_9b2b9235ac3b4751a20cb7858956df7a": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_e49271f8bd064e0bb616058737a65fb4[написал(SUBJECT=Иван, OBJECT=письмо); отправил(SUBJECT=Иван, OBJECT=письмо, RECIPIENT=Мария)])",
+        "excitation": 1.0
+      },
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+        "semantic": "любит(SUBJECT=Иван, OBJECT=чай)",
+        "excitation": 1.0
+      },
+      "N_a020d2bd4aa645a6a56bb4480a18edfd": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными)))",
+        "excitation": 1.0
+      },
+      "N_a7c8abe08c844700b434d0c9c13fb13e": {
+        "semantic": "выйти(SUBJECT=Петя)",
+        "excitation": 0.6071936684423906
+      },
+      "N_ac3cc9e7940945f0893eb7bb43417242": {
+        "semantic": "подарил(SUBJECT=Иван, OBJECT=книга, RECIPIENT=Мария)",
+        "excitation": 1.0
+      },
+      "N_af6ba905b5194712aeecc2371bd9e4ed": {
+        "semantic": "прочитала(SUBJECT=Лиза, OBJECT=книга)",
+        "excitation": 0.603756367523061
+      },
+      "N_b1867019c3a8439a87674a6a1c1ab348": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_d7ab606e681b4675a34ce0c9c8cc59d1[прийти(SUBJECT=Иван); уйти(SUBJECT=Мария)])",
+        "excitation": 1.0
+      },
+      "N_b4f04d23df8e472f8af86684b77818f9": {
+        "semantic": "прийти(SUBJECT=(Иван) AND (Мария))",
+        "excitation": 0.6106505385758032
+      },
+      "N_b93666bc42a94b4b8b70050e9664294c": {
+        "semantic": "отправил(SUBJECT=Иван, OBJECT=письмо, RECIPIENT=Мария)",
+        "excitation": 0.6003385250372166
+      },
+      "N_be8f1c4179ac4b33b5bce393270da24d": {
+        "semantic": "подарил(SUBJECT=Иван, OBJECT=книга)",
+        "excitation": 1.0
+      },
+      "N_c00018588c79416fb110547f5f33b218": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=K_82b9ba8ca6bc47e58100aaa92480d8c3[встал(SUBJECT=Петя); выйти(SUBJECT=Петя)])",
+        "excitation": 1.0
+      },
+      "N_c6bca5b1f8e04710a0072ee196942f9f": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=подарил(SUBJECT=Иван, OBJECT=книга))",
+        "excitation": 1.0
+      },
+      "N_c72fa10cc6644873b0f61e330ccb705b": {
+        "semantic": "читает(SUBJECT=Мария)",
+        "excitation": 1.0
+      },
+      "N_cb9e55545ac74c69964b532d0aff88f4": {
+        "semantic": "встал(SUBJECT=Петя)",
+        "excitation": 0.6071936684423906
+      },
+      "N_cf5dab81b6774a929d4b64d870af289c": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 1.0
+      },
+      "N_cfad48ff0aeb41958660e8c53f21ad40": {
+        "semantic": "отправил(SUBJECT=Мария, OBJECT=письмо, RECIPIENT=Пётр)",
+        "excitation": 0.6176234327643351
+      },
+      "N_d4dc7e3b7787480199368d9c5332ca49": {
+        "semantic": "написал(SUBJECT=Иван, OBJECT=письмо)",
+        "excitation": 0.9501898965605151
+      },
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 1.0
+      },
+      "N_dafa5a0643d440a5a7d515741cda83e6": {
+        "semantic": "улыбнулась(SUBJECT=K_83b5f4564b1e49f4898fab0ec1f6e9d7[Анна; Мария])",
+        "excitation": 0.6211396815485092
+      },
+      "N_db79000de35946ad81f0fb14ba605aa5": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 1.0
+      },
+      "N_dbcf7694a4a94fc4b158de4d4201d379": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.5
+      },
+      "N_ddb559d12ad84abfbfaa1521e22b86a2": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=купил(SUBJECT=Иван, OBJECT=(хлеб) AND (молоко)))",
+        "excitation": 1.0
+      },
+      "N_e9e3b8924e47436796973813d25fcec8": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=читает(SUBJECT=Иван, OBJECT=книга))",
+        "excitation": 1.0
+      },
+      "N_fabd4c456fc94fefa0efcffafa61e07c": {
+        "semantic": "прийти(SUBJECT=Иван)",
+        "excitation": 0.6141270893345917
+      },
+      "N_fd588afed46d474783f1cffd16cea389": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=читает(SUBJECT=Мария))",
+        "excitation": 1.0
+      },
+      "S_0173b32cd07e4b41beba30814500c1c9": {
+        "semantic": "взял",
+        "excitation": 0.8528328120838906
+      },
+      "S_066a7a4b3bf44d328ba13f3f8e585a99": {
+        "semantic": "стол",
+        "excitation": 0.4324679647006973
+      },
+      "S_0a3a560a311b4473808065c3aa0ed334": {
+        "semantic": "любит",
+        "excitation": 1.0
+      },
+      "S_0c6f64612de445f782b2ff10b4f13fef": {
+        "semantic": "написал",
+        "excitation": 0.8455706309681971
+      },
+      "S_0d4cca7d1cae41a4b8f767e99da4c7a7": {
+        "semantic": "встал",
+        "excitation": 0.42036484738319335
+      },
+      "S_1a683e5eb137477d9b336cfbd8641f05": {
+        "semantic": "Анна",
+        "excitation": 0.43001977953358317
+      },
+      "S_1d0fd1ed7b2f4104bf4baac403a2ae0e": {
+        "semantic": "подарил",
+        "excitation": 0.9887101204089311
+      },
+      "S_1d2c96849727415bae30c6f41a4804f1": {
+        "semantic": "или",
+        "excitation": 0.41326617519095843
+      },
+      "S_26ad5b962bc94401a72ad2ca1d712dcf": {
+        "semantic": "Сергей",
+        "excitation": 0.4324679647006973
+      },
+      "S_3613c2e3388149fead3b711dec79c9d5": {
+        "semantic": "Кто",
+        "excitation": 1.0
+      },
+      "S_37ee54d2da624882b45dee16017faf5c": {
+        "semantic": "её",
+        "excitation": 0.4179851775159652
+      },
+      "S_390bf1827cd24d77931ed539bc036cbf": {
+        "semantic": "купил",
+        "excitation": 0.41092669064469217
+      },
+      "S_3a6d8ac4085347d08a9036a5f13a1729": {
+        "semantic": "Потом",
+        "excitation": 0.4324679647006973
+      },
+      "S_46c65e5640af49628a5f609ca504680e": {
+        "semantic": "увидела",
+        "excitation": 0.43001977953358317
+      },
+      "S_46d5e122600740c8aacdb87ba32d7fa5": {
+        "semantic": "Что",
+        "excitation": 0.4736703004021821
+      },
+      "S_4d1948dc41ef43cf9d254a38a50027c8": {
+        "semantic": "спит",
+        "excitation": 0.43483231472343137
+      },
+      "S_4f75f91f30a04501b419991c22085437": {
+        "semantic": "Яблоки",
+        "excitation": 0.41326617519095843
+      },
+      "S_4fc60bbfd6d04f339113b763180a989f": {
+        "semantic": "отправил",
+        "excitation": 0.8455706309681971
+      },
+      "S_55a6e2f23b384cdcb82864f76d0a7536": {
+        "semantic": "и",
+        "excitation": 0.9394623670396968
+      },
+      "S_58f18e00fca342539935482125cf5cf2": {
+        "semantic": "книга",
+        "excitation": 0.9887101204089311
+      },
+      "S_5b38602c862949fb90a7a592ed23b54d": {
+        "semantic": "Она",
+        "excitation": 0.43001977953358317
+      },
+      "S_6d77cb43b6d8464499e758c855414d4b": {
+        "semantic": "Петя",
+        "excitation": 0.42036484738319335
+      },
+      "S_6d957a454cda4218b43a6989fd04adb9": {
+        "semantic": "молоко",
+        "excitation": 0.41092669064469217
+      },
+      "S_74971e57b79744f39eb61c80fc2d2e70": {
+        "semantic": "Марии",
+        "excitation": 0.9831130689532562
+      },
+      "S_7615be76c48444d79344978692f06472": {
+        "semantic": "положил",
+        "excitation": 0.4324679647006973
+      },
+      "S_7b9139cac7d0483f9fbb09f4d899a7cd": {
+        "semantic": "Пётр",
+        "excitation": 0.42758545345223187
+      },
+      "S_8692d43b66214caba0ac4b765a745716": {
+        "semantic": "ключ",
+        "excitation": 0.4324679647006973
+      },
+      "S_8a113f049b8342c0967e59b5c628bd86": {
+        "semantic": "уйти",
+        "excitation": 0.8503298160017421
+      },
+      "S_8c51b6b316c7488787fef1c9c174e361": {
+        "semantic": "он",
+        "excitation": 0.9610399215571052
+      },
+      "S_9d851be9e96d495db9f58b3c4ce4fc9b": {
+        "semantic": "читает",
+        "excitation": 0.8172008996679819
+      },
+      "S_a1b909c31ef04f2289fed4bdad3badef": {
+        "semantic": "прийти",
+        "excitation": 0.8503298160017421
+      },
+      "S_a32475c466d54147bf4ae624a3eddd55": {
+        "semantic": "красный",
+        "excitation": 0.41326617519095843
+      },
+      "S_a735143d0429400f9d48b8a22a03a411": {
+        "semantic": "открыла",
+        "excitation": 0.4179851775159652
+      },
+      "S_b695646fd379418583b65f29ebecc813": {
+        "semantic": "Лиза",
+        "excitation": 0.4179851775159652
+      },
+      "S_ba2ebb580a23426e9694124a226cd2a0": {
+        "semantic": "письмо",
+        "excitation": 0.8455706309681971
+      },
+      "S_bbcdf184ff50433d91e6c41d4bab8c75": {
+        "semantic": "Кошка",
+        "excitation": 0.4663492236733742
+      },
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482": {
+        "semantic": "Иван",
+        "excitation": 0.9943390369531567
+      },
+      "S_cf8df43fc1aa47948a1e02bf7ed6e2b3": {
+        "semantic": "хлеб",
+        "excitation": 0.41092669064469217
+      },
+      "S_d0e36586b16c4283a1e31f4b04d892f9": {
+        "semantic": "улыбнулась",
+        "excitation": 0.43001977953358317
+      },
+      "S_d4469a3dddeb4ea7921614a2b578db39": {
+        "semantic": "прочитала",
+        "excitation": 0.4179851775159652
+      },
+      "S_d6106e497f4e4340a97a5746096934fd": {
+        "semantic": "бывать",
+        "excitation": 0.41326617519095843
+      },
+      "S_da1ef130f8b6421bb3134a8841fac235": {
+        "semantic": "выйти",
+        "excitation": 0.42036484738319335
+      },
+      "S_e4ae41185d744e4bba2c1e2d482263d7": {
+        "semantic": "зелёный",
+        "excitation": 0.41326617519095843
+      },
+      "S_e4e3f811631d419896d1e50ffe89431e": {
+        "semantic": "чай",
+        "excitation": 1.0
+      },
+      "S_ea82c7ffb028443c9056e9de6a6c0c06": {
+        "semantic": "а",
+        "excitation": 0.8551709069044637
+      },
+      "S_f0871d7633cf4e9cae10d47e5ff8b386": {
+        "semantic": "на",
+        "excitation": 0.4324679647006973
+      }
+    },
+    "pending_incoming": {
+      "N_166d80888d044995b32991772e3d4ac0": 1.0,
+      "N_07e962ffa60a410a99819efa6106b60b": 0.0006854425504205056,
+      "N_1b292003b75b48a886b0a0ecdff89b93": 1.0,
+      "N_db79000de35946ad81f0fb14ba605aa5": 0.5150000000000002,
+      "N_222258eee8e04f26bf5735d408209c9d": 0.5000000000000002,
+      "N_cf5dab81b6774a929d4b64d870af289c": 1.0,
+      "N_16acd6e90eb54438beb2cc4488a8f89d": 0.1797589202357763,
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8": 1.0,
+      "N_5762396d099c4b3795b9b8c61f98f50c": 1.0,
+      "N_7994c217d7794c17a7fa481ccd6de766": 0.48500000000000026,
+      "N_e9e3b8924e47436796973813d25fcec8": 0.47000000000000025,
+      "N_fd588afed46d474783f1cffd16cea389": 0.45500000000000024,
+      "N_ddb559d12ad84abfbfaa1521e22b86a2": 0.4400000000000002,
+      "N_a020d2bd4aa645a6a56bb4480a18edfd": 0.4250000000000002,
+      "N_9b2b9235ac3b4751a20cb7858956df7a": 0.4100000000000002,
+      "N_31951efd6605446984133aa9ef8939cf": 0.3950000000000002,
+      "N_c00018588c79416fb110547f5f33b218": 0.38000000000000017,
+      "N_409e92c58d054cbb91c92f04e1085969": 0.36500000000000016,
+      "N_b1867019c3a8439a87674a6a1c1ab348": 0.35000000000000014,
+      "N_6c1892a47d9449c2a50c49975b205ff2": 0.33500000000000013,
+      "N_4efa267fd582409c8880c4121664f752": 0.3200000000000001,
+      "N_09c73c3bf6054f4181c4670c4fe0ea97": 0.12753116687244578,
+      "N_056aaf0c97c1420a999ce4fedba28bed": 0.3050000000000001,
+      "N_c6bca5b1f8e04710a0072ee196942f9f": 0.2900000000000001,
+      "N_223178171fa14845b58b8e5039915c06": 0.2750000000000001,
+      "N_13c9ce95488f43f9bb27a039afe02130": 0.26000000000000006,
+      "N_74e84ade543947b69e2568755e151ca2": 0.24500000000000005,
+      "N_0529adbcfaeb4f08bdc036764f18ed08": 0.23000000000000004,
+      "N_4137998594fa47a595217c86ae0cb6a2": 0.17117834394908318,
+      "N_dbcf7694a4a94fc4b158de4d4201d379": 0.12500000000000017,
+      "M_fc69b4786a6b4fce93342f330f8d03af": 0.41000000000000003,
+      "M_a4a27a9e5230469ab269034b14a1e4d5": 0.41000000000000003,
+      "M_62356d38f31b4e11998ff39a775d8b61": 2.8903477192455562,
+      "M_47579c166a02418dbfc0d19133bbdf7d": 1.9286324021308685,
+      "M_3e0f67de5f5c4d5f876a61ad7e0104be": 1.7868781723392098,
+      "G_b3045fc72fa44ac39f6201ef3fbb6897": 0.4,
+      "M_f56681f8d1944c4f9d71e605cdf400b8": 0.8817542187592261,
+      "M_863ed2b48eec4378b8ae3cbabf21e82c": 0.7286324021308688,
+      "M_5bbd5025082a4ef8b5e951a0b3a0bb3b": 0.48852043086064256,
+      "G_69b2dde6bdc34a15b163949b3c1b8939": 0.4913016714676734,
+      "M_a270391e2e0d4014a955b4572944c542": 0.2484558726194037,
+      "M_39f931ae57fd40e6bd7b1fdc97abe8ba": 0.24987037960484743,
+      "K_83b5f4564b1e49f4898fab0ec1f6e9d7": 0.24987037960484743,
+      "M_824abfd243c94228b4e58a4d7b67d524": 0.6512929396501395,
+      "M_6157310730de47448728ec4aa7f1ced7": 0.6512929396501395,
+      "M_44b55c08669f4135a9464153cb8f6e73": 0.2512929396501395,
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": 1.253927676070733,
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": 0.4875000000000002,
+      "M_5b420d5c902a4051a351540d4c04c251": 6.886635141441073,
+      "N_82353b674761408a98159bcaa210550b": 0.31028163825630756,
+      "N_675ac44b29174695a5d64ed44e879c85": 0.3,
+      "N_c72fa10cc6644873b0f61e330ccb705b": 0.3,
+      "N_7fa561d020084a3ab57ca03066fe716e": 0.3,
+      "G_e80bc6077c574b16937b00f9c4771ea5": 0.3,
+      "K_e49271f8bd064e0bb616058737a65fb4": 0.3,
+      "K_148e7f7aabf542d6bc3094f989d36c4c": 0.3,
+      "K_82b9ba8ca6bc47e58100aaa92480d8c3": 0.3,
+      "K_bcd618e1c13e4600bc50e82a4db2579a": 0.3,
+      "K_d7ab606e681b4675a34ce0c9c8cc59d1": 0.3,
+      "K_a9cf985623ab40b5b64da68e370a8b5a": 0.3,
+      "K_d8f4cd51b0364b809dcf5b91c655a73a": 0.3,
+      "K_d230be7b2afb4083afe8ed43afe46818": 0.3,
+      "N_be8f1c4179ac4b33b5bce393270da24d": 0.3,
+      "N_ac3cc9e7940945f0893eb7bb43417242": 0.3
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_5b420d5c902a4051a351540d4c04c251",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "last_experience_ref": {
+      "uid": "N_dbcf7694a4a94fc4b158de4d4201d379",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "perception.queries.q1.predicate",
+      "ok": true,
+      "expected": "любить",
+      "actual": "любить"
+    },
+    {
+      "name": "perception.queries.q1.mode",
+      "ok": true,
+      "expected": "FILL_ROLE",
+      "actual": "FILL_ROLE"
+    },
+    {
+      "name": "perception.queries.q1.requested_role",
+      "ok": true,
+      "expected": "SUBJECT",
+      "actual": "SUBJECT"
+    },
+    {
+      "name": "perception.queries.q1.role_set",
+      "ok": true,
+      "expected": [
+        "OBJECT"
+      ],
+      "actual": [
+        "OBJECT"
+      ]
+    },
+    {
+      "name": "perception.queries.q1.roles.OBJECT",
+      "ok": true,
+      "expected": {
+        "text": "чай"
+      },
+      "actual": "чай"
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.world_assertion_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "inference.q1.status",
+      "ok": true,
+      "expected": "PROVED",
+      "actual": "PROVED"
+    },
+    {
+      "name": "inference.q1.role",
+      "ok": true,
+      "expected": "SUBJECT",
+      "actual": "SUBJECT"
+    },
+    {
+      "name": "inference.q1.value",
+      "ok": true,
+      "expected": "Иван",
+      "actual": "Иван"
+    },
+    {
+      "name": "templates.любить.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "OBJECT",
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "OBJECT",
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null
+}

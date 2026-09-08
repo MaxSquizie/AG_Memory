@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Sequence
 import json
 import urllib.error
 import urllib.request
@@ -151,6 +151,49 @@ class LMStudioClient:
             body["enable_thinking"] = flag
             body["chat_template_kwargs"] = {"enable_thinking": flag}
         return self._request("POST", "/v1/chat/completions", body)
+
+    @staticmethod
+    def embed_request_body(*, model: str, texts: Sequence[str]) -> dict[str, Any]:
+        inputs = [str(item) for item in texts]
+        if not str(model or "").strip():
+            raise LMStudioClientError("LM Studio embed request requires a model")
+        if not inputs:
+            raise LMStudioClientError("LM Studio embed request requires at least one input")
+        return {"model": str(model).strip(), "input": inputs}
+
+    @staticmethod
+    def parse_embed_response(data: dict[str, Any]) -> list[list[float]]:
+        raw = data.get("data")
+        if not isinstance(raw, list) or not raw:
+            raise LMStudioClientError("LM Studio embeddings response missing data list")
+        indexed: list[tuple[int, list[float]]] = []
+        for position, item in enumerate(raw):
+            if not isinstance(item, dict):
+                raise LMStudioClientError("LM Studio embeddings response contains an invalid item")
+            vector = item.get("embedding")
+            if not isinstance(vector, list) or not vector:
+                raise LMStudioClientError("LM Studio embeddings response missing embedding vector")
+            try:
+                values = [float(value) for value in vector]
+            except (TypeError, ValueError) as exc:
+                raise LMStudioClientError("LM Studio embeddings response contained a non-numeric vector") from exc
+            try:
+                index = int(item.get("index", position))
+            except (TypeError, ValueError) as exc:
+                raise LMStudioClientError("LM Studio embeddings response contained an invalid index") from exc
+            indexed.append((index, values))
+        indexed.sort(key=lambda pair: pair[0])
+        return [vector for _, vector in indexed]
+
+    def embed(self, *, model: str, texts: Sequence[str]) -> list[list[float]]:
+        body = self.embed_request_body(model=model, texts=texts)
+        data = self._request("POST", "/v1/embeddings", body)
+        vectors = self.parse_embed_response(data)
+        if len(vectors) != len(body["input"]):
+            raise LMStudioClientError(
+                f"LM Studio embeddings returned {len(vectors)} vectors for {len(body['input'])} inputs"
+            )
+        return vectors
 
 
     def native_chat(

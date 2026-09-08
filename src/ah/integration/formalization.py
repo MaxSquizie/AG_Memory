@@ -3,9 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime
 from enum import Enum
+from typing import Mapping
+import re
 
 from ah.agent import InteractionContext
 from ah.model import ActantRole, Domain, Ref, VariableSort
+from ah.integration.errors import CandidateValidationError
 from ah.temporal import TemporalAnchorContext, TemporalNormalizer, temporal_value_from_ref
 from ah.perception import (
     ActDependencyCandidate,
@@ -117,6 +120,7 @@ class ExistentialBinding:
     # continuation evidence only; they do not create a new canonical node kind.
     anchor_ref: Ref | None = None
     anchor_member_refs: tuple[Ref, ...] = ()
+    negative: bool = False
 
     def __post_init__(self) -> None:
         if not self.entity_ref.strip():
@@ -127,6 +131,33 @@ class ExistentialBinding:
             raise ValueError("ExistentialBinding.anchor_ref must be G")
         if self.anchor_ref is None and self.anchor_member_refs:
             raise ValueError("anchor_member_refs require anchor_ref")
+        if self.negative and self.anchor_ref is not None:
+            raise ValueError("negative existentials cannot continue a prior existential anchor")
+
+
+@dataclass(frozen=True, slots=True)
+class UniversalBinding:
+    """Runtime-only binding for a universal determiner plus restriction class.
+
+    ``entity_ref`` is a parser-local handle, not a canonical UID. Integration
+    uses a scoped ``BoundVar`` and an asserted ``FORALL``/``IMPLIES`` rule instead
+    of fabricating ``m_все_люди``. ``negate_quantifier`` is the §24.2 ``не все``
+    reading; body negation is kept on the assertion itself.
+    """
+
+    entity_ref: str
+    variable_id: int
+    restriction_lemma: str
+    sort: VariableSort = VariableSort.ENTITY
+    negate_quantifier: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.entity_ref.strip():
+            raise ValueError("UniversalBinding.entity_ref must be non-empty")
+        if self.variable_id < 0:
+            raise ValueError("UniversalBinding.variable_id must be >= 0")
+        if not self.restriction_lemma.strip():
+            raise ValueError("UniversalBinding.restriction_lemma must be non-empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +190,7 @@ class CandidateIR:
     ordered_assertion_ids: tuple[str, ...]
     discourse_refs: tuple[DiscourseRef, ...] = ()
     existential_bindings: tuple[ExistentialBinding, ...] = ()
+    universal_bindings: tuple[UniversalBinding, ...] = ()
     temporal_refs: tuple[UnresolvedTemporalRef, ...] = ()
     batch_kind: BatchKind = BatchKind.MESSAGE
     source_ref: str | None = None
@@ -561,6 +593,28 @@ class SemanticConsolidator:
         "что-то", "что-нибудь", "что-либо", "нечто",
         "someone", "somebody", "something",
     })
+    _NEGATIVE_EXISTENTIALS = frozenset({
+        "никто", "ничто", "никакой", "никакая", "никакое", "никакие",
+        "nobody", "noone", "nothing",
+    })
+    _UNIVERSAL_DETERMINERS = frozenset({
+        "все", "весь", "вся", "всей", "всех", "всем", "всем", "всеми",
+        "каждый", "каждая", "каждое", "каждые", "каждого", "каждому", "каждым",
+        "любой", "любая", "любое", "любые", "любого", "любому",
+        "all", "every", "each",
+    })
+    _WORD_RE = re.compile(r"[A-Za-zА-Яа-яЁё-]+")
+    _NOT_ALL_RE = re.compile(
+        r"(?<![A-Za-zА-Яа-яЁё])не\s+(все|весь|вся|всей|всех|всем|каждый|каждая|каждое|каждые|"
+        r"каждый|любой|любая|любое|all|every|each)\b",
+        re.IGNORECASE,
+    )
+    _ALL_RE = re.compile(
+        r"(?<![A-Za-zА-Яа-яЁё])(все|весь|вся|всей|всех|всем|каждый|каждая|каждое|каждые|"
+        r"любой|любая|любое|all|every|each)\b",
+        re.IGNORECASE,
+    )
+    _NE_RE = re.compile(r"(?<![A-Za-zА-Яа-яЁё])не\b", re.IGNORECASE)
 
     @classmethod
     def _is_existential_anchor(cls, actant: ActantCandidate) -> bool:
@@ -581,6 +635,227 @@ class SemanticConsolidator:
             return False
         text = (actant.normalized_hint or actant.mention or "").strip().casefold().replace("ё", "е")
         return text in cls._EXISTENTIAL_PRONOUNS
+
+    def _lemma(self, word: str) -> str:
+        token = str(word or "").strip()
+        if not token:
+            return ""
+        try:
+            analyses = tuple(self.morphology.analyze_all(token))
+        except AttributeError:
+            item = self.morphology.analyze(token)
+            analyses = () if item is None else (item,)
+        infos = tuple(material_analyses(analyses))
+        preferred = tuple(item for item in infos if item.pos in {"NOUN", "NPRO", "ADJF"})
+        if preferred and preferred[0].normal_form:
+            return str(preferred[0].normal_form).casefold().replace("ё", "е")
+        if infos and infos[0].normal_form:
+            return str(infos[0].normal_form).casefold().replace("ё", "е")
+        return token.casefold().replace("ё", "е")
+
+    def _restriction_lemma(self, head: str) -> str:
+        words = self._WORD_RE.findall(head)
+        if not words:
+            raise CandidateValidationError("Universal quantifier requires a restriction class")
+        return self._lemma(words[-1])
+
+    def _source_quantifier_scope(self, source_text: str) -> tuple[str | None, bool]:
+        """Return (kind, extra_body_negation) from the utterance operator tree.
+
+        ``not_all`` is «не все N P». ``all`` is «все N P» or «все N не P».
+        A second ``не`` after a «не все» NP is structurally ambiguous → fail closed.
+        """
+
+        text = str(source_text or "")
+        not_all = self._NOT_ALL_RE.search(text)
+        if not_all is not None:
+            rest = text[not_all.end():]
+            if self._NE_RE.search(rest):
+                raise CandidateValidationError(
+                    "Ambiguous quantifier/predicate negation: «не все … не …» is not guessed"
+                )
+            return "not_all", False
+        all_match = self._ALL_RE.search(text)
+        if all_match is not None:
+            rest = text[all_match.end():]
+            return "all", bool(self._NE_RE.search(rest))
+        return None, False
+
+    def _determiner_attaches_to_head(self, source_text: str, mention: str) -> bool:
+        """True when a universal determiner in the utterance modifies this NP.
+
+        Used when Perception already stripped «все/каждый» off the actant mention
+        but left the restriction class.  «он открыл все окна» must not treat the
+        subject as a universal restriction just because «все» occurs later.
+        """
+
+        head = str(mention or "").strip().casefold().replace("ё", "е")
+        if not head:
+            return False
+        text = str(source_text or "").casefold().replace("ё", "е")
+        attached = re.compile(
+            r"(?<![A-Za-zА-Яа-яЁё])(?:не\s+)?(?:"
+            r"все|весь|вся|всей|всех|всем|всеми|"
+            r"каждый|каждая|каждое|каждые|каждого|каждому|каждым|"
+            r"любой|любая|любое|любые|любого|любому|all|every|each"
+            r")\s+" + re.escape(head) + r"\b",
+            re.IGNORECASE,
+        )
+        return attached.search(text) is not None
+
+    def _parse_quantifier_mention(
+        self,
+        actant: ActantCandidate,
+        *,
+        source_kind: str | None,
+        source_text: str,
+    ) -> tuple[str, str, str] | None:
+        """Return (kind, head, leftover_mention) or None.
+
+        kind is nobody | forall | not_forall.
+        """
+
+        raw = (actant.normalized_hint or actant.mention or "").strip()
+        if not raw or actant.composition is not None or actant.proposition is not None:
+            return None
+        words = [item.casefold().replace("ё", "е") for item in self._WORD_RE.findall(raw)]
+        if not words:
+            return None
+        if words[0] in self._NEGATIVE_EXISTENTIALS and len(words) == 1:
+            return "nobody", "", raw
+        if actant.role is not ActantRole.SUBJECT:
+            return None
+        not_all_prefix = len(words) >= 2 and words[0] == "не" and words[1] in self._UNIVERSAL_DETERMINERS
+        if not_all_prefix:
+            head_words = words[2:]
+            if not head_words:
+                raise CandidateValidationError("«не все» requires a restriction class")
+            return "not_forall", " ".join(head_words), " ".join(head_words)
+        if words[0] in self._UNIVERSAL_DETERMINERS:
+            head_words = words[1:]
+            if not head_words:
+                raise CandidateValidationError("Universal quantifier requires a restriction class")
+            kind = "not_forall" if source_kind == "not_all" else "forall"
+            return kind, " ".join(head_words), " ".join(head_words)
+        if (
+            source_kind in {"all", "not_all"}
+            and actant.role is ActantRole.SUBJECT
+            and self._third_person_signature(actant) is None
+            and self._determiner_attaches_to_head(source_text, raw)
+        ):
+            kind = "not_forall" if source_kind == "not_all" else "forall"
+            return kind, raw, raw
+        return None
+
+    def _rewrite_quantified_actants(
+        self, result: PerceptionResult
+    ) -> tuple[PerceptionResult, dict[str, tuple[str, str, bool]]]:
+        """Split universal/negative-existential determiners off actant mentions.
+
+        Returns parser-local handles → (kind, restriction_lemma, negate_quantifier).
+        """
+
+        source_kind, body_negated_from_source = self._source_quantifier_scope(result.source_text)
+        marks: dict[str, tuple[str, str, bool]] = {}
+        next_handle = 0
+
+        def handle_for(actant: ActantCandidate, prefix: str) -> str:
+            nonlocal next_handle
+            if actant.entity_ref:
+                return actant.entity_ref
+            next_handle += 1
+            return f"{prefix}{next_handle}"
+
+        assertions: list[AssertionCandidate] = []
+        for assertion in result.assertions:
+            parsed: list[tuple[ActantCandidate, tuple[str, str, str]]] = []
+            for actant in assertion.actants:
+                parsed_q = self._parse_quantifier_mention(
+                    actant, source_kind=source_kind, source_text=result.source_text
+                )
+                if parsed_q is None:
+                    continue
+                parsed.append((actant, parsed_q))
+            if not parsed:
+                assertions.append(assertion)
+                continue
+            kinds = {item[1][0] for item in parsed}
+            if "nobody" in kinds and kinds - {"nobody"}:
+                raise CandidateValidationError("Cannot mix «никто» with a universal in one assertion")
+            if "forall" in kinds and "not_forall" in kinds:
+                raise CandidateValidationError("Mixed «все» / «не все» in one assertion is not guessed")
+            if len(parsed) > 1 and any(item[1][0] == "not_forall" for item in parsed):
+                raise CandidateValidationError("«не все» is supported only for a single quantified role")
+
+            new_negated = assertion.negated
+            if any(item[1][0] == "nobody" for item in parsed):
+                new_negated = False
+            elif any(item[1][0] == "not_forall" for item in parsed):
+                new_negated = False
+            elif source_kind == "all":
+                new_negated = body_negated_from_source
+
+            actants: list[ActantCandidate] = []
+            parsed_map = {id(actant): parsed_q for actant, parsed_q in parsed}
+            for actant in assertion.actants:
+                parsed_q = parsed_map.get(id(actant))
+                if parsed_q is None:
+                    actants.append(actant)
+                    continue
+                kind, head, leftover = parsed_q
+                prefix = "NX:" if kind == "nobody" else "UQ:"
+                entity_ref = handle_for(actant, prefix)
+                restriction = "" if kind == "nobody" else self._restriction_lemma(head)
+                marks[entity_ref] = (kind, restriction, kind == "not_forall")
+                mention = leftover if leftover else (actant.mention or actant.normalized_hint or kind)
+                actants.append(
+                    replace(
+                        actant,
+                        entity_ref=entity_ref,
+                        mention=mention,
+                        normalized_hint=mention.casefold(),
+                    )
+                )
+            rewritten = replace(assertion, actants=tuple(actants), negated=new_negated)
+            alternatives = tuple(
+                replace(item, actants=tuple(actants), negated=new_negated)
+                if item.local_id == assertion.local_id
+                else item
+                for item in assertion.alternatives
+            )
+            assertions.append(replace(rewritten, alternatives=alternatives))
+        return replace(result, assertions=tuple(assertions)), marks
+
+    def _negative_existential_bindings(
+        self,
+        marks: Mapping[str, tuple[str, str, bool]],
+        *,
+        start_at: int,
+    ) -> tuple[ExistentialBinding, ...]:
+        found = [handle for handle, mark in marks.items() if mark[0] == "nobody"]
+        return tuple(
+            ExistentialBinding(entity_ref=handle, variable_id=start_at + index, negative=True)
+            for index, handle in enumerate(found)
+        )
+
+    def _universal_bindings(
+        self,
+        marks: Mapping[str, tuple[str, str, bool]],
+        *,
+        start_at: int,
+    ) -> tuple[UniversalBinding, ...]:
+        found = [
+            (handle, mark) for handle, mark in marks.items() if mark[0] in {"forall", "not_forall"}
+        ]
+        return tuple(
+            UniversalBinding(
+                entity_ref=handle,
+                variable_id=start_at + index,
+                restriction_lemma=lemma,
+                negate_quantifier=negate,
+            )
+            for index, (handle, (_, lemma, negate)) in enumerate(found)
+        )
 
     def _existential_bindings(
         self, result: PerceptionResult, *, start_at: int = 0
@@ -918,6 +1193,7 @@ class SemanticConsolidator:
             scoped, context=context, source_timestamp=source_timestamp,
             experience_timestamp=experience_timestamp,
         )
+        scoped, quantifier_marks = self._rewrite_quantified_actants(scoped)
         self.validator.validate(scoped)
         ordered = self.validator.dependency_order(scoped)
         next_variable_id = max(
@@ -926,13 +1202,22 @@ class SemanticConsolidator:
         fresh_existentials = self._existential_bindings(
             scoped, start_at=next_variable_id
         )
-        existential_bindings = cross_turn_existentials + fresh_existentials
+        next_variable_id += len(fresh_existentials)
+        negative_existentials = self._negative_existential_bindings(
+            quantifier_marks, start_at=next_variable_id
+        )
+        next_variable_id += len(negative_existentials)
+        universal_bindings = self._universal_bindings(
+            quantifier_marks, start_at=next_variable_id
+        )
+        existential_bindings = cross_turn_existentials + fresh_existentials + negative_existentials
         ir = CandidateIR(
             source_text=scoped.source_text,
             perception=scoped,
             ordered_assertion_ids=tuple(item.local_id for item in ordered),
             discourse_refs=self._discourse_refs(scoped, context),
             existential_bindings=existential_bindings,
+            universal_bindings=universal_bindings,
             temporal_refs=temporal_refs,
             batch_kind=batch_kind,
             source_ref=source_ref,

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 import heapq
 
 from ah.core import AHCore
-from ah.model import Domain, Hypernode, RefKind
+from ah.model import Domain, FunctionSymbol, RefKind
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,6 +109,9 @@ class GarbageCollector:
         expired_candidates: tuple[str, ...],
         *,
         tick: int | None = None,
+        pacemaker_only_uids: Iterable[str] = (),
+        workspace_threshold: float | None = None,
+        epsilon: float = 0.0,
     ) -> GCResult:
         requested = set(expired_candidates)
         general_due: set[str] = set()
@@ -117,6 +121,7 @@ class GarbageCollector:
         requested_tuple = tuple(sorted(requested))
         if not self.enabled or not requested:
             return GCResult(requested_tuple, (), (), (), {})
+        pacemaker_only = {uid for uid in pacemaker_only_uids}
 
         protected: set[str] = set()
         deletable: set[str] = set()
@@ -140,7 +145,7 @@ class GarbageCollector:
         # Other lifecycle candidates are handled together with general structural
         # candidates below, so there is one physical-deletion contract.
         for uid in tuple(sorted(lifecycle_due)):
-            if self._is_intrinsically_protected_lifecycle_candidate(uid):
+            if self._is_historically_protected(uid):
                 protected.add(uid)
                 lifecycle_due.discard(uid)
 
@@ -168,18 +173,21 @@ class GarbageCollector:
                     protected.update(component)
                     continue
 
-                # A currently excited detached component is still participating in
-                # cognition and therefore is not "lost" yet.  This preserves the
-                # existing activation-floor semantics; structural GC is retried only
-                # after another initial-lifetime window.  Committee-injected orphan
-                # nodes are cold, so this guard does not weaken M3.
-                active_component = any(
-                    self.core.store.kind_of(member) is not RefKind.L
-                    and self.core.store.runtime_state(member).excitation > 0.0
-                    for member in component
-                    if self.core.store.has_uid(member)
-                )
-                if active_component:
+                # Historical FALSE(N) / H experience must not be collected as
+                # ordinary orphans even after the immunity window.
+                if any(self._is_historically_protected(member) for member in component):
+                    protected.update(member for member in component if self.core.store.has_uid(member))
+                    continue
+
+                # Defer only mid-cognition: Workspace membership or residual
+                # non-pacemaker excitation. ν pulses and decay-floor leftovers
+                # are not experience and must not grant a fresh lifetime.
+                if self._component_is_cognitively_active(
+                    component,
+                    pacemaker_only=pacemaker_only,
+                    workspace_threshold=workspace_threshold,
+                    epsilon=epsilon,
+                ):
                     for member in component:
                         if self.core.store.has_uid(member):
                             self._schedule(member, int(tick or 0))
@@ -330,7 +338,29 @@ class GarbageCollector:
                 return False
         return not self.core.store.structural_children(uid)
 
-    def _is_intrinsically_protected_lifecycle_candidate(self, uid: str) -> bool:
+    def _component_is_cognitively_active(
+        self,
+        component: set[str],
+        *,
+        pacemaker_only: set[str],
+        workspace_threshold: float | None,
+        epsilon: float,
+    ) -> bool:
+        threshold = float("inf") if workspace_threshold is None else float(workspace_threshold)
+        eps = max(0.0, float(epsilon))
+        for member in component:
+            if not self.core.store.has_uid(member) or self.core.store.kind_of(member) is RefKind.L:
+                continue
+            excitation = self.core.store.runtime_state(member).excitation
+            if excitation > threshold:
+                return True
+            if excitation > eps and member not in pacemaker_only:
+                return True
+        return False
+
+    def _is_historically_protected(self, uid: str) -> bool:
+        if not self.core.store.has_uid(uid):
+            return False
         # Dialogue turns are experienced history. In ordinary operation they are
         # also S-anchored through their event template, but preserve the explicit
         # guard because a current turn may still be under construction.
@@ -349,6 +379,18 @@ class GarbageCollector:
             source_domain = self.core.store.domain_of(link.source.uid)
             target_domain = self.core.store.domain_of(link.target.uid)
             if Domain.H in {source_domain, target_domain}:
+                return True
+
+        # FALSE(N_old) is a historical refutation record, not garbage.
+        if self.core.store.kind_of(uid) is RefKind.G:
+            try:
+                element = self.core.store.get_element_any_domain(uid)
+            except (KeyError, TypeError):
+                element = None
+            if isinstance(element, FunctionSymbol) and str(element.function_id).upper() == "FALSE":
+                return True
+        for parent in self.core.store.function_parents(uid):
+            if str(parent.function_id).upper() == "FALSE":
                 return True
         return False
 

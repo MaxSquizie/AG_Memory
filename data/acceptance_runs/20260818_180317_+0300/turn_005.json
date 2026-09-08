@@ -1,0 +1,2310 @@
+{
+  "index": 5,
+  "input": "Яблоки бывают зелёными или красными.",
+  "status": "OK",
+  "scenario_id": "regression40_frozen",
+  "linguistic_candidate_graph": {
+    "text": "Яблоки бывают зелёными или красными.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Яблоки",
+        "start": 0,
+        "end": 6,
+        "analyses": [
+          {
+            "normal_form": "яблоко",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "accs",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.526315
+          },
+          {
+            "normal_form": "яблоко",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "nomn",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.473684
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "бывают",
+        "start": 7,
+        "end": 13,
+        "analyses": [
+          {
+            "normal_form": "бывать",
+            "pos": "VERB",
+            "case": null,
+            "number": "plur",
+            "gender": null,
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "pres",
+              "plur",
+              "VERB",
+              "impf",
+              "indc",
+              "intr",
+              "3per"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "зелёными",
+        "start": 14,
+        "end": 22,
+        "analyses": [
+          {
+            "normal_form": "зелёный",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "plur",
+              "Qual",
+              "ADJF"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "или",
+        "start": 23,
+        "end": 26,
+        "analyses": [
+          {
+            "normal_form": "или",
+            "pos": "CONJ",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "CONJ"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "красными",
+        "start": 27,
+        "end": 35,
+        "analyses": [
+          {
+            "normal_form": "красный",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "plur",
+              "Qual",
+              "ADJF"
+            ],
+            "score": 0.8
+          },
+          {
+            "normal_form": "красный",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "plur",
+              "anim",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.133333
+          },
+          {
+            "normal_form": "красное",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "plur",
+              "Geox",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.066666
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": ".",
+        "start": 35,
+        "end": 36,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 5,
+          "text": "Яблоки бывают зелёными или красными",
+          "evidence": {
+            "text": "Яблоки бывают зелёными или красными",
+            "start": 0,
+            "end": 35
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "бывать"
+            ]
+          }
+        ],
+        "marker": "яблоки",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "бывать"
+        ]
+      }
+    ],
+    "coordinations": [
+      {
+        "operator": "OR",
+        "span": {
+          "start_index": 3,
+          "end_index": 5,
+          "text": "зелёными или красными",
+          "evidence": {
+            "text": "зелёными или красными",
+            "start": 14,
+            "end": 35
+          }
+        },
+        "member_spans": [
+          {
+            "start_index": 3,
+            "end_index": 3,
+            "text": "зелёными",
+            "evidence": {
+              "text": "зелёными",
+              "start": 14,
+              "end": 22
+            }
+          },
+          {
+            "start_index": 5,
+            "end_index": 5,
+            "text": "красными",
+            "evidence": {
+              "text": "красными",
+              "start": 27,
+              "end": 35
+            }
+          }
+        ]
+      }
+    ],
+    "frame_graph": {
+      "dependencies": [],
+      "coordinations": []
+    }
+  },
+  "perception_result": {
+    "source_text": "Яблоки бывают зелёными или красными.",
+    "assertions": [
+      {
+        "local_id": "A1",
+        "predicate": {
+          "surface": "бывают",
+          "normalized_hint": "бывать",
+          "sense_hint": null,
+          "evidence": {
+            "text": "бывают",
+            "start": 7,
+            "end": 13
+          },
+          "template_candidate": {
+            "roles": [
+              "SUBJECT",
+              "STATE"
+            ]
+          },
+          "template_selection": null
+        },
+        "actants": [
+          {
+            "role": "STATE",
+            "mention": "зелёными или красными",
+            "normalized_hint": null,
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "зелёными или красными",
+              "start": 14,
+              "end": 35
+            },
+            "parser_confidence": null,
+            "composition": {
+              "operator": "OR",
+              "members": [
+                {
+                  "mention": "зелёными",
+                  "normalized_hint": null,
+                  "semantic_hint": null,
+                  "evidence": {
+                    "text": "зелёными",
+                    "start": 14,
+                    "end": 22
+                  }
+                },
+                {
+                  "mention": "красными",
+                  "normalized_hint": null,
+                  "semantic_hint": null,
+                  "evidence": {
+                    "text": "красными",
+                    "start": 27,
+                    "end": 35
+                  }
+                }
+              ]
+            },
+            "proposition": null
+          },
+          {
+            "role": "SUBJECT",
+            "mention": "Яблоки",
+            "normalized_hint": "Яблоко",
+            "semantic_hint": null,
+            "candidate_ref": null,
+            "entity_ref": null,
+            "evidence": {
+              "text": "Яблоки",
+              "start": 0,
+              "end": 6
+            },
+            "parser_confidence": null,
+            "composition": null,
+            "proposition": null
+          }
+        ],
+        "evidence": {
+          "text": "Яблоки бывают зелёными или красными",
+          "start": 0,
+          "end": 35
+        },
+        "alternatives": [],
+        "negated": false,
+        "status": "ASSERTED",
+        "quoted": false
+      }
+    ],
+    "queries": [],
+    "commands": [],
+    "diagnostics": [],
+    "relations": [],
+    "conditionals": [],
+    "act_dependencies": []
+  },
+  "integration_commit": {
+    "assertions": [
+      {
+        "local_id": "A1",
+        "ref": {
+          "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+          "kind": "G"
+        },
+        "domain": "C",
+        "created": true,
+        "ambiguous": false,
+        "semantic_scope": null
+      }
+    ],
+    "experience_ref": {
+      "uid": "N_098de8764ce7443fa2ab91867726e60c",
+      "kind": "N"
+    },
+    "activation_seeds": [
+      {
+        "ref": {
+          "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+          "kind": "G"
+        },
+        "reason": "NEW_FACT"
+      },
+      {
+        "ref": {
+          "uid": "N_098de8764ce7443fa2ab91867726e60c",
+          "kind": "N"
+        },
+        "reason": "EXPERIENCE"
+      },
+      {
+        "ref": {
+          "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+          "kind": "S"
+        },
+        "reason": "RESOLVED_SYMBOL"
+      }
+    ],
+    "refutations": [],
+    "unresolved_queries": [],
+    "unresolved_commands": [],
+    "clarification_required": false,
+    "clarifications": [],
+    "relations": [],
+    "conditionals": []
+  },
+  "queries": [],
+  "agent_context": {
+    "current_input": "Яблоки бывают зелёными или красными.",
+    "workspace_blocks": [
+      {
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Кошка спит.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что делает кошка?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Хорошо, Иван любит чай.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Кто любит чай?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Все, кто ценит хороший напиток! А вы любите чай? 😊»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее агент ответил: «Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что любит Иван»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Ранее пользователь сказал: «Что любит Иван?»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Что любит Иван»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_1ffa92616610480c8852e307cef54917",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван читает книгу.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_24b168f8b9534e9b8def046e418ddaf0",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Мария читает.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "N_f5f00bf4e845441882c6e28c14251c69",
+          "kind": "N"
+        },
+        "mode": "ACTIVE",
+        "semantic": "Пользователь ранее сказал: «Иван купил хлеб и молоко.»",
+        "properties": []
+      },
+      {
+        "root": {
+          "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+          "kind": "G"
+        },
+        "mode": "ACTIVE",
+        "semantic": "(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))",
+        "properties": []
+      }
+    ],
+    "inference_blocks": [],
+    "rendered": "# CURRENT INPUT\nЯблоки бывают зелёными или красными.\n\n# ACTIVE MEMORY\n- Пользователь ранее сказал: «Кошка спит.»\n- Ранее пользователь сказал: «Что делает кошка?»\n- Ранее агент ответил: «Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **»\n- Ранее пользователь сказал: «Иван любит чай.»\n- Пользователь ранее сказал: «Иван любит чай.»\n- Ранее агент ответил: «Хорошо, Иван любит чай.»\n- Ранее пользователь сказал: «Кто любит чай?»\n- Ранее агент ответил: «Все, кто ценит хороший напиток! А вы любите чай? 😊»\n- Ранее агент ответил: «Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?»\n- Ранее пользователь сказал: «Что любит Иван»\n- Ранее пользователь сказал: «Что любит Иван?»\n- Пользователь ранее сказал: «Что любит Иван»\n- Пользователь ранее сказал: «Иван читает книгу.»\n- Пользователь ранее сказал: «Мария читает.»\n- Пользователь ранее сказал: «Иван купил хлеб и молоко.»\n- (бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))",
+    "source_workspace_refs": [
+      {
+        "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+        "kind": "G"
+      },
+      {
+        "uid": "M_5b420d5c902a4051a351540d4c04c251",
+        "kind": "M"
+      },
+      {
+        "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+        "kind": "M"
+      },
+      {
+        "uid": "M_8886594cd3924845b8b316fbd64fa63d",
+        "kind": "M"
+      },
+      {
+        "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+        "kind": "M"
+      },
+      {
+        "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+        "kind": "M"
+      },
+      {
+        "uid": "M_f87a17b453394add85fb3ddb9fb3b8aa",
+        "kind": "M"
+      },
+      {
+        "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+        "kind": "M"
+      },
+      {
+        "uid": "N_098de8764ce7443fa2ab91867726e60c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+        "kind": "N"
+      },
+      {
+        "uid": "N_166d80888d044995b32991772e3d4ac0",
+        "kind": "N"
+      },
+      {
+        "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1ca1c4e829754256a693a0d61d7280f3",
+        "kind": "N"
+      },
+      {
+        "uid": "N_1ffa92616610480c8852e307cef54917",
+        "kind": "N"
+      },
+      {
+        "uid": "N_222258eee8e04f26bf5735d408209c9d",
+        "kind": "N"
+      },
+      {
+        "uid": "N_24b168f8b9534e9b8def046e418ddaf0",
+        "kind": "N"
+      },
+      {
+        "uid": "N_270eca9c9f804e91be9bc62f0c3a8f94",
+        "kind": "N"
+      },
+      {
+        "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5c78f6012ee042d2940d294336169c7b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_5c96619218a8448893f6da00b005be30",
+        "kind": "N"
+      },
+      {
+        "uid": "N_82353b674761408a98159bcaa210550b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+        "kind": "N"
+      },
+      {
+        "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+        "kind": "N"
+      },
+      {
+        "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+        "kind": "N"
+      },
+      {
+        "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+        "kind": "N"
+      },
+      {
+        "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+        "kind": "N"
+      },
+      {
+        "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+        "kind": "N"
+      },
+      {
+        "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+        "kind": "N"
+      },
+      {
+        "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+        "kind": "N"
+      },
+      {
+        "uid": "N_e1689bb122194fd89aa74765d5412fd9",
+        "kind": "N"
+      },
+      {
+        "uid": "N_f5f00bf4e845441882c6e28c14251c69",
+        "kind": "N"
+      },
+      {
+        "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+        "kind": "S"
+      },
+      {
+        "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+        "kind": "S"
+      },
+      {
+        "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+        "kind": "S"
+      },
+      {
+        "uid": "S_7fd9dfc6c16f471ca6e4ae17b2e66c91",
+        "kind": "S"
+      },
+      {
+        "uid": "S_bbcdf184ff50433d91e6c41d4bab8c75",
+        "kind": "S"
+      },
+      {
+        "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+        "kind": "S"
+      },
+      {
+        "uid": "S_dd067555487f4fe4b126940a9c0c9183",
+        "kind": "S"
+      },
+      {
+        "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+        "kind": "S"
+      },
+      {
+        "uid": "T_108e6823ed274a6591ca24ef16b1ed89",
+        "kind": "T"
+      },
+      {
+        "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+        "kind": "T"
+      },
+      {
+        "uid": "T_e7dfe8e6e37d4e14b2747bf5b06855fa",
+        "kind": "T"
+      },
+      {
+        "uid": "T_fe2690bfb952457d9d8b5a5099bca99f",
+        "kind": "T"
+      }
+    ]
+  },
+  "agent_context_diagnostic": {
+    "tick_index": 109,
+    "workspace_threshold": 0.35,
+    "workspace": [
+      {
+        "position": 1,
+        "root": {
+          "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+          "kind": "G"
+        },
+        "semantic": "[G_1984bb033c62491c9b2fd175ce0f2349] ([N_bbc1ed30d5f649fba932ac34d3addcdb] [S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать(SUBJECT=[M_800670f285fd468ebbcecc30ce271197] Яблоко, STATE=[M_4bd1b246579d4a2b86ebaeaa41bc12da] зелёными)) OR ([N_d9c2050cafa341d4aeca9af1d6d9e77f] [S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать(SUBJECT=[M_800670f285fd468ebbcecc30ce271197] Яблоко, STATE=[M_7f84998382eb4c218e937ef25f18e86d] красными))",
+        "kind": "G",
+        "domain": "C",
+        "excitation": 0.65,
+        "output": 0.65,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 2,
+        "root": {
+          "uid": "M_5b420d5c902a4051a351540d4c04c251",
+          "kind": "M"
+        },
+        "semantic": "[M_5b420d5c902a4051a351540d4c04c251] Пользователь",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 1.0,
+        "output": 0.1501908083690644,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 3,
+        "root": {
+          "uid": "M_62356d38f31b4e11998ff39a775d8b61",
+          "kind": "M"
+        },
+        "semantic": "[M_62356d38f31b4e11998ff39a775d8b61] Иван",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.412096,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 4,
+        "root": {
+          "uid": "M_8886594cd3924845b8b316fbd64fa63d",
+          "kind": "M"
+        },
+        "semantic": "[M_8886594cd3924845b8b316fbd64fa63d] книга",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.47209599999999996,
+        "output": 0.15209599999999995,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 5,
+        "root": {
+          "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+          "kind": "M"
+        },
+        "semantic": "[M_9c31b2e507ed4c46ac9d6cbcfec9bd0a] АГент",
+        "kind": "M",
+        "domain": "P",
+        "excitation": 0.8578302460967535,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 6,
+        "root": {
+          "uid": "M_a4a27a9e5230469ab269034b14a1e4d5",
+          "kind": "M"
+        },
+        "semantic": "[M_a4a27a9e5230469ab269034b14a1e4d5] чай",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.8274209812844735,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 7,
+        "root": {
+          "uid": "M_f87a17b453394add85fb3ddb9fb3b8aa",
+          "kind": "M"
+        },
+        "semantic": "[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.4720000000000001,
+        "output": 0.21200000000000008,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 8,
+        "root": {
+          "uid": "M_fc69b4786a6b4fce93342f330f8d03af",
+          "kind": "M"
+        },
+        "semantic": "[M_fc69b4786a6b4fce93342f330f8d03af] Кошка",
+        "kind": "M",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.00012224201249999567,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 9,
+        "root": {
+          "uid": "N_098de8764ce7443fa2ab91867726e60c",
+          "kind": "N"
+        },
+        "semantic": "[N_098de8764ce7443fa2ab91867726e60c] реплика пользователя: Яблоки бывают зелёными или красными.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5,
+        "output": 0.5,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 10,
+        "root": {
+          "uid": "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+          "kind": "N"
+        },
+        "semantic": "[N_0bae3cf6a9a14be4a4100a6af1d5e16d] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9916584851246795,
+        "output": 2.28700314464092e-07,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 11,
+        "root": {
+          "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+          "kind": "N"
+        },
+        "semantic": "[N_0cebf7e679084d3fb18448e01c6689a7] реплика пользователя: Мария читает.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49774602224913056,
+        "output": 4.594013843750577e-05,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 12,
+        "root": {
+          "uid": "N_166d80888d044995b32991772e3d4ac0",
+          "kind": "N"
+        },
+        "semantic": "[N_166d80888d044995b32991772e3d4ac0] реплика пользователя: Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6155820146248268,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 13,
+        "root": {
+          "uid": "N_16acd6e90eb54438beb2cc4488a8f89d",
+          "kind": "N"
+        },
+        "semantic": "[N_16acd6e90eb54438beb2cc4488a8f89d] реплика пользователя: Что делает кошка?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.602667874207298,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 14,
+        "root": {
+          "uid": "N_1b292003b75b48a886b0a0ecdff89b93",
+          "kind": "N"
+        },
+        "semantic": "[N_1b292003b75b48a886b0a0ecdff89b93] реплика агента: Хорошо, Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6257772409950637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 15,
+        "root": {
+          "uid": "N_1ca1c4e829754256a693a0d61d7280f3",
+          "kind": "N"
+        },
+        "semantic": "[N_1ca1c4e829754256a693a0d61d7280f3] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.3779777404320991,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 16,
+        "root": {
+          "uid": "N_1ffa92616610480c8852e307cef54917",
+          "kind": "N"
+        },
+        "semantic": "[N_1ffa92616610480c8852e307cef54917] [S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_8886594cd3924845b8b316fbd64fa63d] книга)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.4000641025187499,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 17,
+        "root": {
+          "uid": "N_222258eee8e04f26bf5735d408209c9d",
+          "kind": "N"
+        },
+        "semantic": "[N_222258eee8e04f26bf5735d408209c9d] реплика агента: Многие! Чай — один из самых популярных напитков в мире, и у каждого свои любимые сорта. А вы любите чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6876613281393915,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 18,
+        "root": {
+          "uid": "N_24b168f8b9534e9b8def046e418ddaf0",
+          "kind": "N"
+        },
+        "semantic": "[N_24b168f8b9534e9b8def046e418ddaf0] [S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает(SUBJECT=[M_f87a17b453394add85fb3ddb9fb3b8aa] Мария)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 1.0,
+        "output": 0.40004799999999996,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 19,
+        "root": {
+          "uid": "N_270eca9c9f804e91be9bc62f0c3a8f94",
+          "kind": "N"
+        },
+        "semantic": "[N_270eca9c9f804e91be9bc62f0c3a8f94] реплика пользователя: Кошка спит.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.500283880071895,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 20,
+        "root": {
+          "uid": "N_4bb9facf12c24b19a4668bf513b653f2",
+          "kind": "N"
+        },
+        "semantic": "[N_4bb9facf12c24b19a4668bf513b653f2] реплика пользователя: Что любит Иван?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6138136088018763,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 21,
+        "root": {
+          "uid": "N_5762396d099c4b3795b9b8c61f98f50c",
+          "kind": "N"
+        },
+        "semantic": "[N_5762396d099c4b3795b9b8c61f98f50c] реплика пользователя: Кто любит чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6601817385434364,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 22,
+        "root": {
+          "uid": "N_5c78f6012ee042d2940d294336169c7b",
+          "kind": "N"
+        },
+        "semantic": "[N_5c78f6012ee042d2940d294336169c7b] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.592665967608474,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 23,
+        "root": {
+          "uid": "N_5c96619218a8448893f6da00b005be30",
+          "kind": "N"
+        },
+        "semantic": "[N_5c96619218a8448893f6da00b005be30] реплика пользователя: Иван читает книгу.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.4973799486377539,
+        "output": 6.0165815000012834e-05,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 24,
+        "root": {
+          "uid": "N_82353b674761408a98159bcaa210550b",
+          "kind": "N"
+        },
+        "semantic": "[N_82353b674761408a98159bcaa210550b] [S_4d1948dc41ef43cf9d254a38a50027c8] спит(SUBJECT=[M_fc69b4786a6b4fce93342f330f8d03af] Кошка)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.9951614756403068,
+        "output": 7.847714999997812e-05,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 25,
+        "root": {
+          "uid": "N_9652ca2b78434c53a55fd22d679fdd25",
+          "kind": "N"
+        },
+        "semantic": "[N_9652ca2b78434c53a55fd22d679fdd25] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6186896350640793,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 26,
+        "root": {
+          "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+          "kind": "N"
+        },
+        "semantic": "[N_967c54d7c8c1479688f99f4c69d03a5b] реплика агента: Иван любит чай.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.5192441565566145,
+        "output": 1.85247254758103e-07,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 27,
+        "root": {
+          "uid": "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+          "kind": "N"
+        },
+        "semantic": "[N_9dbaf31287954e5cabfa71dfa7a8b6a2] [S_0a3a560a311b4473808065c3aa0ed334] любит(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[M_a4a27a9e5230469ab269034b14a1e4d5] чай)",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 28,
+        "root": {
+          "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+          "kind": "N"
+        },
+        "semantic": "[N_a1cd48aaf8ca468f923d5e52334cb02f] реплика пользователя: Иван купил хлеб и молоко.",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49880115895631943,
+        "output": 3.2000000000032e-05,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 29,
+        "root": {
+          "uid": "N_c45d8a0d9901424c89a131b5d6ed0461",
+          "kind": "N"
+        },
+        "semantic": "[N_c45d8a0d9901424c89a131b5d6ed0461] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.37577684741122375,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 30,
+        "root": {
+          "uid": "N_cf5dab81b6774a929d4b64d870af289c",
+          "kind": "N"
+        },
+        "semantic": "[N_cf5dab81b6774a929d4b64d870af289c] реплика агента: Все, кто ценит хороший напиток! А вы любите чай? 😊",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6854841083942367,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 31,
+        "root": {
+          "uid": "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+          "kind": "N"
+        },
+        "semantic": "[N_d6fa4f8c6d0f4222aede7b4143bb17d8] реплика агента: Кошка может делать очень много разных вещей! Это зависит от настроения, возраста и ситуации.\n\nОбычно кошки:\n\n*   **Спят или дремлют** (это их основное занятие).\n*   **Играют** с игрушками или другими животными.\n*   **Охотятся** (даже если это просто игра с мышкой).\n*   **",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6080982815546445,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "CONSOLIDATED"
+      },
+      {
+        "position": 32,
+        "root": {
+          "uid": "N_db79000de35946ad81f0fb14ba605aa5",
+          "kind": "N"
+        },
+        "semantic": "[N_db79000de35946ad81f0fb14ba605aa5] реплика пользователя: Кто любит чай?",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.6928445569304202,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 33,
+        "root": {
+          "uid": "N_e1689bb122194fd89aa74765d5412fd9",
+          "kind": "N"
+        },
+        "semantic": "[N_e1689bb122194fd89aa74765d5412fd9] реплика пользователя: Что любит Иван",
+        "kind": "N",
+        "domain": "H",
+        "excitation": 0.49272499249392787,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 34,
+        "root": {
+          "uid": "N_f5f00bf4e845441882c6e28c14251c69",
+          "kind": "N"
+        },
+        "semantic": "[N_f5f00bf4e845441882c6e28c14251c69] [S_dd067555487f4fe4b126940a9c0c9183] купил(SUBJECT=[M_62356d38f31b4e11998ff39a775d8b61] Иван, OBJECT=[G_f3752e015a4d426baf94ddb6aff220ec] ([M_841a3c00305c4d54a52896bf48e9f9f3] хлеб) AND ([M_70757a181b0445f1acbf102b21ba9f50] молоко))",
+        "kind": "N",
+        "domain": "C",
+        "excitation": 0.8,
+        "output": 0.15000000000000002,
+        "decay_age": 0,
+        "lifecycle_state": "NEW"
+      },
+      {
+        "position": 35,
+        "root": {
+          "uid": "S_0a3a560a311b4473808065c3aa0ed334",
+          "kind": "S"
+        },
+        "semantic": "[S_0a3a560a311b4473808065c3aa0ed334] любит",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9853228417558362,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 36,
+        "root": {
+          "uid": "S_46d5e122600740c8aacdb87ba32d7fa5",
+          "kind": "S"
+        },
+        "semantic": "[S_46d5e122600740c8aacdb87ba32d7fa5] Что",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9853228417558362,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 37,
+        "root": {
+          "uid": "S_4d1948dc41ef43cf9d254a38a50027c8",
+          "kind": "S"
+        },
+        "semantic": "[S_4d1948dc41ef43cf9d254a38a50027c8] спит",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.990191134910427,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 38,
+        "root": {
+          "uid": "S_7fd9dfc6c16f471ca6e4ae17b2e66c91",
+          "kind": "S"
+        },
+        "semantic": "[S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9950834813775309,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 39,
+        "root": {
+          "uid": "S_bbcdf184ff50433d91e6c41d4bab8c75",
+          "kind": "S"
+        },
+        "semantic": "[S_bbcdf184ff50433d91e6c41d4bab8c75] Кошка",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.8833036475492708,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 40,
+        "root": {
+          "uid": "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+          "kind": "S"
+        },
+        "semantic": "[S_c5a3cd90fe2e4d40a3dd7c1aa2e05482] Иван",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 41,
+        "root": {
+          "uid": "S_dd067555487f4fe4b126940a9c0c9183",
+          "kind": "S"
+        },
+        "semantic": "[S_dd067555487f4fe4b126940a9c0c9183] купил",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.9476617761328255,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 42,
+        "root": {
+          "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+          "kind": "S"
+        },
+        "semantic": "[S_f5e1b9c5ff7a48c58d4308726ba7988c] бывать",
+        "kind": "S",
+        "domain": null,
+        "excitation": 0.95,
+        "output": 0.95,
+        "decay_age": 0,
+        "lifecycle_state": null
+      },
+      {
+        "position": 43,
+        "root": {
+          "uid": "T_108e6823ed274a6591ca24ef16b1ed89",
+          "kind": "T"
+        },
+        "semantic": "[T_108e6823ed274a6591ca24ef16b1ed89] predicate=[S_4d1948dc41ef43cf9d254a38a50027c8] спит; roles=[SUBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9926342940659647,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 44,
+        "root": {
+          "uid": "T_1d42488e4536454999a4ed3b83e836b8",
+          "kind": "T"
+        },
+        "semantic": "[T_1d42488e4536454999a4ed3b83e836b8] predicate=[S_0a3a560a311b4473808065c3aa0ed334] любит; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.987753989073888,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 45,
+        "root": {
+          "uid": "T_e7dfe8e6e37d4e14b2747bf5b06855fa",
+          "kind": "T"
+        },
+        "semantic": "[T_e7dfe8e6e37d4e14b2747bf5b06855fa] predicate=[S_7fd9dfc6c16f471ca6e4ae17b2e66c91] читает; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.9975387117187637,
+        "output": 0.0,
+        "decay_age": 1,
+        "lifecycle_state": null
+      },
+      {
+        "position": 46,
+        "root": {
+          "uid": "T_fe2690bfb952457d9d8b5a5099bca99f",
+          "kind": "T"
+        },
+        "semantic": "[T_fe2690bfb952457d9d8b5a5099bca99f] predicate=[S_dd067555487f4fe4b126940a9c0c9183] купил; roles=[SUBJECT, OBJECT]",
+        "kind": "T",
+        "domain": "C",
+        "excitation": 0.95,
+        "output": 0.95,
+        "decay_age": 0,
+        "lifecycle_state": null
+      }
+    ],
+    "settle_ticks": 1
+  },
+  "agent_response": null,
+  "agent_generation_skipped": true,
+  "response_perception": null,
+  "response_integration": null,
+  "parser_diagnostics": [
+    {
+      "sequence": 6,
+      "source_text": "Яблоки бывают зелёными или красными.",
+      "attempts": [
+        {
+          "role": "act_type",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными\nOPTIONS:\nNONE: none or unclear\nASSERTION: states information as a claim/fact\nQUERY: asks for information\nCOMMAND: requests or orders an action",
+          "normalized_answer": "ASSERTION",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными.\nTOKENS:\n[1] Яблоки\n[2] бывают\n[3] зелёными\n[4] или\n[5] красными\n[6] .\nOPTIONS:\n[-2] cannot choose reliably from the shown candidates\n[-1] no meaningful predicate exists\n[0] predicate is understood but not written as a token\n[2] token 2: бывают; morphology=VERB",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_end",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными.\nTOKENS:\n[1] Яблоки\n[2] бывают\n[3] зелёными\n[4] или\n[5] красными\n[6] .\nPREDICATE_START: [2] бывают\nOPTIONS:\n[0] cannot determine the predicate boundary reliably\n[2] end at token 2: бывают",
+          "normalized_answer": "2",
+          "retry_index": 0
+        },
+        {
+          "role": "predicate_symbol",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными\nTARGET:\nбывают\nRUSSIAN_LEMMA:\nбывать",
+          "normalized_answer": "бывать",
+          "retry_index": 0
+        },
+        {
+          "role": "negation",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными\nPREDICATE:\nбывают\nOPTIONS:\nNO: not negated\nYES: explicitly negated\nUNKNOWN: cannot determine negation reliably",
+          "normalized_answer": "0",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_deterministic",
+          "raw_text": "<deterministic:pymorphy3>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными.\nTOKENS:\n[1] Яблоки\n[2] бывают\n[3] зелёными\n[4] или\n[5] красными\n[6] .\nPREDICATE:\nбывают\nTARGET:\nзелёными или красными",
+          "normalized_answer": "STATE:3-5",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_deterministic",
+          "raw_text": "<deterministic:pymorphy3>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными.\nTOKENS:\n[1] Яблоки\n[2] бывают\n[3] зелёными\n[4] или\n[5] красными\n[6] .\nPREDICATE:\nбывают\nTARGET:\nЯблоки",
+          "normalized_answer": "SUBJECT:1",
+          "retry_index": 0
+        },
+        {
+          "role": "actant_start",
+          "raw_text": "<deterministic>",
+          "error": null,
+          "prompt": "TEXT:\nЯблоки бывают зелёными или красными.\nPREDICATE:\nбывают\nALREADY_SELECTED:\nзелёными или красными | Яблоки\nOPTIONS:\n[-1] cannot choose reliably from the remaining phrases\n[0] no more relevant phrase remains",
+          "normalized_answer": "0",
+          "retry_index": 0
+        }
+      ],
+      "decoded": {
+        "source_text": "Яблоки бывают зелёными или красными.",
+        "assertions": [
+          {
+            "local_id": "A1",
+            "predicate": {
+              "surface": "бывают",
+              "normalized_hint": "бывать",
+              "sense_hint": null,
+              "evidence": {
+                "text": "бывают",
+                "start": 7,
+                "end": 13
+              },
+              "template_candidate": null,
+              "template_selection": null
+            },
+            "actants": [
+              {
+                "role": "STATE",
+                "mention": "зелёными или красными",
+                "normalized_hint": null,
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "зелёными или красными",
+                  "start": 14,
+                  "end": 35
+                },
+                "parser_confidence": null,
+                "composition": {
+                  "operator": "OR",
+                  "members": [
+                    {
+                      "mention": "зелёными",
+                      "normalized_hint": null,
+                      "semantic_hint": null,
+                      "evidence": {
+                        "text": "зелёными",
+                        "start": 14,
+                        "end": 22
+                      }
+                    },
+                    {
+                      "mention": "красными",
+                      "normalized_hint": null,
+                      "semantic_hint": null,
+                      "evidence": {
+                        "text": "красными",
+                        "start": 27,
+                        "end": 35
+                      }
+                    }
+                  ]
+                },
+                "proposition": null
+              },
+              {
+                "role": "SUBJECT",
+                "mention": "Яблоки",
+                "normalized_hint": "Яблоко",
+                "semantic_hint": null,
+                "candidate_ref": null,
+                "entity_ref": null,
+                "evidence": {
+                  "text": "Яблоки",
+                  "start": 0,
+                  "end": 6
+                },
+                "parser_confidence": null,
+                "composition": null,
+                "proposition": null
+              }
+            ],
+            "evidence": {
+              "text": "Яблоки бывают зелёными или красными",
+              "start": 0,
+              "end": 35
+            },
+            "alternatives": [],
+            "negated": false,
+            "status": "ASSERTED",
+            "quoted": false
+          }
+        ],
+        "queries": [],
+        "commands": [],
+        "diagnostics": [],
+        "relations": [],
+        "conditionals": [],
+        "act_dependencies": []
+      },
+      "final_error": null
+    }
+  ],
+  "llm_requests": [],
+  "ah_diff": {
+    "added": {
+      "G_1984bb033c62491c9b2fd175ce0f2349": {
+        "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+        "kind": "G",
+        "domain": "C",
+        "function_id": "OR",
+        "operands": [
+          {
+            "uid": "N_bbc1ed30d5f649fba932ac34d3addcdb",
+            "kind": "N"
+          },
+          {
+            "uid": "N_d9c2050cafa341d4aeca9af1d6d9e77f",
+            "kind": "N"
+          }
+        ]
+      },
+      "L_dd32ae0b64ed4262af5dd5ea38f70c03": {
+        "uid": "L_dd32ae0b64ed4262af5dd5ea38f70c03",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.21500000000000002,
+        "source": {
+          "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_098de8764ce7443fa2ab91867726e60c",
+          "kind": "N"
+        }
+      },
+      "M_4bd1b246579d4a2b86ebaeaa41bc12da": {
+        "uid": "M_4bd1b246579d4a2b86ebaeaa41bc12da",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "зелёными",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_7f84998382eb4c218e937ef25f18e86d": {
+        "uid": "M_7f84998382eb4c218e937ef25f18e86d",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "красными",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "M_800670f285fd468ebbcecc30ce271197": {
+        "uid": "M_800670f285fd468ebbcecc30ce271197",
+        "kind": "M",
+        "domain": "C",
+        "properties": {
+          "name": {
+            "name": "name",
+            "value": "Яблоко",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "gc_auto_created": true
+        }
+      },
+      "N_098de8764ce7443fa2ab91867726e60c": {
+        "uid": "N_098de8764ce7443fa2ab91867726e60c",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_e5333a288009442882fd9698dfd42d3f",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_5b420d5c902a4051a351540d4c04c251",
+            "kind": "M"
+          },
+          "OBJECT": {
+            "uid": "G_1984bb033c62491c9b2fd175ce0f2349",
+            "kind": "G"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Яблоки бывают зелёными или красными.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "dedup_exempt": true,
+          "lifecycle_state": "NEW",
+          "created_tick": 108,
+          "expires_tick": 308,
+          "last_qualifying_tick": 108,
+          "qualifying_reactivations": 0
+        }
+      },
+      "N_bbc1ed30d5f649fba932ac34d3addcdb": {
+        "uid": "N_bbc1ed30d5f649fba932ac34d3addcdb",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_dc48776d7852471c9b2d3f90a29e1bfb",
+          "kind": "T"
+        },
+        "actants": {
+          "STATE": {
+            "uid": "M_4bd1b246579d4a2b86ebaeaa41bc12da",
+            "kind": "M"
+          },
+          "SUBJECT": {
+            "uid": "M_800670f285fd468ebbcecc30ce271197",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1
+        }
+      },
+      "N_d9c2050cafa341d4aeca9af1d6d9e77f": {
+        "uid": "N_d9c2050cafa341d4aeca9af1d6d9e77f",
+        "kind": "N",
+        "domain": "C",
+        "weight": 0.4,
+        "template": {
+          "uid": "T_dc48776d7852471c9b2d3f90a29e1bfb",
+          "kind": "T"
+        },
+        "actants": {
+          "STATE": {
+            "uid": "M_7f84998382eb4c218e937ef25f18e86d",
+            "kind": "M"
+          },
+          "SUBJECT": {
+            "uid": "M_800670f285fd468ebbcecc30ce271197",
+            "kind": "M"
+          }
+        },
+        "properties": {},
+        "meta": {
+          "occurrence_count": 1
+        }
+      },
+      "S_f5e1b9c5ff7a48c58d4308726ba7988c": {
+        "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+        "kind": "S",
+        "domain": null,
+        "forms": [
+          "бывать",
+          "бывают"
+        ]
+      },
+      "T_dc48776d7852471c9b2d3f90a29e1bfb": {
+        "uid": "T_dc48776d7852471c9b2d3f90a29e1bfb",
+        "kind": "T",
+        "domain": "C",
+        "predicate": {
+          "uid": "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+          "kind": "S"
+        },
+        "roles": [
+          "SUBJECT",
+          "STATE"
+        ]
+      }
+    },
+    "removed": {},
+    "changed": {
+      "L_74713205425249b5a5e0327b806ac1cf": {
+        "before": {
+          "uid": "L_74713205425249b5a5e0327b806ac1cf",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.21500000000000002,
+          "source": {
+            "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_74713205425249b5a5e0327b806ac1cf",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.23000000000000004,
+          "source": {
+            "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_a1cd48aaf8ca468f923d5e52334cb02f",
+            "kind": "N"
+          }
+        }
+      },
+      "L_b4488d64ab7b4588901dbdc53c6a0d6c": {
+        "before": {
+          "uid": "L_b4488d64ab7b4588901dbdc53c6a0d6c",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_270eca9c9f804e91be9bc62f0c3a8f94",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_5c96619218a8448893f6da00b005be30",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_b4488d64ab7b4588901dbdc53c6a0d6c",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24300000000000005,
+          "source": {
+            "uid": "N_270eca9c9f804e91be9bc62f0c3a8f94",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_5c96619218a8448893f6da00b005be30",
+            "kind": "N"
+          }
+        }
+      },
+      "L_e82dad6a27904faaa2a91cb5b73bfd68": {
+        "before": {
+          "uid": "L_e82dad6a27904faaa2a91cb5b73bfd68",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.23000000000000004,
+          "source": {
+            "uid": "N_5c96619218a8448893f6da00b005be30",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+            "kind": "N"
+          }
+        },
+        "after": {
+          "uid": "L_e82dad6a27904faaa2a91cb5b73bfd68",
+          "kind": "L",
+          "domain": null,
+          "relation_id": "FOLLOW",
+          "weight": 0.24500000000000005,
+          "source": {
+            "uid": "N_5c96619218a8448893f6da00b005be30",
+            "kind": "N"
+          },
+          "target": {
+            "uid": "N_0cebf7e679084d3fb18448e01c6689a7",
+            "kind": "N"
+          }
+        }
+      }
+    }
+  },
+  "runtime_after": {
+    "tick": 109,
+    "workspace_uids": [
+      "G_1984bb033c62491c9b2fd175ce0f2349",
+      "M_5b420d5c902a4051a351540d4c04c251",
+      "M_62356d38f31b4e11998ff39a775d8b61",
+      "M_8886594cd3924845b8b316fbd64fa63d",
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "M_a4a27a9e5230469ab269034b14a1e4d5",
+      "M_f87a17b453394add85fb3ddb9fb3b8aa",
+      "M_fc69b4786a6b4fce93342f330f8d03af",
+      "N_098de8764ce7443fa2ab91867726e60c",
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+      "N_0cebf7e679084d3fb18448e01c6689a7",
+      "N_166d80888d044995b32991772e3d4ac0",
+      "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "N_1b292003b75b48a886b0a0ecdff89b93",
+      "N_1ca1c4e829754256a693a0d61d7280f3",
+      "N_1ffa92616610480c8852e307cef54917",
+      "N_222258eee8e04f26bf5735d408209c9d",
+      "N_24b168f8b9534e9b8def046e418ddaf0",
+      "N_270eca9c9f804e91be9bc62f0c3a8f94",
+      "N_4bb9facf12c24b19a4668bf513b653f2",
+      "N_5762396d099c4b3795b9b8c61f98f50c",
+      "N_5c78f6012ee042d2940d294336169c7b",
+      "N_5c96619218a8448893f6da00b005be30",
+      "N_82353b674761408a98159bcaa210550b",
+      "N_9652ca2b78434c53a55fd22d679fdd25",
+      "N_967c54d7c8c1479688f99f4c69d03a5b",
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+      "N_a1cd48aaf8ca468f923d5e52334cb02f",
+      "N_c45d8a0d9901424c89a131b5d6ed0461",
+      "N_cf5dab81b6774a929d4b64d870af289c",
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "N_db79000de35946ad81f0fb14ba605aa5",
+      "N_e1689bb122194fd89aa74765d5412fd9",
+      "N_f5f00bf4e845441882c6e28c14251c69",
+      "S_0a3a560a311b4473808065c3aa0ed334",
+      "S_46d5e122600740c8aacdb87ba32d7fa5",
+      "S_4d1948dc41ef43cf9d254a38a50027c8",
+      "S_7fd9dfc6c16f471ca6e4ae17b2e66c91",
+      "S_bbcdf184ff50433d91e6c41d4bab8c75",
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+      "S_dd067555487f4fe4b126940a9c0c9183",
+      "S_f5e1b9c5ff7a48c58d4308726ba7988c",
+      "T_108e6823ed274a6591ca24ef16b1ed89",
+      "T_1d42488e4536454999a4ed3b83e836b8",
+      "T_e7dfe8e6e37d4e14b2747bf5b06855fa",
+      "T_fe2690bfb952457d9d8b5a5099bca99f"
+    ],
+    "workspace": {
+      "G_1984bb033c62491c9b2fd175ce0f2349": {
+        "semantic": "(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными))",
+        "excitation": 0.65
+      },
+      "M_5b420d5c902a4051a351540d4c04c251": {
+        "semantic": "Пользователь",
+        "excitation": 1.0
+      },
+      "M_62356d38f31b4e11998ff39a775d8b61": {
+        "semantic": "Иван",
+        "excitation": 1.0
+      },
+      "M_8886594cd3924845b8b316fbd64fa63d": {
+        "semantic": "книга",
+        "excitation": 0.47209599999999996
+      },
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+        "semantic": "АГент",
+        "excitation": 0.8578302460967535
+      },
+      "M_a4a27a9e5230469ab269034b14a1e4d5": {
+        "semantic": "чай",
+        "excitation": 0.8274209812844735
+      },
+      "M_f87a17b453394add85fb3ddb9fb3b8aa": {
+        "semantic": "Мария",
+        "excitation": 0.4720000000000001
+      },
+      "M_fc69b4786a6b4fce93342f330f8d03af": {
+        "semantic": "Кошка",
+        "excitation": 0.9975387117187637
+      },
+      "N_098de8764ce7443fa2ab91867726e60c": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=(бывать(SUBJECT=Яблоко, STATE=зелёными)) OR (бывать(SUBJECT=Яблоко, STATE=красными)))",
+        "excitation": 0.5
+      },
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d": {
+        "semantic": "любит(SUBJECT=Иван)",
+        "excitation": 0.9916584851246795
+      },
+      "N_0cebf7e679084d3fb18448e01c6689a7": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=читает(SUBJECT=Мария))",
+        "excitation": 0.49774602224913056
+      },
+      "N_166d80888d044995b32991772e3d4ac0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+        "excitation": 0.6155820146248268
+      },
+      "N_16acd6e90eb54438beb2cc4488a8f89d": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.602667874207298
+      },
+      "N_1b292003b75b48a886b0a0ecdff89b93": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6257772409950637
+      },
+      "N_1ca1c4e829754256a693a0d61d7280f3": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3779777404320991
+      },
+      "N_1ffa92616610480c8852e307cef54917": {
+        "semantic": "читает(SUBJECT=Иван, OBJECT=книга)",
+        "excitation": 1.0
+      },
+      "N_222258eee8e04f26bf5735d408209c9d": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6876613281393915
+      },
+      "N_24b168f8b9534e9b8def046e418ddaf0": {
+        "semantic": "читает(SUBJECT=Мария)",
+        "excitation": 1.0
+      },
+      "N_270eca9c9f804e91be9bc62f0c3a8f94": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=спит(SUBJECT=Кошка))",
+        "excitation": 0.500283880071895
+      },
+      "N_4bb9facf12c24b19a4668bf513b653f2": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6138136088018763
+      },
+      "N_5762396d099c4b3795b9b8c61f98f50c": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6601817385434364
+      },
+      "N_5c78f6012ee042d2940d294336169c7b": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.592665967608474
+      },
+      "N_5c96619218a8448893f6da00b005be30": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=читает(SUBJECT=Иван, OBJECT=книга))",
+        "excitation": 0.4973799486377539
+      },
+      "N_82353b674761408a98159bcaa210550b": {
+        "semantic": "спит(SUBJECT=Кошка)",
+        "excitation": 0.9951614756403068
+      },
+      "N_9652ca2b78434c53a55fd22d679fdd25": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван))",
+        "excitation": 0.6186896350640793
+      },
+      "N_967c54d7c8c1479688f99f4c69d03a5b": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.5192441565566145
+      },
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+        "semantic": "любит(SUBJECT=Иван, OBJECT=чай)",
+        "excitation": 0.990191134910427
+      },
+      "N_a1cd48aaf8ca468f923d5e52334cb02f": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=купил(SUBJECT=Иван, OBJECT=(хлеб) AND (молоко)))",
+        "excitation": 0.49880115895631943
+      },
+      "N_c45d8a0d9901424c89a131b5d6ed0461": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.37577684741122375
+      },
+      "N_cf5dab81b6774a929d4b64d870af289c": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6854841083942367
+      },
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6080982815546445
+      },
+      "N_db79000de35946ad81f0fb14ba605aa5": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6928445569304202
+      },
+      "N_e1689bb122194fd89aa74765d5412fd9": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.49272499249392787
+      },
+      "N_f5f00bf4e845441882c6e28c14251c69": {
+        "semantic": "купил(SUBJECT=Иван, OBJECT=(хлеб) AND (молоко))",
+        "excitation": 0.8
+      },
+      "S_0a3a560a311b4473808065c3aa0ed334": {
+        "semantic": "любит",
+        "excitation": 0.9853228417558362
+      },
+      "S_46d5e122600740c8aacdb87ba32d7fa5": {
+        "semantic": "Что",
+        "excitation": 0.9853228417558362
+      },
+      "S_4d1948dc41ef43cf9d254a38a50027c8": {
+        "semantic": "спит",
+        "excitation": 0.990191134910427
+      },
+      "S_7fd9dfc6c16f471ca6e4ae17b2e66c91": {
+        "semantic": "читает",
+        "excitation": 0.9950834813775309
+      },
+      "S_bbcdf184ff50433d91e6c41d4bab8c75": {
+        "semantic": "Кошка",
+        "excitation": 0.8833036475492708
+      },
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482": {
+        "semantic": "Иван",
+        "excitation": 0.9975387117187637
+      },
+      "S_dd067555487f4fe4b126940a9c0c9183": {
+        "semantic": "купил",
+        "excitation": 0.9476617761328255
+      },
+      "S_f5e1b9c5ff7a48c58d4308726ba7988c": {
+        "semantic": "бывать",
+        "excitation": 0.95
+      },
+      "T_108e6823ed274a6591ca24ef16b1ed89": {
+        "semantic": "спит",
+        "excitation": 0.9926342940659647
+      },
+      "T_1d42488e4536454999a4ed3b83e836b8": {
+        "semantic": "любит",
+        "excitation": 0.987753989073888
+      },
+      "T_e7dfe8e6e37d4e14b2747bf5b06855fa": {
+        "semantic": "читает",
+        "excitation": 0.9975387117187637
+      },
+      "T_fe2690bfb952457d9d8b5a5099bca99f": {
+        "semantic": "купил",
+        "excitation": 0.95
+      }
+    },
+    "pending_incoming": {
+      "N_270eca9c9f804e91be9bc62f0c3a8f94": 4.501508290621904e-08,
+      "N_0cebf7e679084d3fb18448e01c6689a7": 1.3838137450002953e-05,
+      "N_a1cd48aaf8ca468f923d5e52334cb02f": 9.877129764063742e-06,
+      "N_098de8764ce7443fa2ab91867726e60c": 6.400000000006401e-06,
+      "N_f5f00bf4e845441882c6e28c14251c69": 0.3800096,
+      "T_dc48776d7852471c9b2d3f90a29e1bfb": 0.95,
+      "M_fc69b4786a6b4fce93342f330f8d03af": 3.2175631499991035e-05,
+      "M_62356d38f31b4e11998ff39a775d8b61": 0.22002573248762575,
+      "M_8886594cd3924845b8b316fbd64fa63d": 0.16002564100749997,
+      "M_f87a17b453394add85fb3ddb9fb3b8aa": 0.1600192,
+      "G_f3752e015a4d426baf94ddb6aff220ec": 0.06000000000000001,
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": 5.55741764274309e-08,
+      "M_5b420d5c902a4051a351540d4c04c251": 0.15004143178603127,
+      "N_1ffa92616610480c8852e307cef54917": 1.8049744500003848e-05,
+      "N_24b168f8b9534e9b8def046e418ddaf0": 1.3782041531251731e-05,
+      "G_1984bb033c62491c9b2fd175ce0f2349": 0.15
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_5b420d5c902a4051a351540d4c04c251",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "last_experience_ref": {
+      "uid": "N_098de8764ce7443fa2ab91867726e60c",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "PASS",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "perception.assertion_count",
+      "ok": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "perception.assertions.a1.predicate",
+      "ok": true,
+      "expected": "бывать",
+      "actual": "бывать"
+    },
+    {
+      "name": "perception.assertions.a1.status",
+      "ok": true,
+      "expected": "ASSERTED",
+      "actual": "ASSERTED"
+    },
+    {
+      "name": "perception.assertions.a1.negated",
+      "ok": true,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "name": "perception.assertions.a1.role_set",
+      "ok": true,
+      "expected": [
+        "STATE",
+        "SUBJECT"
+      ],
+      "actual": [
+        "STATE",
+        "SUBJECT"
+      ]
+    },
+    {
+      "name": "perception.assertions.a1.roles.SUBJECT",
+      "ok": true,
+      "expected": {
+        "text": "Яблоко"
+      },
+      "actual": "Яблоко"
+    },
+    {
+      "name": "perception.assertions.a1.roles.STATE",
+      "ok": true,
+      "expected": {
+        "composition": {
+          "operator": "OR",
+          "members": [
+            "зелёными",
+            "красными"
+          ]
+        }
+      },
+      "actual": {
+        "operator": "OR",
+        "members": [
+          "зелёными",
+          "красными"
+        ]
+      }
+    },
+    {
+      "name": "perception.query_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "perception.relations",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "perception.conditionals",
+      "ok": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "name": "integration.completed",
+      "ok": true,
+      "expected": "OK",
+      "actual": "OK"
+    },
+    {
+      "name": "integration.commit_present",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "integration.domains.a1",
+      "ok": true,
+      "expected": "C",
+      "actual": "C"
+    },
+    {
+      "name": "inference.query_outcome_count",
+      "ok": true,
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "canonical.assertions.a1.integrated",
+      "ok": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "name": "canonical.assertions.a1.predicate",
+      "ok": true,
+      "expected": "бывать",
+      "actual": [
+        "бывать",
+        "бывают"
+      ]
+    },
+    {
+      "name": "canonical.assertions.a1.or_lift",
+      "ok": true,
+      "expected": "G:OR",
+      "actual": "OR"
+    },
+    {
+      "name": "templates.бывать.explicit_role_coverage",
+      "ok": true,
+      "expected": [
+        "STATE",
+        "SUBJECT"
+      ],
+      "actual": [
+        [
+          "STATE",
+          "SUBJECT"
+        ]
+      ],
+      "detail": "Canonical T must cover every role explicitly observed or requested so far; hidden roles are not required by this check."
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "basic_frames",
+  "semantic_tags": [
+    "regression40"
+  ]
+}

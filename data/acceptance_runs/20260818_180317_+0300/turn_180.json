@@ -1,0 +1,1901 @@
+{
+  "index": 180,
+  "input": "Я положил книгу рядом с журналом, который был старым.",
+  "status": "ERROR",
+  "scenario_id": "case_180",
+  "linguistic_candidate_graph": {
+    "text": "Я положил книгу рядом с журналом, который был старым.",
+    "tokens": [
+      {
+        "index": 1,
+        "text": "Я",
+        "start": 0,
+        "end": 1,
+        "analyses": [
+          {
+            "normal_form": "я",
+            "pos": "NPRO",
+            "case": "nomn",
+            "number": "sing",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "nomn",
+              "NPRO",
+              "1per",
+              "sing"
+            ],
+            "score": 0.2941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "nomn",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "gent",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "datv",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "accs",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "ablt",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "loct",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "gent",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "femn",
+              "datv",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "ablt",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "Name",
+              "loct",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "nomn",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "gent",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "datv",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "accs",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "ablt",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "loct",
+              "masc",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "nomn",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "gent",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "femn",
+              "datv",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "accs",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "ablt",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          },
+          {
+            "normal_form": "я",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "anim",
+            "transitivity": null,
+            "grammemes": [
+              "Sgtm",
+              "Patr",
+              "Init",
+              "femn",
+              "Fixd",
+              "anim",
+              "Abbr",
+              "sing",
+              "loct",
+              "NOUN"
+            ],
+            "score": 0.02941176470588235
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "text": "положил",
+        "start": 2,
+        "end": 9,
+        "analyses": [
+          {
+            "normal_form": "положить",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "tran",
+            "grammemes": [
+              "past",
+              "VERB",
+              "tran",
+              "sing",
+              "indc",
+              "masc",
+              "perf"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "text": "книгу",
+        "start": 10,
+        "end": 15,
+        "analyses": [
+          {
+            "normal_form": "книга",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "sing",
+              "accs",
+              "inan",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "text": "рядом",
+        "start": 16,
+        "end": 21,
+        "analyses": [
+          {
+            "normal_form": "рядом",
+            "pos": "ADVB",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ADVB",
+              "Prdx"
+            ],
+            "score": 0.783132
+          },
+          {
+            "normal_form": "ряд",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "masc",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.216867
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "text": "с",
+        "start": 22,
+        "end": 23,
+        "analyses": [
+          {
+            "normal_form": "с",
+            "pos": "PREP",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PREP"
+            ],
+            "score": 0.997628
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "femn",
+              "Fixd",
+              "Abbr",
+              "nomn",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.000406
+          },
+          {
+            "normal_form": "с",
+            "pos": "PRCL",
+            "case": null,
+            "number": null,
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "PRCL"
+            ],
+            "score": 0.000271
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "nomn",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "gent",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "datv",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "accs",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "femn",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "femn",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "loct",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "femn",
+              "Fixd",
+              "Abbr",
+              "gent",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "femn",
+              "datv",
+              "Fixd",
+              "Abbr",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "femn",
+              "Fixd",
+              "Abbr",
+              "accs",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "plur",
+              "femn",
+              "Fixd",
+              "Abbr",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "femn",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "femn",
+              "Fixd",
+              "Abbr",
+              "loct",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Fixd",
+              "Abbr",
+              "sing",
+              "nomn",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Fixd",
+              "Abbr",
+              "sing",
+              "gent",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "datv",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Fixd",
+              "Abbr",
+              "sing",
+              "accs",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "Fixd",
+              "Abbr",
+              "sing",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "Fixd",
+              "Abbr",
+              "sing",
+              "loct",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "nomn",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "Fixd",
+              "Abbr",
+              "nomn",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "gent",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "Fixd",
+              "Abbr",
+              "gent",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "datv",
+              "Fixd",
+              "Abbr",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "accs",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "Fixd",
+              "Abbr",
+              "accs",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "plur",
+              "Fixd",
+              "Abbr",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          },
+          {
+            "normal_form": "с",
+            "pos": "NOUN",
+            "case": "loct",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "Fixd",
+              "Abbr",
+              "loct",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 6.7e-05
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "text": "журналом",
+        "start": 24,
+        "end": 32,
+        "analyses": [
+          {
+            "normal_form": "журнал",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "masc",
+              "inan",
+              "NOUN"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "text": ",",
+        "start": 32,
+        "end": 33,
+        "analyses": []
+      },
+      {
+        "index": 8,
+        "text": "который",
+        "start": 34,
+        "end": 41,
+        "analyses": [
+          {
+            "normal_form": "который",
+            "pos": "ADJF",
+            "case": "nomn",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "nomn",
+              "Apro",
+              "Subx",
+              "masc",
+              "Anph",
+              "ADJF"
+            ],
+            "score": 0.828767
+          },
+          {
+            "normal_form": "который",
+            "pos": "ADJF",
+            "case": "accs",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "sing",
+              "accs",
+              "Apro",
+              "Subx",
+              "masc",
+              "Anph",
+              "inan",
+              "ADJF"
+            ],
+            "score": 0.171232
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "text": "был",
+        "start": 42,
+        "end": 45,
+        "analyses": [
+          {
+            "normal_form": "быть",
+            "pos": "VERB",
+            "case": null,
+            "number": "sing",
+            "gender": "masc",
+            "mood": "indc",
+            "animacy": null,
+            "transitivity": "intr",
+            "grammemes": [
+              "past",
+              "VERB",
+              "sing",
+              "indc",
+              "intr",
+              "masc",
+              "impf"
+            ],
+            "score": 1.0
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "text": "старым",
+        "start": 46,
+        "end": 52,
+        "analyses": [
+          {
+            "normal_form": "старый",
+            "pos": "ADJF",
+            "case": "datv",
+            "number": "plur",
+            "gender": null,
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "Qual",
+              "plur",
+              "datv",
+              "ADJF"
+            ],
+            "score": 0.5
+          },
+          {
+            "normal_form": "старый",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "masc",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "masc",
+              "Qual",
+              "ADJF"
+            ],
+            "score": 0.318181
+          },
+          {
+            "normal_form": "старый",
+            "pos": "ADJF",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": null,
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "neut",
+              "Qual",
+              "ADJF"
+            ],
+            "score": 0.090909
+          },
+          {
+            "normal_form": "старое",
+            "pos": "NOUN",
+            "case": "ablt",
+            "number": "sing",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "ablt",
+              "sing",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.045454
+          },
+          {
+            "normal_form": "старое",
+            "pos": "NOUN",
+            "case": "datv",
+            "number": "plur",
+            "gender": "neut",
+            "mood": null,
+            "animacy": "inan",
+            "transitivity": null,
+            "grammemes": [
+              "plur",
+              "datv",
+              "neut",
+              "inan",
+              "NOUN"
+            ],
+            "score": 0.045454
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "text": ".",
+        "start": 52,
+        "end": 53,
+        "analyses": []
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "CL1",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 1,
+          "end_index": 6,
+          "text": "Я положил книгу рядом с журналом",
+          "evidence": {
+            "text": "Я положил книгу рядом с журналом",
+            "start": 0,
+            "end": 32
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 2,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "положить"
+            ]
+          }
+        ],
+        "marker": "я",
+        "parent_clause_id": null,
+        "parent_role_hint": null,
+        "connector_span": null,
+        "relative": false,
+        "quoted": false,
+        "implicit_copula": false
+      },
+      {
+        "clause_id": "CL2",
+        "sentence_id": 1,
+        "span": {
+          "start_index": 8,
+          "end_index": 10,
+          "text": "который был старым",
+          "evidence": {
+            "text": "который был старым",
+            "start": 34,
+            "end": 52
+          }
+        },
+        "predicate_heads": [
+          {
+            "token_index": 9,
+            "strength": 2,
+            "finite": true,
+            "lemma_candidates": [
+              "быть"
+            ]
+          }
+        ],
+        "marker": "который",
+        "parent_clause_id": "CL1",
+        "parent_role_hint": null,
+        "connector_span": {
+          "start_index": 8,
+          "end_index": 8,
+          "text": "который",
+          "evidence": {
+            "text": "который",
+            "start": 34,
+            "end": 41
+          }
+        },
+        "relative": true,
+        "quoted": false,
+        "implicit_copula": false
+      }
+    ],
+    "predicates": [
+      {
+        "token_index": 2,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "положить"
+        ]
+      },
+      {
+        "token_index": 9,
+        "strength": 2,
+        "finite": true,
+        "lemma_candidates": [
+          "быть"
+        ]
+      }
+    ],
+    "coordinations": [],
+    "frame_graph": {
+      "dependencies": [
+        {
+          "parent_token_index": 2,
+          "child_token_index": 9,
+          "kind": "SUBORDINATE",
+          "parent_clause_id": "CL1",
+          "child_clause_id": "CL2"
+        }
+      ],
+      "coordinations": []
+    }
+  },
+  "error": "PerceptionParseError: antecedent_choice failed after 2 attempt(s): relative_antecedent expected exactly one of: C1, C2, UNCLEAR",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 299, in _parse_adaptive\n    parsed = parser.parse(text, structural_resolution=structural_resolution)\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 906, in parse\n    assertions = self._attach_nested_assertions(assertions, assertion_spans)\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 1821, in _attach_nested_assertions\n    self._resolve_relative_antecedents(by_id, clause_to_locals)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 2580, in _resolve_relative_antecedents\n    selected = self._choose_relative_antecedent(clause, candidates)\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 2507, in _choose_relative_antecedent\n    selected = self._probe(\n        \"antecedent_choice\",\n    ...<2 lines>...\n        max_new_tokens=4,\n    )\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\adaptive_parser.py\", line 5830, in _probe\n    raise AdaptiveParseError(\n        f\"{stage} failed after {self.settings.retry_attempts + 1} attempt(s): {last_error}\"\n    )\nah.perception.adaptive_parser.AdaptiveParseError: antecedent_choice failed after 2 attempt(s): relative_antecedent expected exactly one of: C1, C2, UNCLEAR\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\diagnostics\\acceptance_runner.py\", line 361, in run_acceptance_suite\n    turn = orchestrator.handle_user_text(case.text, generate_response=False)\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 505, in handle_user_text\n    result = self._handle_user_text(text, generate_response=generate_response)\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\agent\\orchestrator.py\", line 541, in _handle_user_text\n    perception = self.perception.parse(text, self.context)\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 159, in parse\n    return self._parse_adaptive(text)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\src\\ah\\perception\\llm_parser.py\", line 328, in _parse_adaptive\n    raise PerceptionParseError(final_error) from exc\nah.perception.llm_parser.PerceptionParseError: antecedent_choice failed after 2 attempt(s): relative_antecedent expected exactly one of: C1, C2, UNCLEAR\n",
+  "parser_diagnostics": [
+    {
+      "sequence": 181,
+      "source_text": "Я положил книгу рядом с журналом, который был старым.",
+      "attempts": [],
+      "decoded": null,
+      "final_error": "antecedent_choice failed after 2 attempt(s): relative_antecedent expected exactly one of: C1, C2, UNCLEAR"
+    }
+  ],
+  "llm_requests": [
+    {
+      "sequence": 646,
+      "req_id": "a1c021ec36b245fd988aaac1ce6d5a4f",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nЯ положил книгу рядом с журналом, который был старым.\nPREDICATE:\nположил\nTARGET:\nЯ\nCANDIDATE RELATIONS:\nACTOR_OR_EXPERIENCER: TARGET is the actor, holder, experiencer, or entity whose state/action PREDICATE describes; being the person something is given/sent/shown/said TO does not by itself make TARGET SUBJECT\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nACTOR_OR_EXPERIENCER\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "ACTOR_OR_EXPERIENCER",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 647,
+      "req_id": "ea99b6c81de44100916abc486e8e057b",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nЯ положил книгу рядом с журналом, который был старым.\nPREDICATE:\nположил\nTARGET:\nкнигу\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "AFFECTED_OR_CONTENT",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 648,
+      "req_id": "f2314332bbb94ab5b7609dc55c1fbf27",
+      "role": "perception_modifier_attachment",
+      "prompt": "TEXT:\nЯ положил книгу рядом с журналом, который был старым.\nPREDICATE:\nположил\nMODIFIER:\nрядом с журналом\nPOSSIBLE READINGS:\nEVENT: «рядом с журналом» относится к действию «положил»\nNOMINAL_1: «рядом с журналом» описывает «книгу»\nQUESTION:\nWhich attachment is determined by the sentence itself? Choose UNCLEAR only when two or more listed readings remain genuinely possible from the text.\nCHOICES:\nEVENT\nNOMINAL_1\nUNCLEAR\n\nTASK:\nChoose exactly one label from CHOICES. EVENT means the modifier belongs to the predicate/event; NOMINAL_n means it describes that nominal phrase. Choose UNCLEAR only when the source text itself does not determine one reading. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "NOMINAL_1",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 649,
+      "req_id": "39b40131e2b44efd90fe65d113bedea0",
+      "role": "perception_role_cue",
+      "prompt": "TEXT:\nЯ положил книгу рядом с журналом, который был старым.\nPREDICATE:\nрядом с\nTARGET:\nрядом с журналом\nCANDIDATE RELATIONS:\nAFFECTED_OR_CONTENT: TARGET is the direct semantic target: an entity/content affected, perceived, possessed, selected, summoned/called, or referred to by PREDICATE; a person can be OBJECT when the action directly targets that person rather than giving/sending/saying something to them\nRECEIVER_OR_ADDRESSEE: TARGET is the receiver/addressee/beneficiary/destination that receives an object, information, communication, or benefit; mere personhood or being the direct target of an action does not make TARGET a RECIPIENT; a person directly seen/met/called/selected is normally the direct semantic target instead\nORIGIN: TARGET is the origin from which another participant, object, or information comes, moves, is removed, or is obtained; TARGET does not become a constituent of the result\nABSENT_ENTITY: TARGET itself is explicitly represented as absent from, excluded from, or not participating in the event (for example, the event happens without TARGET); ordinary negation of the predicate/event or contrastive negation of another filler does NOT make TARGET an absentee\nSECONDARY_PARTICIPANT: TARGET is a secondary co-participant that is not the actor, direct object, receiver, source, or absent entity\nPLACE: TARGET specifies where or to what place the event/participant is located or moves; it is not the origin it comes from\nPREDICATED_STATE: TARGET is a property, condition, class, status, or value predicated of a participant\nTIME_POINT: TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed\nELAPSED_DURATION: TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts\nCAUSE: TARGET is the reason or prior circumstance that causes/explains why the event happens\nINTENDED_GOAL: TARGET is the intended goal or result for which the event is performed\nINSTRUMENT: TARGET is an instrument or tool used as a separate implement/device/object to perform the event; it remains an instrument rather than becoming material of the result\nCONSTITUENT_MATERIAL: TARGET is a substance or material constituent/component from which an affected or resulting entity is made, formed, or composed; it is not a separate implement and not an origin of motion\nQUANTITY_OR_MEASURE: TARGET specifies quantity, count, size, degree, or non-temporal measure; it is not elapsed duration\nMANNER_OR_PROCEDURE: TARGET describes the manner, procedure, or method by which the event is carried out, rather than naming a separate tool or constituent material; a concrete implement such as a hammer/pencil/key is TOOL\nQUESTION:\nWhich single relation does TARGET have in this event? Use the whole sentence. Grammatical negation (НЕ) negates the proposition or contrasts a filler; by itself it never changes that filler's semantic role and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself is explicitly represented as absent/excluded/non-participating. Choose only among the listed candidate relations.\nCHOICES:\nAFFECTED_OR_CONTENT\nRECEIVER_OR_ADDRESSEE\nORIGIN\nABSENT_ENTITY\nSECONDARY_PARTICIPANT\nPLACE\nPREDICATED_STATE\nTIME_POINT\nELAPSED_DURATION\nCAUSE\nINTENDED_GOAL\nINSTRUMENT\nCONSTITUENT_MATERIAL\nQUANTITY_OR_MEASURE\nMANNER_OR_PROCEDURE\n\nTASK:\nChoose one label from CHOICES for TARGET's semantic relation to PREDICATE. Use the whole sentence. Negation of an event or contrastive filler does not change TARGET's role and does not imply ABSENT_ENTITY. Use ABSENT_ENTITY only when TARGET itself is absent, excluded, or non-participating. Return only the label.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "PLACE",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 650,
+      "req_id": "7826bfe1033d4f0d9b033c087731b407",
+      "role": "perception_antecedent_choice",
+      "prompt": "TEXT:\nЯ положил книгу рядом с журналом, который был старым.\nRELATIVE CONNECTOR:\nкоторый\nPOSSIBLE ANTECEDENT MENTIONS:\nC1: Я\nC2: журналом\nQUESTION:\nWhich source mention is modified by this relative clause? Choose UNCLEAR if the sentence itself does not determine exactly one.\nCHOICES:\nC1\nC2\nUNCLEAR\n\nTASK:\nResolve only the local source-text reference. Return exactly one label from CHOICES. Use UNCLEAR if the sentence does not determine one antecedent.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "2",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    },
+    {
+      "sequence": 651,
+      "req_id": "6a8005193c0640c58f59f580e85d0ea5",
+      "role": "perception_antecedent_choice",
+      "prompt": "TEXT:\nЯ положил книгу рядом с журналом, который был старым.\nRELATIVE CONNECTOR:\nкоторый\nPOSSIBLE ANTECEDENT MENTIONS:\nC1: Я\nC2: журналом\nQUESTION:\nWhich source mention is modified by this relative clause? Choose UNCLEAR if the sentence itself does not determine exactly one.\nCHOICES:\nC1\nC2\nUNCLEAR\n\nTASK:\nResolve only the local source-text reference. Return exactly one label from CHOICES. Use UNCLEAR if the sentence does not determine one antecedent.",
+      "system": "Solve only the final TASK. Instructions and protocol labels are English. Return only the requested English label; when selecting a token/span, return only its integer option number without brackets; when explicitly asked for a lexical lemma, return only that lemma. Do not copy the input. Do not explain or add punctuation.",
+      "response_text": "2",
+      "rendered_prompt": null,
+      "input_tokens": null,
+      "choice_outputs": [],
+      "choice_scores": null,
+      "calibration_choice_scores": null,
+      "calibrated_choice_scores": null,
+      "choice_winner": null,
+      "raw_choice_margin": null,
+      "choice_margin": null,
+      "choice_scoring_mode": null,
+      "decision_margin_threshold": null,
+      "decision_accepted": null,
+      "error": null
+    }
+  ],
+  "ah_diff": {
+    "added": {
+      "L_8437cfba51684f008da9001eae3b896b": {
+        "uid": "L_8437cfba51684f008da9001eae3b896b",
+        "kind": "L",
+        "domain": null,
+        "relation_id": "FOLLOW",
+        "weight": 0.2,
+        "source": {
+          "uid": "N_967c54d7c8c1479688f99f4c69d03a5b",
+          "kind": "N"
+        },
+        "target": {
+          "uid": "N_2cbd024d31eb4e5683d648db18796804",
+          "kind": "N"
+        }
+      },
+      "N_2cbd024d31eb4e5683d648db18796804": {
+        "uid": "N_2cbd024d31eb4e5683d648db18796804",
+        "kind": "N",
+        "domain": "H",
+        "weight": 0.3,
+        "template": {
+          "uid": "T_e5333a288009442882fd9698dfd42d3f",
+          "kind": "T"
+        },
+        "actants": {
+          "SUBJECT": {
+            "uid": "M_5b420d5c902a4051a351540d4c04c251",
+            "kind": "M"
+          }
+        },
+        "properties": {
+          "text": {
+            "name": "text",
+            "value": "Я положил книгу рядом с журналом, который был старым.",
+            "type_name": "str",
+            "unit": null
+          }
+        },
+        "meta": {
+          "occurrence_count": 1,
+          "event_instance": true,
+          "dedup_exempt": true
+        }
+      }
+    },
+    "removed": {},
+    "changed": {}
+  },
+  "runtime_after": {
+    "tick": 104,
+    "workspace_uids": [
+      "M_5b420d5c902a4051a351540d4c04c251",
+      "M_62356d38f31b4e11998ff39a775d8b61",
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "M_a4a27a9e5230469ab269034b14a1e4d5",
+      "M_fc69b4786a6b4fce93342f330f8d03af",
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d",
+      "N_166d80888d044995b32991772e3d4ac0",
+      "N_16acd6e90eb54438beb2cc4488a8f89d",
+      "N_1b292003b75b48a886b0a0ecdff89b93",
+      "N_1ca1c4e829754256a693a0d61d7280f3",
+      "N_222258eee8e04f26bf5735d408209c9d",
+      "N_4bb9facf12c24b19a4668bf513b653f2",
+      "N_5762396d099c4b3795b9b8c61f98f50c",
+      "N_5c78f6012ee042d2940d294336169c7b",
+      "N_82353b674761408a98159bcaa210550b",
+      "N_9652ca2b78434c53a55fd22d679fdd25",
+      "N_967c54d7c8c1479688f99f4c69d03a5b",
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2",
+      "N_c45d8a0d9901424c89a131b5d6ed0461",
+      "N_cf5dab81b6774a929d4b64d870af289c",
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8",
+      "N_db79000de35946ad81f0fb14ba605aa5",
+      "N_e1689bb122194fd89aa74765d5412fd9",
+      "S_0a3a560a311b4473808065c3aa0ed334",
+      "S_46d5e122600740c8aacdb87ba32d7fa5",
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482",
+      "T_1d42488e4536454999a4ed3b83e836b8"
+    ],
+    "workspace": {
+      "M_5b420d5c902a4051a351540d4c04c251": {
+        "semantic": "Пользователь",
+        "excitation": 1.0
+      },
+      "M_62356d38f31b4e11998ff39a775d8b61": {
+        "semantic": "Иван",
+        "excitation": 0.9377261893344568
+      },
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": {
+        "semantic": "АГент",
+        "excitation": 0.7086234979281048
+      },
+      "M_a4a27a9e5230469ab269034b14a1e4d5": {
+        "semantic": "чай",
+        "excitation": 0.6752226622331868
+      },
+      "M_fc69b4786a6b4fce93342f330f8d03af": {
+        "semantic": "Кошка",
+        "excitation": 0.6246285728584249
+      },
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d": {
+        "semantic": "любит(SUBJECT=Иван)",
+        "excitation": 0.8
+      },
+      "N_166d80888d044995b32991772e3d4ac0": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван, OBJECT=чай))",
+        "excitation": 0.6232138988393179
+      },
+      "N_16acd6e90eb54438beb2cc4488a8f89d": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6101396510403929
+      },
+      "N_1b292003b75b48a886b0a0ecdff89b93": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6335355239433542
+      },
+      "N_1ca1c4e829754256a693a0d61d7280f3": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.3826638460721264
+      },
+      "N_222258eee8e04f26bf5735d408209c9d": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6961868397860265
+      },
+      "N_4bb9facf12c24b19a4668bf513b653f2": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6
+      },
+      "N_5762396d099c4b3795b9b8c61f98f50c": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6683665627738127
+      },
+      "N_5c78f6012ee042d2940d294336169c7b": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.6
+      },
+      "N_82353b674761408a98159bcaa210550b": {
+        "semantic": "спит(SUBJECT=Кошка)",
+        "excitation": 0.6361369697998834
+      },
+      "N_9652ca2b78434c53a55fd22d679fdd25": {
+        "semantic": "высказать(SUBJECT=Пользователь, OBJECT=любит(SUBJECT=Иван))",
+        "excitation": 0.6
+      },
+      "N_967c54d7c8c1479688f99f4c69d03a5b": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.5
+      },
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": {
+        "semantic": "любит(SUBJECT=Иван, OBJECT=чай)",
+        "excitation": 0.6900909162917637
+      },
+      "N_c45d8a0d9901424c89a131b5d6ed0461": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.38043566674283924
+      },
+      "N_cf5dab81b6774a929d4b64d870af289c": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6939826272298252
+      },
+      "N_d6fa4f8c6d0f4222aede7b4143bb17d8": {
+        "semantic": "высказать(SUBJECT=АГент)",
+        "excitation": 0.6156373836817342
+      },
+      "N_db79000de35946ad81f0fb14ba605aa5": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.7014343293921061
+      },
+      "N_e1689bb122194fd89aa74765d5412fd9": {
+        "semantic": "высказать(SUBJECT=Пользователь)",
+        "excitation": 0.49876935585938187
+      },
+      "S_0a3a560a311b4473808065c3aa0ed334": {
+        "semantic": "любит",
+        "excitation": 0.9975387117187637
+      },
+      "S_46d5e122600740c8aacdb87ba32d7fa5": {
+        "semantic": "Что",
+        "excitation": 0.9975387117187637
+      },
+      "S_c5a3cd90fe2e4d40a3dd7c1aa2e05482": {
+        "semantic": "Иван",
+        "excitation": 0.9975387117187637
+      },
+      "T_1d42488e4536454999a4ed3b83e836b8": {
+        "semantic": "любит",
+        "excitation": 1.0
+      }
+    },
+    "pending_incoming": {
+      "N_e1689bb122194fd89aa74765d5412fd9": 6.4598849451584e-05,
+      "N_4bb9facf12c24b19a4668bf513b653f2": 0.0215,
+      "N_9652ca2b78434c53a55fd22d679fdd25": 0.0215,
+      "N_967c54d7c8c1479688f99f4c69d03a5b": 0.019999999999999997,
+      "N_9dbaf31287954e5cabfa71dfa7a8b6a2": 0.4,
+      "N_0bae3cf6a9a14be4a4100a6af1d5e16d": 0.43,
+      "M_62356d38f31b4e11998ff39a775d8b61": 0.06000000000000001,
+      "M_5b420d5c902a4051a351540d4c04c251": 0.09009787704462359,
+      "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a": 0.15,
+      "N_2cbd024d31eb4e5683d648db18796804": 0.5
+    },
+    "pending_refutations": []
+  },
+  "interaction_context_after": {
+    "self_ref": {
+      "uid": "M_9c31b2e507ed4c46ac9d6cbcfec9bd0a",
+      "kind": "M"
+    },
+    "user_ref": {
+      "uid": "M_5b420d5c902a4051a351540d4c04c251",
+      "kind": "M"
+    },
+    "now_ref": null,
+    "active_location_ref": null,
+    "pronoun_refs": {},
+    "last_experience_ref": {
+      "uid": "N_2cbd024d31eb4e5683d648db18796804",
+      "kind": "N"
+    },
+    "pending_clarification_refs": []
+  },
+  "semantic_status": "FAIL",
+  "semantic_checks": [
+    {
+      "name": "perception.available",
+      "ok": false,
+      "expected": true,
+      "actual": false
+    },
+    {
+      "name": "integration.completed",
+      "ok": false,
+      "expected": "OK",
+      "actual": "ERROR"
+    }
+  ],
+  "semantic_note": null,
+  "semantic_family": "personal_provenance_stress",
+  "semantic_tags": [
+    "personal",
+    "relative",
+    "provenance"
+  ]
+}

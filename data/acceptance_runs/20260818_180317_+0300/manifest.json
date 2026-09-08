@@ -1,0 +1,3404 @@
+{
+  "cases_file": "C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\data\\acceptance_cases.txt",
+  "output_dir": "C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\data\\acceptance_runs\\20260818_180317_+0300",
+  "total": 200,
+  "succeeded": 197,
+  "failed": 3,
+  "semantic_passed": 145,
+  "semantic_failed": 55,
+  "semantic_gaps": 0,
+  "semantic_families": {
+    "basic_frames": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "gaps": 0
+    },
+    "coordination": {
+      "total": 6,
+      "passed": 4,
+      "failed": 2,
+      "gaps": 0
+    },
+    "coreference": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "gaps": 0
+    },
+    "template_evolution_queries": {
+      "total": 7,
+      "passed": 6,
+      "failed": 1,
+      "gaps": 0
+    },
+    "nested_content_control": {
+      "total": 3,
+      "passed": 2,
+      "failed": 1,
+      "gaps": 0
+    },
+    "relative_clauses": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "gaps": 0
+    },
+    "temporal_causal_conditional": {
+      "total": 7,
+      "passed": 4,
+      "failed": 3,
+      "gaps": 0
+    },
+    "negation_voice": {
+      "total": 5,
+      "passed": 4,
+      "failed": 1,
+      "gaps": 0
+    },
+    "reference_ambiguity": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "gaps": 0
+    },
+    "structural_ambiguity": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "gaps": 0
+    },
+    "personal_provenance": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "gaps": 0
+    },
+    "lexical_basic_frames": {
+      "total": 10,
+      "passed": 7,
+      "failed": 3,
+      "gaps": 0
+    },
+    "recipient_transfer": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "adjunct_roles": {
+      "total": 10,
+      "passed": 5,
+      "failed": 5,
+      "gaps": 0
+    },
+    "template_evolution_stress": {
+      "total": 10,
+      "passed": 8,
+      "failed": 2,
+      "gaps": 0
+    },
+    "coordination_stress": {
+      "total": 10,
+      "passed": 7,
+      "failed": 3,
+      "gaps": 0
+    },
+    "coreference_stress": {
+      "total": 10,
+      "passed": 5,
+      "failed": 5,
+      "gaps": 0
+    },
+    "relative_clause_stress": {
+      "total": 10,
+      "passed": 9,
+      "failed": 1,
+      "gaps": 0
+    },
+    "nested_content_stress": {
+      "total": 10,
+      "passed": 7,
+      "failed": 3,
+      "gaps": 0
+    },
+    "temporal_causal_stress": {
+      "total": 10,
+      "passed": 7,
+      "failed": 3,
+      "gaps": 0
+    },
+    "conditional_stress": {
+      "total": 10,
+      "passed": 5,
+      "failed": 5,
+      "gaps": 0
+    },
+    "negation_stress": {
+      "total": 10,
+      "passed": 8,
+      "failed": 2,
+      "gaps": 0
+    },
+    "passive_impersonal_stress": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    },
+    "query_role_stress": {
+      "total": 10,
+      "passed": 7,
+      "failed": 3,
+      "gaps": 0
+    },
+    "personal_provenance_stress": {
+      "total": 10,
+      "passed": 9,
+      "failed": 1,
+      "gaps": 0
+    },
+    "ambiguity_stress": {
+      "total": 10,
+      "passed": 2,
+      "failed": 8,
+      "gaps": 0
+    },
+    "morphology_case_pressure": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "gaps": 0
+    }
+  },
+  "oracle_file": "C:\\Users\\art\\SynologyDrive\\projects\\AG_Memory\\data\\acceptance_oracle.json",
+  "scenario_isolation": true,
+  "scenario_count": 149,
+  "cases": [
+    {
+      "index": 1,
+      "input": "Кошка спит.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "basic_frames",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_001.json"
+    },
+    {
+      "index": 2,
+      "input": "Иван читает книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "basic_frames",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_002.json"
+    },
+    {
+      "index": 3,
+      "input": "Мария читает.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "basic_frames",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_003.json"
+    },
+    {
+      "index": 4,
+      "input": "Иван купил хлеб и молоко.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "basic_frames",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_004.json"
+    },
+    {
+      "index": 5,
+      "input": "Яблоки бывают зелёными или красными.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "basic_frames",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_005.json"
+    },
+    {
+      "index": 6,
+      "input": "Иван написал письмо и отправил его Марии.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coordination",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a2.roles.OBJECT"
+      ],
+      "error": null,
+      "file": "turn_006.json"
+    },
+    {
+      "index": 7,
+      "input": "Лиза взяла книгу, открыла её и прочитала.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_007.json"
+    },
+    {
+      "index": 8,
+      "input": "Петя встал и вышел.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_008.json"
+    },
+    {
+      "index": 9,
+      "input": "Иван и Мария пришли и ушли.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_009.json"
+    },
+    {
+      "index": 10,
+      "input": "Иван пришёл, а Мария ушла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_010.json"
+    },
+    {
+      "index": 11,
+      "input": "Иван написал письмо, а Мария отправила его Петру.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coordination",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "canonical.assertions.a2.roles.OBJECT"
+      ],
+      "error": null,
+      "file": "turn_011.json"
+    },
+    {
+      "index": 12,
+      "input": "Анна увидела Марию. Она улыбнулась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_012.json"
+    },
+    {
+      "index": 13,
+      "input": "Сергей положил ключ на стол. Потом он взял его.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_013.json"
+    },
+    {
+      "index": 14,
+      "input": "Иван подарил книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_014.json"
+    },
+    {
+      "index": 15,
+      "input": "Иван подарил Марии книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_015.json"
+    },
+    {
+      "index": 16,
+      "input": "Кто подарил Марии книгу?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_016.json"
+    },
+    {
+      "index": 17,
+      "input": "Что Иван подарил Марии?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_017.json"
+    },
+    {
+      "index": 18,
+      "input": "Кому Иван подарил книгу?",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.queries.q1.requested_roles",
+        "perception.queries.q1.role_set",
+        "inference.q1.status",
+        "inference.q1.role",
+        "inference.q1.value"
+      ],
+      "error": null,
+      "file": "turn_018.json"
+    },
+    {
+      "index": 19,
+      "input": "Иван любит чай.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_019.json"
+    },
+    {
+      "index": 20,
+      "input": "Кто любит чай?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_queries",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_020.json"
+    },
+    {
+      "index": 21,
+      "input": "Иван сказал, что Мария прочитала книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_control",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_021.json"
+    },
+    {
+      "index": 22,
+      "input": "Иван попросил Марию прочитать книгу.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "nested_content_control",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "canonical.assertions.a2.roles.SUBJECT"
+      ],
+      "error": null,
+      "file": "turn_022.json"
+    },
+    {
+      "index": 23,
+      "input": "Мария хочет купить билет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_control",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_023.json"
+    },
+    {
+      "index": 24,
+      "input": "Книга, которую Иван купил, лежит на столе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clauses",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_024.json"
+    },
+    {
+      "index": 25,
+      "input": "Человек, который вошёл в комнату, сел на стул.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clauses",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_025.json"
+    },
+    {
+      "index": 26,
+      "input": "После того как Мария прочитала книгу, она написала отзыв.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_026.json"
+    },
+    {
+      "index": 27,
+      "input": "Перед тем как Иван ушёл, он закрыл окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_027.json"
+    },
+    {
+      "index": 28,
+      "input": "Иван открыл дверь, потому что Мария попросила его войти.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "perception.assertions.a2.roles.SUBJECT",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.SUBJECT"
+      ],
+      "error": null,
+      "file": "turn_028.json"
+    },
+    {
+      "index": 29,
+      "input": "Иван остался дома, потому что шёл дождь.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "perception.assertions.a2.roles.SUBJECT",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.SUBJECT"
+      ],
+      "error": null,
+      "file": "turn_029.json"
+    },
+    {
+      "index": 30,
+      "input": "Если Лиза получит советы, она прочитает документ и напишет текст.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.SUBJECT"
+      ],
+      "error": null,
+      "file": "turn_030.json"
+    },
+    {
+      "index": 31,
+      "input": "Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_031.json"
+    },
+    {
+      "index": 32,
+      "input": "Если Иван придёт, Мария прочитает документ и отправит его Петру.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_conditional",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_032.json"
+    },
+    {
+      "index": 33,
+      "input": "Иван не читает книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_voice",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_033.json"
+    },
+    {
+      "index": 34,
+      "input": "Мария не пришла.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "negation_voice",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT"
+      ],
+      "error": null,
+      "file": "turn_034.json"
+    },
+    {
+      "index": 35,
+      "input": "Иван читает не книгу, а журнал.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_voice",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_035.json"
+    },
+    {
+      "index": 36,
+      "input": "Книга написана Иваном.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_voice",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_036.json"
+    },
+    {
+      "index": 37,
+      "input": "Мне дали книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_voice",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_037.json"
+    },
+    {
+      "index": 38,
+      "input": "Анна сказала Марии, что она победила.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "reference_ambiguity",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "perception.assertions.a2.alternatives.2.SUBJECT",
+        "canonical.assertions.a2.role_set"
+      ],
+      "error": null,
+      "file": "turn_038.json"
+    },
+    {
+      "index": 39,
+      "input": "Иван увидел Петра с биноклем.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "structural_ambiguity",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_039.json"
+    },
+    {
+      "index": 40,
+      "input": "Я положил книгу рядом с журналом, который был новым.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "personal_provenance",
+      "semantic_tags": [
+        "regression40"
+      ],
+      "scenario_id": "regression40_frozen",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: antecedent_choice failed after 2 attempt(s): relative_antecedent expected exactly one of: C1, C2, UNCLEAR",
+      "file": "turn_040.json"
+    },
+    {
+      "index": 41,
+      "input": "Собака бежит.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "intransitive",
+        "subject"
+      ],
+      "scenario_id": "case_041",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_041.json"
+    },
+    {
+      "index": 42,
+      "input": "Ольга закрыла дверь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "transitive",
+        "object"
+      ],
+      "scenario_id": "case_042",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_042.json"
+    },
+    {
+      "index": 43,
+      "input": "Лампа стоит на столе.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "location"
+      ],
+      "scenario_id": "case_043",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "templates.стоять.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_043.json"
+    },
+    {
+      "index": 44,
+      "input": "Небо стало тёмным.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "state",
+        "copular"
+      ],
+      "scenario_id": "case_044",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_044.json"
+    },
+    {
+      "index": 45,
+      "input": "Птица летит над домом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "location",
+        "preposition"
+      ],
+      "scenario_id": "case_045",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_045.json"
+    },
+    {
+      "index": 46,
+      "input": "Мальчик держит мяч.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "transitive"
+      ],
+      "scenario_id": "case_046",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_046.json"
+    },
+    {
+      "index": 47,
+      "input": "Вода осталась холодной.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "state",
+        "template-evolution"
+      ],
+      "scenario_id": "case_047",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_047.json"
+    },
+    {
+      "index": 48,
+      "input": "Книга лежит в шкафу.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "location"
+      ],
+      "scenario_id": "case_048",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "templates.лежать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_048.json"
+    },
+    {
+      "index": 49,
+      "input": "Девочка открыла окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "transitive"
+      ],
+      "scenario_id": "case_049",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_049.json"
+    },
+    {
+      "index": 50,
+      "input": "Поезд прибыл на станцию.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "lexical_basic_frames",
+      "semantic_tags": [
+        "location",
+        "motion"
+      ],
+      "scenario_id": "case_050",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.LOCATION",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.LOCATION",
+        "templates.прибыть.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_050.json"
+    },
+    {
+      "index": 51,
+      "input": "Ольга передала Сергею ключ.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_051",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_051.json"
+    },
+    {
+      "index": 52,
+      "input": "Сергей отправил Анне письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_052",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_052.json"
+    },
+    {
+      "index": 53,
+      "input": "Анна показала Петру фотографию.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_053",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_053.json"
+    },
+    {
+      "index": 54,
+      "input": "Пётр дал Ольге книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_054",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_054.json"
+    },
+    {
+      "index": 55,
+      "input": "Мария вернула Ивану билет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_055",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_055.json"
+    },
+    {
+      "index": 56,
+      "input": "Иван принёс Марии чай.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_056",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_056.json"
+    },
+    {
+      "index": 57,
+      "input": "Ольга продала Сергею стол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_057",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_057.json"
+    },
+    {
+      "index": 58,
+      "input": "Сергей сообщил Анне новость.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_058",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_058.json"
+    },
+    {
+      "index": 59,
+      "input": "Анна вручила Петру документ.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_059",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_059.json"
+    },
+    {
+      "index": 60,
+      "input": "Пётр предложил Марии помощь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "recipient_transfer",
+      "semantic_tags": [
+        "recipient",
+        "ditransitive"
+      ],
+      "scenario_id": "case_060",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_060.json"
+    },
+    {
+      "index": 61,
+      "input": "Иван открыл дверь ключом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "tool",
+        "instrumental"
+      ],
+      "scenario_id": "case_061",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_061.json"
+    },
+    {
+      "index": 62,
+      "input": "Мария написала письмо карандашом.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "tool",
+        "instrumental"
+      ],
+      "scenario_id": "case_062",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.OBJECT",
+        "templates.написать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_062.json"
+    },
+    {
+      "index": 63,
+      "input": "Сергей получил письмо от Анны.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "source",
+        "preposition"
+      ],
+      "scenario_id": "case_063",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "templates.получить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_063.json"
+    },
+    {
+      "index": 64,
+      "input": "Ольга взяла книгу со стола.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "source",
+        "preposition"
+      ],
+      "scenario_id": "case_064",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_064.json"
+    },
+    {
+      "index": 65,
+      "input": "Иван сделал стол из дерева.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "material"
+      ],
+      "scenario_id": "case_065",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.MATERIAL",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.OBJECT",
+        "canonical.assertions.a1.roles.MATERIAL",
+        "templates.сделать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_065.json"
+    },
+    {
+      "index": 66,
+      "input": "Мария ждала два часа.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "duration",
+        "numeric"
+      ],
+      "scenario_id": "case_066",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_066.json"
+    },
+    {
+      "index": 67,
+      "input": "Иван пришёл утром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "time"
+      ],
+      "scenario_id": "case_067",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_067.json"
+    },
+    {
+      "index": 68,
+      "input": "Мария купила три книги.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "amount",
+        "numeric"
+      ],
+      "scenario_id": "case_068",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.OBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.OBJECT",
+        "canonical.assertions.a1.roles.AMOUNT",
+        "templates.купить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_068.json"
+    },
+    {
+      "index": 69,
+      "input": "Сергей открыл окно, чтобы проветрить комнату.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "purpose",
+        "nested"
+      ],
+      "scenario_id": "case_069",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.OBJECT",
+        "templates.открыть.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_069.json"
+    },
+    {
+      "index": 70,
+      "input": "Иван сел, чтобы отдохнуть.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "adjunct_roles",
+      "semantic_tags": [
+        "purpose",
+        "control"
+      ],
+      "scenario_id": "case_070",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_070.json"
+    },
+    {
+      "index": 71,
+      "input": "Пётр открыл сундук.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution"
+      ],
+      "scenario_id": "template_open_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_071.json"
+    },
+    {
+      "index": 72,
+      "input": "Пётр открыл сундук ключом.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "tool"
+      ],
+      "scenario_id": "template_open_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_072.json"
+    },
+    {
+      "index": 73,
+      "input": "Пётр открыл сундук вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "time"
+      ],
+      "scenario_id": "template_open_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_073.json"
+    },
+    {
+      "index": 74,
+      "input": "Мария открыла шкаф ключом утром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "multi-role"
+      ],
+      "scenario_id": "template_open_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_074.json"
+    },
+    {
+      "index": 75,
+      "input": "Сергей положил папку на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "location"
+      ],
+      "scenario_id": "template_put_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_075.json"
+    },
+    {
+      "index": 76,
+      "input": "Сергей положил папку на полку вечером.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "time"
+      ],
+      "scenario_id": "template_put_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_076.json"
+    },
+    {
+      "index": 77,
+      "input": "Анна написала записку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution"
+      ],
+      "scenario_id": "template_write_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_077.json"
+    },
+    {
+      "index": 78,
+      "input": "Анна написала записку карандашом.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "tool"
+      ],
+      "scenario_id": "template_write_evolution",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.OBJECT"
+      ],
+      "error": null,
+      "file": "turn_078.json"
+    },
+    {
+      "index": 79,
+      "input": "Анна написала записку утром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "template-evolution",
+        "time"
+      ],
+      "scenario_id": "template_write_evolution",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_079.json"
+    },
+    {
+      "index": 80,
+      "input": "Чем Анна написала записку?",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "template_evolution_stress",
+      "semantic_tags": [
+        "query",
+        "tool",
+        "template-evolution"
+      ],
+      "scenario_id": "template_write_evolution",
+      "semantic_failures": [
+        "perception.queries.q1.role_set"
+      ],
+      "error": null,
+      "file": "turn_080.json"
+    },
+    {
+      "index": 81,
+      "input": "Иван открыл дверь и вошёл.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "predicate-coordination"
+      ],
+      "scenario_id": "case_081",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_081.json"
+    },
+    {
+      "index": 82,
+      "input": "Мария взяла книгу и положила её на стол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "predicate-coordination",
+        "coreference"
+      ],
+      "scenario_id": "case_082",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_082.json"
+    },
+    {
+      "index": 83,
+      "input": "Анна написала письмо и отправила его Сергею.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "predicate-coordination",
+        "recipient"
+      ],
+      "scenario_id": "case_083",
+      "semantic_failures": [
+        "perception.assertions.a2.roles.RECIPIENT",
+        "canonical.assertions.a2.roles.OBJECT",
+        "canonical.assertions.a2.roles.RECIPIENT"
+      ],
+      "error": null,
+      "file": "turn_083.json"
+    },
+    {
+      "index": 84,
+      "input": "Сергей пришёл и сел на стул.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "predicate-coordination"
+      ],
+      "scenario_id": "case_084",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_084.json"
+    },
+    {
+      "index": 85,
+      "input": "Ольга закрыла окно и дверь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "actant-coordination",
+        "and"
+      ],
+      "scenario_id": "case_085",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_085.json"
+    },
+    {
+      "index": 86,
+      "input": "Иван купил чай или кофе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "actant-coordination",
+        "or"
+      ],
+      "scenario_id": "case_086",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_086.json"
+    },
+    {
+      "index": 87,
+      "input": "Мария и Анна читают книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "subject-coordination"
+      ],
+      "scenario_id": "case_087",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_087.json"
+    },
+    {
+      "index": 88,
+      "input": "Иван и Пётр открыли окно и вышли.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "subject-coordination",
+        "predicate-coordination"
+      ],
+      "scenario_id": "case_088",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "canonical.assertions.a2.role_set"
+      ],
+      "error": null,
+      "file": "turn_088.json"
+    },
+    {
+      "index": 89,
+      "input": "Анна вошла, а Сергей вышел.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "contrast-coordination"
+      ],
+      "scenario_id": "case_089",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_089.json"
+    },
+    {
+      "index": 90,
+      "input": "Ольга взяла ключ, открыла дверь и вошла.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coordination_stress",
+      "semantic_tags": [
+        "predicate-coordination",
+        "three-frame"
+      ],
+      "scenario_id": "case_090",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.OBJECT",
+        "templates.взять.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_090.json"
+    },
+    {
+      "index": 91,
+      "input": "Иван взял мяч. Потом он бросил его.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "two-sentence"
+      ],
+      "scenario_id": "case_091",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_091.json"
+    },
+    {
+      "index": 92,
+      "input": "Мария открыла книгу. Потом она закрыла её.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "two-sentence"
+      ],
+      "scenario_id": "case_092",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_092.json"
+    },
+    {
+      "index": 93,
+      "input": "Анна дала Сергею письмо. Потом он прочитал его.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "recipient-antecedent"
+      ],
+      "scenario_id": "case_093",
+      "semantic_failures": [
+        "canonical.assertions.a2.roles.OBJECT"
+      ],
+      "error": null,
+      "file": "turn_093.json"
+    },
+    {
+      "index": 94,
+      "input": "Пётр встретил Ольгу. Потом она ушла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "object-antecedent"
+      ],
+      "scenario_id": "case_094",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_094.json"
+    },
+    {
+      "index": 95,
+      "input": "Сергей положил телефон на стол. Потом он взял телефон.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "lexical-coreference",
+        "two-sentence"
+      ],
+      "scenario_id": "case_095",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_095.json"
+    },
+    {
+      "index": 96,
+      "input": "Ольга увидела Анну. Потом Ольга улыбнулась.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "lexical-coreference"
+      ],
+      "scenario_id": "case_096",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.OBJECT",
+        "perception.assertions.a2.roles.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.OBJECT",
+        "canonical.assertions.a2.roles.SUBJECT",
+        "templates.увидеть.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_096.json"
+    },
+    {
+      "index": 97,
+      "input": "Иван сказал Петру, что он опоздал.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "ambiguity",
+        "nested"
+      ],
+      "scenario_id": "case_097",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.RECIPIENT",
+        "perception.assertions.a2.alternatives.1.SUBJECT",
+        "perception.assertions.a2.alternatives.2.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.RECIPIENT",
+        "templates.сказать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_097.json"
+    },
+    {
+      "index": 98,
+      "input": "Мария увидела Анну. Она ушла.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "ambiguity",
+        "two-sentence"
+      ],
+      "scenario_id": "case_098",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.OBJECT",
+        "perception.assertions.a2.alternatives.1.SUBJECT",
+        "perception.assertions.a2.alternatives.2.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.OBJECT",
+        "templates.увидеть.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_098.json"
+    },
+    {
+      "index": 99,
+      "input": "Сергей дал Петру ключ, и тот открыл дверь.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "demonstrative-coreference",
+        "тот"
+      ],
+      "scenario_id": "case_099",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: antecedent_choice failed after 2 attempt(s): antecedent_choice expected exactly one of: C1, C2, C3, UNCLEAR",
+      "file": "turn_099.json"
+    },
+    {
+      "index": 100,
+      "input": "Анна взяла книгу, а затем положила её на стол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "coreference_stress",
+      "semantic_tags": [
+        "pronoun",
+        "coordination"
+      ],
+      "scenario_id": "case_100",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_100.json"
+    },
+    {
+      "index": 101,
+      "input": "Мальчик, который держит мяч, бежит.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-subject"
+      ],
+      "scenario_id": "case_101",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_101.json"
+    },
+    {
+      "index": 102,
+      "input": "Письмо, которое Мария написала, лежит на столе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-object"
+      ],
+      "scenario_id": "case_102",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_102.json"
+    },
+    {
+      "index": 103,
+      "input": "Дверь, которую Иван открыл, закрылась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-object"
+      ],
+      "scenario_id": "case_103",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_103.json"
+    },
+    {
+      "index": 104,
+      "input": "Ольга увидела человека, который вошёл в комнату.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-subject",
+        "postposed"
+      ],
+      "scenario_id": "case_104",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_104.json"
+    },
+    {
+      "index": 105,
+      "input": "Стол, который Сергей купил, стоит в комнате.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-object"
+      ],
+      "scenario_id": "case_105",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_105.json"
+    },
+    {
+      "index": 106,
+      "input": "Человек, которого Мария встретила, улыбнулся.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-object",
+        "animate"
+      ],
+      "scenario_id": "case_106",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_106.json"
+    },
+    {
+      "index": 107,
+      "input": "Ключ, который лежит на столе, открыл дверь.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-subject"
+      ],
+      "scenario_id": "case_107",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a2.roles.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a2.roles.SUBJECT",
+        "templates.лежать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_107.json"
+    },
+    {
+      "index": 108,
+      "input": "Комната, в которую вошёл Пётр, была пустой.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-location"
+      ],
+      "scenario_id": "case_108",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_108.json"
+    },
+    {
+      "index": 109,
+      "input": "Письмо, которое Сергей отправил Марии, пришло вчера.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-object",
+        "time"
+      ],
+      "scenario_id": "case_109",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_109.json"
+    },
+    {
+      "index": 110,
+      "input": "Книга, которую Иван положил на стол, лежит на столе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "relative_clause_stress",
+      "semantic_tags": [
+        "relative-object",
+        "location"
+      ],
+      "scenario_id": "case_110",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_110.json"
+    },
+    {
+      "index": 111,
+      "input": "Иван думает, что Мария придёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "content",
+        "finite-complement"
+      ],
+      "scenario_id": "case_111",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_111.json"
+    },
+    {
+      "index": 112,
+      "input": "Мария знает, что Пётр читает книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "content",
+        "finite-complement"
+      ],
+      "scenario_id": "case_112",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_112.json"
+    },
+    {
+      "index": 113,
+      "input": "Анна хочет открыть окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "content",
+        "control"
+      ],
+      "scenario_id": "case_113",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_113.json"
+    },
+    {
+      "index": 114,
+      "input": "Сергей решил купить билет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "content",
+        "control"
+      ],
+      "scenario_id": "case_114",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_114.json"
+    },
+    {
+      "index": 115,
+      "input": "Ольга начала читать книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "content",
+        "control"
+      ],
+      "scenario_id": "case_115",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_115.json"
+    },
+    {
+      "index": 116,
+      "input": "Иван попросил Петра закрыть дверь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "request",
+        "recipient",
+        "control"
+      ],
+      "scenario_id": "case_116",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_116.json"
+    },
+    {
+      "index": 117,
+      "input": "Мария сказала Анне открыть окно.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "speech",
+        "recipient",
+        "control"
+      ],
+      "scenario_id": "case_117",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.RECIPIENT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.RECIPIENT",
+        "canonical.assertions.a2.roles.SUBJECT",
+        "templates.сказать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_117.json"
+    },
+    {
+      "index": 118,
+      "input": "Сергей попросил Ольгу принести чай.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "request",
+        "recipient",
+        "control"
+      ],
+      "scenario_id": "case_118",
+      "semantic_failures": [
+        "canonical.assertions.a2.roles.SUBJECT"
+      ],
+      "error": null,
+      "file": "turn_118.json"
+    },
+    {
+      "index": 119,
+      "input": "Анна хочет попросить Петра прийти.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "nested-depth-3",
+        "control"
+      ],
+      "scenario_id": "case_119",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_119.json"
+    },
+    {
+      "index": 120,
+      "input": "Иван сказал Марии, что Пётр хочет купить книгу.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "nested_content_stress",
+      "semantic_tags": [
+        "nested-depth-3",
+        "content"
+      ],
+      "scenario_id": "case_120",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.RECIPIENT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.RECIPIENT",
+        "templates.сказать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_120.json"
+    },
+    {
+      "index": 121,
+      "input": "После того как Иван открыл дверь, он вошёл.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "time",
+        "follow"
+      ],
+      "scenario_id": "case_121",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_121.json"
+    },
+    {
+      "index": 122,
+      "input": "Перед тем как Мария ушла, она закрыла окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "time",
+        "follow"
+      ],
+      "scenario_id": "case_122",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_122.json"
+    },
+    {
+      "index": 123,
+      "input": "Анна улыбнулась, потому что Сергей пришёл.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "cause"
+      ],
+      "scenario_id": "case_123",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_123.json"
+    },
+    {
+      "index": 124,
+      "input": "Пётр остался дома, потому что заболел.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "cause",
+        "omitted-subject"
+      ],
+      "scenario_id": "case_124",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_124.json"
+    },
+    {
+      "index": 125,
+      "input": "После того как Ольга купила книгу, она прочитала её.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "time",
+        "coreference"
+      ],
+      "scenario_id": "case_125",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_125.json"
+    },
+    {
+      "index": 126,
+      "input": "Сергей закрыл дверь, потому что начался дождь.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "cause"
+      ],
+      "scenario_id": "case_126",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.SUBJECT",
+        "templates.начаться.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_126.json"
+    },
+    {
+      "index": 127,
+      "input": "Перед тем как Пётр сел, он снял пальто.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "time",
+        "follow"
+      ],
+      "scenario_id": "case_127",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_127.json"
+    },
+    {
+      "index": 128,
+      "input": "Мария написала письмо после того, как получила новость.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "time",
+        "postposed-clause"
+      ],
+      "scenario_id": "case_128",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.OBJECT",
+        "templates.получить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_128.json"
+    },
+    {
+      "index": 129,
+      "input": "Иван ушёл после того, как Анна пришла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "time",
+        "postposed-clause"
+      ],
+      "scenario_id": "case_129",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_129.json"
+    },
+    {
+      "index": 130,
+      "input": "Ольга открыла дверь, потому что Сергей позвонил.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "temporal_causal_stress",
+      "semantic_tags": [
+        "cause"
+      ],
+      "scenario_id": "case_130",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "canonical.assertions.a2.role_set",
+        "canonical.assertions.a2.roles.SUBJECT",
+        "templates.позвонить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_130.json"
+    },
+    {
+      "index": 131,
+      "input": "Если Иван придёт, Мария уйдёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "one-to-one"
+      ],
+      "scenario_id": "case_131",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_131.json"
+    },
+    {
+      "index": 132,
+      "input": "Если Мария купит книгу, она прочитает её.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "coreference"
+      ],
+      "scenario_id": "case_132",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "templates.прочитать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_132.json"
+    },
+    {
+      "index": 133,
+      "input": "Если Сергей найдёт ключ, он откроет дверь.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "coreference"
+      ],
+      "scenario_id": "case_133",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "templates.найти.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_133.json"
+    },
+    {
+      "index": 134,
+      "input": "Если Анна придёт и Пётр останется, Мария улыбнётся.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "and-antecedent"
+      ],
+      "scenario_id": "case_134",
+      "semantic_failures": [
+        "perception.assertions.a2.role_set",
+        "templates.остаться.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_134.json"
+    },
+    {
+      "index": 135,
+      "input": "Если Иван откроет дверь, Мария войдёт и Пётр выйдет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "and-consequent"
+      ],
+      "scenario_id": "case_135",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_135.json"
+    },
+    {
+      "index": 136,
+      "input": "Если Ольга получит письмо, она ответит Сергею.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "recipient"
+      ],
+      "scenario_id": "case_136",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "templates.получить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_136.json"
+    },
+    {
+      "index": 137,
+      "input": "Если Пётр купит билет, он поедет домой.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "location"
+      ],
+      "scenario_id": "case_137",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "templates.купить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_137.json"
+    },
+    {
+      "index": 138,
+      "input": "Если Мария не придёт, Иван уйдёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "negated-antecedent"
+      ],
+      "scenario_id": "case_138",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_138.json"
+    },
+    {
+      "index": 139,
+      "input": "Если Иван придёт, Мария не уйдёт.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "negated-consequent"
+      ],
+      "scenario_id": "case_139",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_139.json"
+    },
+    {
+      "index": 140,
+      "input": "Если Иван и Мария придут, Пётр начнёт работу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "conditional_stress",
+      "semantic_tags": [
+        "conditional",
+        "subject-composition"
+      ],
+      "scenario_id": "case_140",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_140.json"
+    },
+    {
+      "index": 141,
+      "input": "Ольга не открыла дверь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation"
+      ],
+      "scenario_id": "case_141",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_141.json"
+    },
+    {
+      "index": 142,
+      "input": "Сергей не отправил письмо Марии.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation",
+        "recipient"
+      ],
+      "scenario_id": "case_142",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.RECIPIENT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.RECIPIENT",
+        "templates.отправить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_142.json"
+    },
+    {
+      "index": 143,
+      "input": "Анна читает не журнал, а книгу.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "contrastive-negation"
+      ],
+      "scenario_id": "case_143",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_143.json"
+    },
+    {
+      "index": 144,
+      "input": "Пётр купил не чай, а кофе.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "contrastive-negation"
+      ],
+      "scenario_id": "case_144",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_144.json"
+    },
+    {
+      "index": 145,
+      "input": "Иван не пришёл и Мария не ушла.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation",
+        "coordination"
+      ],
+      "scenario_id": "case_145",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_145.json"
+    },
+    {
+      "index": 146,
+      "input": "Ольга не взяла ключ.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation"
+      ],
+      "scenario_id": "case_146",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_146.json"
+    },
+    {
+      "index": 147,
+      "input": "Книга не лежит на столе.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation",
+        "location"
+      ],
+      "scenario_id": "case_147",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "templates.лежать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_147.json"
+    },
+    {
+      "index": 148,
+      "input": "Сергей не дал Марии письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation",
+        "recipient"
+      ],
+      "scenario_id": "case_148",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_148.json"
+    },
+    {
+      "index": 149,
+      "input": "Анна не сказала Петру правду.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "negation",
+        "speech"
+      ],
+      "scenario_id": "case_149",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_149.json"
+    },
+    {
+      "index": 150,
+      "input": "Пётр читает не книгу, а письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "negation_stress",
+      "semantic_tags": [
+        "contrastive-negation"
+      ],
+      "scenario_id": "case_150",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_150.json"
+    },
+    {
+      "index": 151,
+      "input": "Письмо написано Марией.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "passive"
+      ],
+      "scenario_id": "case_151",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_151.json"
+    },
+    {
+      "index": 152,
+      "input": "Дверь открыта Иваном.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "passive"
+      ],
+      "scenario_id": "case_152",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_152.json"
+    },
+    {
+      "index": 153,
+      "input": "Книга прочитана Сергеем.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "passive"
+      ],
+      "scenario_id": "case_153",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_153.json"
+    },
+    {
+      "index": 154,
+      "input": "Документ подписан Анной.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "passive"
+      ],
+      "scenario_id": "case_154",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_154.json"
+    },
+    {
+      "index": 155,
+      "input": "Окно закрыто Петром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "passive"
+      ],
+      "scenario_id": "case_155",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_155.json"
+    },
+    {
+      "index": 156,
+      "input": "Мне отправили письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "impersonal",
+        "recipient",
+        "personal"
+      ],
+      "scenario_id": "case_156",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_156.json"
+    },
+    {
+      "index": 157,
+      "input": "Марии дали ключ.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "impersonal",
+        "recipient"
+      ],
+      "scenario_id": "case_157",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_157.json"
+    },
+    {
+      "index": 158,
+      "input": "Петру показали документ.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "impersonal",
+        "recipient"
+      ],
+      "scenario_id": "case_158",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_158.json"
+    },
+    {
+      "index": 159,
+      "input": "Мне принесли чай.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "impersonal",
+        "recipient",
+        "personal"
+      ],
+      "scenario_id": "case_159",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_159.json"
+    },
+    {
+      "index": 160,
+      "input": "Анне сообщили новость.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "passive_impersonal_stress",
+      "semantic_tags": [
+        "impersonal",
+        "recipient"
+      ],
+      "scenario_id": "case_160",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_160.json"
+    },
+    {
+      "index": 161,
+      "input": "Борис починил велосипед молотком.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query-seed",
+        "tool"
+      ],
+      "scenario_id": "query_tool",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_161.json"
+    },
+    {
+      "index": 162,
+      "input": "Чем Борис починил велосипед?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query",
+        "tool"
+      ],
+      "scenario_id": "query_tool",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_162.json"
+    },
+    {
+      "index": 163,
+      "input": "Елена отправила Николаю посылку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query-seed",
+        "recipient"
+      ],
+      "scenario_id": "query_recipient",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_163.json"
+    },
+    {
+      "index": 164,
+      "input": "Кому Елена отправила посылку?",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query",
+        "recipient"
+      ],
+      "scenario_id": "query_recipient",
+      "semantic_failures": [
+        "perception.queries.q1.requested_roles",
+        "perception.queries.q1.role_set",
+        "inference.q1.status",
+        "inference.q1.role",
+        "inference.q1.value"
+      ],
+      "error": null,
+      "file": "turn_164.json"
+    },
+    {
+      "index": 165,
+      "input": "Дмитрий получил подарок от Ирины.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query-seed",
+        "source"
+      ],
+      "scenario_id": "query_source",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "templates.получить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_165.json"
+    },
+    {
+      "index": 166,
+      "input": "От кого Дмитрий получил подарок?",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query",
+        "source"
+      ],
+      "scenario_id": "query_source",
+      "semantic_failures": [
+        "perception.queries.q1.role_set",
+        "templates.получить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_166.json"
+    },
+    {
+      "index": 167,
+      "input": "Виктор встретил Алексея утром.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query-seed",
+        "time"
+      ],
+      "scenario_id": "query_time",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_167.json"
+    },
+    {
+      "index": 168,
+      "input": "Когда Виктор встретил Алексея?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query",
+        "time"
+      ],
+      "scenario_id": "query_time",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_168.json"
+    },
+    {
+      "index": 169,
+      "input": "София положила вазу на полку.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query-seed",
+        "location"
+      ],
+      "scenario_id": "query_location",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_169.json"
+    },
+    {
+      "index": 170,
+      "input": "Куда София положила вазу?",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "query_role_stress",
+      "semantic_tags": [
+        "query",
+        "location"
+      ],
+      "scenario_id": "query_location",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_170.json"
+    },
+    {
+      "index": 171,
+      "input": "Я открыл окно.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "user-subject"
+      ],
+      "scenario_id": "case_171",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_171.json"
+    },
+    {
+      "index": 172,
+      "input": "Я положил телефон на стол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "user-subject"
+      ],
+      "scenario_id": "case_172",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_172.json"
+    },
+    {
+      "index": 173,
+      "input": "Я взял телефон. Потом я положил его на стол.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "coreference"
+      ],
+      "scenario_id": "case_173",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_173.json"
+    },
+    {
+      "index": 174,
+      "input": "Мне дали билет.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "recipient"
+      ],
+      "scenario_id": "case_174",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_174.json"
+    },
+    {
+      "index": 175,
+      "input": "Я прочитал письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "user-subject"
+      ],
+      "scenario_id": "case_175",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_175.json"
+    },
+    {
+      "index": 176,
+      "input": "Я сказал Марии, что прочитал письмо.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "nested"
+      ],
+      "scenario_id": "case_176",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_176.json"
+    },
+    {
+      "index": 177,
+      "input": "Я попросил Сергея открыть дверь.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "request",
+        "nested"
+      ],
+      "scenario_id": "case_177",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_177.json"
+    },
+    {
+      "index": 178,
+      "input": "Я увидел Анну. Она улыбнулась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "coreference",
+        "provenance"
+      ],
+      "scenario_id": "case_178",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_178.json"
+    },
+    {
+      "index": 179,
+      "input": "Мне отправили книгу. Я открыл её.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "coreference"
+      ],
+      "scenario_id": "case_179",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_179.json"
+    },
+    {
+      "index": 180,
+      "input": "Я положил книгу рядом с журналом, который был старым.",
+      "status": "ERROR",
+      "semantic_status": "FAIL",
+      "semantic_family": "personal_provenance_stress",
+      "semantic_tags": [
+        "personal",
+        "relative",
+        "provenance"
+      ],
+      "scenario_id": "case_180",
+      "semantic_failures": [
+        "perception.available",
+        "integration.completed"
+      ],
+      "error": "PerceptionParseError: antecedent_choice failed after 2 attempt(s): relative_antecedent expected exactly one of: C1, C2, UNCLEAR",
+      "file": "turn_180.json"
+    },
+    {
+      "index": 181,
+      "input": "Мария увидела Анну с зонтом.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "scenario_id": "case_181",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_181.json"
+    },
+    {
+      "index": 182,
+      "input": "Сергей встретил Петра с собакой.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "scenario_id": "case_182",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_182.json"
+    },
+    {
+      "index": 183,
+      "input": "Ольга сфотографировала Ивана с телефоном.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "scenario_id": "case_183",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_183.json"
+    },
+    {
+      "index": 184,
+      "input": "Пётр заметил Марию с зонтом.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "scenario_id": "case_184",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_184.json"
+    },
+    {
+      "index": 185,
+      "input": "Анна увидела Сергея с рюкзаком.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "structural-ambiguity",
+        "with-attachment"
+      ],
+      "scenario_id": "case_185",
+      "semantic_failures": [
+        "perception.assertion_count",
+        "integration.world_assertion_count",
+        "integration.cp_semantic_addition_count",
+        "integration.clarification.required",
+        "integration.clarification.kind",
+        "integration.clarification.options"
+      ],
+      "error": null,
+      "file": "turn_185.json"
+    },
+    {
+      "index": 186,
+      "input": "Иван сказал Петру, что он устал.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "reference-ambiguity",
+        "pronoun"
+      ],
+      "scenario_id": "case_186",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.RECIPIENT",
+        "perception.assertions.a2.alternatives.1.SUBJECT",
+        "perception.assertions.a2.alternatives.2.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.RECIPIENT",
+        "templates.сказать.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_186.json"
+    },
+    {
+      "index": 187,
+      "input": "Мария сообщила Анне, что она победила.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "reference-ambiguity",
+        "pronoun"
+      ],
+      "scenario_id": "case_187",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.RECIPIENT",
+        "perception.assertions.a2.alternatives.1.SUBJECT",
+        "perception.assertions.a2.alternatives.2.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.RECIPIENT",
+        "templates.сообщить.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_187.json"
+    },
+    {
+      "index": 188,
+      "input": "Сергей увидел Петра. Он улыбнулся.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "reference-ambiguity",
+        "two-sentence"
+      ],
+      "scenario_id": "case_188",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_188.json"
+    },
+    {
+      "index": 189,
+      "input": "Ольга встретила Анну. Она улыбнулась.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "reference-ambiguity",
+        "two-sentence"
+      ],
+      "scenario_id": "case_189",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_189.json"
+    },
+    {
+      "index": 190,
+      "input": "Анна увидела Марию. Она засмеялась.",
+      "status": "OK",
+      "semantic_status": "FAIL",
+      "semantic_family": "ambiguity_stress",
+      "semantic_tags": [
+        "reference-ambiguity",
+        "two-sentence"
+      ],
+      "scenario_id": "case_190",
+      "semantic_failures": [
+        "perception.assertions.a1.role_set",
+        "perception.assertions.a1.roles.OBJECT",
+        "perception.assertions.a2.alternatives.1.SUBJECT",
+        "perception.assertions.a2.alternatives.2.SUBJECT",
+        "canonical.assertions.a1.role_set",
+        "canonical.assertions.a1.roles.SUBJECT",
+        "canonical.assertions.a1.roles.OBJECT",
+        "templates.увидеть.explicit_role_coverage"
+      ],
+      "error": null,
+      "file": "turn_190.json"
+    },
+    {
+      "index": 191,
+      "input": "Мария увидела Сергея.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_191",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_191.json"
+    },
+    {
+      "index": 192,
+      "input": "Сергей встретил Ивана.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_192",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_192.json"
+    },
+    {
+      "index": 193,
+      "input": "Анна позвала Петра.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_193",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_193.json"
+    },
+    {
+      "index": 194,
+      "input": "Иван заметил Алексея.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_194",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_194.json"
+    },
+    {
+      "index": 195,
+      "input": "Пётр увидел учителя.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_195",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_195.json"
+    },
+    {
+      "index": 196,
+      "input": "Ольга встретила врача.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_196",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_196.json"
+    },
+    {
+      "index": 197,
+      "input": "Мария позвала брата.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_197",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_197.json"
+    },
+    {
+      "index": 198,
+      "input": "Сергей увидел друга.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_198",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_198.json"
+    },
+    {
+      "index": 199,
+      "input": "Анна встретила мальчика.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_199",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_199.json"
+    },
+    {
+      "index": 200,
+      "input": "Иван заметил человека.",
+      "status": "OK",
+      "semantic_status": "PASS",
+      "semantic_family": "morphology_case_pressure",
+      "semantic_tags": [
+        "animate-accusative",
+        "case-syncretism"
+      ],
+      "scenario_id": "case_200",
+      "semantic_failures": [],
+      "error": null,
+      "file": "turn_200.json"
+    }
+  ]
+}

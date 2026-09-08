@@ -1,0 +1,44 @@
+Acceptance run: 20260817_160032_+0300
+Cases: 40 | RUNTIME OK: 35 | RUNTIME ERROR: 5
+SEMANTIC PASS: 34 | FAIL: 6 | GAP: 0
+
+001 PASS (runtime=OK): Кошка спит.
+002 PASS (runtime=OK): Иван читает книгу.
+003 PASS (runtime=OK): Мария читает.
+004 PASS (runtime=OK): Иван купил хлеб и молоко.
+005 PASS (runtime=OK): Яблоки бывают зелёными или красными.
+006 PASS (runtime=OK): Иван написал письмо и отправил его Марии.
+007 PASS (runtime=OK): Лиза взяла книгу, открыла её и прочитала.
+008 PASS (runtime=OK): Петя встал и вышел.
+009 PASS (runtime=OK): Иван и Мария пришли и ушли.
+010 PASS (runtime=OK): Иван пришёл, а Мария ушла.
+011 PASS (runtime=OK): Иван написал письмо, а Мария отправила его Петру.
+012 PASS (runtime=OK): Анна увидела Марию. Она улыбнулась.
+013 PASS (runtime=OK): Сергей положил ключ на стол. Потом он взял его.
+014 PASS (runtime=OK): Иван подарил книгу.
+015 PASS (runtime=OK): Иван подарил Марии книгу.
+016 PASS (runtime=OK): Кто подарил Марии книгу?
+017 PASS (runtime=OK): Что Иван подарил Марии?
+018 PASS (runtime=OK): Кому Иван подарил книгу?
+019 PASS (runtime=OK): Иван любит чай.
+020 PASS (runtime=OK): Кто любит чай?
+021 FAIL (runtime=ERROR): Иван сказал, что Мария прочитала книгу. | perception.available, integration.completed | runtime: PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT
+022 FAIL (runtime=ERROR): Иван попросил Марию прочитать книгу. | perception.available, integration.completed | runtime: PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT
+023 FAIL (runtime=ERROR): Мария хочет купить билет. | perception.available, integration.completed | runtime: PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT
+024 PASS (runtime=OK): Книга, которую Иван купил, лежит на столе.
+025 PASS (runtime=OK): Человек, который вошёл в комнату, сел на стул.
+026 PASS (runtime=OK): После того как Мария прочитала книгу, она написала отзыв.
+027 PASS (runtime=OK): Перед тем как Иван ушёл, он закрыл окно.
+028 FAIL (runtime=ERROR): Иван открыл дверь, потому что Мария попросила его войти. | perception.available, integration.completed | runtime: PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT
+029 PASS (runtime=OK): Иван остался дома, потому что шёл дождь.
+030 PASS (runtime=OK): Если Лиза получит советы, она прочитает документ и напишет текст.
+031 PASS (runtime=OK): Если Иван придёт и Мария принесёт документы, Пётр начнёт работу.
+032 PASS (runtime=OK): Если Иван придёт, Мария прочитает документ и отправит его Петру.
+033 PASS (runtime=OK): Иван не читает книгу.
+034 PASS (runtime=OK): Мария не пришла.
+035 PASS (runtime=OK): Иван читает не книгу, а журнал.
+036 PASS (runtime=OK): Книга написана Иваном.
+037 PASS (runtime=OK): Мне дали книгу.
+038 FAIL (runtime=ERROR): Анна сказала Марии, что она победила. | perception.available, integration.completed | runtime: PerceptionParseError: frame_relation expected exactly one of: CONTENT_LINK, NOT_CONTENT
+039 FAIL (runtime=OK): Иван увидел Петра с биноклем. | perception.assertion_count, integration.world_assertion_count, integration.cp_semantic_addition_count, integration.clarification.required, integration.clarification.kind, integration.clarification.options
+040 PASS (runtime=OK): Я положил книгу рядом с журналом, который был новым.

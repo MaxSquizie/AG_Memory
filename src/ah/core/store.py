@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from threading import RLock
 import json
@@ -424,6 +425,21 @@ class AHStore:
         """
         self._state.lifetime_clock_tick = max(0, int(tick))
         self._state.lifetime_tracking_enabled = True
+
+    @contextmanager
+    def established_snapshot_insertions(self):
+        """Insert canonical records without marking them as GC-managed orphans.
+
+        Bulk corpus / cold memory load is established knowledge. Committee
+        injections through the ordinary API after this context still receive
+        initial-lifetime tracking because the previous flag is restored.
+        """
+        previous = self._state.lifetime_tracking_enabled
+        self._state.lifetime_tracking_enabled = False
+        try:
+            yield
+        finally:
+            self._state.lifetime_tracking_enabled = previous
 
     def set_lifetime_clock(self, tick: int) -> None:
         """Set the technical tick used to timestamp subsequent canonical insertions."""

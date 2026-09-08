@@ -17,6 +17,7 @@ from ah.core import AHCore, JsonPersistence, SequentialUidGenerator
 from ah.diagnostics import HackathonPreflightInspector
 from ah.dsl import DSLInterpreter
 from ah.ignition import IgnitionEngine
+from ah.integration.contracts import SeedReason
 from ah.model import ActantRole, Domain, Property
 
 
@@ -309,6 +310,131 @@ class V4LifecycleDsl2200Tests(unittest.TestCase):
         self.assertFalse(report.is_a_acyclic)
         self.assertFalse(report.h_follow_acyclic)
         self.assertFalse(report.structural_ok)
+
+    def test_pacemaker_pulse_does_not_immortalize_orphan(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        engine = IgnitionEngine(
+            core,
+            IgnitionSettings(
+                nu=1.0,
+                tick_interval_seconds=1.0,
+                pacemaker=PacemakerSettings(enabled=True, target_policy="round_robin"),
+            ),
+            WorkspaceSettings(threshold=0.35),
+            LifecycleSettings(2, 100, 20, 50),
+        )
+        orphan = core.add_entity(Domain.C, {"name": Property("name", "ν-orphan", "str")})
+        pulsed = False
+        for _ in range(12):
+            result = engine.tick(include_pacemaker=True)
+            if orphan.uid in result.pacemaker_targets:
+                pulsed = True
+        self.assertTrue(pulsed)
+        self.assertFalse(core.store.has_uid(orphan.uid))
+
+    def test_semantic_excitation_preserves_s_anchored_live_node(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        engine = IgnitionEngine(
+            core,
+            IgnitionSettings(
+                nu=1.0,
+                tick_interval_seconds=1.0,
+                pacemaker=PacemakerSettings(enabled=True),
+            ),
+            WorkspaceSettings(threshold=0.35),
+            LifecycleSettings(2, 100, 20, 50),
+        )
+        s = core.add_abstract_symbol({"хранить"})
+        t = core.add_template(Domain.C, core.ref(s.uid), (ActantRole.SUBJECT,))
+        actor = core.add_entity(Domain.C, {"name": Property("name", "память", "str")})
+        n, _ = core.add_hypernode(
+            Domain.C,
+            core.ref(t.uid),
+            {ActantRole.SUBJECT: core.ref(actor.uid)},
+            0.4,
+        )
+        engine.seed(core.ref(n.uid), 0.65, reason=SeedReason.NEW_FACT)
+        for _ in range(12):
+            engine.tick(include_pacemaker=True)
+        self.assertTrue(all(core.store.has_uid(uid) for uid in (s.uid, t.uid, actor.uid, n.uid)))
+
+    def test_false_wrapper_protects_zero_weight_refuted_n(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        engine = IgnitionEngine(
+            core,
+            self._quiet_ignition(),
+            WorkspaceSettings(),
+            LifecycleSettings(2, 100, 20, 50),
+        )
+        s = core.add_abstract_symbol({"отрицать"})
+        t = core.add_template(Domain.C, core.ref(s.uid), (ActantRole.SUBJECT,))
+        actor = core.add_entity(Domain.C, {"name": Property("name", "факт", "str")})
+        n, _ = core.add_hypernode(
+            Domain.C,
+            core.ref(t.uid),
+            {ActantRole.SUBJECT: core.ref(actor.uid)},
+            0.4,
+        )
+        false_g, _ = core.ensure_function(Domain.C, "FALSE", (core.ref(n.uid),))
+        core.store._replace_hypernode(Domain.C, replace(core.store.get_hypernode(n.uid), weight=0.0))
+        for _ in range(10):
+            engine.tick(include_pacemaker=False)
+        self.assertTrue(core.store.has_uid(n.uid))
+        self.assertTrue(core.store.has_uid(false_g.uid))
+
+    def test_h_event_instance_is_historically_protected(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        engine = IgnitionEngine(
+            core,
+            self._quiet_ignition(),
+            WorkspaceSettings(),
+            LifecycleSettings(2, 100, 20, 50),
+        )
+        s = core.add_abstract_symbol({"сказать"})
+        t = core.add_template(Domain.H, core.ref(s.uid), ())
+        event, _ = core.add_hypernode(
+            Domain.H,
+            core.ref(t.uid),
+            {},
+            0.3,
+            meta={"event_instance": True},
+            deduplicate=False,
+        )
+        for _ in range(10):
+            engine.tick(include_pacemaker=False)
+        self.assertTrue(core.store.has_uid(event.uid))
+
+    def test_corpus_import_after_ignition_is_not_lifetime_managed(self) -> None:
+        from ah.corpus.loader import import_json_payload
+
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        IgnitionEngine(
+            core,
+            self._quiet_ignition(),
+            WorkspaceSettings(),
+            LifecycleSettings(5, 100, 20, 50),
+        )
+        import_json_payload(core, {"entities": [{"name": "КорпусныйУзел"}]})
+        imported = core.store.find_entities_by_name("КорпусныйУзел", Domain.C)
+        self.assertEqual(len(imported), 1)
+        self.assertFalse(core.store.is_lifetime_managed(imported[0].uid))
+        injected = core.add_entity(Domain.C, {"name": Property("name", "API-узел", "str")})
+        self.assertTrue(core.store.is_lifetime_managed(injected.uid))
+
+    def test_dsl_orphan_is_collected_with_pacemaker_on(self) -> None:
+        core = AHCore(uid_generator=SequentialUidGenerator())
+        engine = IgnitionEngine(
+            core,
+            IgnitionSettings(pacemaker=PacemakerSettings(enabled=True)),
+            WorkspaceSettings(),
+            LifecycleSettings(3, 100, 20, 50),
+        )
+        dsl = DSLInterpreter(core)
+        orphan = dsl.execute('addElement domain=C kind=M name="dsl-orphan"').value
+        self.assertTrue(core.store.is_lifetime_managed(orphan.uid))
+        for _ in range(10):
+            engine.tick(include_pacemaker=True)
+        self.assertFalse(core.store.has_uid(orphan.uid))
 
 
 if __name__ == "__main__":
