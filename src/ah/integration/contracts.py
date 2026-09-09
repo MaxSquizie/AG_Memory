@@ -254,7 +254,8 @@ class IntegrationCommit:
     clarifications: tuple[ClarificationRequest, ...] = ()
     relations: tuple[IntegratedRelation, ...] = ()
     conditionals: tuple[IntegratedConditional, ...] = ()
-    formulas: tuple[IntegratedFormula, ...] = ()
     existentials: tuple[IntegratedExistential, ...] = ()
     universals: tuple[IntegratedExistential, ...] = ()
     conflicts: tuple[IntegratedConflict, ...] = ()
+    # Appended for positional-call compatibility with older IntegrationCommit code.
+    formulas: tuple[IntegratedFormula, ...] = ()
