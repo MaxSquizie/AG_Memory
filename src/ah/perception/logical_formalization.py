@@ -117,6 +117,7 @@ class LogicalFormBuilder:
                 parent.local_id in consumed
                 or parent.status is not AssertionStatus.ASSERTED
                 or parent.quoted
+                or not parent.negated
             ):
                 continue
             proposition_actants = [
@@ -194,12 +195,19 @@ class LogicalFormBuilder:
 
             relations: list[str | None] = []
             for left, right in zip(atoms, atoms[1:]):
-                structural = self._structural_relation(left, right)
+                structural = self._structural_relation(
+                    left, right, source_text
+                )
                 if structural is not None:
                     relations.append(structural)
                     self._diagnostics.append(
                         f"LOGIC:{left.local_id}->{right.local_id}:structural_{structural}"
                     )
+                    continue
+                if not self._relation_probe_candidate(
+                    source_text, sentence_id, left, right
+                ):
+                    relations.append(None)
                     continue
                 prompt = self._relation_prompt(
                     source_text, sentence_id, left, right
@@ -240,13 +248,6 @@ class LogicalFormBuilder:
                         by_id,
                     )
                     if expr is not None:
-                        expr = self._maybe_whole_negation(
-                            source_text,
-                            sentence_id,
-                            segment_atoms,
-                            expr,
-                            by_id,
-                        )
                         evidence = self._cover_evidence(
                             source_text,
                             tuple(
@@ -347,41 +348,113 @@ class LogicalFormBuilder:
             predicate_end=p_end if isinstance(p_end, int) else None,
         )
 
-    def _structural_relation(self, left: _Atom, right: _Atom) -> str | None:
+    def _structural_relation(
+        self,
+        left: _Atom,
+        right: _Atom,
+        source_text: str,
+    ) -> str | None:
+        # First use the explicit predicate-coordination graph when both semantic
+        # frames retain overt predicate heads.
         if (
-            left.predicate_start is None
-            or right.predicate_start is None
-            or left.predicate_end is None
-            or right.predicate_end is None
+            left.predicate_start is not None
+            and right.predicate_start is not None
+            and left.predicate_end is not None
+            and right.predicate_end is not None
         ):
-            return None
-        left_heads = {
-            item.token_index
-            for item in self.graph.predicates
-            if left.predicate_start <= item.token_index <= left.predicate_end
-        }
-        right_heads = {
-            item.token_index
-            for item in self.graph.predicates
-            if right.predicate_start <= item.token_index <= right.predicate_end
-        }
-        if len(left_heads) != 1 or len(right_heads) != 1:
-            return None
-        left_head = next(iter(left_heads))
-        right_head = next(iter(right_heads))
-        for group in self.graph.frame_graph.coordinations:
-            members = group.member_token_indices
-            if left_head not in members or right_head not in members:
-                continue
-            li, ri = members.index(left_head), members.index(right_head)
-            if abs(li - ri) != 1:
-                continue
-            return (
-                PropositionOperator.OR.value
-                if group.operator is CoordinationKind.OR
-                else PropositionOperator.AND.value
+            left_heads = {
+                item.token_index
+                for item in self.graph.predicates
+                if left.predicate_start <= item.token_index <= left.predicate_end
+            }
+            right_heads = {
+                item.token_index
+                for item in self.graph.predicates
+                if right.predicate_start <= item.token_index <= right.predicate_end
+            }
+            if len(left_heads) == 1 and len(right_heads) == 1:
+                left_head = next(iter(left_heads))
+                right_head = next(iter(right_heads))
+                for group in self.graph.frame_graph.coordinations:
+                    members = group.member_token_indices
+                    if left_head not in members or right_head not in members:
+                        continue
+                    li, ri = members.index(left_head), members.index(right_head)
+                    if abs(li - ri) != 1:
+                        continue
+                    return (
+                        PropositionOperator.OR.value
+                        if group.operator is CoordinationKind.OR
+                        else PropositionOperator.AND.value
+                    )
+
+        # Recovered ellipsis can lack a target predicate head even though the
+        # source still contains an explicit clause coordinator. Coordinator
+        # identity is finite grammar, not an open-ended semantic lexicon.
+        if 0 <= left.end <= right.start <= len(source_text):
+            boundary = source_text[left.end:right.start].casefold()
+            words = tuple(
+                part
+                for part in "".join(
+                    ch if (ch.isalpha() or ch in {"ё", "-"}) else " "
+                    for ch in boundary
+                ).split()
+                if part
             )
+            if any(word in {"или", "либо"} for word in words):
+                return PropositionOperator.OR.value
+            if any(word in {"и", "да", "а", "но", "однако"} for word in words):
+                return PropositionOperator.AND.value
+
+        # Clause markers provide the same finite structural evidence when source
+        # evidence spans overlap because of shared/recovered actants.
+        right_clause = next(
+            (
+                clause
+                for clause in self.graph.clauses
+                if clause.sentence_id == right.sentence_id
+                and clause.span.evidence.start <= right.start
+                < clause.span.evidence.end
+            ),
+            None,
+        )
+        if right_clause is not None and right_clause.marker:
+            marker = right_clause.marker.casefold()
+            if marker in {"или", "либо"}:
+                return PropositionOperator.OR.value
+            if marker in {"и", "да", "а", "но", "однако"}:
+                return PropositionOperator.AND.value
         return None
+
+    def _relation_probe_candidate(
+        self,
+        source_text: str,
+        sentence_id: int,
+        left: _Atom,
+        right: _Atom,
+    ) -> bool:
+        """Open a semantic probe only for a bounded nontrivial relation surface.
+
+        The trigger does not enumerate semantic paraphrases. It recognizes only
+        structural evidence that material outside the two proposition cores may
+        encode their relation: lexical boundary material or a punctuation-led
+        preface such as "one of the following: ...".
+        """
+        sentence_text = self._sentence_text(source_text, sentence_id)
+        if 0 <= left.end <= right.start <= len(source_text):
+            boundary = source_text[left.end:right.start]
+            if any(ch.isalpha() for ch in boundary):
+                return True
+
+        clauses = [
+            item for item in self.graph.clauses if item.sentence_id == sentence_id
+        ]
+        if clauses:
+            sentence_start = min(item.span.evidence.start for item in clauses)
+            prefix = source_text[sentence_start:left.start]
+            if ":" in prefix or "—" in prefix or "–" in prefix:
+                return True
+        return ":" in sentence_text and left.start < right.start
 
     def _compose_segment(
         self,
