@@ -876,6 +876,77 @@ class GroundFormulaReasoner:
             )
         return None
 
+    def _try_disjunctive_elimination(
+        self,
+        target: Ref,
+        *,
+        depth: int,
+        stack: tuple[str, ...],
+    ) -> InferenceOutcome | None:
+        """Derive one disjunct when an asserted OR leaves it as the only live branch.
+
+        This is target-directed OR elimination: for an asserted OR(A, B, ...),
+        target B is proved only when every *other* branch is explicitly disproved.
+        UNKNOWN branches block the rule, and conflicted branches remain UNKNOWN via
+        the ordinary evaluator, so open-world absence can never eliminate a branch.
+        """
+        if depth >= self.max_depth:
+            return None
+
+        checked: set[str] = set()
+        for or_ref, or_obj in self._function_parents(target, "OR"):
+            if or_ref.uid in checked:
+                continue
+            checked.add(or_ref.uid)
+            if not self._asserted_function(or_ref, or_obj):
+                continue
+            if self.conflicts.is_conflicted(or_ref):
+                continue
+            branches = tuple(item for item in or_obj.operands if isinstance(item, Ref))
+            if len(branches) != len(or_obj.operands) or target not in branches or len(branches) < 2:
+                continue
+
+            other_outcomes: list[InferenceOutcome] = []
+            blocked = False
+            for branch in branches:
+                if branch == target:
+                    continue
+                outcome = self._eval(branch, depth=depth + 1, stack=(*stack, or_ref.uid))
+                if outcome.status is not LogicalStatus.DISPROVED:
+                    blocked = True
+                    break
+                other_outcomes.append(outcome)
+            if blocked or len(other_outcomes) != len(branches) - 1:
+                continue
+
+            self._focus(or_ref, depth)
+            premises: list[Ref] = [or_ref]
+            seen = {or_ref.uid}
+            trace: list[Ref] = [or_ref]
+            max_depth = depth
+            for outcome in other_outcomes:
+                for premise in outcome.premise_refs:
+                    if premise.uid not in seen:
+                        seen.add(premise.uid)
+                        premises.append(premise)
+                trace.extend(outcome.uid_trace)
+                max_depth = max(max_depth, outcome.logical_depth)
+            trace.append(target)
+            self._focus(target, max_depth + 1)
+            return self._outcome(
+                LogicalStatus.PROVED,
+                StopReason.GOAL_SATISFIED,
+                target,
+                tuple(premises),
+                tuple(trace),
+                depth=max_depth + 1,
+                diagnostics=(
+                    f"asserted OR leaves {target.uid} as the only non-refuted branch",
+                ),
+                rule_id="OR_ELIM",
+            )
+        return None
+
     def _try_proof_by_cases(
         self,
         target: Ref,
@@ -1113,6 +1184,9 @@ class GroundFormulaReasoner:
         eliminated = self._try_and_elimination(ref, depth=depth, stack=stack)
         if eliminated is not None:
             return eliminated
+        disjunct = self._try_disjunctive_elimination(ref, depth=depth, stack=stack)
+        if disjunct is not None:
+            return disjunct
         implied = self._try_implication(ref, depth=depth, stack=stack)
         if implied is not None:
             return implied
