@@ -71,6 +71,32 @@ class SourceScope:
 
 
 @dataclass(frozen=True, slots=True)
+class SourceProjectionCursor:
+    """Runtime cursor over ordered semantic roots of one canonical source."""
+
+    source_ref: str
+    next_index: int = 0
+
+    def __post_init__(self) -> None:
+        if not self.source_ref.strip():
+            raise ValueError("SourceProjectionCursor.source_ref must be non-empty")
+        if self.next_index < 0:
+            raise ValueError("SourceProjectionCursor.next_index must be >= 0")
+
+
+@dataclass(frozen=True, slots=True)
+class SourceScopeSlice:
+    """One bounded source slice plus causal/temporal boundary overlap."""
+
+    scope: SourceScope
+    cursor: SourceProjectionCursor
+    next_cursor: SourceProjectionCursor
+    primary_refs: tuple[Ref, ...]
+    overlap_refs: tuple[Ref, ...] = ()
+    done: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class SourceScopeActivation:
     source_scope: SourceScope
     seeded_refs: tuple[Ref, ...]
