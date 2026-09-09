@@ -432,6 +432,38 @@ class IntegrationService:
             )
         return tuple(requests)
 
+    @staticmethod
+    def _emit_plan_diagnostics(plan: MutationPlan, *, source: str) -> None:
+        from ah.diagnostics.session_log import emit
+
+        ir = plan.candidate_ir
+        emit(
+            "pipeline_candidate_ir",
+            source=source,
+            source_text=ir.source_text,
+            batch_kind=ir.batch_kind.value,
+            source_ref=ir.source_ref,
+            ordered_assertion_ids=list(ir.ordered_assertion_ids),
+            discourse_refs=[item.local_id for item in ir.discourse_refs],
+            existential_variable_ids=[item.variable_id for item in ir.existential_bindings],
+            universal_variable_ids=[item.variable_id for item in ir.universal_bindings],
+            unresolved_temporal_refs=[item.local_id for item in ir.temporal_refs],
+            query_count=len(ir.perception.queries),
+            command_count=len(ir.perception.commands),
+            relation_count=len(ir.perception.relations),
+            conditional_count=len(ir.perception.conditionals),
+        )
+        emit(
+            "pipeline_mutation_plan",
+            source=source,
+            forced_domain=None if plan.forced_domain is None else plan.forced_domain.value,
+            speaker_uid=plan.speaker_ref.uid,
+            existing_experience_uid=(
+                None if plan.existing_experience_ref is None else plan.existing_experience_ref.uid
+            ),
+            ordered_assertion_ids=list(ir.ordered_assertion_ids),
+        )
+
     def prepare_external_plan(
         self,
         result: PerceptionResult,
@@ -445,7 +477,7 @@ class IntegrationService:
         """Build the complete validated staging plan without mutating canonical AH."""
         if context.user_ref is None:
             raise IntegrationError("External integration requires context.user_ref")
-        return self.consolidator.prepare(
+        plan = self.consolidator.prepare(
             result,
             speaker_ref=context.user_ref,
             forced_domain=None,
@@ -459,6 +491,8 @@ class IntegrationService:
                 if context.now_ref is not None else None
             ),
         )
+        self._emit_plan_diagnostics(plan, source="EXTERNAL")
+        return plan
 
     def prepare_external_batch_plan(
         self,
@@ -470,7 +504,7 @@ class IntegrationService:
         """Validate/consolidate a complete message/document batch before writing AH."""
         if context.user_ref is None:
             raise IntegrationError("External integration requires context.user_ref")
-        return self.consolidator.prepare_batch(
+        plan = self.consolidator.prepare_batch(
             batch,
             speaker_ref=context.user_ref,
             forced_domain=None,
@@ -481,6 +515,8 @@ class IntegrationService:
                 if context.now_ref is not None else None
             ),
         )
+        self._emit_plan_diagnostics(plan, source="EXTERNAL_BATCH")
+        return plan
 
     def integrate_external_batch(
         self,
@@ -500,7 +536,7 @@ class IntegrationService:
     ) -> MutationPlan:
         if context.self_ref is None:
             raise IntegrationError("H-only agent integration requires context.self_ref")
-        return self.consolidator.prepare(
+        plan = self.consolidator.prepare(
             result,
             speaker_ref=context.self_ref,
             forced_domain=Domain.H,
@@ -513,6 +549,8 @@ class IntegrationService:
                 if context.now_ref is not None else None
             ),
         )
+        self._emit_plan_diagnostics(plan, source="AGENT_H")
+        return plan
 
     def bind_discourse_ref(
         self,
@@ -1549,7 +1587,7 @@ class IntegrationService:
             )
         context.last_experience_ref = experience_ref
         clarifications = self._clarification_requests(tuple(assertions))
-        return IntegrationCommit(
+        commit = IntegrationCommit(
             assertions=tuple(assertions),
             experience_ref=experience_ref,
             activation_seeds=tuple(seeds),
@@ -1564,6 +1602,42 @@ class IntegrationService:
             universals=tuple(universals),
             conflicts=tuple(conflicts),
         )
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_canonical_commit",
+            experience_uid=commit.experience_ref.uid,
+            assertions=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "kind": item.ref.kind.value,
+                    "domain": item.domain.value,
+                    "created": item.created,
+                    "scope": item.semantic_scope,
+                }
+                for item in commit.assertions
+            ],
+            relations=[
+                {
+                    "relation_id": item.relation_id,
+                    "uid": item.ref.uid,
+                    "source_uid": item.source.uid,
+                    "target_uid": item.target.uid,
+                    "created": item.created,
+                }
+                for item in commit.relations
+            ],
+            conditionals=[item.ref.uid for item in commit.conditionals],
+            existentials=[item.ref.uid for item in commit.existentials],
+            universals=[item.ref.uid for item in commit.universals],
+            conflicts=[item.ref.uid for item in commit.conflicts],
+            activation_seeds=[
+                {"uid": item.ref.uid, "reason": item.reason.value}
+                for item in commit.activation_seeds
+            ],
+        )
+        return commit
 
     def _discourse_signature(self, text: str | None) -> tuple[str, str | None] | None:
         """Return a stable number/gender signature for one source nominal.
