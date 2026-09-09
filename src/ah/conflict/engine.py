@@ -361,14 +361,20 @@ class ConflictEngine:
             exclusions = self._schema_exclusion_conflicts_for(ref)
             if exclusions:
                 node = self.core.store.get_hypernode(ref.uid)
-                record = self._ensure_group(
-                    (ref, *exclusions),
-                    kind=self.KIND_MUTUAL_EXCLUSION,
-                    meta={
-                        "exclusion_template": node.template.uid,
-                    },
-                )
-                out[record.group_ref.uid] = record
+                by_template: dict[str, list[Ref]] = {}
+                for other_ref in exclusions:
+                    other = self.core.store.get_hypernode(other_ref.uid)
+                    by_template.setdefault(other.template.uid, []).append(other_ref)
+                for partner_template, partner_refs in sorted(by_template.items()):
+                    pair = tuple(sorted((node.template.uid, partner_template)))
+                    record = self._ensure_group(
+                        (ref, *partner_refs),
+                        kind=self.KIND_MUTUAL_EXCLUSION,
+                        meta={
+                            "exclusion_templates": pair,
+                        },
+                    )
+                    out[record.group_ref.uid] = record
         return tuple(out[uid] for uid in sorted(out))
 
     def is_unresolved_group(self, group: Group | Ref) -> bool:
