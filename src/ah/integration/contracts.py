@@ -194,6 +194,24 @@ class IntegratedExistential:
 
 
 @dataclass(frozen=True, slots=True)
+class IntegratedFormula:
+    """One source-asserted logical formula built from scoped proposition leaves."""
+
+    local_id: str
+    ref: Ref
+    member_refs: tuple[Ref, ...]
+    created: bool
+
+    def __post_init__(self) -> None:
+        if not self.local_id.strip():
+            raise ValueError("IntegratedFormula.local_id must be non-empty")
+        if self.ref.kind.value != "G":
+            raise ValueError("IntegratedFormula.ref must be G")
+        if not self.member_refs:
+            raise ValueError("IntegratedFormula requires at least one member proposition")
+
+
+@dataclass(frozen=True, slots=True)
 class IntegratedConditional:
     ref: Ref
     antecedent: Ref
@@ -236,6 +254,7 @@ class IntegrationCommit:
     clarifications: tuple[ClarificationRequest, ...] = ()
     relations: tuple[IntegratedRelation, ...] = ()
     conditionals: tuple[IntegratedConditional, ...] = ()
+    formulas: tuple[IntegratedFormula, ...] = ()
     existentials: tuple[IntegratedExistential, ...] = ()
     universals: tuple[IntegratedExistential, ...] = ()
     conflicts: tuple[IntegratedConflict, ...] = ()
