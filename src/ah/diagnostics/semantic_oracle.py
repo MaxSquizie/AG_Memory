@@ -1005,6 +1005,99 @@ def _match_integrated_conditionals(
         match_side("consequent", consequent_ref, expected_then, members[split:split + len(expected_then)])
 
 
+def _canonical_formula_shape(
+    snapshot: Mapping[str, Mapping[str, Any]],
+    ref: Any,
+    uid_to_local: Mapping[str, str],
+) -> Any:
+    if not isinstance(ref, dict):
+        return ("<missing>",)
+    uid = str(ref.get("uid", ""))
+    if uid in uid_to_local:
+        return ("REF", uid_to_local[uid])
+    item = snapshot.get(uid)
+    if not isinstance(item, dict):
+        return ("UID", uid)
+    if item.get("kind") != "G":
+        return ("UID", uid)
+    operator = str(item.get("function_id", "")).upper()
+    if operator == "IF":
+        operator = "IMPLIES"
+    if operator == "FALSE":
+        operator = "NOT"
+    return (
+        operator,
+        tuple(
+            _canonical_formula_shape(snapshot, operand, uid_to_local)
+            for operand in item.get("operands", []) or []
+        ),
+    )
+
+
+def _match_integrated_formulas(
+    checks: list[dict[str, Any]],
+    snapshot: Mapping[str, Mapping[str, Any]],
+    commit: Mapping[str, Any],
+    expected_formulas: Sequence[Mapping[str, Any]],
+    key_to_local: Mapping[str, str],
+) -> None:
+    actual = [
+        item for item in commit.get("formulas", []) or []
+        if isinstance(item, dict)
+    ]
+    _check(
+        checks,
+        "integration.formula_count",
+        len(actual) == len(expected_formulas),
+        expected=len(expected_formulas),
+        actual=len(actual),
+    )
+    local_to_ref = {
+        str(item.get("local_id", "")): item.get("ref")
+        for item in commit.get("assertions", []) or []
+        if isinstance(item, dict) and isinstance(item.get("ref"), dict)
+    }
+    uid_to_local = {
+        str(ref.get("uid", "")): local
+        for local, ref in local_to_ref.items()
+        if isinstance(ref, dict)
+    }
+    for index, expected in enumerate(expected_formulas):
+        if index >= len(actual):
+            break
+        item = actual[index]
+        prefix = f"integration.formulas.f{index + 1}"
+        actual_shape = _canonical_formula_shape(
+            snapshot, item.get("ref"), uid_to_local
+        )
+        expected_shape = _normalize_expected_proposition_expr(
+            expected.get("expr"), key_to_local
+        )
+        _check(
+            checks,
+            f"{prefix}.expr",
+            actual_shape == expected_shape,
+            expected=expected_shape,
+            actual=actual_shape,
+        )
+        member_locals = tuple(
+            uid_to_local.get(str(ref.get("uid", "")), "<missing>")
+            for ref in item.get("member_refs", []) or []
+            if isinstance(ref, dict)
+        )
+        expected_members = tuple(
+            key_to_local.get(key, "<missing>")
+            for key in _expected_expr_keys(expected.get("expr"))
+        )
+        _check(
+            checks,
+            f"{prefix}.members",
+            member_locals == expected_members,
+            expected=expected_members,
+            actual=member_locals,
+        )
+
+
 def _clarification_options(snapshot: Mapping[str, Mapping[str, Any]], commit: Mapping[str, Any]) -> tuple[str, ...]:
     labels: list[str] = []
     for clarification in commit.get("clarifications", []) or []:
