@@ -111,6 +111,7 @@ class AgentTurnResult:
     clarification_request: ClarificationRequest | None = None
     clarification_resolution: ClarificationResolutionCommit | None = None
     agent_context_diagnostic: AgentContextDiagnostic | None = None
+    response_error: str | None = None
 
 
 class AgentOrchestrator:
@@ -304,6 +305,26 @@ class AgentOrchestrator:
             )
         return response_perception, response_integration, response_ticks
 
+    @staticmethod
+    def _safe_response_error(exc: Exception) -> str:
+        return f"response_generation_failed:{type(exc).__name__}:{exc}"
+
+    def _safe_generate_response(self, producer: Callable[[], str]) -> tuple[str | None, str | None]:
+        """Run Main LLM/clarification generation without endangering committed memory.
+
+        Perception, Integration and Reasoner state are already canonical before this
+        point. A response backend failure is therefore a presentation failure only:
+        it must not roll back the user turn or prevent persistence/autosave.
+        """
+        try:
+            return producer(), None
+        except Exception as exc:  # response backend is an external failure boundary
+            from ah.diagnostics.session_log import emit
+
+            error = self._safe_response_error(exc)
+            emit("agent_response_generation_failed", error=error)
+            return None, error
+
     def _autosave(self, lock) -> bool:
         with lock:
             if self.persistence is None:
@@ -404,15 +425,19 @@ class AgentOrchestrator:
         response_perception: PerceptionResult | None = None
         response_integration: IntegrationCommit | None = None
         response_ticks: tuple[TickResult, ...] = ()
+        response_error: str | None = None
         active_request = next_request if resolution is not None else request
         if generate_response:
-            if active_request is not None:
-                response_text = self._generate_clarification(active_request)
-            else:
-                response_text = self.agent.respond(agent_context)
-            response_perception, response_integration, response_ticks = self._record_agent_utterance(
-                response_text, lock
+            producer = (
+                (lambda: self._generate_clarification(active_request))
+                if active_request is not None
+                else (lambda: self.agent.respond(agent_context))
             )
+            response_text, response_error = self._safe_generate_response(producer)
+            if response_text is not None:
+                response_perception, response_integration, response_ticks = self._record_agent_utterance(
+                    response_text, lock
+                )
 
         autosaved = self._autosave(lock)
         return AgentTurnResult(
@@ -431,6 +456,7 @@ class AgentOrchestrator:
             autosaved=autosaved,
             clarification_request=active_request,
             clarification_resolution=resolution,
+            response_error=response_error,
         )
 
     def handle_user_text(
@@ -515,11 +541,15 @@ class AgentOrchestrator:
             response_perception: PerceptionResult | None = None
             response_integration: IntegrationCommit | None = None
             response_ticks: tuple[TickResult, ...] = ()
+            response_error: str | None = None
             if generate_response:
-                response_text = self._generate_clarification(request)
-                response_perception, response_integration, response_ticks = self._record_agent_utterance(
-                    response_text, lock
+                response_text, response_error = self._safe_generate_response(
+                    lambda: self._generate_clarification(request)
                 )
+                if response_text is not None:
+                    response_perception, response_integration, response_ticks = self._record_agent_utterance(
+                        response_text, lock
+                    )
             autosaved = self._autosave(lock)
             return AgentTurnResult(
                 user_text=text,
@@ -538,6 +568,7 @@ class AgentOrchestrator:
                 ticks_after_response=response_ticks,
                 autosaved=autosaved,
                 clarification_request=request,
+                response_error=response_error,
             )
         except PerceptionParseError:
             # Semantic failure never erases the fact that the external communication
@@ -667,26 +698,30 @@ class AgentOrchestrator:
         response_ticks: tuple[TickResult, ...] = ()
 
         clarification_request = integration.clarifications[0] if integration.clarifications else None
+        response_error: str | None = None
         if generate_response:
             if integration.clarifications:
-                response_text = self._generate_clarification(clarification_request)
+                producer = lambda: self._generate_clarification(clarification_request)
             elif any(execution.outcome is None for execution in query_results):
                 # A semantic proof obligation exists but deterministic compilation
                 # failed. ACTIVE MEMORY may contain suggestive prose/H experiences,
                 # but letting the response LLM answer from it would recreate the
                 # black-box path the proof system is meant to eliminate. Fail closed
                 # and expose the compiler failure through diagnostics/Proof Explorer.
-                response_text = self._unresolved_goal_response(text)
+                producer = lambda: self._unresolved_goal_response(text)
             else:
-                response_text = self.agent.respond(agent_context)
-            response_perception, response_integration, response_ticks = self._record_agent_utterance(
-                response_text, lock
-            )
-            if integration.clarifications:
-                # Arm the dialogue state only after the clarification utterance was
-                # successfully generated and committed as an H experience.
-                with lock:
-                    self._enqueue_clarifications(integration.clarifications)
+                producer = lambda: self.agent.respond(agent_context)
+            response_text, response_error = self._safe_generate_response(producer)
+            if response_text is not None:
+                response_perception, response_integration, response_ticks = self._record_agent_utterance(
+                    response_text, lock
+                )
+                if integration.clarifications:
+                    # Arm dialogue state only after the clarification was actually
+                    # generated and recorded; a failed backend must not create a
+                    # pending choice that the user never saw.
+                    with lock:
+                        self._enqueue_clarifications(integration.clarifications)
 
         autosaved = self._autosave(lock)
 
@@ -706,4 +741,5 @@ class AgentOrchestrator:
             autosaved=autosaved,
             clarification_request=clarification_request,
             clarification_resolution=None,
+            response_error=response_error,
         )
