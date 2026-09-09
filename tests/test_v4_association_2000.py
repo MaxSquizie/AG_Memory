@@ -10,6 +10,7 @@ from ah.association import (
     AssociationDomainPolicy,
     AssociationGoal,
     AssociationHopKind,
+    AssociationSemantics,
     AssociationStatus,
 )
 from ah.config import IgnitionSettings, LifecycleSettings, PacemakerSettings, PlasticitySettings, WorkspaceSettings
@@ -290,3 +291,36 @@ def test_function_g_can_be_the_association_common_node() -> None:
     assert outcome.status is AssociationStatus.FOUND
     assert g_ref.uid in {ref.uid for ref in outcome.common_candidates}
     assert outcome.common_ref == g_ref
+
+
+def test_association_outcome_distinguishes_semantic_and_episodic_paths() -> None:
+    semantic_core = AHCore(uid_generator=SequentialUidGenerator())
+    left = _entity(semantic_core, "semantic-left")
+    right = _entity(semantic_core, "semantic-right")
+    bridge = _entity(semantic_core, "semantic-bridge")
+    semantic_core.add_link("ASSOC", left, bridge, 1.0)
+    semantic_core.add_link("ASSOC", right, bridge, 1.0)
+    semantic = AssociationCoordinator(semantic_core, _engine(semantic_core)).solve(
+        AssociationGoal(left, right),
+        budget=AssociationBudget(max_depth=2, max_expanded_states=30, max_ticks=5),
+    )
+    assert semantic.status is AssociationStatus.FOUND
+    assert semantic.semantics is AssociationSemantics.SEMANTIC
+    assert semantic.minimal_fact_count == 0
+
+    episodic, _episode = _h_bridge(AssociationDomainPolicy.ALL)
+    assert episodic.status is AssociationStatus.FOUND
+    assert episodic.semantics is AssociationSemantics.EPISODIC
+    assert episodic.minimal_fact_count == 0
+
+
+def test_association_reports_minimal_number_of_distinct_n_facts_in_discovered_routes() -> None:
+    core, crow, table, _legs, _have_t, left_n, right_n = _have_fixture()
+    outcome = AssociationCoordinator(core, _engine(core)).solve(
+        AssociationGoal(crow, table),
+        budget=AssociationBudget(max_depth=5, max_expanded_states=200, max_ticks=12),
+    )
+    assert outcome.status is AssociationStatus.FOUND
+    assert outcome.semantics is AssociationSemantics.SEMANTIC
+    assert outcome.minimal_fact_count == 2
+    assert left_n.uid != right_n.uid
