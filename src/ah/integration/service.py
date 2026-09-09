@@ -1019,7 +1019,7 @@ class IntegrationService:
                     AssertionStatus.HYPOTHETICAL,
                     AssertionStatus.MODAL,
                 }:
-                    semantic_scope = candidate.status.value
+                    semantic_scope = "LOGICAL" if formula_leaf else candidate.status.value
                     integrated = self._integrate_assertion(
                         tx, candidate, context, local_refs, entity_local_refs,
                         local_domain_overrides.get(candidate.local_id, forced_domain),
@@ -1029,7 +1029,7 @@ class IntegrationService:
                     )
                     proposition_ref = integrated.ref
                     created = integrated.created
-                    if candidate.negated:
+                    if candidate.negated and not formula_leaf:
                         not_g, not_created = tx.ensure_function(
                             integrated.domain, "NOT", (proposition_ref,)
                         )
@@ -1119,7 +1119,14 @@ class IntegrationService:
                     semantic_scope=("LOGICAL" if formula_leaf else None),
                 )
 
-                if candidate.negated:
+                if candidate.negated and formula_leaf:
+                    # Local negation is represented explicitly inside the
+                    # PropositionExprCandidate AST.  Keep REF(local_id) bound to
+                    # the positive scoped N so NOT scope is materialized exactly
+                    # once at the formula root.
+                    assertions.append(integrated)
+                    local_refs[candidate.local_id] = integrated.ref
+                elif candidate.negated:
                     # Object-level negation is canonical NOT(P), not FALSE(N).
                     # FALSE is reserved for explicit correction/refutation of one
                     # already stored proposition/support.  A negative statement
