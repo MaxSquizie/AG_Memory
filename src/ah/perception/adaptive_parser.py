@@ -3323,6 +3323,7 @@ class AdaptivePerceptionParser:
         if graph is None or len(assertions) < 2:
             return ()
 
+        assertion_by_local = {item.local_id: item for item in assertions}
         clause_to_locals: dict[str, list[str]] = {}
         for local_id, span in assertion_spans.items():
             if span is None:
@@ -3467,14 +3468,14 @@ class AdaptivePerceptionParser:
             # only after Python has fixed the two proposition regions.
             if clause.marker != "если":
                 subordinate_text = " | ".join(
-                    assertions[[item.local_id for item in assertions].index(ref)].evidence.text
-                    if assertions[[item.local_id for item in assertions].index(ref)].evidence is not None
+                    assertion_by_local[ref].evidence.text
+                    if assertion_by_local[ref].evidence is not None
                     else ref
                     for ref in antecedent
                 )
                 matrix_text = " | ".join(
-                    assertions[[item.local_id for item in assertions].index(ref)].evidence.text
-                    if assertions[[item.local_id for item in assertions].index(ref)].evidence is not None
+                    assertion_by_local[ref].evidence.text
+                    if assertion_by_local[ref].evidence is not None
                     else ref
                     for ref in consequent
                 )
