@@ -39,6 +39,18 @@ class PropagationEvent:
 
 
 @dataclass(frozen=True, slots=True)
+class NodeTickTransition:
+    """Per-affected-node decomposition of one synchronous Ignition tick."""
+
+    ref: Ref
+    incoming: float
+    pacemaker_incoming: float
+    seed_reasons: tuple[str, ...]
+    before: RuntimeState
+    after: RuntimeState
+
+
+@dataclass(frozen=True, slots=True)
 class TickResult:
     tick: int
     activation_events: tuple[Ref, ...]
@@ -49,6 +61,9 @@ class TickResult:
     gc: GCResult | None = None
     propagations: tuple[PropagationEvent, ...] = ()
     pacemaker_targets: tuple[str, ...] = ()
+    node_transitions: tuple[NodeTickTransition, ...] = ()
+    link_weight_updates: tuple[tuple[str, float, float], ...] = ()
+    hypernode_weight_updates: tuple[tuple[str, float, float], ...] = ()
 
 
 class IgnitionEngine:
@@ -590,6 +605,7 @@ class IgnitionEngine:
         # PHASE 4 — h_L needs only links incident to a same-tick activation event;
         # links whose endpoints both lack events are unchanged by definition.
         link_updates: list[Link] = []
+        link_weight_audit: list[tuple[str, float, float]] = []
         plasticity = self.settings.plasticity
         plasticity_activation_uids = set(activation_uids)
         if plasticity.ignore_pacemaker_only_events:
@@ -610,8 +626,10 @@ class IgnitionEngine:
                 )
                 if new_weight != link.weight:
                     link_updates.append(replace(link, weight=new_weight))
+                    link_weight_audit.append((link.uid, float(link.weight), float(new_weight)))
 
         hypernode_updates: list[tuple[Domain, Hypernode]] = []
+        hypernode_weight_audit: list[tuple[str, float, float]] = []
         if plasticity.enabled:
             pending_by_uid: dict[str, tuple[Domain, Hypernode]] = {}
             for uid, reasons in seed_reasons.items():
@@ -628,6 +646,7 @@ class IgnitionEngine:
                 new_weight = self.plasticity_policy.confirm_hypernode(node.weight)
                 if new_weight != node.weight:
                     pending_by_uid[uid] = (domain, replace(node, weight=new_weight))
+                    hypernode_weight_audit.append((uid, float(node.weight), float(new_weight)))
 
             for uid in refutations:
                 if not self.core.store.has_uid(uid) or self.core.store.kind_of(uid) is not RefKind.N:
@@ -639,6 +658,7 @@ class IgnitionEngine:
                 new_weight = self.plasticity_policy.refute_hypernode(node.weight)
                 if new_weight != node.weight:
                     pending_by_uid[uid] = (domain, replace(node, weight=new_weight))
+                    hypernode_weight_audit.append((uid, float(node.weight), float(new_weight)))
                 else:
                     pending_by_uid.pop(uid, None)
             hypernode_updates.extend(pending_by_uid.values())
@@ -700,6 +720,18 @@ class IgnitionEngine:
                 key=lambda r: r.uid,
             )
         )
+        node_transitions = tuple(
+            NodeTickTransition(
+                ref=self.core.ref(uid),
+                incoming=float(incoming.get(uid, 0.0)),
+                pacemaker_incoming=float(pacemaker_incoming.get(uid, 0.0)),
+                seed_reasons=tuple(reason.value for reason in seed_reasons.get(uid, ())),
+                before=deepcopy(snapshot[uid]),
+                after=deepcopy(next_states[uid]),
+            )
+            for uid in sorted(snapshot)
+            if uid in next_states and self.core.store.has_uid(uid)
+        )
         result = TickResult(
             tick=tick,
             activation_events=activation_refs,
@@ -712,7 +744,17 @@ class IgnitionEngine:
             gc=gc_result,
             propagations=tuple(propagations),
             pacemaker_targets=tuple(sorted(set(pacemaker_targets))),
+            node_transitions=node_transitions,
+            link_weight_updates=tuple(link_weight_audit),
+            hypernode_weight_updates=tuple(hypernode_weight_audit),
         )
         self.tick_index += 1
         self.core.store.set_lifetime_clock(self.tick_index)
+        try:
+            from ah.diagnostics.session_log import audit_tick_result
+
+            audit_tick_result(result)
+        except Exception:
+            # Diagnostics are observational only and must never affect cognition.
+            pass
         return result
