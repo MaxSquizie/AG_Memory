@@ -27,6 +27,10 @@ class InferenceSchema:
     # handled separately by relation-specific reasoners.
     functional_role: ActantRole | None = None
     inverse_of: str | None = None
+    # Explicit positive-positive incompatibility between predicate templates.
+    # It is operational only when key roles are registered; absence stays open-world.
+    mutually_exclusive_with: tuple[str, ...] = ()
+    exclusion_key_roles: tuple[ActantRole, ...] = ()
     rule_handlers: tuple[str, ...] = ()
 
 
@@ -75,6 +79,10 @@ class InferenceSchemaRegistry:
             functional=schema.functional,
             functional_role=schema.functional_role,
             inverse_of=(schema.inverse_of.upper() if schema.inverse_of else None),
+            mutually_exclusive_with=tuple(
+                self._key(item) for item in schema.mutually_exclusive_with
+            ),
+            exclusion_key_roles=tuple(schema.exclusion_key_roles),
             rule_handlers=tuple(handler.upper() for handler in schema.rule_handlers),
         )
 
@@ -87,6 +95,40 @@ class InferenceSchemaRegistry:
 
     def is_functional(self, canonical_id: str) -> bool:
         return self.get(canonical_id).functional
+
+    def is_symmetric(self, canonical_id: str) -> bool:
+        return self.get(canonical_id).symmetric
+
+    def is_reflexive(self, canonical_id: str) -> bool:
+        return self.get(canonical_id).reflexive
+
+    def is_irreflexive(self, canonical_id: str) -> bool:
+        return self.get(canonical_id).irreflexive
+
+    def inverse_for(self, canonical_id: str) -> str | None:
+        key = self._key(canonical_id)
+        direct = self.get(key).inverse_of
+        if direct is not None:
+            return direct
+        reverse = tuple(
+            schema.canonical_id
+            for schema in self._schemas.values()
+            if schema.inverse_of == key
+        )
+        return reverse[0] if len(reverse) == 1 else None
+
+    def mutual_exclusion_key(
+        self, left_id: str, right_id: str
+    ) -> tuple[ActantRole, ...] | None:
+        left = self.get(left_id)
+        right = self.get(right_id)
+        right_key = self._key(right_id)
+        left_key = self._key(left_id)
+        if right_key in left.mutually_exclusive_with and left.exclusion_key_roles:
+            return left.exclusion_key_roles
+        if left_key in right.mutually_exclusive_with and right.exclusion_key_roles:
+            return right.exclusion_key_roles
+        return None
 
     def has_handler(self, canonical_id: str, handler: str) -> bool:
         return handler.strip().upper() in self.get(canonical_id).rule_handlers
