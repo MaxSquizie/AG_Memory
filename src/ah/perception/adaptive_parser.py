@@ -3340,30 +3340,75 @@ class AdaptivePerceptionParser:
         def branch_expr(refs: tuple[str, ...]) -> PropositionExprCandidate:
             if len(refs) == 1:
                 return PropositionExprCandidate.ref_expr(refs[0])
-            ordered_refs = sorted(
+            ordered_refs = tuple(sorted(
                 refs,
                 key=lambda ref: assertion_spans[ref].start_index
                 if assertion_spans.get(ref) is not None else 10**9,
-            )
-            # Preserve explicit OR at proposition level. AND is the default only
-            # when no disjunctive coordinator occurs between consecutive frames.
-            saw_or = False
-            saw_and = False
+            ))
+            relations: list[str] = []
             for left, right in zip(ordered_refs, ordered_refs[1:]):
                 ls, rs = assertion_spans.get(left), assertion_spans.get(right)
-                if ls is None or rs is None:
-                    continue
-                between = [
-                    token.text.casefold() for token in graph.tokens
-                    if ls.end_index < token.index < rs.start_index
-                ]
-                saw_or = saw_or or any(item in {"или", "либо"} for item in between)
-                saw_and = saw_and or any(item in {"и", "да"} for item in between)
-            operator = PropositionOperator.OR if saw_or and not saw_and else PropositionOperator.AND
-            return PropositionExprCandidate(
-                operator,
-                members=tuple(PropositionExprCandidate.ref_expr(ref) for ref in ordered_refs),
+                between = (
+                    [
+                        token.text.casefold() for token in graph.tokens
+                        if ls is not None
+                        and rs is not None
+                        and ls.end_index < token.index < rs.start_index
+                    ]
+                    if ls is not None and rs is not None
+                    else []
+                )
+                has_or = any(item in {"или", "либо"} for item in between)
+                has_and = any(
+                    item in {"и", "да", "а", "но", "однако"} for item in between
+                )
+                if has_or and not has_and:
+                    relations.append("OR")
+                else:
+                    # Branch membership is already established by conditional
+                    # clause topology.  Comma-only/list continuation therefore
+                    # means conjunction unless an explicit disjunction is present.
+                    relations.append("AND")
+
+            atom_exprs = tuple(
+                PropositionExprCandidate.ref_expr(ref) for ref in ordered_refs
             )
+            if len(set(relations)) == 1:
+                return PropositionExprCandidate(
+                    PropositionOperator(relations[0]),
+                    members=atom_exprs,
+                )
+
+            candidates = LogicalFormBuilder._scope_candidates(
+                atom_exprs, tuple(relations)
+            )
+            if len(candidates) == 1:
+                return candidates[0]
+            if not candidates or len(candidates) > LogicalFormBuilder._MAX_SCOPE_CHOICES:
+                raise AdaptiveParseError(
+                    "conditional logical scope has no bounded candidate set",
+                    tuple(self._traces),
+                )
+            labels = tuple(f"C{index}" for index in range(1, len(candidates) + 1))
+            prompt = (
+                f"TEXT:\n{graph.text}\n"
+                + "ATOMS:\n"
+                + "\n".join(ordered_refs)
+                + "\nCANDIDATE SCOPES:\n"
+                + "\n".join(
+                    f"{label}: {LogicalFormBuilder._render(expr)}"
+                    for label, expr in zip(labels, candidates)
+                )
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "logical_scope", prompt, (*labels, "UNCLEAR")
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "conditional logical scope unresolved",
+                    tuple(self._traces),
+                )
+            return candidates[labels.index(decision)]
 
         out: list[ConditionalCandidate] = []
         seen: set[tuple[tuple[str, ...], tuple[str, ...]]] = set()
@@ -3390,19 +3435,20 @@ class AdaptivePerceptionParser:
             consequent_ids: list[str] = list(
                 clause_to_locals.get(clause.parent_clause_id, ())
             )
-            # A fronted condition can govern an additive coordinated continuation
-            # that the clause builder represents as the next top-level sibling:
-            # ``Если A, B и C``.  Once B is the parent consequent, contiguous
-            # same-sentence siblings explicitly led by additive coordinators remain
-            # inside that consequent region.  Do not absorb OR/adversative siblings
-            # here: they require a different logical composition than AND.
+            # A fronted condition can govern a coordinated consequent region
+            # represented as top-level siblings: "Если A, B и C" as well as
+            # "Если A, B или C".  Keep every explicit truth-functional coordinator;
+            # branch_expr below determines AND/OR scope instead of discarding the
+            # disjunctive continuation.
             if 0 <= parent_i:
                 for sibling in clauses[parent_i + 1:]:
                     if sibling.sentence_id != clause.sentence_id:
                         break
                     if sibling.parent_clause_id is not None:
                         break
-                    if sibling.marker.casefold() not in {"и", "да"}:
+                    if sibling.marker.casefold() not in {
+                        "и", "да", "или", "либо", "а", "но", "однако"
+                    }:
                         break
                     sibling_locals = clause_to_locals.get(sibling.clause_id, ())
                     if not sibling_locals:
