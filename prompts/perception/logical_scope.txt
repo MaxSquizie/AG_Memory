@@ -1,0 +1,3 @@
+Choose exactly one candidate scope Cn from CANDIDATE SCOPES, or UNCLEAR.
+
+All candidate trees use only proposition atoms and operator relations already fixed by earlier stages. Decide only the grouping/scope explicitly conveyed by the source. Use punctuation, correlatives, clause structure and semantic grouping. Do not invent an operator, remove an atom, or rewrite a candidate. If the source does not safely determine one candidate tree, return UNCLEAR. Return only the label.
