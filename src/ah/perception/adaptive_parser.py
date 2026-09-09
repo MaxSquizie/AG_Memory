@@ -1279,6 +1279,7 @@ class AdaptivePerceptionParser:
             event_diagnostics = (
                 *participant_projection_diagnostics,
                 *factivity_diagnostics,
+                *logical_diagnostics,
                 *normalized.diagnostics,
                 *causal_diagnostics,
             )
