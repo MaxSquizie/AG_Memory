@@ -43,6 +43,7 @@ from .contracts import (
     IntegratedAssertion,
     IntegratedConditional,
     IntegratedExistential,
+    IntegratedFormula,
     IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
@@ -698,6 +699,43 @@ class IntegrationService:
                 created=created,
             )
 
+    @staticmethod
+    def _materialize_proposition_expr(
+        core: AHCore,
+        expr: PropositionExprCandidate,
+        local_refs: dict[str, Ref],
+        forced_domain: Domain | None,
+    ) -> tuple[Ref, bool]:
+        """Materialize one validated proposition AST without asserting its leaves."""
+        if expr.operator is PropositionOperator.REF:
+            assert expr.ref is not None
+            try:
+                return local_refs[expr.ref], False
+            except KeyError as exc:
+                raise CandidateValidationError(
+                    f"proposition ref not integrated yet: {expr.ref}"
+                ) from exc
+        members: list[Ref] = []
+        created_any = False
+        for member in expr.members:
+            ref, created = IntegrationService._materialize_proposition_expr(
+                core, member, local_refs, forced_domain
+            )
+            members.append(ref)
+            created_any = created_any or created
+        domain = (
+            forced_domain
+            if forced_domain is not None
+            else DomainRouter(core).route_external(tuple(members))
+        )
+        function_id = (
+            "NOT"
+            if expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
+            else expr.operator.value
+        )
+        function, created = core.ensure_function(domain, function_id, tuple(members))
+        return core.ref(function.uid), created_any or created
+
     def _integrate_plan(
         self,
         plan: MutationPlan,
@@ -717,6 +755,7 @@ class IntegrationService:
         refutations: list[RefutationRequest] = []
         relations: list[IntegratedRelation] = []
         conditionals: list[IntegratedConditional] = []
+        formulas: list[IntegratedFormula] = []
         existentials: list[IntegratedExistential] = []
         universals: list[IntegratedExistential] = []
         conflicts: list[IntegratedConflict] = []
@@ -738,6 +777,22 @@ class IntegrationService:
             for item in plan.candidate_ir.universal_bindings
         }
         bound_vars = {**existential_vars, **universal_vars}
+
+        assertion_by_id = {item.local_id: item for item in ordered}
+        ordinary_formula_roots = tuple(
+            root
+            for root in result.proposition_roots
+            if not all(
+                assertion_by_id[ref].status is AssertionStatus.CONDITIONAL
+                for ref in root.expression.leaf_refs()
+            )
+        )
+        formula_leaf_ids = {
+            ref for root in ordinary_formula_roots for ref in root.expression.leaf_refs()
+        }
+        formula_operator_source_ids = {
+            ref for root in ordinary_formula_roots for ref in root.operator_source_refs
+        }
 
         def candidate_bound_refs(
             candidate: AssertionCandidate, mapping: dict[str, BoundVar]
@@ -859,6 +914,13 @@ class IntegrationService:
                 )
 
             for candidate in ordered:
+                # Some matrix frames are consumed by a validated logical wrapper
+                # (for example a truth-negating construction).  They are linguistic
+                # operator evidence, not independent world propositions.
+                if candidate.local_id in formula_operator_source_ids:
+                    continue
+
+                formula_leaf = candidate.local_id in formula_leaf_ids
                 quantified = (
                     candidate.local_id in existential_assertion_vars
                     or candidate.local_id in universal_assertion_vars
@@ -1035,10 +1097,12 @@ class IntegrationService:
                         domain=integrated.domain,
                         created=integrated.created or transition_created,
                         ambiguous=integrated.ambiguous,
+                        semantic_scope=("LOGICAL" if formula_leaf else None),
                     )
                     assertions.append(final)
                     local_refs[candidate.local_id] = final.ref
-                    seeds.append(ActivationSeedRequest(final.ref, SeedReason.NEW_FACT))
+                    if not formula_leaf:
+                        seeds.append(ActivationSeedRequest(final.ref, SeedReason.NEW_FACT))
                     continue
 
                 integrated = self._integrate_assertion(
@@ -1051,7 +1115,8 @@ class IntegrationService:
                     entity_anchors=entity_anchors,
                     speaker_ref=speaker_ref,
                     addressee_ref=addressee_ref,
-                    count_occurrence=not candidate.negated,
+                    count_occurrence=(not candidate.negated and not formula_leaf),
+                    semantic_scope=("LOGICAL" if formula_leaf else None),
                 )
 
                 if candidate.negated:
@@ -1069,24 +1134,27 @@ class IntegrationService:
                         domain=integrated.domain,
                         created=integrated.created or not_created,
                         ambiguous=integrated.ambiguous,
+                        semantic_scope=("LOGICAL" if formula_leaf else None),
                     )
                     assertions.append(final)
                     local_refs[candidate.local_id] = final.ref
-                    seeds.append(
-                        ActivationSeedRequest(
-                            not_ref,
-                            SeedReason.NEW_FACT if not_created else SeedReason.REACTIVATED_FACT,
+                    if not formula_leaf:
+                        seeds.append(
+                            ActivationSeedRequest(
+                                not_ref,
+                                SeedReason.NEW_FACT if not_created else SeedReason.REACTIVATED_FACT,
+                            )
                         )
-                    )
                 else:
                     assertions.append(integrated)
                     local_refs[candidate.local_id] = integrated.ref
-                    seeds.append(
-                        ActivationSeedRequest(
-                            integrated.ref,
-                            SeedReason.NEW_FACT if integrated.created else SeedReason.REACTIVATED_FACT,
+                    if not formula_leaf:
+                        seeds.append(
+                            ActivationSeedRequest(
+                                integrated.ref,
+                                SeedReason.NEW_FACT if integrated.created else SeedReason.REACTIVATED_FACT,
+                            )
                         )
-                    )
 
             # Build asserted existential formulae from connected components of
             # batch-local unknown participants.  An assertion that shares two
@@ -1286,6 +1354,31 @@ class IntegrationService:
                         )
                     )
 
+            # Materialize top-level logical formula roots only after every leaf
+            # proposition has a canonical scoped ref.  The H occurrence will assert
+            # these roots; leaf N/G refs deliberately remain non-occurring operands.
+            for root in ordinary_formula_roots:
+                root_ref, created = self._materialize_proposition_expr(
+                    tx, root.expression, local_refs, forced_domain
+                )
+                member_refs = tuple(
+                    local_refs[ref] for ref in root.expression.leaf_refs()
+                )
+                formulas.append(
+                    IntegratedFormula(
+                        local_id=root.local_id,
+                        ref=root_ref,
+                        member_refs=member_refs,
+                        created=created,
+                    )
+                )
+                seeds.append(
+                    ActivationSeedRequest(
+                        root_ref,
+                        SeedReason.NEW_FACT if created else SeedReason.REACTIVATED_FACT,
+                    )
+                )
+
             # Conditional branches are canonical proposition content but are not
             # ordinary asserted world facts.  Integrate them as scoped N/G operands,
             # then bind the antecedent and consequent through deterministic IMPLIES.
@@ -1330,31 +1423,33 @@ class IntegrationService:
                 antecedent_members = tuple(conditional_local_refs[item] for item in conditional.antecedent_refs)
                 consequent_members = tuple(conditional_local_refs[item] for item in conditional.consequent_refs)
 
-                def materialize_expr(expr: PropositionExprCandidate | None, fallback: tuple[str, ...]) -> Ref:
+                def materialize_expr(
+                    expr: PropositionExprCandidate | None,
+                    fallback: tuple[str, ...],
+                ) -> Ref:
                     if expr is None:
                         expr = (
                             PropositionExprCandidate.ref_expr(fallback[0])
                             if len(fallback) == 1
                             else PropositionExprCandidate(
                                 PropositionOperator.AND,
-                                members=tuple(PropositionExprCandidate.ref_expr(ref) for ref in fallback),
+                                members=tuple(
+                                    PropositionExprCandidate.ref_expr(ref)
+                                    for ref in fallback
+                                ),
                             )
                         )
-                    if expr.operator is PropositionOperator.REF:
-                        assert expr.ref is not None
-                        return conditional_local_refs[expr.ref]
-                    members = tuple(materialize_expr(member, member.leaf_refs()) for member in expr.members)
-                    domain = forced_domain if forced_domain is not None else DomainRouter(tx).route_external(members)
-                    function_id = (
-                        "NOT"
-                        if expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
-                        else expr.operator.value
+                    ref, _created = self._materialize_proposition_expr(
+                        tx, expr, conditional_local_refs, forced_domain
                     )
-                    function, _ = tx.ensure_function(domain, function_id, members)
-                    return tx.ref(function.uid)
+                    return ref
 
-                antecedent_ref = materialize_expr(conditional.antecedent_expr, conditional.antecedent_refs)
-                consequent_ref = materialize_expr(conditional.consequent_expr, conditional.consequent_refs)
+                antecedent_ref = materialize_expr(
+                    conditional.antecedent_expr, conditional.antecedent_refs
+                )
+                consequent_ref = materialize_expr(
+                    conditional.consequent_expr, conditional.consequent_refs
+                )
                 conditional_domain = (
                     forced_domain
                     if forced_domain is not None
@@ -1474,7 +1569,13 @@ class IntegrationService:
                 follow_weight=self.config.follow_link_weight,
             )
             semantic_refs = (
-                tuple(item.ref for item in assertions if item.semantic_scope != "QUANTIFIED")
+                tuple(
+                    item.ref
+                    for item in assertions
+                    if item.semantic_scope != "QUANTIFIED"
+                    and item.local_id not in formula_leaf_ids
+                )
+                + tuple(item.ref for item in formulas)
                 + tuple(item.ref for item in conditionals)
                 + tuple(item.ref for item in existentials)
                 + tuple(item.ref for item in universals)
@@ -1598,6 +1699,7 @@ class IntegrationService:
             clarifications=clarifications,
             relations=tuple(relations),
             conditionals=tuple(conditionals),
+            formulas=tuple(formulas),
             existentials=tuple(existentials),
             universals=tuple(universals),
             conflicts=tuple(conflicts),
@@ -1629,6 +1731,15 @@ class IntegrationService:
                 for item in commit.relations
             ],
             conditionals=[item.ref.uid for item in commit.conditionals],
+            formulas=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "members": [ref.uid for ref in item.member_refs],
+                    "created": item.created,
+                }
+                for item in commit.formulas
+            ],
             existentials=[item.ref.uid for item in commit.existentials],
             universals=[item.ref.uid for item in commit.universals],
             conflicts=[item.ref.uid for item in commit.conflicts],
