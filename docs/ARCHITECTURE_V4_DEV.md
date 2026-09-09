@@ -2836,9 +2836,16 @@ current input
 
 Raw chunks не извлекаются как RAG-context.
 
+**Статус реализации v0.25.22: ЗАКРЫТО для one-shot summary.** Все operational
+chunks сначала консолидируются одним DOCUMENT batch; source scope затем проецирует
+canonical semantics и связи, а Main LLM получает только frozen AgentContext.
+
 ## 31.5. Слишком необязательно существующее большое projection
 
-**ОТКРЫТО.** Если даже компактная source-scoped semantics не помещается в context window, нужен controlled iterative projection protocol.
+**ЧАСТИЧНО ЗАКРЫТО в v0.25.22.** Для one-shot ответа существует детерминированное
+relation-aware сжатие внутри source scope с явным budget/notice и без raw fallback.
+Controlled iterative continuation protocol для полного покрытия чрезмерно большого
+источника остаётся открытым.
 
 Требования к будущему решению:
 
@@ -3165,7 +3172,10 @@ B. различать semantic association через C/P
 
 ## 36.3. Fallback для слишком source-scoped + document projection
 
-**ОТКРЫТО.** Нужно выбрать exact protocol, если compact semantics документа всё равно превосходит context budget.
+**ЧАСТИЧНО ЗАКРЫТО.** One-shot source compaction имеет deterministic selection,
+stop и budget semantics. Нужно выбрать exact iterative protocol, если задача
+требует покрыть compact semantics документа несколькими последовательными
+AgentContext.
 
 Варианты для отдельного решения:
 
@@ -3674,4 +3684,3 @@ CAUSE(B,C)
 ```
 
 Допустимо вернуть upstream causal path `A -> B -> C`; нельзя автоматически materialize ordinary `CAUSE(A,C)`.
-

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import asdict
 import json
 from pathlib import Path
@@ -37,7 +38,10 @@ from ah.diagnostics import (
     run_hidden_valency_diagnostic,
     run_m2_attention_acceptance,
     validate_oracle_alignment,
+    FormalizationTraceBuilder,
     ProofSnapshotBuilder,
+    run_m3_gc_acceptance,
+    score_m1_acceptance_bundle,
 )
 
 from .config_editor import ConfigEditor
@@ -53,6 +57,8 @@ from .inference_explorer import InferenceExplorerWidget
 from .all_nodes_viewer import AllNodesViewerWidget
 from .diagnostics_panel import DiagnosticsPanel
 from .node_inspector import NodeInspectorWidget
+from .document_panel import DocumentPanelWidget
+from .metrics_panel import MetricsPanelWidget
 
 
 class WorkerSignals(QObject):
@@ -94,6 +100,11 @@ class MainWindow(QMainWindow):
         self._document_acceptance_worker: FunctionWorker | None = None
         self._hidden_valency_worker: FunctionWorker | None = None
         self._m2_acceptance_worker: FunctionWorker | None = None
+        self._document_ingest_worker: FunctionWorker | None = None
+        self._document_context_worker: FunctionWorker | None = None
+        self._document_summary_worker: FunctionWorker | None = None
+        self._metrics_m1_worker: FunctionWorker | None = None
+        self._metrics_m3_worker: FunctionWorker | None = None
         self._llm_operation_worker: FunctionWorker | None = None
         self._llm_operation_clears_restart = False
         self._selected_uid: str | None = None
@@ -129,6 +140,8 @@ class MainWindow(QMainWindow):
         self._build_workspace_dock()
         self._build_all_nodes_dock()
         self._build_inference_dock()
+        self._build_document_dock()
+        self._build_metrics_dock()
         self._build_runtime_dock()
         self._build_workspace_mode_menu()
 
@@ -195,12 +208,22 @@ class MainWindow(QMainWindow):
         bar.addAction(self.action_clear_memory)
 
         bar.addSeparator()
+        self.action_document = QAction("Документы", self)
+        self.action_document.setToolTip("Полный document → AH pipeline и AH-only context")
+        self.action_document.triggered.connect(self._show_document_panel)
+        bar.addAction(self.action_document)
+
         self.action_inference_explorer = QAction("Логический вывод", self)
         self.action_inference_explorer.setToolTip(
             "Все live/M2 proof-цепочки: отдельный canvas, семантика шагов, UID trace и проверки."
         )
         self.action_inference_explorer.triggered.connect(self._show_inference_explorer)
         bar.addAction(self.action_inference_explorer)
+
+        self.action_metrics = QAction("Метрики M1–M3", self)
+        self.action_metrics.setToolTip("Отдельные вкладки M1, M2 и M3 с диагностическими canvas")
+        self.action_metrics.triggered.connect(self._show_metrics_panel)
+        bar.addAction(self.action_metrics)
 
         reset_camera = QAction("Сброс камеры", self)
         reset_camera.triggered.connect(lambda: self.canvas_browser.active_canvas.reset_camera())
@@ -265,6 +288,7 @@ class MainWindow(QMainWindow):
             self.inspector_dock, self.node_dock, self.link_dock,
             self.workspace_dock, self.all_nodes_dock, self.inference_dock,
             self.llm_dock, self.config_dock, self.runtime_dock, self.chat_dock,
+            self.document_dock, self.metrics_dock,
         )
         for dock in all_docks:
             dock.hide()
@@ -601,6 +625,229 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
         dock.hide()
 
+    def _build_document_dock(self) -> None:
+        dock = QDockWidget("Документ → AH", self)
+        self.document_dock = dock
+        self.document_panel = DocumentPanelWidget(self)
+        self.document_panel.ingest_requested.connect(self._ingest_document_from_gui)
+        self.document_panel.activate_requested.connect(self._build_document_context_from_gui)
+        self.document_panel.summary_requested.connect(self._summarize_document_from_gui)
+        dock.setWidget(self.document_panel)
+        dock.setMinimumWidth(520)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        dock.hide()
+
+    def _show_document_panel(self) -> None:
+        if self._workspace_mode != "graph":
+            self._set_workspace_mode("graph")
+        self.document_dock.setFloating(False)
+        self.document_dock.show()
+        self.document_dock.raise_()
+        width = max(440, min(650, self.width() // 2))
+        self.resizeDocks([self.document_dock], [width], Qt.Orientation.Horizontal)
+        self.statusBar().showMessage("Открыта отдельная вкладка document → AH", 2500)
+
+    def _document_operation_running(self) -> bool:
+        return any(
+            worker is not None
+            for worker in (
+                self._document_ingest_worker,
+                self._document_context_worker,
+                self._document_summary_worker,
+            )
+        )
+
+    def _ingest_document_from_gui(self, path: str) -> None:
+        if self._cognitive_run_active():
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+        if self.services.perception is None:
+            QMessageBox.warning(self, "Документ", "Запустите LLM perception перед ingestion.")
+            return
+        if not Path(path).is_file():
+            QMessageBox.warning(self, "Документ", f"Файл не найден:\n{path}")
+            return
+        self.document_panel.set_busy(True)
+        self.document_panel.status.setText("Perception всех chunks → единый DOCUMENT commit…")
+        worker = FunctionWorker(lambda: self.services.document_processor().ingest_file(path))
+        self._document_ingest_worker = worker
+        worker.signals.result.connect(self._document_ingest_finished)
+        worker.signals.error.connect(self._document_operation_error)
+        worker.signals.finished.connect(self._document_ingest_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _document_ingest_finished(self, result) -> None:
+        self.document_panel.set_ingestion_result(result)
+        try:
+            trace = FormalizationTraceBuilder(
+                self.services.core,
+                self.services.ignition,
+                runtime_lock=self.services.operation_lock,
+            ).build(
+                result.integration,
+                trace_id=f"document:{result.source_ref}",
+                source="DOCUMENT",
+                title=result.title or result.source_ref,
+                source_text=result.source_text,
+            )
+            self.metrics_panel.add_m1_trace(trace, select=False)
+        except Exception:
+            # A visualization failure must not roll back an already committed document.
+            pass
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        self.statusBar().showMessage(
+            f"Документ загружен: {len(result.chunks)} chunks, coverage {result.coverage_ratio:.1%}",
+            7000,
+        )
+
+    @Slot(str)
+    def _document_operation_error(self, message: str) -> None:
+        self.document_panel.set_busy(False)
+        self.document_panel.status.setText(f"Ошибка: {message}")
+        QMessageBox.critical(self, "Document pipeline", message)
+
+    @Slot()
+    def _document_ingest_worker_finished(self) -> None:
+        self._document_ingest_worker = None
+        self.document_panel.set_busy(False)
+
+    def _build_document_context_from_gui(self, source_ref: str) -> None:
+        if self._cognitive_run_active():
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+        request = self.document_panel.summary_request.text().strip()
+        self.document_panel.set_busy(True)
+        self.document_panel.status.setText("Строю полный source-scoped AgentContext…")
+        worker = FunctionWorker(
+            lambda: self.services.document_processor().build_context(
+                source_ref, request=request
+            )
+        )
+        self._document_context_worker = worker
+        worker.signals.result.connect(self._document_context_finished)
+        worker.signals.error.connect(self._document_operation_error)
+        worker.signals.finished.connect(self._document_context_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _document_context_finished(self, result) -> None:
+        self.document_panel.set_context(result.rendered_context, result.workspace_refs)
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        self.statusBar().showMessage(
+            f"Source context готов: ~{result.estimated_tokens} tokens", 6000
+        )
+
+    @Slot()
+    def _document_context_worker_finished(self) -> None:
+        self._document_context_worker = None
+        self.document_panel.set_busy(False)
+
+    def _summarize_document_from_gui(self, source_ref: str, request: str) -> None:
+        if self._cognitive_run_active():
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+        if self.services.agent is None:
+            QMessageBox.warning(self, "Document summary", "Запустите LLM agent перед summary.")
+            return
+        self.document_panel.set_busy(True)
+        self.document_panel.status.setText("Source scope → AgentContext → LLM summary…")
+        worker = FunctionWorker(
+            lambda: self.services.document_processor().summarize(source_ref, request=request)
+        )
+        self._document_summary_worker = worker
+        worker.signals.result.connect(self._document_summary_finished)
+        worker.signals.error.connect(self._document_operation_error)
+        worker.signals.finished.connect(self._document_summary_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _document_summary_finished(self, result) -> None:
+        self.document_panel.set_context(result.rendered_context, result.workspace_refs)
+        self.document_panel.set_summary(result.text)
+        self.canvas.refresh()
+        self.chat_history.append(
+            f"<b>Document summary:</b> source={self._html(result.source_ref)}<br>"
+            f"{self._html(result.text)}"
+        )
+        self.statusBar().showMessage("Memory-grounded document summary готов", 7000)
+
+    @Slot()
+    def _document_summary_worker_finished(self) -> None:
+        self._document_summary_worker = None
+        self.document_panel.set_busy(False)
+
+    def _build_metrics_dock(self) -> None:
+        dock = QDockWidget("Метрики M1–M3", self)
+        self.metrics_dock = dock
+        self.metrics_panel = MetricsPanelWidget(self.services, self)
+        self.metrics_panel.m1_score_requested.connect(self._score_m1_from_gui)
+        self.metrics_panel.m2_run_requested.connect(self._run_m2_acceptance)
+        self.metrics_panel.m3_run_requested.connect(self._run_m3_from_gui)
+        dock.setWidget(self.metrics_panel)
+        dock.setMinimumWidth(620)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        dock.hide()
+
+    def _show_metrics_panel(self) -> None:
+        if self._workspace_mode != "graph":
+            self._set_workspace_mode("graph")
+        self.metrics_dock.setFloating(False)
+        self.metrics_dock.show()
+        self.metrics_dock.raise_()
+        width = max(620, min(1000, (self.width() * 2) // 3))
+        self.resizeDocks([self.metrics_dock], [width], Qt.Orientation.Horizontal)
+        self.statusBar().showMessage("Открыты отдельные вкладки метрик M1–M3", 2500)
+
+    def _score_m1_from_gui(self, run_dir: str) -> None:
+        if self._metrics_m1_worker is not None:
+            return
+        path = Path(run_dir)
+        if not path.is_dir():
+            QMessageBox.warning(self, "M1", f"Папка не найдена:\n{path}")
+            return
+        worker = FunctionWorker(lambda: score_m1_acceptance_bundle(path))
+        self._metrics_m1_worker = worker
+        worker.signals.result.connect(self._m1_score_finished)
+        worker.signals.error.connect(self._metrics_worker_error)
+        worker.signals.finished.connect(self._m1_score_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _m1_score_finished(self, report) -> None:
+        self.metrics_panel.set_m1_report(report)
+        self.statusBar().showMessage(f"M1 weighted F1 = {report.weighted_mean:.3f}", 5000)
+
+    @Slot()
+    def _m1_score_worker_finished(self) -> None:
+        self._metrics_m1_worker = None
+
+    def _run_m3_from_gui(self) -> None:
+        if self._cognitive_run_active():
+            self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
+            return
+        worker = FunctionWorker(lambda: run_m3_gc_acceptance(self.services.config))
+        self._metrics_m3_worker = worker
+        worker.signals.result.connect(self._m3_from_gui_finished)
+        worker.signals.error.connect(self._metrics_worker_error)
+        worker.signals.finished.connect(self._m3_worker_finished)
+        self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _m3_from_gui_finished(self, report) -> None:
+        self.metrics_panel.set_m3_report(report)
+        self.statusBar().showMessage(f"M3: {'PASS' if report.passed else 'FAIL'}", 6000)
+
+    @Slot(str)
+    def _metrics_worker_error(self, message: str) -> None:
+        QMessageBox.critical(self, "Метрики", message)
+
+    @Slot()
+    def _m3_worker_finished(self) -> None:
+        self._metrics_m3_worker = None
+
     def _build_runtime_dock(self) -> None:
         dock = QDockWidget("Runtime / Trace", self)
         self.runtime_dock = dock
@@ -655,6 +902,24 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 
     # ---------- runtime controls ----------
+    def _cognitive_run_active(self) -> bool:
+        """Serialize every operation that reads/mutates the shared live runtime."""
+        return any(
+            worker is not None
+            for worker in (
+                self._chat_worker,
+                self._acceptance_worker,
+                self._document_acceptance_worker,
+                self._hidden_valency_worker,
+                self._m2_acceptance_worker,
+                self._document_ingest_worker,
+                self._document_context_worker,
+                self._document_summary_worker,
+                self._metrics_m3_worker,
+                self._llm_operation_worker,
+            )
+        )
+
     def _toggle_llm(self) -> None:
         llm = self.services.llm
         if llm is None:
@@ -694,7 +959,7 @@ class MainWindow(QMainWindow):
         self._refresh_status()
 
     def _start_llm(self) -> None:
-        if self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Диагностический run использует LLM", 2500)
             return
         llm = self.services.llm
@@ -706,7 +971,7 @@ class MainWindow(QMainWindow):
         self._run_llm_operation(llm.start, clears_restart=True)
 
     def _stop_llm(self) -> None:
-        if self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Диагностический run использует LLM", 2500)
             return
         llm = self.services.llm
@@ -715,7 +980,7 @@ class MainWindow(QMainWindow):
         self._run_llm_operation(llm.stop)
 
     def _restart_llm(self) -> None:
-        if self._acceptance_worker is not None or self._hidden_valency_worker is not None:
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Диагностический run использует LLM", 2500)
             return
         llm = self.services.llm
@@ -744,17 +1009,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Tick", str(exc))
 
     def _reload_from_disk(self) -> None:
-        if any(
-            worker is not None
-            for worker in (
-                self._chat_worker,
-                self._acceptance_worker,
-                self._document_acceptance_worker,
-                self._hidden_valency_worker,
-                self._m2_acceptance_worker,
-                self._llm_operation_worker,
-            )
-        ):
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Дождитесь окончания текущей операции перед Reload Memory", 3000)
             return
         answer = QMessageBox.question(
@@ -787,7 +1042,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("AH сохранена", 2500)
 
     def _clear_memory(self) -> None:
-        if any(worker is not None for worker in (self._chat_worker, self._acceptance_worker, self._document_acceptance_worker, self._hidden_valency_worker, self._m2_acceptance_worker, self._llm_operation_worker)):
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Дождитесь окончания текущего cognitive run", 2500)
             return
         answer = QMessageBox.question(
@@ -814,7 +1069,7 @@ class MainWindow(QMainWindow):
         # delivered. The previous implementation kept the worker only in a local
         # variable and re-enabled the button through a lambda, which is fragile
         # across worker-thread/UI-thread boundaries.
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2000)
             return
 
@@ -898,7 +1153,7 @@ class MainWindow(QMainWindow):
         label: str,
         title: str,
     ) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -960,6 +1215,9 @@ class MainWindow(QMainWindow):
     def _acceptance_finished(self, result) -> None:
         if getattr(result, "proofs", ()):
             self.inference_explorer.add_chains(result.proofs, select_last=False)
+            self.metrics_panel.add_m2_chains(result.proofs, select_last=False)
+        if getattr(result, "formalization_traces", ()):
+            self.metrics_panel.add_m1_traces(result.formalization_traces, select_last=True)
         label = self._active_acceptance_label
         self.chat_history.append(
             f"<b>{self._html(label)}:</b> semantic PASS {result.semantic_passed}/{result.total}, "
@@ -971,6 +1229,9 @@ class MainWindow(QMainWindow):
             f"FAIL {result.semantic_failed}; GAP {result.semantic_gaps}",
             10000,
         )
+        if label.startswith("M1"):
+            self.metrics_panel.m1_path.setText(str(result.output_dir))
+            self._score_m1_from_gui(str(result.output_dir))
         QMessageBox.information(
             self,
             self._active_acceptance_title,
@@ -1012,13 +1273,7 @@ class MainWindow(QMainWindow):
         self._active_acceptance_title = "Acceptance suite"
 
     def _run_document_acceptance(self) -> None:
-        if (
-            self._chat_worker is not None
-            or self._acceptance_worker is not None
-            or self._document_acceptance_worker is not None
-            or self._hidden_valency_worker is not None
-            or self._m2_acceptance_worker is not None
-        ):
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -1112,13 +1367,7 @@ class MainWindow(QMainWindow):
         self._resume_acceptance_status_polling()
 
     def _run_m2_acceptance(self) -> None:
-        if (
-            self._chat_worker is not None
-            or self._acceptance_worker is not None
-            or self._document_acceptance_worker is not None
-            or self._hidden_valency_worker is not None
-            or self._m2_acceptance_worker is not None
-        ):
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
 
@@ -1160,6 +1409,7 @@ class MainWindow(QMainWindow):
 
     @Slot(object)
     def _m2_acceptance_finished(self, result) -> None:
+        self.metrics_panel.set_m2_acceptance_result(result)
         self.canvas_browser.set_sandbox_snapshot(
             result.sandbox_snapshot,
             total_uids=result.ah_uids,
@@ -1214,7 +1464,7 @@ class MainWindow(QMainWindow):
         self._refresh_status()
 
     def _run_hidden_valency_diagnostic(self) -> None:
-        if self._chat_worker is not None or self._acceptance_worker is not None or self._document_acceptance_worker is not None or self._hidden_valency_worker is not None or self._m2_acceptance_worker is not None:
+        if self._cognitive_run_active():
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self._llm_operation_worker is not None:
@@ -1366,6 +1616,7 @@ class MainWindow(QMainWindow):
                     diagnostics=q.diagnostics,
                 )
                 self.inference_explorer.add_chain(proof, select=False)
+                self.metrics_panel.add_m2_chain(proof, select=False)
                 trace_payload.append(
                     {
                         "query": i,
@@ -1382,6 +1633,7 @@ class MainWindow(QMainWindow):
                 title=f"Turn {self._turn_sequence} · Query {i}",
             )
             self.inference_explorer.add_chain(proof, select=False)
+            self.metrics_panel.add_m2_chain(proof, select=False)
             trace_payload.append(
                 {
                     "query": i,
@@ -1396,6 +1648,23 @@ class MainWindow(QMainWindow):
                     ),
                 }
             )
+        try:
+            formalization = FormalizationTraceBuilder(
+                self.services.core,
+                self.services.ignition,
+                runtime_lock=self.services.operation_lock,
+            ).build(
+                result.integration,
+                trace_id=f"live:turn:{self._turn_sequence}",
+                source="LIVE",
+                title=f"Turn {self._turn_sequence}",
+                source_text=result.user_text,
+                diagnostics=tuple(str(item) for item in result.perception.diagnostics),
+            )
+            self.metrics_panel.add_m1_trace(formalization, select=False)
+        except Exception:
+            # The committed turn stays authoritative; visualization is best-effort.
+            pass
         self.trace_view.setPlainText(json.dumps(trace_payload, ensure_ascii=False, indent=2))
         self.llm_panel.show_agent_context(result.agent_context, result.agent_context_diagnostic)
         self.canvas.refresh()

@@ -80,7 +80,7 @@ class ProofCanvasView(QGraphicsView):
             text.setDefaultTextColor(QColor(235, 239, 246))
             text.setTextWidth(width - 24)
             text.setHtml(
-                f"<b>{node.kind}:{node.uid}</b><br>"
+                f"<b>{node.kind}:{node.uid} · domain={node.domain or '—'}</b><br>"
                 f"<span style='color:#c8d0dd'>{self._html(node.semantic)}</span>"
             )
             text.setPos(x + 12, y0 + 10)

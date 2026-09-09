@@ -27,6 +27,8 @@ from .hidden_valency_diagnostic import (
     run_hidden_valency_diagnostic,
 )
 from .graph_dump import GraphInspector, GraphSnapshot, LinkDiagnostic, NodeDiagnostic, StructuralEdgeDiagnostic
+from .formalization_trace import FormalizationTraceBuilder, FormalizationTraceSnapshot
+from .history import BoundedHistory
 from .summary import RuntimeDiagnostics, RuntimeSummary
 from .trace_view import TraceView
 from .inference_proof import (
@@ -81,6 +83,9 @@ __all__ = [
     "run_hidden_valency_diagnostic",
     "GraphInspector",
     "GraphSnapshot",
+    "FormalizationTraceBuilder",
+    "FormalizationTraceSnapshot",
+    "BoundedHistory",
     "LinkDiagnostic",
     "NodeDiagnostic",
     "StructuralEdgeDiagnostic",

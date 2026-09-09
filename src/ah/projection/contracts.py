@@ -87,9 +87,10 @@ class SourceScopedContextResult:
 class ProjectionBudgetExceeded(ValueError):
     """Fail-closed source/context overflow.
 
-    Architecture v4 intentionally leaves iterative oversized-source projection
-    open.  Until that protocol is specified, projection must never silently fall
-    back to raw chunks or drop semantic blocks.
+    Normal Workspace projection never silently falls back to raw chunks or drops
+    semantic blocks. Complete-source projection has a separate, explicit and
+    deterministic compaction operator; it raises this exception if even one
+    coherent semantic root plus its compression notice cannot fit.
     """
 
     def __init__(self, estimated_tokens: int, budget_tokens: int) -> None:

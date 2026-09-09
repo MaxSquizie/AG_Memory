@@ -55,6 +55,12 @@ class RuntimeServices:
     perception: LLMPerceptionService | None
     agent: LLMAgent | None
 
+    def document_processor(self, *, max_chunk_chars: int = 6000):
+        """Create the lightweight document facade over these live services."""
+        from ah.documents import DocumentProcessor
+
+        return DocumentProcessor(self, max_chunk_chars=max_chunk_chars)
+
     @classmethod
     def build(cls, config: AppConfig, *, core: AHCore | None = None) -> "RuntimeServices":
         persistence = JsonPersistence(config.paths.persistence_file, config.persistence)

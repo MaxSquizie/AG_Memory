@@ -204,3 +204,58 @@ def test_source_scoped_context_service_composes_activation_and_projection():
     assert {ref.uid for ref in result.activation.seeded_refs} == {first.uid, second.uid}
     assert unrelated.uid not in {ref.uid for ref in result.activation.seeded_refs}
     assert "TOP SECRET RAW DOCUMENT" not in result.context.rendered
+
+
+def test_complete_source_projection_is_index_bounded_explicitly_compacted_and_deterministic(monkeypatch):
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    user = entity(core, "Пользователь", Domain.P)
+    roots = tuple(
+        fact(core, "описывать", entity(core, f"Раздел {index} с подробным названием"))
+        for index in range(8)
+    )
+    for index, target in enumerate(roots[1:], start=1):
+        core.add_link(
+            ("BEFORE", "AFTER", "OVERLAP", "CAUSE")[index % 4],
+            roots[0],
+            target,
+            0.4,
+        )
+    ExperienceMapper(core, event_weight=0.3, follow_weight=0.2).record_turn(
+        source_text="RAW SOURCE MUST NEVER ENTER THE MODEL",
+        speaker_ref=user,
+        semantic_refs=roots,
+        context=InteractionContext(user_ref=user),
+        speech_act_kinds=("ASSERTION",),
+        source_ref="doc:compact",
+        batch_kind="DOCUMENT",
+    )
+    ignition = IgnitionEngine(
+        core,
+        IgnitionSettings(),
+        WorkspaceSettings(threshold=10.0),
+        LifecycleSettings(gc_enabled=False),
+    )
+    service = SourceScopedContextService(
+        SourceScopeActivator(core, ignition),
+        ContextProjector(core, ContextSettings(max_tokens=4096)),
+    )
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("complete source context must stay on source/adjacency indexes")
+
+    monkeypatch.setattr(core.store, "elements", forbidden)
+    monkeypatch.setattr(core.store, "all_elements", forbidden)
+    monkeypatch.setattr(core.store, "all_uids", forbidden)
+    monkeypatch.setattr(core.store, "links", forbidden)
+
+    first = service.build_complete_source(
+        "Сожми документ.", "doc:compact", budget_tokens=70
+    ).context
+    second = service.build_complete_source(
+        "Сожми документ.", "doc:compact", budget_tokens=70
+    ).context
+    assert first.rendered == second.rendered
+    assert first.estimated_tokens <= 70
+    assert "сжат детерминированно" in first.rendered
+    assert "RAW SOURCE MUST NEVER ENTER THE MODEL" not in first.rendered
+    assert roots[0].uid in {ref.uid for ref in first.source_workspace_refs}

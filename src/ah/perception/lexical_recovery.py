@@ -534,8 +534,25 @@ class LexicalRecovery:
                 continue
             infos = material_analyses(other.analyses)
             other_acc = any(info.pos in nominal_poses and info.case == "accs" for info in infos)
+            other_oblique = any(
+                info.pos in nominal_poses
+                and info.case in {
+                    "datv", "ablt", "gent", "gen1", "gen2", "loct", "loc1", "loc2"
+                }
+                for info in infos
+            )
             other_nom = any(info.pos in {"NOUN", "NPRO"} and info.case == "nomn" for info in infos)
-            if other_acc and not (other_nom and self._subject_agrees_surface(other, transitive_heads[0], graph)):
+            # An ACC reading from a fully indeclinable/proper-name paradigm does
+            # not prove that this token fills the direct slot. If the same surface
+            # has a material oblique reading, keep the current candidate unbiased.
+            if (
+                other_acc
+                and not other_oblique
+                and not (
+                    other_nom
+                    and self._subject_agrees_surface(other, transitive_heads[0], graph)
+                )
+            ):
                 other_direct_shaped = True
                 break
 
@@ -917,22 +934,6 @@ class LexicalRecovery:
             for item in tokens[clause.span.start_index - 1 : clause.span.end_index]
         )
 
-    @staticmethod
-    def _candidate_lemmas(candidate: _RankedCandidate) -> frozenset[str]:
-        return frozenset(
-            item.normal_form.casefold()
-            for item in material_analyses(candidate.analyses)
-            if item.normal_form
-        )
-
-    @classmethod
-    def _same_lexeme_family(
-        cls, left: _RankedCandidate, right: _RankedCandidate
-    ) -> bool:
-        left_lemmas = cls._candidate_lemmas(left)
-        right_lemmas = cls._candidate_lemmas(right)
-        return bool(left_lemmas and right_lemmas and left_lemmas & right_lemmas)
-
     @classmethod
     def _noisy_channel_dominates(
         cls, raw: str, best: _RankedCandidate, runner_up: _RankedCandidate
@@ -1072,13 +1073,6 @@ class LexicalRecovery:
                 confidence = min(0.96, 0.84 + base_margin / 2.0)
                 reason = "morphosyntactic margin"
             elif has_context and (
-                self._same_lexeme_family(best, ranked[1])
-                and best.grammar_score - ranked[1].grammar_score >= 0.22
-                and best.distance <= ranked[1].distance + 0.20
-            ):
-                confidence = 0.89
-                reason = "same-lexeme grammatical form dominance"
-            elif has_context and (
                 best.grammar_score - ranked[1].grammar_score >= 0.35
                 and best.distance <= ranked[1].distance + 0.25
             ):
@@ -1099,16 +1093,23 @@ class LexicalRecovery:
                     if best.base_score - item.base_score <= 0.20
                 )
                 semantic_scores: dict[str, float] = {}
+                rerank_attempted = False
+                rerank_error: str | None = None
+                observed_semantic_margin: float | None = None
+                observed_combined_margin: float | None = None
                 if has_context and self.semantic_reranker is not None and len(close) >= 2:
+                    rerank_attempted = True
                     try:
                         semantic_scores = self.semantic_reranker.rank(
                             self._context_text(token, tokens, graph),
                             tuple(item.text for item in close),
                         )
-                    except Exception:
+                    except Exception as exc:
                         # Embeddings are optional enrichment. Transport/model errors
                         # must not turn into a forced correction or parser outage.
                         semantic_scores = {}
+                        detail = " ".join(str(exc).split())
+                        rerank_error = f"{type(exc).__name__}: {detail}"[:240]
                 if semantic_scores and all(item.text in semantic_scores for item in close):
                     sem_sorted = sorted(
                         close,
@@ -1129,6 +1130,8 @@ class LexicalRecovery:
                         semantic_scores[semantic_best.text]
                         - semantic_scores[sem_sorted[1].text]
                     )
+                    observed_combined_margin = semantic_margin
+                    observed_semantic_margin = raw_semantic_margin
                     if semantic_margin >= 0.10 and raw_semantic_margin >= 0.05:
                         selected = semantic_best
                         confidence = min(0.94, 0.82 + semantic_margin / 2.0)
@@ -1148,6 +1151,22 @@ class LexicalRecovery:
                     )
                 )
             else:
+                if rerank_error is not None:
+                    ambiguity_reason = f"semantic reranker unavailable ({rerank_error})"
+                elif rerank_attempted and not semantic_scores:
+                    ambiguity_reason = "semantic reranker returned no complete scores"
+                elif observed_combined_margin is not None and observed_semantic_margin is not None:
+                    ambiguity_reason = (
+                        "embedding margin below safe threshold "
+                        f"(combined={observed_combined_margin:.3f}, "
+                        f"semantic={observed_semantic_margin:.3f})"
+                    )
+                elif self.semantic_reranker is None:
+                    ambiguity_reason = (
+                        "no safe deterministic margin; semantic reranker disabled"
+                    )
+                else:
+                    ambiguity_reason = "no safe deterministic or embedding margin"
                 decisions.append(
                     TokenCandidate(
                         token.index,
@@ -1156,7 +1175,7 @@ class LexicalRecovery:
                         LexicalRecoveryStatus.AMBIGUOUS,
                         alternatives=display,
                         confidence=0.0,
-                        reason="no safe deterministic or embedding margin",
+                        reason=ambiguity_reason,
                     )
                 )
         return tuple(decisions)

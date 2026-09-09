@@ -947,7 +947,18 @@ class LinguisticCandidateBuilder:
                             or tokens[owner_start - 1].text.casefold() in _CLAUSE_COORDINATORS
                         )
                     )
-                    if not owner_is_open_peer and ellipsis_tail_candidate(token.index, low):
+                    comma_before = token.index > 1 and tokens[token.index - 2].text == ","
+                    if (
+                        owner_is_open_peer
+                        and comma_before
+                        and ellipsis_tail_candidate(token.index, low)
+                    ):
+                        # A comma closes the current predicate-free peer; this
+                        # coordinator starts another proposition. Without that
+                        # boundary the same ``и`` remains NP coordination.
+                        boundaries.add(token.index)
+                        implicit_peer_starts.add(token.index)
+                    elif not owner_is_open_peer and ellipsis_tail_candidate(token.index, low):
                         boundaries.add(token.index)
                 continue
 

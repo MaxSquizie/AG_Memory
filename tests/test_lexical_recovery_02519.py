@@ -41,7 +41,8 @@ def test_weighted_damerau_levenshtein_covers_all_edit_families() -> None:
     assert weighted_damerau_levenshtein("стол", "стол") == 0.0
     assert weighted_damerau_levenshtein("стол", "сто") == pytest.approx(0.72)
     assert weighted_damerau_levenshtein("стоол", "стол") == pytest.approx(0.45)
-    assert weighted_damerau_levenshtein("стол", "стул") == pytest.approx(0.80)
+    # о→р are adjacent ЙЦУКЕН keys; о→у are not.
+    assert weighted_damerau_levenshtein("стол", "стрл") == pytest.approx(0.80)
     assert weighted_damerau_levenshtein("стло", "стол") == pytest.approx(0.70)
     assert weighted_damerau_levenshtein("елка", "ёлка") == pytest.approx(0.15)
     assert weighted_damerau_levenshtein("книгп", "книга") < 1.0
@@ -115,6 +116,12 @@ class _SemanticReranker:
         return {item: (1.0 if item == self.preferred else 0.0) for item in candidates}
 
 
+class _UnavailableReranker:
+    def rank(self, context: str, candidates: tuple[str, ...]) -> dict[str, float]:
+        del context, candidates
+        raise RuntimeError("embedding endpoint is offline")
+
+
 def test_semantic_reranker_runs_only_for_the_narrow_close_shortlist(morphology) -> None:
     reranker = _SemanticReranker("кот")
     _graph, by_raw = decisions("Ребёнок увидел ктт.", morphology, reranker)
@@ -125,6 +132,18 @@ def test_semantic_reranker_runs_only_for_the_narrow_close_shortlist(morphology) 
     unique = _SemanticReranker("документ")
     decisions("Мария прочитала докмент.", morphology, unique)
     assert unique.calls == []
+
+
+def test_semantic_reranker_failure_is_fail_closed_and_observable(morphology) -> None:
+    _graph, by_raw = decisions(
+        "Ребёнок увидел ктт.", morphology, _UnavailableReranker()
+    )
+    item = by_raw["ктт"]
+    assert item.status is LexicalRecoveryStatus.AMBIGUOUS
+    assert item.normalized_text is None
+    assert item.reason is not None
+    assert "semantic reranker unavailable" in item.reason
+    assert "embedding endpoint is offline" in item.reason
 
 
 class _ParserFixture:
@@ -175,4 +194,3 @@ def test_parser_uses_corrected_identity_but_keeps_raw_evidence(morphology) -> No
 def test_parser_fails_closed_before_semantics_on_ambiguous_oov(morphology) -> None:
     with pytest.raises(AdaptiveParseError, match="ambiguous lexical recovery"):
         parser(morphology).parse("Мария увидела ктт.")
-

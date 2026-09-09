@@ -131,3 +131,24 @@ class SourceScopedContextService:
             budget_tokens=budget_tokens,
         )
         return SourceScopedContextResult(activation, context)
+
+    def build_complete_source(
+        self,
+        current_input: str,
+        source_ref: str,
+        *,
+        settle_ticks: int = 1,
+        inference_results=(),
+        unresolved_goal_diagnostics=(),
+        budget_tokens: int | None = None,
+    ) -> SourceScopedContextResult:
+        """Build document context from every root in the bounded source index."""
+        activation = self.activator.activate(source_ref, settle_ticks=settle_ticks)
+        context = self.projector.project_compact_source(
+            current_input,
+            activation.source_scope,
+            tuple(inference_results),
+            tuple(unresolved_goal_diagnostics),
+            budget_tokens=budget_tokens,
+        )
+        return SourceScopedContextResult(activation, context)

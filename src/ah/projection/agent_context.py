@@ -131,6 +131,175 @@ class ContextProjector:
             estimated_tokens=estimated_tokens,
         )
 
+    def project_compact_source(
+        self,
+        current_input: str,
+        source_scope: SourceScope,
+        inference_results: tuple[InferenceOutcome, ...] = (),
+        unresolved_goal_diagnostics: tuple[tuple[str, ...], ...] = (),
+        *,
+        budget_tokens: int | None = None,
+    ) -> AgentContext:
+        """Project a complete, source-bounded document under a hard budget.
+
+        This operator deliberately differs from normal Workspace projection: it
+        addresses every semantic root resolved through the source index.  It never
+        scans the global graph and never falls back to raw document/chunk text.
+        When the complete semantic projection does not fit, a deterministic,
+        relation-aware subset is emitted together with an explicit notice.
+        """
+        seen: set[str] = set()
+        roots: list[Ref] = []
+        for ref in source_scope.semantic_roots:
+            if ref.uid in seen or not self.core.store.has_uid(ref.uid):
+                continue
+            seen.add(ref.uid)
+            roots.append(ref)
+        source_roots = tuple(roots)
+        allowed = {ref.uid for ref in source_roots}
+        memory_blocks = self._model_memory_blocks(
+            current_input,
+            source_roots,
+            allowed_uids=allowed,
+        )
+        relation_blocks = self._source_relation_blocks(
+            source_roots,
+            source_scope,
+            relation_ids={"CAUSE", "FOLLOW", "IS-A", "BEFORE", "AFTER", "OVERLAP"},
+        )
+        inference_blocks = tuple(
+            block
+            for outcome in inference_results
+            if (block := self._inference_block(outcome)) is not None
+        ) + tuple(
+            self._unresolved_goal_block(diagnostics)
+            for diagnostics in unresolved_goal_diagnostics
+        )
+        all_memory = memory_blocks + relation_blocks
+        limit = self.settings.max_tokens if budget_tokens is None else min(
+            self.settings.max_tokens, int(budget_tokens)
+        )
+        if limit <= 0:
+            raise ValueError("budget_tokens must be > 0")
+
+        rendered = self._render_context(current_input, all_memory, inference_blocks)
+        full_estimate = self._estimate_tokens(rendered)
+        selected = all_memory
+        if full_estimate > limit:
+            selected = self._compact_source_blocks(
+                current_input,
+                source_roots,
+                memory_blocks,
+                relation_blocks,
+                inference_blocks,
+                limit,
+                full_estimate,
+            )
+            rendered = self._render_context(current_input, selected, inference_blocks)
+        estimated_tokens = self._estimate_tokens(rendered)
+        if estimated_tokens > limit:
+            raise ProjectionBudgetExceeded(estimated_tokens, limit)
+        return AgentContext(
+            current_input,
+            selected,
+            inference_blocks,
+            rendered,
+            source_workspace_refs=source_roots,
+            source_scope_ref=source_scope.source_ref,
+            estimated_tokens=estimated_tokens,
+        )
+
+    def _compact_source_blocks(
+        self,
+        current_input: str,
+        roots: tuple[Ref, ...],
+        memory_blocks: tuple[ProjectionBlock, ...],
+        relation_blocks: tuple[ProjectionBlock, ...],
+        inference_blocks: tuple[ProjectionBlock, ...],
+        limit: int,
+        full_estimate: int,
+    ) -> tuple[ProjectionBlock, ...]:
+        """Select a coherent source subset without interpreting raw text."""
+        degree = {ref.uid: 0 for ref in roots}
+        relation_rows: list[tuple[ProjectionBlock, object]] = []
+        for block in relation_blocks:
+            if block.root is None or block.root.kind is not RefKind.L:
+                continue
+            try:
+                link = self.core.store.get_link(block.root.uid)
+            except (KeyError, TypeError):
+                continue
+            relation_rows.append((block, link))
+            if link.source.uid in degree:
+                degree[link.source.uid] += 1
+            if link.target.uid in degree:
+                degree[link.target.uid] += 1
+
+        root_blocks = {
+            block.root.uid: block
+            for block in memory_blocks
+            if block.root is not None and block.root.kind is not RefKind.L
+        }
+        kind_priority = {
+            RefKind.N: 0,
+            RefKind.G: 0,
+            RefKind.K: 0,
+            RefKind.M: 1,
+        }
+        candidates = sorted(
+            (ref for ref in roots if ref.uid in root_blocks),
+            key=lambda ref: (
+                -degree.get(ref.uid, 0),
+                kind_priority.get(ref.kind, 2),
+                self.core.store.creation_sequence(ref.uid),
+            ),
+        )
+
+        total = len(memory_blocks) + len(relation_blocks)
+
+        def notice(kept: int) -> ProjectionBlock:
+            omitted = max(0, total - kept)
+            return ProjectionBlock(
+                None,
+                ProjectionMode.DEPENDENCY,
+                "Контекст источника сжат детерминированно по связности: "
+                f"сохранено {kept}, опущено {omitted} семантических блоков; "
+                "сырой текст документа не использован.",
+            )
+
+        chosen_uids: set[str] = set()
+        chosen_roots: list[ProjectionBlock] = []
+        for ref in candidates:
+            block = root_blocks[ref.uid]
+            trial_roots = chosen_roots + [block]
+            trial = (notice(len(trial_roots)), *trial_roots)
+            rendered = self._render_context(current_input, tuple(trial), inference_blocks)
+            if self._estimate_tokens(rendered) <= limit:
+                chosen_roots.append(block)
+                chosen_uids.add(ref.uid)
+
+        if not chosen_roots:
+            raise ProjectionBudgetExceeded(full_estimate, limit)
+
+        chosen_relations: list[ProjectionBlock] = []
+        for block, link in sorted(
+            relation_rows,
+            key=lambda row: self.core.store.creation_sequence(row[0].root.uid),
+        ):
+            if link.source.uid not in chosen_uids or link.target.uid not in chosen_uids:
+                continue
+            trial_body = chosen_roots + chosen_relations + [block]
+            trial = (notice(len(trial_body)), *trial_body)
+            rendered = self._render_context(current_input, tuple(trial), inference_blocks)
+            if self._estimate_tokens(rendered) <= limit:
+                chosen_relations.append(block)
+
+        chosen_roots.sort(
+            key=lambda block: self.core.store.creation_sequence(block.root.uid)
+        )
+        selected_body = chosen_roots + chosen_relations
+        return (notice(len(selected_body)), *selected_body)
+
     def diagnose(
         self,
         context: AgentContext,
@@ -522,6 +691,8 @@ class ContextProjector:
         self,
         visible_roots: tuple[Ref, ...],
         source_scope: SourceScope,
+        *,
+        relation_ids: set[str] | frozenset[str] = frozenset({"CAUSE", "FOLLOW", "IS-A"}),
     ) -> tuple[ProjectionBlock, ...]:
         """Preserve direct structural ordering inside one bounded source scope.
 
@@ -538,7 +709,7 @@ class ContextProjector:
         for ref in visible_roots:
             for link in self.core.store.outgoing_links(ref.uid):
                 relation = link.relation_id.upper()
-                if relation not in {"CAUSE", "FOLLOW", "IS-A"}:
+                if relation not in relation_ids:
                     continue
                 if link.uid in seen:
                     continue

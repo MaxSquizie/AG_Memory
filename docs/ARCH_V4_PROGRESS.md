@@ -283,3 +283,20 @@ CLI: `m1-score`, `m3-acceptance`, `tick-benchmark`. Полное описани�
 
 Подробности: `VERSION_02519.md`, `docs/SLICE_25_19.md`,
 `docs/GENERALITY_AUDIT_02519.md`, `docs/ARCHITECTURE_V4_NEXT_02519.md`.
+
+## v0.25.22 — document summary и evidence GUI
+
+- §31.4 **CLOSED operationally**: TXT/Markdown/DOCX проходят полный parse всех
+  staging chunks, единый `FormalizationBatch(DOCUMENT)` и одну canonical
+  transaction. Summary строится только из source-scoped AH semantics.
+- §31.5/§36.3 **PARTIAL**: добавлено bounded one-shot relation-aware semantic
+  compaction с явным notice и жёстким budget. Iterative continuation/cursor для
+  покрытия источника несколькими model contexts остаётся OPEN.
+- M1/M2 получили отдельные immutable diagnostic canvases с hard history 20;
+  snapshots не являются AH/H, premise или activation state.
+- M1 typo gaps исправлены локально через morphology/frame constraints; inversion
+  path сохранён. Новый live model run не заявлен.
+- §20.7 остаётся следующей незакрытой исполняемой строкой; policy-вопросы §30.6,
+  §31.6/§36 и explicit non-goals §37 сознательно не фиксировались.
+
+Регрессия: `1128 passed, 38 subtests passed`.

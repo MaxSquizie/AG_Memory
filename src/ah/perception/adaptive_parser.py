@@ -7645,23 +7645,42 @@ class AdaptivePerceptionParser:
         """
         result = list(actants)
         durations = [item for item in result if item.role is ActantRole.DURATION and item.evidence]
-        amounts = [item for item in result if item.role is ActantRole.AMOUNT and item.evidence]
+        # A numeric literal can arrive here as a generic/OBJECT actant when the
+        # bounded role probe recognized the following nominal head as DURATION
+        # but did not independently label the quantity as AMOUNT. Adjacency to
+        # an already-resolved DURATION is sufficient to fold that literal into
+        # the same phrase; no duration-unit vocabulary is involved.
+        quantities = [
+            item
+            for item in result
+            if item.evidence is not None
+            and (
+                item.role is ActantRole.AMOUNT
+                or bool(
+                    re.fullmatch(
+                        r"[+-]?(?:\d+(?:[.,]\d+)?)",
+                        item.evidence.text.strip(),
+                    )
+                )
+            )
+        ]
         for duration in durations:
             preceding = [
-                amount for amount in amounts
-                if amount in result
-                and amount.evidence is not None
+                quantity for quantity in quantities
+                if quantity in result
+                and quantity is not duration
+                and quantity.evidence is not None
                 and duration.evidence is not None
-                and amount.evidence.end <= duration.evidence.start
-                and text[amount.evidence.end:duration.evidence.start].strip() == ""
+                and quantity.evidence.end <= duration.evidence.start
+                and text[quantity.evidence.end:duration.evidence.start].strip() == ""
             ]
             if len(preceding) != 1:
                 continue
-            amount = preceding[0]
-            assert amount.evidence is not None and duration.evidence is not None
+            quantity = preceding[0]
+            assert quantity.evidence is not None and duration.evidence is not None
             evidence = EvidenceSpan(
-                text[amount.evidence.start:duration.evidence.end],
-                amount.evidence.start,
+                text[quantity.evidence.start:duration.evidence.end],
+                quantity.evidence.start,
                 duration.evidence.end,
             )
             fused = replace(
@@ -7671,7 +7690,7 @@ class AdaptivePerceptionParser:
                 evidence=evidence,
             )
             result[result.index(duration)] = fused
-            result.remove(amount)
+            result.remove(quantity)
         return result
 
     @staticmethod

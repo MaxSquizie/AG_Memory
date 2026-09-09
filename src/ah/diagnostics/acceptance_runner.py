@@ -11,10 +11,15 @@ import traceback
 from typing import Any, Mapping, TYPE_CHECKING
 
 from ah.model import AbstractSymbol, Domain, FunctionSymbol, Group, Hypernode, Link, SemanticEntity, Template
+from ah.integration.contracts import IntegrationCommit
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.lexical_recovery import EmbeddingSemanticReranker, LexicalRecovery
 from ah.perception.morphology import build_morphology
 from ah.diagnostics.inference_proof import ProofChainSnapshot, ProofSnapshotBuilder
+from ah.diagnostics.formalization_trace import (
+    FormalizationTraceBuilder,
+    FormalizationTraceSnapshot,
+)
 from ah.diagnostics.semantic_oracle import (
     DEFAULT_ORACLE_FILENAME,
     evaluate_semantic_case,
@@ -48,6 +53,7 @@ class AcceptanceRunResult:
     semantic_gaps: int = 0
     oracle_file: Path | None = None
     proofs: tuple[ProofChainSnapshot, ...] = ()
+    formalization_traces: tuple[FormalizationTraceSnapshot, ...] = ()
 
 
 @dataclass(slots=True)
@@ -350,6 +356,12 @@ def run_acceptance_suite(
         semantic_failed = 0
         semantic_gaps = 0
         proofs: list[ProofChainSnapshot] = []
+        formalization_traces: list[FormalizationTraceSnapshot] = []
+        formalization_builder = FormalizationTraceBuilder(
+            services.core,
+            services.ignition,
+            runtime_lock=services.operation_lock,
+        )
         required_template_roles: dict[str, set[str]] = {}
 
         active_scenario: str | None = None
@@ -379,6 +391,26 @@ def run_acceptance_suite(
                 turn = orchestrator.handle_user_text(case.text, generate_response=False)
                 record["perception_result"] = _jsonable(turn.perception)
                 record["integration_commit"] = _jsonable(turn.integration)
+                if isinstance(turn.integration, IntegrationCommit):
+                    try:
+                        formalization_traces.append(
+                            formalization_builder.build(
+                                turn.integration,
+                                trace_id=f"acceptance:{timestamp}:{case.index}",
+                                source="ACCEPTANCE",
+                                title=f"Acceptance {case.index}",
+                                source_text=case.text,
+                                diagnostics=tuple(turn.perception.diagnostics),
+                            )
+                        )
+                    except Exception as trace_exc:
+                        # M1 visualization is diagnostic-only. A snapshot problem
+                        # must never turn a successful cognitive case into ERROR.
+                        record["formalization_trace_error"] = (
+                            f"{type(trace_exc).__name__}: {trace_exc}"
+                        )
+                    if len(formalization_traces) > 20:
+                        del formalization_traces[:-20]
                 record["queries"] = _jsonable(turn.queries)
                 proof_builder = ProofSnapshotBuilder(services.core)
                 case_proofs = []
@@ -551,16 +583,17 @@ def run_acceptance_suite(
         (runs_root / "latest.txt").write_text(str(output_dir.resolve()) + "\n", encoding="utf-8", newline="\n")
 
         return AcceptanceRunResult(
-            output_dir,
-            source,
-            len(cases),
-            succeeded,
-            failed,
-            semantic_passed,
-            semantic_failed,
-            semantic_gaps,
-            oracle_source,
-            tuple(proofs),
+            output_dir=output_dir,
+            cases_file=source,
+            total=len(cases),
+            succeeded=succeeded,
+            failed=failed,
+            semantic_passed=semantic_passed,
+            semantic_failed=semantic_failed,
+            semantic_gaps=semantic_gaps,
+            oracle_file=oracle_source,
+            proofs=tuple(proofs),
+            formalization_traces=tuple(formalization_traces),
         )
     finally:
         with services.operation_lock:
