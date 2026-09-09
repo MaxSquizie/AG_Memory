@@ -495,16 +495,39 @@ class AgentOrchestrator:
         # calls stay outside the lock so a continuously running IgnitionClock can
         # keep ticking while the model is thinking, but it cannot observe a
         # half-integrated canonical transaction.
+        from ah.diagnostics.session_log import emit as emit_pipeline_event
+        emit_pipeline_event(
+            "pipeline_raw", source="USER", text=text,
+            source_timestamp=turn_timestamp.isoformat(),
+        )
         with lock:
             self.ignition.begin_prompt_epoch()
             sensory = self.sensory.process(text)
             self.ignition.apply_seed_requests(sensory.activation_seeds)
+        emit_pipeline_event(
+            "pipeline_sensory",
+            source="USER",
+            symbol_candidates=[ref.uid for ref in sensory.symbol_candidates],
+            activation_seeds=[
+                {"uid": item.ref.uid, "reason": item.reason.value}
+                for item in sensory.activation_seeds
+            ],
+        )
 
         try:
             perception = self.perception.parse(text, self.context)
             perception = self._complete_dynamic_templates(perception, lock)
             perception = apply_speech_act_scoping(perception)
             perception = GoalSemanticService(self.perception).complete(perception)
+            emit_pipeline_event(
+                "pipeline_perception",
+                assertion_ids=[item.local_id for item in perception.assertions],
+                query_ids=[item.local_id for item in perception.queries],
+                command_ids=[item.local_id for item in perception.commands],
+                relation_count=len(perception.relations),
+                conditional_count=len(perception.conditionals),
+                diagnostics=list(perception.diagnostics),
+            )
         except PerceptionClarificationRequired as exc:
             # Genuine structural ambiguity is not an error and must not be guessed.
             # Record the external utterance in H, persist only the pending structural
