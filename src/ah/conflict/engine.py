@@ -282,15 +282,21 @@ class ConflictEngine:
             return ()
         node = self.core.store.get_hypernode(ref.uid)
         out: list[Ref] = []
-        for schema in getattr(self.schema_registry, "items", lambda: ())():
+        own_schema = self.schema_registry.get(node.template.uid)
+        partner_ids = set(getattr(own_schema, "mutually_exclusive_with", ()))
+        for other_schema in getattr(self.schema_registry, "items", lambda: ())():
+            if node.template.uid.upper() in getattr(other_schema, "mutually_exclusive_with", ()):
+                partner_ids.add(other_schema.canonical_id)
+
+        for partner_id in sorted(partner_ids):
             key_roles = getattr(
                 self.schema_registry,
                 "mutual_exclusion_key",
                 lambda _left, _right: None,
-            )(node.template.uid, schema.canonical_id)
+            )(node.template.uid, partner_id)
             if not key_roles:
                 continue
-            for other in self.core.store.find_hypernodes_by_template(schema.canonical_id):
+            for other in self.core.store.find_hypernodes_by_template(partner_id):
                 if other.uid == node.uid:
                     continue
                 other_ref = self.core.ref(other.uid)
