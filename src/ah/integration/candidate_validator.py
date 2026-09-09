@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 from ah.model import ActantRole
-from ah.perception import ActDependencyKind, AssertionCandidate, AssertionStatus, PerceptionResult, PropositionExprCandidate
+from ah.perception import (
+    ActDependencyKind,
+    AssertionCandidate,
+    AssertionStatus,
+    PerceptionResult,
+    PropositionExprCandidate,
+    PropositionOperator,
+)
 
 from .errors import CandidateValidationError
 
@@ -135,6 +142,77 @@ class CandidateValidator:
                 raise CandidateValidationError(
                     f"Conditional assertion {candidate.local_id} is not referenced by a ConditionalCandidate"
                 )
+
+        # Top-level logical roots are source assertions of formulae, not extra
+        # facts layered on top of independently asserted leaf N nodes.  Validate the
+        # complete local topology before Integration decides which leaves must be
+        # canonicalized as scoped operands with occurrence_count=0.
+        formula_root_ids: set[str] = set()
+        seen_formula_members: set[str] = set()
+        conditional_endpoint_sets = {
+            frozenset((*item.antecedent_refs, *item.consequent_refs))
+            for item in result.conditionals
+        }
+        for index, root in enumerate(result.proposition_roots, start=1):
+            if root.local_id in formula_root_ids or root.local_id in act_refs:
+                raise CandidateValidationError(
+                    f"Duplicate logical root local_id: {root.local_id!r}"
+                )
+            formula_root_ids.add(root.local_id)
+            leaf_refs = tuple(root.expression.leaf_refs())
+            if not leaf_refs:
+                raise CandidateValidationError(
+                    f"Logical root {root.local_id!r} has no proposition leaves"
+                )
+            for ref in (*leaf_refs, *root.operator_source_refs):
+                if ref not in by_id:
+                    raise CandidateValidationError(
+                        f"Unknown logical formula ref {ref!r} in {root.local_id!r}"
+                    )
+                if ref in seen_formula_members:
+                    raise CandidateValidationError(
+                        f"Assertion {ref!r} participates in more than one top-level logical root"
+                    )
+                seen_formula_members.add(ref)
+
+            conditional_backed = (
+                root.expression.operator is PropositionOperator.IMPLIES
+                and frozenset(leaf_refs) in conditional_endpoint_sets
+                and not root.operator_source_refs
+            )
+            if conditional_backed:
+                if any(by_id[ref].status is not AssertionStatus.CONDITIONAL for ref in leaf_refs):
+                    raise CandidateValidationError(
+                        f"Conditional-backed logical root {root.local_id!r} must use CONDITIONAL leaves"
+                    )
+                continue
+
+            for ref in leaf_refs:
+                leaf = by_id[ref]
+                if leaf.quoted:
+                    raise CandidateValidationError(
+                        f"Top-level logical formula leaf {ref!r} cannot be quoted"
+                    )
+                if root.operator_source_refs:
+                    if leaf.status not in {AssertionStatus.ASSERTED, AssertionStatus.EMBEDDED}:
+                        raise CandidateValidationError(
+                            f"Logical wrapper leaf {ref!r} has incompatible scope {leaf.status.value}"
+                        )
+                elif leaf.status is not AssertionStatus.ASSERTED:
+                    raise CandidateValidationError(
+                        f"Top-level logical formula leaf {ref!r} must be ASSERTED"
+                    )
+
+            for ref in root.operator_source_refs:
+                source = by_id[ref]
+                if source.status is not AssertionStatus.ASSERTED or source.quoted:
+                    raise CandidateValidationError(
+                        f"Logical operator source {ref!r} must be an ordinary asserted matrix frame"
+                    )
+                if not any(actant.proposition is not None for actant in source.actants):
+                    raise CandidateValidationError(
+                        f"Logical operator source {ref!r} must structurally govern proposition content"
+                    )
 
         act_by_ref: dict[str, object] = dict(by_id)
         act_by_ref.update({item.local_id: item for item in result.queries if item.local_id is not None})
