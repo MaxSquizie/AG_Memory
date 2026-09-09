@@ -563,12 +563,14 @@ class PerceptionResult:
     relations: tuple[SituationRelationCandidate, ...] = ()
     act_relations: tuple[ActRelationCandidate, ...] = ()
     conditionals: tuple[ConditionalCandidate, ...] = ()
-    proposition_roots: tuple[PropositionRootCandidate, ...] = ()
     act_dependencies: tuple[ActDependencyCandidate, ...] = ()
     relation_hints: tuple[SituationRelationHintCandidate, ...] = ()
     # Runtime preprocessing diagnostics.  These are source-provenance decisions,
     # never canonical AH elements or authorization to write a fact.
     lexical_recovery: tuple[TokenCandidate, ...] = ()
+    # Keep this field last so legacy positional PerceptionResult construction
+    # preserves its historical argument layout.
+    proposition_roots: tuple[PropositionRootCandidate, ...] = ()
 
     @property
     def acts_count(self) -> int:
