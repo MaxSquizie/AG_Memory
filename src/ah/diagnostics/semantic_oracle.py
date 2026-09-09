@@ -831,6 +831,9 @@ def _match_canonical_assertions(
     snapshot: Mapping[str, Mapping[str, Any]],
     expected_assertions: Sequence[Mapping[str, Any]],
     expected_key_to_local: Mapping[str, str],
+    *,
+    formula_leaf_locals: frozenset[str] = frozenset(),
+    formula_operator_source_locals: frozenset[str] = frozenset(),
 ) -> dict[str, Mapping[str, Any]]:
     expected_by_key = {str(item.get("key") or f"a{i + 1}"): item for i, item in enumerate(expected_assertions)}
     expected_ref_map = _canonical_assertion_ref_map(record, expected_key_to_local)
@@ -839,11 +842,38 @@ def _match_canonical_assertions(
         if expected_status == "CONDITIONAL":
             continue
         prefix = f"canonical.assertions.{key}"
+        local_id = expected_key_to_local.get(key)
         ref = expected_ref_map.get(key)
+        if local_id in formula_operator_source_locals:
+            _check(
+                checks,
+                f"{prefix}.operator_source_not_integrated",
+                ref is None,
+                expected="linguistic logical operator only",
+                actual=ref,
+            )
+            continue
         _check(checks, f"{prefix}.integrated", ref is not None, expected=True, actual=ref is not None)
         if ref is None:
             continue
-        if expected_status == "EMBEDDED":
+        if local_id in formula_leaf_locals:
+            scoped_node = _scoped_member_node(snapshot, ref)
+            scoped_ok = bool(
+                scoped_node is not None
+                and scoped_node.get("meta", {}).get("semantic_scope") == "LOGICAL"
+            )
+            _check(
+                checks,
+                f"{prefix}.scoped",
+                scoped_ok,
+                expected="semantic_scope=LOGICAL",
+                actual=(
+                    scoped_node.get("meta", {}).get("semantic_scope")
+                    if scoped_node is not None
+                    else None
+                ),
+            )
+        elif expected_status == "EMBEDDED":
             scoped_node = _scoped_member_node(snapshot, ref)
             scoped_ok = bool(
                 scoped_node is not None
@@ -863,6 +893,11 @@ def _match_canonical_assertions(
         expected_negated = bool(expected.get("negated", False))
         item = snapshot.get(str(ref.get("uid", "")))
         actual_negated = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "NOT")
+        if local_id in formula_leaf_locals:
+            # Source-local NOT is represented in the proposition AST.  The leaf
+            # mapping deliberately points at the positive scoped N to avoid
+            # materializing NOT twice.
+            expected_negated = False
         if any("composition" in (target if isinstance(target, dict) else {}) and str((target if isinstance(target, dict) else {}).get("composition", {}).get("operator", "")).upper() == "OR" for target in (expected.get("roles", {}) or {}).values()):
             # An OR-valued assertion is lifted to g_OR over complete N propositions.
             actual_or = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "OR")
@@ -1440,7 +1475,28 @@ def evaluate_semantic_case(
         _match_integration(checks, record, after_snapshot, integration_expectation, expected_assertions, key_to_local)
 
         if str(record.get("status", "ERROR")) == "OK" and key_to_local:
-            _match_canonical_assertions(checks, record, after_snapshot, expected_assertions, key_to_local)
+            expected_roots = perception_expectation.get("proposition_roots", []) or []
+            formula_leaf_locals = frozenset(
+                key_to_local.get(key, "<missing>")
+                for root in expected_roots
+                if isinstance(root, dict)
+                for key in _expected_expr_keys(root.get("expr"))
+            )
+            formula_operator_source_locals = frozenset(
+                key_to_local.get(str(key), "<missing>")
+                for root in expected_roots
+                if isinstance(root, dict)
+                for key in root.get("operator_sources", []) or []
+            )
+            _match_canonical_assertions(
+                checks,
+                record,
+                after_snapshot,
+                expected_assertions,
+                key_to_local,
+                formula_leaf_locals=formula_leaf_locals,
+                formula_operator_source_locals=formula_operator_source_locals,
+            )
 
     touched_predicates = [] if unchecked else [str(item.get("predicate", "")) for item in expected_assertions]
     touched_predicates.extend(str(item.get("predicate", "")) for item in expected_queries)
