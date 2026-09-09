@@ -21,6 +21,13 @@ class AssociationStatus(str, Enum):
     RESOURCE_LIMIT = "RESOURCE_LIMIT"
 
 
+class AssociationSemantics(str, Enum):
+    """Whether the selected convergence depends on episodic H content."""
+
+    SEMANTIC = "SEMANTIC"
+    EPISODIC = "EPISODIC"
+
+
 class AssociationDomainPolicy(str, Enum):
     """Runtime policy for the still-open H-domain architecture decision.
 
@@ -116,6 +123,8 @@ class AssociationOutcome:
     ticks_executed: int
     trace: tuple[AssociationTraceEvent, ...]
     domain_policy: AssociationDomainPolicy
+    semantics: AssociationSemantics | None = None
+    minimal_fact_count: int | None = None
 
     @property
     def found(self) -> bool:
