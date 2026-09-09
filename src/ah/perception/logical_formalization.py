@@ -117,7 +117,6 @@ class LogicalFormBuilder:
                 parent.local_id in consumed
                 or parent.status is not AssertionStatus.ASSERTED
                 or parent.quoted
-                or not parent.negated
             ):
                 continue
             proposition_actants = [
@@ -130,6 +129,15 @@ class LogicalFormBuilder:
                 )
             ]
             if len(proposition_actants) != 1:
+                continue
+            # Open the semantic truth-operator probe only for a negated matrix or
+            # an impersonal/content-only matrix.  Ordinary attitude frames with an
+            # explicit experiencer/speaker remain outside this logical classifier.
+            # This is a structural gate, not a predicate-word list.
+            non_content_actants = [
+                item for item in parent.actants if item not in proposition_actants
+            ]
+            if not parent.negated and non_content_actants:
                 continue
             content_actant = proposition_actants[0]
             raw_content = (
