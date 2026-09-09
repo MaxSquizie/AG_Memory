@@ -3414,8 +3414,11 @@ class AdaptivePerceptionParser:
         seen: set[tuple[tuple[str, ...], tuple[str, ...]]] = set()
         clauses = list(graph.clauses)
         clause_index = {item.clause_id: i for i, item in enumerate(clauses)}
+        conditional_markers = {
+            "если", "только_если", "лишь_если", "если_только"
+        }
         for clause in clauses:
-            if clause.marker != "если" or clause.parent_clause_id is None:
+            if clause.marker not in conditional_markers or clause.parent_clause_id is None:
                 continue
             antecedent_ids: list[str] = list(clause_to_locals.get(clause.clause_id, ()))
             child_i = clause_index.get(clause.clause_id, -1)
@@ -3457,6 +3460,44 @@ class AdaptivePerceptionParser:
             consequent = tuple(dict.fromkeys(consequent_ids))
             if not antecedent or not consequent:
                 continue
+
+            # Plain "если" has the ordinary sufficient-condition orientation:
+            # subordinate -> matrix. Modified/correlative conditional shells can
+            # reverse necessity ("B only if A"), so ask one tiny semantic question
+            # only after Python has fixed the two proposition regions.
+            if clause.marker != "если":
+                subordinate_text = " | ".join(
+                    assertions[[item.local_id for item in assertions].index(ref)].evidence.text
+                    if assertions[[item.local_id for item in assertions].index(ref)].evidence is not None
+                    else ref
+                    for ref in antecedent
+                )
+                matrix_text = " | ".join(
+                    assertions[[item.local_id for item in assertions].index(ref)].evidence.text
+                    if assertions[[item.local_id for item in assertions].index(ref)].evidence is not None
+                    else ref
+                    for ref in consequent
+                )
+                prompt = (
+                    f"TEXT:\n{graph.text}\n"
+                    f"CONDITIONAL CONNECTIVE:\n{clause.connector_span.text if clause.connector_span is not None else clause.marker}\n"
+                    f"SUBORDINATE PROPOSITIONS:\n{subordinate_text}\n"
+                    f"MATRIX PROPOSITIONS:\n{matrix_text}\n"
+                    "CHOICES:\nSUBORDINATE_TO_MATRIX\nMATRIX_TO_SUBORDINATE\nUNCLEAR"
+                )
+                direction, _ = self._deep_semantic_choice_probe(
+                    "conditional_direction",
+                    prompt,
+                    ("SUBORDINATE_TO_MATRIX", "MATRIX_TO_SUBORDINATE", "UNCLEAR"),
+                )
+                if direction == "UNCLEAR":
+                    raise AdaptiveParseError(
+                        "conditional logical direction unresolved",
+                        tuple(self._traces),
+                    )
+                if direction == "MATRIX_TO_SUBORDINATE":
+                    antecedent, consequent = consequent, antecedent
+
             key = (antecedent, consequent)
             if key in seen:
                 continue
