@@ -20,6 +20,7 @@ from .morphology import (
     stable_transitivity,
 )
 from .event_normalizer import EventNormalizer
+from .logical_formalization import LogicalFormBuilder
 from .lexical_recovery import (
     LexicalRecovery,
     LexicalRecoveryStatus,
@@ -1237,6 +1238,23 @@ class AdaptivePerceptionParser:
             assertion_spans, query_spans, command_spans,
         )
 
+        proposition_roots = ()
+        logical_diagnostics: tuple[str, ...] = ()
+        if self._candidate_graph is not None and assertions:
+            logical = LogicalFormBuilder(
+                self._candidate_graph,
+                lambda stage, prompt, choices: self._deep_semantic_choice_probe(
+                    stage, prompt, choices
+                )[0],
+            ).build(
+                text,
+                tuple(assertions),
+                assertion_spans,
+                conditionals,
+            )
+            proposition_roots = logical.roots
+            logical_diagnostics = logical.diagnostics
+
         # Event normalization is a runtime perception boundary, not a canonical
         # write.  It can recover independently asserted gerund/result-state
         # situations and conservative FOLLOW edges from the already-built
@@ -1245,6 +1263,7 @@ class AdaptivePerceptionParser:
         event_diagnostics: tuple[str, ...] = (
             *participant_projection_diagnostics,
             *factivity_diagnostics,
+            *logical_diagnostics,
         )
         relation_hints = ()
         if self._candidate_graph is not None and assertions:
@@ -1297,6 +1316,7 @@ class AdaptivePerceptionParser:
             diagnostics=event_diagnostics,
             relations=relations,
             conditionals=conditionals,
+            proposition_roots=proposition_roots,
             act_dependencies=act_dependencies,
             relation_hints=relation_hints,
             lexical_recovery=lexical_decisions,
