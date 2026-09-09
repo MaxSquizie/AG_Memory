@@ -4207,22 +4207,72 @@ class AdaptivePerceptionParser:
                     op = PropositionOperator.OR if group.operator is CoordinationKind.OR else PropositionOperator.AND
                     return PropositionExprCandidate(op, members=tuple(PropositionExprCandidate.ref_expr(r) for r in members))
 
-            # Cross-clause coordination may not live in a single predicate group.
-            # Inspect only explicit coordinators between consecutive proposition
-            # spans; absent OR evidence defaults to conjunction of simultaneously
-            # present situation members.
-            sorted_refs = sorted(ordered_refs, key=lambda r: assertion_spans[r].start_index if assertion_spans.get(r) else 10**9)
-            saw_or = False
-            saw_and = False
+            # Cross-clause proposition content can mix AND and OR. Preserve
+            # every boundary relation first; only a genuinely mixed sequence needs
+            # a bounded scope choice. This prevents "A и B или C" from collapsing
+            # to flat AND merely because one additive coordinator is present.
+            sorted_refs = tuple(sorted(
+                ordered_refs,
+                key=lambda r: assertion_spans[r].start_index
+                if assertion_spans.get(r) else 10**9,
+            ))
+            relations: list[str] = []
             for left, right in zip(sorted_refs, sorted_refs[1:]):
                 ls, rs = assertion_spans.get(left), assertion_spans.get(right)
-                if ls is None or rs is None:
-                    continue
-                between = [t.text.casefold() for t in graph.tokens if ls.end_index < t.index < rs.start_index]
-                saw_or = saw_or or any(x in {"или", "либо"} for x in between)
-                saw_and = saw_and or any(x in {"и", "да"} for x in between)
-            op = PropositionOperator.OR if saw_or and not saw_and else PropositionOperator.AND
-            return PropositionExprCandidate(op, members=tuple(PropositionExprCandidate.ref_expr(r) for r in sorted_refs))
+                between = (
+                    [
+                        t.text.casefold()
+                        for t in graph.tokens
+                        if ls is not None
+                        and rs is not None
+                        and ls.end_index < t.index < rs.start_index
+                    ]
+                    if ls is not None and rs is not None
+                    else []
+                )
+                has_or = any(x in {"или", "либо"} for x in between)
+                has_and = any(
+                    x in {"и", "да", "а", "но", "однако"} for x in between
+                )
+                relations.append("OR" if has_or and not has_and else "AND")
+
+            atom_exprs = tuple(
+                PropositionExprCandidate.ref_expr(ref) for ref in sorted_refs
+            )
+            if len(set(relations)) == 1:
+                return PropositionExprCandidate(
+                    PropositionOperator(relations[0]),
+                    members=atom_exprs,
+                )
+
+            candidates = LogicalFormBuilder._scope_candidates(
+                atom_exprs, tuple(relations)
+            )
+            if not candidates or len(candidates) > LogicalFormBuilder._MAX_SCOPE_CHOICES:
+                raise AdaptiveParseError(
+                    "nested proposition logical scope has no bounded candidate set",
+                    tuple(self._traces),
+                )
+            labels = tuple(f"C{index}" for index in range(1, len(candidates) + 1))
+            prompt = (
+                f"TEXT:\n{graph.text}\n"
+                + "ATOMS:\n"
+                + "\n".join(sorted_refs)
+                + "\nCANDIDATE SCOPES:\n"
+                + "\n".join(
+                    f"{label}: {LogicalFormBuilder._render(expr)}"
+                    for label, expr in zip(labels, candidates)
+                )
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "logical_scope", prompt, (*labels, "UNCLEAR")
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "nested proposition logical scope unresolved",
+                    tuple(self._traces),
+                )
+            return candidates[labels.index(decision)]
 
         # Resolve clause-local linguistic dependencies before frame nesting.
         # Relative pronouns bind an antecedent entity into the child frame, while
