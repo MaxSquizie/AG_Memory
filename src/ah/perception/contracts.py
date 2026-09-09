@@ -83,6 +83,7 @@ class PropositionOperator(str, Enum):
     AND = "AND"
     OR = "OR"
     NOT = "NOT"
+    IMPLIES = "IMPLIES"
     FALSE = "FALSE"  # legacy runtime alias; canonical object negation is NOT
 
 
@@ -109,6 +110,10 @@ class PropositionExprCandidate:
             if len(self.members) != 1:
                 raise ValueError(f"{self.operator.value} proposition requires exactly one member")
             return
+        if self.operator is PropositionOperator.IMPLIES:
+            if len(self.members) != 2:
+                raise ValueError("IMPLIES proposition requires exactly two members")
+            return
         if len(self.members) < 2:
             raise ValueError(f"{self.operator.value} proposition requires at least two members")
 
@@ -124,6 +129,33 @@ class PropositionExprCandidate:
         for member in self.members:
             out.extend(member.leaf_refs())
         return tuple(dict.fromkeys(out))
+
+
+@dataclass(frozen=True, slots=True)
+class PropositionRootCandidate:
+    """One source-asserted top-level logical formula before canonical Integration.
+
+    expression references parser-local AssertionCandidate ids only. Leaf
+    propositions can therefore be canonicalized with zero ordinary occurrence
+    count, while the formula root itself receives the H assertion occurrence.
+    operator_source_refs records matrix frames consumed purely as linguistic
+    logical operators so they are not asserted as independent world facts.
+    """
+
+    local_id: str
+    expression: PropositionExprCandidate
+    evidence: EvidenceSpan | None = None
+    operator_source_refs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.local_id.strip():
+            raise ValueError("PropositionRootCandidate.local_id must be non-empty")
+        if self.expression.operator is PropositionOperator.REF:
+            raise ValueError("Top-level logical root cannot be a bare REF")
+        if any(not item.strip() for item in self.operator_source_refs):
+            raise ValueError("operator_source_refs must contain non-empty local ids")
+        if set(self.operator_source_refs) & set(self.expression.leaf_refs()):
+            raise ValueError("logical operator source cannot also be a formula leaf")
 
 
 class NominalRelationKind(str, Enum):
@@ -531,6 +563,7 @@ class PerceptionResult:
     relations: tuple[SituationRelationCandidate, ...] = ()
     act_relations: tuple[ActRelationCandidate, ...] = ()
     conditionals: tuple[ConditionalCandidate, ...] = ()
+    proposition_roots: tuple[PropositionRootCandidate, ...] = ()
     act_dependencies: tuple[ActDependencyCandidate, ...] = ()
     relation_hints: tuple[SituationRelationHintCandidate, ...] = ()
     # Runtime preprocessing diagnostics.  These are source-provenance decisions,
