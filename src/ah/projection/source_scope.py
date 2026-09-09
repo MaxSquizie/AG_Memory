@@ -5,11 +5,20 @@ from ah.ignition import IgnitionEngine
 from ah.integration.contracts import ActivationSeedRequest, SeedReason
 from ah.model import ActantRole, Domain, Group, Ref, RefKind
 
-from .contracts import SourceScope, SourceScopeActivation, SourceScopedContextResult
+from .contracts import (
+    SourceProjectionCursor,
+    SourceScope,
+    SourceScopeActivation,
+    SourceScopeSlice,
+    SourceScopedContextResult,
+)
 
 
 class SourceScopeNotFound(KeyError):
     pass
+
+
+_COHERENCE_RELATIONS = frozenset({"CAUSE", "FOLLOW", "BEFORE", "AFTER", "OVERLAP"})
 
 
 class SourceScopeResolver:
@@ -52,6 +61,57 @@ class SourceScopeResolver:
         experience_refs.sort(key=lambda ref: self.core.store.creation_sequence(ref.uid))
         return SourceScope(key, tuple(experience_refs), tuple(roots))
 
+    def slice(
+        self,
+        cursor: SourceProjectionCursor,
+        *,
+        max_primary_roots: int,
+    ) -> SourceScopeSlice:
+        """Return an index-bounded semantic slice without reading raw source text.
+
+        Cursor advancement counts only primary roots.  One-hop causal/temporal
+        neighbors from the same source are carried as overlap so relations that
+        cross a slice boundary remain representable without duplicating progress.
+        """
+        if max_primary_roots < 1:
+            raise ValueError("max_primary_roots must be >= 1")
+        full = self.resolve(cursor.source_ref)
+        start = cursor.next_index
+        if start > len(full.semantic_roots):
+            raise ValueError("source projection cursor is past end of source")
+        end = min(len(full.semantic_roots), start + max_primary_roots)
+        primary = full.semantic_roots[start:end]
+        primary_uids = {ref.uid for ref in primary}
+        source_by_uid = {ref.uid: ref for ref in full.semantic_roots}
+        overlap: dict[str, Ref] = {}
+        for ref in primary:
+            for link in (*self.core.store.outgoing_links(ref.uid), *self.core.store.incoming_links(ref.uid)):
+                if link.relation_id.upper() not in _COHERENCE_RELATIONS:
+                    continue
+                other = link.target if link.source.uid == ref.uid else link.source
+                if other.uid in primary_uids or other.uid not in source_by_uid:
+                    continue
+                overlap[other.uid] = source_by_uid[other.uid]
+        ordered_overlap = tuple(
+            sorted(overlap.values(), key=lambda ref: self.core.store.creation_sequence(ref.uid))
+        )
+        roots = tuple(
+            sorted(
+                (*primary, *ordered_overlap),
+                key=lambda ref: self.core.store.creation_sequence(ref.uid),
+            )
+        )
+        sliced_scope = SourceScope(full.source_ref, full.experience_refs, roots)
+        next_cursor = SourceProjectionCursor(full.source_ref, end)
+        return SourceScopeSlice(
+            scope=sliced_scope,
+            cursor=cursor,
+            next_cursor=next_cursor,
+            primary_refs=primary,
+            overlap_refs=ordered_overlap,
+            done=end >= len(full.semantic_roots),
+        )
+
     def _content_roots(self, ref: Ref) -> tuple[Ref, ...]:
         if ref.kind is not RefKind.K or not self.core.store.has_uid(ref.uid):
             return (ref,)
@@ -80,10 +140,11 @@ class SourceScopeActivator:
         self.ignition = ignition
         self.resolver = resolver or SourceScopeResolver(core)
 
-    def activate(self, source_ref: str, *, settle_ticks: int = 1) -> SourceScopeActivation:
+    def activate_scope(
+        self, scope: SourceScope, *, settle_ticks: int = 1
+    ) -> SourceScopeActivation:
         if settle_ticks < 1:
             raise ValueError("settle_ticks must be >= 1")
-        scope = self.resolver.resolve(source_ref)
         seedable = tuple(ref for ref in scope.semantic_roots if ref.kind is not RefKind.L)
         self.ignition.apply_seed_requests(
             tuple(ActivationSeedRequest(ref, SeedReason.QUERY_RECALL) for ref in seedable)
@@ -95,6 +156,11 @@ class SourceScopeActivator:
             seeded_refs=seedable,
             tick_count=settle_ticks,
             workspace_after=self.ignition.workspace_refs(),
+        )
+
+    def activate(self, source_ref: str, *, settle_ticks: int = 1) -> SourceScopeActivation:
+        return self.activate_scope(
+            self.resolver.resolve(source_ref), settle_ticks=settle_ticks
         )
 
 
@@ -131,6 +197,33 @@ class SourceScopedContextService:
             budget_tokens=budget_tokens,
         )
         return SourceScopedContextResult(activation, context)
+
+    def build_source_slice(
+        self,
+        current_input: str,
+        cursor: SourceProjectionCursor,
+        *,
+        max_primary_roots: int,
+        settle_ticks: int = 1,
+        inference_results=(),
+        unresolved_goal_diagnostics=(),
+        budget_tokens: int | None = None,
+    ) -> tuple[SourceScopeSlice, SourceScopedContextResult]:
+        """Project one bounded AH-only slice and return the next deterministic cursor."""
+        sliced = self.activator.resolver.slice(
+            cursor, max_primary_roots=max_primary_roots
+        )
+        activation = self.activator.activate_scope(
+            sliced.scope, settle_ticks=settle_ticks
+        )
+        context = self.projector.project_compact_source(
+            current_input,
+            sliced.scope,
+            tuple(inference_results),
+            tuple(unresolved_goal_diagnostics),
+            budget_tokens=budget_tokens,
+        )
+        return sliced, SourceScopedContextResult(activation, context)
 
     def build_complete_source(
         self,
