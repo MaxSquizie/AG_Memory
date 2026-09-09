@@ -261,6 +261,7 @@ class LinguisticCandidateBuilder:
         tokens = self._tokens(text)
         graph = self._build_from_tokens(text, tokens)
         if self.lexical_recovery is None:
+            self._emit_candidate_diagnostics(graph, lexical_pass=None)
             return graph
 
         # Bounded recurrent lexical recovery.  A first safe correction can expose a
@@ -270,6 +271,7 @@ class LinguisticCandidateBuilder:
         # covering the short dependency chains expected from ordinary typing noise.
         for _pass in range(4):
             decisions = self.lexical_recovery.recover(text, tokens, graph)
+            self._emit_lexical_diagnostics(decisions, lexical_pass=_pass + 1)
             by_index = {item.token_index: item for item in decisions}
             recovered: list[SourceToken] = []
             changed = False
@@ -299,7 +301,65 @@ class LinguisticCandidateBuilder:
             graph = self._build_from_tokens(text, tokens)
             if not changed:
                 break
+        self._emit_candidate_diagnostics(graph, lexical_pass=_pass + 1)
         return graph
+
+    @staticmethod
+    def _emit_lexical_diagnostics(decisions, *, lexical_pass: int) -> None:
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_lexical_recovery",
+            pass_index=lexical_pass,
+            tokens=[
+                {
+                    "index": item.token_index,
+                    "raw": item.raw_text,
+                    "normalized": item.normalized_text,
+                    "status": item.status.value,
+                    "alternatives": list(item.alternatives),
+                    "confidence": item.confidence,
+                    "reason": item.reason,
+                }
+                for item in decisions
+            ],
+        )
+
+    @staticmethod
+    def _emit_candidate_diagnostics(graph: LinguisticCandidateGraph, *, lexical_pass: int | None) -> None:
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_candidates",
+            lexical_pass=lexical_pass,
+            tokens=[
+                {
+                    "index": token.index,
+                    "raw": token.provenance_text,
+                    "text": token.text,
+                    "recovery": None if token.recovery is None else token.recovery.status.value,
+                }
+                for token in graph.tokens
+            ],
+            predicates=[
+                {
+                    "token_index": item.token_index,
+                    "lemma": getattr(item, "lemma", None),
+                }
+                for item in graph.predicates
+            ],
+            clauses=[
+                {
+                    "clause_id": item.clause_id,
+                    "start": item.span.start_index,
+                    "end": item.span.end_index,
+                    "ellipsis": None if item.ellipsis_kind is None else item.ellipsis_kind.value,
+                }
+                for item in graph.clauses
+            ],
+            coordination_count=len(graph.coordinations),
+            frame_dependency_count=len(graph.frame_graph.dependencies),
+        )
 
     def _build_from_tokens(
         self, text: str, tokens: tuple[SourceToken, ...]
