@@ -237,4 +237,5 @@ class IntegrationCommit:
     relations: tuple[IntegratedRelation, ...] = ()
     conditionals: tuple[IntegratedConditional, ...] = ()
     existentials: tuple[IntegratedExistential, ...] = ()
+    universals: tuple[IntegratedExistential, ...] = ()
     conflicts: tuple[IntegratedConflict, ...] = ()

@@ -1,1 +1,0 @@
-Return one complete TemplateCandidate for the shown predicate sense. The first non-empty line is the protocol answer: `SCHEMA: ROLE1,ROLE2,...` using only canonical role names from the prompt. Include the complete reusable valency schema, not only roles currently filled. Exclude generic event circumstances. Do not output canonical IDs.

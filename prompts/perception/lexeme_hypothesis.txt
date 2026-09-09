@@ -1,1 +1,0 @@
-Answer whether the shown candidate lemma is the lexical identity of TARGET in TEXT. Return exactly YES or NO.

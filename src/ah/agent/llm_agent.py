@@ -94,13 +94,20 @@ class LLMAgent:
         )
         raw = str(response.text).strip()
         cleaned, contaminated = self._sanitize(raw)
+        self._log_output_event(
+            "agent_sanitize",
+            stage="initial",
+            raw_text=raw,
+            cleaned_text=cleaned,
+            contaminated=contaminated,
+        )
         if cleaned and (not contaminated or self.settings.sanitize_context_echo):
             return cleaned
         if not self.settings.sanitize_context_echo:
             return raw
 
         last_raw = raw
-        for _ in range(self.settings.repair_attempts):
+        for attempt in range(1, self.settings.repair_attempts + 1):
             repaired = self.backend.generate(
                 self._repair_prompt(context, last_raw),
                 system=_AGENT_REPAIR_SYSTEM_PROMPT,
@@ -109,6 +116,13 @@ class LLMAgent:
             )
             last_raw = str(repaired.text).strip()
             cleaned, contaminated = self._sanitize(last_raw)
+            self._log_output_event(
+                "agent_repair",
+                attempt=attempt,
+                raw_text=last_raw,
+                cleaned_text=cleaned,
+                contaminated=contaminated,
+            )
             if cleaned:
                 return cleaned
 
@@ -203,6 +217,14 @@ class LLMAgent:
             + "\n\nReturn only the final assistant utterance. Do not repeat any memory/context sections."
         )
 
+    @staticmethod
+    def _log_output_event(kind: str, **payload: object) -> None:
+        """Write runtime diagnostics without coupling response semantics to logging."""
+
+        from ah.diagnostics.session_log import emit
+
+        emit(kind, **payload)
+
     def _system_prompt(self) -> str:
         path = self.settings.system_prompt_path
         if path is not None and path.is_file():
@@ -219,4 +241,3 @@ _DEFAULT_AGENT_PROMPT = """Ты — текстовый агент поверх �
 Не выполняй скрытый логический proof вместо reasoner-а и не объявляй неизвестное известным.
 Не повторяй секции CURRENT INPUT, ACTIVE MEMORY или INFERENCE RESULTS в ответе.
 """
-

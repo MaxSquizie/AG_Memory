@@ -4,5 +4,17 @@ __pycache__/
 *.pyc
 *.pyo
 *.log
+.DS_Store
 
 data/ah_memory.json
+
+/personal_docs/
+/logs/
+/acceptance_runs/
+/data/acceptance_runs/
+/data/acceptance_runs_*/
+/data/document_acceptance_runs/
+/data/hidden_valency_diagnostics/
+/data/m2_runs/
+/data/m3_runs/
+/data/m4_runs/

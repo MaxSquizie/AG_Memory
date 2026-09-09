@@ -106,6 +106,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="run committee-shape GC check: 200 injected orphans, <=50 ticks, 100%% live preservation",
     )
     sub.add_parser(
+        "m4-acceptance",
+        help="run AH vs Vanilla RAG benchmark (M4) on the document corpus",
+    )
+    sub.add_parser(
         "tick-benchmark",
         help="benchmark Ignition ticks on a fixture with >=1000 N+L graph units",
     )
@@ -140,8 +144,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "m3-acceptance":
         from ah.diagnostics import run_m3_gc_acceptance
 
-        report = run_m3_gc_acceptance(cfg)
+        report = run_m3_gc_acceptance(cfg, data_dir=cfg.paths.data_dir)
         print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        if report.output_dir:
+            print(f"bundle: {report.output_dir}")
+        return 0 if report.passed else 1
+    if args.command == "m4-acceptance":
+        from ah.diagnostics import run_m4_acceptance
+
+        report = run_m4_acceptance(cfg)
+        print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        if report.output_dir:
+            print(f"bundle: {report.output_dir}")
         return 0 if report.passed else 1
     if args.command == "tick-benchmark":
         from ah.diagnostics import run_tick_benchmark

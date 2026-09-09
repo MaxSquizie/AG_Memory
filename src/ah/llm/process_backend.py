@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from queue import Empty, Queue
 from threading import Event, Lock, Thread
-from typing import Any
+from typing import Any, Sequence
 import json
 import os
 import subprocess
@@ -397,6 +397,11 @@ class LocalLLMProcessBackend:
     def restart(self) -> None:
         self.stop()
         self.start()
+
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        raise RuntimeError(
+            "builtin_process does not provide embeddings; M4 requires ollama or lmstudio"
+        )
 
     def generate(
         self,

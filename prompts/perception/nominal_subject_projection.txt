@@ -1,1 +1,0 @@
-Choose one C-label only if the whole nominal clause supports that noun as a shorthand class/identity of SUBJECT. A name/title/label may support the class of what it names. Do not choose a noun merely because it is a possessor, location, material, source, or related participant. Choose NONE if no candidate is licensed. Return one label only.

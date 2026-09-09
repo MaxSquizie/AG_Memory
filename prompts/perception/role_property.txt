@@ -1,1 +1,0 @@
-Choose exactly one label from CHOICES. Decide only whether PROPERTY applies to TARGET in this sentence. Return only YES or NO.

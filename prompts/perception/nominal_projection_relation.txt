@@ -1,1 +1,0 @@
-Classify only the semantic relation expressed by this nominal clause. Return exactly one label: LABELS_COMPLEMENT, OTHER_RELATION, or UNCLEAR. Use LABELS_COMPLEMENT only when SUBJECT is the name/title/label/identifier/designation of the thing described by a complement. Use OTHER_RELATION for any other nominal relation. Do not infer world knowledge.

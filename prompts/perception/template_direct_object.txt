@@ -1,1 +1,0 @@
-Choose exactly one label from CHOICES. Answer only the Russian direct-object grammar question. Do not explain.

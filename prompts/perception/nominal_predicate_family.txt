@@ -1,1 +1,0 @@
-Classify only TARGET NOMINAL PREDICATE in this clause. Return exactly LABEL_IDENTIFIER, OTHER_NOMINAL, or UNCLEAR. LABEL_IDENTIFIER means the predicate itself is used as a name, title, label, identifier, designation, or alias for a complement. OTHER_NOMINAL means any other nominal sense. Do not infer the final assertion or world knowledge.

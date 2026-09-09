@@ -72,8 +72,10 @@ class LLMConfig:
     backend: str = "builtin_process"
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = ""
+    ollama_embed_model: str = ""
     lmstudio_base_url: str = "http://127.0.0.1:1234"
     lmstudio_model: str = ""
+    lmstudio_embed_model: str = ""
     lmstudio_api_key: str = ""
     loader_type: str = "auto"
     device_map: str = "auto"
@@ -144,6 +146,14 @@ class LLMConfig:
             raise ValueError("llm.ollama_base_url must not be empty")
         if not str(self.lmstudio_base_url).strip():
             raise ValueError("llm.lmstudio_base_url must not be empty")
+
+    def embedding_model_name(self) -> str:
+        backend = self.backend.strip().lower()
+        if backend == "ollama":
+            return (self.ollama_embed_model or self.ollama_model).strip()
+        if backend == "lmstudio":
+            return (self.lmstudio_embed_model or self.lmstudio_model).strip()
+        return ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -488,8 +498,10 @@ def load_config(path: str | Path) -> AppConfig:
         backend=str(llm_raw.get("backend", "builtin_process")),
         ollama_base_url=str(llm_raw.get("ollama_base_url", "http://127.0.0.1:11434")),
         ollama_model=str(llm_raw.get("ollama_model", "")),
+        ollama_embed_model=str(llm_raw.get("ollama_embed_model", "")),
         lmstudio_base_url=str(llm_raw.get("lmstudio_base_url", "http://127.0.0.1:1234")),
         lmstudio_model=str(llm_raw.get("lmstudio_model", "")),
+        lmstudio_embed_model=str(llm_raw.get("lmstudio_embed_model", "")),
         lmstudio_api_key=str(llm_raw.get("lmstudio_api_key", "")),
         loader_type=str(llm_raw.get("loader_type", "auto")),
         device_map=str(llm_raw.get("device_map", "auto")),
@@ -683,3 +695,20 @@ def load_config(path: str | Path) -> AppConfig:
             parse_agent_response_to_h=bool(orchestrator_raw.get("parse_agent_response_to_h", False)),
         ),
     )
+
+
+def validate_app_config(config: AppConfig) -> AppConfig:
+    """Validate backend/path combinations that one TOML section cannot check alone."""
+
+    if not config.llm.enabled:
+        return config
+    backend = config.llm.backend.strip().lower()
+    if backend == "builtin_process" and config.paths.llm_model_dir is None:
+        raise ValueError(
+            "paths.llm_model_dir is required when llm.backend is builtin_process"
+        )
+    if backend == "ollama" and not config.llm.ollama_model.strip():
+        raise ValueError("llm.ollama_model is required when llm.backend is ollama")
+    # LM Studio may intentionally omit lmstudio_model when exactly one model is
+    # loaded; LMStudioBackend performs that deterministic discovery at startup.
+    return config

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Sequence
 import json
 import urllib.error
 import urllib.request
@@ -64,6 +64,42 @@ class OllamaClient:
         if options:
             body["options"] = options
         return self._request("POST", "/api/generate", body)
+
+    @staticmethod
+    def embed_request_body(*, model: str, texts: Sequence[str]) -> dict[str, Any]:
+        inputs = [str(item) for item in texts]
+        if not str(model or "").strip():
+            raise OllamaClientError("Ollama embed request requires a model")
+        if not inputs:
+            raise OllamaClientError("Ollama embed request requires at least one input")
+        return {"model": str(model).strip(), "input": inputs}
+
+    @staticmethod
+    def parse_embed_response(data: dict[str, Any]) -> list[list[float]]:
+        raw = data.get("embeddings")
+        if raw is None and isinstance(data.get("embedding"), list):
+            raw = [data.get("embedding")]
+        if not isinstance(raw, list) or not raw:
+            raise OllamaClientError("Ollama embed response missing embeddings")
+        vectors: list[list[float]] = []
+        for item in raw:
+            if not isinstance(item, list) or not item:
+                raise OllamaClientError("Ollama embed response contained an empty vector")
+            try:
+                vectors.append([float(value) for value in item])
+            except (TypeError, ValueError) as exc:
+                raise OllamaClientError("Ollama embed response contained a non-numeric vector") from exc
+        return vectors
+
+    def embed(self, *, model: str, texts: Sequence[str]) -> list[list[float]]:
+        body = self.embed_request_body(model=model, texts=texts)
+        data = self._request("POST", "/api/embed", body)
+        vectors = self.parse_embed_response(data)
+        if len(vectors) != len(body["input"]):
+            raise OllamaClientError(
+                f"Ollama embed returned {len(vectors)} vectors for {len(body['input'])} inputs"
+            )
+        return vectors
 
     @staticmethod
     def mean_logprob(data: dict[str, Any]) -> float:

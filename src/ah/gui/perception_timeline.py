@@ -16,7 +16,7 @@ def pretty_json(value) -> str:
 def perception_call_phase(diag) -> str:
     roles = {attempt.role for attempt in diag.attempts}
     if roles <= {"template_sense"}:
-        return "post-parse lexical template sense"
+        return "post-parse: lexical template sense (orchestrator)"
     if roles <= {"clarification_answer"}:
         return "clarification answer interpretation"
     if roles <= {"perception", "perception_repair"}:
@@ -52,6 +52,8 @@ def format_parser_raw_history(history, *, turn_source_text: str = "") -> str:
                 parts.append(f"\nWHY IT FAILED: {attempt.error}")
         if diag.final_error:
             parts.append(f"\nCALL FINAL ERROR: {diag.final_error}")
+    final_status = "FAILED" if any(diag.final_error for diag in history) else "OK"
+    parts.append(f"\nTURN PERCEPTION STATUS: {final_status}")
     return "\n".join(parts)
 
 
@@ -62,9 +64,9 @@ def format_parser_decoded_history(history):
             "sequence": diag.sequence,
             "phase": perception_call_phase(diag),
             "source_text": diag.source_text,
-            "status": "INVALID" if diag.final_error else "OK",
+            "status": "FAILED" if diag.final_error else "OK",
             "error": diag.final_error,
             "perception": None if diag.decoded is None else asdict(diag.decoded),
         }
         calls.append(item)
-    return {"calls": calls, "status": "INVALID" if any(d.final_error for d in history) else "OK"}
+    return {"calls": calls, "status": "FAILED" if any(d.final_error for d in history) else "OK"}

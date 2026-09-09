@@ -1,1 +1,0 @@
-Choose exactly one label from CHOICES. Decide only whether PARTICIPANT is the receiver/addressee/target of the PARENT action after CONTENT is already known. Return only RECIPIENT or NOT_RECIPIENT. Do not explain.

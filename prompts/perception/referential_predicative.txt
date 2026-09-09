@@ -1,1 +1,0 @@
-Choose REFERENTIAL when TARGET names/refers to what the copular complement describes. Choose PREDICATIVE when TARGET itself supplies the description. Choose UNCLEAR only if the sentence does not decide. Return exactly one label.

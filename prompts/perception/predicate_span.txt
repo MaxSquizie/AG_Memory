@@ -1,1 +1,0 @@
-Choose the main predicate in TOKENS. Reply only N, N-M, IMPLICIT, or NONE.

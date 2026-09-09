@@ -1,1 +1,0 @@
-Choose exactly one label from CHOICES. Decide only the structure of COMBINED PHRASE in this sentence. Return only A or B.

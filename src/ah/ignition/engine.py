@@ -48,6 +48,7 @@ class TickResult:
     lifecycle: LifecycleTickResult | None = None
     gc: GCResult | None = None
     propagations: tuple[PropagationEvent, ...] = ()
+    pacemaker_targets: tuple[str, ...] = ()
 
 
 class IgnitionEngine:
@@ -345,6 +346,7 @@ class IgnitionEngine:
         # Pacemaker is an internal stimulus scheduled on the same tick clock. It is
         # explicitly marked so h_N does not mistake it for external confirmation.
         workspace_before = self._workspace_refs_locked()
+        pacemaker_targets: list[str] = []
         if include_pacemaker:
             for pulse in self.pacemaker.pulses_for_tick(workspace_before):
                 incoming[pulse.ref.uid] = incoming.get(pulse.ref.uid, 0.0) + pulse.amount
@@ -352,6 +354,7 @@ class IgnitionEngine:
                     pacemaker_incoming.get(pulse.ref.uid, 0.0) + pulse.amount
                 )
                 seed_reasons_mut.setdefault(pulse.ref.uid, []).append(SeedReason.PACEMAKER)
+                pacemaker_targets.append(pulse.ref.uid)
 
         seed_reasons = {uid: tuple(values) for uid, values in seed_reasons_mut.items()}
         refutations = set(self._pending_refutations)
@@ -474,7 +477,10 @@ class IgnitionEngine:
                 if after.decay_origin_excitation <= 0:
                     after.decay_origin_excitation = decay_origin
 
-            if after.excitation > eps and excitation_is_pacemaker_only:
+            if after.excitation > eps and (
+                excitation_is_pacemaker_only
+                or (semantic_z <= eps and before_pacemaker_only and not reset_epoch)
+            ):
                 next_pacemaker_only_excitation.add(uid)
 
         # PHASE 3 — this tick's f output propagates only into next tick's buffer.
@@ -658,7 +664,13 @@ class IgnitionEngine:
             activation_uids=activation_uids - pacemaker_only_activation_uids,
             seed_reasons=seed_reasons,
         )
-        gc_result = self.gc.collect(lifecycle_result.expired_candidates, tick=tick)
+        gc_result = self.gc.collect(
+            lifecycle_result.expired_candidates,
+            tick=tick,
+            pacemaker_only_uids=next_pacemaker_only_excitation,
+            workspace_threshold=self.workspace_settings.threshold,
+            epsilon=eps,
+        )
 
         self._active_uids = {
             uid for uid in self._active_uids if self.core.store.has_uid(uid)
@@ -699,6 +711,7 @@ class IgnitionEngine:
             lifecycle=lifecycle_result,
             gc=gc_result,
             propagations=tuple(propagations),
+            pacemaker_targets=tuple(sorted(set(pacemaker_targets))),
         )
         self.tick_index += 1
         self.core.store.set_lifetime_clock(self.tick_index)
