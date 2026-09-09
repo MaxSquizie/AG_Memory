@@ -228,6 +228,12 @@ _COMPOUND_SUBORDINATORS: dict[tuple[str, ...], str | None] = {
     ("потому", "что"): None,
     ("так", "как"): None,
     ("для", "того", "чтобы"): None,
+    # Conditional particles form one structural connective span. Their logical
+    # direction is intentionally NOT encoded here; Perception resolves that later
+    # from the already bounded subordinate/matrix pair.
+    ("только", "если"): None,
+    ("лишь", "если"): None,
+    ("если", "только"): None,
 }
 _SUBORDINATOR_MARKERS = frozenset(_SUBORDINATORS) | frozenset("_".join(parts) for parts in _COMPOUND_SUBORDINATORS)
 _RELATIVE_PREFIXES = ("котор",)
