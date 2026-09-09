@@ -89,6 +89,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="data/acceptance_oracle_m1_adversarial.json",
         help="semantic oracle JSON aligned with --cases",
     )
+    semantic.add_argument(
+        "--runs-dirname",
+        default="acceptance_runs_m1_adversarial",
+        help="output directory name under the configured data directory",
+    )
     sub.add_parser(
         "m2-acceptance",
         help=(
@@ -173,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
             services,
             cases_file=Path(args.cases),
             oracle_file=Path(args.oracle),
-            runs_dirname="acceptance_runs_m1_adversarial",
+            runs_dirname=str(args.runs_dirname),
         )
         print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
         return 0 if result.semantic_failed == 0 and result.failed == 0 else 1
