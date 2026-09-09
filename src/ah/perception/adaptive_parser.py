@@ -10110,6 +10110,28 @@ class AdaptivePerceptionParser:
         }
         return bool(indices) and indices <= self._transition_cue_token_indices
 
+    @staticmethod
+    def _emit_probe_diagnostic(
+        stage: str,
+        *,
+        role: str,
+        raw: str,
+        normalized: str | None,
+        retry_index: int,
+        error: str | None,
+    ) -> None:
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_probe",
+            stage=stage,
+            role=role,
+            raw=raw,
+            normalized=normalized,
+            retry_index=retry_index,
+            error=error,
+        )
+
     def _exact_choice_probe(
         self,
         stage: str,
@@ -10138,16 +10160,22 @@ class AdaptivePerceptionParser:
         raw = response.text.strip()
         label = raw.upper()
         if label not in choices:
+            error = f"expected exactly one of: {', '.join(choices)}"
             self._traces.append(
-                ProbeTrace(
-                    stage, user_prompt, raw, None, 0,
-                    f"expected exactly one of: {', '.join(choices)}",
-                )
+                ProbeTrace(stage, user_prompt, raw, None, 0, error)
+            )
+            self._emit_probe_diagnostic(
+                stage, role=f"perception_{stage}", raw=raw,
+                normalized=None, retry_index=0, error=error,
             )
             raise AdaptiveParseError(
                 f"{stage} expected exactly one of: {', '.join(choices)}"
             )
         self._traces.append(ProbeTrace(stage, user_prompt, raw, label, 0, None))
+        self._emit_probe_diagnostic(
+            stage, role=f"perception_{stage}", raw=raw,
+            normalized=label, retry_index=0, error=None,
+        )
         return label, float("inf")
 
     def _deep_semantic_choice_probe(
@@ -10195,10 +10223,18 @@ class AdaptivePerceptionParser:
             self._traces.append(
                 ProbeTrace(stage, user_prompt, raw, None, 0, error)
             )
+            self._emit_probe_diagnostic(
+                stage, role=f"semantic_{stage}", raw=raw,
+                normalized=None, retry_index=0, error=error,
+            )
             if optional:
                 return None, float("inf")
             raise AdaptiveParseError(f"{stage} {error}")
         self._traces.append(ProbeTrace(stage, user_prompt, raw, label, 0, None))
+        self._emit_probe_diagnostic(
+            stage, role=f"semantic_{stage}", raw=raw,
+            normalized=label, retry_index=0, error=None,
+        )
         return label, float("inf")
 
     def _probe(
@@ -10232,10 +10268,18 @@ class AdaptivePerceptionParser:
                 self._traces.append(
                     ProbeTrace(stage, user_prompt, raw, None, retry_index, last_error)
                 )
+                self._emit_probe_diagnostic(
+                    stage, role=f"perception_{stage}", raw=raw,
+                    normalized=None, retry_index=retry_index, error=last_error,
+                )
                 continue
             normalized = self._display_answer(value)
             self._traces.append(
                 ProbeTrace(stage, user_prompt, raw, normalized, retry_index, None)
+            )
+            self._emit_probe_diagnostic(
+                stage, role=f"perception_{stage}", raw=raw,
+                normalized=normalized, retry_index=retry_index, error=None,
             )
             return value
         raise AdaptiveParseError(
