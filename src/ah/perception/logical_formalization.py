@@ -121,12 +121,22 @@ class LogicalFormBuilder:
             ):
                 continue
             proposition_actants = [
-                item for item in parent.actants if item.proposition is not None
+                item
+                for item in parent.actants
+                if item.proposition is not None
+                or (
+                    item.candidate_ref is not None
+                    and item.candidate_ref in by_id
+                )
             ]
             if len(proposition_actants) != 1:
                 continue
-            raw_content = proposition_actants[0].proposition
-            assert raw_content is not None
+            content_actant = proposition_actants[0]
+            raw_content = (
+                content_actant.proposition
+                if content_actant.proposition is not None
+                else PropositionExprCandidate.ref_expr(content_actant.candidate_ref or "")
+            )
             content = self._with_leaf_negations(raw_content, by_id)
             content_refs = content.leaf_refs()
             if not content_refs or any(ref not in by_id for ref in content_refs):
