@@ -497,6 +497,107 @@ def _match_relation_hints(
     )
 
 
+def _normalize_actual_proposition_expr(expr: Mapping[str, Any]) -> Any:
+    operator = str(expr.get("operator", "")).upper()
+    if operator == "REF":
+        return ("REF", str(expr.get("ref", "")))
+    if operator == "FALSE":
+        operator = "NOT"
+    members = tuple(
+        _normalize_actual_proposition_expr(item)
+        for item in expr.get("members", []) or []
+        if isinstance(item, dict)
+    )
+    return (operator, members)
+
+
+def _normalize_expected_proposition_expr(
+    expr: Any,
+    key_to_local: Mapping[str, str],
+) -> Any:
+    if isinstance(expr, str):
+        return ("REF", key_to_local.get(expr, "<missing>"))
+    if not isinstance(expr, dict):
+        return ("<invalid>", repr(expr))
+    if "ref" in expr and "op" not in expr and "operator" not in expr:
+        return ("REF", key_to_local.get(str(expr.get("ref", "")), "<missing>"))
+    operator = str(expr.get("op", expr.get("operator", ""))).upper()
+    if operator == "FALSE":
+        operator = "NOT"
+    members_raw = expr.get("args", expr.get("members", [])) or []
+    return (
+        operator,
+        tuple(
+            _normalize_expected_proposition_expr(item, key_to_local)
+            for item in members_raw
+        ),
+    )
+
+
+def _expected_expr_keys(expr: Any) -> tuple[str, ...]:
+    if isinstance(expr, str):
+        return (expr,)
+    if not isinstance(expr, dict):
+        return ()
+    if "ref" in expr and "op" not in expr and "operator" not in expr:
+        value = str(expr.get("ref", ""))
+        return (value,) if value else ()
+    out: list[str] = []
+    for item in expr.get("args", expr.get("members", [])) or []:
+        out.extend(_expected_expr_keys(item))
+    return tuple(dict.fromkeys(key for key in out if key))
+
+
+def _match_proposition_roots(
+    checks: list[dict[str, Any]],
+    actual_roots: Sequence[Mapping[str, Any]],
+    expected_roots: Sequence[Mapping[str, Any]],
+    key_to_local: Mapping[str, str],
+) -> None:
+    _check(
+        checks,
+        "perception.proposition_root_count",
+        len(actual_roots) == len(expected_roots),
+        expected=len(expected_roots),
+        actual=len(actual_roots),
+    )
+    for index, expected in enumerate(expected_roots):
+        if index >= len(actual_roots):
+            break
+        actual = actual_roots[index]
+        prefix = f"perception.proposition_roots.f{index + 1}"
+        actual_expr = actual.get("expression")
+        normalized_actual = (
+            _normalize_actual_proposition_expr(actual_expr)
+            if isinstance(actual_expr, dict)
+            else ("<missing>",)
+        )
+        normalized_expected = _normalize_expected_proposition_expr(
+            expected.get("expr"), key_to_local
+        )
+        _check(
+            checks,
+            f"{prefix}.expr",
+            normalized_actual == normalized_expected,
+            expected=normalized_expected,
+            actual=normalized_actual,
+        )
+        actual_sources = tuple(
+            str(item) for item in actual.get("operator_source_refs", []) or []
+        )
+        expected_sources = tuple(
+            key_to_local.get(str(item), "<missing>")
+            for item in expected.get("operator_sources", []) or []
+        )
+        _check(
+            checks,
+            f"{prefix}.operator_sources",
+            actual_sources == expected_sources,
+            expected=expected_sources,
+            actual=actual_sources,
+        )
+
+
 def _match_conditionals(
     checks: list[dict[str, Any]],
     actual_conditionals: Sequence[Mapping[str, Any]],
