@@ -507,7 +507,7 @@ class AgentOrchestrator:
         emit_pipeline_event(
             "pipeline_sensory",
             source="USER",
-            symbol_candidates=[ref.uid for ref in sensory.symbol_candidates],
+            symbol_candidates=[ref.uid for ref in sensory.symbol_refs],
             activation_seeds=[
                 {"uid": item.ref.uid, "reason": item.reason.value}
                 for item in sensory.activation_seeds
