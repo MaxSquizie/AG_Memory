@@ -83,6 +83,7 @@ class SourceScopeResolver:
         primary = full.semantic_roots[start:end]
         primary_uids = {ref.uid for ref in primary}
         source_by_uid = {ref.uid: ref for ref in full.semantic_roots}
+        source_index = {ref.uid: index for index, ref in enumerate(full.semantic_roots)}
         overlap: dict[str, Ref] = {}
         for ref in primary:
             for link in (*self.core.store.outgoing_links(ref.uid), *self.core.store.incoming_links(ref.uid)):
@@ -90,6 +91,10 @@ class SourceScopeResolver:
                     continue
                 other = link.target if link.source.uid == ref.uid else link.source
                 if other.uid in primary_uids or other.uid not in source_by_uid:
+                    continue
+                # Cursor slices may carry already-seen semantic context forward,
+                # but must not expose future roots before their primary turn.
+                if source_index[other.uid] >= start:
                     continue
                 overlap[other.uid] = source_by_uid[other.uid]
         ordered_overlap = tuple(
