@@ -1469,13 +1469,27 @@ def evaluate_semantic_case(
                 key_to_local,
             )
 
+    coverage_assertions = expected_assertions
     if not unchecked:
-        _update_required_template_roles(required_template_roles, expected_assertions, expected_queries)
+        expected_roots = perception_expectation.get("proposition_roots", []) or []
+        operator_source_keys = {
+            str(key)
+            for root in expected_roots
+            if isinstance(root, dict)
+            for key in root.get("operator_sources", []) or []
+        }
+        coverage_assertions = [
+            item
+            for index, item in enumerate(expected_assertions)
+            if str(item.get("key") or f"a{index + 1}") not in operator_source_keys
+        ]
+        _update_required_template_roles(
+            required_template_roles, coverage_assertions, expected_queries
+        )
         integration_expectation = expected.get("integration", {}) or {}
         _match_integration(checks, record, after_snapshot, integration_expectation, expected_assertions, key_to_local)
 
         if str(record.get("status", "ERROR")) == "OK" and key_to_local:
-            expected_roots = perception_expectation.get("proposition_roots", []) or []
             formula_leaf_locals = frozenset(
                 key_to_local.get(key, "<missing>")
                 for root in expected_roots
@@ -1498,7 +1512,9 @@ def evaluate_semantic_case(
                 formula_operator_source_locals=formula_operator_source_locals,
             )
 
-    touched_predicates = [] if unchecked else [str(item.get("predicate", "")) for item in expected_assertions]
+    touched_predicates = [] if unchecked else [
+        str(item.get("predicate", "")) for item in coverage_assertions
+    ]
     touched_predicates.extend(str(item.get("predicate", "")) for item in expected_queries)
     if oracle_case.grade == "EXACT" and str(record.get("status", "ERROR")) == "OK":
         _check_template_coverage(checks, after_snapshot, required_template_roles, touched_predicates)
