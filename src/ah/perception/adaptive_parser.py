@@ -3446,7 +3446,7 @@ class AdaptivePerceptionParser:
                         break
                     if sibling.parent_clause_id is not None:
                         break
-                    if sibling.marker.casefold() not in {
+                    if (sibling.marker or "").casefold() not in {
                         "и", "да", "или", "либо", "а", "но", "однако"
                     }:
                         break
