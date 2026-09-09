@@ -1207,6 +1207,16 @@ def _match_integration(
     if isinstance(expected_conditionals, list):
         _match_integrated_conditionals(checks, snapshot, commit, expected_conditionals)
 
+    expected_formulas = integration_expectation.get("formulas")
+    if isinstance(expected_formulas, list):
+        _match_integrated_formulas(
+            checks,
+            snapshot,
+            commit,
+            expected_formulas,
+            expected_key_to_local,
+        )
+
     clarification = integration_expectation.get("clarification")
     if isinstance(clarification, dict):
         expected_required = bool(clarification.get("required", False))
@@ -1400,6 +1410,17 @@ def evaluate_semantic_case(
             perception_expectation.get("conditionals", []) or [],
             key_to_local,
         )
+        if "proposition_roots" in perception_expectation:
+            _match_proposition_roots(
+                checks,
+                [
+                    item
+                    for item in actual_perception.get("proposition_roots", []) or []
+                    if isinstance(item, dict)
+                ],
+                perception_expectation.get("proposition_roots", []) or [],
+                key_to_local,
+            )
         # Relation hints are deliberately runtime-only, weaker-than-canonical
         # diagnostics (for example CAUSAL_CANDIDATE from narrative adjacency).
         # Legacy/exact semantic oracles that do not mention this channel must not
