@@ -300,6 +300,31 @@ def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and(
     assert built_or[0].goal is None
     assert built_or[0].diagnostics == ("semantic:OR_goal_not_supported",)
 
+    xor_expr = PropositionExprCandidate(
+        PropositionOperator.XOR,
+        members=(
+            PropositionExprCandidate.ref_expr("A1"),
+            PropositionExprCandidate.ref_expr("A2"),
+        ),
+    )
+    raw_xor = PerceptionResult(
+        source_text="request exactly one",
+        assertions=assertions,
+        commands=(_command(proposition=xor_expr),),
+        act_dependencies=raw.act_dependencies,
+        act_relations=relations,
+    )
+    perception_xor = apply_speech_act_scoping(raw_xor)
+    commit_xor = integration.integrate_external(perception_xor, context)
+    built_xor = SemanticGoalCompiler(core).build(
+        commit_xor, context, perception_xor
+    )
+    assert len(built_xor) == 1
+    assert built_xor[0].goal is None
+    assert built_xor[0].diagnostics == (
+        "semantic:XOR_goal_not_supported",
+    )
+
 
 def test_goal_semantic_service_adds_typed_relation_from_bounded_classifier():
     from ah.perception import GoalSemanticService

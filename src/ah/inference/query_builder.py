@@ -222,12 +222,12 @@ class SemanticGoalCompiler:
         return False
 
     @staticmethod
-    def _has_explicit_or(
+    def _has_explicit_alternative(
         expressions: tuple[PropositionExprCandidate, ...], target_ids: set[str]
     ) -> bool:
         for expr in expressions:
             if (
-                expr.operator is PropositionOperator.OR
+                expr.operator in {PropositionOperator.OR, PropositionOperator.XOR}
                 and set(expr.leaf_refs()) == target_ids
             ):
                 return True
@@ -413,11 +413,22 @@ class SemanticGoalCompiler:
             return []
 
         expressions = self._root_expressions(root)
-        if self._has_explicit_or(expressions, target_ids):
+        if self._has_explicit_alternative(expressions, target_ids):
+            operator = next(
+                (
+                    expr.operator.value
+                    for expr in expressions
+                    if expr.operator in {
+                        PropositionOperator.OR, PropositionOperator.XOR
+                    }
+                    and set(expr.leaf_refs()) == target_ids
+                ),
+                "ALTERNATIVE",
+            )
             return [
                 QueryBuildResult(
                     None,
-                    ("semantic:OR_goal_not_supported",),
+                    (f"semantic:{operator}_goal_not_supported",),
                 )
             ]
         explicit_and = self._has_explicit_and(expressions, target_ids)
