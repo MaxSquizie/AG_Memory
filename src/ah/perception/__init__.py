@@ -42,6 +42,8 @@ from .llm_parser import (
 )
 from .association_semantics import (
     AssociationLLMPerceptionService as LLMPerceptionService,
+    AssociationActRelationCandidate,
+    AssociationEndpointSelector,
     AssociationQueryDecision,
     AssociationSemanticClassifier,
 )
@@ -93,6 +95,8 @@ __all__ = [
     "PerceptionDiagnostic",
     "PerceptionParseError",
     "PerceptionClarificationRequired",
+    "AssociationActRelationCandidate",
+    "AssociationEndpointSelector",
     "AssociationQueryDecision",
     "AssociationSemanticClassifier",
     "TextSensoryResult",
