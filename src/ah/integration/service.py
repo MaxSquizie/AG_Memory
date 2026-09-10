@@ -26,6 +26,7 @@ from ah.perception import (
     PredicateCandidate,
     PropositionExprCandidate,
     PropositionOperator,
+    QueryQuantifierOperator,
     StructuralClarificationSpec,
     NominalRelationKind,
     TemplateCandidate,
@@ -44,6 +45,7 @@ from .contracts import (
     IntegratedConditional,
     IntegratedExistential,
     IntegratedFormula,
+    IntegratedQuantifiedQuery,
     IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
@@ -758,6 +760,7 @@ class IntegrationService:
         formulas: list[IntegratedFormula] = []
         existentials: list[IntegratedExistential] = []
         universals: list[IntegratedExistential] = []
+        quantified_queries: list[IntegratedQuantifiedQuery] = []
         conflicts: list[IntegratedConflict] = []
         local_refs: dict[str, Ref] = {}
         entity_local_refs: dict[str, Ref] = {}
@@ -1361,6 +1364,148 @@ class IntegrationService:
                         )
                     )
 
+            # Quantified queries are canonicalized only as non-occurring formula
+            # targets. They deliberately reuse the same QUANTIFIED pattern identity
+            # as quantified assertions, so an exact previously asserted formula can
+            # be recognized by the reasoner. The query turn itself is never attached
+            # to H as assertion evidence for this formula.
+            for query in resolved_queries:
+                spec = query.quantified
+                if spec is None:
+                    continue
+                if query.local_id is None:
+                    raise CandidateValidationError(
+                        "Quantified query reached Integration without local_id"
+                    )
+                selection = query.predicate.template_selection
+                if selection is None or selection.existing_template_uid is None:
+                    continue
+                try:
+                    template = tx.store.get_template(
+                        selection.existing_template_uid
+                    )
+                except KeyError:
+                    continue
+
+                variables = {
+                    binding.entity_ref: BoundVar(
+                        binding.variable_id, binding.sort
+                    )
+                    for binding in spec.bindings
+                }
+                query_actants: dict[ActantRole, Ref | BoundVar] = {}
+                query_resolution_failed = False
+                resolver = EntityResolver(tx)
+
+                for actant in query.actants:
+                    variable = variables.get(actant.entity_ref or "")
+                    if variable is not None:
+                        query_actants[actant.role] = variable
+                        continue
+
+                    if (
+                        actant.candidate_ref is not None
+                        or actant.composition is not None
+                        or actant.proposition is not None
+                    ):
+                        query_resolution_failed = True
+                        break
+
+                    if (
+                        actant.entity_ref is not None
+                        and actant.entity_ref in entity_local_refs
+                    ):
+                        query_actants[actant.role] = entity_local_refs[
+                            actant.entity_ref
+                        ]
+                        continue
+
+                    resolved = resolver.resolve(
+                        actant,
+                        context,
+                        first_person_ref=speaker_ref,
+                        second_person_ref=addressee_ref,
+                    )
+                    if not isinstance(resolved, ExistingEntity):
+                        # Ordinary unresolved queries fail at GoalCompiler rather
+                        # than inventing entities. Quantified queries keep exactly
+                        # the same policy: no M is created merely to ask a question.
+                        query_resolution_failed = True
+                        break
+                    query_actants[actant.role] = resolved.ref
+
+                if query_resolution_failed:
+                    continue
+
+                template_domain = tx.store.domain_of(template.uid) or Domain.C
+                body_node, body_created = tx.add_or_enrich_hypernode(
+                    template_domain,
+                    tx.ref(template.uid),
+                    query_actants,
+                    weight=self.config.initial_hypernode_weight,
+                    meta={"semantic_scope": "QUANTIFIED"},
+                    count_occurrence=False,
+                )
+                body_member_ref = tx.ref(body_node.uid)
+                body_ref = body_member_ref
+                created_any = body_created
+
+                if spec.body_negated:
+                    not_g, not_created = tx.ensure_function(
+                        template_domain, "NOT", (body_ref,)
+                    )
+                    body_ref = tx.ref(not_g.uid)
+                    created_any = created_any or not_created
+
+                for binding in reversed(spec.bindings):
+                    variable = variables[binding.entity_ref]
+                    if binding.restriction_lemma is not None:
+                        restriction = self._ensure_class_pattern(
+                            tx,
+                            binding.restriction_lemma,
+                            variable,
+                            template_domain,
+                        )
+                        connective = (
+                            "IMPLIES"
+                            if binding.operator is QueryQuantifierOperator.FORALL
+                            else "AND"
+                        )
+                        scoped_g, scoped_created = tx.ensure_function(
+                            template_domain,
+                            connective,
+                            (restriction, body_ref),
+                        )
+                        body_ref = tx.ref(scoped_g.uid)
+                        created_any = created_any or scoped_created
+
+                    quantifier_g, quantifier_created = tx.ensure_function(
+                        template_domain,
+                        binding.operator.value,
+                        (variable, body_ref),
+                    )
+                    body_ref = tx.ref(quantifier_g.uid)
+                    created_any = created_any or quantifier_created
+
+                    if binding.negated:
+                        not_g, not_created = tx.ensure_function(
+                            template_domain, "NOT", (body_ref,)
+                        )
+                        body_ref = tx.ref(not_g.uid)
+                        created_any = created_any or not_created
+
+                quantified_queries.append(
+                    IntegratedQuantifiedQuery(
+                        local_id=query.local_id,
+                        ref=body_ref,
+                        member_refs=(body_member_ref,),
+                        variable_ids=tuple(
+                            binding.variable_id for binding in spec.bindings
+                        ),
+                        created=created_any,
+                    )
+                )
+
             # Materialize top-level logical formula roots only after every leaf
             # proposition has a canonical scoped ref.  The H occurrence will assert
             # these roots; leaf N/G refs deliberately remain non-occurring operands.
@@ -1710,6 +1855,7 @@ class IntegrationService:
             existentials=tuple(existentials),
             universals=tuple(universals),
             conflicts=tuple(conflicts),
+            quantified_queries=tuple(quantified_queries),
         )
         from ah.diagnostics.session_log import emit
 
@@ -1738,6 +1884,15 @@ class IntegrationService:
                 for item in commit.relations
             ],
             conditionals=[item.ref.uid for item in commit.conditionals],
+            quantified_queries=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "members": [ref.uid for ref in item.member_refs],
+                    "variable_ids": list(item.variable_ids),
+                }
+                for item in commit.quantified_queries
+            ],
             formulas=[
                 {
                     "local_id": item.local_id,

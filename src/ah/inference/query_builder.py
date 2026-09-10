@@ -28,6 +28,7 @@ from .contracts import (
     AllOfGoal,
     CauseEntailmentGoal,
     ExistsGoal,
+    FormulaGoal,
     GoalSpec,
     InferenceQuery,
     MultiRoleFillGoal,
@@ -678,6 +679,34 @@ class SemanticGoalCompiler:
             diagnostic="semantic:explicit_AND",
         )
 
+    @staticmethod
+    def _build_quantified_formula_goal(
+        query: QueryCandidate,
+        integration: IntegrationCommit,
+    ) -> QueryBuildResult:
+        if query.local_id is None:
+            return QueryBuildResult(
+                None, ("semantic:quantified_query_local_id_missing",)
+            )
+        matches = tuple(
+            item
+            for item in integration.quantified_queries
+            if item.local_id == query.local_id
+        )
+        if len(matches) != 1:
+            diagnostic = (
+                "semantic:quantified_query_not_materialized"
+                if not matches
+                else "semantic:quantified_query_root_not_unique"
+            )
+            return QueryBuildResult(None, (diagnostic,))
+        item = matches[0]
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(FormulaGoal(item.ref))),
+            ("semantic:quantified_formula_goal",),
+            (item.ref, *item.member_refs),
+        )
+
     def build(
         self,
         integration: IntegrationCommit,
@@ -693,7 +722,9 @@ class SemanticGoalCompiler:
         # into hidden inference requests and pollute the public query outcomes.
         if perception is None:
             return tuple(
-                self._build_direct_query(query, context, attention_refs)
+                self._build_quantified_formula_goal(query, integration)
+                if query.quantified is not None
+                else self._build_direct_query(query, context, attention_refs)
                 for query in integration.unresolved_queries
             )
 
@@ -714,6 +745,15 @@ class SemanticGoalCompiler:
         }
 
         for root in roots:
+            if (
+                isinstance(root, QueryCandidate)
+                and root.quantified is not None
+            ):
+                results.append(
+                    self._build_quantified_formula_goal(root, integration)
+                )
+                continue
+
             descendants = self._descendants(perception, root.local_id)
             target_ids = {
                 local_id
