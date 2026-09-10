@@ -25,6 +25,7 @@ from ah.perception.linguistic_candidates import (
     CandidateSpan,
     ClauseCandidate,
     LinguisticCandidateGraph,
+    SourceToken,
 )
 from ah.perception.logical_formalization import LogicalFormBuilder
 
@@ -84,7 +85,7 @@ def _render(expr: PropositionExprCandidate) -> str:
     return f"{expr.operator.value}(" + ",".join(_render(x) for x in expr.members) + ")"
 
 
-def test_semantic_paraphrase_can_form_or_without_keyword_authority() -> None:
+def test_semantic_paraphrase_can_form_xor_without_keyword_authority() -> None:
     text = "Одно из двух: Иван придёт, Мария позвонит."
     e1 = EvidenceSpan("Иван придёт", text.index("Иван"), text.index("Иван") + len("Иван придёт"))
     e2 = EvidenceSpan("Мария позвонит", text.index("Мария"), text.index("Мария") + len("Мария позвонит"))
@@ -96,16 +97,21 @@ def test_semantic_paraphrase_can_form_or_without_keyword_authority() -> None:
 
     def probe(stage: str, prompt: str, choices: tuple[str, ...]) -> str:
         calls.append(stage)
-        assert stage == "logical_relation"
-        assert "Одно из двух" in prompt
-        return "OR"
+        if stage == "logical_relation":
+            assert "Одно из двух" in prompt
+            return "OR"
+        if stage == "logical_or_exclusivity":
+            assert "OR(A1,A2)" in prompt
+            return "EXCLUSIVE"
+        raise AssertionError(stage)
 
     result = LogicalFormBuilder(_graph(text), probe).build(
         text, assertions, {"A1": None, "A2": None}
     )
+    assert result.unresolved is None
     assert len(result.roots) == 1
-    assert _render(result.roots[0].expression) == "OR(A1,A2)"
-    assert calls == ["logical_relation"]
+    assert _render(result.roots[0].expression) == "XOR(A1,A2)"
+    assert calls == ["logical_relation", "logical_or_exclusivity"]
 
 
 def test_mixed_and_or_scope_is_chosen_only_from_deterministic_candidate_trees() -> None:
@@ -124,16 +130,19 @@ def test_mixed_and_or_scope_is_chosen_only_from_deterministic_candidate_trees() 
         )
 
     def probe(stage: str, prompt: str, choices: tuple[str, ...]) -> str:
-        assert stage == "logical_scope"
-        wanted = "OR(AND(A1,A2),A3)"
-        for line in prompt.splitlines():
-            if ": " not in line:
-                continue
-            label, rendered = line.split(": ", 1)
-            if rendered == wanted:
-                assert label in choices
-                return label
-        raise AssertionError(prompt)
+        if stage == "logical_scope":
+            wanted = "OR(AND(A1,A2),A3)"
+            for line in prompt.splitlines():
+                if ": " not in line:
+                    continue
+                label, rendered = line.split(": ", 1)
+                if rendered == wanted:
+                    assert label in choices
+                    return label
+            raise AssertionError(prompt)
+        if stage == "logical_or_exclusivity":
+            return "INCLUSIVE_OR"
+        raise AssertionError(stage)
 
     result = LogicalFormBuilder(_graph(text), probe).build(
         text, tuple(assertions), {f"A{i}": None for i in range(1, 4)}
@@ -154,7 +163,11 @@ def test_local_negation_is_explicit_inside_compound_formula_ast() -> None:
             negated=True,
         ),
     )
-    result = LogicalFormBuilder(_graph(text), lambda *_: "UNCLEAR").build(
+    def probe(stage: str, _prompt: str, _choices: tuple[str, ...]) -> str:
+        assert stage == "logical_whole_negation"
+        return "NO"
+
+    result = LogicalFormBuilder(_graph(text), probe).build(
         text, assertions, {"A1": None, "A2": None}
     )
     assert len(result.roots) == 1
@@ -314,3 +327,180 @@ def test_truth_negating_matrix_can_be_consumed_as_operator_source_not_world_fact
     assert len(commit.formulas) == 1
     formula = core.store.get_element_any_domain(commit.formulas[0].ref.uid)
     assert isinstance(formula, FunctionSymbol) and formula.function_id == "NOT"
+
+
+
+def _graph_with_not_token(text: str) -> LinguisticCandidateGraph:
+    span = CandidateSpan(1, 1, text, EvidenceSpan(text, 0, len(text)))
+    clause = ClauseCandidate("CL1", 0, span, ())
+    token = SourceToken(1, "Не", 0, 2)
+    return LinguisticCandidateGraph(text, (token,), (clause,), (), ())
+
+
+def test_or_exclusivity_unclear_keeps_sound_inclusive_or() -> None:
+    text = "Иван придёт или Мария позвонит."
+    p1, p2 = "Иван придёт", "Мария позвонит"
+    assertions = (
+        _assertion(
+            "A1", "прийти", "Иван",
+            EvidenceSpan(p1, text.index(p1), text.index(p1) + len(p1)),
+        ),
+        _assertion(
+            "A2", "позвонить", "Мария",
+            EvidenceSpan(p2, text.index(p2), text.index(p2) + len(p2)),
+        ),
+    )
+
+    def probe(stage: str, _prompt: str, _choices: tuple[str, ...]) -> str:
+        assert stage == "logical_or_exclusivity"
+        return "UNCLEAR"
+
+    result = LogicalFormBuilder(_graph(text), probe).build(
+        text, assertions, {"A1": None, "A2": None}
+    )
+    assert result.unresolved is None
+    assert _render(result.roots[0].expression) == "OR(A1,A2)"
+
+
+def test_whole_formula_negation_probe_is_live() -> None:
+    text = "Не оба: Иван пришёл и Мария ушла."
+    p1, p2 = "Иван пришёл", "Мария ушла"
+    assertions = (
+        _assertion(
+            "A1", "прийти", "Иван",
+            EvidenceSpan(p1, text.index(p1), text.index(p1) + len(p1)),
+        ),
+        _assertion(
+            "A2", "уйти", "Мария",
+            EvidenceSpan(p2, text.index(p2), text.index(p2) + len(p2)),
+        ),
+    )
+
+    def probe(stage: str, prompt: str, _choices: tuple[str, ...]) -> str:
+        assert stage == "logical_whole_negation"
+        assert "AND(A1,A2)" in prompt
+        return "WHOLE_NOT"
+
+    result = LogicalFormBuilder(_graph_with_not_token(text), probe).build(
+        text, assertions, {"A1": None, "A2": None}
+    )
+    assert result.unresolved is None
+    assert len(result.roots) == 1
+    assert _render(result.roots[0].expression) == "NOT(AND(A1,A2))"
+
+
+def test_whole_negation_unclear_fails_closed() -> None:
+    text = "Не оба: Иван пришёл и Мария ушла."
+    p1, p2 = "Иван пришёл", "Мария ушла"
+    assertions = (
+        _assertion(
+            "A1", "прийти", "Иван",
+            EvidenceSpan(p1, text.index(p1), text.index(p1) + len(p1)),
+        ),
+        _assertion(
+            "A2", "уйти", "Мария",
+            EvidenceSpan(p2, text.index(p2), text.index(p2) + len(p2)),
+        ),
+    )
+    result = LogicalFormBuilder(
+        _graph_with_not_token(text),
+        lambda stage, _prompt, _choices: (
+            "UNCLEAR" if stage == "logical_whole_negation" else "INCLUSIVE_OR"
+        ),
+    ).build(text, assertions, {"A1": None, "A2": None})
+    assert result.roots == ()
+    assert result.unresolved is not None
+    assert "whole-formula negation" in result.unresolved
+
+
+def test_scope_unclear_fails_closed_instead_of_asserting_formula_leaves() -> None:
+    text = "Иван пришёл и Мария позвонила или Пётр ушёл."
+    parts = ("Иван пришёл", "Мария позвонила", "Пётр ушёл")
+    assertions = tuple(
+        _assertion(
+            f"A{index}",
+            ("прийти", "позвонить", "уйти")[index - 1],
+            ("Иван", "Мария", "Пётр")[index - 1],
+            EvidenceSpan(part, text.index(part), text.index(part) + len(part)),
+        )
+        for index, part in enumerate(parts, 1)
+    )
+    result = LogicalFormBuilder(
+        _graph(text),
+        lambda stage, _prompt, _choices: (
+            "UNCLEAR" if stage == "logical_scope" else "INCLUSIVE_OR"
+        ),
+    ).build(text, assertions, {"A1": None, "A2": None, "A3": None})
+    assert result.roots == ()
+    assert result.unresolved is not None
+    assert "logical scope unresolved" in result.unresolved
+
+
+def test_xor_materializes_and_excludes_other_branch_after_one_is_proved() -> None:
+    core, context, service, engine = _env()
+    e1 = EvidenceSpan("Иван пришёл", 0, 11)
+    e2 = EvidenceSpan("Мария ушла", 18, 28)
+    a1 = _assertion("A1", "прийти", "Иван", e1)
+    a2 = _assertion("A2", "уйти", "Мария", e2)
+    root = PropositionRootCandidate(
+        "F1",
+        PropositionExprCandidate(
+            PropositionOperator.XOR,
+            members=(
+                PropositionExprCandidate.ref_expr("A1"),
+                PropositionExprCandidate.ref_expr("A2"),
+            ),
+        ),
+    )
+    commit = service.integrate_external(
+        PerceptionResult(
+            "Ровно одно: Иван пришёл или Мария ушла.",
+            assertions=(a1, a2),
+            proposition_roots=(root,),
+        ),
+        context,
+    )
+    xor_ref = commit.formulas[0].ref
+    xor_obj = core.store.get_element_any_domain(xor_ref.uid)
+    assert isinstance(xor_obj, FunctionSymbol)
+    assert xor_obj.function_id == "XOR"
+    assert _solve(engine, xor_ref).status is LogicalStatus.PROVED
+
+    factual = _assertion(
+        "A1", "прийти", "Иван", EvidenceSpan("Иван пришёл", 0, 11)
+    )
+    service.integrate_external(
+        PerceptionResult("Иван пришёл.", assertions=(factual,)),
+        context,
+    )
+    outcome = _solve(engine, commit.assertions[1].ref)
+    assert outcome.status is LogicalStatus.DISPROVED
+    assert any("XOR exclusion" in item for item in outcome.diagnostics)
+
+
+def test_unasserted_xor_is_unknown_until_exactly_one_branch_is_established() -> None:
+    core, _context, _service, engine = _env()
+    predicate = core.ensure_abstract_symbol("быть")
+    template = core.add_template(
+        Domain.C, core.ref(predicate.uid), (ActantRole.SUBJECT,)
+    )
+    a = core.add_entity(Domain.C, {"name": Property("name", "a", "str")})
+    b = core.add_entity(Domain.C, {"name": Property("name", "b", "str")})
+    n1, _ = core.add_hypernode(
+        Domain.C,
+        core.ref(template.uid),
+        {ActantRole.SUBJECT: core.ref(a.uid)},
+        1.0,
+        count_occurrence=False,
+    )
+    n2, _ = core.add_hypernode(
+        Domain.C,
+        core.ref(template.uid),
+        {ActantRole.SUBJECT: core.ref(b.uid)},
+        1.0,
+        count_occurrence=False,
+    )
+    xor = core.add_function(
+        Domain.C, "XOR", (core.ref(n1.uid), core.ref(n2.uid))
+    )
+    assert _solve(engine, core.ref(xor.uid)).status is LogicalStatus.UNKNOWN
