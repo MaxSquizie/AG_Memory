@@ -605,12 +605,12 @@
       "scenario": "modal_v1_009"
     },
     {
-      "text": "Вчера сервер работал.",
+      "text": "Действительно, сервер работает.",
       "grade": "EXACT",
       "family": "nonmodal_negative",
       "tags": [
         "NONE",
-        "time-adverb"
+        "factual-certainty"
       ],
       "expect": {
         "perception": {
@@ -637,12 +637,13 @@
       "scenario": "modal_v1_010"
     },
     {
-      "text": "Сервер быстро работает.",
+      "text": "Сервер действительно работает.",
       "grade": "EXACT",
       "family": "nonmodal_negative",
       "tags": [
         "NONE",
-        "manner-adverb"
+        "factual-certainty",
+        "medial"
       ],
       "expect": {
         "perception": {
@@ -669,12 +670,12 @@
       "scenario": "modal_v1_011"
     },
     {
-      "text": "Иногда сервер перезагружается.",
+      "text": "Фактически, сервер работает.",
       "grade": "EXACT",
       "family": "nonmodal_negative",
       "tags": [
         "NONE",
-        "frequency-adverb"
+        "factual-commitment"
       ],
       "expect": {
         "perception": {
@@ -682,7 +683,7 @@
           "assertions": [
             {
               "key": "a1",
-              "predicate": "перезагружаться",
+              "predicate": "работать",
               "status": "ASSERTED",
               "negated": false,
               "roles": {
@@ -928,7 +929,7 @@
       "scenario": "modal_v1_017"
     },
     {
-      "text": "Анна заметила, что дверь открыта.",
+      "text": "Анна увидела, что Иван вошёл.",
       "grade": "EXACT",
       "family": "factivity",
       "tags": [
@@ -941,7 +942,7 @@
           "assertions": [
             {
               "key": "a1",
-              "predicate": "заметить",
+              "predicate": "увидеть",
               "status": "ASSERTED",
               "negated": false,
               "roles": {
@@ -953,12 +954,11 @@
             },
             {
               "key": "a2",
-              "predicate": "быть",
+              "predicate": "войти",
               "status": "ASSERTED",
               "negated": false,
               "roles": {
-                "SUBJECT": "дверь",
-                "STATE": "открыта"
+                "SUBJECT": "Иван"
               }
             }
           ],
