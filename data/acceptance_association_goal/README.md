@@ -31,6 +31,9 @@ Important invariants:
   unique existing lexical `S`; no new `m` is created by asking a question.
 - Generic `ActRelationCandidate("ASSOCIATION", ...)` is invalid. The runtime marker
   must use the typed `AssociationActRelationCandidate` contract.
+- One act cannot simultaneously carry `ASSOCIATION` and a canonical world-relation
+  goal such as `IS-A`; Perception must resolve the requested operation first, so
+  GoalCompiler behavior never depends on relation ordering.
 - Quoted association requests, quantified association queries, and negated association
   commands do not execute under the current binary AssociationGoal contract.
 - Parser endpoint selectors must be distinct. They may nevertheless resolve to the
