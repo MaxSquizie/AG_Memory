@@ -353,6 +353,86 @@ def test_modal_proposition_goal_fails_closed_instead_of_proving_operand():
     )
 
 
+def test_matrix_attitude_query_proves_attitude_fact_not_embedded_content():
+    core, context, integration, engine = _runtime()
+
+    stored_child = _event_assertion(
+        "A2", "Server", "working", status=AssertionStatus.EMBEDDED
+    )
+    stored_parent = AssertionCandidate(
+        "A1",
+        PredicateCandidate(
+            "believe",
+            "believe",
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.OBJECT)
+            ),
+        ),
+        (
+            ActantCandidate(ActantRole.SUBJECT, mention="Anna"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                proposition=PropositionExprCandidate.ref_expr("A2"),
+            ),
+        ),
+    )
+    integration.integrate_external(
+        PerceptionResult(
+            "Anna believes that the server is working.",
+            assertions=(stored_parent, stored_child),
+        ),
+        context,
+    )
+
+    queried_child = _event_assertion(
+        "A2", "Server", "working", status=AssertionStatus.EMBEDDED
+    )
+    query = QueryCandidate(
+        PredicateCandidate(
+            "believe",
+            "believe",
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.OBJECT)
+            ),
+        ),
+        (
+            ActantCandidate(ActantRole.SUBJECT, mention="Anna"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                proposition=PropositionExprCandidate.ref_expr("A2"),
+            ),
+        ),
+        query_mode=QueryMode.EXISTS,
+        local_id="Q1",
+    )
+    perception = PerceptionResult(
+        "Does Anna believe that the server is working?",
+        assertions=(queried_child,),
+        queries=(query,),
+        act_dependencies=(
+            ActDependencyCandidate(
+                "Q1", "A2", ActDependencyKind.SUBORDINATE
+            ),
+        ),
+    )
+    commit = integration.integrate_external(perception, context)
+    built = SemanticGoalCompiler(core).build(
+        commit, context, perception
+    )
+    assert len(built) == 1
+    assert built[0].diagnostics == (
+        "semantic:matrix_proposition_query",
+    )
+    outcome = engine.solve(built[0].goal)
+    assert outcome.status is LogicalStatus.PROVED
+
+    # The embedded content itself is not promoted merely because the attitude
+    # query succeeded.
+    embedded_ref = commit.assertions[0].ref
+    embedded_node = core.store.get_hypernode(embedded_ref.uid)
+    assert embedded_node.meta.get("semantic_scope") == "EMBEDDED"
+
+
 def test_goal_semantic_service_adds_typed_relation_from_bounded_classifier():
     from ah.perception import GoalSemanticService
 
