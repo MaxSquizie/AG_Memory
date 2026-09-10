@@ -222,6 +222,35 @@ class SemanticGoalCompiler:
         return False
 
     @staticmethod
+    def _explicit_modal_operator(
+        expressions: tuple[PropositionExprCandidate, ...],
+        target_ids: set[str],
+    ) -> PropositionOperator | None:
+        modal = {
+            PropositionOperator.POSSIBLE,
+            PropositionOperator.REQUIRED,
+            PropositionOperator.PERMITTED,
+        }
+
+        def find(expr: PropositionExprCandidate) -> PropositionOperator | None:
+            if (
+                expr.operator in modal
+                and set(expr.leaf_refs()) == target_ids
+            ):
+                return expr.operator
+            for member in expr.members:
+                found = find(member)
+                if found is not None:
+                    return found
+            return None
+
+        for expr in expressions:
+            found = find(expr)
+            if found is not None:
+                return found
+        return None
+
+    @staticmethod
     def _has_explicit_alternative(
         expressions: tuple[PropositionExprCandidate, ...], target_ids: set[str]
     ) -> bool:
@@ -413,6 +442,21 @@ class SemanticGoalCompiler:
             return []
 
         expressions = self._root_expressions(root)
+        modal_operator = self._explicit_modal_operator(
+            expressions, target_ids
+        )
+        if modal_operator is not None:
+            # Until a dedicated modal query goal exists, never compile M(P) as a
+            # request to prove ordinary P. This is the query-side counterpart of
+            # the canonical nonfactivity barrier in GroundFormulaReasoner.
+            return [
+                QueryBuildResult(
+                    None,
+                    (
+                        f"semantic:{modal_operator.value}_goal_not_supported",
+                    ),
+                )
+            ]
         if self._has_explicit_alternative(expressions, target_ids):
             operator = next(
                 (

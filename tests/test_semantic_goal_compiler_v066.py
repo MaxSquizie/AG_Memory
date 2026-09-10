@@ -326,6 +326,33 @@ def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and(
     )
 
 
+def test_modal_proposition_goal_fails_closed_instead_of_proving_operand():
+    core, context, integration, _engine = _runtime()
+    assertion = _classification_assertion("A1", "Server", "working")
+    possible_expr = PropositionExprCandidate(
+        PropositionOperator.POSSIBLE,
+        members=(PropositionExprCandidate.ref_expr("A1"),),
+    )
+    raw = PerceptionResult(
+        source_text="request whether possible",
+        assertions=(assertion,),
+        commands=(_command(proposition=possible_expr),),
+        act_dependencies=(
+            ActDependencyCandidate(
+                "C1", "A1", ActDependencyKind.SUBORDINATE
+            ),
+        ),
+    )
+    perception = apply_speech_act_scoping(raw)
+    commit = integration.integrate_external(perception, context)
+    built = SemanticGoalCompiler(core).build(commit, context, perception)
+    assert len(built) == 1
+    assert built[0].goal is None
+    assert built[0].diagnostics == (
+        "semantic:POSSIBLE_goal_not_supported",
+    )
+
+
 def test_goal_semantic_service_adds_typed_relation_from_bounded_classifier():
     from ah.perception import GoalSemanticService
 
