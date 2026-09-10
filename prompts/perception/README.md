@@ -29,3 +29,4 @@ Rules:
 
 - `relative_clause_mode.txt` — exact `RELATIVE/SUBORDINATE` decision for relative-adverb surface ambiguity after structural narrowing.
 - `clause_subject_control.txt` — exact `SAME_SUBJECT/INDEPENDENT` decision for omitted finite subordinate subjects.
+- `association_query.txt` — bounded non-thinking association-intent probe. Deterministic parsing first enumerates source-grounded endpoint candidates as local `E1..En` labels, including members of one actant composition. The model may return only `ORDINARY`, `UNKNOWN`, or one enumerated `ASSOCIATION:Ea:Eb` pair. It never sees canonical AH UIDs and never constructs `AssociationGoal`; canonical endpoint resolution remains deterministic and read-only in GoalCompiler.
