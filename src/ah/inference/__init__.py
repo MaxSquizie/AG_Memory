@@ -31,7 +31,15 @@ from .context import BranchContext, CounterfactualContext, ProofContext
 from .schema import InferenceSchema, InferenceSchemaRegistry
 from .engine import InferenceEngine
 from .materialization import InferenceMaterializer, MaterializationResult
-from .query_builder import QueryBuildResult, QueryGoalBuilder, SemanticGoalCompiler, TurnGoalBuilder
+from .query_builder import QueryBuildResult, QueryGoalBuilder
+from .counterfactual_goal import CounterfactualSemanticGoalCompiler
+
+# Public/default turn compiler includes the counterfactual extension while the
+# mature base compiler remains available internally from query_builder. Keeping the
+# extension at this boundary avoids coupling its implementation to quantified/XOR
+# dispatch that is evolving independently in other branches.
+SemanticGoalCompiler = CounterfactualSemanticGoalCompiler
+TurnGoalBuilder = CounterfactualSemanticGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
@@ -39,6 +47,7 @@ __all__ = [
     "AssociationGoal",
     "CauseEntailmentGoal",
     "CounterfactualGoal",
+    "CounterfactualSemanticGoalCompiler",
     "CognitiveEventKind",
     "CognitiveTraceEvent",
     "CompositeConclusion",
