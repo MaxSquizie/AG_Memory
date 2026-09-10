@@ -24,6 +24,9 @@ def test_registry_has_v4_logical_kernel_and_legacy_if_alias() -> None:
     assert registry.canonical_id("AND") == "AND"
     assert registry.canonical_id("if") == "IMPLIES"
     assert registry.get("IMPLIES").reasoner_handler == "IMPLIES"
+    assert registry.get("POSSIBLE").reasoner_handler == "POSSIBLE"
+    assert registry.get("REQUIRED").reasoner_handler == "REQUIRED"
+    assert registry.get("PERMITTED").reasoner_handler == "PERMITTED"
     assert registry.get("FORALL").reasoner_handler == "FORALL"
     assert registry.get("EXISTS").reasoner_handler == "EXISTS"
 
@@ -80,3 +83,13 @@ def test_legacy_declaration_only_quantifier_can_be_rendered_for_diagnostics() ->
     registry = FunctionRegistry()
     assert registry.render("FORALL", ("$0:ENTITY",)) == "FORALL $0:ENTITY: <UNRESOLVED_BODY>"
     assert registry.render("EXISTS", ("$0:ENTITY",)) == "EXISTS $0:ENTITY: <UNRESOLVED_BODY>"
+
+
+
+def test_modal_wrappers_require_one_proposition_operand() -> None:
+    core = AHCore()
+    proposition = _proposition(core)
+    possible = core.add_function(Domain.C, "POSSIBLE", (proposition,))
+    assert possible.function_id == "POSSIBLE"
+    with pytest.raises(ValueError):
+        core.add_function(Domain.C, "POSSIBLE", (proposition, proposition))

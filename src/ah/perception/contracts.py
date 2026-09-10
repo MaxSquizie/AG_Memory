@@ -85,6 +85,9 @@ class PropositionOperator(str, Enum):
     XOR = "XOR"
     NOT = "NOT"
     IMPLIES = "IMPLIES"
+    POSSIBLE = "POSSIBLE"
+    REQUIRED = "REQUIRED"
+    PERMITTED = "PERMITTED"
     FALSE = "FALSE"  # legacy runtime alias; canonical object negation is NOT
 
 
@@ -93,7 +96,7 @@ class PropositionExprCandidate:
     """Runtime-only proposition expression over local assertion refs.
 
     This is deliberately not a canonical AH type. Integration maps REF to the
-    corresponding scoped N and AND/OR/XOR/NOT/IMPLIES to canonical g operators.
+    corresponding scoped N and registered proposition operators to canonical g operators.
     """
 
     operator: PropositionOperator
@@ -107,9 +110,17 @@ class PropositionExprCandidate:
             return
         if self.ref is not None:
             raise ValueError("non-REF proposition cannot carry ref")
-        if self.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}:
+        if self.operator in {
+            PropositionOperator.NOT,
+            PropositionOperator.FALSE,
+            PropositionOperator.POSSIBLE,
+            PropositionOperator.REQUIRED,
+            PropositionOperator.PERMITTED,
+        }:
             if len(self.members) != 1:
-                raise ValueError(f"{self.operator.value} proposition requires exactly one member")
+                raise ValueError(
+                    f"{self.operator.value} proposition requires exactly one member"
+                )
             return
         if self.operator is PropositionOperator.IMPLIES:
             if len(self.members) != 2:

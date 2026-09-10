@@ -136,6 +136,17 @@ class FunctionRegistry:
                 operand_validator=_proposition_refs,
             )
         )
+        # Modal wrappers have deliberately shallow semantics. Their presence can
+        # itself be proved, but no wrapper licenses its operand as ordinary truth.
+        for modal_id in ("POSSIBLE", "REQUIRED", "PERMITTED"):
+            self.register(
+                FunctionSpec(
+                    modal_id, 1, 1,
+                    lambda xs, name=modal_id: f"{name} ({xs[0]})",
+                    reasoner_handler=modal_id,
+                    operand_validator=_proposition_refs,
+                )
+            )
         self.register(
             FunctionSpec(
                 "FALSE", 1, 1,

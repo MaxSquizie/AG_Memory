@@ -668,6 +668,13 @@ class GroundFormulaReasoner:
                 for branch in out
             )
 
+        if canonical in {"POSSIBLE", "REQUIRED", "PERMITTED"}:
+            # Quantified/modal interaction is intentionally conservative: only an
+            # explicitly asserted modal proposition is a valid bound premise.
+            if self._asserted_function(ref, obj):
+                return (_BoundProof(env.copy(), (ref,), (ref,), depth),)
+            return ()
+
         if canonical == "XOR":
             # Variable-bearing XOR needs explicit negative evidence for every
             # non-selected branch before one witness can establish "exactly one".
@@ -1386,6 +1393,29 @@ class GroundFormulaReasoner:
                         rule_id="NOT_CONTRADICTION",
                     )
             return self._outcome(LogicalStatus.UNKNOWN, StopReason.SEARCH_EXHAUSTED, None, (), (), depth=depth)
+
+        if canonical in {"POSSIBLE", "REQUIRED", "PERMITTED"}:
+            # Scope-protection semantics only. A source-asserted modal wrapper proves
+            # that modal proposition itself; it never proves or refutes its operand.
+            if self._asserted_function(ref, obj):
+                self._focus(ref, depth)
+                return self._outcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    ref,
+                    (ref,),
+                    (ref,),
+                    depth=depth,
+                    rule_id=f"{canonical}_ASSERTED",
+                )
+            return self._outcome(
+                LogicalStatus.UNKNOWN,
+                StopReason.SEARCH_EXHAUSTED,
+                None,
+                (),
+                (),
+                depth=depth,
+            )
 
         if canonical == "XOR":
             # Natural-language n-ary XOR means exactly one true branch, not parity
