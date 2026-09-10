@@ -152,16 +152,23 @@ class ModalScopeBuilder:
     ) -> list[_Cue]:
         cues: list[_Cue] = []
         for item in assertions:
+            proposition_only_actants = bool(item.actants) and all(
+                actant.candidate_ref is not None
+                or actant.proposition is not None
+                for actant in item.actants
+            )
             if (
                 item.status is not AssertionStatus.ASSERTED
                 or item.quoted
-                or item.actants
+                or (item.actants and not proposition_only_actants)
             ):
                 continue
             sentence_id = self._sentence_id(item.local_id, assertion_spans)
             if sentence_id is None or sentence_target_counts.get(sentence_id, 0) < 2:
                 continue
-            evidence = item.evidence or item.predicate.evidence
+            # The cue is the matrix predicate itself, not its complete subordinate
+            # proposition evidence span.
+            evidence = item.predicate.evidence or item.evidence
             if (
                 evidence is None
                 or evidence.start is None
@@ -379,6 +386,25 @@ class ModalScopeBuilder:
         for cue in cues:
             # Build current top-level expression owners for this sentence.
             owners: list[tuple[str, int | str, PropositionExprCandidate]] = []
+
+            # An impersonal matrix operator may already govern proposition content
+            # structurally (e.g. REQUIRED(content=P)). It remains eligible only
+            # because _shell_cues proved that every actant is proposition-valued;
+            # subject-bearing attitudes such as BELIEVES(A,P) never enter here.
+            if cue.source_ref is not None:
+                source = self._by_id.get(cue.source_ref)
+                if source is not None:
+                    for actant in source.actants:
+                        content = actant.proposition
+                        if content is None and actant.candidate_ref is not None:
+                            content = PropositionExprCandidate.ref_expr(
+                                actant.candidate_ref
+                            )
+                        if content is not None:
+                            owners.append(
+                                ("content", cue.source_ref, content)
+                            )
+
             for index, root in enumerate(root_list):
                 leaf = next(iter(root.expression.leaf_refs()), None)
                 if leaf is None or self._sentence_id(leaf, assertion_spans) != cue.sentence_id:
