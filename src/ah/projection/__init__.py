@@ -1,4 +1,5 @@
 from .agent_context import ContextProjector
+from .association_context import AssociationContextProjector
 from .contracts import (
     AgentContext,
     AgentContextDiagnostic,
@@ -22,6 +23,7 @@ from .source_scope import (
 __all__ = [
     "AgentContext",
     "AgentContextDiagnostic",
+    "AssociationContextProjector",
     "ContextProjector",
     "FunctionRegistry",
     "FunctionSpec",
