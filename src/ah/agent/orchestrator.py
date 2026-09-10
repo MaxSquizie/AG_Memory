@@ -44,8 +44,6 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
     def _execute_associations(
         self,
         result: AgentTurnResult,
-        *,
-        lock,
     ) -> tuple[
         tuple[QueryExecution | _BaseQueryExecution, ...],
         tuple[AssociationOutcome, ...],
@@ -120,9 +118,7 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
         lock = self.runtime_lock or nullcontext()
 
         with lock:
-            executions, association_outcomes, unresolved = self._execute_associations(
-                base, lock=lock
-            )
+            executions, association_outcomes, unresolved = self._execute_associations(base)
             workspace = self.ignition.workspace_refs()
             inference_outcomes = tuple(
                 execution.outcome
@@ -168,7 +164,11 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                     with lock:
                         self._enqueue_clarifications(base.integration.clarifications)
 
-        autosaved = base.autosaved or self._autosave(lock)
+        # The base no-response pass may already have autosaved the user turn. Run
+        # the post-route autosave anyway: association changes runtime excitation and
+        # a generated response may add a new H occurrence after that first save.
+        post_autosaved = self._autosave(lock)
+        autosaved = base.autosaved or post_autosaved
         return replace(
             base,
             queries=executions,
