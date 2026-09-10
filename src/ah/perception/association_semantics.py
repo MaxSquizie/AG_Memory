@@ -198,9 +198,7 @@ class AssociationSemanticClassifier:
                     if selector in seen:
                         continue
                     seen.add(selector)
-                    result.append(
-                        _EndpointCandidate(selector, member.lookup_text)
-                    )
+                    result.append(_EndpointCandidate(selector, member.lookup_text))
                 continue
             selector = AssociationEndpointSelector(actant.role)
             if selector in seen:
@@ -252,12 +250,11 @@ class AssociationSemanticClassifier:
                     override={
                         "max_new_tokens": 12,
                         "temperature": 0.0,
-                        "top_p": 1.0,
-                        "top_k": 0,
                         "repetition_penalty": 1.0,
                         "no_repeat_ngram_size": 0,
+                        "enable_thinking": False,
                     },
-                    role="perception",
+                    role="semantic_association_query",
                 )
             except Exception as exc:
                 attempts.append(
