@@ -538,8 +538,8 @@ def test_quantified_query_domain_matches_personal_fixed_actant() -> None:
             _bound(ActantRole.SUBJECT, "QX", "employees"),
             ActantCandidate(
                 ActantRole.OBJECT,
-                mention="you",
-                normalized_hint="you",
+                mention="тебя",
+                normalized_hint="тебя",
             ),
         ),
         (
@@ -553,7 +553,7 @@ def test_quantified_query_domain_matches_personal_fixed_actant() -> None:
     )
     # In external input second person resolves to the agent/self P entity.
     perception = PerceptionResult(
-        "Does every employee know you?", queries=(query,)
+        "Каждый сотрудник знает тебя?", queries=(query,)
     )
     commit = service.integrate_external(perception, context)
     assert len(commit.quantified_queries) == 1
