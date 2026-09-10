@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ah.model import ActantRole
+from ah.model import ActantRole, VariableSort
 from ah.temporal.contracts import TemporalCandidate, TemporalMode, TransitionOperator
 from .lexical_recovery import TokenCandidate
 
@@ -331,6 +331,61 @@ class QueryMode(str, Enum):
     EXISTS = "EXISTS"
 
 
+class QueryQuantifierOperator(str, Enum):
+    EXISTS = "EXISTS"
+    FORALL = "FORALL"
+
+
+@dataclass(frozen=True, slots=True)
+class QuantifiedQueryBinding:
+    """One already-formalized quantified role inside a query.
+
+    This is a runtime contract between quantifier formalization and GoalCompiler.
+    entity_ref is the parser-local handle carried by one or more actants; it is
+    never a canonical M UID. negated negates this quantifier complete scope.
+    restriction_lemma is optional for unrestricted and class-restricted forms.
+    """
+
+    entity_ref: str
+    variable_id: int
+    operator: QueryQuantifierOperator
+    restriction_lemma: str | None = None
+    negated: bool = False
+    sort: VariableSort = VariableSort.ENTITY
+
+    def __post_init__(self) -> None:
+        if not self.entity_ref.strip():
+            raise ValueError("QuantifiedQueryBinding.entity_ref must be non-empty")
+        if self.variable_id < 0:
+            raise ValueError("QuantifiedQueryBinding.variable_id must be >= 0")
+        if self.restriction_lemma is not None and not self.restriction_lemma.strip():
+            raise ValueError(
+                "QuantifiedQueryBinding.restriction_lemma must be non-empty or None"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class QuantifiedQuerySpec:
+    """Complete quantified goal shape, outermost binding first.
+
+    body_negated is predicate/body negation inside every quantifier and is
+    intentionally distinct from negating the quantifier itself.
+    """
+
+    bindings: tuple[QuantifiedQueryBinding, ...]
+    body_negated: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.bindings:
+            raise ValueError("QuantifiedQuerySpec requires at least one binding")
+        refs = tuple(item.entity_ref for item in self.bindings)
+        ids = tuple(item.variable_id for item in self.bindings)
+        if len(set(refs)) != len(refs):
+            raise ValueError("QuantifiedQuerySpec.entity_ref bindings must be unique")
+        if len(set(ids)) != len(ids):
+            raise ValueError("QuantifiedQuerySpec.variable_id values must be unique")
+
+
 @dataclass(frozen=True, slots=True)
 class QueryCandidate:
     predicate: PredicateCandidate
@@ -343,6 +398,7 @@ class QueryCandidate:
     query_mode: QueryMode = QueryMode.EXISTS
     local_id: str | None = None
     quoted: bool = False
+    quantified: QuantifiedQuerySpec | None = None
 
     def __post_init__(self) -> None:
         roles = self.requested_roles

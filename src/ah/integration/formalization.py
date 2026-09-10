@@ -21,6 +21,7 @@ from ah.perception import (
     PerceptionResult,
     PropositionExprCandidate,
     PropositionRootCandidate,
+    QuantifiedQuerySpec,
     QueryCandidate,
     SituationRelationCandidate,
     SituationRelationHintCandidate,
@@ -344,6 +345,21 @@ def _namespace_actant(actant: ActantCandidate, prefix: str, source_offset: int =
     )
 
 
+def _namespace_quantified_query(
+    spec: QuantifiedQuerySpec | None,
+    prefix: str,
+) -> QuantifiedQuerySpec | None:
+    if spec is None:
+        return None
+    return replace(
+        spec,
+        bindings=tuple(
+            replace(binding, entity_ref=f"{prefix}{binding.entity_ref}")
+            for binding in spec.bindings
+        ),
+    )
+
+
 def _namespace_assertion(item: AssertionCandidate, prefix: str, source_offset: int = 0) -> AssertionCandidate:
     local_id = f"{prefix}{item.local_id}"
     alternatives = tuple(
@@ -388,6 +404,7 @@ def namespace_perception_result(
             local_id=_prefix_local(item.local_id, prefix),
             predicate=_offset_predicate(item.predicate, source_offset),
             actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in item.actants),
+            quantified=_namespace_quantified_query(item.quantified, prefix),
         )
         for item in result.queries
     )

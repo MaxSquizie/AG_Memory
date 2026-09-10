@@ -194,6 +194,27 @@ class IntegratedExistential:
 
 
 @dataclass(frozen=True, slots=True)
+class IntegratedQuantifiedQuery:
+    """Canonical non-asserted formula root used only as a query target."""
+
+    local_id: str
+    ref: Ref
+    member_refs: tuple[Ref, ...]
+    variable_ids: tuple[int, ...]
+    created: bool
+
+    def __post_init__(self) -> None:
+        if not self.local_id.strip():
+            raise ValueError("IntegratedQuantifiedQuery.local_id must be non-empty")
+        if self.ref.kind.value != "G":
+            raise ValueError("IntegratedQuantifiedQuery.ref must be G")
+        if not self.member_refs:
+            raise ValueError("IntegratedQuantifiedQuery requires body member refs")
+        if not self.variable_ids:
+            raise ValueError("IntegratedQuantifiedQuery requires variables")
+
+
+@dataclass(frozen=True, slots=True)
 class IntegratedFormula:
     """One source-asserted logical formula built from scoped proposition leaves."""
 
@@ -259,3 +280,4 @@ class IntegrationCommit:
     conflicts: tuple[IntegratedConflict, ...] = ()
     # Appended for positional-call compatibility with older IntegrationCommit code.
     formulas: tuple[IntegratedFormula, ...] = ()
+    quantified_queries: tuple[IntegratedQuantifiedQuery, ...] = ()

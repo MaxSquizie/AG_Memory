@@ -84,12 +84,52 @@ class CandidateValidator:
         act_refs: set[str] = set(by_id)
         for index, query in enumerate(result.queries, start=1):
             if query.local_id is None:
+                if query.quantified is not None:
+                    raise CandidateValidationError(
+                        f"quantified query#{index} requires local_id"
+                    )
                 continue
             if not query.local_id.strip():
                 raise CandidateValidationError(f"query#{index}.local_id must be non-empty")
             if query.local_id in act_refs:
                 raise CandidateValidationError(f"Duplicate act local_id: {query.local_id}")
             act_refs.add(query.local_id)
+
+            if query.quantified is not None:
+                if query.quoted:
+                    raise CandidateValidationError(
+                        f"Quantified query {query.local_id} cannot be quoted"
+                    )
+                if query.query_mode.value != "EXISTS":
+                    raise CandidateValidationError(
+                        f"Quantified query {query.local_id} currently requires polar EXISTS mode"
+                    )
+                handles = {
+                    actant.entity_ref
+                    for actant in query.actants
+                    if actant.entity_ref is not None
+                }
+                for binding in query.quantified.bindings:
+                    if binding.entity_ref not in handles:
+                        raise CandidateValidationError(
+                            f"Quantified query binding {binding.entity_ref!r} "
+                            f"is not used by {query.local_id}"
+                        )
+                bound_handles = {
+                    binding.entity_ref for binding in query.quantified.bindings
+                }
+                for actant in query.actants:
+                    if actant.entity_ref not in bound_handles:
+                        continue
+                    if (
+                        actant.candidate_ref is not None
+                        or actant.composition is not None
+                        or actant.proposition is not None
+                    ):
+                        raise CandidateValidationError(
+                            f"Quantified query actant {actant.role.value} in "
+                            f"{query.local_id} must be a direct bound role"
+                        )
         for index, command in enumerate(result.commands, start=1):
             if command.local_id is None:
                 continue
