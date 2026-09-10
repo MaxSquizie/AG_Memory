@@ -74,6 +74,7 @@ def test_association_oracle_covers_fail_closed_and_non_entity_origins() -> None:
         "homographic_symbol",
         "noncanonical_formula",
         "generic_marker_rejected",
+        "mixed_relation_marker_rejected",
         "common_node_kinds",
     } == set(edge)
     assert set(edge["common_node_kinds"]["allowed_common_kinds"]) == {
