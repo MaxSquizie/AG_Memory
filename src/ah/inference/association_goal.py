@@ -325,13 +325,9 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
             for support in resolved.support_refs:
                 add_attention(support)
 
-        if endpoints[0] == endpoints[1]:
-            return AssociationQueryBuildResult(
-                None,
-                ("semantic:association_endpoints_identical",),
-                tuple(attention),
-            )
-
+        # Equal canonical origins are valid: expand(A) intersects expand(A) at
+        # depth zero. Distinct parser selectors are enforced upstream, while the
+        # coordinator intentionally owns this trivial convergence case.
         goal = AssociationGoal(endpoints[0], endpoints[1])
         return AssociationQueryBuildResult(
             None,
