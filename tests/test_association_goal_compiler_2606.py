@@ -12,7 +12,7 @@ from ah.association import (
 )
 from ah.config import ContextSettings
 from ah.core import AHCore, SequentialUidGenerator
-from ah.inference import AssociationQueryBuildResult, SemanticGoalCompiler
+from ah.inference import AssociationGoal, AssociationQueryBuildResult, SemanticGoalCompiler
 from ah.integration.candidate_validator import CandidateValidator
 from ah.integration.contracts import IntegratedAssertion, IntegrationCommit
 from ah.integration.errors import CandidateValidationError
@@ -363,9 +363,7 @@ def test_negated_association_command_is_rejected_before_execution() -> None:
 def test_association_projection_has_own_channel_and_never_becomes_inference_block() -> None:
     core, _context = _env()
     same = _entity(core, "same")
-    goal = __import__("ah.inference", fromlist=["AssociationGoal"]).AssociationGoal(
-        same, same
-    )
+    goal = AssociationGoal(same, same)
     path = AssociationPath(same, same, (same,), ())
     outcome = AssociationOutcome(
         status=AssociationStatus.FOUND,
