@@ -21,7 +21,7 @@ class AssociationContextProjector(ContextProjector):
 
     AssociationOutcome is runtime search provenance, not a proof and not a new fact.
     The response model therefore receives it in its own ASSOCIATION RESULTS section
-    rather than through the logical INFERENCE wording used for InferenceOutcome.
+    and AgentContext keeps it outside ``inference_blocks`` as well.
     """
 
     def __init__(self, core: AHCore, settings: ContextSettings) -> None:
@@ -58,7 +58,7 @@ class AssociationContextProjector(ContextProjector):
             )
             return ProjectionBlock(
                 outcome.common_ref,
-                ProjectionMode.DEPENDENCY,
+                ProjectionMode.ASSOCIATION,
                 text,
             )
 
@@ -67,7 +67,7 @@ class AssociationContextProjector(ContextProjector):
             "В пределах заданного runtime-бюджета подтверждённая точка сходимости "
             "не найдена. Это результат поиска активации, НЕ логическое опровержение."
         )
-        return ProjectionBlock(None, ProjectionMode.DEPENDENCY, text)
+        return ProjectionBlock(None, ProjectionMode.ASSOCIATION, text)
 
     @staticmethod
     def _render_with_association_sections(
@@ -131,9 +131,10 @@ class AssociationContextProjector(ContextProjector):
         return AgentContext(
             current_input,
             base.workspace_blocks,
-            base.inference_blocks + association_blocks,
+            base.inference_blocks,
             rendered,
             source_workspace_refs=base.source_workspace_refs,
             source_scope_ref=base.source_scope_ref,
             estimated_tokens=estimated_tokens,
+            association_blocks=association_blocks,
         )
