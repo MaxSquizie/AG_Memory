@@ -10,6 +10,7 @@ class ProjectionMode(str, Enum):
     ACTIVE = "ACTIVE"
     DEPENDENCY = "DEPENDENCY"
     INFERENCE = "INFERENCE"
+    ASSOCIATION = "ASSOCIATION"
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,8 +49,6 @@ class AgentContextDiagnostic:
     workspace_threshold: float
     workspace: tuple[WorkspaceContextDiagnostic, ...]
     settle_ticks: int = 0
-
-
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,7 +140,10 @@ class AgentContext:
     # Runtime-only provenance/budget diagnostics; never serialized into ``rendered``.
     source_scope_ref: str | None = None
     estimated_tokens: int = 0
+    # Association is representation convergence, not proof. Keep it out of
+    # inference_blocks even when both appear in the same response context.
+    association_blocks: tuple[ProjectionBlock, ...] = ()
 
     @property
     def all_blocks(self) -> tuple[ProjectionBlock, ...]:
-        return self.workspace_blocks + self.inference_blocks
+        return self.workspace_blocks + self.inference_blocks + self.association_blocks
