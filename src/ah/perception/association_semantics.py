@@ -155,19 +155,37 @@ class AssociationSemanticClassifier:
         attempts: list[AssociationProbeAttempt] = []
 
         for retry_index in range(self.retry_attempts + 1):
-            response = self.backend.generate(
-                prompt,
-                system=system,
-                override={
-                    "max_new_tokens": 12,
-                    "temperature": 0.0,
-                    "top_p": 1.0,
-                    "top_k": 0,
-                    "repetition_penalty": 1.0,
-                    "no_repeat_ngram_size": 0,
-                },
-                role="perception",
-            )
+            try:
+                response = self.backend.generate(
+                    prompt,
+                    system=system,
+                    override={
+                        "max_new_tokens": 12,
+                        "temperature": 0.0,
+                        "top_p": 1.0,
+                        "top_k": 0,
+                        "repetition_penalty": 1.0,
+                        "no_repeat_ngram_size": 0,
+                    },
+                    role="perception",
+                )
+            except Exception as exc:
+                # Model/backend failure is a perception-boundary failure. Do not let
+                # a transport/runtime exception escape around orchestrator's normal
+                # raw-H preservation path, and do not reinterpret it as ORDINARY.
+                attempts.append(
+                    AssociationProbeAttempt(
+                        "",
+                        None,
+                        f"backend:{type(exc).__name__}:{exc}",
+                        retry_index,
+                    )
+                )
+                raise AssociationProbeError(
+                    "association semantic probe backend failed",
+                    tuple(attempts),
+                ) from exc
+
             label = response.text.strip().upper()
             if label in choices:
                 attempts.append(
