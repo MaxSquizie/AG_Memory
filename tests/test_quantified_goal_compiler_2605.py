@@ -561,3 +561,35 @@ def test_quantified_query_domain_matches_personal_fixed_actant() -> None:
     assert core.store.domain_of(root.uid) is Domain.P
     body = commit.quantified_queries[0].member_refs[0]
     assert core.store.domain_of(body.uid) is Domain.P
+
+
+
+def test_quantified_formula_goal_compiles_without_perception_argument() -> None:
+    core, context, service, _engine = _env()
+    _template(core, "employee", (ActantRole.SUBJECT,))
+    _template(core, "arrive", (ActantRole.SUBJECT,))
+    query = _query(
+        "arrive",
+        (_bound(ActantRole.SUBJECT, "QX", "employees"),),
+        (
+            _binding(
+                "QX",
+                0,
+                QueryQuantifierOperator.FORALL,
+                restriction="employee",
+            ),
+        ),
+    )
+    perception = PerceptionResult(
+        "Did every employee arrive?", queries=(query,)
+    )
+    commit = service.integrate_external(perception, context)
+    built = SemanticGoalCompiler(core).build(
+        commit, context, perception=None
+    )
+    assert len(built) == 1
+    assert built[0].goal is not None
+    assert isinstance(built[0].goal.goal.target, FormulaGoal)
+    assert built[0].goal.goal.target.expression == (
+        commit.quantified_queries[0].ref
+    )

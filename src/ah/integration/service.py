@@ -452,6 +452,10 @@ class IntegrationService:
             universal_variable_ids=[item.variable_id for item in ir.universal_bindings],
             unresolved_temporal_refs=[item.local_id for item in ir.temporal_refs],
             query_count=len(ir.perception.queries),
+            quantified_query_count=sum(
+                1 for item in ir.perception.queries
+                if item.quantified is not None
+            ),
             command_count=len(ir.perception.commands),
             relation_count=len(ir.perception.relations),
             conditional_count=len(ir.perception.conditionals),
