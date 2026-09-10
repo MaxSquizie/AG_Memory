@@ -91,6 +91,15 @@ class CounterfactualSemanticGoalCompiler(_BaseSemanticGoalCompiler):
                 None,
                 ("semantic:counterfactual_quantified_target_not_supported",),
             )
+        if any(item.act_ref == root.local_id for item in perception.act_relations):
+            # A direct structural relation query has RelationGoal semantics. The
+            # current CounterfactualGoal explicitly wraps FormulaGoal, so silently
+            # treating that relation query as existence of a linguistic N would be
+            # unsound.
+            return QueryBuildResult(
+                None,
+                ("semantic:counterfactual_relation_target_not_supported",),
+            )
 
         assumption_scope: set[str] = set()
         for local_id in outer_assumptions:
