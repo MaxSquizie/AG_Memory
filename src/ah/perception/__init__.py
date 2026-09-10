@@ -34,12 +34,16 @@ from .contracts import (
     StructuralClarificationSpec,
 )
 from .llm_parser import (
-    LLMPerceptionService,
     LLMPerceptionSettings,
     PerceptionAttemptDiagnostic,
     PerceptionDiagnostic,
     PerceptionParseError,
     PerceptionClarificationRequired,
+)
+from .association_semantics import (
+    AssociationLLMPerceptionService as LLMPerceptionService,
+    AssociationQueryDecision,
+    AssociationSemanticClassifier,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
@@ -89,6 +93,8 @@ __all__ = [
     "PerceptionDiagnostic",
     "PerceptionParseError",
     "PerceptionClarificationRequired",
+    "AssociationQueryDecision",
+    "AssociationSemanticClassifier",
     "TextSensoryResult",
     "TextSensoryService",
     "TemporalCandidate",
@@ -107,4 +113,4 @@ from .morphology import MorphInfo, Morphology, NullMorphology, Pymorphy3Morpholo
 
 from .scoping import apply_speech_act_scoping
 
-from .goal_semantics import GoalSemanticService
+from .association_goal_semantics import AssociationGoalSemanticService as GoalSemanticService
