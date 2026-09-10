@@ -15,7 +15,7 @@
       "Existing entity endpoints resolve to canonical M; local proposition/formula endpoints resolve to already integrated N/G.",
       "When no M exists, only a unique already indexed lexical S may be used as a fallback origin.",
       "Entity ambiguity, lexical homography, unresolved handles, missing local proposition refs, and noncanonical formula expressions fail closed.",
-      "AssociationGoal endpoints must be distinct and excitable; L is never a valid origin.",
+      "Parser endpoint selectors are distinct, but both may resolve to the same excitable canonical ref; L is never a valid origin.",
       "AssociationGoal is executed by AssociationCoordinator and never wrapped in InferenceQuery for InferenceEngine.",
       "Association search may converge on S/M/T/N/G/K according to ordinary AH activation/incidence mechanics.",
       "AssociationOutcome is projected through AgentContext.association_blocks with ProjectionMode.ASSOCIATION, never through inference_blocks.",
@@ -157,11 +157,14 @@
       "expected_failure": "quantified+association requires a separate combined contract"
     },
     {
-      "id": "identical_endpoints",
+      "id": "identical_canonical_origins",
       "text": "Найди связь между огнём и огнём.",
       "expected_intent": "ASSOCIATION",
-      "expected_goal": null,
-      "expected_diagnostic": "semantic:association_endpoints_identical"
+      "typed_precondition": "two distinct parser endpoint selectors both resolve to the same canonical ref A",
+      "expected_goal": "AssociationGoal(A,A)",
+      "expected_runtime_status": "FOUND",
+      "expected_common": "A",
+      "expected_depth": 0
     },
     {
       "id": "unknown_endpoint_no_creation",
