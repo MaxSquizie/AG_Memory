@@ -7,7 +7,12 @@ from typing import Protocol
 from ah.llm.process_backend import LLMResponse
 from ah.model import ActantRole
 
-from .contracts import ActantCandidate, CommandCandidate, QueryCandidate
+from .contracts import (
+    ActRelationCandidate,
+    ActantCandidate,
+    CommandCandidate,
+    QueryCandidate,
+)
 from .llm_parser import (
     LLMPerceptionService as _BaseLLMPerceptionService,
     PerceptionAttemptDiagnostic,
@@ -27,15 +32,81 @@ class _TextGenerator(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
+class AssociationEndpointSelector:
+    """UID-free address of one endpoint inside an already parsed act.
+
+    ``member_index`` is zero-based and is present only when the endpoint is one
+    member of an ActantCompositionCandidate. This lets ``A и B`` remain one
+    syntactic actant while association can still target A and B independently.
+    """
+
+    role: ActantRole
+    member_index: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.member_index is not None and self.member_index < 0:
+            raise ValueError("association member_index must be >= 0")
+
+
+@dataclass(frozen=True, slots=True)
 class AssociationQueryDecision:
     """UID-free endpoint choice for one associative-search speech act."""
 
-    left_role: ActantRole
-    right_role: ActantRole
+    left: AssociationEndpointSelector
+    right: AssociationEndpointSelector
 
     def __post_init__(self) -> None:
-        if self.left_role is self.right_role:
-            raise ValueError("association endpoints must use different actant roles")
+        if self.left == self.right:
+            raise ValueError("association endpoints must be distinct")
+
+    @property
+    def left_role(self) -> ActantRole:
+        return self.left.role
+
+    @property
+    def right_role(self) -> ActantRole:
+        return self.right.role
+
+
+@dataclass(frozen=True, slots=True)
+class AssociationActRelationCandidate(ActRelationCandidate):
+    """Typed runtime ASSOCIATION marker with optional composition-member selectors.
+
+    It deliberately subclasses ActRelationCandidate so PerceptionResult keeps its
+    existing contract. Unlike an ordinary intra-act relation, two endpoints may use
+    the same semantic role when they address different members of one composition.
+    """
+
+    source_member_index: int | None = None
+    target_member_index: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.canonical_relation_id != "ASSOCIATION":
+            raise ValueError("AssociationActRelationCandidate requires ASSOCIATION")
+        if not self.act_ref.strip():
+            raise ValueError("AssociationActRelationCandidate.act_ref must be non-empty")
+        for value in (self.source_member_index, self.target_member_index):
+            if value is not None and value < 0:
+                raise ValueError("association member indexes must be >= 0")
+        if (
+            self.source_role is self.target_role
+            and self.source_member_index == self.target_member_index
+        ):
+            raise ValueError("association endpoint selectors must be distinct")
+
+    @property
+    def source_selector(self) -> AssociationEndpointSelector:
+        return AssociationEndpointSelector(self.source_role, self.source_member_index)
+
+    @property
+    def target_selector(self) -> AssociationEndpointSelector:
+        return AssociationEndpointSelector(self.target_role, self.target_member_index)
+
+
+@dataclass(frozen=True, slots=True)
+class _EndpointCandidate:
+    selector: AssociationEndpointSelector
+    text: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,10 +130,10 @@ class AssociationProbeError(ValueError):
 class AssociationSemanticClassifier:
     """One bounded semantic decision: ordinary query vs associative connection.
 
-    Deterministic code supplies only already parsed explicit actants and local E1/E2
-    labels. The model never sees AH UIDs and never constructs AssociationGoal. The
-    output vocabulary is finite for the current act: ORDINARY, UNKNOWN, or one of
-    the enumerated ASSOCIATION:Ea:Eb endpoint pairs.
+    Deterministic parsing enumerates source-grounded endpoint candidates first. The
+    model sees only local E1/E2 labels plus human-readable source text; it never sees
+    canonical UIDs and never constructs AssociationGoal. Output is one finite cue:
+    ORDINARY, UNKNOWN, or ASSOCIATION:Ea:Eb.
     """
 
     PROMPT_NAME = "association_query.txt"
@@ -99,26 +170,45 @@ class AssociationSemanticClassifier:
         return text
 
     @staticmethod
-    def _candidate_actants(
+    def _direct_endpoint_text(actant: ActantCandidate) -> str:
+        if actant.evidence is not None and actant.evidence.text.strip():
+            return actant.evidence.text.strip()
+        if actant.lookup_text:
+            return actant.lookup_text
+        if actant.proposition is not None:
+            return "proposition expressed by this actant in TEXT"
+        if actant.candidate_ref is not None:
+            return "proposition referenced by this actant in TEXT"
+        if actant.entity_ref is not None:
+            return "entity referenced by this actant in TEXT"
+        return "endpoint expressed by this actant in TEXT"
+
+    @classmethod
+    def endpoint_candidates(
+        cls,
         actants: tuple[ActantCandidate, ...],
-    ) -> tuple[ActantCandidate, ...]:
-        # Association endpoints here are explicit entity/concept mentions. Compound
-        # proposition/composition endpoints need a separate typed contract; do not
-        # flatten them into entities merely to make the goal compile.
-        result: list[ActantCandidate] = []
-        seen_roles: set[ActantRole] = set()
+    ) -> tuple[_EndpointCandidate, ...]:
+        """Enumerate endpoints from parser structure, never from lexical markers."""
+        result: list[_EndpointCandidate] = []
+        seen: set[AssociationEndpointSelector] = set()
         for actant in actants:
-            if actant.role in seen_roles:
+            if actant.composition is not None:
+                for index, member in enumerate(actant.composition.members):
+                    selector = AssociationEndpointSelector(actant.role, index)
+                    if selector in seen:
+                        continue
+                    seen.add(selector)
+                    result.append(
+                        _EndpointCandidate(selector, member.lookup_text)
+                    )
                 continue
-            if (
-                actant.proposition is not None
-                or actant.composition is not None
-                or actant.candidate_ref is not None
-                or not actant.lookup_text
-            ):
+            selector = AssociationEndpointSelector(actant.role)
+            if selector in seen:
                 continue
-            seen_roles.add(actant.role)
-            result.append(actant)
+            seen.add(selector)
+            result.append(
+                _EndpointCandidate(selector, cls._direct_endpoint_text(actant))
+            )
         return tuple(result)
 
     def classify(
@@ -126,13 +216,13 @@ class AssociationSemanticClassifier:
         source_text: str,
         act: QueryCandidate | CommandCandidate,
     ) -> tuple[AssociationQueryDecision | None, tuple[AssociationProbeAttempt, ...]]:
-        candidates = self._candidate_actants(act.actants)
+        candidates = self.endpoint_candidates(act.actants)
         if len(candidates) < 2:
             return None, ()
 
         labels = tuple(f"E{index + 1}" for index in range(len(candidates)))
-        role_by_label = {
-            label: candidate.role for label, candidate in zip(labels, candidates)
+        endpoint_by_label = {
+            label: candidate for label, candidate in zip(labels, candidates)
         }
         pair_choices = tuple(
             f"ASSOCIATION:{labels[left]}:{labels[right]}"
@@ -141,7 +231,7 @@ class AssociationSemanticClassifier:
         )
         choices = ("ORDINARY", *pair_choices, "UNKNOWN")
         endpoint_lines = "\n".join(
-            f"{label}: role={candidate.role.value}; text={candidate.lookup_text}"
+            f"{label}: role={candidate.selector.role.value}; text={candidate.text}"
             for label, candidate in zip(labels, candidates)
         )
         act_kind = "QUERY" if isinstance(act, QueryCandidate) else "COMMAND"
@@ -170,9 +260,6 @@ class AssociationSemanticClassifier:
                     role="perception",
                 )
             except Exception as exc:
-                # Model/backend failure is a perception-boundary failure. Do not let
-                # a transport/runtime exception escape around orchestrator's normal
-                # raw-H preservation path, and do not reinterpret it as ORDINARY.
                 attempts.append(
                     AssociationProbeAttempt(
                         "",
@@ -201,7 +288,8 @@ class AssociationSemanticClassifier:
                 _, left_label, right_label = label.split(":", 2)
                 return (
                     AssociationQueryDecision(
-                        role_by_label[left_label], role_by_label[right_label]
+                        endpoint_by_label[left_label].selector,
+                        endpoint_by_label[right_label].selector,
                     ),
                     tuple(attempts),
                 )
