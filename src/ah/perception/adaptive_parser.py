@@ -3403,7 +3403,8 @@ class AdaptivePerceptionParser:
             embedded = {
                 ref for ref in descendants(query.local_id)
                 if ref in by_assertion
-                and by_assertion[ref].status is AssertionStatus.EMBEDDED
+                and by_assertion[ref].status
+                in {AssertionStatus.ASSERTED, AssertionStatus.EMBEDDED}
                 and not by_assertion[ref].quoted
             }
             if not embedded:
