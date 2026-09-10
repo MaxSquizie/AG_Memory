@@ -81,6 +81,10 @@ class LogicalFormBuilder:
         assertion_spans: Mapping[str, object | None],
         conditionals: Sequence[ConditionalCandidate] = (),
     ) -> LogicalFormalizationResult:
+        # A builder is normally turn-local, but keep repeated direct/test use
+        # deterministic as well.
+        self._diagnostics = []
+        self._unresolved = None
         by_id = {item.local_id: item for item in assertions}
         provisional: list[
             tuple[int, int, PropositionExprCandidate, EvidenceSpan | None, tuple[str, ...]]
@@ -174,9 +178,15 @@ class LogicalFormBuilder:
                 self._CONTENT_OPERATOR_CHOICES,
             )
             if decision != "NOT_CONTENT":
-                if decision == "UNCLEAR":
+                if decision in {"UNCLEAR", None}:
                     self._diagnostics.append(
                         f"LOGIC:{parent.local_id}:content_operator_unclear"
+                    )
+                    self._unresolved = (
+                        f"logical content operator unresolved for {parent.local_id}"
+                    )
+                    return LogicalFormalizationResult(
+                        (), tuple(self._diagnostics), self._unresolved
                     )
                 continue
 
@@ -246,7 +256,7 @@ class LogicalFormBuilder:
                 decision = self.probe(
                     "logical_relation", prompt, self._RELATION_CHOICES
                 )
-                if decision == "UNCLEAR":
+                if decision in {"UNCLEAR", None}:
                     self._diagnostics.append(
                         f"LOGIC:{left.local_id}->{right.local_id}:relation_unclear"
                     )
@@ -257,7 +267,7 @@ class LogicalFormBuilder:
                     return LogicalFormalizationResult(
                         (), tuple(self._diagnostics), self._unresolved
                     )
-                if decision in {"NONE", None}:
+                if decision == "NONE":
                     relations.append(None)
                     continue
                 relations.append(decision)
@@ -531,6 +541,9 @@ class LogicalFormBuilder:
 
         candidates = self._scope_candidates(atom_exprs, relations)
         if not candidates:
+            self._unresolved = (
+                f"logical scope has no legal candidate tree in sentence {sentence_id}"
+            )
             return None
         if len(candidates) == 1:
             return candidates[0]

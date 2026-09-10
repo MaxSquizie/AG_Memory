@@ -504,3 +504,55 @@ def test_unasserted_xor_is_unknown_until_exactly_one_branch_is_established() -> 
         Domain.C, "XOR", (core.ref(n1.uid), core.ref(n2.uid))
     )
     assert _solve(engine, core.ref(xor.uid)).status is LogicalStatus.UNKNOWN
+
+
+
+def test_relation_probe_protocol_failure_fails_closed() -> None:
+    text = "Одно из вариантов: Иван придёт, Мария позвонит."
+    p1, p2 = "Иван придёт", "Мария позвонит"
+    assertions = (
+        _assertion(
+            "A1", "прийти", "Иван",
+            EvidenceSpan(p1, text.index(p1), text.index(p1) + len(p1)),
+        ),
+        _assertion(
+            "A2", "позвонить", "Мария",
+            EvidenceSpan(p2, text.index(p2), text.index(p2) + len(p2)),
+        ),
+    )
+    result = LogicalFormBuilder(
+        _graph(text), lambda _stage, _prompt, _choices: None
+    ).build(text, assertions, {"A1": None, "A2": None})
+    assert result.roots == ()
+    assert result.unresolved is not None
+    assert "truth-functional relation unresolved" in result.unresolved
+
+
+def test_content_operator_unclear_fails_closed_instead_of_asserting_matrix() -> None:
+    text = "Не верно, что Иван пришёл."
+    child = _assertion(
+        "A1",
+        "прийти",
+        "Иван",
+        EvidenceSpan("Иван пришёл", text.index("Иван"), text.index("Иван") + len("Иван пришёл")),
+        status=AssertionStatus.EMBEDDED,
+    )
+    content = PropositionExprCandidate.ref_expr("A1")
+    parent = _assertion(
+        "A2",
+        "верно",
+        "это",
+        EvidenceSpan(text, 0, len(text)),
+        negated=True,
+        proposition=content,
+    )
+
+    result = LogicalFormBuilder(
+        _graph(text),
+        lambda stage, _prompt, _choices: (
+            "UNCLEAR" if stage == "logical_content_operator" else "INCLUSIVE_OR"
+        ),
+    ).build(text, (parent, child), {"A1": None, "A2": None})
+    assert result.roots == ()
+    assert result.unresolved is not None
+    assert "logical content operator unresolved" in result.unresolved
