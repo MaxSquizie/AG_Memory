@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "corpus_id": "quantified-goal-compiler-v1-12",
+  "input_boundary": "QuantifiedQuerySpec",
+  "case_count": 12,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Point 4 downstream acceptance: formalized quantified query -> non-asserted canonical query formula -> FormulaGoal -> open-world inference.",
+    "invariants": [
+      "GoalCompiler never reparses quantifier words.",
+      "Quantified queries compile to FormulaGoal, never ordinary ExistsGoal.",
+      "Query materialization creates no assertion occurrence for the target formula.",
+      "FORALL is not proved by enumerating currently known instances.",
+      "EXISTS may be proved by one consistent witness.",
+      "NOT(EXISTS) is UNKNOWN from absence alone.",
+      "NOT(FORALL P) is distinct from FORALL NOT(P)."
+    ]
+  },
+  "cases": [
+    {
+      "id": "forall_asserted",
+      "text": "Все сотрудники пришли?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "FORALL",
+          "restriction": "employee"
+        }
+      ],
+      "seed": "assert_root",
+      "expected_formula": "FORALL($0,IMPLIES(employee($0),arrive($0)))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "forall_known_instances_open_world",
+      "text": "Все сотрудники пришли?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "FORALL",
+          "restriction": "employee"
+        }
+      ],
+      "seed": "shared_witness",
+      "expected_formula": "FORALL($0,IMPLIES(employee($0),arrive($0)))",
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "exists_witness",
+      "text": "Кто-то пришёл?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "EXISTS"
+        }
+      ],
+      "seed": "body_witness",
+      "expected_formula": "EXISTS($0,arrive($0))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "exists_no_witness",
+      "text": "Кто-то пришёл?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "EXISTS"
+        }
+      ],
+      "seed": "none",
+      "expected_formula": "EXISTS($0,arrive($0))",
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "restricted_exists_shared_witness",
+      "text": "Хотя бы один сотрудник пришёл?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "EXISTS",
+          "restriction": "employee"
+        }
+      ],
+      "seed": "shared_witness",
+      "expected_formula": "EXISTS($0,AND(employee($0),arrive($0)))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "restricted_exists_split_witness",
+      "text": "Хотя бы один сотрудник пришёл?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "EXISTS",
+          "restriction": "employee"
+        }
+      ],
+      "seed": "split_witness",
+      "expected_formula": "EXISTS($0,AND(employee($0),arrive($0)))",
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "not_exists_explicit",
+      "text": "Никто не пришёл?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "EXISTS",
+          "negated": true
+        }
+      ],
+      "seed": "assert_root",
+      "expected_formula": "NOT(EXISTS($0,arrive($0)))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "not_exists_absence_is_unknown",
+      "text": "Никто не пришёл?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "EXISTS",
+          "negated": true
+        }
+      ],
+      "seed": "none",
+      "expected_formula": "NOT(EXISTS($0,arrive($0)))",
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "not_forall_explicit",
+      "text": "Не все сотрудники пришли?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "FORALL",
+          "restriction": "employee",
+          "negated": true
+        }
+      ],
+      "seed": "assert_root",
+      "expected_formula": "NOT(FORALL($0,IMPLIES(employee($0),arrive($0))))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "forall_body_not",
+      "text": "Все сотрудники не пришли?",
+      "predicate": "arrive",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "FORALL",
+          "restriction": "employee"
+        }
+      ],
+      "body_negated": true,
+      "seed": "assert_root",
+      "expected_formula": "FORALL($0,IMPLIES(employee($0),NOT(arrive($0))))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "nested_forall_exists",
+      "text": "Каждый сотрудник знает хотя бы одного менеджера?",
+      "predicate": "know",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "FORALL",
+          "restriction": "employee"
+        },
+        {
+          "role": "OBJECT",
+          "handle": "QY",
+          "variable_id": 1,
+          "operator": "EXISTS",
+          "restriction": "manager"
+        }
+      ],
+      "seed": "assert_root",
+      "expected_formula": "FORALL($0,IMPLIES(employee($0),EXISTS($1,AND(manager($1),know($0,$1)))))",
+      "expected_status": "PROVED"
+    },
+    {
+      "id": "forall_with_fixed_object",
+      "text": "Каждый сотрудник подписал ContractA?",
+      "predicate": "sign",
+      "bindings": [
+        {
+          "role": "SUBJECT",
+          "handle": "QX",
+          "variable_id": 0,
+          "operator": "FORALL",
+          "restriction": "employee"
+        }
+      ],
+      "fixed_roles": {
+        "OBJECT": "ContractA"
+      },
+      "seed": "assert_root",
+      "expected_formula": "FORALL($0,IMPLIES(employee($0),sign($0,ContractA)))",
+      "expected_status": "PROVED"
+    }
+  ]
+}
