@@ -979,7 +979,13 @@ def _match_integrated_conditionals(
             expected=expected_member_count, actual=len(members),
         )
 
-        def match_side(name: str, side_ref: Any, expected_predicates: list[str], member_slice: list[Mapping[str, Any]]) -> None:
+        def match_side(
+            name: str,
+            side_ref: Any,
+            expected_predicates: list[str],
+            member_slice: list[Mapping[str, Any]],
+            expected_operator: Any = None,
+        ) -> None:
             if not isinstance(side_ref, dict):
                 _check(checks, f"{prefix}.{name}.shape", False, expected="canonical ref", actual=side_ref)
                 return
@@ -988,18 +994,19 @@ def _match_integrated_conditionals(
                 shape_ok = not (
                     isinstance(side, dict)
                     and side.get("kind") == "G"
-                    and str(side.get("function_id", "")).upper() == "AND"
+                    and str(side.get("function_id", "")).upper()
+                    in {"AND", "OR", "XOR"}
                 ) and bool(member_slice) and side_ref == member_slice[0]
                 expected_shape = "SINGLE"
                 actual_shape = (side or {}).get("function_id", "SINGLE") if isinstance(side, dict) else None
             else:
+                expected_shape = str(expected_operator or "AND").upper()
                 shape_ok = bool(
                     isinstance(side, dict)
                     and side.get("kind") == "G"
-                    and str(side.get("function_id", "")).upper() == "AND"
+                    and str(side.get("function_id", "")).upper() == expected_shape
                     and side.get("operands") == member_slice
                 )
-                expected_shape = "AND"
                 actual_shape = (side or {}).get("function_id") if isinstance(side, dict) else None
             _check(
                 checks, f"{prefix}.{name}.shape", shape_ok,
@@ -1036,8 +1043,20 @@ def _match_integrated_conditionals(
             )
 
         split = len(expected_if)
-        match_side("antecedent", antecedent_ref, expected_if, members[:split])
-        match_side("consequent", consequent_ref, expected_then, members[split:split + len(expected_then)])
+        match_side(
+            "antecedent",
+            antecedent_ref,
+            expected_if,
+            members[:split],
+            expected.get("if_operator"),
+        )
+        match_side(
+            "consequent",
+            consequent_ref,
+            expected_then,
+            members[split:split + len(expected_then)],
+            expected.get("then_operator"),
+        )
 
 
 def _canonical_formula_shape(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Callable, Mapping, Sequence
 
@@ -35,6 +35,7 @@ class LogicalFormalizationResult:
     roots: tuple[PropositionRootCandidate, ...]
     diagnostics: tuple[str, ...] = ()
     unresolved: str | None = None
+    conditionals: tuple[ConditionalCandidate, ...] = ()
 
 
 class LogicalFormBuilder:
@@ -90,24 +91,48 @@ class LogicalFormBuilder:
             tuple[int, int, PropositionExprCandidate, EvidenceSpan | None, tuple[str, ...]]
         ] = []
         consumed: set[str] = set()
+        refined_conditionals: list[ConditionalCandidate] = []
 
         # Existing conditional recognition already gives us exact branch membership
         # and direction.  Expose the same structure through the common proposition
         # AST without changing the mature conditional Integration path.
         for conditional in conditionals:
-            antecedent = conditional.antecedent_expr or self._flat_expr(
+            raw_antecedent = conditional.antecedent_expr or self._flat_expr(
                 conditional.antecedent_refs, PropositionOperator.AND
             )
-            consequent = conditional.consequent_expr or self._flat_expr(
+            raw_consequent = conditional.consequent_expr or self._flat_expr(
                 conditional.consequent_refs, PropositionOperator.AND
             )
-            antecedent = self._with_leaf_negations(antecedent, by_id)
-            consequent = self._with_leaf_negations(consequent, by_id)
-            antecedent = self._refine_or_exclusivity(
-                source_text, antecedent, by_id, context="conditional antecedent"
+
+            # Integration already wraps a negated conditional leaf through the
+            # local candidate polarity. Keep these branch expressions polarity-free
+            # so canonical materialization cannot create NOT(NOT(P)). The common
+            # proposition root below adds leaf NOT explicitly for diagnostics and
+            # source-level AST semantics.
+            material_antecedent = self._refine_or_exclusivity(
+                source_text,
+                raw_antecedent,
+                by_id,
+                context="conditional antecedent",
             )
-            consequent = self._refine_or_exclusivity(
-                source_text, consequent, by_id, context="conditional consequent"
+            material_consequent = self._refine_or_exclusivity(
+                source_text,
+                raw_consequent,
+                by_id,
+                context="conditional consequent",
+            )
+            refined_conditionals.append(
+                replace(
+                    conditional,
+                    antecedent_expr=material_antecedent,
+                    consequent_expr=material_consequent,
+                )
+            )
+            antecedent = self._with_leaf_negations(
+                material_antecedent, by_id
+            )
+            consequent = self._with_leaf_negations(
+                material_consequent, by_id
             )
             expr = PropositionExprCandidate(
                 PropositionOperator.IMPLIES,
@@ -325,7 +350,10 @@ class LogicalFormBuilder:
             in enumerate(provisional, start=1)
         )
         return LogicalFormalizationResult(
-            roots, tuple(self._diagnostics), self._unresolved
+            roots,
+            tuple(self._diagnostics),
+            self._unresolved,
+            tuple(refined_conditionals),
         )
 
     @staticmethod

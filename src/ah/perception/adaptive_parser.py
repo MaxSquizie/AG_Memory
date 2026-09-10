@@ -1258,6 +1258,7 @@ class AdaptivePerceptionParser:
                     tuple(self._traces),
                 )
             proposition_roots = logical.roots
+            conditionals = logical.conditionals
             logical_diagnostics = logical.diagnostics
 
         # Event normalization is a runtime perception boundary, not a canonical

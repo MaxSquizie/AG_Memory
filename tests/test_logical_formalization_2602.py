@@ -556,3 +556,98 @@ def test_content_operator_unclear_fails_closed_instead_of_asserting_matrix() -> 
     assert result.roots == ()
     assert result.unresolved is not None
     assert "logical content operator unresolved" in result.unresolved
+
+
+
+def test_conditional_xor_refinement_reaches_actual_canonical_implies_branch() -> None:
+    core, context, service, _engine = _env()
+    text = "Если Иван придёт, Мария уйдёт или Пётр останется, но не оба."
+    parts = ("Иван придёт", "Мария уйдёт", "Пётр останется")
+    assertions = (
+        _assertion(
+            "A1", "прийти", "Иван",
+            EvidenceSpan(parts[0], text.index(parts[0]), text.index(parts[0]) + len(parts[0])),
+            status=AssertionStatus.CONDITIONAL,
+        ),
+        _assertion(
+            "A2", "уйти", "Мария",
+            EvidenceSpan(parts[1], text.index(parts[1]), text.index(parts[1]) + len(parts[1])),
+            status=AssertionStatus.CONDITIONAL,
+        ),
+        _assertion(
+            "A3", "остаться", "Пётр",
+            EvidenceSpan(parts[2], text.index(parts[2]), text.index(parts[2]) + len(parts[2])),
+            status=AssertionStatus.CONDITIONAL,
+        ),
+    )
+    conditional = ConditionalCandidate(
+        ("A1",),
+        ("A2", "A3"),
+        consequent_expr=PropositionExprCandidate(
+            PropositionOperator.OR,
+            members=(
+                PropositionExprCandidate.ref_expr("A2"),
+                PropositionExprCandidate.ref_expr("A3"),
+            ),
+        ),
+    )
+
+    def probe(stage: str, prompt: str, _choices: tuple[str, ...]) -> str:
+        assert stage == "logical_or_exclusivity"
+        if "conditional consequent" in prompt:
+            return "EXCLUSIVE"
+        return "INCLUSIVE_OR"
+
+    logical = LogicalFormBuilder(_graph(text), probe).build(
+        text,
+        assertions,
+        {"A1": None, "A2": None, "A3": None},
+        (conditional,),
+    )
+    assert logical.unresolved is None
+    assert len(logical.conditionals) == 1
+    refined = logical.conditionals[0]
+    assert refined.consequent_expr is not None
+    assert _render(refined.consequent_expr) == "XOR(A2,A3)"
+    assert _render(logical.roots[0].expression) == "IMPLIES(A1,XOR(A2,A3))"
+
+    commit = service.integrate_external(
+        PerceptionResult(
+            text,
+            assertions=assertions,
+            conditionals=logical.conditionals,
+            proposition_roots=logical.roots,
+        ),
+        context,
+    )
+    assert len(commit.conditionals) == 1
+    integrated = commit.conditionals[0]
+    top = core.store.get_element_any_domain(integrated.ref.uid)
+    branch = core.store.get_element_any_domain(integrated.consequent.uid)
+    assert isinstance(top, FunctionSymbol)
+    assert top.function_id == "IMPLIES"
+    assert top.operands == (integrated.antecedent, integrated.consequent)
+    assert isinstance(branch, FunctionSymbol)
+    assert branch.function_id == "XOR"
+
+
+def test_conditional_leaf_negation_is_not_written_twice_during_refinement() -> None:
+    text = "Если Иван не придёт, Мария уйдёт."
+    a1 = _assertion(
+        "A1", "прийти", "Иван",
+        EvidenceSpan("Иван не придёт", text.index("Иван"), text.index("Иван") + len("Иван не придёт")),
+        negated=True,
+        status=AssertionStatus.CONDITIONAL,
+    )
+    a2 = _assertion(
+        "A2", "уйти", "Мария",
+        EvidenceSpan("Мария уйдёт", text.index("Мария"), text.index("Мария") + len("Мария уйдёт")),
+        status=AssertionStatus.CONDITIONAL,
+    )
+    logical = LogicalFormBuilder(_graph(text), lambda *_: "INCLUSIVE_OR").build(
+        text, (a1, a2), {"A1": None, "A2": None},
+        (ConditionalCandidate(("A1",), ("A2",)),),
+    )
+    assert logical.conditionals[0].antecedent_expr is not None
+    assert _render(logical.conditionals[0].antecedent_expr) == "A1"
+    assert _render(logical.roots[0].expression) == "IMPLIES(NOT(A1),A2)"
