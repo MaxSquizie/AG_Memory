@@ -1,8 +1,8 @@
 You classify one already parsed speech act for a memory system.
 
 Decide whether the user's actual goal is to DISCOVER an associative connection,
-semantic bridge, common representation, or memory path between two explicitly
-mentioned endpoint candidates.
+semantic bridge, common representation, or memory path between exactly two
+explicitly mentioned endpoint candidates.
 
 ASSOCIATION means the user is asking what connects two things, asks to find a
 connection/path/association between them, or asks for the common semantic bridge.
@@ -11,6 +11,11 @@ for an ordinary role filler, comparing the things, or merely mentioning both.
 
 Use meaning from the complete TEXT, not a vocabulary/marker rule. Endpoint labels
 E1, E2, ... are local to this request and are not memory IDs.
+
+Choose ASSOCIATION:Ea:Eb only when the text itself determines one unique pair of
+endpoints for this associative operation. If the request asks for one association
+among three or more endpoints, leaves the pair unclear, or otherwise exceeds the
+binary operation, return UNKNOWN. Do not arbitrarily choose a pair.
 
 Return exactly one line copied from CHOICES. If the intent or endpoint pair is not
 semantically determined by the text, return UNKNOWN. Do not explain your answer.
