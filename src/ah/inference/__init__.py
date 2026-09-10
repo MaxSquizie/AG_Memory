@@ -29,17 +29,22 @@ from .bindings import BindingEnvironment
 from .runtime import GoalRuntime
 from .context import BranchContext, CounterfactualContext, ProofContext
 from .schema import InferenceSchema, InferenceSchemaRegistry
-from .engine import InferenceEngine
 from .materialization import InferenceMaterializer, MaterializationResult
 from .query_builder import QueryBuildResult, QueryGoalBuilder
 from .counterfactual_goal import CounterfactualSemanticGoalCompiler
+from .modal_goal import (
+    FormulaPattern,
+    FormulaPatternGoal,
+    ModalInferenceEngine,
+    ModalSemanticGoalCompiler,
+)
 
-# Public/default turn compiler includes the counterfactual extension while the
-# mature base compiler remains available internally from query_builder. Keeping the
-# extension at this boundary avoids coupling its implementation to quantified/XOR
-# dispatch that is evolving independently in other branches.
-SemanticGoalCompiler = CounterfactualSemanticGoalCompiler
-TurnGoalBuilder = CounterfactualSemanticGoalCompiler
+# Public runtime composes the independent GoalCompiler extensions in one inheritance
+# chain.  The mature base implementations remain in engine.py/query_builder.py;
+# counterfactual and modal layers add only their typed runtime boundaries.
+InferenceEngine = ModalInferenceEngine
+SemanticGoalCompiler = ModalSemanticGoalCompiler
+TurnGoalBuilder = ModalSemanticGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
@@ -55,6 +60,8 @@ __all__ = [
     "ExistingRefConclusion",
     "ExistsGoal",
     "FormulaGoal",
+    "FormulaPattern",
+    "FormulaPatternGoal",
     "GoalMode",
     "GoalSpec",
     "GoalRuntime",
@@ -67,6 +74,8 @@ __all__ = [
     "InferenceQuery",
     "LogicalStatus",
     "MaterializationResult",
+    "ModalInferenceEngine",
+    "ModalSemanticGoalCompiler",
     "MultiRoleBindingConclusion",
     "MultiRoleFillGoal",
     "QueryBuildResult",
