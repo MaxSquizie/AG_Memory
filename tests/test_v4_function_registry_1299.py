@@ -93,3 +93,23 @@ def test_modal_wrappers_require_one_proposition_operand() -> None:
     assert possible.function_id == "POSSIBLE"
     with pytest.raises(ValueError):
         core.add_function(Domain.C, "POSSIBLE", (proposition, proposition))
+
+
+
+def test_modal_function_roundtrips_through_persistence(tmp_path: Path) -> None:
+    core = AHCore()
+    proposition = _proposition(core)
+    modal = core.add_function(
+        Domain.C, "REQUIRED", (proposition,), uid="G_REQUIRED"
+    )
+    path = tmp_path / "modal.json"
+    persistence = JsonPersistence(path, PersistenceSettings())
+    persistence.save(core)
+
+    loaded = persistence.load().core
+    restored = loaded.store.get_element_any_domain(modal.uid)
+    assert restored.function_id == "REQUIRED"
+    assert restored.operands == (proposition,)
+    assert loaded.function_registry.render(
+        "REQUIRED", ("server works",)
+    ) == "REQUIRED (server works)"
