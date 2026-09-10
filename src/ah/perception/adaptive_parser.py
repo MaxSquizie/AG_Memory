@@ -1238,6 +1238,9 @@ class AdaptivePerceptionParser:
             assertions, queries, commands, act_dependencies,
             assertion_spans, query_spans, command_spans,
         )
+        queries = self._attach_embedded_query_content(
+            text, assertions, queries, act_dependencies
+        )
 
         proposition_roots = ()
         logical_diagnostics: tuple[str, ...] = ()
@@ -3335,6 +3338,140 @@ class AdaptivePerceptionParser:
             [replace(item, quoted=True) if item.local_id in quoted else item for item in queries],
             [replace(item, quoted=True) if item.local_id in quoted else item for item in commands],
         )
+
+    def _attach_embedded_query_content(
+        self,
+        source_text: str,
+        assertions: list[AssertionCandidate],
+        queries: list[QueryCandidate],
+        dependencies: tuple[ActDependencyCandidate, ...],
+    ) -> list[QueryCandidate]:
+        """Separate attitude-matrix queries from requests to evaluate their content.
+
+        A structural Q -> A dependency only says that an assertion-shaped frame is
+        embedded under a question. It does not tell whether the requested truth is
+        the matrix relation itself ("Does Anna believe P?") or P ("Is it true that
+        P?"). Python first fixes the query root and the single subordinate
+        proposition root; one bounded source-only probe decides only that binary
+        semantic distinction.
+
+        MATRIX_QUERY attaches the already-known proposition as an OBJECT actant of
+        QueryCandidate so Integration can resolve the correct proposition-valued T.
+        CONTENT_GOAL keeps the existing descendant-goal path. No predicate inventory
+        or keyword trigger decides the result.
+        """
+        if not queries or not dependencies:
+            return queries
+
+        by_assertion = {item.local_id: item for item in assertions}
+        adjacency: dict[str, list[str]] = {}
+        for edge in dependencies:
+            if edge.kind is ActDependencyKind.QUOTED:
+                continue
+            adjacency.setdefault(edge.parent_ref, []).append(edge.child_ref)
+
+        def descendants(root: str) -> set[str]:
+            out: set[str] = set()
+            queue = list(adjacency.get(root, ()))
+            while queue:
+                ref = queue.pop()
+                if ref in out:
+                    continue
+                out.add(ref)
+                queue.extend(adjacency.get(ref, ()))
+            return out
+
+        def event_text(item: AssertionCandidate) -> str:
+            evidence = item.evidence or item.predicate.evidence
+            if evidence is not None and evidence.text.strip():
+                return evidence.text.strip()
+            return item.predicate.surface
+
+        result: list[QueryCandidate] = []
+        for query in queries:
+            if query.local_id is None or query.quoted:
+                result.append(query)
+                continue
+            if any(
+                actant.proposition is not None
+                or actant.candidate_ref is not None
+                for actant in query.actants
+            ):
+                result.append(query)
+                continue
+
+            embedded = {
+                ref for ref in descendants(query.local_id)
+                if ref in by_assertion
+                and by_assertion[ref].status is AssertionStatus.EMBEDDED
+                and not by_assertion[ref].quoted
+            }
+            if not embedded:
+                result.append(query)
+                continue
+
+            child_of_embedded = {
+                child
+                for parent in embedded
+                for child in adjacency.get(parent, ())
+                if child in embedded
+            }
+            proposition_roots = tuple(sorted(embedded - child_of_embedded))
+            if len(proposition_roots) != 1:
+                # Existing content-goal compilation can still handle several
+                # descendants. Matrix attitude query needs an exact proposition
+                # argument, so do not guess a compound scope here.
+                result.append(query)
+                continue
+
+            proposition_ref = proposition_roots[0]
+            content = by_assertion[proposition_ref]
+            root_roles = ", ".join(
+                f"{actant.role.value}={actant.mention or actant.normalized_hint or '?'}"
+                for actant in query.actants
+                if actant.proposition is None and actant.candidate_ref is None
+            ) or "<none>"
+            prompt = (
+                f"TEXT:\n{source_text}\n"
+                f"QUERY PREDICATE:\n{query.predicate.surface}\n"
+                f"QUERY PARTICIPANTS:\n{root_roles}\n"
+                f"EMBEDDED PROPOSITION:\n{event_text(content)}\n"
+                "CHOICES:\nMATRIX_QUERY\nCONTENT_GOAL\nUNCLEAR"
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "embedded_query_mode",
+                prompt,
+                ("MATRIX_QUERY", "CONTENT_GOAL", "UNCLEAR"),
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "embedded query matrix/content scope unresolved",
+                    tuple(self._traces),
+                )
+            if decision == "CONTENT_GOAL":
+                result.append(query)
+                continue
+
+            if any(actant.role is ActantRole.OBJECT for actant in query.actants):
+                raise AdaptiveParseError(
+                    "matrix proposition query conflicts with existing OBJECT actant",
+                    tuple(self._traces),
+                )
+            result.append(
+                replace(
+                    query,
+                    actants=(
+                        *query.actants,
+                        ActantCandidate(
+                            ActantRole.OBJECT,
+                            proposition=PropositionExprCandidate.ref_expr(
+                                proposition_ref
+                            ),
+                        ),
+                    ),
+                )
+            )
+        return result
 
     def _derive_conditionals(
         self,
