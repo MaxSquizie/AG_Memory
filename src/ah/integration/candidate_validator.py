@@ -55,6 +55,10 @@ class CandidateValidator(_BaseCandidateValidator):
         if not association:
             return
 
+        ordinary_by_act: dict[str, int] = {}
+        for relation in ordinary:
+            ordinary_by_act[relation.act_ref] = ordinary_by_act.get(relation.act_ref, 0) + 1
+
         acts: dict[str, QueryCandidate | CommandCandidate] = {}
         acts.update(
             {
@@ -84,6 +88,12 @@ class CandidateValidator(_BaseCandidateValidator):
                 raise CandidateValidationError(
                     "ASSOCIATION may target only an explicit QUERY/COMMAND act: "
                     f"{relation.act_ref!r}"
+                )
+            if ordinary_by_act.get(relation.act_ref, 0):
+                raise CandidateValidationError(
+                    "ASSOCIATION cannot share one act with a canonical world-relation "
+                    f"goal in {relation.act_ref!r}; the intended operation must be "
+                    "resolved before GoalCompiler"
                 )
             if relation.act_ref in seen:
                 raise CandidateValidationError(
