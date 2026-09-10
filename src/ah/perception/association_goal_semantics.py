@@ -2,24 +2,18 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from .contracts import (
-    ActRelationCandidate,
-    CommandCandidate,
-    PerceptionResult,
-    QueryCandidate,
-)
+from .association_semantics import AssociationActRelationCandidate
+from .contracts import CommandCandidate, PerceptionResult, QueryCandidate
 from .goal_semantics import GoalSemanticService as _BaseGoalSemanticService
 
 
 class AssociationGoalSemanticService(_BaseGoalSemanticService):
     """Add one typed association-intent decision after ordinary relation typing.
 
-    Structural parsing has already supplied the act, predicate and semantic roles.
-    Deterministic narrowing admits only acts with at least two explicit entity-like
-    actants. A bounded perception micro-probe then decides whether the user's goal is
-    associative convergence between two of those local endpoints. The result is
-    represented as runtime-only ActRelationCandidate("ASSOCIATION", ...); it is never
-    materialized as an asserted canonical L relation.
+    Structural parsing owns endpoint structure. A bounded semantic micro-probe only
+    decides whether the current act requests associative convergence and, if so,
+    which parser-local endpoints participate. Canonical refs remain unavailable at
+    this layer.
     """
 
     @staticmethod
@@ -30,17 +24,7 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
             return False
         if isinstance(root, CommandCandidate) and root.negated:
             return False
-        roles = {
-            actant.role
-            for actant in root.actants
-            if (
-                actant.proposition is None
-                and actant.composition is None
-                and actant.candidate_ref is None
-                and bool(actant.lookup_text)
-            )
-        }
-        return len(roles) >= 2
+        return bool(root.actants)
 
     def complete(self, result: PerceptionResult) -> PerceptionResult:
         completed = super().complete(result)
@@ -49,7 +33,13 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
             return completed
 
         relations = list(completed.act_relations)
-        covered = {item.act_ref for item in relations}
+        # IS-A or another future intra-act relation does not consume association
+        # intent. Only an already typed ASSOCIATION marker suppresses a duplicate.
+        covered = {
+            item.act_ref
+            for item in relations
+            if item.canonical_relation_id == "ASSOCIATION"
+        }
         changed = False
         for root in (*completed.queries, *completed.commands):
             if not self._eligible(root) or root.local_id in covered:
@@ -58,27 +48,13 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
             if decision is None:
                 continue
 
-            eligible_roles = {
-                actant.role
-                for actant in root.actants
-                if (
-                    actant.proposition is None
-                    and actant.composition is None
-                    and actant.candidate_ref is None
-                    and bool(actant.lookup_text)
-                )
-            }
-            left_role = getattr(decision, "left_role", None)
-            right_role = getattr(decision, "right_role", None)
-            if left_role not in eligible_roles or right_role not in eligible_roles:
-                raise ValueError(
-                    "association semantic decision escaped eligible actant roles"
-                )
-            relation = ActRelationCandidate(
+            relation = AssociationActRelationCandidate(
                 "ASSOCIATION",
                 root.local_id,
-                left_role,
-                right_role,
+                decision.left.role,
+                decision.right.role,
+                source_member_index=decision.left.member_index,
+                target_member_index=decision.right.member_index,
             )
             relations.append(relation)
             covered.add(root.local_id)
