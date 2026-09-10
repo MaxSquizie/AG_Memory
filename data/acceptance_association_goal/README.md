@@ -33,7 +33,9 @@ Important invariants:
   must use the typed `AssociationActRelationCandidate` contract.
 - Quoted association requests, quantified association queries, and negated association
   commands do not execute under the current binary AssociationGoal contract.
-- Binary endpoints must be distinct.
+- Parser endpoint selectors must be distinct. They may nevertheless resolve to the
+  same canonical ref; `AssociationCoordinator` then owns the valid depth-zero
+  convergence `expand(A) ∩ expand(A)`.
 - `AssociationGoal` and `AssociationOutcome` are not sent through `InferenceEngine`.
 - `AgentContext.association_blocks` and `ProjectionMode.ASSOCIATION` remain distinct
   from `inference_blocks` / `ProjectionMode.INFERENCE`.
