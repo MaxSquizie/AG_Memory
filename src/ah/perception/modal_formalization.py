@@ -408,11 +408,17 @@ class ModalScopeBuilder:
                 ):
                     continue
                 if self._sentence_id(item.local_id, assertion_spans) == cue.sentence_id:
+                    atom = PropositionExprCandidate.ref_expr(item.local_id)
+                    if item.negated:
+                        atom = PropositionExprCandidate(
+                            PropositionOperator.NOT,
+                            members=(atom,),
+                        )
                     owners.append(
                         (
                             "bare",
                             item.local_id,
-                            PropositionExprCandidate.ref_expr(item.local_id),
+                            atom,
                         )
                     )
             if not owners:
