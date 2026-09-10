@@ -1437,9 +1437,18 @@ class IntegrationService:
                 if query_resolution_failed:
                     continue
 
-                template_domain = tx.store.domain_of(template.uid) or Domain.C
+                concrete_refs = tuple(
+                    value
+                    for value in query_actants.values()
+                    if isinstance(value, Ref)
+                )
+                query_domain = (
+                    forced_domain
+                    if forced_domain is not None
+                    else DomainRouter(tx).route_external(concrete_refs)
+                )
                 body_node, body_created = tx.add_or_enrich_hypernode(
-                    template_domain,
+                    query_domain,
                     tx.ref(template.uid),
                     query_actants,
                     weight=self.config.initial_hypernode_weight,
@@ -1452,7 +1461,7 @@ class IntegrationService:
 
                 if spec.body_negated:
                     not_g, not_created = tx.ensure_function(
-                        template_domain, "NOT", (body_ref,)
+                        query_domain, "NOT", (body_ref,)
                     )
                     body_ref = tx.ref(not_g.uid)
                     created_any = created_any or not_created
@@ -1472,7 +1481,7 @@ class IntegrationService:
                             else "AND"
                         )
                         scoped_g, scoped_created = tx.ensure_function(
-                            template_domain,
+                            query_domain,
                             connective,
                             (restriction, body_ref),
                         )
@@ -1480,7 +1489,7 @@ class IntegrationService:
                         created_any = created_any or scoped_created
 
                     quantifier_g, quantifier_created = tx.ensure_function(
-                        template_domain,
+                        query_domain,
                         binding.operator.value,
                         (variable, body_ref),
                     )
@@ -1489,7 +1498,7 @@ class IntegrationService:
 
                     if binding.negated:
                         not_g, not_created = tx.ensure_function(
-                            template_domain, "NOT", (body_ref,)
+                            query_domain, "NOT", (body_ref,)
                         )
                         body_ref = tx.ref(not_g.uid)
                         created_any = created_any or not_created

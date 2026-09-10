@@ -524,3 +524,40 @@ def test_document_namespace_rewrites_quantified_binding_handles() -> None:
     assert item.actants[0].entity_ref == "B3:QX"
     assert item.quantified is not None
     assert item.quantified.bindings[0].entity_ref == "B3:QX"
+
+
+
+def test_quantified_query_domain_matches_personal_fixed_actant() -> None:
+    core, context, service, _engine = _env()
+    _template(
+        core, "know", (ActantRole.SUBJECT, ActantRole.OBJECT)
+    )
+    query = _query(
+        "know",
+        (
+            _bound(ActantRole.SUBJECT, "QX", "employees"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                mention="you",
+                normalized_hint="you",
+            ),
+        ),
+        (
+            _binding(
+                "QX",
+                0,
+                QueryQuantifierOperator.FORALL,
+                restriction="employee",
+            ),
+        ),
+    )
+    # In external input second person resolves to the agent/self P entity.
+    perception = PerceptionResult(
+        "Does every employee know you?", queries=(query,)
+    )
+    commit = service.integrate_external(perception, context)
+    assert len(commit.quantified_queries) == 1
+    root = commit.quantified_queries[0].ref
+    assert core.store.domain_of(root.uid) is Domain.P
+    body = commit.quantified_queries[0].member_refs[0]
+    assert core.store.domain_of(body.uid) is Domain.P
