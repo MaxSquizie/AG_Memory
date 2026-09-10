@@ -39,18 +39,21 @@ from .modal_goal import (
     ModalSemanticGoalCompiler,
 )
 from .modal_dispatch import ModalTurnGoalCompiler
+from .association_goal import AssociationQueryBuildResult, AssociationTurnGoalCompiler
 
 # Public runtime composes independent GoalCompiler extensions in one inheritance
-# chain. The mature base implementations remain in engine.py/query_builder.py;
-# counterfactual and modal layers add only typed runtime boundaries.
+# chain. Association execution itself remains outside InferenceEngine and is routed
+# to AssociationCoordinator by the agent orchestrator.
 InferenceEngine = ModalInferenceEngine
-SemanticGoalCompiler = ModalTurnGoalCompiler
-TurnGoalBuilder = ModalTurnGoalCompiler
+SemanticGoalCompiler = AssociationTurnGoalCompiler
+TurnGoalBuilder = AssociationTurnGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
     "AssociationGoal",
+    "AssociationQueryBuildResult",
+    "AssociationTurnGoalCompiler",
     "CauseEntailmentGoal",
     "CounterfactualGoal",
     "CounterfactualSemanticGoalCompiler",
