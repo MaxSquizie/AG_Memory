@@ -11,6 +11,7 @@
       "The association protocol probe runs with thinking disabled.",
       "A composed actant exposes independently addressable member selectors without flattening the parser structure.",
       "Only AssociationActRelationCandidate may carry the runtime ASSOCIATION relation id.",
+      "ASSOCIATION and a canonical world-relation goal cannot coexist on one act; Perception must resolve the operation before GoalCompiler so relation ordering is irrelevant.",
       "GoalCompiler does not create M, N, T, G, K, S, or L while resolving endpoints.",
       "Existing entity endpoints resolve to canonical M; local proposition/formula endpoints resolve to already integrated N/G.",
       "When no M exists, only a unique already indexed lexical S may be used as a fallback origin.",
@@ -223,6 +224,12 @@
       "id": "generic_marker_rejected",
       "precondition": "PerceptionResult contains plain ActRelationCandidate('ASSOCIATION', ...) instead of typed AssociationActRelationCandidate",
       "expected_integration_validation": "FAIL"
+    },
+    {
+      "id": "mixed_relation_marker_rejected",
+      "precondition": "one act carries both typed ASSOCIATION and a canonical world relation such as IS-A in any order",
+      "expected_integration_validation": "FAIL",
+      "order_independent": true
     },
     {
       "id": "common_node_kinds",
