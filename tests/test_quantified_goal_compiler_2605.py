@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from ah.agent import InteractionContext
 from ah.config import InferenceSettings
 from ah.core import AHCore, SequentialUidGenerator
@@ -9,7 +11,7 @@ from ah.inference import (
     LogicalStatus,
     SemanticGoalCompiler,
 )
-from ah.integration import IntegrationConfig, IntegrationService, namespace_perception_result
+from ah.integration import CandidateValidationError, IntegrationConfig, IntegrationService, namespace_perception_result
 from ah.integration.experience_mapper import ExperienceMapper
 from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Property, Ref, VariableSort
 from ah.perception import (
@@ -593,3 +595,86 @@ def test_quantified_formula_goal_compiles_without_perception_argument() -> None:
     assert built[0].goal.goal.target.expression == (
         commit.quantified_queries[0].ref
     )
+
+
+
+@pytest.mark.parametrize(
+    "mutator, expected",
+    [
+        (
+            lambda q: QueryCandidate(
+                q.predicate,
+                q.actants,
+                query_mode=q.query_mode,
+                local_id=None,
+                quantified=q.quantified,
+            ),
+            "requires local_id",
+        ),
+        (
+            lambda q: QueryCandidate(
+                q.predicate,
+                q.actants,
+                requested_roles=(ActantRole.OBJECT,),
+                query_mode=QueryMode.FILL_ROLE,
+                local_id=q.local_id,
+                quantified=q.quantified,
+            ),
+            "requires polar EXISTS mode",
+        ),
+        (
+            lambda q: QueryCandidate(
+                q.predicate,
+                q.actants,
+                query_mode=q.query_mode,
+                local_id=q.local_id,
+                quantified=QuantifiedQuerySpec(
+                    (
+                        QuantifiedQueryBinding(
+                            "UNUSED",
+                            0,
+                            QueryQuantifierOperator.FORALL,
+                            restriction_lemma="employee",
+                        ),
+                    )
+                ),
+            ),
+            "is not used",
+        ),
+        (
+            lambda q: QueryCandidate(
+                q.predicate,
+                q.actants,
+                query_mode=q.query_mode,
+                local_id=q.local_id,
+                quoted=True,
+                quantified=q.quantified,
+            ),
+            "cannot be quoted",
+        ),
+    ],
+)
+def test_malformed_quantified_query_contract_fails_before_commit(
+    mutator, expected
+) -> None:
+    core, context, service, _engine = _env()
+    _template(core, "employee", (ActantRole.SUBJECT,))
+    _template(core, "arrive", (ActantRole.SUBJECT,))
+    base = _query(
+        "arrive",
+        (_bound(ActantRole.SUBJECT, "QX", "employees"),),
+        (
+            _binding(
+                "QX",
+                0,
+                QueryQuantifierOperator.FORALL,
+                restriction="employee",
+            ),
+        ),
+    )
+    broken = mutator(base)
+    with pytest.raises(CandidateValidationError, match=expected):
+        service.integrate_external(
+            PerceptionResult("quantified query", queries=(broken,)),
+            context,
+        )
