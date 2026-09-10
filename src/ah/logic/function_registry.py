@@ -118,6 +118,16 @@ class FunctionRegistry:
                 operand_validator=_refs_only,
             )
         )
+        # Propositional n-ary XOR means exactly one true alternative.  It is
+        # deliberately not parity XOR, matching natural-language exclusive choice.
+        self.register(
+            FunctionSpec(
+                "XOR", 2, None,
+                lambda xs: " XOR ".join(f"({x})" for x in xs),
+                reasoner_handler="XOR",
+                operand_validator=_proposition_refs,
+            )
+        )
         self.register(
             FunctionSpec(
                 "NOT", 1, 1,

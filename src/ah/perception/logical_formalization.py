@@ -34,6 +34,7 @@ class _Atom:
 class LogicalFormalizationResult:
     roots: tuple[PropositionRootCandidate, ...]
     diagnostics: tuple[str, ...] = ()
+    unresolved: str | None = None
 
 
 class LogicalFormBuilder:
@@ -44,9 +45,10 @@ class LogicalFormBuilder:
     A bounded semantic probe is used only when the source relation/scope is not
     already fixed by the linguistic candidate graph.
 
-    XOR is deliberately not canonicalized here.  Exclusive alternatives still have
-    inclusive OR as a valid base proposition; exclusivity is a separate semantic
-    constraint implemented by the XOR formalization layer.
+    OR is the safe base relation for alternatives. A separate bounded semantic
+    probe upgrades an already established OR subtree to XOR only when the source
+    explicitly commits to exclusivity. This avoids both marker dictionaries and
+    accidental exclusive readings of ordinary natural-language "or".
     """
 
     _RELATION_CHOICES = (
@@ -59,6 +61,7 @@ class LogicalFormBuilder:
     )
     _WHOLE_NEGATION_CHOICES = ("WHOLE_NOT", "NO", "UNCLEAR")
     _CONTENT_OPERATOR_CHOICES = ("NOT_CONTENT", "NONE", "UNCLEAR")
+    _OR_EXCLUSIVITY_CHOICES = ("EXCLUSIVE", "INCLUSIVE_OR", "UNCLEAR")
     _MAX_SCOPE_CHOICES = 24
 
     def __init__(
@@ -69,6 +72,7 @@ class LogicalFormBuilder:
         self.graph = graph
         self.probe = probe
         self._diagnostics: list[str] = []
+        self._unresolved: str | None = None
 
     def build(
         self,
@@ -95,6 +99,12 @@ class LogicalFormBuilder:
             )
             antecedent = self._with_leaf_negations(antecedent, by_id)
             consequent = self._with_leaf_negations(consequent, by_id)
+            antecedent = self._refine_or_exclusivity(
+                source_text, antecedent, by_id, context="conditional antecedent"
+            )
+            consequent = self._refine_or_exclusivity(
+                source_text, consequent, by_id, context="conditional consequent"
+            )
             expr = PropositionExprCandidate(
                 PropositionOperator.IMPLIES,
                 members=(antecedent, consequent),
@@ -146,6 +156,9 @@ class LogicalFormBuilder:
                 else PropositionExprCandidate.ref_expr(content_actant.candidate_ref or "")
             )
             content = self._with_leaf_negations(raw_content, by_id)
+            content = self._refine_or_exclusivity(
+                source_text, content, by_id, context=f"content of {parent.local_id}"
+            )
             content_refs = content.leaf_refs()
             if not content_refs or any(ref not in by_id for ref in content_refs):
                 continue
@@ -233,12 +246,19 @@ class LogicalFormBuilder:
                 decision = self.probe(
                     "logical_relation", prompt, self._RELATION_CHOICES
                 )
-                if decision in {"NONE", "UNCLEAR", None}:
+                if decision == "UNCLEAR":
+                    self._diagnostics.append(
+                        f"LOGIC:{left.local_id}->{right.local_id}:relation_unclear"
+                    )
+                    self._unresolved = (
+                        "truth-functional relation unresolved between "
+                        f"{left.local_id} and {right.local_id}"
+                    )
+                    return LogicalFormalizationResult(
+                        (), tuple(self._diagnostics), self._unresolved
+                    )
+                if decision in {"NONE", None}:
                     relations.append(None)
-                    if decision == "UNCLEAR":
-                        self._diagnostics.append(
-                            f"LOGIC:{left.local_id}->{right.local_id}:relation_unclear"
-                        )
                     continue
                 relations.append(decision)
                 self._diagnostics.append(
@@ -265,6 +285,10 @@ class LogicalFormBuilder:
                         segment_relations,
                         by_id,
                     )
+                    if self._unresolved is not None:
+                        return LogicalFormalizationResult(
+                            (), tuple(self._diagnostics), self._unresolved
+                        )
                     if expr is not None:
                         evidence = self._cover_evidence(
                             source_text,
@@ -290,7 +314,9 @@ class LogicalFormBuilder:
             for index, (_start, _kind, expr, evidence, operator_refs)
             in enumerate(provisional, start=1)
         )
-        return LogicalFormalizationResult(roots, tuple(self._diagnostics))
+        return LogicalFormalizationResult(
+            roots, tuple(self._diagnostics), self._unresolved
+        )
 
     @staticmethod
     def _flat_expr(
@@ -492,9 +518,15 @@ class LogicalFormBuilder:
         )
 
         if len(set(relations)) == 1 and relations[0] in {"AND", "OR"}:
-            return PropositionExprCandidate(
+            expr = PropositionExprCandidate(
                 PropositionOperator(relations[0]),
                 members=atom_exprs,
+            )
+            expr = self._refine_or_exclusivity(
+                source_text, expr, by_id, context=f"sentence {sentence_id}"
+            )
+            return self._maybe_whole_negation(
+                source_text, sentence_id, atoms, expr, by_id
             )
 
         candidates = self._scope_candidates(atom_exprs, relations)
@@ -505,6 +537,10 @@ class LogicalFormBuilder:
         if len(candidates) > self._MAX_SCOPE_CHOICES:
             self._diagnostics.append(
                 f"LOGIC:sentence{sentence_id}:scope_candidate_overflow:{len(candidates)}"
+            )
+            self._unresolved = (
+                f"logical scope candidate overflow in sentence {sentence_id}: "
+                f"{len(candidates)} candidates"
             )
             return None
 
@@ -529,8 +565,15 @@ class LogicalFormBuilder:
             self._diagnostics.append(
                 f"LOGIC:sentence{sentence_id}:scope_unclear"
             )
+            self._unresolved = f"logical scope unresolved in sentence {sentence_id}"
             return None
-        return candidates[labels.index(decision)]
+        expr = candidates[labels.index(decision)]
+        expr = self._refine_or_exclusivity(
+            source_text, expr, by_id, context=f"sentence {sentence_id}"
+        )
+        return self._maybe_whole_negation(
+            source_text, sentence_id, atoms, expr, by_id
+        )
 
     @classmethod
     def _scope_candidates(
@@ -576,6 +619,91 @@ class LogicalFormBuilder:
             )
         raise ValueError(f"unsupported logical relation: {relation}")
 
+    def _refine_or_exclusivity(
+        self,
+        source_text: str,
+        expr: PropositionExprCandidate,
+        by_id: Mapping[str, AssertionCandidate],
+        *,
+        context: str,
+    ) -> PropositionExprCandidate:
+        """Upgrade only explicitly exclusive OR subtrees to canonical XOR.
+
+        UNCLEAR keeps OR because OR is entailed by both inclusive and exclusive
+        readings. This is a sound weakening, not a guessed semantic fallback.
+        """
+        if expr.operator is PropositionOperator.REF:
+            return expr
+        members = tuple(
+            self._refine_or_exclusivity(
+                source_text, member, by_id, context=context
+            )
+            for member in expr.members
+        )
+        refined = PropositionExprCandidate(expr.operator, members=members)
+        if refined.operator is not PropositionOperator.OR:
+            return refined
+
+        leaf_lines = []
+        for ref in refined.leaf_refs():
+            assertion = by_id.get(ref)
+            leaf_lines.append(
+                f"{ref}: "
+                + (
+                    assertion.evidence.text
+                    if assertion is not None and assertion.evidence is not None
+                    else ref
+                )
+            )
+        prompt = (
+            f"TEXT:\n{source_text}\n"
+            f"CONTEXT:\n{context}\n"
+            f"OR CANDIDATE:\n{self._render(refined)}\n"
+            + "ALTERNATIVES:\n"
+            + "\n".join(leaf_lines)
+        )
+        decision = self.probe(
+            "logical_or_exclusivity",
+            prompt,
+            self._OR_EXCLUSIVITY_CHOICES,
+        )
+        if decision == "EXCLUSIVE":
+            self._diagnostics.append(
+                f"LOGIC:{context}:OR_promoted_to_XOR:{self._render(refined)}"
+            )
+            return PropositionExprCandidate(
+                PropositionOperator.XOR, members=refined.members
+            )
+        if decision == "UNCLEAR":
+            self._diagnostics.append(
+                f"LOGIC:{context}:or_exclusivity_unclear_kept_OR"
+            )
+        return refined
+
+    def _whole_negation_probe_candidate(
+        self,
+        sentence_id: int,
+        atoms: Sequence[_Atom],
+        by_id: Mapping[str, AssertionCandidate],
+    ) -> bool:
+        if any(by_id[item.local_id].negated for item in atoms):
+            return True
+        clauses = [
+            item for item in self.graph.clauses if item.sentence_id == sentence_id
+        ]
+        if not clauses:
+            return False
+        start = min(item.span.evidence.start or 0 for item in clauses)
+        end = max(item.span.evidence.end or 0 for item in clauses)
+        for token in self.graph.tokens:
+            if not (start <= token.start < end):
+                continue
+            # НЕ/НИ are finite grammatical scope triggers, not semantic answers.
+            surface = (token.raw_text or token.text).strip().casefold()
+            if surface in {"не", "ни"}:
+                return True
+        return False
+
     def _maybe_whole_negation(
         self,
         source_text: str,
@@ -583,7 +711,11 @@ class LogicalFormBuilder:
         atoms: Sequence[_Atom],
         expr: PropositionExprCandidate,
         by_id: Mapping[str, AssertionCandidate],
-    ) -> PropositionExprCandidate:
+    ) -> PropositionExprCandidate | None:
+        if not self._whole_negation_probe_candidate(
+            sentence_id, atoms, by_id
+        ):
+            return expr
         sentence_text = self._sentence_text(source_text, sentence_id)
         prompt = (
             f"TEXT:\n{sentence_text}\n"
@@ -607,10 +739,14 @@ class LogicalFormBuilder:
             return PropositionExprCandidate(
                 PropositionOperator.NOT, members=(expr,)
             )
-        if decision == "UNCLEAR":
+        if decision == "UNCLEAR" or decision is None:
             self._diagnostics.append(
                 f"LOGIC:sentence{sentence_id}:whole_negation_unclear"
             )
+            self._unresolved = (
+                f"whole-formula negation scope unresolved in sentence {sentence_id}"
+            )
+            return None
         return expr
 
     def _relation_prompt(

@@ -82,6 +82,7 @@ class PropositionOperator(str, Enum):
     REF = "REF"
     AND = "AND"
     OR = "OR"
+    XOR = "XOR"
     NOT = "NOT"
     IMPLIES = "IMPLIES"
     FALSE = "FALSE"  # legacy runtime alias; canonical object negation is NOT
@@ -92,7 +93,7 @@ class PropositionExprCandidate:
     """Runtime-only proposition expression over local assertion refs.
 
     This is deliberately not a canonical AH type. Integration maps REF to the
-    corresponding scoped N and AND/OR/NOT to the already-canonical g operators.
+    corresponding scoped N and AND/OR/XOR/NOT/IMPLIES to canonical g operators.
     """
 
     operator: PropositionOperator

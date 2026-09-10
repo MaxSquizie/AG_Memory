@@ -1252,6 +1252,11 @@ class AdaptivePerceptionParser:
                 assertion_spans,
                 conditionals,
             )
+            if logical.unresolved is not None:
+                raise AdaptiveParseError(
+                    f"logical formalization unresolved: {logical.unresolved}",
+                    tuple(self._traces),
+                )
             proposition_roots = logical.roots
             logical_diagnostics = logical.diagnostics
 
