@@ -164,7 +164,12 @@ class ModalScopeBuilder:
             ):
                 continue
             sentence_id = self._sentence_id(item.local_id, assertion_spans)
-            if sentence_id is None or sentence_target_counts.get(sentence_id, 0) < 2:
+            if sentence_id is None:
+                continue
+            if (
+                not proposition_only_actants
+                and sentence_target_counts.get(sentence_id, 0) < 2
+            ):
                 continue
             # The cue is the matrix predicate itself, not its complete subordinate
             # proposition evidence span.

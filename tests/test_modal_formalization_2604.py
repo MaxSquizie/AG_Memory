@@ -392,3 +392,110 @@ def test_required_and_permitted_are_equally_nonfactive() -> None:
         )
         assert _solve(engine, commit.formulas[0].ref).status is LogicalStatus.PROVED
         assert _solve(engine, commit.assertions[0].ref).status is LogicalStatus.UNKNOWN
+
+
+
+def test_impersonal_proposition_shell_can_be_consumed_as_required_operator() -> None:
+    text = "Необходимо, чтобы сервер работал."
+    graph = _graph(
+        text,
+        (
+            ("Необходимо", "PRED"),
+            (",", None),
+            ("чтобы", "CONJ"),
+            ("сервер", "NOUN"),
+            ("работал", "VERB"),
+            (".", None),
+        ),
+    )
+    child = _assertion(
+        "A2", "работал", "сервер", "сервер работал", text
+    )
+    content = PropositionExprCandidate.ref_expr("A2")
+    pred_start = text.index("Необходимо")
+    parent = AssertionCandidate(
+        "A1",
+        PredicateCandidate(
+            "Необходимо",
+            "необходимо",
+            evidence=EvidenceSpan(
+                "Необходимо", pred_start, pred_start + len("Необходимо")
+            ),
+            template_candidate=TemplateCandidate((ActantRole.OBJECT,)),
+        ),
+        (
+            ActantCandidate(
+                ActantRole.OBJECT,
+                proposition=content,
+            ),
+        ),
+        evidence=EvidenceSpan(text, 0, len(text)),
+    )
+
+    result = ModalScopeBuilder(
+        graph,
+        lambda stage, *_args: (
+            "REQUIRED" if stage == "modal_operator" else "UNCLEAR"
+        ),
+    ).build(
+        text,
+        (parent, child),
+        {"A1": _Span(1, 1), "A2": _Span(5, 5)},
+    )
+    assert result.unresolved is None
+    assert len(result.roots) == 1
+    assert _render(result.roots[0].expression) == "REQUIRED(A2)"
+    assert result.roots[0].operator_source_refs == ("A1",)
+
+
+def test_subject_bearing_attitude_is_not_consumed_as_impersonal_modal_shell() -> None:
+    text = "Анна думает, что сервер работает."
+    graph = _graph(
+        text,
+        (
+            ("Анна", "NOUN"),
+            ("думает", "VERB"),
+            (",", None),
+            ("что", "CONJ"),
+            ("сервер", "NOUN"),
+            ("работает", "VERB"),
+            (".", None),
+        ),
+    )
+    child = _assertion(
+        "A2", "работает", "сервер", "сервер работает", text
+    )
+    pred_start = text.index("думает")
+    parent = AssertionCandidate(
+        "A1",
+        PredicateCandidate(
+            "думает",
+            "думать",
+            evidence=EvidenceSpan(
+                "думает", pred_start, pred_start + len("думает")
+            ),
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.OBJECT)
+            ),
+        ),
+        (
+            ActantCandidate(ActantRole.SUBJECT, mention="Анна"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                proposition=PropositionExprCandidate.ref_expr("A2"),
+            ),
+        ),
+        evidence=EvidenceSpan(text, 0, len(text)),
+    )
+    calls = []
+    result = ModalScopeBuilder(
+        graph,
+        lambda stage, *_args: calls.append(stage) or "POSSIBLE",
+    ).build(
+        text,
+        (parent, child),
+        {"A1": _Span(2, 2), "A2": _Span(6, 6)},
+    )
+    assert result.roots == ()
+    assert result.unresolved is None
+    assert calls == []
