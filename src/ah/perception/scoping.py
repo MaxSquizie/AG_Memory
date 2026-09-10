@@ -12,7 +12,7 @@ from .contracts import (
 )
 
 
-_COUNTERFACTUAL_TARGET_PREFIX = "__CF_TARGET__:"
+_COUNTERFACTUAL_TARGET_SUFFIX = ":__CF_TARGET__"
 
 
 def apply_speech_act_scoping(result: PerceptionResult) -> PerceptionResult:
@@ -31,8 +31,9 @@ def apply_speech_act_scoping(result: PerceptionResult) -> PerceptionResult:
     Integration will canonicalize it with occurrence_count=0; it never becomes an
     ordinary factual premise. No surface marker such as "если бы" is inspected.
 
-    The pass is deterministic and idempotent. Quoted edges are separate scope
-    boundaries and are never traversed.
+    The pass is deterministic and idempotent, including after document-local IDs
+    are namespaced (``Q1:__CF_TARGET__`` -> ``B0:Q1:__CF_TARGET__``). Quoted edges
+    are separate scope boundaries and are never traversed.
     """
     root_ids = {
         item.local_id
@@ -134,7 +135,7 @@ def apply_speech_act_scoping(result: PerceptionResult) -> PerceptionResult:
         if getattr(query, "quantified", None) is not None:
             continue
 
-        target_id = f"{_COUNTERFACTUAL_TARGET_PREFIX}{qid}"
+        target_id = f"{qid}{_COUNTERFACTUAL_TARGET_SUFFIX}"
         if target_id in occupied_ids:
             # Idempotence: if a prior pass already created the exact shadow and its
             # dependency is present, there is nothing more to do. Any other use of
