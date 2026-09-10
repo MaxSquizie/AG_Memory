@@ -209,9 +209,27 @@ class CandidateValidator:
                     raise CandidateValidationError(
                         f"Logical operator source {ref!r} must be an ordinary asserted matrix frame"
                     )
-                if not any(actant.proposition is not None for actant in source.actants):
+                modal_root = root.expression.operator in {
+                    PropositionOperator.POSSIBLE,
+                    PropositionOperator.REQUIRED,
+                    PropositionOperator.PERMITTED,
+                }
+                if (
+                    not modal_root
+                    and not any(
+                        actant.proposition is not None
+                        for actant in source.actants
+                    )
+                ):
                     raise CandidateValidationError(
                         f"Logical operator source {ref!r} must structurally govern proposition content"
+                    )
+                if modal_root and source.actants:
+                    # A zero-actant predicative shell may be consumed as a modal
+                    # operator source. Ordinary argument-bearing matrix predicates
+                    # remain semantic N propositions instead of being erased here.
+                    raise CandidateValidationError(
+                        f"Modal operator source {ref!r} must be an argument-free source shell"
                     )
 
         act_by_ref: dict[str, object] = dict(by_id)

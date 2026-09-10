@@ -21,6 +21,7 @@ from .morphology import (
 )
 from .event_normalizer import EventNormalizer
 from .logical_formalization import LogicalFormBuilder
+from .modal_formalization import ModalScopeBuilder
 from .lexical_recovery import (
     LexicalRecovery,
     LexicalRecoveryStatus,
@@ -1260,6 +1261,28 @@ class AdaptivePerceptionParser:
             proposition_roots = logical.roots
             conditionals = logical.conditionals
             logical_diagnostics = logical.diagnostics
+
+            modal = ModalScopeBuilder(
+                self._candidate_graph,
+                lambda stage, prompt, choices: self._deep_semantic_choice_probe(
+                    stage, prompt, choices
+                )[0],
+            ).build(
+                text,
+                tuple(assertions),
+                assertion_spans,
+                proposition_roots,
+            )
+            if modal.unresolved is not None:
+                raise AdaptiveParseError(
+                    f"modal formalization unresolved: {modal.unresolved}",
+                    tuple(self._traces),
+                )
+            proposition_roots = modal.roots
+            logical_diagnostics = (
+                *logical_diagnostics,
+                *modal.diagnostics,
+            )
 
         # Event normalization is a runtime perception boundary, not a canonical
         # write.  It can recover independently asserted gerund/result-state
