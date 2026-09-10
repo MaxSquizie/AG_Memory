@@ -30,8 +30,8 @@ class MainWindow(_BaseMainWindow):
     """GUI surface exposing only tests that evaluate semantic formalization.
 
     Historical buttons are kept alive but hidden so inherited worker-completion
-    handlers may still safely toggle them.  The visible surface is one selector and
-    one run button.  Text->semantic-oracle suites keep using the production
+    handlers may still safely toggle them. The visible surface is one selector and
+    one run button. Text->semantic-oracle suites keep using the production
     acceptance runner; typed GoalCompiler contracts use narrow pytest targets because
     their fixtures require preloaded canonical memory and cannot be represented by a
     standalone text/oracle pair without weakening the test.
@@ -149,6 +149,7 @@ class MainWindow(_BaseMainWindow):
         super().__init__(*args, **kwargs)
         self._semantic_test_process: QProcess | None = None
         self._semantic_process_output: list[str] = []
+        self._semantic_worker_failed = False
         self._install_semantic_test_controls()
 
     def _install_semantic_test_controls(self) -> None:
@@ -205,7 +206,10 @@ class MainWindow(_BaseMainWindow):
 
     def _semantic_test_busy(self) -> bool:
         process = self._semantic_test_process
-        process_busy = process is not None and process.state() != QProcess.NotRunning
+        process_busy = (
+            process is not None
+            and process.state() != QProcess.ProcessState.NotRunning
+        )
         return bool(
             process_busy
             or getattr(self, "_acceptance_worker", None) is not None
@@ -223,6 +227,7 @@ class MainWindow(_BaseMainWindow):
             return
 
         suite = self._selected_semantic_suite()
+        self._semantic_worker_failed = False
         self.semantic_test_status.setText("RUNNING")
         self.semantic_test_button.setEnabled(False)
         self.semantic_suite.setEnabled(False)
@@ -277,7 +282,7 @@ class MainWindow(_BaseMainWindow):
             return
 
         process = QProcess(self)
-        process.setProcessChannelMode(QProcess.MergedChannels)
+        process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         process.setWorkingDirectory(str(repo_root))
         process.readyReadStandardOutput.connect(self._semantic_pytest_output)
         process.finished.connect(self._semantic_pytest_finished)
@@ -329,7 +334,7 @@ class MainWindow(_BaseMainWindow):
         # FailedToStart does not reliably produce a useful finished callback on all
         # Qt backends, so recover the UI explicitly. Runtime crashes normally still
         # proceed through finished where the captured stderr is shown.
-        if error == QProcess.FailedToStart:
+        if error == QProcess.ProcessError.FailedToStart:
             label = self._selected_semantic_suite().label
             message = process.errorString() or "pytest process failed to start"
             self.chat_history.append(
@@ -344,14 +349,28 @@ class MainWindow(_BaseMainWindow):
         self.semantic_test_button.setEnabled(True)
         self.semantic_suite.setEnabled(True)
 
+    @Slot(str)
+    def _acceptance_error(self, message: str) -> None:
+        self._semantic_worker_failed = True
+        super()._acceptance_error(message)
+
+    @Slot(str)
+    def _hidden_valency_error(self, message: str) -> None:
+        self._semantic_worker_failed = True
+        super()._hidden_valency_error(message)
+
     @Slot()
     def _acceptance_worker_finished(self) -> None:
         super()._acceptance_worker_finished()
         if hasattr(self, "semantic_test_button"):
-            self._semantic_suite_idle("DONE")
+            self._semantic_suite_idle(
+                "ERROR" if self._semantic_worker_failed else "DONE"
+            )
 
     @Slot()
     def _hidden_valency_worker_finished(self) -> None:
         super()._hidden_valency_worker_finished()
         if hasattr(self, "semantic_test_button"):
-            self._semantic_suite_idle("DONE")
+            self._semantic_suite_idle(
+                "ERROR" if self._semantic_worker_failed else "DONE"
+            )
