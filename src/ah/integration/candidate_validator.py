@@ -209,22 +209,25 @@ class CandidateValidator:
                     raise CandidateValidationError(
                         f"Logical operator source {ref!r} must be an ordinary asserted matrix frame"
                     )
-                modal_root = root.expression.operator in {
-                    PropositionOperator.POSSIBLE,
-                    PropositionOperator.REQUIRED,
-                    PropositionOperator.PERMITTED,
-                }
-                if (
-                    not modal_root
-                    and not any(
-                        actant.proposition is not None
-                        for actant in source.actants
-                    )
-                ):
+                def contains_modal(expr: PropositionExprCandidate) -> bool:
+                    if expr.operator in {
+                        PropositionOperator.POSSIBLE,
+                        PropositionOperator.REQUIRED,
+                        PropositionOperator.PERMITTED,
+                    }:
+                        return True
+                    return any(contains_modal(member) for member in expr.members)
+
+                modal_formula = contains_modal(root.expression)
+                has_proposition_content = any(
+                    actant.proposition is not None
+                    for actant in source.actants
+                )
+                if not modal_formula and not has_proposition_content:
                     raise CandidateValidationError(
                         f"Logical operator source {ref!r} must structurally govern proposition content"
                     )
-                if modal_root and source.actants:
+                if modal_formula and not has_proposition_content and source.actants:
                     # A zero-actant predicative shell may be consumed as a modal
                     # operator source. Ordinary argument-bearing matrix predicates
                     # remain semantic N propositions instead of being erased here.

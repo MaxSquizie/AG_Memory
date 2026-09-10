@@ -1,0 +1,5 @@
+Choose exactly one listed candidate proposition scope for the already classified modal cue.
+
+Each Cn is an exact proposition subtree produced by Python. Select the subtree that the modal cue semantically modifies in the source. Do not regroup conjunction/disjunction, do not move negation, do not invent a new subtree, and do not change the modal type. If the source does not determine one listed scope safely, return UNCLEAR.
+
+Return only one listed Cn label or UNCLEAR.
