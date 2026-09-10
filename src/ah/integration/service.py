@@ -1473,7 +1473,7 @@ class IntegrationService:
                             tx,
                             binding.restriction_lemma,
                             variable,
-                            template_domain,
+                            query_domain,
                         )
                         connective = (
                             "IMPLIES"
