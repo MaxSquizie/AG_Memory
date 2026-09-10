@@ -38,13 +38,14 @@ from .modal_goal import (
     ModalInferenceEngine,
     ModalSemanticGoalCompiler,
 )
+from .modal_dispatch import ModalTurnGoalCompiler
 
-# Public runtime composes the independent GoalCompiler extensions in one inheritance
-# chain.  The mature base implementations remain in engine.py/query_builder.py;
-# counterfactual and modal layers add only their typed runtime boundaries.
+# Public runtime composes independent GoalCompiler extensions in one inheritance
+# chain. The mature base implementations remain in engine.py/query_builder.py;
+# counterfactual and modal layers add only typed runtime boundaries.
 InferenceEngine = ModalInferenceEngine
-SemanticGoalCompiler = ModalSemanticGoalCompiler
-TurnGoalBuilder = ModalSemanticGoalCompiler
+SemanticGoalCompiler = ModalTurnGoalCompiler
+TurnGoalBuilder = ModalTurnGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
@@ -76,6 +77,7 @@ __all__ = [
     "MaterializationResult",
     "ModalInferenceEngine",
     "ModalSemanticGoalCompiler",
+    "ModalTurnGoalCompiler",
     "MultiRoleBindingConclusion",
     "MultiRoleFillGoal",
     "QueryBuildResult",
