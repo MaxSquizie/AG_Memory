@@ -439,6 +439,139 @@ def _match_queries(
             )
             _check(checks, f"{prefix}.roles.{role}", ok, expected=target_spec, actual=actual_target)
 
+        expected_quantified = expected.get("quantified")
+        actual_quantified = actual.get("quantified")
+        if expected_quantified is not None:
+            _check(
+                checks,
+                f"{prefix}.quantified.present",
+                isinstance(actual_quantified, dict),
+                expected=True,
+                actual=isinstance(actual_quantified, dict),
+            )
+            if isinstance(actual_quantified, dict):
+                expected_body_negated = bool(
+                    expected_quantified.get("body_negated", False)
+                )
+                actual_body_negated = bool(
+                    actual_quantified.get("body_negated", False)
+                )
+                _check(
+                    checks,
+                    f"{prefix}.quantified.body_negated",
+                    actual_body_negated == expected_body_negated,
+                    expected=expected_body_negated,
+                    actual=actual_body_negated,
+                )
+
+                actual_bindings = [
+                    item
+                    for item in actual_quantified.get("bindings", []) or []
+                    if isinstance(item, dict)
+                ]
+                expected_bindings = list(
+                    expected_quantified.get("bindings", []) or []
+                )
+                _check(
+                    checks,
+                    f"{prefix}.quantified.binding_count",
+                    len(actual_bindings) == len(expected_bindings),
+                    expected=len(expected_bindings),
+                    actual=len(actual_bindings),
+                )
+                for b_index, expected_binding in enumerate(expected_bindings):
+                    if b_index >= len(actual_bindings):
+                        break
+                    actual_binding = actual_bindings[b_index]
+                    bprefix = (
+                        f"{prefix}.quantified.bindings.b{b_index + 1}"
+                    )
+                    role = str(expected_binding.get("role", ""))
+                    actual_role = actual_roles.get(role)
+                    expected_handle = (
+                        actual_role.get("entity_ref")
+                        if isinstance(actual_role, dict)
+                        else None
+                    )
+                    actual_handle = actual_binding.get("entity_ref")
+                    _check(
+                        checks,
+                        f"{bprefix}.role_binding",
+                        bool(expected_handle)
+                        and str(actual_handle) == str(expected_handle),
+                        expected=f"entity_ref used by query role {role}",
+                        actual=actual_handle,
+                    )
+                    expected_operator = str(
+                        expected_binding.get("operator", "")
+                    ).upper()
+                    actual_operator = str(
+                        actual_binding.get("operator", "")
+                    ).upper()
+                    _check(
+                        checks,
+                        f"{bprefix}.operator",
+                        actual_operator == expected_operator,
+                        expected=expected_operator,
+                        actual=actual_operator,
+                    )
+                    expected_variable_id = int(
+                        expected_binding.get("variable_id", b_index)
+                    )
+                    actual_variable_id = int(
+                        actual_binding.get("variable_id", -1)
+                    )
+                    _check(
+                        checks,
+                        f"{bprefix}.variable_id",
+                        actual_variable_id == expected_variable_id,
+                        expected=expected_variable_id,
+                        actual=actual_variable_id,
+                    )
+                    expected_restriction = expected_binding.get(
+                        "restriction"
+                    )
+                    actual_restriction = actual_binding.get(
+                        "restriction_lemma"
+                    )
+                    _check(
+                        checks,
+                        f"{bprefix}.restriction",
+                        (
+                            None
+                            if actual_restriction is None
+                            else _norm(actual_restriction)
+                        )
+                        == (
+                            None
+                            if expected_restriction is None
+                            else _norm(expected_restriction)
+                        ),
+                        expected=expected_restriction,
+                        actual=actual_restriction,
+                    )
+                    expected_negated = bool(
+                        expected_binding.get("negated", False)
+                    )
+                    actual_negated = bool(
+                        actual_binding.get("negated", False)
+                    )
+                    _check(
+                        checks,
+                        f"{bprefix}.negated",
+                        actual_negated == expected_negated,
+                        expected=expected_negated,
+                        actual=actual_negated,
+                    )
+        elif actual_quantified is not None:
+            _check(
+                checks,
+                f"{prefix}.quantified.unexpected",
+                False,
+                expected=None,
+                actual=actual_quantified,
+            )
+
 
 def _match_relations(
     checks: list[dict[str, Any]],
