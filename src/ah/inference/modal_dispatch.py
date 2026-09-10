@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from ah.agent import InteractionContext
 from ah.integration.contracts import IntegrationCommit
-from ah.model import Ref
-from ah.perception import PropositionExprCandidate, QueryCandidate
+from ah.model import FunctionSymbol, Ref, RefKind
+from ah.perception import PropositionExprCandidate, PropositionOperator, QueryCandidate
 
 from .contracts import GoalSpec, InferenceQuery
-from .modal_goal import ModalSemanticGoalCompiler
+from .modal_goal import FormulaPattern, ModalSemanticGoalCompiler
 from .query_builder import QueryBuildResult
 
 
@@ -40,6 +40,54 @@ class ModalTurnGoalCompiler(ModalSemanticGoalCompiler):
             for actant in query.actants
         )
 
+    def _pattern_from_expr(
+        self,
+        expr: PropositionExprCandidate,
+        integrated_by_id: dict[str, object],
+        assertion_by_id: dict[str, object],
+    ) -> FormulaPattern | None:
+        # A negative EMBEDDED assertion is already represented by Integration as
+        # g_NOT(N). When the proposition AST also explicitly owns that same NOT,
+        # remove exactly the Integration wrapper before rebuilding the AST node.
+        # For a real double negation, the outer NOT remains a separate parent in
+        # the expression tree, so NOT(NOT(N)) is preserved rather than collapsed.
+        if (
+            expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
+            and len(expr.members) == 1
+            and expr.members[0].operator is PropositionOperator.REF
+        ):
+            child = expr.members[0]
+            assert child.ref is not None
+            integrated = integrated_by_id.get(child.ref)
+            ref = getattr(integrated, "ref", None)
+            if (
+                isinstance(ref, Ref)
+                and ref.kind is RefKind.G
+                and self.core.store.has_uid(ref.uid)
+            ):
+                element = self.core.store.get_element_any_domain(ref.uid)
+                if isinstance(element, FunctionSymbol):
+                    try:
+                        operator = self.core.function_registry.canonical_id(
+                            element.function_id
+                        )
+                    except KeyError:
+                        operator = ""
+                    if (
+                        operator == "NOT"
+                        and len(element.operands) == 1
+                        and isinstance(element.operands[0], Ref)
+                    ):
+                        return FormulaPattern(
+                            operator="NOT",
+                            members=(
+                                self._pattern_for_canonical_ref(element.operands[0]),
+                            ),
+                        )
+        return super()._pattern_from_expr(
+            expr, integrated_by_id, assertion_by_id
+        )
+
     def _build_matrix_proposition_query(
         self,
         query: QueryCandidate,
@@ -67,9 +115,6 @@ class ModalTurnGoalCompiler(ModalSemanticGoalCompiler):
             )
 
         expression = modal_expressions[0]
-        # At this late boundary Integration has already encoded local assertion
-        # negation in the referenced N/G. Passing an empty assertion map is safe:
-        # _pattern_from_expr expands those ground G wrappers structurally.
         goal = self._goal_from_modal_expr(expression, integrated_by_id, {})
         if goal is None:
             return QueryBuildResult(
