@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from threading import RLock
 
+from ah.perception import AssertionStatus, SituationRelationCandidate
 from ah.projection import ProjectionBudgetExceeded, SourceProjectionCursor
 
 from .pipeline import (
@@ -111,12 +112,150 @@ class DocumentProcessor(_PipelineDocumentProcessor):
         viable = tuple(value for value in candidates if start < value <= hard_end)
         return max(viable) if viable else None
 
-    def _resolve_batch_discourse_refs(self, plan):
-        """Bind only one uniquely compatible backward antecedent.
+    @staticmethod
+    def _assertion_start(assertion) -> int | None:
+        starts: list[int] = []
+        evidence = getattr(assertion, "evidence", None)
+        if evidence is not None and evidence.start is not None:
+            starts.append(int(evidence.start))
+        predicate = getattr(assertion, "predicate", None)
+        predicate_evidence = None if predicate is None else getattr(predicate, "evidence", None)
+        if predicate_evidence is not None and predicate_evidence.start is not None:
+            starts.append(int(predicate_evidence.start))
+        for actant in getattr(assertion, "actants", ()):
+            actant_evidence = getattr(actant, "evidence", None)
+            if actant_evidence is not None and actant_evidence.start is not None:
+                starts.append(int(actant_evidence.start))
+        return min(starts) if starts else None
 
-        Future candidates are excluded by document-global evidence offsets; multiple
-        prior candidates remain unresolved and therefore keep Integration fail-closed.
+    @staticmethod
+    def _assertion_semantic(assertion) -> str:
+        predicate = assertion.predicate.lookup_form
+        bindings: list[str] = []
+        for actant in assertion.actants:
+            value = actant.lookup_text
+            if value:
+                bindings.append(f"{actant.role.value}={value}")
+            elif actant.candidate_ref is not None or actant.proposition is not None:
+                bindings.append(f"{actant.role.value}=[situation]")
+        body = predicate if not bindings else f"{predicate}({', '.join(bindings)})"
+        return f"NOT {body}" if assertion.negated else body
+
+    def _boundary_discourse_relations(self, plan) -> tuple[SituationRelationCandidate, ...]:
+        """Resolve CAUSE/FOLLOW that crosses operational chunk boundaries.
+
+        The semantic probe receives only two adjacent bounded source windows plus
+        UID-free candidate strings. Its finite-choice decision is mapped back to
+        parser-local assertion IDs. Canonical UIDs are never shown to Perception and
+        no canonical mutation occurs here.
         """
+        classifier = getattr(self.services.perception, "classify_discourse_relation", None)
+        if not callable(classifier):
+            return ()
+
+        source_text = plan.perception.source_text
+        chunks = self.chunk_text(source_text)
+        if len(chunks) < 2:
+            return ()
+
+        buckets: list[list[object]] = [[] for _ in chunks]
+        for assertion in plan.perception.assertions:
+            if assertion.status is not AssertionStatus.ASSERTED or assertion.quoted:
+                continue
+            start = self._assertion_start(assertion)
+            if start is None:
+                continue
+            for index, chunk in enumerate(chunks):
+                if chunk.start <= start < chunk.end:
+                    buckets[index].append(assertion)
+                    break
+        for bucket in buckets:
+            bucket.sort(
+                key=lambda item: (
+                    self._assertion_start(item)
+                    if self._assertion_start(item) is not None
+                    else 2**63,
+                    item.local_id,
+                )
+            )
+
+        existing = {
+            (item.canonical_relation_id, item.source_ref, item.target_ref)
+            for item in plan.perception.relations
+        }
+        additions: list[SituationRelationCandidate] = []
+
+        for boundary_index in range(1, len(chunks)):
+            prior = tuple(buckets[boundary_index - 1])
+            current = tuple(buckets[boundary_index])
+            if not prior or not current:
+                continue
+
+            prior_semantics = tuple(self._assertion_semantic(item) for item in prior)
+            current_semantics = tuple(self._assertion_semantic(item) for item in current)
+            resolved_current = {
+                current_index
+                for current_index, assertion in enumerate(current)
+                if any(
+                    relation.canonical_relation_id in {"CAUSE", "FOLLOW"}
+                    and relation.target_ref == assertion.local_id
+                    for relation in plan.perception.relations
+                )
+            }
+            excluded = {
+                (prior_index, current_index)
+                for current_index in resolved_current
+                for prior_index in range(len(prior))
+            }
+            narrative_context = chunks[boundary_index - 1].text + chunks[boundary_index].text
+
+            while len(resolved_current) < len(current):
+                decision = classifier(
+                    narrative_context,
+                    prior_semantics,
+                    current_semantics,
+                    excluded_pairs=tuple(sorted(excluded)),
+                )
+                if decision is None:
+                    break
+                if (
+                    decision.prior_index < 0
+                    or decision.prior_index >= len(prior)
+                    or decision.current_index < 0
+                    or decision.current_index >= len(current)
+                    or decision.current_index in resolved_current
+                    or (decision.prior_index, decision.current_index) in excluded
+                ):
+                    raise DocumentProcessingError(
+                        "Document boundary discourse probe escaped its finite candidate set"
+                    )
+                relation_id = decision.canonical_relation_id
+                if relation_id not in {"CAUSE", "FOLLOW"}:
+                    raise DocumentProcessingError(
+                        f"Unsupported document boundary discourse relation: {relation_id}"
+                    )
+                source_ref = prior[decision.prior_index].local_id
+                target_ref = current[decision.current_index].local_id
+                key = (relation_id, source_ref, target_ref)
+                if key not in existing:
+                    additions.append(
+                        SituationRelationCandidate(
+                            relation_id=relation_id,
+                            source_ref=source_ref,
+                            target_ref=target_ref,
+                        )
+                    )
+                    existing.add(key)
+                resolved_current.add(decision.current_index)
+                excluded.update(
+                    (prior_index, decision.current_index)
+                    for prior_index in range(len(prior))
+                )
+
+        return tuple(additions)
+
+    def _resolve_batch_discourse_refs(self, plan):
+        """Resolve document-wide references/relations before the sole canonical commit."""
         while plan.candidate_ir.discourse_refs:
             positions: dict[str, int] = {}
             for assertion in plan.perception.assertions:
@@ -150,7 +289,23 @@ class DocumentProcessor(_PipelineDocumentProcessor):
                 selected[1],
                 context=self.services.context,
             )
-        return plan
+
+        boundary_relations = self._boundary_discourse_relations(plan)
+        if not boundary_relations:
+            return plan
+
+        perception = replace(
+            plan.perception,
+            relations=tuple((*plan.perception.relations, *boundary_relations)),
+        )
+        return self.services.integration.prepare_external_plan(
+            perception,
+            self.services.context,
+            batch_kind=plan.candidate_ir.batch_kind,
+            source_ref=plan.candidate_ir.source_ref,
+            source_timestamp=plan.candidate_ir.source_timestamp,
+            existing_experience_ref=plan.existing_experience_ref,
+        )
 
     def _reduce_partial_results(
         self,
