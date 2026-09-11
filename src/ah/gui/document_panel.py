@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QTimer, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
@@ -27,6 +27,10 @@ class DocumentPanelWidget(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._source_ref: str | None = None
+        self._summary_polling = False
+        self._telemetry_timer = QTimer(self)
+        self._telemetry_timer.setInterval(250)
+        self._telemetry_timer.timeout.connect(self._render_continuation_diagnostics)
         self._build()
 
     def _build(self) -> None:
@@ -126,6 +130,9 @@ class DocumentPanelWidget(QWidget):
 
     def _emit_summary(self) -> None:
         if self._source_ref:
+            self._summary_polling = True
+            self._telemetry_timer.start()
+            self.continuation_view.setPlainText("Continuation запускается…")
             self.summary_requested.emit(self._source_ref, self.summary_request.text().strip())
 
     def set_busy(self, busy: bool) -> None:
@@ -136,6 +143,11 @@ class DocumentPanelWidget(QWidget):
         self.progress.setVisible(busy)
         if busy:
             self.progress.setRange(0, 0)
+        else:
+            self._telemetry_timer.stop()
+            if self._summary_polling:
+                self._render_continuation_diagnostics()
+            self._summary_polling = False
 
     def set_ingestion_result(self, result) -> None:
         self._source_ref = result.source_ref
@@ -176,7 +188,7 @@ class DocumentPanelWidget(QWidget):
         lines.append(
             f"stop={state.stop_reason} | source primary coverage="
             f"{state.primary_covered}/{state.source_primary_total} "
-            f"({state.source_coverage_ratio:.1%}) | final ~{state.final_estimated_tokens} tok"
+            f"({state.source_coverage_ratio:.1%}) | current/final ~{state.final_estimated_tokens} tok"
         )
         self.continuation_view.setPlainText("\n".join(lines))
 
@@ -188,6 +200,8 @@ class DocumentPanelWidget(QWidget):
             if self._source_ref
             else None
         )
+        self._telemetry_timer.stop()
+        self._summary_polling = False
         if state is None:
             self.status.setText("Summary построен из source-scoped AH context.")
         else:
