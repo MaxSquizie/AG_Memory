@@ -58,6 +58,7 @@ def test_document_pipeline_uses_one_document_batch_and_bounded_source_continuati
     pipeline = (ROOT / "src" / "ah" / "documents" / "pipeline.py").read_text(encoding="utf-8")
     runtime = (ROOT / "src" / "ah" / "documents" / "runtime.py").read_text(encoding="utf-8")
     public_api = (ROOT / "src" / "ah" / "documents" / "__init__.py").read_text(encoding="utf-8")
+    module_cli = (ROOT / "src" / "ah" / "documents" / "__main__.py").read_text(encoding="utf-8")
     panel = (ROOT / "src" / "ah" / "gui" / "document_panel.py").read_text(encoding="utf-8")
 
     assert "TemplateCompletionService" in pipeline
@@ -73,10 +74,13 @@ def test_document_pipeline_uses_one_document_batch_and_bounded_source_continuati
     assert "ProjectionBudgetExceeded" in runtime
     assert "source_primary_total" in runtime
     assert "stop_reason" in runtime
+    assert "failure" in runtime
     assert "from .runtime import" in public_api
     assert "DocumentProcessor" in public_api
+    assert "from .cli import main" in module_cli
 
     assert "last_document_summary_runtime_state" in panel
     assert "cursor" in panel
     assert "overlap" in panel
     assert "stop=" in panel
+    assert "failure=" in panel
