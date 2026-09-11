@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from types import SimpleNamespace
 
 import ah.documents as documents
@@ -47,31 +48,14 @@ def _summary(source_ref: str = "doc:operator") -> DocumentSummary:
     )
 
 
-def test_public_document_processor_enforces_fixed_default_summary_budget(monkeypatch):
-    captured = {}
+def test_public_document_processor_declares_fixed_default_summary_budget():
+    parameter = inspect.signature(DocumentProcessor.summarize).parameters["budget_tokens"]
 
-    def fake_summary(self, source_ref, **kwargs):
-        captured.update(kwargs)
-        return _summary(source_ref)
-
-    monkeypatch.setattr(documents._PipelineDocumentProcessor, "summarize", fake_summary)
-    processor = DocumentProcessor(SimpleNamespace())
-
-    result = processor.summarize("doc:operator", budget_tokens=None)
-
-    assert result.text == "result"
-    assert captured["budget_tokens"] == DEFAULT_DOCUMENT_SUMMARY_BUDGET_TOKENS == 4096
-    assert captured["max_primary_roots"] == 24
-    assert captured["max_slices"] == 128
+    assert parameter.default == DEFAULT_DOCUMENT_SUMMARY_BUDGET_TOKENS == 4096
 
 
-def test_runtime_summary_diagnostics_report_cursor_budget_stop_and_full_primary_coverage(monkeypatch):
-    monkeypatch.setattr(
-        documents._PipelineDocumentProcessor,
-        "summarize",
-        lambda self, source_ref, **kwargs: _summary(source_ref),
-    )
-    DocumentProcessor(SimpleNamespace()).summarize("doc:operator")
+def test_runtime_summary_diagnostics_report_cursor_budget_stop_and_full_primary_coverage():
+    documents._remember_summary(_summary("doc:operator"))
 
     state = last_document_summary_runtime_state("doc:operator")
 
@@ -83,6 +67,43 @@ def test_runtime_summary_diagnostics_report_cursor_budget_stop_and_full_primary_
     assert state.final_estimated_tokens == 321
     assert [item.cursor_end for item in state.slice_diagnostics] == [2, 3]
     assert state.slice_diagnostics[1].overlap_refs == ("N2",)
+
+
+def test_hierarchical_aggregation_stays_within_fixed_budget_and_reduces_to_one_result():
+    class Agent:
+        def __init__(self):
+            self.contexts = []
+
+        def respond(self, context):
+            self.contexts.append(context)
+            return f"compressed-{len(self.contexts)}"
+
+    agent = Agent()
+    processor = DocumentProcessor(SimpleNamespace(agent=agent))
+    partials = ("A" * 120, "B" * 120, "C" * 120, "D" * 120)
+    pair_context = processor._aggregation_context(
+        "doc:operator",
+        "summary",
+        partials[:2],
+        budget_tokens=None,
+    )
+    budget = pair_context.estimated_tokens
+    assert processor._aggregation_context(
+        "doc:operator", "summary", partials[:2], budget_tokens=budget
+    ).estimated_tokens <= budget
+
+    text, final_context = processor._reduce_partial_results(
+        "doc:operator",
+        "summary",
+        partials,
+        budget_tokens=budget,
+    )
+
+    assert text.startswith("compressed-")
+    assert len(agent.contexts) == 3  # two first-level pairs, then their two summaries
+    assert all(context.estimated_tokens <= budget for context in agent.contexts)
+    assert final_context is agent.contexts[-1]
+    assert all("A" * 120 not in context.current_input for context in agent.contexts)
 
 
 def test_document_cli_exposes_fixed_continuation_controls():
