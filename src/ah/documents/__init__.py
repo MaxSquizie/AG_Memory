@@ -25,13 +25,7 @@ _RUNTIME_SUMMARY_DIAGNOSTICS: "OrderedDict[str, DocumentSummaryRuntimeState]" = 
 
 @dataclass(frozen=True, slots=True)
 class DocumentSummaryRuntimeState:
-    """Operator-only continuation state from the most recent summary run.
-
-    This object is not canonical AH, is never serialized into H and is never added
-    to ``AgentContext.rendered``. It is only a bounded in-process diagnostic cache
-    so GUI surfaces can inspect the continuation protocol without changing the
-    existing MainWindow worker/result wiring.
-    """
+    """Operator-only continuation state from the current/most recent summary run."""
 
     source_ref: str
     slice_diagnostics: tuple[DocumentSliceDiagnostic, ...]
@@ -47,23 +41,44 @@ class DocumentSummaryRuntimeState:
         return min(1.0, self.primary_covered / self.source_primary_total)
 
 
-def _remember_summary(result: DocumentSummary) -> None:
-    diagnostics = tuple(result.slice_diagnostics)
-    primary_covered = sum(len(item.primary_refs) for item in diagnostics)
-    source_primary_total = diagnostics[-1].cursor_end if diagnostics else 0
-    state = DocumentSummaryRuntimeState(
-        source_ref=result.source_ref,
-        slice_diagnostics=diagnostics,
-        stop_reason=result.stop_reason,
-        primary_covered=primary_covered,
-        source_primary_total=source_primary_total,
-        final_estimated_tokens=result.estimated_tokens,
-    )
+def _store_runtime_state(state: DocumentSummaryRuntimeState) -> None:
     with _RUNTIME_DIAGNOSTICS_LOCK:
-        _RUNTIME_SUMMARY_DIAGNOSTICS[result.source_ref] = state
-        _RUNTIME_SUMMARY_DIAGNOSTICS.move_to_end(result.source_ref)
+        _RUNTIME_SUMMARY_DIAGNOSTICS[state.source_ref] = state
+        _RUNTIME_SUMMARY_DIAGNOSTICS.move_to_end(state.source_ref)
         while len(_RUNTIME_SUMMARY_DIAGNOSTICS) > _MAX_RUNTIME_SUMMARY_DIAGNOSTICS:
             _RUNTIME_SUMMARY_DIAGNOSTICS.popitem(last=False)
+
+
+def _remember_progress(
+    source_ref: str,
+    diagnostics: tuple[DocumentSliceDiagnostic, ...],
+    *,
+    source_primary_total: int,
+    stop_reason: str,
+    estimated_tokens: int,
+) -> None:
+    _store_runtime_state(
+        DocumentSummaryRuntimeState(
+            source_ref=source_ref,
+            slice_diagnostics=diagnostics,
+            stop_reason=stop_reason,
+            primary_covered=sum(len(item.primary_refs) for item in diagnostics),
+            source_primary_total=source_primary_total,
+            final_estimated_tokens=estimated_tokens,
+        )
+    )
+
+
+def _remember_summary(result: DocumentSummary) -> None:
+    diagnostics = tuple(result.slice_diagnostics)
+    source_primary_total = diagnostics[-1].cursor_end if diagnostics else 0
+    _remember_progress(
+        result.source_ref,
+        diagnostics,
+        source_primary_total=source_primary_total,
+        stop_reason=result.stop_reason,
+        estimated_tokens=result.estimated_tokens,
+    )
 
 
 def last_document_summary_runtime_state(source_ref: str) -> DocumentSummaryRuntimeState | None:
@@ -142,13 +157,7 @@ class DocumentProcessor(_PipelineDocumentProcessor):
         *,
         budget_tokens: int,
     ):
-        """Deterministically reduce AH-derived partials under the same fixed budget.
-
-        Packing is sequential and greedy. A singleton may be carried to the next
-        reduction round, but every round must reduce the number of partials. If no
-        adjacent pair can fit, the operation fails closed rather than truncating or
-        retrieving raw source through another channel.
-        """
+        """Deterministically reduce AH-derived partials under the same fixed budget."""
         current = list(partials)
         last_context = None
         while len(current) > 1:
@@ -236,11 +245,19 @@ class DocumentProcessor(_PipelineDocumentProcessor):
             raise ValueError("max_slices must be >= 1")
 
         scoped = self._source_context_service()
+        source_primary_total = len(scoped.activator.resolver.resolve(source_ref).semantic_roots)
         cursor = SourceProjectionCursor(source_ref, 0)
         diagnostics: list[DocumentSliceDiagnostic] = []
         partials: list[str] = []
         workspace_seen: list[str] = []
         last_slice_context = None
+        _remember_progress(
+            source_ref,
+            (),
+            source_primary_total=source_primary_total,
+            stop_reason="running",
+            estimated_tokens=0,
+        )
 
         for slice_index in range(1, max_slices + 1):
             with self.services.operation_lock:
@@ -268,11 +285,25 @@ class DocumentProcessor(_PipelineDocumentProcessor):
                     done=sliced.done,
                 )
             )
+            _remember_progress(
+                source_ref,
+                tuple(diagnostics),
+                source_primary_total=source_primary_total,
+                stop_reason="projecting" if not sliced.done else "aggregating",
+                estimated_tokens=result.context.estimated_tokens,
+            )
             partials.append(self.services.agent.respond(result.context))
             cursor = sliced.next_cursor
             if sliced.done:
                 break
         else:
+            _remember_progress(
+                source_ref,
+                tuple(diagnostics),
+                source_primary_total=source_primary_total,
+                stop_reason="max_slices_exceeded",
+                estimated_tokens=0 if last_slice_context is None else last_slice_context.estimated_tokens,
+            )
             raise DocumentProcessingError(
                 f"Document summary exceeded max_slices={max_slices} before source cursor reached done"
             )
