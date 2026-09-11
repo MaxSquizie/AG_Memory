@@ -91,9 +91,6 @@ def _acceptance_chunk_limit(spec: DocumentSpec, contract: Mapping[str, Any]) -> 
         if value < 256:
             raise ValueError(f"{spec.document_id}: max_chunk_chars must be >= 256")
         return value
-    # Existing oracle units are only authoring aids now, but their maximum length is
-    # a deterministic source-derived ceiling that guarantees bounded multi-window
-    # ingestion for the acceptance documents without cutting an oversized unit.
     longest_authored_unit = max((len(item.text) for item in spec.paragraphs), default=256)
     return max(256, min(1800, longest_authored_unit + 32))
 
@@ -101,12 +98,7 @@ def _acceptance_chunk_limit(spec: DocumentSpec, contract: Mapping[str, Any]) -> 
 def _source_experiences(
     snapshot: Mapping[str, Mapping[str, Any]], source_ref: str
 ) -> tuple[tuple[str, Mapping[str, Any]], ...]:
-    """Return H occurrences carrying one technical source handle.
-
-    The acceptance contract distinguishes a real DOCUMENT experience from an
-    arbitrary H node that merely copied the same source_ref metadata. This prevents
-    a MESSAGE-style write from masquerading as one atomic document commit.
-    """
+    """Return H occurrences carrying one technical source handle."""
     matches: list[tuple[str, Mapping[str, Any]]] = []
     for uid, item in snapshot.items():
         if not isinstance(item, Mapping):
@@ -239,6 +231,77 @@ def _runtime_checks(
             }
         )
 
+    committed_fact_uids = {
+        str(item.ref.uid)
+        for item in getattr(result.integration, "assertions", ())
+        if getattr(item, "ref", None) is not None
+    }
+    expected_fact_ids = tuple(
+        str(item.get("id"))
+        for item in (spec.final_expectation.get("facts") or ())
+        if isinstance(item, Mapping) and item.get("id") is not None
+    )
+    missing_commit_facts = tuple(
+        fact_id
+        for fact_id in expected_fact_ids
+        if matched.get(fact_id) not in committed_fact_uids
+    )
+    checks.append(
+        {
+            "name": "runtime.oracle_facts_in_document_commit",
+            "ok": not missing_commit_facts,
+            "expected": list(expected_fact_ids),
+            "actual": {
+                "committed_uids": sorted(committed_fact_uids),
+                "missing_fact_ids": list(missing_commit_facts),
+            },
+        }
+    )
+
+    committed_relations = {
+        (
+            str(getattr(item, "relation_id", "")).upper(),
+            str(getattr(getattr(item, "source", None), "uid", "")),
+            str(getattr(getattr(item, "target", None), "uid", "")),
+        )
+        for item in getattr(result.integration, "relations", ())
+    }
+    missing_commit_links: list[dict[str, Any]] = []
+    expected_links = tuple(
+        item
+        for item in (spec.final_expectation.get("links") or ())
+        if isinstance(item, Mapping)
+    )
+    for item in expected_links:
+        relation_id = str(item.get("relation") or "").upper()
+        source_id = str(item.get("source") or "")
+        target_id = str(item.get("target") or "")
+        expected_tuple = (
+            relation_id,
+            str(matched.get(source_id) or ""),
+            str(matched.get(target_id) or ""),
+        )
+        if expected_tuple not in committed_relations:
+            missing_commit_links.append(
+                {
+                    "relation": relation_id,
+                    "source": source_id,
+                    "target": target_id,
+                    "resolved": list(expected_tuple),
+                }
+            )
+    checks.append(
+        {
+            "name": "runtime.oracle_links_in_document_commit",
+            "ok": not missing_commit_links,
+            "expected": len(expected_links),
+            "actual": {
+                "committed_relation_count": len(committed_relations),
+                "missing": missing_commit_links,
+            },
+        }
+    )
+
     spans = _assertion_global_spans(result)
     for fact_id, expectation in (contract.get("source_spans") or {}).items():
         if not isinstance(expectation, Mapping):
@@ -322,7 +385,7 @@ def run_document_acceptance(services, *, oracle_file: str | Path | None = None) 
                     source_ref=source_ref,
                 )
                 runtime_successes += 1
-            except Exception as exc:  # diagnostics boundary: preserve real failure
+            except Exception as exc:
                 runtime_errors += 1
                 error_text = f"{type(exc).__name__}: {exc}"
                 error_traceback = traceback.format_exc()
@@ -354,9 +417,6 @@ def run_document_acceptance(services, *, oracle_file: str | Path | None = None) 
                 )
                 status = "PASS" if all(bool(item.get("ok")) for item in graph_checks) else "FAIL"
 
-            # Compatibility fields now describe authored oracle units, not separately
-            # replayed turns. A passing document means those unit hints were covered
-            # by one successful whole-document transaction.
             authored_units = len(spec.paragraphs)
             verdict = DocumentVerdict(
                 document_id=spec.document_id,
