@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "documents": {
+    "cooling_station": {
+      "max_chunk_chars": 256,
+      "require_multiple_chunks": true,
+      "source_spans": {
+        "temperature_drop": {"contains": "опустилась"},
+        "water_freeze": {"contains": "замёрзла"},
+        "pump_stop": {"contains": "остановила"}
+      }
+    },
+    "greenhouse_control": {
+      "max_chunk_chars": 256,
+      "require_multiple_chunks": true
+    },
+    "archive_leak": {
+      "max_chunk_chars": 256,
+      "require_multiple_chunks": true
+    },
+    "house_by_pier_monolith": {
+      "require_multiple_chunks": true
+    },
+    "belyaev_amphibian_mutiny": {
+      "require_multiple_chunks": true
+    },
+    "old_observatory_monolith": {
+      "require_multiple_chunks": true
+    }
+  }
+}
