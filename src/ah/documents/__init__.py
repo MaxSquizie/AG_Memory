@@ -4,6 +4,7 @@ from .pipeline import (
     DocumentIngestionResult,
     DocumentProcessingError,
     DocumentProcessor,
+    DocumentSliceDiagnostic,
     DocumentSummary,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "DocumentIngestionResult",
     "DocumentProcessingError",
     "DocumentProcessor",
+    "DocumentSliceDiagnostic",
     "DocumentSummary",
 ]
