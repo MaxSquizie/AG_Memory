@@ -72,6 +72,49 @@ def last_document_summary_runtime_state(source_ref: str) -> DocumentSummaryRunti
 class DocumentProcessor(_PipelineDocumentProcessor):
     """Public document facade with fixed continuation budget and operator telemetry."""
 
+    def _resolve_batch_discourse_refs(self, plan):
+        """Bind only one uniquely compatible backward antecedent.
+
+        This overrides the legacy facade implementation because Integration's
+        ``context`` parameter is keyword-only. Future candidates are excluded by
+        document-global evidence offsets; multiple prior candidates remain
+        unresolved and therefore keep the transaction fail-closed.
+        """
+        while plan.candidate_ir.discourse_refs:
+            positions: dict[str, int] = {}
+            for assertion in plan.perception.assertions:
+                variants = assertion.alternatives or (assertion,)
+                for variant in variants:
+                    for actant in variant.actants:
+                        if actant.entity_ref is None or actant.evidence is None:
+                            continue
+                        positions[actant.entity_ref] = min(
+                            positions.get(actant.entity_ref, actant.evidence.start),
+                            actant.evidence.start,
+                        )
+
+            selected: tuple[str, str] | None = None
+            for ref in plan.candidate_ir.discourse_refs:
+                if ref.source_start is None:
+                    continue
+                prior = tuple(
+                    candidate
+                    for candidate in ref.candidate_entity_refs
+                    if candidate in positions and positions[candidate] < ref.source_start
+                )
+                if len(prior) == 1:
+                    selected = (ref.local_id, prior[0])
+                    break
+            if selected is None:
+                break
+            plan = self.services.integration.bind_discourse_ref(
+                plan,
+                selected[0],
+                selected[1],
+                context=self.services.context,
+            )
+        return plan
+
     def summarize(
         self,
         source_ref: str,
