@@ -61,12 +61,15 @@ def _assertion(local_id: str, source: str, start: int, predicate: str, lemma: st
 def test_boundary_probe_excludes_semantic_duplicate_repeated_in_later_chunk():
     first = (
         "Иван прибыл в порт и остановился у дальнего причала, подробно описывая "
-        "обстоятельства произошедшего и ожидая дальнейших указаний диспетчера."
+        "обстоятельства произошедшего и ожидая дальнейших указаний диспетчера Он "
+        "внимательно следил за сигналами порта и сверял время по часам у склада и "
+        "молча ждал ответа диспетчера."
     )
     second = (
         " Иван прибыл в порт. Иван вошёл в здание после ожидания у ворот, подробно "
         "описывая обстоятельства произошедшего и закрывая за собой тяжёлую дверь."
     )
+    assert 240 <= len(first) < 256
     source = first + second
     processor_for_chunks = DocumentProcessor(SimpleNamespace(), max_chunk_chars=256)
     chunks = processor_for_chunks.chunk_text(source)
