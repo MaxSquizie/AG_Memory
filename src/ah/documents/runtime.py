@@ -148,6 +148,11 @@ class DocumentProcessor(_PipelineDocumentProcessor):
         UID-free candidate strings. Its finite-choice decision is mapped back to
         parser-local assertion IDs. Canonical UIDs are never shown to Perception and
         no canonical mutation occurs here.
+
+        Assertions whose UID-free semantic fingerprint already appeared in an
+        earlier window are excluded from ``current``. Those are document dedup
+        bridges, not new events, and allowing them into the probe could create a
+        spurious self/FOLLOW edge after canonical deduplication.
         """
         classifier = getattr(self.services.perception, "classify_discourse_relation", None)
         if not callable(classifier):
@@ -187,7 +192,16 @@ class DocumentProcessor(_PipelineDocumentProcessor):
 
         for boundary_index in range(1, len(chunks)):
             prior = tuple(buckets[boundary_index - 1])
-            current = tuple(buckets[boundary_index])
+            earlier_semantics = {
+                self._assertion_semantic(item)
+                for bucket in buckets[:boundary_index]
+                for item in bucket
+            }
+            current = tuple(
+                item
+                for item in buckets[boundary_index]
+                if self._assertion_semantic(item) not in earlier_semantics
+            )
             if not prior or not current:
                 continue
 
@@ -289,6 +303,12 @@ class DocumentProcessor(_PipelineDocumentProcessor):
                 selected[1],
                 context=self.services.context,
             )
+
+        # Ambiguous/future-only coreference already makes the document invalid.
+        # Do not spend semantic-probe calls enriching a plan that Integration must
+        # reject before canonical mutation.
+        if plan.candidate_ir.discourse_refs:
+            return plan
 
         boundary_relations = self._boundary_discourse_relations(plan)
         if not boundary_relations:
