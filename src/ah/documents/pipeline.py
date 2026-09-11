@@ -9,7 +9,13 @@ from typing import TYPE_CHECKING
 
 from ah.integration import BatchKind, FormalizationBatch, TemplateCompletionService
 from ah.perception import PerceptionResult
-from ah.projection import AgentContext, SourceScopeActivator, SourceScopedContextService
+from ah.projection import (
+    AgentContext,
+    ProjectionBudgetExceeded,
+    SourceProjectionCursor,
+    SourceScopeActivator,
+    SourceScopedContextService,
+)
 
 if TYPE_CHECKING:
     from ah.bootstrap import RuntimeServices
@@ -62,6 +68,20 @@ class DocumentContext:
 
 
 @dataclass(frozen=True, slots=True)
+class DocumentSliceDiagnostic:
+    """Runtime-only progress record for one bounded source projection slice."""
+
+    slice_index: int
+    cursor_start: int
+    cursor_end: int
+    primary_refs: tuple[str, ...]
+    overlap_refs: tuple[str, ...]
+    workspace_refs: tuple[str, ...]
+    estimated_tokens: int
+    done: bool
+
+
+@dataclass(frozen=True, slots=True)
 class DocumentSummary:
     source_ref: str
     request: str
@@ -69,15 +89,19 @@ class DocumentSummary:
     rendered_context: str
     workspace_refs: tuple[str, ...]
     estimated_tokens: int
+    slice_diagnostics: tuple[DocumentSliceDiagnostic, ...] = ()
+    stop_reason: str = "complete"
 
 
 class DocumentProcessor:
-    """Ingest a whole document through the existing formalization pipeline.
+    """Ingest and project a whole document without raw-text response shortcuts.
 
     Chunks are operational perception windows only. Every window is parsed and
     template-completed before one ``FormalizationBatch(DOCUMENT)`` is submitted to
     the one canonical transaction. Summary input is frozen AH projection, never
-    raw source or raw chunks.
+    raw source or raw chunks. Large-source summarization advances over deterministic
+    source-scope slices and aggregates only model results produced from those
+    frozen AH contexts.
     """
 
     _SENTENCE_BOUNDARY_RE = re.compile(r"[.!?…](?:[\"'»”’)\]]+)?(?=\s|$)")
@@ -173,10 +197,10 @@ class DocumentProcessor:
         """Bind only uniquely compatible prior document anchors before commit.
 
         CandidateIR already exposes grammatical compatibility without choosing an
-        antecedent.  Document chunks are operational windows, so here we use their
-        global source offsets to reject future mentions.  A pronoun is grounded
-        only when exactly one compatible entity handle has appeared earlier in the
-        same document; multiple prior candidates remain explicit DiscourseRef and
+        antecedent. Document chunks are operational windows, so here we use their
+        global source offsets to reject future mentions. A pronoun is grounded only
+        when exactly one compatible entity handle has appeared earlier in the same
+        document; multiple prior candidates remain explicit ``DiscourseRef`` and
         Integration fails closed rather than guessing.
         """
         while plan.candidate_ir.discourse_refs:
@@ -280,6 +304,12 @@ class DocumentProcessor:
             source_timestamp=source_timestamp,
         )
 
+    def _source_context_service(self) -> SourceScopedContextService:
+        return SourceScopedContextService(
+            SourceScopeActivator(self.services.core, self.services.ignition),
+            self.services.projector,
+        )
+
     def build_context(
         self,
         source_ref: str,
@@ -288,10 +318,7 @@ class DocumentProcessor:
         settle_ticks: int = 1,
         budget_tokens: int | None = None,
     ) -> DocumentContext:
-        scoped = SourceScopedContextService(
-            SourceScopeActivator(self.services.core, self.services.ignition),
-            self.services.projector,
-        )
+        scoped = self._source_context_service()
         with self.services.operation_lock:
             result = scoped.build_complete_source(
                 request,
@@ -306,6 +333,41 @@ class DocumentProcessor:
             workspace_refs=tuple(ref.uid for ref in result.activation.workspace_after),
         )
 
+    @staticmethod
+    def _aggregation_context(
+        source_ref: str,
+        request: str,
+        partials: tuple[str, ...],
+        *,
+        budget_tokens: int | None,
+    ) -> AgentContext:
+        """Freeze an aggregation request containing only AH-derived partial results.
+
+        The partials were produced from bounded frozen AgentContexts. They are not
+        raw source text and do not grant the model a second retrieval channel.
+        """
+        body = "\n\n".join(
+            f"[PART {index}]\n{text.strip()}" for index, text in enumerate(partials, 1)
+        )
+        aggregate_request = (
+            f"{request}\n\n"
+            "Ниже даны последовательные промежуточные результаты, каждый получен "
+            "только из AH-проекции соответствующего фрагмента источника. Объедини "
+            "их в один ответ, не добавляя фактов, которых нет в промежуточных результатах."
+        )
+        rendered = f"[CURRENT INPUT]\n{aggregate_request}\n\n[DOCUMENT PARTIALS]\n{body}"
+        estimated_tokens = max(1, (len(rendered) + 3) // 4)
+        if budget_tokens is not None and estimated_tokens > budget_tokens:
+            raise ProjectionBudgetExceeded(estimated_tokens, budget_tokens)
+        return AgentContext(
+            current_input=aggregate_request,
+            workspace_blocks=(),
+            inference_blocks=(),
+            rendered=rendered,
+            source_scope_ref=source_ref,
+            estimated_tokens=estimated_tokens,
+        )
+
     def summarize(
         self,
         source_ref: str,
@@ -313,25 +375,91 @@ class DocumentProcessor:
         request: str = "Сделай краткое содержание документа в 5–7 предложениях.",
         settle_ticks: int = 1,
         budget_tokens: int | None = None,
+        max_primary_roots: int = 24,
+        max_slices: int = 128,
     ) -> DocumentSummary:
+        """Summarize a source through deterministic bounded AH-only continuation.
+
+        Progress is the source cursor, not model state. Every canonical semantic root
+        is primary exactly once; only already-seen causal/temporal neighbors may be
+        repeated as overlap. The loop stops solely when ``SourceScopeSlice.done`` is
+        true or fails closed at ``max_slices``. The final model call, when needed,
+        sees only partial results derived from frozen AH contexts and never raw
+        source/chunk text.
+        """
         if self.services.agent is None:
             raise DocumentProcessingError(
                 "LLM agent is disabled; memory-grounded summary requires the agent"
             )
-        context = self.build_context(
-            source_ref,
-            request=request,
-            settle_ticks=settle_ticks,
-            budget_tokens=budget_tokens,
-        )
-        # This is the only object handed to the response model; it contains no raw
-        # source/chunk field.
-        text = self.services.agent.respond(context.agent_context)
+        if max_primary_roots < 1:
+            raise ValueError("max_primary_roots must be >= 1")
+        if max_slices < 1:
+            raise ValueError("max_slices must be >= 1")
+
+        scoped = self._source_context_service()
+        cursor = SourceProjectionCursor(source_ref, 0)
+        diagnostics: list[DocumentSliceDiagnostic] = []
+        partials: list[str] = []
+        workspace_seen: list[str] = []
+        last_context: AgentContext | None = None
+
+        for slice_index in range(1, max_slices + 1):
+            with self.services.operation_lock:
+                sliced, result = scoped.build_source_slice(
+                    request,
+                    cursor,
+                    max_primary_roots=max_primary_roots,
+                    settle_ticks=settle_ticks,
+                    budget_tokens=budget_tokens,
+                )
+            last_context = result.context
+            workspace_refs = tuple(ref.uid for ref in result.activation.workspace_after)
+            for uid in workspace_refs:
+                if uid not in workspace_seen:
+                    workspace_seen.append(uid)
+            diagnostics.append(
+                DocumentSliceDiagnostic(
+                    slice_index=slice_index,
+                    cursor_start=sliced.cursor.next_index,
+                    cursor_end=sliced.next_cursor.next_index,
+                    primary_refs=tuple(ref.uid for ref in sliced.primary_refs),
+                    overlap_refs=tuple(ref.uid for ref in sliced.overlap_refs),
+                    workspace_refs=workspace_refs,
+                    estimated_tokens=result.context.estimated_tokens,
+                    done=sliced.done,
+                )
+            )
+            partials.append(self.services.agent.respond(result.context))
+            cursor = sliced.next_cursor
+            if sliced.done:
+                break
+        else:
+            raise DocumentProcessingError(
+                f"Document summary exceeded max_slices={max_slices} before source cursor reached done"
+            )
+
+        if last_context is None or not partials:
+            raise DocumentProcessingError("Document source projection produced no semantic slice")
+
+        if len(partials) == 1:
+            text = partials[0]
+            final_context = last_context
+        else:
+            final_context = self._aggregation_context(
+                source_ref,
+                request,
+                tuple(partials),
+                budget_tokens=budget_tokens,
+            )
+            text = self.services.agent.respond(final_context)
+
         return DocumentSummary(
             source_ref=source_ref,
             request=request,
             text=text,
-            rendered_context=context.rendered_context,
-            workspace_refs=context.workspace_refs,
-            estimated_tokens=context.estimated_tokens,
+            rendered_context=final_context.rendered,
+            workspace_refs=tuple(workspace_seen),
+            estimated_tokens=final_context.estimated_tokens,
+            slice_diagnostics=tuple(diagnostics),
+            stop_reason="source_complete",
         )
