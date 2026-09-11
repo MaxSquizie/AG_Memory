@@ -8,6 +8,7 @@ from threading import RLock
 import pytest
 
 from ah.documents import DocumentChunk, DocumentIngestionResult
+from ah.model import Ref, RefKind
 from ah.perception import PerceptionResult
 import ah.diagnostics.document_runtime_acceptance as runtime_acceptance
 
@@ -41,13 +42,17 @@ def _oracle(tmp_path):
     return path
 
 
-def _h_event(source_ref: str):
+def _h_event(source_ref: str, *, batch_kind: str = "DOCUMENT"):
     return {
         "H1": {
             "uid": "H1",
             "kind": "N",
             "domain": "H",
-            "meta": {"source_ref": source_ref, "batch_kind": "DOCUMENT"},
+            "meta": {
+                "source_ref": source_ref,
+                "batch_kind": batch_kind,
+                "event_instance": True,
+            },
         }
     }
 
@@ -89,6 +94,24 @@ def _install_state_shims(monkeypatch):
     monkeypatch.setattr(runtime_acceptance, "_restore_runtime_state", restore)
 
 
+def _ingestion(text: str, title: str, source_ref: str) -> DocumentIngestionResult:
+    cut = len(text) // 2
+    return DocumentIngestionResult(
+        source_ref=source_ref,
+        title=title,
+        source_text=text,
+        chunks=(
+            DocumentChunk(0, text[:cut], 0, cut),
+            DocumentChunk(1, text[cut:], cut, len(text)),
+        ),
+        perception_units=(PerceptionResult(text[:cut]), PerceptionResult(text[cut:])),
+        integration=SimpleNamespace(
+            assertions=(),
+            experience_ref=Ref(RefKind.N, "H1"),
+        ),
+    )
+
+
 def test_public_document_acceptance_routes_to_atomic_runner():
     from ah.diagnostics import run_document_acceptance
 
@@ -109,18 +132,7 @@ def test_runner_calls_one_document_processor_ingest_and_checks_single_document_c
         def ingest_text(self, text, *, title, source_ref):
             calls.append((text, title, source_ref, self.limit))
             services.snapshot = _h_event(source_ref)
-            cut = len(text) // 2
-            return DocumentIngestionResult(
-                source_ref=source_ref,
-                title=title,
-                source_text=text,
-                chunks=(
-                    DocumentChunk(0, text[:cut], 0, cut),
-                    DocumentChunk(1, text[cut:], cut, len(text)),
-                ),
-                perception_units=(PerceptionResult(text[:cut]), PerceptionResult(text[cut:])),
-                integration=SimpleNamespace(assertions=()),
-            )
+            return _ingestion(text, title, source_ref)
 
     monkeypatch.setattr(runtime_acceptance, "DocumentProcessor", FakeProcessor)
     result = runtime_acceptance.run_document_acceptance(services, oracle_file=oracle)
@@ -129,12 +141,39 @@ def test_runner_calls_one_document_processor_ingest_and_checks_single_document_c
     assert result.total_documents == 1
     assert result.passed_documents == 1
     assert result.runtime_errors == 0
-    assert services.snapshot == {}  # live state restored after diagnostics
+    assert services.snapshot == {}
     record = json.loads(next(result.output_dir.glob("document_001_*.json")).read_text(encoding="utf-8"))
     checks = {item["name"]: item for item in record["graph_checks"]}
     assert checks["runtime.atomic_document_commit"]["ok"] is True
     assert checks["runtime.source_coverage"]["ok"] is True
     assert checks["runtime.multiple_operational_chunks"]["ok"] is True
+    manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["one_document_one_commit"] is True
+
+
+def test_message_occurrence_with_same_source_ref_cannot_masquerade_as_document_commit(tmp_path, monkeypatch):
+    oracle = _oracle(tmp_path)
+    services = _services(tmp_path)
+    _install_state_shims(monkeypatch)
+
+    class WrongBatchProcessor:
+        def __init__(self, services_arg, *, max_chunk_chars):
+            self.services = services_arg
+
+        def ingest_text(self, text, *, title, source_ref):
+            self.services.snapshot = _h_event(source_ref, batch_kind="MESSAGE")
+            return _ingestion(text, title, source_ref)
+
+    monkeypatch.setattr(runtime_acceptance, "DocumentProcessor", WrongBatchProcessor)
+    result = runtime_acceptance.run_document_acceptance(services, oracle_file=oracle)
+
+    assert result.failed_documents == 1
+    record = json.loads(next(result.output_dir.glob("document_001_*.json")).read_text(encoding="utf-8"))
+    atomic = next(item for item in record["graph_checks"] if item["name"] == "runtime.atomic_document_commit")
+    assert atomic["ok"] is False
+    assert atomic["actual"]["document_event_uids"] == []
+    manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["one_document_one_commit"] is False
 
 
 def test_failed_document_records_atomic_rollback_violation_instead_of_hiding_it(tmp_path, monkeypatch):
@@ -159,10 +198,12 @@ def test_failed_document_records_atomic_rollback_violation_instead_of_hiding_it(
     rollback = next(item for item in record["graph_checks"] if item["name"] == "runtime.atomic_rollback")
     assert rollback["ok"] is False
     assert record["runtime_status"] == "ERROR"
+    manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["one_document_one_commit"] is False
     assert services.snapshot == {}
 
 
-def test_failed_document_with_real_rollback_is_still_failure_but_rollback_check_passes(tmp_path, monkeypatch):
+def test_failed_document_with_real_rollback_is_still_failure_but_atomic_contract_passes(tmp_path, monkeypatch):
     oracle = _oracle(tmp_path)
     services = _services(tmp_path)
     _install_state_shims(monkeypatch)
@@ -181,3 +222,5 @@ def test_failed_document_with_real_rollback_is_still_failure_but_rollback_check_
     record = json.loads(next(result.output_dir.glob("document_001_*.json")).read_text(encoding="utf-8"))
     rollback = next(item for item in record["graph_checks"] if item["name"] == "runtime.atomic_rollback")
     assert rollback["ok"] is True
+    manifest = json.loads((result.output_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["one_document_one_commit"] is True
