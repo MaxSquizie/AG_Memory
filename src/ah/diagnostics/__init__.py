@@ -19,8 +19,8 @@ from .document_acceptance import (
     DocumentVerdict,
     evaluate_document_graph,
     load_document_specs,
-    run_document_acceptance,
 )
+from .document_runtime_acceptance import run_document_acceptance
 from .hidden_valency_diagnostic import (
     HiddenValencyDiagnosticCase,
     HiddenValencyDiagnosticResult,
