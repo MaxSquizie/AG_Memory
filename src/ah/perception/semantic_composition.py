@@ -29,9 +29,9 @@ def _remove_consumed_leaf_not(
     """Remove exactly the predicate-polarity NOT directly wrapping a consumed leaf.
 
     Logical/whole-scope NOT is preserved. LogicalFormBuilder represents a negated
-    assertion leaf as NOT(REF). Therefore an independent outer source-level NOT is
-    represented as NOT(NOT(REF)); recursively removing the innermost wrapper leaves
-    the genuine outer NOT intact.
+    assertion leaf in the common proposition root as NOT(REF). Therefore an
+    independent outer source-level NOT is represented as NOT(NOT(REF)); recursively
+    removing the innermost wrapper leaves the genuine outer NOT intact.
     """
 
     if expr.operator is PropositionOperator.REF:
@@ -179,55 +179,19 @@ def validate_semantic_composition(result: PerceptionResult) -> None:
     _validate_nested_propositions(result.assertions, assertion_refs)
 
 
-def _rewrite_assertion_proposition_scopes(
-    assertion: AssertionCandidate,
-    consumed: frozenset[str],
-    source_occurrences: dict[str, int],
-    removed_total: dict[str, int],
-) -> AssertionCandidate:
-    def rewrite_variant(variant: AssertionCandidate) -> AssertionCandidate:
-        changed = False
-        actants = []
-        for actant in variant.actants:
-            proposition = actant.proposition
-            if proposition is None:
-                actants.append(actant)
-                continue
-            for ref in consumed:
-                source_occurrences[ref] += _count_ref(proposition, ref)
-            rewritten, removed = _remove_consumed_leaf_not(proposition, consumed)
-            for ref, count in removed.items():
-                removed_total[ref] = removed_total.get(ref, 0) + count
-            if rewritten != proposition:
-                changed = True
-                actants.append(replace(actant, proposition=rewritten))
-            else:
-                actants.append(actant)
-        if not changed:
-            return variant
-        return replace(variant, actants=tuple(actants))
-
-    rewritten_alternatives = tuple(rewrite_variant(item) for item in assertion.alternatives)
-    base_without_alternatives = replace(assertion, alternatives=())
-    rewritten_base = rewrite_variant(base_without_alternatives)
-    if rewritten_alternatives == assertion.alternatives and rewritten_base == base_without_alternatives:
-        return assertion
-    return replace(rewritten_base, alternatives=rewritten_alternatives)
-
-
 def reconcile_quantifier_scope(
     before: PerceptionResult,
     assertions: Iterable[AssertionCandidate],
 ) -> PerceptionResult:
-    """Reconcile proposition polarity after quantifier binder formalization.
+    """Reconcile common proposition-root polarity after binder formalization.
 
     QuantifierFormalizer may move source negation from an assertion body to a
-    NOT_FORALL/NOT_EXISTS binder. Logical/modal/conditional/nested composition is
-    intentionally built earlier, so every runtime AST copy may still contain the
-    old predicate-level NOT. This function removes exactly that stale leaf wrapper
-    from all proposition-bearing surfaces and leaves independent outer operators
-    untouched. Any mismatch fails closed instead of silently changing formula
-    meaning.
+    NOT_FORALL/NOT_EXISTS binder. Logical/modal composition is built earlier, so
+    the common ``proposition_roots`` AST can still contain the old predicate-level
+    NOT. Conditional material expressions and nested proposition actants are
+    intentionally polarity-free: Integration applies the referenced assertion's
+    polarity/binder there, so rewriting those surfaces would create a second
+    polarity channel. Only the common source-level formula roots are reconciled.
     """
 
     final_assertions = tuple(assertions)
@@ -243,20 +207,10 @@ def reconcile_quantifier_scope(
         for ref, old in old_by_id.items()
         if old.negated and not new_by_id[ref].negated
     )
-    removed_total: dict[str, int] = {ref: 0 for ref in consumed}
-    source_occurrences: dict[str, int] = {ref: 0 for ref in consumed}
-
-    rewritten_assertions = tuple(
-        _rewrite_assertion_proposition_scopes(
-            assertion,
-            consumed,
-            source_occurrences,
-            removed_total,
-        )
-        for assertion in final_assertions
-    )
 
     roots: list[PropositionRootCandidate] = []
+    removed_total: dict[str, int] = {ref: 0 for ref in consumed}
+    source_occurrences: dict[str, int] = {ref: 0 for ref in consumed}
     for root in before.proposition_roots:
         for ref in consumed:
             source_occurrences[ref] += _count_ref(root.expression, ref)
@@ -267,49 +221,19 @@ def reconcile_quantifier_scope(
             root if rewritten == root.expression else replace(root, expression=rewritten)
         )
 
-    conditionals = []
-    for conditional in before.conditionals:
-        antecedent = conditional.antecedent_expr
-        consequent = conditional.consequent_expr
-        rewritten_antecedent = antecedent
-        rewritten_consequent = consequent
-        for name, expr in (("antecedent", antecedent), ("consequent", consequent)):
-            if expr is None:
-                continue
-            for ref in consumed:
-                source_occurrences[ref] += _count_ref(expr, ref)
-            rewritten, removed = _remove_consumed_leaf_not(expr, consumed)
-            for ref, count in removed.items():
-                removed_total[ref] = removed_total.get(ref, 0) + count
-            if name == "antecedent":
-                rewritten_antecedent = rewritten
-            else:
-                rewritten_consequent = rewritten
-        if rewritten_antecedent == antecedent and rewritten_consequent == consequent:
-            conditionals.append(conditional)
-        else:
-            conditionals.append(
-                replace(
-                    conditional,
-                    antecedent_expr=rewritten_antecedent,
-                    consequent_expr=rewritten_consequent,
-                )
-            )
-
     for ref in consumed:
         occurrences = source_occurrences.get(ref, 0)
         removed = removed_total.get(ref, 0)
         if occurrences and removed != occurrences:
             raise SemanticCompositionError(
-                "quantifier consumed predicate negation but proposition scope did not "
+                "quantifier consumed predicate negation but proposition root did not "
                 f"contain exactly one leaf-polarity NOT per occurrence for {ref}: "
                 f"occurrences={occurrences}, removed={removed}"
             )
 
     result = replace(
         before,
-        assertions=rewritten_assertions,
-        conditionals=tuple(conditionals),
+        assertions=final_assertions,
         proposition_roots=tuple(roots),
     )
     validate_semantic_composition(result)
