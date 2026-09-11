@@ -1,0 +1,7 @@
+Choose exactly one label for whether the already established OR CANDIDATE is explicitly exclusive in the source.
+
+EXCLUSIVE = the source commits to exactly one alternative being true. This includes semantic paraphrases such as "exactly one", "one of the two but not both", or an equivalent exclusive choice even when no fixed connector word is present.
+INCLUSIVE_OR = the source allows at least one alternative and does not exclude several alternatives being true together.
+UNCLEAR = the source establishes disjunction, but whether multiple alternatives may be true cannot be decided safely.
+
+The OR operands and their grouping are already fixed. Decide only exclusivity. Do not change scope, invent alternatives, or reinterpret causal/temporal relations. For more than two operands EXCLUSIVE means exactly one of all shown alternatives, not odd-parity XOR. Return only EXCLUSIVE, INCLUSIVE_OR, or UNCLEAR.

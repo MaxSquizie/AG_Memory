@@ -29,16 +29,34 @@ from .bindings import BindingEnvironment
 from .runtime import GoalRuntime
 from .context import BranchContext, CounterfactualContext, ProofContext
 from .schema import InferenceSchema, InferenceSchemaRegistry
-from .engine import InferenceEngine
 from .materialization import InferenceMaterializer, MaterializationResult
-from .query_builder import QueryBuildResult, QueryGoalBuilder, SemanticGoalCompiler, TurnGoalBuilder
+from .query_builder import QueryBuildResult, QueryGoalBuilder
+from .counterfactual_goal import CounterfactualSemanticGoalCompiler
+from .modal_goal import (
+    FormulaPattern,
+    FormulaPatternGoal,
+    ModalInferenceEngine,
+    ModalSemanticGoalCompiler,
+)
+from .modal_dispatch import ModalTurnGoalCompiler
+from .association_goal import AssociationQueryBuildResult, AssociationTurnGoalCompiler
+
+# Public runtime composes independent GoalCompiler extensions in one inheritance
+# chain. Association execution itself remains outside InferenceEngine and is routed
+# to AssociationCoordinator by the agent orchestrator.
+InferenceEngine = ModalInferenceEngine
+SemanticGoalCompiler = AssociationTurnGoalCompiler
+TurnGoalBuilder = AssociationTurnGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
     "AssociationGoal",
+    "AssociationQueryBuildResult",
+    "AssociationTurnGoalCompiler",
     "CauseEntailmentGoal",
     "CounterfactualGoal",
+    "CounterfactualSemanticGoalCompiler",
     "CognitiveEventKind",
     "CognitiveTraceEvent",
     "CompositeConclusion",
@@ -46,6 +64,8 @@ __all__ = [
     "ExistingRefConclusion",
     "ExistsGoal",
     "FormulaGoal",
+    "FormulaPattern",
+    "FormulaPatternGoal",
     "GoalMode",
     "GoalSpec",
     "GoalRuntime",
@@ -58,6 +78,9 @@ __all__ = [
     "InferenceQuery",
     "LogicalStatus",
     "MaterializationResult",
+    "ModalInferenceEngine",
+    "ModalSemanticGoalCompiler",
+    "ModalTurnGoalCompiler",
     "MultiRoleBindingConclusion",
     "MultiRoleFillGoal",
     "QueryBuildResult",

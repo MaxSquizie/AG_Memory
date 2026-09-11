@@ -133,6 +133,48 @@ class DocumentProcessor:
             raise DocumentProcessingError("Document chunk coverage invariant failed")
         return tuple(chunks)
 
+    def _resolve_batch_discourse_refs(self, plan):
+        """Bind only uniquely compatible prior document anchors before commit.
+
+        CandidateIR already exposes grammatical compatibility without choosing an
+        antecedent.  Document chunks are operational windows, so here we use their
+        global source offsets to reject future mentions.  A pronoun is grounded
+        only when exactly one compatible entity handle has appeared earlier in the
+        same document; multiple prior candidates remain explicit DiscourseRef and
+        Integration fails closed rather than guessing.
+        """
+        while plan.candidate_ir.discourse_refs:
+            positions: dict[str, int] = {}
+            for assertion in plan.perception.assertions:
+                variants = assertion.alternatives or (assertion,)
+                for variant in variants:
+                    for actant in variant.actants:
+                        if actant.entity_ref is None or actant.evidence is None:
+                            continue
+                        positions[actant.entity_ref] = min(
+                            positions.get(actant.entity_ref, actant.evidence.start),
+                            actant.evidence.start,
+                        )
+
+            selected: tuple[str, str] | None = None
+            for ref in plan.candidate_ir.discourse_refs:
+                if ref.source_start is None:
+                    continue
+                prior = tuple(
+                    candidate
+                    for candidate in ref.candidate_entity_refs
+                    if candidate in positions and positions[candidate] < ref.source_start
+                )
+                if len(prior) == 1:
+                    selected = (ref.local_id, prior[0])
+                    break
+            if selected is None:
+                break
+            plan = self.services.integration.bind_discourse_ref(
+                plan, selected[0], selected[1], self.services.context
+            )
+        return plan
+
     def ingest_text(
         self,
         text: str,
@@ -167,9 +209,11 @@ class DocumentProcessor:
             source_timestamp=source_timestamp,
         )
         with self.services.operation_lock:
-            commit = self.services.integration.integrate_external_batch(
+            plan = self.services.integration.prepare_external_batch_plan(
                 batch, self.services.context
             )
+            plan = self._resolve_batch_discourse_refs(plan)
+            commit = self.services.integration.integrate_plan(plan, self.services.context)
             self.services.ignition.apply_seed_requests(commit.activation_seeds)
             self.services.ignition.apply_refutation_requests(commit.refutations)
 

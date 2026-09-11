@@ -483,6 +483,139 @@ def _match_queries(
             )
             _check(checks, f"{prefix}.roles.{role}", ok, expected=target_spec, actual=actual_target)
 
+        expected_quantified = expected.get("quantified")
+        actual_quantified = actual.get("quantified")
+        if expected_quantified is not None:
+            _check(
+                checks,
+                f"{prefix}.quantified.present",
+                isinstance(actual_quantified, dict),
+                expected=True,
+                actual=isinstance(actual_quantified, dict),
+            )
+            if isinstance(actual_quantified, dict):
+                expected_body_negated = bool(
+                    expected_quantified.get("body_negated", False)
+                )
+                actual_body_negated = bool(
+                    actual_quantified.get("body_negated", False)
+                )
+                _check(
+                    checks,
+                    f"{prefix}.quantified.body_negated",
+                    actual_body_negated == expected_body_negated,
+                    expected=expected_body_negated,
+                    actual=actual_body_negated,
+                )
+
+                actual_bindings = [
+                    item
+                    for item in actual_quantified.get("bindings", []) or []
+                    if isinstance(item, dict)
+                ]
+                expected_bindings = list(
+                    expected_quantified.get("bindings", []) or []
+                )
+                _check(
+                    checks,
+                    f"{prefix}.quantified.binding_count",
+                    len(actual_bindings) == len(expected_bindings),
+                    expected=len(expected_bindings),
+                    actual=len(actual_bindings),
+                )
+                for b_index, expected_binding in enumerate(expected_bindings):
+                    if b_index >= len(actual_bindings):
+                        break
+                    actual_binding = actual_bindings[b_index]
+                    bprefix = (
+                        f"{prefix}.quantified.bindings.b{b_index + 1}"
+                    )
+                    role = str(expected_binding.get("role", ""))
+                    actual_role = actual_roles.get(role)
+                    expected_handle = (
+                        actual_role.get("entity_ref")
+                        if isinstance(actual_role, dict)
+                        else None
+                    )
+                    actual_handle = actual_binding.get("entity_ref")
+                    _check(
+                        checks,
+                        f"{bprefix}.role_binding",
+                        bool(expected_handle)
+                        and str(actual_handle) == str(expected_handle),
+                        expected=f"entity_ref used by query role {role}",
+                        actual=actual_handle,
+                    )
+                    expected_operator = str(
+                        expected_binding.get("operator", "")
+                    ).upper()
+                    actual_operator = str(
+                        actual_binding.get("operator", "")
+                    ).upper()
+                    _check(
+                        checks,
+                        f"{bprefix}.operator",
+                        actual_operator == expected_operator,
+                        expected=expected_operator,
+                        actual=actual_operator,
+                    )
+                    expected_variable_id = int(
+                        expected_binding.get("variable_id", b_index)
+                    )
+                    actual_variable_id = int(
+                        actual_binding.get("variable_id", -1)
+                    )
+                    _check(
+                        checks,
+                        f"{bprefix}.variable_id",
+                        actual_variable_id == expected_variable_id,
+                        expected=expected_variable_id,
+                        actual=actual_variable_id,
+                    )
+                    expected_restriction = expected_binding.get(
+                        "restriction"
+                    )
+                    actual_restriction = actual_binding.get(
+                        "restriction_lemma"
+                    )
+                    _check(
+                        checks,
+                        f"{bprefix}.restriction",
+                        (
+                            None
+                            if actual_restriction is None
+                            else _norm(actual_restriction)
+                        )
+                        == (
+                            None
+                            if expected_restriction is None
+                            else _norm(expected_restriction)
+                        ),
+                        expected=expected_restriction,
+                        actual=actual_restriction,
+                    )
+                    expected_negated = bool(
+                        expected_binding.get("negated", False)
+                    )
+                    actual_negated = bool(
+                        actual_binding.get("negated", False)
+                    )
+                    _check(
+                        checks,
+                        f"{bprefix}.negated",
+                        actual_negated == expected_negated,
+                        expected=expected_negated,
+                        actual=actual_negated,
+                    )
+        elif actual_quantified is not None:
+            _check(
+                checks,
+                f"{prefix}.quantified.unexpected",
+                False,
+                expected=None,
+                actual=actual_quantified,
+            )
+
 
 def _match_relations(
     checks: list[dict[str, Any]],
@@ -539,6 +672,107 @@ def _match_relation_hints(
         expected=normalized_expected,
         actual=normalized_actual,
     )
+
+
+def _normalize_actual_proposition_expr(expr: Mapping[str, Any]) -> Any:
+    operator = str(expr.get("operator", "")).upper()
+    if operator == "REF":
+        return ("REF", str(expr.get("ref", "")))
+    if operator == "FALSE":
+        operator = "NOT"
+    members = tuple(
+        _normalize_actual_proposition_expr(item)
+        for item in expr.get("members", []) or []
+        if isinstance(item, dict)
+    )
+    return (operator, members)
+
+
+def _normalize_expected_proposition_expr(
+    expr: Any,
+    key_to_local: Mapping[str, str],
+) -> Any:
+    if isinstance(expr, str):
+        return ("REF", key_to_local.get(expr, "<missing>"))
+    if not isinstance(expr, dict):
+        return ("<invalid>", repr(expr))
+    if "ref" in expr and "op" not in expr and "operator" not in expr:
+        return ("REF", key_to_local.get(str(expr.get("ref", "")), "<missing>"))
+    operator = str(expr.get("op", expr.get("operator", ""))).upper()
+    if operator == "FALSE":
+        operator = "NOT"
+    members_raw = expr.get("args", expr.get("members", [])) or []
+    return (
+        operator,
+        tuple(
+            _normalize_expected_proposition_expr(item, key_to_local)
+            for item in members_raw
+        ),
+    )
+
+
+def _expected_expr_keys(expr: Any) -> tuple[str, ...]:
+    if isinstance(expr, str):
+        return (expr,)
+    if not isinstance(expr, dict):
+        return ()
+    if "ref" in expr and "op" not in expr and "operator" not in expr:
+        value = str(expr.get("ref", ""))
+        return (value,) if value else ()
+    out: list[str] = []
+    for item in expr.get("args", expr.get("members", [])) or []:
+        out.extend(_expected_expr_keys(item))
+    return tuple(dict.fromkeys(key for key in out if key))
+
+
+def _match_proposition_roots(
+    checks: list[dict[str, Any]],
+    actual_roots: Sequence[Mapping[str, Any]],
+    expected_roots: Sequence[Mapping[str, Any]],
+    key_to_local: Mapping[str, str],
+) -> None:
+    _check(
+        checks,
+        "perception.proposition_root_count",
+        len(actual_roots) == len(expected_roots),
+        expected=len(expected_roots),
+        actual=len(actual_roots),
+    )
+    for index, expected in enumerate(expected_roots):
+        if index >= len(actual_roots):
+            break
+        actual = actual_roots[index]
+        prefix = f"perception.proposition_roots.f{index + 1}"
+        actual_expr = actual.get("expression")
+        normalized_actual = (
+            _normalize_actual_proposition_expr(actual_expr)
+            if isinstance(actual_expr, dict)
+            else ("<missing>",)
+        )
+        normalized_expected = _normalize_expected_proposition_expr(
+            expected.get("expr"), key_to_local
+        )
+        _check(
+            checks,
+            f"{prefix}.expr",
+            normalized_actual == normalized_expected,
+            expected=normalized_expected,
+            actual=normalized_actual,
+        )
+        actual_sources = tuple(
+            str(item) for item in actual.get("operator_source_refs", []) or []
+        )
+        expected_sources = tuple(
+            key_to_local.get(str(item), "<missing>")
+            for item in expected.get("operator_sources", []) or []
+        )
+        _check(
+            checks,
+            f"{prefix}.operator_sources",
+            actual_sources == expected_sources,
+            expected=expected_sources,
+            actual=actual_sources,
+        )
 
 
 def _match_conditionals(
@@ -781,6 +1015,9 @@ def _match_canonical_assertions(
     snapshot: Mapping[str, Mapping[str, Any]],
     expected_assertions: Sequence[Mapping[str, Any]],
     expected_key_to_local: Mapping[str, str],
+    *,
+    formula_leaf_locals: frozenset[str] = frozenset(),
+    formula_operator_source_locals: frozenset[str] = frozenset(),
 ) -> dict[str, Mapping[str, Any]]:
     expected_by_key = {str(item.get("key") or f"a{i + 1}"): item for i, item in enumerate(expected_assertions)}
     expected_ref_map = _canonical_assertion_ref_map(record, expected_key_to_local)
@@ -789,11 +1026,38 @@ def _match_canonical_assertions(
         if expected_status == "CONDITIONAL":
             continue
         prefix = f"canonical.assertions.{key}"
+        local_id = expected_key_to_local.get(key)
         ref = expected_ref_map.get(key)
+        if local_id in formula_operator_source_locals:
+            _check(
+                checks,
+                f"{prefix}.operator_source_not_integrated",
+                ref is None,
+                expected="linguistic logical operator only",
+                actual=ref,
+            )
+            continue
         _check(checks, f"{prefix}.integrated", ref is not None, expected=True, actual=ref is not None)
         if ref is None:
             continue
-        if expected_status == "EMBEDDED":
+        if local_id in formula_leaf_locals:
+            scoped_node = _scoped_member_node(snapshot, ref)
+            scoped_ok = bool(
+                scoped_node is not None
+                and scoped_node.get("meta", {}).get("semantic_scope") == "LOGICAL"
+            )
+            _check(
+                checks,
+                f"{prefix}.scoped",
+                scoped_ok,
+                expected="semantic_scope=LOGICAL",
+                actual=(
+                    scoped_node.get("meta", {}).get("semantic_scope")
+                    if scoped_node is not None
+                    else None
+                ),
+            )
+        elif expected_status == "EMBEDDED":
             scoped_node = _scoped_member_node(snapshot, ref)
             scoped_ok = bool(
                 scoped_node is not None
@@ -813,6 +1077,11 @@ def _match_canonical_assertions(
         expected_negated = bool(expected.get("negated", False))
         item = snapshot.get(str(ref.get("uid", "")))
         actual_negated = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "NOT")
+        if local_id in formula_leaf_locals:
+            # Source-local NOT is represented in the proposition AST.  The leaf
+            # mapping deliberately points at the positive scoped N to avoid
+            # materializing NOT twice.
+            expected_negated = False
         if any("composition" in (target if isinstance(target, dict) else {}) and str((target if isinstance(target, dict) else {}).get("composition", {}).get("operator", "")).upper() == "OR" for target in (expected.get("roles", {}) or {}).values()):
             # An OR-valued assertion is lifted to g_OR over complete N propositions.
             actual_or = bool(isinstance(item, dict) and item.get("kind") == "G" and item.get("function_id") == "OR")
@@ -894,7 +1163,13 @@ def _match_integrated_conditionals(
             expected=expected_member_count, actual=len(members),
         )
 
-        def match_side(name: str, side_ref: Any, expected_predicates: list[str], member_slice: list[Mapping[str, Any]]) -> None:
+        def match_side(
+            name: str,
+            side_ref: Any,
+            expected_predicates: list[str],
+            member_slice: list[Mapping[str, Any]],
+            expected_operator: Any = None,
+        ) -> None:
             if not isinstance(side_ref, dict):
                 _check(checks, f"{prefix}.{name}.shape", False, expected="canonical ref", actual=side_ref)
                 return
@@ -903,18 +1178,19 @@ def _match_integrated_conditionals(
                 shape_ok = not (
                     isinstance(side, dict)
                     and side.get("kind") == "G"
-                    and str(side.get("function_id", "")).upper() == "AND"
+                    and str(side.get("function_id", "")).upper()
+                    in {"AND", "OR", "XOR"}
                 ) and bool(member_slice) and side_ref == member_slice[0]
                 expected_shape = "SINGLE"
                 actual_shape = (side or {}).get("function_id", "SINGLE") if isinstance(side, dict) else None
             else:
+                expected_shape = str(expected_operator or "AND").upper()
                 shape_ok = bool(
                     isinstance(side, dict)
                     and side.get("kind") == "G"
-                    and str(side.get("function_id", "")).upper() == "AND"
+                    and str(side.get("function_id", "")).upper() == expected_shape
                     and side.get("operands") == member_slice
                 )
-                expected_shape = "AND"
                 actual_shape = (side or {}).get("function_id") if isinstance(side, dict) else None
             _check(
                 checks, f"{prefix}.{name}.shape", shape_ok,
@@ -951,8 +1227,113 @@ def _match_integrated_conditionals(
             )
 
         split = len(expected_if)
-        match_side("antecedent", antecedent_ref, expected_if, members[:split])
-        match_side("consequent", consequent_ref, expected_then, members[split:split + len(expected_then)])
+        match_side(
+            "antecedent",
+            antecedent_ref,
+            expected_if,
+            members[:split],
+            expected.get("if_operator"),
+        )
+        match_side(
+            "consequent",
+            consequent_ref,
+            expected_then,
+            members[split:split + len(expected_then)],
+            expected.get("then_operator"),
+        )
+
+
+def _canonical_formula_shape(
+    snapshot: Mapping[str, Mapping[str, Any]],
+    ref: Any,
+    uid_to_local: Mapping[str, str],
+) -> Any:
+    if not isinstance(ref, dict):
+        return ("<missing>",)
+    uid = str(ref.get("uid", ""))
+    if uid in uid_to_local:
+        return ("REF", uid_to_local[uid])
+    item = snapshot.get(uid)
+    if not isinstance(item, dict):
+        return ("UID", uid)
+    if item.get("kind") != "G":
+        return ("UID", uid)
+    operator = str(item.get("function_id", "")).upper()
+    if operator == "IF":
+        operator = "IMPLIES"
+    if operator == "FALSE":
+        operator = "NOT"
+    return (
+        operator,
+        tuple(
+            _canonical_formula_shape(snapshot, operand, uid_to_local)
+            for operand in item.get("operands", []) or []
+        ),
+    )
+
+
+def _match_integrated_formulas(
+    checks: list[dict[str, Any]],
+    snapshot: Mapping[str, Mapping[str, Any]],
+    commit: Mapping[str, Any],
+    expected_formulas: Sequence[Mapping[str, Any]],
+    key_to_local: Mapping[str, str],
+) -> None:
+    actual = [
+        item for item in commit.get("formulas", []) or []
+        if isinstance(item, dict)
+    ]
+    _check(
+        checks,
+        "integration.formula_count",
+        len(actual) == len(expected_formulas),
+        expected=len(expected_formulas),
+        actual=len(actual),
+    )
+    local_to_ref = {
+        str(item.get("local_id", "")): item.get("ref")
+        for item in commit.get("assertions", []) or []
+        if isinstance(item, dict) and isinstance(item.get("ref"), dict)
+    }
+    uid_to_local = {
+        str(ref.get("uid", "")): local
+        for local, ref in local_to_ref.items()
+        if isinstance(ref, dict)
+    }
+    for index, expected in enumerate(expected_formulas):
+        if index >= len(actual):
+            break
+        item = actual[index]
+        prefix = f"integration.formulas.f{index + 1}"
+        actual_shape = _canonical_formula_shape(
+            snapshot, item.get("ref"), uid_to_local
+        )
+        expected_shape = _normalize_expected_proposition_expr(
+            expected.get("expr"), key_to_local
+        )
+        _check(
+            checks,
+            f"{prefix}.expr",
+            actual_shape == expected_shape,
+            expected=expected_shape,
+            actual=actual_shape,
+        )
+        member_locals = tuple(
+            uid_to_local.get(str(ref.get("uid", "")), "<missing>")
+            for ref in item.get("member_refs", []) or []
+            if isinstance(ref, dict)
+        )
+        expected_members = tuple(
+            key_to_local.get(key, "<missing>")
+            for key in _expected_expr_keys(expected.get("expr"))
+        )
+        _check(
+            checks,
+            f"{prefix}.members",
+            member_locals == expected_members,
+            expected=expected_members,
+            actual=member_locals,
+        )
 
 
 def _snapshot_item_for_ref(
@@ -1300,6 +1681,16 @@ def _match_integration(
             _canonical_assertion_ref_map(record, expected_key_to_local),
         )
 
+    expected_formulas = integration_expectation.get("formulas")
+    if isinstance(expected_formulas, list):
+        _match_integrated_formulas(
+            checks,
+            snapshot,
+            commit,
+            expected_formulas,
+            expected_key_to_local,
+        )
+
     clarification = integration_expectation.get("clarification")
     if isinstance(clarification, dict):
         expected_required = bool(clarification.get("required", False))
@@ -1493,6 +1884,17 @@ def evaluate_semantic_case(
             perception_expectation.get("conditionals", []) or [],
             key_to_local,
         )
+        if "proposition_roots" in perception_expectation:
+            _match_proposition_roots(
+                checks,
+                [
+                    item
+                    for item in actual_perception.get("proposition_roots", []) or []
+                    if isinstance(item, dict)
+                ],
+                perception_expectation.get("proposition_roots", []) or [],
+                key_to_local,
+            )
         # Relation hints are deliberately runtime-only, weaker-than-canonical
         # diagnostics (for example CAUSAL_CANDIDATE from narrative adjacency).
         # Legacy/exact semantic oracles that do not mention this channel must not
@@ -1506,15 +1908,52 @@ def evaluate_semantic_case(
                 key_to_local,
             )
 
+    coverage_assertions = expected_assertions
     if not unchecked:
-        _update_required_template_roles(required_template_roles, expected_assertions, expected_queries)
+        expected_roots = perception_expectation.get("proposition_roots", []) or []
+        operator_source_keys = {
+            str(key)
+            for root in expected_roots
+            if isinstance(root, dict)
+            for key in root.get("operator_sources", []) or []
+        }
+        coverage_assertions = [
+            item
+            for index, item in enumerate(expected_assertions)
+            if str(item.get("key") or f"a{index + 1}") not in operator_source_keys
+        ]
+        _update_required_template_roles(
+            required_template_roles, coverage_assertions, expected_queries
+        )
         integration_expectation = expected.get("integration", {}) or {}
         _match_integration(checks, record, after_snapshot, integration_expectation, expected_assertions, key_to_local)
 
         if str(record.get("status", "ERROR")) == "OK" and key_to_local:
-            _match_canonical_assertions(checks, record, after_snapshot, expected_assertions, key_to_local)
+            formula_leaf_locals = frozenset(
+                key_to_local.get(key, "<missing>")
+                for root in expected_roots
+                if isinstance(root, dict)
+                for key in _expected_expr_keys(root.get("expr"))
+            )
+            formula_operator_source_locals = frozenset(
+                key_to_local.get(str(key), "<missing>")
+                for root in expected_roots
+                if isinstance(root, dict)
+                for key in root.get("operator_sources", []) or []
+            )
+            _match_canonical_assertions(
+                checks,
+                record,
+                after_snapshot,
+                expected_assertions,
+                key_to_local,
+                formula_leaf_locals=formula_leaf_locals,
+                formula_operator_source_locals=formula_operator_source_locals,
+            )
 
-    touched_predicates = [] if unchecked else [str(item.get("predicate", "")) for item in expected_assertions]
+    touched_predicates = [] if unchecked else [
+        str(item.get("predicate", "")) for item in coverage_assertions
+    ]
     touched_predicates.extend(str(item.get("predicate", "")) for item in expected_queries)
     if oracle_case.grade == "EXACT" and str(record.get("status", "ERROR")) == "OK":
         _check_template_coverage(checks, after_snapshot, required_template_roles, touched_predicates)

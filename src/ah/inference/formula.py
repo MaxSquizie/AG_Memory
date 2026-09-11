@@ -331,6 +331,22 @@ class GroundFormulaReasoner:
         out.sort(key=lambda item: item[0].uid)
         return tuple(out)
 
+    def _alternative_parents(
+        self, ref: Ref
+    ) -> tuple[tuple[Ref, FunctionSymbol], ...]:
+        """Return asserted-alternative containers discoverable from one operand.
+
+        XOR entails OR-style exhaustiveness, so elimination/proof-by-cases can use
+        either operator. Exclusivity-specific reasoning remains in dedicated rules.
+        """
+        out = [
+            item
+            for operator in ("OR", "XOR")
+            for item in self._function_parents(ref, operator)
+        ]
+        out.sort(key=lambda item: item[0].uid)
+        return tuple(out)
+
     def _asserted_not_parent(self, ref: Ref) -> Ref | None:
         # Explicit local assumptions override incompatible canonical polarity only
         # inside the active proof scope.
@@ -652,6 +668,22 @@ class GroundFormulaReasoner:
                 for branch in out
             )
 
+        if canonical in {"POSSIBLE", "REQUIRED", "PERMITTED"}:
+            # Quantified/modal interaction is intentionally conservative: only an
+            # explicitly asserted modal proposition is a valid bound premise.
+            if self._asserted_function(ref, obj):
+                return (_BoundProof(env.copy(), (ref,), (ref,), depth),)
+            return ()
+
+        if canonical == "XOR":
+            # Variable-bearing XOR needs explicit negative evidence for every
+            # non-selected branch before one witness can establish "exactly one".
+            # Until that complete bound proof exists, only an explicitly asserted
+            # XOR is admissible here; treating XOR as OR would be unsound.
+            if self._asserted_function(ref, obj):
+                return (_BoundProof(env.copy(), (ref,), (ref,), depth),)
+            return ()
+
         if canonical == "NOT":
             if len(obj.operands) != 1 or not isinstance(obj.operands[0], Ref):
                 return ()
@@ -876,6 +908,139 @@ class GroundFormulaReasoner:
             )
         return None
 
+    def _try_disjunctive_elimination(
+        self,
+        target: Ref,
+        *,
+        depth: int,
+        stack: tuple[str, ...],
+    ) -> InferenceOutcome | None:
+        """Derive one disjunct when an asserted OR leaves it as the only live branch.
+
+        This is target-directed OR elimination: for an asserted OR(A, B, ...),
+        target B is proved only when every *other* branch is explicitly disproved.
+        UNKNOWN branches block the rule, and conflicted branches remain UNKNOWN via
+        the ordinary evaluator, so open-world absence can never eliminate a branch.
+        """
+        if depth >= self.max_depth:
+            return None
+
+        checked: set[str] = set()
+        for or_ref, or_obj in self._alternative_parents(target):
+            if or_ref.uid in checked:
+                continue
+            checked.add(or_ref.uid)
+            if not self._asserted_function(or_ref, or_obj):
+                continue
+            if self.conflicts.is_conflicted(or_ref):
+                continue
+            branches = tuple(item for item in or_obj.operands if isinstance(item, Ref))
+            if len(branches) != len(or_obj.operands) or target not in branches or len(branches) < 2:
+                continue
+
+            other_outcomes: list[InferenceOutcome] = []
+            blocked = False
+            for branch in branches:
+                if branch == target:
+                    continue
+                outcome = self._eval(branch, depth=depth + 1, stack=(*stack, or_ref.uid))
+                if outcome.status is not LogicalStatus.DISPROVED:
+                    blocked = True
+                    break
+                other_outcomes.append(outcome)
+            if blocked or len(other_outcomes) != len(branches) - 1:
+                continue
+
+            self._focus(or_ref, depth)
+            premises: list[Ref] = [or_ref]
+            seen = {or_ref.uid}
+            trace: list[Ref] = [or_ref]
+            max_depth = depth
+            for outcome in other_outcomes:
+                for premise in outcome.premise_refs:
+                    if premise.uid not in seen:
+                        seen.add(premise.uid)
+                        premises.append(premise)
+                trace.extend(outcome.uid_trace)
+                max_depth = max(max_depth, outcome.logical_depth)
+            trace.append(target)
+            self._focus(target, max_depth + 1)
+            return self._outcome(
+                LogicalStatus.PROVED,
+                StopReason.GOAL_SATISFIED,
+                target,
+                tuple(premises),
+                tuple(trace),
+                depth=max_depth + 1,
+                diagnostics=(
+                    "asserted "
+                    f"{self.core.function_registry.canonical_id(or_obj.function_id)} "
+                    f"leaves {target.uid} as the only non-refuted branch",
+                ),
+                rule_id=(
+                    f"{self.core.function_registry.canonical_id(or_obj.function_id)}_ELIM"
+                ),
+            )
+        return None
+
+    def _try_xor_exclusion(
+        self,
+        target: Ref,
+        *,
+        depth: int,
+        stack: tuple[str, ...],
+    ) -> InferenceOutcome | None:
+        """Refute one XOR branch when a different exclusive branch is proved.
+
+        This is the information that inclusive OR deliberately does not provide.
+        A branch is never rejected from absence alone: another branch must have a
+        positive proof under the ordinary open-world evaluator.
+        """
+        if depth >= self.max_depth:
+            return None
+
+        for xor_ref, xor_obj in self._function_parents(target, "XOR"):
+            if not self._asserted_function(xor_ref, xor_obj):
+                continue
+            if self.conflicts.is_conflicted(xor_ref):
+                continue
+            branches = tuple(
+                item for item in xor_obj.operands if isinstance(item, Ref)
+            )
+            if (
+                len(branches) != len(xor_obj.operands)
+                or target not in branches
+                or len(branches) < 2
+            ):
+                continue
+
+            for branch in branches:
+                if branch == target:
+                    continue
+                outcome = self._eval(
+                    branch,
+                    depth=depth + 1,
+                    stack=(*stack, xor_ref.uid),
+                )
+                if outcome.status is not LogicalStatus.PROVED:
+                    continue
+                self._focus(xor_ref, depth)
+                self._focus(target, max(depth + 1, outcome.logical_depth))
+                premises = self._merge_refs((xor_ref,), outcome.premise_refs)
+                return self._outcome(
+                    LogicalStatus.DISPROVED,
+                    StopReason.GOAL_REFUTED,
+                    target,
+                    premises,
+                    (xor_ref, *outcome.uid_trace, target),
+                    depth=max(depth + 1, outcome.logical_depth),
+                    diagnostics=(
+                        f"XOR exclusion: proved {branch.uid}, therefore {target.uid} is false",
+                    ),
+                    rule_id="XOR_EXCLUSION",
+                )
+        return None
+
     def _try_proof_by_cases(
         self,
         target: Ref,
@@ -906,7 +1071,7 @@ class GroundFormulaReasoner:
 
         checked_or: set[str] = set()
         for antecedent in tuple(rules_by_antecedent):
-            for or_ref, or_obj in self._function_parents(antecedent, "OR"):
+            for or_ref, or_obj in self._alternative_parents(antecedent):
                 if or_ref.uid in checked_or:
                     continue
                 checked_or.add(or_ref.uid)
@@ -979,9 +1144,13 @@ class GroundFormulaReasoner:
                     tuple(trace),
                     depth=max_branch_depth + 1,
                     diagnostics=(
-                        f"proof by cases over asserted OR with {len(branches)} branches",
+                        "proof by cases over asserted "
+                        f"{self.core.function_registry.canonical_id(or_obj.function_id)} "
+                        f"with {len(branches)} branches",
                     ),
-                    rule_id="OR_CASES",
+                    rule_id=(
+                        f"{self.core.function_registry.canonical_id(or_obj.function_id)}_CASES"
+                    ),
                 )
         return None
 
@@ -1113,6 +1282,12 @@ class GroundFormulaReasoner:
         eliminated = self._try_and_elimination(ref, depth=depth, stack=stack)
         if eliminated is not None:
             return eliminated
+        disjunct = self._try_disjunctive_elimination(ref, depth=depth, stack=stack)
+        if disjunct is not None:
+            return disjunct
+        xor_excluded = self._try_xor_exclusion(ref, depth=depth, stack=stack)
+        if xor_excluded is not None:
+            return xor_excluded
         implied = self._try_implication(ref, depth=depth, stack=stack)
         if implied is not None:
             return implied
@@ -1218,6 +1393,150 @@ class GroundFormulaReasoner:
                         rule_id="NOT_CONTRADICTION",
                     )
             return self._outcome(LogicalStatus.UNKNOWN, StopReason.SEARCH_EXHAUSTED, None, (), (), depth=depth)
+
+        if canonical in {"POSSIBLE", "REQUIRED", "PERMITTED"}:
+            # Scope-protection semantics only. A source-asserted modal wrapper proves
+            # that modal proposition itself; it never proves or refutes its operand.
+            if self._asserted_function(ref, obj):
+                self._focus(ref, depth)
+                return self._outcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    ref,
+                    (ref,),
+                    (ref,),
+                    depth=depth,
+                    rule_id=f"{canonical}_ASSERTED",
+                )
+            return self._outcome(
+                LogicalStatus.UNKNOWN,
+                StopReason.SEARCH_EXHAUSTED,
+                None,
+                (),
+                (),
+                depth=depth,
+            )
+
+        if canonical == "XOR":
+            # Natural-language n-ary XOR means exactly one true branch, not parity
+            # XOR. Open-world UNKNOWN therefore blocks introduction unless every
+            # other branch has explicit negative support.
+            if self._asserted_function(ref, obj):
+                self._focus(ref, depth)
+                return self._outcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    ref,
+                    (ref,),
+                    (ref,),
+                    depth=depth,
+                    rule_id="XOR_ASSERTED",
+                )
+
+            children = [
+                operand for operand in obj.operands if isinstance(operand, Ref)
+            ]
+            if len(children) != len(obj.operands):
+                return self._outcome(
+                    LogicalStatus.UNKNOWN,
+                    StopReason.SEARCH_EXHAUSTED,
+                    None,
+                    (),
+                    (),
+                    depth=depth,
+                    diagnostics=("XOR contains unresolved non-Ref operands",),
+                )
+            outcomes = [
+                self._eval(child, depth=depth, stack=stack)
+                for child in children
+            ]
+            proved = [
+                item for item in outcomes if item.status is LogicalStatus.PROVED
+            ]
+            disproved = [
+                item for item in outcomes if item.status is LogicalStatus.DISPROVED
+            ]
+
+            if len(proved) >= 2:
+                witnesses = proved[:2]
+                premises = tuple(
+                    dict.fromkeys(
+                        premise
+                        for item in witnesses
+                        for premise in item.premise_refs
+                    )
+                )
+                trace = tuple(
+                    step for item in witnesses for step in item.uid_trace
+                ) + (ref,)
+                return self._outcome(
+                    LogicalStatus.DISPROVED,
+                    StopReason.GOAL_REFUTED,
+                    ref,
+                    premises,
+                    trace,
+                    depth=max(
+                        (item.logical_depth for item in witnesses), default=depth
+                    ),
+                    diagnostics=("XOR refuted by multiple proved branches",),
+                    rule_id="XOR_MULTI_TRUE",
+                )
+
+            if len(proved) == 1 and len(disproved) == len(children) - 1:
+                premises = tuple(
+                    dict.fromkeys(
+                        premise
+                        for item in outcomes
+                        for premise in item.premise_refs
+                    )
+                )
+                trace = tuple(
+                    step for item in outcomes for step in item.uid_trace
+                ) + (ref,)
+                return self._outcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    ref,
+                    premises,
+                    trace,
+                    depth=max(
+                        (item.logical_depth for item in outcomes), default=depth
+                    ),
+                    rule_id="XOR_INTRO",
+                )
+
+            if outcomes and len(disproved) == len(children):
+                premises = tuple(
+                    dict.fromkeys(
+                        premise
+                        for item in outcomes
+                        for premise in item.premise_refs
+                    )
+                )
+                trace = tuple(
+                    step for item in outcomes for step in item.uid_trace
+                ) + (ref,)
+                return self._outcome(
+                    LogicalStatus.DISPROVED,
+                    StopReason.GOAL_REFUTED,
+                    ref,
+                    premises,
+                    trace,
+                    depth=max(
+                        (item.logical_depth for item in outcomes), default=depth
+                    ),
+                    diagnostics=("XOR refuted because every branch is false",),
+                    rule_id="XOR_ALL_FALSE",
+                )
+
+            return self._outcome(
+                LogicalStatus.UNKNOWN,
+                StopReason.SEARCH_EXHAUSTED,
+                None,
+                (),
+                (),
+                depth=depth,
+            )
 
         if canonical in {"AND", "OR"}:
             # A top-level compound explicitly asserted by the user is sufficient

@@ -28,6 +28,7 @@ from .contracts import (
     AllOfGoal,
     CauseEntailmentGoal,
     ExistsGoal,
+    FormulaGoal,
     GoalSpec,
     InferenceQuery,
     MultiRoleFillGoal,
@@ -199,6 +200,124 @@ class SemanticGoalCompiler:
             return self.query_builder.build(query, context, attention_refs)
         return self.query_builder.build(query, context)
 
+    def _build_matrix_proposition_query(
+        self,
+        query: QueryCandidate,
+        context: InteractionContext,
+        integrated_by_id: dict[str, object],
+        attention_refs: tuple[Ref, ...],
+    ) -> QueryBuildResult:
+        """Compile a query about a matrix relation whose argument is proposition P.
+
+        Perception has already made the matrix-vs-content distinction and attached
+        the exact local proposition as an actant. This method only resolves the
+        already-selected template, ordinary entity actants and that proposition ref.
+        It never turns P into the goal.
+        """
+        selection = query.predicate.template_selection
+        if selection is None or selection.existing_template_uid is None:
+            return QueryBuildResult(
+                None, ("semantic:matrix_query_template_unresolved",)
+            )
+        try:
+            template = self.core.store.get_template(
+                selection.existing_template_uid
+            )
+        except KeyError:
+            return QueryBuildResult(
+                None, ("semantic:matrix_query_template_missing",)
+            )
+
+        resolver = EntityResolver(self.core)
+        known: dict[ActantRole, Ref] = {}
+        attention: list[Ref] = []
+        seen_attention: set[str] = set()
+
+        def add_attention(ref: Ref) -> None:
+            if ref.uid not in seen_attention:
+                seen_attention.add(ref.uid)
+                attention.append(ref)
+
+        for ref in attention_refs:
+            add_attention(ref)
+
+        for actant in query.actants:
+            if actant.proposition is not None or actant.candidate_ref is not None:
+                if actant.proposition is not None:
+                    expr = actant.proposition
+                    if expr.operator is not PropositionOperator.REF:
+                        return QueryBuildResult(
+                            None,
+                            (
+                                "semantic:matrix_query_compound_proposition_not_supported",
+                            ),
+                        )
+                    assert expr.ref is not None
+                    local_id = expr.ref
+                else:
+                    assert actant.candidate_ref is not None
+                    local_id = actant.candidate_ref
+                integrated = integrated_by_id.get(local_id)
+                ref = getattr(integrated, "ref", None)
+                if not isinstance(ref, Ref):
+                    return QueryBuildResult(
+                        None,
+                        (
+                            f"semantic:matrix_query_content_missing:{local_id}",
+                        ),
+                    )
+                known[actant.role] = ref
+                add_attention(ref)
+                continue
+
+            resolved = resolver.resolve(
+                actant,
+                context,
+                first_person_ref=context.user_ref,
+                second_person_ref=context.self_ref,
+                attention_refs=attention_refs,
+            )
+            if not isinstance(resolved, ExistingEntity):
+                return QueryBuildResult(
+                    None,
+                    (
+                        f"semantic:matrix_query_actant_unresolved:{actant.role.value}",
+                    ),
+                )
+            known[actant.role] = resolved.ref
+            add_attention(resolved.ref)
+            for support in resolved.support_refs:
+                add_attention(support)
+
+        required_roles = set(known) | set(query.requested_roles)
+        if not required_roles.issubset(set(template.roles)):
+            return QueryBuildResult(
+                None, ("semantic:matrix_query_template_role_mismatch",)
+            )
+
+        template_ref = self.core.ref(template.uid)
+        if query.query_mode is QueryMode.FILL_ROLE:
+            if len(query.requested_roles) == 1:
+                target = RoleFillGoal(
+                    template_ref, known, query.requested_roles[0]
+                )
+            elif len(query.requested_roles) > 1:
+                target = MultiRoleFillGoal(
+                    template_ref, known, query.requested_roles
+                )
+            else:
+                return QueryBuildResult(
+                    None, ("semantic:matrix_query_requested_role_missing",)
+                )
+        else:
+            target = ExistsGoal(template_ref, known)
+
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(target)),
+            ("semantic:matrix_proposition_query",),
+            tuple(attention),
+        )
+
     @staticmethod
     def _root_expressions(root) -> tuple[PropositionExprCandidate, ...]:
         expressions: list[PropositionExprCandidate] = []
@@ -222,12 +341,41 @@ class SemanticGoalCompiler:
         return False
 
     @staticmethod
-    def _has_explicit_or(
+    def _explicit_modal_operator(
+        expressions: tuple[PropositionExprCandidate, ...],
+        target_ids: set[str],
+    ) -> PropositionOperator | None:
+        modal = {
+            PropositionOperator.POSSIBLE,
+            PropositionOperator.REQUIRED,
+            PropositionOperator.PERMITTED,
+        }
+
+        def find(expr: PropositionExprCandidate) -> PropositionOperator | None:
+            if (
+                expr.operator in modal
+                and set(expr.leaf_refs()) == target_ids
+            ):
+                return expr.operator
+            for member in expr.members:
+                found = find(member)
+                if found is not None:
+                    return found
+            return None
+
+        for expr in expressions:
+            found = find(expr)
+            if found is not None:
+                return found
+        return None
+
+    @staticmethod
+    def _has_explicit_alternative(
         expressions: tuple[PropositionExprCandidate, ...], target_ids: set[str]
     ) -> bool:
         for expr in expressions:
             if (
-                expr.operator is PropositionOperator.OR
+                expr.operator in {PropositionOperator.OR, PropositionOperator.XOR}
                 and set(expr.leaf_refs()) == target_ids
             ):
                 return True
@@ -413,11 +561,37 @@ class SemanticGoalCompiler:
             return []
 
         expressions = self._root_expressions(root)
-        if self._has_explicit_or(expressions, target_ids):
+        modal_operator = self._explicit_modal_operator(
+            expressions, target_ids
+        )
+        if modal_operator is not None:
+            # Until a dedicated modal query goal exists, never compile M(P) as a
+            # request to prove ordinary P. This is the query-side counterpart of
+            # the canonical nonfactivity barrier in GroundFormulaReasoner.
             return [
                 QueryBuildResult(
                     None,
-                    ("semantic:OR_goal_not_supported",),
+                    (
+                        f"semantic:{modal_operator.value}_goal_not_supported",
+                    ),
+                )
+            ]
+        if self._has_explicit_alternative(expressions, target_ids):
+            operator = next(
+                (
+                    expr.operator.value
+                    for expr in expressions
+                    if expr.operator in {
+                        PropositionOperator.OR, PropositionOperator.XOR
+                    }
+                    and set(expr.leaf_refs()) == target_ids
+                ),
+                "ALTERNATIVE",
+            )
+            return [
+                QueryBuildResult(
+                    None,
+                    (f"semantic:{operator}_goal_not_supported",),
                 )
             ]
         explicit_and = self._has_explicit_and(expressions, target_ids)
@@ -505,6 +679,34 @@ class SemanticGoalCompiler:
             diagnostic="semantic:explicit_AND",
         )
 
+    @staticmethod
+    def _build_quantified_formula_goal(
+        query: QueryCandidate,
+        integration: IntegrationCommit,
+    ) -> QueryBuildResult:
+        if query.local_id is None:
+            return QueryBuildResult(
+                None, ("semantic:quantified_query_local_id_missing",)
+            )
+        matches = tuple(
+            item
+            for item in integration.quantified_queries
+            if item.local_id == query.local_id
+        )
+        if len(matches) != 1:
+            diagnostic = (
+                "semantic:quantified_query_not_materialized"
+                if not matches
+                else "semantic:quantified_query_root_not_unique"
+            )
+            return QueryBuildResult(None, (diagnostic,))
+        item = matches[0]
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(FormulaGoal(item.ref))),
+            ("semantic:quantified_formula_goal",),
+            (item.ref, *item.member_refs),
+        )
+
     def build(
         self,
         integration: IntegrationCommit,
@@ -520,7 +722,9 @@ class SemanticGoalCompiler:
         # into hidden inference requests and pollute the public query outcomes.
         if perception is None:
             return tuple(
-                self._build_direct_query(query, context, attention_refs)
+                self._build_quantified_formula_goal(query, integration)
+                if query.quantified is not None
+                else self._build_direct_query(query, context, attention_refs)
                 for query in integration.unresolved_queries
             )
 
@@ -541,6 +745,15 @@ class SemanticGoalCompiler:
         }
 
         for root in roots:
+            if (
+                isinstance(root, QueryCandidate)
+                and root.quantified is not None
+            ):
+                results.append(
+                    self._build_quantified_formula_goal(root, integration)
+                )
+                continue
+
             descendants = self._descendants(perception, root.local_id)
             target_ids = {
                 local_id
@@ -550,6 +763,25 @@ class SemanticGoalCompiler:
                 and not assertion_by_id[local_id].quoted
             }
             if target_ids:
+                if isinstance(root, QueryCandidate) and any(
+                    actant.proposition is not None
+                    or actant.candidate_ref is not None
+                    for actant in root.actants
+                ):
+                    resolved_query = unresolved_query_by_id.get(
+                        root.local_id, root
+                    )
+                    results.append(
+                        self._build_matrix_proposition_query(
+                            resolved_query,
+                            context,
+                            integrated_by_id,
+                            attention_refs,
+                        )
+                    )
+                    covered_embedded.update(target_ids)
+                    continue
+
                 scope_results = self._compile_scope(
                     root=root,
                     target_ids=target_ids,

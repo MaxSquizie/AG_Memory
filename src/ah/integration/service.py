@@ -26,6 +26,7 @@ from ah.perception import (
     PredicateCandidate,
     PropositionExprCandidate,
     PropositionOperator,
+    QueryQuantifierOperator,
     StructuralClarificationSpec,
     NominalRelationKind,
     TemplateCandidate,
@@ -43,6 +44,8 @@ from .contracts import (
     IntegratedAssertion,
     IntegratedConditional,
     IntegratedExistential,
+    IntegratedFormula,
+    IntegratedQuantifiedQuery,
     IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
@@ -432,6 +435,42 @@ class IntegrationService:
             )
         return tuple(requests)
 
+    @staticmethod
+    def _emit_plan_diagnostics(plan: MutationPlan, *, source: str) -> None:
+        from ah.diagnostics.session_log import emit
+
+        ir = plan.candidate_ir
+        emit(
+            "pipeline_candidate_ir",
+            source=source,
+            source_text=ir.source_text,
+            batch_kind=ir.batch_kind.value,
+            source_ref=ir.source_ref,
+            ordered_assertion_ids=list(ir.ordered_assertion_ids),
+            discourse_refs=[item.local_id for item in ir.discourse_refs],
+            existential_variable_ids=[item.variable_id for item in ir.existential_bindings],
+            universal_variable_ids=[item.variable_id for item in ir.universal_bindings],
+            unresolved_temporal_refs=[item.local_id for item in ir.temporal_refs],
+            query_count=len(ir.perception.queries),
+            quantified_query_count=sum(
+                1 for item in ir.perception.queries
+                if item.quantified is not None
+            ),
+            command_count=len(ir.perception.commands),
+            relation_count=len(ir.perception.relations),
+            conditional_count=len(ir.perception.conditionals),
+        )
+        emit(
+            "pipeline_mutation_plan",
+            source=source,
+            forced_domain=None if plan.forced_domain is None else plan.forced_domain.value,
+            speaker_uid=plan.speaker_ref.uid,
+            existing_experience_uid=(
+                None if plan.existing_experience_ref is None else plan.existing_experience_ref.uid
+            ),
+            ordered_assertion_ids=list(ir.ordered_assertion_ids),
+        )
+
     def prepare_external_plan(
         self,
         result: PerceptionResult,
@@ -445,7 +484,7 @@ class IntegrationService:
         """Build the complete validated staging plan without mutating canonical AH."""
         if context.user_ref is None:
             raise IntegrationError("External integration requires context.user_ref")
-        return self.consolidator.prepare(
+        plan = self.consolidator.prepare(
             result,
             speaker_ref=context.user_ref,
             forced_domain=None,
@@ -459,6 +498,8 @@ class IntegrationService:
                 if context.now_ref is not None else None
             ),
         )
+        self._emit_plan_diagnostics(plan, source="EXTERNAL")
+        return plan
 
     def prepare_external_batch_plan(
         self,
@@ -470,7 +511,7 @@ class IntegrationService:
         """Validate/consolidate a complete message/document batch before writing AH."""
         if context.user_ref is None:
             raise IntegrationError("External integration requires context.user_ref")
-        return self.consolidator.prepare_batch(
+        plan = self.consolidator.prepare_batch(
             batch,
             speaker_ref=context.user_ref,
             forced_domain=None,
@@ -481,6 +522,8 @@ class IntegrationService:
                 if context.now_ref is not None else None
             ),
         )
+        self._emit_plan_diagnostics(plan, source="EXTERNAL_BATCH")
+        return plan
 
     def integrate_external_batch(
         self,
@@ -500,7 +543,7 @@ class IntegrationService:
     ) -> MutationPlan:
         if context.self_ref is None:
             raise IntegrationError("H-only agent integration requires context.self_ref")
-        return self.consolidator.prepare(
+        plan = self.consolidator.prepare(
             result,
             speaker_ref=context.self_ref,
             forced_domain=Domain.H,
@@ -513,6 +556,8 @@ class IntegrationService:
                 if context.now_ref is not None else None
             ),
         )
+        self._emit_plan_diagnostics(plan, source="AGENT_H")
+        return plan
 
     def bind_discourse_ref(
         self,
@@ -660,6 +705,43 @@ class IntegrationService:
                 created=created,
             )
 
+    @staticmethod
+    def _materialize_proposition_expr(
+        core: AHCore,
+        expr: PropositionExprCandidate,
+        local_refs: dict[str, Ref],
+        forced_domain: Domain | None,
+    ) -> tuple[Ref, bool]:
+        """Materialize one validated proposition AST without asserting its leaves."""
+        if expr.operator is PropositionOperator.REF:
+            assert expr.ref is not None
+            try:
+                return local_refs[expr.ref], False
+            except KeyError as exc:
+                raise CandidateValidationError(
+                    f"proposition ref not integrated yet: {expr.ref}"
+                ) from exc
+        members: list[Ref] = []
+        created_any = False
+        for member in expr.members:
+            ref, created = IntegrationService._materialize_proposition_expr(
+                core, member, local_refs, forced_domain
+            )
+            members.append(ref)
+            created_any = created_any or created
+        domain = (
+            forced_domain
+            if forced_domain is not None
+            else DomainRouter(core).route_external(tuple(members))
+        )
+        function_id = (
+            "NOT"
+            if expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
+            else expr.operator.value
+        )
+        function, created = core.ensure_function(domain, function_id, tuple(members))
+        return core.ref(function.uid), created_any or created
+
     def _integrate_plan(
         self,
         plan: MutationPlan,
@@ -679,8 +761,10 @@ class IntegrationService:
         refutations: list[RefutationRequest] = []
         relations: list[IntegratedRelation] = []
         conditionals: list[IntegratedConditional] = []
+        formulas: list[IntegratedFormula] = []
         existentials: list[IntegratedExistential] = []
         universals: list[IntegratedExistential] = []
+        quantified_queries: list[IntegratedQuantifiedQuery] = []
         conflicts: list[IntegratedConflict] = []
         local_refs: dict[str, Ref] = {}
         entity_local_refs: dict[str, Ref] = {}
@@ -700,6 +784,22 @@ class IntegrationService:
             for item in plan.candidate_ir.universal_bindings
         }
         bound_vars = {**existential_vars, **universal_vars}
+
+        assertion_by_id = {item.local_id: item for item in ordered}
+        ordinary_formula_roots = tuple(
+            root
+            for root in result.proposition_roots
+            if not all(
+                assertion_by_id[ref].status is AssertionStatus.CONDITIONAL
+                for ref in root.expression.leaf_refs()
+            )
+        )
+        formula_leaf_ids = {
+            ref for root in ordinary_formula_roots for ref in root.expression.leaf_refs()
+        }
+        formula_operator_source_ids = {
+            ref for root in ordinary_formula_roots for ref in root.operator_source_refs
+        }
 
         def candidate_bound_refs(
             candidate: AssertionCandidate, mapping: dict[str, BoundVar]
@@ -821,6 +921,13 @@ class IntegrationService:
                 )
 
             for candidate in ordered:
+                # Some matrix frames are consumed by a validated logical wrapper
+                # (for example a truth-negating construction).  They are linguistic
+                # operator evidence, not independent world propositions.
+                if candidate.local_id in formula_operator_source_ids:
+                    continue
+
+                formula_leaf = candidate.local_id in formula_leaf_ids
                 quantified = (
                     candidate.local_id in existential_assertion_vars
                     or candidate.local_id in universal_assertion_vars
@@ -919,7 +1026,7 @@ class IntegrationService:
                     AssertionStatus.HYPOTHETICAL,
                     AssertionStatus.MODAL,
                 }:
-                    semantic_scope = candidate.status.value
+                    semantic_scope = "LOGICAL" if formula_leaf else candidate.status.value
                     integrated = self._integrate_assertion(
                         tx, candidate, context, local_refs, entity_local_refs,
                         local_domain_overrides.get(candidate.local_id, forced_domain),
@@ -929,7 +1036,7 @@ class IntegrationService:
                     )
                     proposition_ref = integrated.ref
                     created = integrated.created
-                    if candidate.negated:
+                    if candidate.negated and not formula_leaf:
                         not_g, not_created = tx.ensure_function(
                             integrated.domain, "NOT", (proposition_ref,)
                         )
@@ -997,10 +1104,12 @@ class IntegrationService:
                         domain=integrated.domain,
                         created=integrated.created or transition_created,
                         ambiguous=integrated.ambiguous,
+                        semantic_scope=("LOGICAL" if formula_leaf else None),
                     )
                     assertions.append(final)
                     local_refs[candidate.local_id] = final.ref
-                    seeds.append(ActivationSeedRequest(final.ref, SeedReason.NEW_FACT))
+                    if not formula_leaf:
+                        seeds.append(ActivationSeedRequest(final.ref, SeedReason.NEW_FACT))
                     continue
 
                 integrated = self._integrate_assertion(
@@ -1013,10 +1122,18 @@ class IntegrationService:
                     entity_anchors=entity_anchors,
                     speaker_ref=speaker_ref,
                     addressee_ref=addressee_ref,
-                    count_occurrence=not candidate.negated,
+                    count_occurrence=(not candidate.negated and not formula_leaf),
+                    semantic_scope=("LOGICAL" if formula_leaf else None),
                 )
 
-                if candidate.negated:
+                if candidate.negated and formula_leaf:
+                    # Local negation is represented explicitly inside the
+                    # PropositionExprCandidate AST.  Keep REF(local_id) bound to
+                    # the positive scoped N so NOT scope is materialized exactly
+                    # once at the formula root.
+                    assertions.append(integrated)
+                    local_refs[candidate.local_id] = integrated.ref
+                elif candidate.negated:
                     # Object-level negation is canonical NOT(P), not FALSE(N).
                     # FALSE is reserved for explicit correction/refutation of one
                     # already stored proposition/support.  A negative statement
@@ -1031,24 +1148,27 @@ class IntegrationService:
                         domain=integrated.domain,
                         created=integrated.created or not_created,
                         ambiguous=integrated.ambiguous,
+                        semantic_scope=("LOGICAL" if formula_leaf else None),
                     )
                     assertions.append(final)
                     local_refs[candidate.local_id] = final.ref
-                    seeds.append(
-                        ActivationSeedRequest(
-                            not_ref,
-                            SeedReason.NEW_FACT if not_created else SeedReason.REACTIVATED_FACT,
+                    if not formula_leaf:
+                        seeds.append(
+                            ActivationSeedRequest(
+                                not_ref,
+                                SeedReason.NEW_FACT if not_created else SeedReason.REACTIVATED_FACT,
+                            )
                         )
-                    )
                 else:
                     assertions.append(integrated)
                     local_refs[candidate.local_id] = integrated.ref
-                    seeds.append(
-                        ActivationSeedRequest(
-                            integrated.ref,
-                            SeedReason.NEW_FACT if integrated.created else SeedReason.REACTIVATED_FACT,
+                    if not formula_leaf:
+                        seeds.append(
+                            ActivationSeedRequest(
+                                integrated.ref,
+                                SeedReason.NEW_FACT if integrated.created else SeedReason.REACTIVATED_FACT,
+                            )
                         )
-                    )
 
             # Build asserted existential formulae from connected components of
             # batch-local unknown participants.  An assertion that shares two
@@ -1268,6 +1388,182 @@ class IntegrationService:
                         )
                     )
 
+            # Quantified queries are canonicalized only as non-occurring formula
+            # targets. They deliberately reuse the same QUANTIFIED pattern identity
+            # as quantified assertions, so an exact previously asserted formula can
+            # be recognized by the reasoner. The query turn itself is never attached
+            # to H as assertion evidence for this formula.
+            for query in resolved_queries:
+                spec = query.quantified
+                if spec is None:
+                    continue
+                if query.local_id is None:
+                    raise CandidateValidationError(
+                        "Quantified query reached Integration without local_id"
+                    )
+                selection = query.predicate.template_selection
+                if selection is None or selection.existing_template_uid is None:
+                    continue
+                try:
+                    template = tx.store.get_template(
+                        selection.existing_template_uid
+                    )
+                except KeyError:
+                    continue
+
+                variables = {
+                    binding.entity_ref: BoundVar(
+                        binding.variable_id, binding.sort
+                    )
+                    for binding in spec.bindings
+                }
+                query_actants: dict[ActantRole, Ref | BoundVar] = {}
+                query_resolution_failed = False
+                resolver = EntityResolver(tx)
+
+                for actant in query.actants:
+                    variable = variables.get(actant.entity_ref or "")
+                    if variable is not None:
+                        query_actants[actant.role] = variable
+                        continue
+
+                    if (
+                        actant.candidate_ref is not None
+                        or actant.composition is not None
+                        or actant.proposition is not None
+                    ):
+                        query_resolution_failed = True
+                        break
+
+                    if (
+                        actant.entity_ref is not None
+                        and actant.entity_ref in entity_local_refs
+                    ):
+                        query_actants[actant.role] = entity_local_refs[
+                            actant.entity_ref
+                        ]
+                        continue
+
+                    resolved = resolver.resolve(
+                        actant,
+                        context,
+                        first_person_ref=speaker_ref,
+                        second_person_ref=addressee_ref,
+                    )
+                    if not isinstance(resolved, ExistingEntity):
+                        # Ordinary unresolved queries fail at GoalCompiler rather
+                        # than inventing entities. Quantified queries keep exactly
+                        # the same policy: no M is created merely to ask a question.
+                        query_resolution_failed = True
+                        break
+                    query_actants[actant.role] = resolved.ref
+
+                if query_resolution_failed:
+                    continue
+
+                concrete_refs = tuple(
+                    value
+                    for value in query_actants.values()
+                    if isinstance(value, Ref)
+                )
+                query_domain = (
+                    forced_domain
+                    if forced_domain is not None
+                    else DomainRouter(tx).route_external(concrete_refs)
+                )
+                body_node, body_created = tx.add_or_enrich_hypernode(
+                    query_domain,
+                    tx.ref(template.uid),
+                    query_actants,
+                    weight=self.config.initial_hypernode_weight,
+                    meta={"semantic_scope": "QUANTIFIED"},
+                    count_occurrence=False,
+                )
+                body_member_ref = tx.ref(body_node.uid)
+                body_ref = body_member_ref
+                created_any = body_created
+
+                if spec.body_negated:
+                    not_g, not_created = tx.ensure_function(
+                        query_domain, "NOT", (body_ref,)
+                    )
+                    body_ref = tx.ref(not_g.uid)
+                    created_any = created_any or not_created
+
+                for binding in reversed(spec.bindings):
+                    variable = variables[binding.entity_ref]
+                    if binding.restriction_lemma is not None:
+                        restriction = self._ensure_class_pattern(
+                            tx,
+                            binding.restriction_lemma,
+                            variable,
+                            query_domain,
+                        )
+                        connective = (
+                            "IMPLIES"
+                            if binding.operator is QueryQuantifierOperator.FORALL
+                            else "AND"
+                        )
+                        scoped_g, scoped_created = tx.ensure_function(
+                            query_domain,
+                            connective,
+                            (restriction, body_ref),
+                        )
+                        body_ref = tx.ref(scoped_g.uid)
+                        created_any = created_any or scoped_created
+
+                    quantifier_g, quantifier_created = tx.ensure_function(
+                        query_domain,
+                        binding.operator.value,
+                        (variable, body_ref),
+                    )
+                    body_ref = tx.ref(quantifier_g.uid)
+                    created_any = created_any or quantifier_created
+
+                    if binding.negated:
+                        not_g, not_created = tx.ensure_function(
+                            query_domain, "NOT", (body_ref,)
+                        )
+                        body_ref = tx.ref(not_g.uid)
+                        created_any = created_any or not_created
+
+                quantified_queries.append(
+                    IntegratedQuantifiedQuery(
+                        local_id=query.local_id,
+                        ref=body_ref,
+                        member_refs=(body_member_ref,),
+                        variable_ids=tuple(
+                            binding.variable_id for binding in spec.bindings
+                        ),
+                        created=created_any,
+                    )
+                )
+
+            # Materialize top-level logical formula roots only after every leaf
+            # proposition has a canonical scoped ref.  The H occurrence will assert
+            # these roots; leaf N/G refs deliberately remain non-occurring operands.
+            for root in ordinary_formula_roots:
+                root_ref, created = self._materialize_proposition_expr(
+                    tx, root.expression, local_refs, forced_domain
+                )
+                member_refs = tuple(
+                    local_refs[ref] for ref in root.expression.leaf_refs()
+                )
+                formulas.append(
+                    IntegratedFormula(
+                        local_id=root.local_id,
+                        ref=root_ref,
+                        member_refs=member_refs,
+                        created=created,
+                    )
+                )
+                seeds.append(
+                    ActivationSeedRequest(
+                        root_ref,
+                        SeedReason.NEW_FACT if created else SeedReason.REACTIVATED_FACT,
+                    )
+                )
+
             # Conditional branches are canonical proposition content but are not
             # ordinary asserted world facts.  Integrate them as scoped N/G operands,
             # then bind the antecedent and consequent through deterministic IMPLIES.
@@ -1312,31 +1608,33 @@ class IntegrationService:
                 antecedent_members = tuple(conditional_local_refs[item] for item in conditional.antecedent_refs)
                 consequent_members = tuple(conditional_local_refs[item] for item in conditional.consequent_refs)
 
-                def materialize_expr(expr: PropositionExprCandidate | None, fallback: tuple[str, ...]) -> Ref:
+                def materialize_expr(
+                    expr: PropositionExprCandidate | None,
+                    fallback: tuple[str, ...],
+                ) -> Ref:
                     if expr is None:
                         expr = (
                             PropositionExprCandidate.ref_expr(fallback[0])
                             if len(fallback) == 1
                             else PropositionExprCandidate(
                                 PropositionOperator.AND,
-                                members=tuple(PropositionExprCandidate.ref_expr(ref) for ref in fallback),
+                                members=tuple(
+                                    PropositionExprCandidate.ref_expr(ref)
+                                    for ref in fallback
+                                ),
                             )
                         )
-                    if expr.operator is PropositionOperator.REF:
-                        assert expr.ref is not None
-                        return conditional_local_refs[expr.ref]
-                    members = tuple(materialize_expr(member, member.leaf_refs()) for member in expr.members)
-                    domain = forced_domain if forced_domain is not None else DomainRouter(tx).route_external(members)
-                    function_id = (
-                        "NOT"
-                        if expr.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}
-                        else expr.operator.value
+                    ref, _created = self._materialize_proposition_expr(
+                        tx, expr, conditional_local_refs, forced_domain
                     )
-                    function, _ = tx.ensure_function(domain, function_id, members)
-                    return tx.ref(function.uid)
+                    return ref
 
-                antecedent_ref = materialize_expr(conditional.antecedent_expr, conditional.antecedent_refs)
-                consequent_ref = materialize_expr(conditional.consequent_expr, conditional.consequent_refs)
+                antecedent_ref = materialize_expr(
+                    conditional.antecedent_expr, conditional.antecedent_refs
+                )
+                consequent_ref = materialize_expr(
+                    conditional.consequent_expr, conditional.consequent_refs
+                )
                 conditional_domain = (
                     forced_domain
                     if forced_domain is not None
@@ -1456,7 +1754,13 @@ class IntegrationService:
                 follow_weight=self.config.follow_link_weight,
             )
             semantic_refs = (
-                tuple(item.ref for item in assertions if item.semantic_scope != "QUANTIFIED")
+                tuple(
+                    item.ref
+                    for item in assertions
+                    if item.semantic_scope != "QUANTIFIED"
+                    and item.local_id not in formula_leaf_ids
+                )
+                + tuple(item.ref for item in formulas)
                 + tuple(item.ref for item in conditionals)
                 + tuple(item.ref for item in existentials)
                 + tuple(item.ref for item in universals)
@@ -1569,7 +1873,7 @@ class IntegrationService:
             )
         context.last_experience_ref = experience_ref
         clarifications = self._clarification_requests(tuple(assertions))
-        return IntegrationCommit(
+        commit = IntegrationCommit(
             assertions=tuple(assertions),
             experience_ref=experience_ref,
             activation_seeds=tuple(seeds),
@@ -1580,10 +1884,66 @@ class IntegrationService:
             clarifications=clarifications,
             relations=tuple(relations),
             conditionals=tuple(conditionals),
+            formulas=tuple(formulas),
             existentials=tuple(existentials),
             universals=tuple(universals),
             conflicts=tuple(conflicts),
+            quantified_queries=tuple(quantified_queries),
         )
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_canonical_commit",
+            experience_uid=commit.experience_ref.uid,
+            assertions=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "kind": item.ref.kind.value,
+                    "domain": item.domain.value,
+                    "created": item.created,
+                    "scope": item.semantic_scope,
+                }
+                for item in commit.assertions
+            ],
+            relations=[
+                {
+                    "relation_id": item.relation_id,
+                    "uid": item.ref.uid,
+                    "source_uid": item.source.uid,
+                    "target_uid": item.target.uid,
+                    "created": item.created,
+                }
+                for item in commit.relations
+            ],
+            conditionals=[item.ref.uid for item in commit.conditionals],
+            quantified_queries=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "members": [ref.uid for ref in item.member_refs],
+                    "variable_ids": list(item.variable_ids),
+                }
+                for item in commit.quantified_queries
+            ],
+            formulas=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "members": [ref.uid for ref in item.member_refs],
+                    "created": item.created,
+                }
+                for item in commit.formulas
+            ],
+            existentials=[item.ref.uid for item in commit.existentials],
+            universals=[item.ref.uid for item in commit.universals],
+            conflicts=[item.ref.uid for item in commit.conflicts],
+            activation_seeds=[
+                {"uid": item.ref.uid, "reason": item.reason.value}
+                for item in commit.activation_seeds
+            ],
+        )
+        return commit
 
     def _discourse_signature(self, text: str | None) -> tuple[str, str | None] | None:
         """Return a stable number/gender signature for one source nominal.

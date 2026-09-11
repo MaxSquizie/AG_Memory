@@ -40,6 +40,7 @@ class ConflictEngine:
     TYPE = "CONFLICT"
     KIND_POLARITY = "POLARITY"
     KIND_FUNCTIONAL = "FUNCTIONAL"
+    KIND_MUTUAL_EXCLUSION = "MUTUAL_EXCLUSION"
 
     def __init__(self, core: AHCore, schema_registry: _SchemaRegistry | None = None) -> None:
         self.core = core
@@ -266,6 +267,50 @@ class ConflictEngine:
             out.append(other_ref)
         return tuple(sorted(out, key=self._member_key))
 
+    def _schema_exclusion_conflicts_for(self, ref: Ref) -> tuple[Ref, ...]:
+        """Return asserted positive N excluded by an explicit schema declaration.
+
+        Mutual exclusion is never guessed from predicate names.  It is operational
+        only when the registry explicitly declares the other template and a
+        non-empty tuple of key roles.  Every key role must be present and equal in
+        both propositions; all other differences are allowed because the schema
+        declaration itself defines the incompatible states.
+        """
+        if self.schema_registry is None or ref.kind is not RefKind.N:
+            return ()
+        if not self._is_asserted_expression(ref):
+            return ()
+        node = self.core.store.get_hypernode(ref.uid)
+        out: list[Ref] = []
+        own_schema = self.schema_registry.get(node.template.uid)
+        partner_ids = set(getattr(own_schema, "mutually_exclusive_with", ()))
+        for other_schema in getattr(self.schema_registry, "items", lambda: ())():
+            if node.template.uid.upper() in getattr(other_schema, "mutually_exclusive_with", ()):
+                partner_ids.add(other_schema.canonical_id)
+
+        for partner_id in sorted(partner_ids):
+            key_roles = getattr(
+                self.schema_registry,
+                "mutual_exclusion_key",
+                lambda _left, _right: None,
+            )(node.template.uid, partner_id)
+            if not key_roles:
+                continue
+            for other in self.core.store.find_hypernodes_by_template(partner_id):
+                if other.uid == node.uid:
+                    continue
+                other_ref = self.core.ref(other.uid)
+                if self.core.store.domain_of(other.uid) is not self.core.store.domain_of(node.uid):
+                    continue
+                if not self._is_asserted_expression(other_ref):
+                    continue
+                if any(role not in node.actants or role not in other.actants for role in key_roles):
+                    continue
+                if any(node.actants[role] != other.actants[role] for role in key_roles):
+                    continue
+                out.append(other_ref)
+        return tuple(sorted(set(out), key=self._member_key))
+
     # ---------- public API ----------
     def register_asserted_roots(self, refs: tuple[Ref, ...]) -> tuple[ConflictRecord, ...]:
         """Create/reuse conflict sets touched by newly asserted top-level roots.
@@ -312,6 +357,24 @@ class ConflictEngine:
                     },
                 )
                 out[record.group_ref.uid] = record
+
+            exclusions = self._schema_exclusion_conflicts_for(ref)
+            if exclusions:
+                node = self.core.store.get_hypernode(ref.uid)
+                by_template: dict[str, list[Ref]] = {}
+                for other_ref in exclusions:
+                    other = self.core.store.get_hypernode(other_ref.uid)
+                    by_template.setdefault(other.template.uid, []).append(other_ref)
+                for partner_template, partner_refs in sorted(by_template.items()):
+                    pair = tuple(sorted((node.template.uid, partner_template)))
+                    record = self._ensure_group(
+                        (ref, *partner_refs),
+                        kind=self.KIND_MUTUAL_EXCLUSION,
+                        meta={
+                            "exclusion_templates": pair,
+                        },
+                    )
+                    out[record.group_ref.uid] = record
         return tuple(out[uid] for uid in sorted(out))
 
     def is_unresolved_group(self, group: Group | Ref) -> bool:
@@ -331,7 +394,7 @@ class ConflictEngine:
 
         members = tuple(group_obj.members)
         kind = str(group_obj.meta.get("conflict_kind") or self.KIND_POLARITY).upper()
-        if kind == self.KIND_FUNCTIONAL:
+        if kind in {self.KIND_FUNCTIONAL, self.KIND_MUTUAL_EXCLUSION}:
             live = tuple(member for member in members if self._is_asserted_expression(member))
             return len(live) >= 2
 

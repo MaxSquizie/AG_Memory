@@ -1,0 +1,7 @@
+Choose exactly one label for the relation of the MATRIX frame to its already identified proposition CONTENT.
+
+NOT_CONTENT = the MATRIX is purely a truth-negating wrapper: it states that the CONTENT proposition/formula is false or not the case. The matrix should therefore be represented as logical NOT over CONTENT rather than as an independent world predicate.
+NONE = the MATRIX has its own semantic relation to CONTENT, such as belief, report, possibility, requirement, desire, knowledge, speech, evaluation, or another attitude/content relation.
+UNCLEAR = it cannot be decided safely whether the matrix is pure truth negation or an independent semantic relation.
+
+Do not classify ordinary predicate negation inside CONTENT here. Return only NOT_CONTENT, NONE, or UNCLEAR.

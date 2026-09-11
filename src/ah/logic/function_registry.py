@@ -118,6 +118,16 @@ class FunctionRegistry:
                 operand_validator=_refs_only,
             )
         )
+        # Propositional n-ary XOR means exactly one true alternative.  It is
+        # deliberately not parity XOR, matching natural-language exclusive choice.
+        self.register(
+            FunctionSpec(
+                "XOR", 2, None,
+                lambda xs: " XOR ".join(f"({x})" for x in xs),
+                reasoner_handler="XOR",
+                operand_validator=_proposition_refs,
+            )
+        )
         self.register(
             FunctionSpec(
                 "NOT", 1, 1,
@@ -126,6 +136,17 @@ class FunctionRegistry:
                 operand_validator=_proposition_refs,
             )
         )
+        # Modal wrappers have deliberately shallow semantics. Their presence can
+        # itself be proved, but no wrapper licenses its operand as ordinary truth.
+        for modal_id in ("POSSIBLE", "REQUIRED", "PERMITTED"):
+            self.register(
+                FunctionSpec(
+                    modal_id, 1, 1,
+                    lambda xs, name=modal_id: f"{name} ({xs[0]})",
+                    reasoner_handler=modal_id,
+                    operand_validator=_proposition_refs,
+                )
+            )
         self.register(
             FunctionSpec(
                 "FALSE", 1, 1,

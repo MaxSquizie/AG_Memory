@@ -16,6 +16,7 @@ from .contracts import (
     AssociationHopKind,
     AssociationOutcome,
     AssociationPath,
+    AssociationSemantics,
     AssociationStatus,
     AssociationTraceEvent,
     AssociationTraceKind,
@@ -507,6 +508,37 @@ class AssociationCoordinator:
 
         return self.core.ref(min(common, key=key))
 
+    @staticmethod
+    def _path_fact_uids(path: AssociationPath | None) -> frozenset[str]:
+        if path is None:
+            return frozenset()
+        return frozenset(ref.uid for ref in path.refs if ref.kind is RefKind.N)
+
+    def _association_semantics(
+        self,
+        left_path: AssociationPath | None,
+        right_path: AssociationPath | None,
+    ) -> AssociationSemantics | None:
+        if left_path is None or right_path is None:
+            return None
+        refs = (*left_path.refs, *right_path.refs)
+        if any(self.core.store.domain_of(ref.uid) is Domain.H for ref in refs):
+            return AssociationSemantics.EPISODIC
+        return AssociationSemantics.SEMANTIC
+
+    def _minimal_common_fact_count(
+        self, state: AssociationSearchState, common_uids: tuple[str, ...]
+    ) -> int | None:
+        if not common_uids:
+            return None
+        counts: list[int] = []
+        for uid in common_uids:
+            common = self.core.ref(uid)
+            left = state.path(_LEFT, common, self.core)
+            right = state.path(_RIGHT, common, self.core)
+            counts.append(len(self._path_fact_uids(left) | self._path_fact_uids(right)))
+        return min(counts) if counts else None
+
     def _outcome(
         self,
         state: AssociationSearchState,
@@ -533,6 +565,9 @@ class AssociationCoordinator:
         )
         left_path = state.path(_LEFT, common, self.core) if common is not None else None
         right_path = state.path(_RIGHT, common, self.core) if common is not None else None
+        common_uids = tuple(ref.uid for ref in common_refs)
+        semantics = self._association_semantics(left_path, right_path)
+        minimal_fact_count = self._minimal_common_fact_count(state, common_uids)
         left_activated = tuple(
             self.core.ref(uid)
             for uid in sorted(state.parents[_LEFT], key=lambda uid: (state.depths[_LEFT][uid], uid))
@@ -554,4 +589,6 @@ class AssociationCoordinator:
             ticks_executed=ticks_executed,
             trace=tuple(state.trace),
             domain_policy=policy,
+            semantics=semantics,
+            minimal_fact_count=minimal_fact_count,
         )

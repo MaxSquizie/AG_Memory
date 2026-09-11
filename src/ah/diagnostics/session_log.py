@@ -72,7 +72,60 @@ def log_llm_request(**payload: Any) -> None:
 
 
 def audit_tick_result(result: Any) -> None:
-    """Emit lifecycle/GC diagnostics for one Ignition tick, never into AH/H."""
+    """Emit a full runtime-only decomposition of one Ignition tick, never into AH/H."""
+    node_transitions = getattr(result, "node_transitions", ())
+    propagations = getattr(result, "propagations", ())
+    emit(
+        "ignition_tick",
+        tick=int(getattr(result, "tick", -1)),
+        incoming=dict(getattr(result, "incoming_consumed", {})),
+        outgoing=dict(getattr(result, "outgoing_scheduled", {})),
+        activation_events=[ref.uid for ref in getattr(result, "activation_events", ())],
+        workspace=[ref.uid for ref in getattr(result, "workspace", ())],
+        pacemaker_targets=list(getattr(result, "pacemaker_targets", ())),
+        nodes=[
+            {
+                "uid": item.ref.uid,
+                "incoming": item.incoming,
+                "pacemaker_incoming": item.pacemaker_incoming,
+                "seed_reasons": list(item.seed_reasons),
+                "before": {
+                    "x": item.before.excitation,
+                    "output": item.before.output,
+                    "activation_event": item.before.activation_event,
+                    "decay_age": item.before.decay_age,
+                    "decay_origin": item.before.decay_origin_excitation,
+                    "first_excitation_tick": item.before.first_excitation_tick,
+                    "last_activation_tick": item.before.last_activation_tick,
+                    "last_output_tick": item.before.last_output_tick,
+                },
+                "after": {
+                    "x": item.after.excitation,
+                    "output": item.after.output,
+                    "activation_event": item.after.activation_event,
+                    "decay_age": item.after.decay_age,
+                    "decay_origin": item.after.decay_origin_excitation,
+                    "first_excitation_tick": item.after.first_excitation_tick,
+                    "last_activation_tick": item.after.last_activation_tick,
+                    "last_output_tick": item.after.last_output_tick,
+                },
+            }
+            for item in node_transitions
+        ],
+        propagations=[
+            {
+                "source": item.source.uid,
+                "target": item.target.uid,
+                "via_uid": item.via_uid,
+                "via_kind": item.via_kind,
+                "relation": item.relation,
+                "amount": item.amount,
+            }
+            for item in propagations
+        ],
+        link_weight_updates=list(getattr(result, "link_weight_updates", ())),
+        hypernode_weight_updates=list(getattr(result, "hypernode_weight_updates", ())),
+    )
     gc = getattr(result, "gc", None)
     if gc is not None and getattr(gc, "deleted", ()):
         emit(

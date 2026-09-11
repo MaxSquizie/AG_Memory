@@ -1,11 +1,14 @@
 from .agent_context import ContextProjector
+from .association_context import AssociationContextProjector
 from .contracts import (
     AgentContext,
     AgentContextDiagnostic,
     ProjectionBlock,
     ProjectionMode,
     ProjectionBudgetExceeded,
+    SourceProjectionCursor,
     SourceScope,
+    SourceScopeSlice,
     SourceScopeActivation,
     SourceScopedContextResult,
     WorkspaceContextDiagnostic,
@@ -20,6 +23,7 @@ from .source_scope import (
 __all__ = [
     "AgentContext",
     "AgentContextDiagnostic",
+    "AssociationContextProjector",
     "ContextProjector",
     "FunctionRegistry",
     "FunctionSpec",
@@ -27,7 +31,9 @@ __all__ = [
     "ProjectionMode",
     "ProjectionBudgetExceeded",
     "SemanticProjector",
+    "SourceProjectionCursor",
     "SourceScope",
+    "SourceScopeSlice",
     "SourceScopeActivation",
     "SourceScopeActivator",
     "SourceScopedContextResult",

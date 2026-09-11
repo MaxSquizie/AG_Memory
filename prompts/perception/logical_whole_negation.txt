@@ -1,0 +1,7 @@
+Choose exactly one label.
+
+WHOLE_NOT = the source explicitly denies the truth of the entire CANDIDATE FORMULA as a unit.
+NO = the source does not negate the whole formula. Local negations listed under LOCAL NEGATIONS ALREADY REPRESENTED stay local. Wording such as "not both" or another restriction on one subexpression is not whole-formula negation unless the complete shown formula is denied.
+UNCLEAR = whole-formula versus local/subexpression negation cannot be resolved safely from the source.
+
+Return only WHOLE_NOT, NO, or UNCLEAR.

@@ -737,6 +737,98 @@ class InferenceEngine:
                 ),
             )
 
+        schema = self.schema_registry.get(relation)
+        if goal.source == goal.target:
+            if schema.irreflexive:
+                runtime.rule("IRREFLEXIVE", logical_depth=1, detail=relation)
+                return InferenceOutcome(
+                    LogicalStatus.DISPROVED,
+                    StopReason.GOAL_REFUTED,
+                    None,
+                    (goal.source,),
+                    (goal.source,),
+                    domain_from_premises(self.core, (goal.source,)),
+                    1,
+                    (f"{relation} is explicitly registered IRREFLEXIVE",),
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        (goal.source,), rule_id="IRREFLEXIVE", relation_id=relation
+                    ),
+                )
+            if schema.reflexive:
+                runtime.rule("REFLEXIVE", logical_depth=1, detail=relation)
+                premises = (goal.source,)
+                return InferenceOutcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    DerivedLinkConclusion(relation, goal.source, goal.target),
+                    premises,
+                    premises,
+                    domain_from_premises(self.core, premises),
+                    1,
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        premises, rule_id="REFLEXIVE", relation_id=relation
+                    ),
+                )
+
+        if schema.symmetric:
+            reverse = self.core.store.find_link(relation, goal.target.uid, goal.source.uid)
+            runtime.memory_query(
+                "SYMMETRIC_RELATION",
+                f"{relation}|{goal.target.uid}|{goal.source.uid}",
+                logical_depth=0,
+                focus_ref=goal.source,
+                candidate_count=1 if reverse is not None else 0,
+                detail="reverse typed link lookup licensed by SYMMETRIC schema",
+            )
+            if reverse is not None:
+                link_ref = self.core.ref(reverse.uid)
+                premises = (goal.source, link_ref, goal.target)
+                runtime.rule("SYMMETRY", logical_depth=1, detail=relation)
+                return InferenceOutcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    DerivedLinkConclusion(relation, goal.source, goal.target),
+                    premises,
+                    premises,
+                    domain_from_premises(self.core, premises),
+                    1,
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        premises, rule_id="SYMMETRY", relation_id=relation
+                    ),
+                )
+
+        inverse = self.schema_registry.inverse_for(relation)
+        if inverse is not None:
+            inverse_link = self.core.store.find_link(inverse, goal.target.uid, goal.source.uid)
+            runtime.memory_query(
+                "INVERSE_RELATION",
+                f"{inverse}|{goal.target.uid}|{goal.source.uid}",
+                logical_depth=0,
+                focus_ref=goal.source,
+                candidate_count=1 if inverse_link is not None else 0,
+                detail=f"inverse typed link lookup licensed by {relation}<->{inverse}",
+            )
+            if inverse_link is not None:
+                link_ref = self.core.ref(inverse_link.uid)
+                premises = (goal.source, link_ref, goal.target)
+                runtime.rule("INVERSE_OF", logical_depth=1, detail=f"{relation}<->{inverse}")
+                return InferenceOutcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    DerivedLinkConclusion(relation, goal.source, goal.target),
+                    premises,
+                    premises,
+                    domain_from_premises(self.core, premises),
+                    1,
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        premises, rule_id="INVERSE_OF", relation_id=relation
+                    ),
+                )
+
         if not self.schema_registry.is_transitive(relation):
             return InferenceOutcome(
                 LogicalStatus.UNKNOWN,

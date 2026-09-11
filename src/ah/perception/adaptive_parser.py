@@ -24,6 +24,8 @@ from .quantifier_formalization import (
     QuantifierFormalizationError,
     QuantifierFormalizer,
 )
+from .logical_formalization import LogicalFormBuilder
+from .modal_formalization import ModalScopeBuilder
 from .lexical_recovery import (
     LexicalRecovery,
     LexicalRecoveryStatus,
@@ -1241,6 +1243,54 @@ class AdaptivePerceptionParser:
             assertions, queries, commands, act_dependencies,
             assertion_spans, query_spans, command_spans,
         )
+        queries = self._attach_embedded_query_content(
+            text, assertions, queries, act_dependencies
+        )
+
+        proposition_roots = ()
+        logical_diagnostics: tuple[str, ...] = ()
+        if self._candidate_graph is not None and assertions:
+            logical = LogicalFormBuilder(
+                self._candidate_graph,
+                lambda stage, prompt, choices: self._deep_semantic_choice_probe(
+                    stage, prompt, choices
+                )[0],
+            ).build(
+                text,
+                tuple(assertions),
+                assertion_spans,
+                conditionals,
+            )
+            if logical.unresolved is not None:
+                raise AdaptiveParseError(
+                    f"logical formalization unresolved: {logical.unresolved}",
+                    tuple(self._traces),
+                )
+            proposition_roots = logical.roots
+            conditionals = logical.conditionals
+            logical_diagnostics = logical.diagnostics
+
+            modal = ModalScopeBuilder(
+                self._candidate_graph,
+                lambda stage, prompt, choices: self._deep_semantic_choice_probe(
+                    stage, prompt, choices
+                )[0],
+            ).build(
+                text,
+                tuple(assertions),
+                assertion_spans,
+                proposition_roots,
+            )
+            if modal.unresolved is not None:
+                raise AdaptiveParseError(
+                    f"modal formalization unresolved: {modal.unresolved}",
+                    tuple(self._traces),
+                )
+            proposition_roots = modal.roots
+            logical_diagnostics = (
+                *logical_diagnostics,
+                *modal.diagnostics,
+            )
 
         # Event normalization is a runtime perception boundary, not a canonical
         # write.  It can recover independently asserted gerund/result-state
@@ -1250,6 +1300,7 @@ class AdaptivePerceptionParser:
         event_diagnostics: tuple[str, ...] = (
             *participant_projection_diagnostics,
             *factivity_diagnostics,
+            *logical_diagnostics,
         )
         relation_hints = ()
         if self._candidate_graph is not None and assertions:
@@ -1265,6 +1316,7 @@ class AdaptivePerceptionParser:
             event_diagnostics = (
                 *participant_projection_diagnostics,
                 *factivity_diagnostics,
+                *logical_diagnostics,
                 *normalized.diagnostics,
                 *causal_diagnostics,
             )
@@ -1302,6 +1354,7 @@ class AdaptivePerceptionParser:
             diagnostics=event_diagnostics,
             relations=relations,
             conditionals=conditionals,
+            proposition_roots=proposition_roots,
             act_dependencies=act_dependencies,
             relation_hints=relation_hints,
             lexical_recovery=lexical_decisions,
@@ -3352,6 +3405,141 @@ class AdaptivePerceptionParser:
             [replace(item, quoted=True) if item.local_id in quoted else item for item in commands],
         )
 
+    def _attach_embedded_query_content(
+        self,
+        source_text: str,
+        assertions: list[AssertionCandidate],
+        queries: list[QueryCandidate],
+        dependencies: tuple[ActDependencyCandidate, ...],
+    ) -> list[QueryCandidate]:
+        """Separate attitude-matrix queries from requests to evaluate their content.
+
+        A structural Q -> A dependency only says that an assertion-shaped frame is
+        embedded under a question. It does not tell whether the requested truth is
+        the matrix relation itself ("Does Anna believe P?") or P ("Is it true that
+        P?"). Python first fixes the query root and the single subordinate
+        proposition root; one bounded source-only probe decides only that binary
+        semantic distinction.
+
+        MATRIX_QUERY attaches the already-known proposition as an OBJECT actant of
+        QueryCandidate so Integration can resolve the correct proposition-valued T.
+        CONTENT_GOAL keeps the existing descendant-goal path. No predicate inventory
+        or keyword trigger decides the result.
+        """
+        if not queries or not dependencies:
+            return queries
+
+        by_assertion = {item.local_id: item for item in assertions}
+        adjacency: dict[str, list[str]] = {}
+        for edge in dependencies:
+            if edge.kind is ActDependencyKind.QUOTED:
+                continue
+            adjacency.setdefault(edge.parent_ref, []).append(edge.child_ref)
+
+        def descendants(root: str) -> set[str]:
+            out: set[str] = set()
+            queue = list(adjacency.get(root, ()))
+            while queue:
+                ref = queue.pop()
+                if ref in out:
+                    continue
+                out.add(ref)
+                queue.extend(adjacency.get(ref, ()))
+            return out
+
+        def event_text(item: AssertionCandidate) -> str:
+            evidence = item.evidence or item.predicate.evidence
+            if evidence is not None and evidence.text.strip():
+                return evidence.text.strip()
+            return item.predicate.surface
+
+        result: list[QueryCandidate] = []
+        for query in queries:
+            if query.local_id is None or query.quoted:
+                result.append(query)
+                continue
+            if any(
+                actant.proposition is not None
+                or actant.candidate_ref is not None
+                for actant in query.actants
+            ):
+                result.append(query)
+                continue
+
+            embedded = {
+                ref for ref in descendants(query.local_id)
+                if ref in by_assertion
+                and by_assertion[ref].status
+                in {AssertionStatus.ASSERTED, AssertionStatus.EMBEDDED}
+                and not by_assertion[ref].quoted
+            }
+            if not embedded:
+                result.append(query)
+                continue
+
+            child_of_embedded = {
+                child
+                for parent in embedded
+                for child in adjacency.get(parent, ())
+                if child in embedded
+            }
+            proposition_roots = tuple(sorted(embedded - child_of_embedded))
+            if len(proposition_roots) != 1:
+                # Existing content-goal compilation can still handle several
+                # descendants. Matrix attitude query needs an exact proposition
+                # argument, so do not guess a compound scope here.
+                result.append(query)
+                continue
+
+            proposition_ref = proposition_roots[0]
+            content = by_assertion[proposition_ref]
+            root_roles = ", ".join(
+                f"{actant.role.value}={actant.mention or actant.normalized_hint or '?'}"
+                for actant in query.actants
+                if actant.proposition is None and actant.candidate_ref is None
+            ) or "<none>"
+            prompt = (
+                f"TEXT:\n{source_text}\n"
+                f"QUERY PREDICATE:\n{query.predicate.surface}\n"
+                f"QUERY PARTICIPANTS:\n{root_roles}\n"
+                f"EMBEDDED PROPOSITION:\n{event_text(content)}\n"
+                "CHOICES:\nMATRIX_QUERY\nCONTENT_GOAL\nUNCLEAR"
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "embedded_query_mode",
+                prompt,
+                ("MATRIX_QUERY", "CONTENT_GOAL", "UNCLEAR"),
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "embedded query matrix/content scope unresolved",
+                    tuple(self._traces),
+                )
+            if decision == "CONTENT_GOAL":
+                result.append(query)
+                continue
+
+            if any(actant.role is ActantRole.OBJECT for actant in query.actants):
+                raise AdaptiveParseError(
+                    "matrix proposition query conflicts with existing OBJECT actant",
+                    tuple(self._traces),
+                )
+            result.append(
+                replace(
+                    query,
+                    actants=(
+                        *query.actants,
+                        ActantCandidate(
+                            ActantRole.OBJECT,
+                            proposition=PropositionExprCandidate.ref_expr(
+                                proposition_ref
+                            ),
+                        ),
+                    ),
+                )
+            )
+        return result
+
     def _derive_conditionals(
         self,
         assertions: list[AssertionCandidate],
@@ -3368,6 +3556,7 @@ class AdaptivePerceptionParser:
         if graph is None or len(assertions) < 2:
             return ()
 
+        assertion_by_local = {item.local_id: item for item in assertions}
         clause_to_locals: dict[str, list[str]] = {}
         for local_id, span in assertion_spans.items():
             if span is None:
@@ -3385,37 +3574,85 @@ class AdaptivePerceptionParser:
         def branch_expr(refs: tuple[str, ...]) -> PropositionExprCandidate:
             if len(refs) == 1:
                 return PropositionExprCandidate.ref_expr(refs[0])
-            ordered_refs = sorted(
+            ordered_refs = tuple(sorted(
                 refs,
                 key=lambda ref: assertion_spans[ref].start_index
                 if assertion_spans.get(ref) is not None else 10**9,
-            )
-            # Preserve explicit OR at proposition level. AND is the default only
-            # when no disjunctive coordinator occurs between consecutive frames.
-            saw_or = False
-            saw_and = False
+            ))
+            relations: list[str] = []
             for left, right in zip(ordered_refs, ordered_refs[1:]):
                 ls, rs = assertion_spans.get(left), assertion_spans.get(right)
-                if ls is None or rs is None:
-                    continue
-                between = [
-                    token.text.casefold() for token in graph.tokens
-                    if ls.end_index < token.index < rs.start_index
-                ]
-                saw_or = saw_or or any(item in {"или", "либо"} for item in between)
-                saw_and = saw_and or any(item in {"и", "да"} for item in between)
-            operator = PropositionOperator.OR if saw_or and not saw_and else PropositionOperator.AND
-            return PropositionExprCandidate(
-                operator,
-                members=tuple(PropositionExprCandidate.ref_expr(ref) for ref in ordered_refs),
+                between = (
+                    [
+                        token.text.casefold() for token in graph.tokens
+                        if ls is not None
+                        and rs is not None
+                        and ls.end_index < token.index < rs.start_index
+                    ]
+                    if ls is not None and rs is not None
+                    else []
+                )
+                has_or = any(item in {"или", "либо"} for item in between)
+                has_and = any(
+                    item in {"и", "да", "а", "но", "однако"} for item in between
+                )
+                if has_or and not has_and:
+                    relations.append("OR")
+                else:
+                    # Branch membership is already established by conditional
+                    # clause topology.  Comma-only/list continuation therefore
+                    # means conjunction unless an explicit disjunction is present.
+                    relations.append("AND")
+
+            atom_exprs = tuple(
+                PropositionExprCandidate.ref_expr(ref) for ref in ordered_refs
             )
+            if len(set(relations)) == 1:
+                return PropositionExprCandidate(
+                    PropositionOperator(relations[0]),
+                    members=atom_exprs,
+                )
+
+            candidates = LogicalFormBuilder._scope_candidates(
+                atom_exprs, tuple(relations)
+            )
+            if len(candidates) == 1:
+                return candidates[0]
+            if not candidates or len(candidates) > LogicalFormBuilder._MAX_SCOPE_CHOICES:
+                raise AdaptiveParseError(
+                    "conditional logical scope has no bounded candidate set",
+                    tuple(self._traces),
+                )
+            labels = tuple(f"C{index}" for index in range(1, len(candidates) + 1))
+            prompt = (
+                f"TEXT:\n{graph.text}\n"
+                + "ATOMS:\n"
+                + "\n".join(ordered_refs)
+                + "\nCANDIDATE SCOPES:\n"
+                + "\n".join(
+                    f"{label}: {LogicalFormBuilder._render(expr)}"
+                    for label, expr in zip(labels, candidates)
+                )
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "logical_scope", prompt, (*labels, "UNCLEAR")
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "conditional logical scope unresolved",
+                    tuple(self._traces),
+                )
+            return candidates[labels.index(decision)]
 
         out: list[ConditionalCandidate] = []
         seen: set[tuple[tuple[str, ...], tuple[str, ...]]] = set()
         clauses = list(graph.clauses)
         clause_index = {item.clause_id: i for i, item in enumerate(clauses)}
+        conditional_markers = {
+            "если", "только_если", "лишь_если", "если_только"
+        }
         for clause in clauses:
-            if clause.marker != "если" or clause.parent_clause_id is None:
+            if clause.marker not in conditional_markers or clause.parent_clause_id is None:
                 continue
             antecedent_ids: list[str] = list(clause_to_locals.get(clause.clause_id, ()))
             child_i = clause_index.get(clause.clause_id, -1)
@@ -3435,19 +3672,20 @@ class AdaptivePerceptionParser:
             consequent_ids: list[str] = list(
                 clause_to_locals.get(clause.parent_clause_id, ())
             )
-            # A fronted condition can govern an additive coordinated continuation
-            # that the clause builder represents as the next top-level sibling:
-            # ``Если A, B и C``.  Once B is the parent consequent, contiguous
-            # same-sentence siblings explicitly led by additive coordinators remain
-            # inside that consequent region.  Do not absorb OR/adversative siblings
-            # here: they require a different logical composition than AND.
+            # A fronted condition can govern a coordinated consequent region
+            # represented as top-level siblings: "Если A, B и C" as well as
+            # "Если A, B или C".  Keep every explicit truth-functional coordinator;
+            # branch_expr below determines AND/OR scope instead of discarding the
+            # disjunctive continuation.
             if 0 <= parent_i:
                 for sibling in clauses[parent_i + 1:]:
                     if sibling.sentence_id != clause.sentence_id:
                         break
                     if sibling.parent_clause_id is not None:
                         break
-                    if sibling.marker.casefold() not in {"и", "да"}:
+                    if (sibling.marker or "").casefold() not in {
+                        "и", "да", "или", "либо", "а", "но", "однако"
+                    }:
                         break
                     sibling_locals = clause_to_locals.get(sibling.clause_id, ())
                     if not sibling_locals:
@@ -3456,6 +3694,44 @@ class AdaptivePerceptionParser:
             consequent = tuple(dict.fromkeys(consequent_ids))
             if not antecedent or not consequent:
                 continue
+
+            # Plain "если" has the ordinary sufficient-condition orientation:
+            # subordinate -> matrix. Modified/correlative conditional shells can
+            # reverse necessity ("B only if A"), so ask one tiny semantic question
+            # only after Python has fixed the two proposition regions.
+            if clause.marker != "если":
+                subordinate_text = " | ".join(
+                    assertion_by_local[ref].evidence.text
+                    if assertion_by_local[ref].evidence is not None
+                    else ref
+                    for ref in antecedent
+                )
+                matrix_text = " | ".join(
+                    assertion_by_local[ref].evidence.text
+                    if assertion_by_local[ref].evidence is not None
+                    else ref
+                    for ref in consequent
+                )
+                prompt = (
+                    f"TEXT:\n{graph.text}\n"
+                    f"CONDITIONAL CONNECTIVE:\n{clause.connector_span.text if clause.connector_span is not None else clause.marker}\n"
+                    f"SUBORDINATE PROPOSITIONS:\n{subordinate_text}\n"
+                    f"MATRIX PROPOSITIONS:\n{matrix_text}\n"
+                    "CHOICES:\nSUBORDINATE_TO_MATRIX\nMATRIX_TO_SUBORDINATE\nUNCLEAR"
+                )
+                direction, _ = self._deep_semantic_choice_probe(
+                    "conditional_direction",
+                    prompt,
+                    ("SUBORDINATE_TO_MATRIX", "MATRIX_TO_SUBORDINATE", "UNCLEAR"),
+                )
+                if direction == "UNCLEAR":
+                    raise AdaptiveParseError(
+                        "conditional logical direction unresolved",
+                        tuple(self._traces),
+                    )
+                if direction == "MATRIX_TO_SUBORDINATE":
+                    antecedent, consequent = consequent, antecedent
+
             key = (antecedent, consequent)
             if key in seen:
                 continue
@@ -4206,22 +4482,72 @@ class AdaptivePerceptionParser:
                     op = PropositionOperator.OR if group.operator is CoordinationKind.OR else PropositionOperator.AND
                     return PropositionExprCandidate(op, members=tuple(PropositionExprCandidate.ref_expr(r) for r in members))
 
-            # Cross-clause coordination may not live in a single predicate group.
-            # Inspect only explicit coordinators between consecutive proposition
-            # spans; absent OR evidence defaults to conjunction of simultaneously
-            # present situation members.
-            sorted_refs = sorted(ordered_refs, key=lambda r: assertion_spans[r].start_index if assertion_spans.get(r) else 10**9)
-            saw_or = False
-            saw_and = False
+            # Cross-clause proposition content can mix AND and OR. Preserve
+            # every boundary relation first; only a genuinely mixed sequence needs
+            # a bounded scope choice. This prevents "A и B или C" from collapsing
+            # to flat AND merely because one additive coordinator is present.
+            sorted_refs = tuple(sorted(
+                ordered_refs,
+                key=lambda r: assertion_spans[r].start_index
+                if assertion_spans.get(r) else 10**9,
+            ))
+            relations: list[str] = []
             for left, right in zip(sorted_refs, sorted_refs[1:]):
                 ls, rs = assertion_spans.get(left), assertion_spans.get(right)
-                if ls is None or rs is None:
-                    continue
-                between = [t.text.casefold() for t in graph.tokens if ls.end_index < t.index < rs.start_index]
-                saw_or = saw_or or any(x in {"или", "либо"} for x in between)
-                saw_and = saw_and or any(x in {"и", "да"} for x in between)
-            op = PropositionOperator.OR if saw_or and not saw_and else PropositionOperator.AND
-            return PropositionExprCandidate(op, members=tuple(PropositionExprCandidate.ref_expr(r) for r in sorted_refs))
+                between = (
+                    [
+                        t.text.casefold()
+                        for t in graph.tokens
+                        if ls is not None
+                        and rs is not None
+                        and ls.end_index < t.index < rs.start_index
+                    ]
+                    if ls is not None and rs is not None
+                    else []
+                )
+                has_or = any(x in {"или", "либо"} for x in between)
+                has_and = any(
+                    x in {"и", "да", "а", "но", "однако"} for x in between
+                )
+                relations.append("OR" if has_or and not has_and else "AND")
+
+            atom_exprs = tuple(
+                PropositionExprCandidate.ref_expr(ref) for ref in sorted_refs
+            )
+            if len(set(relations)) == 1:
+                return PropositionExprCandidate(
+                    PropositionOperator(relations[0]),
+                    members=atom_exprs,
+                )
+
+            candidates = LogicalFormBuilder._scope_candidates(
+                atom_exprs, tuple(relations)
+            )
+            if not candidates or len(candidates) > LogicalFormBuilder._MAX_SCOPE_CHOICES:
+                raise AdaptiveParseError(
+                    "nested proposition logical scope has no bounded candidate set",
+                    tuple(self._traces),
+                )
+            labels = tuple(f"C{index}" for index in range(1, len(candidates) + 1))
+            prompt = (
+                f"TEXT:\n{graph.text}\n"
+                + "ATOMS:\n"
+                + "\n".join(sorted_refs)
+                + "\nCANDIDATE SCOPES:\n"
+                + "\n".join(
+                    f"{label}: {LogicalFormBuilder._render(expr)}"
+                    for label, expr in zip(labels, candidates)
+                )
+            )
+            decision, _ = self._deep_semantic_choice_probe(
+                "logical_scope", prompt, (*labels, "UNCLEAR")
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "nested proposition logical scope unresolved",
+                    tuple(self._traces),
+                )
+            return candidates[labels.index(decision)]
 
         # Resolve clause-local linguistic dependencies before frame nesting.
         # Relative pronouns bind an antecedent entity into the child frame, while
@@ -10176,6 +10502,28 @@ class AdaptivePerceptionParser:
         }
         return bool(indices) and indices <= self._transition_cue_token_indices
 
+    @staticmethod
+    def _emit_probe_diagnostic(
+        stage: str,
+        *,
+        role: str,
+        raw: str,
+        normalized: str | None,
+        retry_index: int,
+        error: str | None,
+    ) -> None:
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_probe",
+            stage=stage,
+            role=role,
+            raw=raw,
+            normalized=normalized,
+            retry_index=retry_index,
+            error=error,
+        )
+
     def _exact_choice_probe(
         self,
         stage: str,
@@ -10204,16 +10552,22 @@ class AdaptivePerceptionParser:
         raw = response.text.strip()
         label = raw.upper()
         if label not in choices:
+            error = f"expected exactly one of: {', '.join(choices)}"
             self._traces.append(
-                ProbeTrace(
-                    stage, user_prompt, raw, None, 0,
-                    f"expected exactly one of: {', '.join(choices)}",
-                )
+                ProbeTrace(stage, user_prompt, raw, None, 0, error)
+            )
+            self._emit_probe_diagnostic(
+                stage, role=f"perception_{stage}", raw=raw,
+                normalized=None, retry_index=0, error=error,
             )
             raise AdaptiveParseError(
                 f"{stage} expected exactly one of: {', '.join(choices)}"
             )
         self._traces.append(ProbeTrace(stage, user_prompt, raw, label, 0, None))
+        self._emit_probe_diagnostic(
+            stage, role=f"perception_{stage}", raw=raw,
+            normalized=label, retry_index=0, error=None,
+        )
         return label, float("inf")
 
     def _deep_semantic_choice_probe(
@@ -10261,10 +10615,18 @@ class AdaptivePerceptionParser:
             self._traces.append(
                 ProbeTrace(stage, user_prompt, raw, None, 0, error)
             )
+            self._emit_probe_diagnostic(
+                stage, role=f"semantic_{stage}", raw=raw,
+                normalized=None, retry_index=0, error=error,
+            )
             if optional:
                 return None, float("inf")
             raise AdaptiveParseError(f"{stage} {error}")
         self._traces.append(ProbeTrace(stage, user_prompt, raw, label, 0, None))
+        self._emit_probe_diagnostic(
+            stage, role=f"semantic_{stage}", raw=raw,
+            normalized=label, retry_index=0, error=None,
+        )
         return label, float("inf")
 
     def _probe(
@@ -10298,10 +10660,18 @@ class AdaptivePerceptionParser:
                 self._traces.append(
                     ProbeTrace(stage, user_prompt, raw, None, retry_index, last_error)
                 )
+                self._emit_probe_diagnostic(
+                    stage, role=f"perception_{stage}", raw=raw,
+                    normalized=None, retry_index=retry_index, error=last_error,
+                )
                 continue
             normalized = self._display_answer(value)
             self._traces.append(
                 ProbeTrace(stage, user_prompt, raw, normalized, retry_index, None)
+            )
+            self._emit_probe_diagnostic(
+                stage, role=f"perception_{stage}", raw=raw,
+                normalized=normalized, retry_index=retry_index, error=None,
             )
             return value
         raise AdaptiveParseError(

@@ -176,6 +176,89 @@ class SemanticOracle1238Tests(unittest.TestCase):
         failures = {item["name"] for item in verdict.failures}
         self.assertIn("templates.подарить.explicit_role_coverage", failures)
 
+    def test_quantified_query_contract_is_graded_by_role_not_parser_handle(self) -> None:
+        oracle = SemanticOracleCase(
+            1,
+            "Все сотрудники пришли?",
+            "EXACT",
+            {
+                "perception": {
+                    "must_parse": True,
+                    "assertions": [],
+                    "queries": [
+                        {
+                            "predicate": "прийти",
+                            "mode": "EXISTS",
+                            "roles": {"SUBJECT": "сотрудники"},
+                            "quantified": {
+                                "bindings": [
+                                    {
+                                        "role": "SUBJECT",
+                                        "variable_id": 0,
+                                        "operator": "FORALL",
+                                        "restriction": "сотрудник",
+                                    }
+                                ],
+                                "body_negated": False,
+                            },
+                        }
+                    ],
+                    "relations": [],
+                    "conditionals": [],
+                },
+                "integration": {"must_succeed": True},
+            },
+        )
+        record = {
+            "status": "OK",
+            "perception_result": {
+                "assertions": [],
+                "queries": [
+                    {
+                        "local_id": "Q1",
+                        "predicate": {
+                            "surface": "пришли",
+                            "normalized_hint": "прийти",
+                        },
+                        "actants": [
+                            {
+                                "role": "SUBJECT",
+                                "mention": "сотрудники",
+                                "normalized_hint": "сотрудники",
+                                "entity_ref": "ANY_INTERNAL_HANDLE",
+                            }
+                        ],
+                        "requested_roles": [],
+                        "query_mode": "EXISTS",
+                        "quantified": {
+                            "bindings": [
+                                {
+                                    "entity_ref": "ANY_INTERNAL_HANDLE",
+                                    "variable_id": 0,
+                                    "operator": "FORALL",
+                                    "restriction_lemma": "сотрудник",
+                                    "negated": False,
+                                    "sort": "ENTITY",
+                                }
+                            ],
+                            "body_negated": False,
+                        },
+                    }
+                ],
+                "commands": [],
+                "relations": [],
+                "conditionals": [],
+            },
+            "integration_commit": {
+                "assertions": [],
+                "clarification_required": False,
+                "clarifications": [],
+            },
+            "queries": [],
+        }
+        verdict = evaluate_semantic_case(record, oracle, {}, {})
+        self.assertEqual(verdict.status, "PASS", verdict.failures)
+
     def test_canonical_if_with_scoped_members_is_semantic_pass(self) -> None:
         oracle = SemanticOracleCase(
             1,

@@ -21,6 +21,7 @@ from ah.model import ActantRole, Domain, Property
 from ah.projection import (
     ContextProjector,
     ProjectionBudgetExceeded,
+    SourceProjectionCursor,
     SourceScopeActivator,
     SourceScopeResolver,
     SourceScopedContextService,
@@ -259,3 +260,45 @@ def test_complete_source_projection_is_index_bounded_explicitly_compacted_and_de
     assert "сжат детерминированно" in first.rendered
     assert "RAW SOURCE MUST NEVER ENTER THE MODEL" not in first.rendered
     assert roots[0].uid in {ref.uid for ref in first.source_workspace_refs}
+
+
+def test_source_projection_cursor_advances_only_primary_roots_and_carries_prior_coherence() -> None:
+    core, _context, _event_ref, first, second, _unrelated = document_memory()
+    resolver = SourceScopeResolver(core)
+
+    page1 = resolver.slice(
+        SourceProjectionCursor("doc:incident-1"), max_primary_roots=1
+    )
+    assert page1.primary_refs == (first,)
+    assert page1.overlap_refs == ()
+    assert page1.next_cursor.next_index == 1
+    assert page1.done is False
+
+    page2 = resolver.slice(page1.next_cursor, max_primary_roots=1)
+    assert page2.primary_refs == (second,)
+    # CAUSE crosses the cursor boundary, so the already-seen predecessor is
+    # available as semantic overlap without consuming or exposing a future root.
+    assert page2.overlap_refs == (first,)
+    assert page2.next_cursor.next_index == 2
+    assert page2.done is True
+
+
+def test_source_slice_projection_uses_only_ah_semantics_and_never_raw_source() -> None:
+    core, _context, _event_ref, first, second, unrelated = document_memory()
+    ignition = ignition_for(core)
+    service = SourceScopedContextService(
+        SourceScopeActivator(core, ignition),
+        ContextProjector(core, ContextSettings(max_tokens=4096)),
+    )
+
+    sliced, result = service.build_source_slice(
+        "Продолжи пересказ.",
+        SourceProjectionCursor("doc:incident-1", 1),
+        max_primary_roots=1,
+        budget_tokens=256,
+    )
+    assert sliced.primary_refs == (second,)
+    assert sliced.overlap_refs == (first,)
+    assert unrelated.uid not in {ref.uid for ref in result.activation.seeded_refs}
+    assert "TOP SECRET RAW DOCUMENT" not in result.context.rendered
+    assert "CAUSE" in result.context.rendered

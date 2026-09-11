@@ -33,7 +33,7 @@ def main() -> None:
     from ah.bootstrap import RuntimeServices
     from ah.config import load_config
     from ah.diagnostics.session_log import start_session
-    from ah.gui.main_window import MainWindow
+    from ah.gui.semantic_test_window import MainWindow
     from ah.gui.theme import apply_theme
 
     args = parse_args()

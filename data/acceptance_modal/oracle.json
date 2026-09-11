@@ -1,0 +1,976 @@
+{
+  "version": 1,
+  "corpus_id": "modal-attitude-formalization-v1-18",
+  "case_count": 18,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Point-3 acceptance for modal/attitude scope protection without full modal logic.",
+    "rule": "Python fixes proposition operands and scope candidates. Bounded semantic probes classify only modal type/scope or factivity. POSSIBLE/REQUIRED/PERMITTED and subject attitudes never imply ordinary P unless factivity separately licenses P."
+  },
+  "coverage": {
+    "modal_possible": 3,
+    "modal_scope": 3,
+    "impersonal_modal": 3,
+    "nonmodal_negative": 3,
+    "reported_attitude": 4,
+    "factivity": 2
+  },
+  "cases": [
+    {
+      "text": "Возможно, сервер работает.",
+      "grade": "EXACT",
+      "family": "modal_possible",
+      "tags": [
+        "POSSIBLE",
+        "sentence-adjunct"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  "a1"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  "a1"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_001"
+    },
+    {
+      "text": "Вероятно, поезд опоздает.",
+      "grade": "EXACT",
+      "family": "modal_possible",
+      "tags": [
+        "POSSIBLE",
+        "probability"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "опоздать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "поезд"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  "a1"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  "a1"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_002"
+    },
+    {
+      "text": "Возможно, Иван не придёт.",
+      "grade": "EXACT",
+      "family": "modal_possible",
+      "tags": [
+        "POSSIBLE",
+        "NOT",
+        "scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_003"
+    },
+    {
+      "text": "Возможно, Иван придёт и Мария уйдёт.",
+      "grade": "EXACT",
+      "family": "modal_scope",
+      "tags": [
+        "POSSIBLE",
+        "AND",
+        "whole-scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_004"
+    },
+    {
+      "text": "Иван придёт и, возможно, Мария уйдёт.",
+      "grade": "EXACT",
+      "family": "modal_scope",
+      "tags": [
+        "POSSIBLE",
+        "AND",
+        "local-scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  {
+                    "op": "POSSIBLE",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  {
+                    "op": "POSSIBLE",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_005"
+    },
+    {
+      "text": "Возможно, Иван придёт или Мария позвонит.",
+      "grade": "EXACT",
+      "family": "modal_scope",
+      "tags": [
+        "POSSIBLE",
+        "OR",
+        "whole-scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "POSSIBLE",
+                "args": [
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_006"
+    },
+    {
+      "text": "Необходимо, чтобы сервер работал.",
+      "grade": "EXACT",
+      "family": "impersonal_modal",
+      "tags": [
+        "REQUIRED",
+        "operator-source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "необходимо",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "REQUIRED",
+                "args": [
+                  "a2"
+                ]
+              },
+              "operator_sources": [
+                "a1"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "REQUIRED",
+                "args": [
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_007"
+    },
+    {
+      "text": "Требуется, чтобы система отвечала.",
+      "grade": "EXACT",
+      "family": "impersonal_modal",
+      "tags": [
+        "REQUIRED",
+        "operator-source",
+        "paraphrase"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "требоваться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "отвечать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "система"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "REQUIRED",
+                "args": [
+                  "a2"
+                ]
+              },
+              "operator_sources": [
+                "a1"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "REQUIRED",
+                "args": [
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_008"
+    },
+    {
+      "text": "Разрешено, чтобы посетители входили.",
+      "grade": "EXACT",
+      "family": "impersonal_modal",
+      "tags": [
+        "PERMITTED",
+        "operator-source"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "разрешить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "входить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "посетители"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "PERMITTED",
+                "args": [
+                  "a2"
+                ]
+              },
+              "operator_sources": [
+                "a1"
+              ]
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "PERMITTED",
+                "args": [
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "modal_v1_009"
+    },
+    {
+      "text": "Действительно, сервер работает.",
+      "grade": "EXACT",
+      "family": "nonmodal_negative",
+      "tags": [
+        "NONE",
+        "factual-certainty"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "scenario": "modal_v1_010"
+    },
+    {
+      "text": "Сервер действительно работает.",
+      "grade": "EXACT",
+      "family": "nonmodal_negative",
+      "tags": [
+        "NONE",
+        "factual-certainty",
+        "medial"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "scenario": "modal_v1_011"
+    },
+    {
+      "text": "Фактически, сервер работает.",
+      "grade": "EXACT",
+      "family": "nonmodal_negative",
+      "tags": [
+        "NONE",
+        "factual-commitment"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "scenario": "modal_v1_012"
+    },
+    {
+      "text": "Анна сказала, что сервер работает.",
+      "grade": "EXACT",
+      "family": "reported_attitude",
+      "tags": [
+        "reported",
+        "NONFACTIVE"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "note": "Reported content is addressable but not ordinary factual evidence.",
+      "scenario": "modal_v1_013"
+    },
+    {
+      "text": "Анна думает, что сервер работает.",
+      "grade": "EXACT",
+      "family": "reported_attitude",
+      "tags": [
+        "belief",
+        "NONFACTIVE"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "думать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "note": "Belief holder remains explicit in the matrix N; BELIEF(P) must not collapse to P.",
+      "scenario": "modal_v1_014"
+    },
+    {
+      "text": "Анна надеется, что поезд придёт.",
+      "grade": "EXACT",
+      "family": "reported_attitude",
+      "tags": [
+        "hope",
+        "NONFACTIVE"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "надеяться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "поезд"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "scenario": "modal_v1_015"
+    },
+    {
+      "text": "Мария хочет купить билет.",
+      "grade": "EXACT",
+      "family": "reported_attitude",
+      "tags": [
+        "desire",
+        "control",
+        "NONFACTIVE"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "хотеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "купить",
+              "status": "EMBEDDED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "same_as": "a1.SUBJECT"
+                },
+                "OBJECT": "билет"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "scenario": "modal_v1_016"
+    },
+    {
+      "text": "Анна узнала, что сервер работает.",
+      "grade": "EXACT",
+      "family": "factivity",
+      "tags": [
+        "FACTIVE",
+        "knowledge"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "узнать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "работать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сервер"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "note": "A positive factivity decision promotes the content; this is deliberately different from saying/thinking/hoping.",
+      "scenario": "modal_v1_017"
+    },
+    {
+      "text": "Анна увидела, что Иван вошёл.",
+      "grade": "EXACT",
+      "family": "factivity",
+      "tags": [
+        "FACTIVE",
+        "perception"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": {
+                  "assertion": "a2"
+                }
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true
+        }
+      },
+      "scenario": "modal_v1_018"
+    }
+  ]
+}

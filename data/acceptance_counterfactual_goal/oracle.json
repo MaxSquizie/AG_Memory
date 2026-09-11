@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "corpus_id": "counterfactual-goal-compiler-v1-12",
+  "input_boundary": "typed HYPOTHETICAL scope + QUERY dependencies",
+  "case_count": 12,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Point 5 acceptance: typed counterfactual scope -> CounterfactualGoal -> existing CounterfactualContext sandbox.",
+    "invariants": [
+      "GoalCompiler never recognizes counterfactuals from surface marker words.",
+      "HYPOTHETICAL assumptions are not ordinary factual premises.",
+      "A direct polar counterfactual query gets one EMBEDDED addressable target with occurrence_count=0.",
+      "Independent sibling assumptions enter one CounterfactualContext simultaneously.",
+      "Nested content below a hypothetical assumption is not mistaken for the query target.",
+      "Counterfactual proof does not mutate canonical AH or materialize its conclusion.",
+      "Positive and negative local overrides disappear when the counterfactual scope ends.",
+      "Incompatible simultaneous assumptions stop as CONFLICTED.",
+      "Open-ended FILL_ROLE and structural RelationGoal counterfactual targets fail closed.",
+      "Quoted hypothetical edges do not create a counterfactual scope.",
+      "Ordinary non-counterfactual query dispatch remains unchanged."
+    ]
+  },
+  "cases": [
+    {
+      "id": "direct_positive_mp",
+      "input": "HYPOTHETICAL P; QUERY Q; dependency Q->P; asserted rule P->Q",
+      "expected_goal": "CounterfactualGoal([P], FormulaGoal(Q))",
+      "expected_status": "PROVED",
+      "shadow_target": true,
+      "canonical_mutation_during_solve": false
+    },
+    {
+      "id": "multiple_simultaneous_assumptions",
+      "input": "HYPOTHETICAL P,R; QUERY Q; asserted rule AND(P,R)->Q",
+      "expected_goal": "CounterfactualGoal([P,R], FormulaGoal(Q))",
+      "expected_status": "PROVED",
+      "shadow_target": true,
+      "canonical_mutation_during_solve": false
+    },
+    {
+      "id": "missing_required_assumption",
+      "input": "HYPOTHETICAL P; QUERY Q; asserted rule AND(P,R)->Q",
+      "expected_goal": "CounterfactualGoal([P], FormulaGoal(Q))",
+      "expected_status": "UNKNOWN",
+      "shadow_target": true
+    },
+    {
+      "id": "negative_assumption_override",
+      "input": "world P; HYPOTHETICAL NOT(P); QUERY Q; asserted rule NOT(P)->Q",
+      "expected_goal": "CounterfactualGoal([NOT(P)], FormulaGoal(Q))",
+      "expected_status": "PROVED",
+      "outside_scope": "P remains PROVED"
+    },
+    {
+      "id": "positive_assumption_override",
+      "input": "world NOT(P); HYPOTHETICAL P; QUERY Q; asserted rule P->Q",
+      "expected_goal": "CounterfactualGoal([P], FormulaGoal(Q))",
+      "expected_status": "PROVED",
+      "outside_scope": "P remains DISPROVED"
+    },
+    {
+      "id": "incompatible_assumptions",
+      "input": "HYPOTHETICAL P,NOT(P); QUERY Q",
+      "expected_goal": "CounterfactualGoal([P,NOT(P)], FormulaGoal(Q))",
+      "expected_status": "UNKNOWN",
+      "expected_stop_reason": "CONFLICTED"
+    },
+    {
+      "id": "explicit_embedded_target",
+      "input": "HYPOTHETICAL P; EMBEDDED Q; QUERY root depends on both",
+      "expected_goal": "CounterfactualGoal([P], FormulaGoal(Q))",
+      "expected_status": "PROVED",
+      "shadow_target": false
+    },
+    {
+      "id": "nested_hypothetical_content",
+      "input": "QUERY -> HYPOTHETICAL H -> EMBEDDED P; direct query target Q",
+      "expected_goal": "CounterfactualGoal([H], FormulaGoal(Q))",
+      "nested_P_is_target": false,
+      "shadow_target": true
+    },
+    {
+      "id": "open_ended_fill_role",
+      "input": "HYPOTHETICAL P; FILL_ROLE query",
+      "expected_goal": null,
+      "expected_diagnostic": "semantic:counterfactual_formula_target_required"
+    },
+    {
+      "id": "structural_relation_target",
+      "input": "HYPOTHETICAL P; typed relation QUERY",
+      "expected_goal": null,
+      "expected_diagnostic": "semantic:counterfactual_relation_target_not_supported"
+    },
+    {
+      "id": "quoted_hypothesis_edge",
+      "input": "QUERY -QUOTED-> HYPOTHETICAL P",
+      "expected_counterfactual": false,
+      "shadow_target": false
+    },
+    {
+      "id": "ordinary_query_regression",
+      "input": "ordinary QUERY Q without HYPOTHETICAL descendants",
+      "expected_counterfactual": false,
+      "expected_status": "PROVED"
+    }
+  ]
+}

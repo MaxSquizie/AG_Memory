@@ -22,6 +22,8 @@ from ah.perception import (
     PropositionExprCandidate,
     QuantifierCandidate,
     QuantifierKind,
+    PropositionRootCandidate,
+    QuantifiedQuerySpec,
     QueryCandidate,
     SituationRelationCandidate,
     SituationRelationHintCandidate,
@@ -327,6 +329,20 @@ def _namespace_expr(expr: PropositionExprCandidate | None, prefix: str) -> Propo
     return replace(expr, members=tuple(_namespace_expr(item, prefix) for item in expr.members))
 
 
+def _namespace_proposition_root(
+    item: PropositionRootCandidate,
+    prefix: str,
+    source_offset: int = 0,
+) -> PropositionRootCandidate:
+    return replace(
+        item,
+        local_id=f"{prefix}{item.local_id}",
+        expression=_namespace_expr(item.expression, prefix),
+        evidence=_offset_evidence(item.evidence, source_offset),
+        operator_source_refs=tuple(f"{prefix}{ref}" for ref in item.operator_source_refs),
+    )
+
+
 def _namespace_actant(actant: ActantCandidate, prefix: str, source_offset: int = 0) -> ActantCandidate:
     nominal_relations = tuple(
         replace(
@@ -352,6 +368,21 @@ def _namespace_actant(actant: ActantCandidate, prefix: str, source_offset: int =
             )
         ),
         composition=_offset_composition(actant.composition, source_offset),
+    )
+
+
+def _namespace_quantified_query(
+    spec: QuantifiedQuerySpec | None,
+    prefix: str,
+) -> QuantifiedQuerySpec | None:
+    if spec is None:
+        return None
+    return replace(
+        spec,
+        bindings=tuple(
+            replace(binding, entity_ref=f"{prefix}{binding.entity_ref}")
+            for binding in spec.bindings
+        ),
     )
 
 
@@ -399,6 +430,7 @@ def namespace_perception_result(
             local_id=_prefix_local(item.local_id, prefix),
             predicate=_offset_predicate(item.predicate, source_offset),
             actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in item.actants),
+            quantified=_namespace_quantified_query(item.quantified, prefix),
         )
         for item in result.queries
     )
@@ -455,6 +487,10 @@ def namespace_perception_result(
         relations=relations,
         act_relations=act_relations,
         conditionals=conditionals,
+        proposition_roots=tuple(
+            _namespace_proposition_root(item, prefix, source_offset)
+            for item in result.proposition_roots
+        ),
         act_dependencies=dependencies,
         relation_hints=hints,
     )
@@ -481,6 +517,7 @@ def merge_formalization_units(batch: FormalizationBatch) -> PerceptionResult:
         relations=tuple(item for unit in units for item in unit.relations),
         act_relations=tuple(item for unit in units for item in unit.act_relations),
         conditionals=tuple(item for unit in units for item in unit.conditionals),
+        proposition_roots=tuple(item for unit in units for item in unit.proposition_roots),
         act_dependencies=tuple(item for unit in units for item in unit.act_dependencies),
         relation_hints=tuple(item for unit in units for item in unit.relation_hints),
     )

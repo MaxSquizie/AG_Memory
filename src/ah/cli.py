@@ -92,7 +92,7 @@ def build_parser() -> argparse.ArgumentParser:
     semantic.add_argument(
         "--runs-dirname",
         default="acceptance_runs_m1_adversarial",
-        help="output directory name below configured data_dir",
+        help="output directory name under the configured data directory",
     )
     sub.add_parser(
         "quantifier-acceptance",
