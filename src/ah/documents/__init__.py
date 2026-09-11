@@ -74,6 +74,25 @@ def last_document_summary_runtime_state(source_ref: str) -> DocumentSummaryRunti
 class DocumentProcessor(_PipelineDocumentProcessor):
     """Public document facade with bounded continuation and operator telemetry."""
 
+    @classmethod
+    def _latest_structural_boundary(cls, text: str, start: int, hard_end: int) -> int | None:
+        """Use only boundaries that do not intentionally split a clause relation.
+
+        A semicolon, colon or arbitrary single newline can still connect predicate,
+        actants or a discourse relation. Production document ingestion therefore
+        cuts only after a complete sentence or a real paragraph boundary. If none
+        fits the operational budget, inherited ``chunk_text`` fails closed.
+        """
+        window = text[start:hard_end]
+        candidates: list[int] = []
+        paragraph = window.rfind("\n\n")
+        if paragraph >= 0:
+            candidates.append(start + paragraph + 2)
+        for match in cls._SENTENCE_BOUNDARY_RE.finditer(window):
+            candidates.append(start + match.end())
+        viable = tuple(value for value in candidates if start < value <= hard_end)
+        return max(viable) if viable else None
+
     def _resolve_batch_discourse_refs(self, plan):
         """Bind only one uniquely compatible backward antecedent.
 
@@ -157,8 +176,6 @@ class DocumentProcessor(_PipelineDocumentProcessor):
             reduced_any = False
             for group in groups:
                 if len(group) == 1:
-                    # Ensure even a singleton remains representable under the fixed
-                    # aggregation budget before carrying it into the next round.
                     try:
                         self._aggregation_context(
                             source_ref,
