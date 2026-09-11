@@ -30,6 +30,7 @@ class DocumentSummaryRuntimeState:
     primary_covered: int
     source_primary_total: int
     final_estimated_tokens: int
+    failure: str | None = None
 
     @property
     def source_coverage_ratio(self) -> float:
@@ -53,6 +54,7 @@ def _remember_progress(
     source_primary_total: int,
     stop_reason: str,
     estimated_tokens: int,
+    failure: str | None = None,
 ) -> None:
     _store_runtime_state(
         DocumentSummaryRuntimeState(
@@ -62,6 +64,7 @@ def _remember_progress(
             primary_covered=sum(len(item.primary_refs) for item in diagnostics),
             source_primary_total=source_primary_total,
             final_estimated_tokens=estimated_tokens,
+            failure=failure,
         )
     )
 
@@ -81,6 +84,10 @@ def _remember_summary(result: DocumentSummary) -> None:
 def last_document_summary_runtime_state(source_ref: str) -> DocumentSummaryRuntimeState | None:
     with _RUNTIME_DIAGNOSTICS_LOCK:
         return _RUNTIME_SUMMARY_DIAGNOSTICS.get(source_ref)
+
+
+def _failure_text(exc: BaseException) -> str:
+    return f"{type(exc).__name__}: {exc}"
 
 
 class DocumentProcessor(_PipelineDocumentProcessor):
@@ -241,15 +248,28 @@ class DocumentProcessor(_PipelineDocumentProcessor):
             raise ValueError("max_slices must be >= 1")
 
         scoped = self._source_context_service()
-        with self.services.operation_lock:
-            source_primary_total = len(
-                scoped.activator.resolver.resolve(source_ref).semantic_roots
-            )
-        cursor = SourceProjectionCursor(source_ref, 0)
         diagnostics: list[DocumentSliceDiagnostic] = []
         partials: list[str] = []
         workspace_seen: list[str] = []
         last_slice_context = None
+
+        try:
+            with self.services.operation_lock:
+                source_primary_total = len(
+                    scoped.activator.resolver.resolve(source_ref).semantic_roots
+                )
+        except Exception as exc:
+            _remember_progress(
+                source_ref,
+                (),
+                source_primary_total=0,
+                stop_reason="source_scope_failed",
+                estimated_tokens=0,
+                failure=_failure_text(exc),
+            )
+            raise
+
+        cursor = SourceProjectionCursor(source_ref, 0)
         _remember_progress(
             source_ref,
             (),
@@ -259,14 +279,38 @@ class DocumentProcessor(_PipelineDocumentProcessor):
         )
 
         for slice_index in range(1, max_slices + 1):
-            with self.services.operation_lock:
-                sliced, result = scoped.build_source_slice(
-                    request,
-                    cursor,
-                    max_primary_roots=max_primary_roots,
-                    settle_ticks=settle_ticks,
-                    budget_tokens=budget_tokens,
+            try:
+                with self.services.operation_lock:
+                    sliced, result = scoped.build_source_slice(
+                        request,
+                        cursor,
+                        max_primary_roots=max_primary_roots,
+                        settle_ticks=settle_ticks,
+                        budget_tokens=budget_tokens,
+                    )
+            except ProjectionBudgetExceeded as exc:
+                _remember_progress(
+                    source_ref,
+                    tuple(diagnostics),
+                    source_primary_total=source_primary_total,
+                    stop_reason="slice_budget_exceeded",
+                    estimated_tokens=exc.estimated_tokens,
+                    failure=_failure_text(exc),
                 )
+                raise
+            except Exception as exc:
+                _remember_progress(
+                    source_ref,
+                    tuple(diagnostics),
+                    source_primary_total=source_primary_total,
+                    stop_reason="slice_projection_failed",
+                    estimated_tokens=(
+                        0 if last_slice_context is None else last_slice_context.estimated_tokens
+                    ),
+                    failure=_failure_text(exc),
+                )
+                raise
+
             last_slice_context = result.context
             workspace_refs = tuple(ref.uid for ref in result.activation.workspace_after)
             for uid in workspace_refs:
@@ -291,35 +335,84 @@ class DocumentProcessor(_PipelineDocumentProcessor):
                 stop_reason="projecting" if not sliced.done else "aggregating",
                 estimated_tokens=result.context.estimated_tokens,
             )
-            partials.append(self.services.agent.respond(result.context))
+            try:
+                partial = self.services.agent.respond(result.context)
+            except Exception as exc:
+                _remember_progress(
+                    source_ref,
+                    tuple(diagnostics),
+                    source_primary_total=source_primary_total,
+                    stop_reason="slice_generation_failed",
+                    estimated_tokens=result.context.estimated_tokens,
+                    failure=_failure_text(exc),
+                )
+                raise
+            partials.append(partial)
             cursor = sliced.next_cursor
             if sliced.done:
                 break
         else:
+            message = (
+                f"Document summary exceeded max_slices={max_slices} "
+                "before source cursor reached done"
+            )
             _remember_progress(
                 source_ref,
                 tuple(diagnostics),
                 source_primary_total=source_primary_total,
                 stop_reason="max_slices_exceeded",
-                estimated_tokens=0 if last_slice_context is None else last_slice_context.estimated_tokens,
+                estimated_tokens=(
+                    0 if last_slice_context is None else last_slice_context.estimated_tokens
+                ),
+                failure=message,
             )
-            raise DocumentProcessingError(
-                f"Document summary exceeded max_slices={max_slices} before source cursor reached done"
-            )
+            raise DocumentProcessingError(message)
 
         if last_slice_context is None or not partials:
-            raise DocumentProcessingError("Document source projection produced no semantic slice")
+            message = "Document source projection produced no semantic slice"
+            _remember_progress(
+                source_ref,
+                tuple(diagnostics),
+                source_primary_total=source_primary_total,
+                stop_reason="empty_source_projection",
+                estimated_tokens=0,
+                failure=message,
+            )
+            raise DocumentProcessingError(message)
 
         if len(partials) == 1:
             text = partials[0]
             final_context = last_slice_context
         else:
-            text, final_context = self._reduce_partial_results(
-                source_ref,
-                request,
-                tuple(partials),
-                budget_tokens=budget_tokens,
-            )
+            try:
+                text, final_context = self._reduce_partial_results(
+                    source_ref,
+                    request,
+                    tuple(partials),
+                    budget_tokens=budget_tokens,
+                )
+            except ProjectionBudgetExceeded as exc:
+                _remember_progress(
+                    source_ref,
+                    tuple(diagnostics),
+                    source_primary_total=source_primary_total,
+                    stop_reason="aggregation_budget_exceeded",
+                    estimated_tokens=exc.estimated_tokens,
+                    failure=_failure_text(exc),
+                )
+                raise
+            except Exception as exc:
+                _remember_progress(
+                    source_ref,
+                    tuple(diagnostics),
+                    source_primary_total=source_primary_total,
+                    stop_reason="aggregation_failed",
+                    estimated_tokens=(
+                        0 if last_slice_context is None else last_slice_context.estimated_tokens
+                    ),
+                    failure=_failure_text(exc),
+                )
+                raise
 
         result = DocumentSummary(
             source_ref=source_ref,
