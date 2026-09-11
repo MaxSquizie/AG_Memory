@@ -116,7 +116,7 @@ def test_modal_scope_keeps_modal_operator_while_leaf_polarity_is_reconciled() ->
     assert expr.members == (_and(_ref("a1"), _ref("a2")),)
 
 
-def test_conditional_scope_copy_is_reconciled_with_formula_root() -> None:
+def test_conditional_material_expr_stays_polarity_free_while_formula_root_is_reconciled() -> None:
     antecedent = _assertion("a1", negated=True)
     consequent = _assertion("a2")
     before = PerceptionResult(
@@ -126,7 +126,7 @@ def test_conditional_scope_copy_is_reconciled_with_formula_root() -> None:
             ConditionalCandidate(
                 ("a1",),
                 ("a2",),
-                antecedent_expr=_not(_ref("a1")),
+                antecedent_expr=_ref("a1"),
                 consequent_expr=_ref("a2"),
             ),
         ),
@@ -150,14 +150,14 @@ def test_conditional_scope_copy_is_reconciled_with_formula_root() -> None:
     assert after.proposition_roots[0].expression.members[0] == _ref("a1")
 
 
-def test_nested_proposition_scope_is_reconciled() -> None:
+def test_nested_material_proposition_stays_polarity_free() -> None:
     child = _assertion("a2", negated=True)
     parent = _assertion(
         "a1",
         actants=(
             ActantCandidate(
                 role=ActantRole.OBJECT,
-                proposition=_not(_ref("a2")),
+                proposition=_ref("a2"),
             ),
         ),
     )
