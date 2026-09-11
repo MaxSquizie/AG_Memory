@@ -134,7 +134,7 @@ sensory_symbol = 0.85
 # Intentionally stronger than N/H seeds; newly created S receives it too.
 resolved_symbol = 0.95
 # Runtime attention seed for a referent/supporting fact resolved from a query.
-query_recall = 0.80
+query_recall = 0.95
 correction = 0.65
 pacemaker = 0.08
 

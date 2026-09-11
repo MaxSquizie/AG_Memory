@@ -92,6 +92,28 @@ def legacy_semantic_answer(role: str, prompt: str) -> str | None:
         # general compatibility backend.
         return "NONE"
 
+    if role == "semantic_temporal_mode":
+        # Pre-TemporalMode parser fixtures do not grade aspectual interpretation.
+        # Keep their timed imperfective occurrences process-like; dedicated
+        # TemporalMode tests exercise every fixed label and ambiguity path.
+        return "PROCESS"
+
+    if role == "semantic_modal_operator":
+        # ModalScopeBuilder was inserted into the shared parser pipeline after
+        # these fixtures were written.  Dedicated modal tests provide explicit
+        # operator decisions; legacy non-modal sentences answer the bounded
+        # probe with its neutral label.
+        return "NONE"
+
+    if role == "semantic_logical_whole_negation":
+        # Old compound fixtures already encode every local NOT on its atom.
+        return "NO"
+
+    if role == "semantic_logical_content_operator":
+        # Their matrix predicates are ordinary content/attitude relations, not
+        # pure wrappers that negate the embedded proposition as a whole.
+        return "NONE"
+
     if role != "perception_role_cue":
         return None
 

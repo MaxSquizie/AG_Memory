@@ -106,7 +106,13 @@ class InferenceEngine:
         if isinstance(goal, MultiRoleFillGoal):
             return self._multi_role_fill(goal, runtime)
         if isinstance(goal, ExistsGoal):
-            return self._exists(goal, runtime)
+            return self._exists(
+                goal,
+                query,
+                attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
         if isinstance(goal, RelationGoal):
             return self._relation(goal, query, workspace_refs, attention, runtime)
         if isinstance(goal, CauseEntailmentGoal):
@@ -630,7 +636,15 @@ class InferenceEngine:
             len(matches),
         )
 
-    def _exists(self, goal: ExistsGoal, runtime: GoalRuntime) -> InferenceOutcome:
+    def _exists(
+        self,
+        goal: ExistsGoal,
+        query: InferenceQuery,
+        attention: InferenceAttention | None,
+        *,
+        proof_context: ProofContext,
+        runtime: GoalRuntime,
+    ) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
         matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime)
         conflicted: list[Ref] = []
@@ -675,6 +689,52 @@ class InferenceEngine:
         conflict = self._conflict_outcome(tuple(conflicted), expanded=len(matches))
         if conflict is not None:
             return conflict
+
+        # A direct EXISTS query may target an atom which was asserted only as a
+        # leaf of a source-level formula.  Such N nodes deliberately have zero
+        # ordinary occurrences, so FACT_MATCH must not accept them directly; let
+        # the formula reasoner establish the leaf through AND elimination,
+        # implication, or another registered logical rule.  Candidate generation
+        # remains local to the goal's template index and no scoped mention becomes
+        # a truth premise merely by existing in the store.
+        scoped_candidates = sorted(
+            (
+                node
+                for node in self.core.store.find_hypernodes_by_template(
+                    goal.template_ref.uid
+                )
+                if node.meta.get("semantic_scope")
+                and all(
+                    node.actants.get(role) == ref
+                    for role, ref in goal.known_roles.items()
+                )
+            ),
+            key=lambda node: node.uid,
+        )
+        reasoner = GroundFormulaReasoner(
+            self.core,
+            self.settings,
+            query,
+            attention=attention,
+            proof_context=proof_context,
+            runtime=runtime,
+        )
+        for node in scoped_candidates:
+            candidate_ref = self.core.ref(node.uid)
+            runtime.subgoal(
+                logical_depth=0,
+                ref=candidate_ref,
+                detail="derive scoped EXISTS witness through formula rules",
+            )
+            derived = reasoner.solve(FormulaGoal(candidate_ref))
+            if derived.status is LogicalStatus.PROVED:
+                return replace(
+                    derived,
+                    diagnostics=(
+                        "EXISTS witness derived from asserted formula",
+                        *derived.diagnostics,
+                    ),
+                )
         return InferenceOutcome(
             LogicalStatus.UNKNOWN,
             StopReason.SEARCH_EXHAUSTED,

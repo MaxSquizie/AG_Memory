@@ -256,7 +256,22 @@ class SemanticOracle1238Tests(unittest.TestCase):
             },
             "queries": [],
         }
-        verdict = evaluate_semantic_case(record, oracle, {}, {})
+        snapshot = {
+            "S_ARRIVE": {
+                "uid": "S_ARRIVE",
+                "kind": "S",
+                "domain": None,
+                "forms": ["прийти", "пришли"],
+            },
+            "T_ARRIVE": {
+                "uid": "T_ARRIVE",
+                "kind": "T",
+                "domain": "C",
+                "predicate": {"uid": "S_ARRIVE", "kind": "S"},
+                "roles": ["SUBJECT"],
+            },
+        }
+        verdict = evaluate_semantic_case(record, oracle, snapshot, {})
         self.assertEqual(verdict.status, "PASS", verdict.failures)
 
     def test_canonical_if_with_scoped_members_is_semantic_pass(self) -> None:

@@ -29,10 +29,11 @@ class AssociationSemantics(str, Enum):
 
 
 class AssociationDomainPolicy(str, Enum):
-    """Runtime policy for the still-open H-domain architecture decision.
+    """Runtime policy for H-domain participation in associative search.
 
     ``ALL`` allows H to participate like C/P. ``EXCLUDE_H`` keeps episodic H out
-    of the search. The choice is runtime-only and never changes canonical AH.
+    of the search. The choice is runtime-only and never changes canonical AH;
+    outcomes independently report whether a found route is semantic or episodic.
     """
 
     ALL = "ALL"

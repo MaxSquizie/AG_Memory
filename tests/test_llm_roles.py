@@ -38,7 +38,7 @@ class CaptureBackend:
 
 class LLMRoleTests(unittest.TestCase):
     def test_worker_fixed_choice_scoring_returns_only_allowed_option(self) -> None:
-        import torch
+        torch = __import__("pytest").importorskip("torch")
 
         class Tokenizer:
             def __call__(self, text, *, return_tensors="pt", add_special_tokens=False):

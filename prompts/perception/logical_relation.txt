@@ -1,10 +1,1 @@
-Choose exactly one label from CHOICES for the explicit truth-functional relation between the already identified LEFT and RIGHT propositions.
-
-AND = the source presents LEFT and RIGHT together as jointly asserted alternatives/components of one logical conjunction. Adversative wording can still be AND when both are asserted.
-OR = the source presents at least one of LEFT/RIGHT as an alternative. Use OR even when the wording may later require exclusivity; XOR is classified separately.
-IMPLIES_LR = the source states that LEFT is a condition/sufficient premise for RIGHT, not merely that LEFT happened before or caused RIGHT in this particular episode.
-IMPLIES_RL = the source states that RIGHT is a condition/sufficient premise for LEFT.
-NONE = the propositions are merely separate narrative facts, temporal sequence, causally related events, comparison, explanation, or otherwise not joined by one of these truth-functional operators.
-UNCLEAR = the source really supports more than one of the listed truth-functional readings and the choice cannot be made safely.
-
-Use the whole TEXT to interpret paraphrases such as "both", "one of the alternatives", "provided that", "on condition that", "follows if", etc. Do not rely on one connector word. Return only one label.
+Classify the explicit truth relation between fixed LEFT and RIGHT. AND asserts both; OR offers alternatives; IMPLIES_LR makes LEFT sufficient for RIGHT; IMPLIES_RL reverses this. NONE is narrative, temporal, causal, comparative, or explanatory linkage only. UNCLEAR means unresolved. Use full TEXT, not one word. Return one label from CHOICES.

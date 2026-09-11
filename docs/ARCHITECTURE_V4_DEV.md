@@ -1930,6 +1930,12 @@ NOT(EXISTS t in relevant_past: P@t)
 
 При open-world semantics простое отсутствие эпизодов `P` не доказывает `NEVER(P)`.
 
+**Статус реализации v0.25.25: ЧАСТИЧНО ЗАКРЫТО.** Пять фазовых операторов
+`START/STOP/CONTINUE/AGAIN/NO_LONGER` проходят source formalization, canonical
+wrapper и state runtime end-to-end. Отдельная семантика `никогда P` пока не
+формализуется как `NOT(EXISTS t ...)`: текущий общий negation path не эквивалентен
+этому temporal scope. Этот остаток вынесен в semantic-composition roadmap.
+
 ## 20.7. Temporal mode occurrence-а
 
 Нужно различать:
@@ -1951,6 +1957,12 @@ morphology/aspect/tense
 → deterministic narrowing
 → bounded probe if needed
 ```
+
+**Статус реализации v0.25.24: ЗАКРЫТО.** Классификация выполняется отдельным
+pre-integration проходом только для occurrence, где TIME/DURATION делает различие
+наблюдаемым. Устойчивые morphology/frame cases не вызывают модель; остаток проходит
+один closed-choice semantic probe с `AMBIGUOUS` и fail-closed. Режим хранится в
+metadata конкретного `N`, входит в его semantic identity и не переносится на `T`.
 
 ---
 
@@ -2048,6 +2060,14 @@ Hebbian rule **не создаёт новый L** и не изобретает �
 ```
 
 Депрессия имеет ненулевой configurable floor и не удаляет semantic relation. Physical deletion — задача lifecycle/GC.
+
+**Статус реализации v0.25.25: ЗАКРЫТО.** Runtime использует immutable snapshot и
+simultaneous commit для каждого tick; propagation попадает только в buffer
+следующего tick. `resolved_symbol` и `query_recall` имеют равное начальное значение,
+но отдельные настройки. Workspace вычисляется как строгий полный набор `x > t` без
+top-N. Пластичность посещает только существующие `L`, учитывает same-tick events,
+игнорирует inactivity, ограничивает depression ненулевым floor и не создаёт/не
+удаляет topology.
 
 ---
 
@@ -2793,15 +2813,18 @@ Goal может создавать narrow queries и смещать focus, но 
 
 ## 30.6. H-domain
 
-**ОТКРЫТО.** Пока не принято, считать ли пересечение через `H` полноценным основанием ассоциации либо различать:
+**РЕШЕНО в v0.25.25 как runtime policy.** Пересечение через `H` не зашивается в
+canonical model как единственно допустимая политика. Один запрос явно выбирает
+`ALL` либо `EXCLUDE_H`, а найденный результат всегда типизирован:
 
 ```text
-semantic/objective association через C/P
-и
-episodic association через H
+SEMANTIC — route не зависит от H
+EPISODIC — bridge зависит от H
 ```
 
-Простая последовательная совместная встречаемость тем сама по себе не считается требуемым intersection-style association.
+Тем самым UI/эксперимент может разрешить все реальные пересечения либо потребовать
+только semantic association без изменения AH. Простая последовательная
+совместная встречаемость тем сама по себе не подменяет intersection-style search.
 
 ---
 
@@ -2842,10 +2865,12 @@ canonical semantics и связи, а Main LLM получает только fro
 
 ## 31.5. Слишком необязательно существующее большое projection
 
-**ЧАСТИЧНО ЗАКРЫТО в v0.25.22.** Для one-shot ответа существует детерминированное
+**ЧАСТИЧНО ЗАКРЫТО в v0.25.25.** Для one-shot ответа существует детерминированное
 relation-aware сжатие внутри source scope с явным budget/notice и без raw fallback.
-Controlled iterative continuation protocol для полного покрытия чрезмерно большого
-источника остаётся открытым.
+Добавлен runtime `SourceProjectionCursor` и bounded source slices с переносом только
+уже увиденного causal/temporal overlap. `DocumentProcessor` пока не выполняет
+полный multi-slice summary/aggregation loop, поэтому end-to-end continuation
+остаётся открытым.
 
 Требования к будущему решению:
 
@@ -2859,9 +2884,12 @@ Controlled iterative continuation protocol для полного покрыти�
 
 ## 31.6. Main-LLM initiated memory request
 
-**ОТКРЫТО.** Не принято, должна ли Main LLM вообще иметь право запросить дополнительную память после первого AgentContext.
-
-Базовая архитектура исходит из того, что GoalSpec/Reasoner закрывают memory search локально. Если такой механизм появится, запрос должен быть строго контролируемым capability, а не произвольным чтением AH.
+**РЕШЕНО в v0.25.25: capability отсутствует.** На один response call Main LLM
+получает один окончательный frozen `AgentContext` и не может инициировать второй
+memory request. Весь recall выполняется локальными `GoalSpec`/Reasoner/Association
+и Workspace до генерации. Document multi-slice orchestration, когда будет
+завершена, остаётся внешним контролируемым pipeline и не выдаёт модели право читать
+AH произвольно.
 
 ## 31.7. Ответ Main LLM
 
@@ -3146,36 +3174,28 @@ peak RAM
 
 ## 36.1. `H` в association mode
 
-**ОТКРЫТО.** Возможны две политики:
+**ЗАКРЫТО в v0.25.25.** Политика обратима и выбирается на runtime boundary:
 
 ```text
-A. любое реальное пересечение AH, включая H, считается association;
-
-B. различать semantic association через C/P
-   и episodic association, если bridge зависит от H.
+ALL       — разрешить реальные пересечения, включая H;
+EXCLUDE_H — исключить H из ancestry.
 ```
 
-До решения implementation не должна необратимо зашивать одну политику в canonical data model. Фильтр domain лучше оставить runtime option association coordinator-а.
+Независимо от фильтра outcome различает `SEMANTIC` и `EPISODIC`. Выбор не меняет
+canonical data model или persistence.
 
 ## 36.2. Инициативный memory request основной LLM
 
-**ОТКРЫТО.** Базовый вариант — Main LLM получает один готовый AgentContext и не управляет memory search.
-
-Альтернатива — ограниченный protocol «нужен дополнительный контекст X», который локальная система переводит в GoalSpec/narrow query. Если будет реализован, он должен:
-
-```text
-не позволять arbitrary global retrieval;
-иметь лимит итераций;
-быть детерминированно валидируемым;
-не менять canonical AH сам по себе.
-```
+**ЗАКРЫТО в v0.25.25 выбором базового варианта.** Main LLM получает ровно один
+готовый `AgentContext` на response call и не управляет memory search. Вторичный
+protocol запроса памяти не входит в текущий контракт.
 
 ## 36.3. Fallback для слишком source-scoped + document projection
 
 **ЧАСТИЧНО ЗАКРЫТО.** One-shot source compaction имеет deterministic selection,
-stop и budget semantics. Нужно выбрать exact iterative protocol, если задача
-требует покрыть compact semantics документа несколькими последовательными
-AgentContext.
+stop и budget semantics. Runtime cursor/slice primitive уже существует, но его
+ещё не исполняет `DocumentProcessor` как законченный multi-context summary с
+детерминированным aggregation/termination contract.
 
 Варианты для отдельного решения:
 
@@ -3508,9 +3528,11 @@ serialization/reload case if canonical data affected.
 - **Counterfactual:** local proof overlay, no copy of AH.
 - **Meta-propositions:** `N` может быть аргументом; occurrence отделён от content.
 - **Association:** intersection `expand(A) ∩ expand(B)`, не consequence.
+- **Association/H:** runtime `ALL|EXCLUDE_H`; outcome всегда различает semantic и episodic route.
 - **Hebbian:** only existing `L`, same-tick activation events.
 - **Scene:** отдельный canonical scene object не вводится.
 - **Context projection:** Workspace-driven, human-readable, no hidden raw RAG.
+- **Main-LLM recall:** один frozen `AgentContext`; secondary memory-request capability отсутствует.
 
 ## Ограниченные по design
 
@@ -3518,9 +3540,7 @@ serialization/reload case if canonical data affected.
 
 ## Открытые
 
-- **Association through H:** policy не выбрана.
-- **Oversized document projection:** exact iterative fallback не определён.
-- **Main-LLM memory request:** capability/absence пока не выбраны.
+- **Oversized document projection:** cursor/slices готовы, но iterative summary/aggregation pipeline не завершён.
 
 ## Отложенные / опциональные
 

@@ -15,7 +15,13 @@ def test_orchestrator_has_no_lexical_prove_dispatch():
 
 
 def test_turn_goal_builder_contract_is_semantic_not_lexical():
-    source = inspect.getsource(TurnGoalBuilder)
+    # Public TurnGoalBuilder composes several semantic compilers through its MRO;
+    # inspect the complete production chain rather than only the outer extension.
+    source = "\n".join(
+        inspect.getsource(cls)
+        for cls in TurnGoalBuilder.__mro__
+        if cls.__module__.startswith("ah.inference")
+    )
     assert "semantic_scope" in source
     assert '"EMBEDDED"' in source
     assert "unresolved_queries" in source

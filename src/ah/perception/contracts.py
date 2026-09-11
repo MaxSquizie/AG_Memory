@@ -353,6 +353,8 @@ class AssertionCandidate:
     def __post_init__(self) -> None:
         if self.transition_operator is not None and self.temporal_mode is not TemporalMode.TRANSITION:
             raise ValueError("transition_operator requires temporal_mode=TRANSITION")
+        if self.temporal_mode is TemporalMode.TRANSITION and self.transition_operator is None:
+            raise ValueError("temporal_mode=TRANSITION requires transition_operator")
 
 
 class CompositionOperator(str, Enum):

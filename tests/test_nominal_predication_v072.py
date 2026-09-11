@@ -7,6 +7,7 @@ from ah.llm import LLMResponse
 from ah.model import ActantRole
 from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.morphology import MorphInfo
+from legacy_semantic_fixture import legacy_semantic_answer
 
 PROJECT = Path(__file__).resolve().parents[1]
 
@@ -81,6 +82,9 @@ class Backend:
             if "Докажи" in prompt:
                 return LLMResponse("COMMAND", {})
             return LLMResponse("ASSERTION", {})
+        fallback = legacy_semantic_answer(role, prompt)
+        if fallback is not None:
+            return LLMResponse(str(fallback), {})
         raise AssertionError(f"unexpected probe {role}:\n{prompt}")
 
 

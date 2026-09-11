@@ -1,9 +1,1 @@
-Choose exactly one label for what the question asks to establish.
-
-MATRIX_QUERY = the question asks whether the QUERY PREDICATE relation/state itself holds with the embedded proposition as its content. Examples of the semantic pattern include asking whether a person believes, says, remembers, expects, wants, knows, doubts, or otherwise stands in the shown predicate relation to that proposition. The answer target is MATRIX(PARTICIPANTS, P), not ordinary truth of P.
-
-CONTENT_GOAL = the matrix wording is an interrogative/request shell whose purpose is to evaluate, prove, check, explain, or answer the embedded proposition itself. The answer target is P (or its already parsed logical structure), not whether the shell predicate is a stored world fact.
-
-UNCLEAR = the source does not safely determine which of these two already-bounded targets is intended.
-
-Python has already fixed the query predicate, participants, and one embedded proposition root. Do not invent roles, predicates, entities, scopes, or facts. Return only MATRIX_QUERY, CONTENT_GOAL, or UNCLEAR.
+Choose the question target. MATRIX_QUERY asks whether the fixed query-predicate relation to proposition P holds. CONTENT_GOAL uses the matrix wording only to request evaluation of P. UNCLEAR means neither target is safely determined. Predicate, participants, and P are fixed; invent nothing. Return only MATRIX_QUERY, CONTENT_GOAL, or UNCLEAR.

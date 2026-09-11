@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from ah.ignition import IgnitionEngine
 from ah.integration.contracts import ActivationSeedRequest, SeedReason
 from ah.model import Ref, RefKind
+
+if TYPE_CHECKING:
+    from ah.ignition import IgnitionEngine
 
 
 @dataclass(frozen=True, slots=True)

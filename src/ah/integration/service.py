@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime
 import re
+from typing import Callable
 
 from ah.config import IntegrationSettings
 from ah.conflict import ConflictEngine
@@ -529,8 +530,23 @@ class IntegrationService:
         self,
         batch: FormalizationBatch,
         context: InteractionContext,
+        *,
+        plan_transform: Callable[[MutationPlan], MutationPlan] | None = None,
     ) -> IntegrationCommit:
-        return self.integrate_plan(self.prepare_external_batch_plan(batch, context), context)
+        """Prepare and atomically commit one complete external batch.
+
+        ``plan_transform`` is a pre-commit staging hook for deterministic batch-wide
+        consolidation such as document cross-chunk coreference. It receives no
+        mutable AH transaction and therefore cannot expose a partial canonical
+        document: the transformed plan is still committed exactly once below.
+        """
+
+        plan = self.prepare_external_batch_plan(batch, context)
+        if plan_transform is not None:
+            plan = plan_transform(plan)
+            if not isinstance(plan, MutationPlan):
+                raise TypeError("plan_transform must return MutationPlan")
+        return self.integrate_plan(plan, context)
 
     def prepare_h_plan(
         self,

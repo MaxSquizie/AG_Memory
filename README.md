@@ -1,4 +1,42 @@
-# AH Agent MVP — v0.25.21
+# AH Agent MVP — v0.25.25
+
+## v0.25.25 — Activation/Workspace contracts и объединённая v4-линия
+
+Ветка `temp` объединена с основной историей merge-коммитом. Для §21 закреплены
+синхронные tick semantics, Workspace как полный набор `x > threshold` без top-N,
+пластичность только существующих `L` по same-tick activation events и ненулевой
+floor без физического удаления relation. Начальные gains упоминания и query focus
+равны (`0.95`), но остаются двумя независимо настраиваемыми параметрами.
+
+Добавлены проверки независимости результата от порядка вставки, отсутствия
+self-reinforcement от propagation на следующем tick и разграничения attention от
+truth. Устранён cold-import цикл `ah.ignition ↔ ah.inference`. Итоговый аудит и
+два непересекающихся потока продолжения зафиксированы в
+`docs/ARCHITECTURE_AUDIT_02525.md`.
+
+## v0.25.24 — occurrence-level temporal mode
+
+§20.7 закрыт отдельным staging-проходом `TemporalModeFormalizer`. `STATE`,
+`EVENT`, `PROCESS` и `TRANSITION` относятся к конкретному proposition `N`, а не к
+глобальному `T`. Морфология и frame metadata решают устойчивые случаи; для
+остаточной смысловой неоднозначности вызывается один UID-free non-thinking probe с
+закрытым ответом и `AMBIGUOUS`. Режим участвует в canonical identity и проверяется
+semantic oracle. Добавлен независимый acceptance на 46 случаев.
+
+## v0.25.23 — semantic quantifier formalization
+
+Кванторы распознаются отдельным source-semantic проходом, а не списком словоформ.
+После структурного сужения один bounded probe выбирает `FORALL`, `EXISTS`,
+`NO`, `EXACTLY_ONE` либо `NOT_QUANTIFIER/AMBIGUOUS`; Integration строит scoped
+`BoundVar`/`FORALL`/`EXISTS` без fake entity. Добавлен 78-case acceptance с
+oracle, CLI и GUI entry point.
+
+## v0.25.22 — document summary и evidence GUI
+
+В объединённой линии большие TXT/Markdown/DOCX проходят единый atomic DOCUMENT
+batch, source-scoped AH activation и bounded semantic projection без raw-RAG
+fallback. M1/M2 diagnostics вынесены на отдельные вкладки с immutable canvas
+history последних 20 формализаций и UID proof traces.
 
 ## v0.25.21 — iterative lexical recovery и ellipsis robustness
 

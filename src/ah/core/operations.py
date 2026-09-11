@@ -227,6 +227,7 @@ class AHCore:
             return updated, False
 
         scope = effective_meta.get("semantic_scope")
+        temporal_mode = effective_meta.get("temporal_mode")
         compatible: list[Hypernode] = []
         for existing in self.store.find_hypernodes_by_template(template.uid):
             if self.store.domain_of(existing.uid) is not domain:
@@ -234,6 +235,8 @@ class AHCore:
             if bool(existing.meta.get("dedup_exempt", False)):
                 continue
             if existing.meta.get("semantic_scope") != scope:
+                continue
+            if existing.meta.get("temporal_mode") != temporal_mode:
                 continue
             existing_roles = set(existing.actants)
             new_roles = set(actants)

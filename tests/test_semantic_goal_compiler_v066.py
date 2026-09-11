@@ -326,8 +326,8 @@ def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and(
     )
 
 
-def test_modal_proposition_goal_fails_closed_instead_of_proving_operand():
-    core, context, integration, _engine = _runtime()
+def test_modal_proposition_goal_is_read_only_and_does_not_prove_operand():
+    core, context, integration, engine = _runtime()
     assertion = _classification_assertion("A1", "Server", "working")
     possible_expr = PropositionExprCandidate(
         PropositionOperator.POSSIBLE,
@@ -347,10 +347,18 @@ def test_modal_proposition_goal_fails_closed_instead_of_proving_operand():
     commit = integration.integrate_external(perception, context)
     built = SemanticGoalCompiler(core).build(commit, context, perception)
     assert len(built) == 1
-    assert built[0].goal is None
+    assert built[0].goal is not None
     assert built[0].diagnostics == (
-        "semantic:POSSIBLE_goal_not_supported",
+        "semantic:modal_formula_goal:POSSIBLE",
     )
+    outcome = engine.solve(built[0].goal)
+    assert outcome.status is LogicalStatus.UNKNOWN
+    assert "No canonical formula matches" in outcome.diagnostics[0]
+    # Compiling or executing the modal query does not manufacture POSSIBLE(P)
+    # and does not promote its query-scoped operand to an ordinary fact.
+    operand = core.store.get_hypernode(commit.assertions[0].ref.uid)
+    assert operand.meta.get("semantic_scope") == "EMBEDDED"
+    assert int(operand.meta.get("occurrence_count", 0)) == 0
 
 
 def test_matrix_attitude_query_proves_attitude_fact_not_embedded_content():

@@ -495,6 +495,15 @@ class MainWindow(QMainWindow):
             + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_quantifiers" / "oracle.json")
         )
         self.m1_quantifier_button.clicked.connect(self._run_m1_quantifier_acceptance)
+        self.m1_temporal_mode_button = QPushButton("M1: temporal mode acceptance")
+        self.m1_temporal_mode_button.setToolTip(
+            "Occurrence TemporalMode: STATE, PROCESS, EVENT and TRANSITION.\n"
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_temporal_modes" / "cases.txt")
+            + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_temporal_modes" / "oracle.json")
+        )
+        self.m1_temporal_mode_button.clicked.connect(
+            self._run_m1_temporal_mode_acceptance
+        )
         self.document_acceptance_button = QPushButton("Document acceptance")
         self.document_acceptance_button.setToolTip(
             "3 вручную написанных многоабзацных текста: причинные цепочки, distractors, "
@@ -524,6 +533,7 @@ class MainWindow(QMainWindow):
         m1_buttons.addWidget(self.m1_ellipsis_button)
         m1_buttons.addWidget(self.m1_typo_button)
         m1_buttons.addWidget(self.m1_quantifier_button)
+        m1_buttons.addWidget(self.m1_temporal_mode_button)
         diagnostic_buttons = QHBoxLayout()
         diagnostic_buttons.addWidget(self.document_acceptance_button)
         diagnostic_buttons.addWidget(self.hidden_valency_button)
@@ -1159,6 +1169,15 @@ class MainWindow(QMainWindow):
             runs_dirname="acceptance_runs_m1_quantifiers",
             label="M1 quantifiers",
             title="M1 quantifier acceptance",
+        )
+
+    def _run_m1_temporal_mode_acceptance(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_temporal_modes/cases.txt",
+            oracle_filename="acceptance_temporal_modes/oracle.json",
+            runs_dirname="acceptance_runs_m1_temporal_modes",
+            label="M1 temporal modes",
+            title="M1 temporal mode acceptance",
         )
 
     def _run_acceptance_pair(

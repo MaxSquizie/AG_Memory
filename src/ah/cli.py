@@ -99,6 +99,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="run the 78-case semantic quantifier corpus through the normal local-LLM pipeline",
     )
     sub.add_parser(
+        "temporal-mode-acceptance",
+        help="run the 46-case occurrence TemporalMode corpus through the normal local-LLM pipeline",
+    )
+    sub.add_parser(
         "m2-acceptance",
         help=(
             "run attention-driven M2 on a dirty/live-AH snapshot with >=150k UIDs "
@@ -175,13 +179,21 @@ def main(argv: list[str] | None = None) -> int:
 
     services = RuntimeServices.build(cfg)
 
-    if args.command in {"semantic-acceptance", "quantifier-acceptance"}:
+    if args.command in {
+        "semantic-acceptance",
+        "quantifier-acceptance",
+        "temporal-mode-acceptance",
+    }:
         from ah.diagnostics import run_acceptance_suite
 
         if args.command == "quantifier-acceptance":
             cases_file = cfg.paths.data_dir / "acceptance_quantifiers" / "cases.txt"
             oracle_file = cfg.paths.data_dir / "acceptance_quantifiers" / "oracle.json"
             runs_dirname = "acceptance_runs_m1_quantifiers"
+        elif args.command == "temporal-mode-acceptance":
+            cases_file = cfg.paths.data_dir / "acceptance_temporal_modes" / "cases.txt"
+            oracle_file = cfg.paths.data_dir / "acceptance_temporal_modes" / "oracle.json"
+            runs_dirname = "acceptance_runs_m1_temporal_modes"
         else:
             cases_file = Path(args.cases)
             oracle_file = Path(args.oracle)

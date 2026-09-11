@@ -300,3 +300,54 @@ CLI: `m1-score`, `m3-acceptance`, `tick-benchmark`. Полное описани�
   §31.6/§36 и explicit non-goals §37 сознательно не фиксировались.
 
 Регрессия: `1128 passed, 38 subtests passed`.
+
+## v0.25.23 — source-semantic quantifier formalization
+
+- До Integration добавлен отдельный `QuantifierFormalizer`: structural gate
+  ограничивает NP candidates, один bounded probe классифицирует смысл, а не
+  словоформу.
+- `FORALL/EXISTS/NO/EXACTLY_ONE` получают restriction, scope и общий local
+  variable handle; Integration переиспользует существующие `BoundVar` и
+  quantified formula contracts без fake M.
+- `AMBIGUOUS` блокирует commit, `NOT_QUANTIFIER` оставляет ordinary NP; order слов
+  не назначает semantic role.
+- Corpus `acceptance_quantifiers` содержит 78 cases/oracle и подключён к CLI/GUI.
+
+## v0.25.24 — occurrence TemporalMode
+
+- §20.7 закрыт отдельным `TemporalModeFormalizer` для наблюдаемых TIME/DURATION
+  occurrences.
+- Stable frame/aspect cases разрешаются детерминированно; остаток получает один
+  UID-free `STATE/EVENT/PROCESS/AMBIGUOUS` probe.
+- Embedded/quoted/formula-scoped content не становится temporal evidence;
+  alternatives обязаны совпасть по mode.
+- Mode входит в identity конкретного N, не переносится на T. Acceptance: 46
+  заранее заданных cases/oracle.
+
+Подробности: `docs/SLICE_25_24.md`.
+
+## v0.25.25 — §21 closure, branch merge и audit boundary
+
+- `temp` объединена с main двухродительским merge-коммитом; ранее подключённая
+  `gc` и contributor history сохранены.
+- §21 закрыт regression-контрактом: immutable synchronous tick, propagation only
+  next tick, uncapped `x > threshold` Workspace, independent equal initial seed
+  gains, same-tick plasticity only for existing L и ненулевой floor.
+- Association/H зафиксирован как runtime `ALL/EXCLUDE_H` с typed
+  `SEMANTIC/EPISODIC` outcome. Main LLM secondary memory request исключён: один
+  response call получает один frozen AgentContext.
+- Source cursor/slice primitive принят, но iterative document summary остаётся
+  незавершённым end-to-end контуром.
+- Post-merge regression repairs не меняют working semantic mechanisms: connector
+  filtering modal pass, public atomic document plan transform, non-duplicate
+  autosave и derivation ordinary EXISTS из доказанного formula leaf.
+
+Полный аудит и два независимых остаточных потока:
+`docs/ARCHITECTURE_AUDIT_02525.md`,
+`docs/ROADMAP_A_SEMANTIC_COMPOSITION_02525.md`,
+`docs/ROADMAP_B_DOCUMENT_RUNTIME_02525.md`.
+
+Подробности: `docs/SLICE_25_25.md`.
+
+Регрессия: `1334 passed, 2 skipped, 38 subtests passed`; два skip —
+только optional PyTorch scorer-тесты.

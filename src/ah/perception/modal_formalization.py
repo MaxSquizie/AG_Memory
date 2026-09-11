@@ -69,9 +69,16 @@ class ModalScopeBuilder:
     )
     _MAX_SCOPE_CHOICES = 24
 
-    def __init__(self, graph: LinguisticCandidateGraph, probe: ModalProbe) -> None:
+    def __init__(
+        self,
+        graph: LinguisticCandidateGraph,
+        probe: ModalProbe,
+        *,
+        ignored_token_indices: frozenset[int] = frozenset(),
+    ) -> None:
         self.graph = graph
         self.probe = probe
+        self.ignored_token_indices = ignored_token_indices
         self._diagnostics: list[str] = []
         self._unresolved: str | None = None
 
@@ -216,6 +223,8 @@ class ModalScopeBuilder:
 
         eligible: list[tuple[object, int]] = []
         for token in self.graph.tokens:
+            if token.index in self.ignored_token_indices:
+                continue
             if is_occupied(token.start, token.end):
                 continue
             surface = (token.raw_text or token.text).strip()
@@ -227,6 +236,10 @@ class ModalScopeBuilder:
             if clause is None or sentence_target_counts.get(clause.sentence_id, 0) < 1:
                 continue
             poses = {item.pos for item in token.analyses if item.pos}
+            # Structural coordinators/connectors are proposition topology, not
+            # modality, even when morphology also offers a rare adverbial parse.
+            if poses & {"CONJ", "PREP"}:
+                continue
             if not (poses & _MODAL_CUE_POS):
                 continue
             eligible.append((token, clause.sentence_id))
@@ -308,6 +321,11 @@ class ModalScopeBuilder:
             if key not in seen:
                 seen.add(key)
                 out.append(item)
+            # Predicate-level negation is already a resolved local operator.
+            # A sentence-level modal cue may wrap NOT(P), but must not silently
+            # move below that boundary and turn it into NOT(MODAL(P)).
+            if item.operator is PropositionOperator.NOT:
+                return
             for child in item.members:
                 visit(child)
 

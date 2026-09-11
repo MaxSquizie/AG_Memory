@@ -14,6 +14,7 @@ from ah.model import ActantRole
 from ah.perception import LLMPerceptionService, LLMPerceptionSettings
 from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.morphology import Pymorphy3Morphology
+from legacy_semantic_fixture import legacy_semantic_answer
 from test_ellipsis_canonical_02513 import runtime
 
 
@@ -74,6 +75,9 @@ class GraphEllipsisFixture:
             return LLMResponse("DIFFERENT", {})
         if role == "perception_act_relation":
             return LLMResponse("NONE", {})
+        fallback = legacy_semantic_answer(role, prompt)
+        if fallback is not None:
+            return LLMResponse(str(fallback), {})
         raise AssertionError(f"unspecified bounded fixture: {role}\n{prompt[:900]}")
 
 

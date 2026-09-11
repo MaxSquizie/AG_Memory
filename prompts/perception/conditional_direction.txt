@@ -1,7 +1,1 @@
-Choose exactly one label for the logical implication direction between the already identified SUBORDINATE PROPOSITIONS and MATRIX PROPOSITIONS.
-
-SUBORDINATE_TO_MATRIX = the subordinate condition is presented as sufficient for the matrix proposition: if SUBORDINATE, then MATRIX.
-MATRIX_TO_SUBORDINATE = the matrix proposition is presented as requiring the subordinate condition: MATRIX only if SUBORDINATE.
-UNCLEAR = the source does not safely determine one of these directions, or explicitly states a biconditional/equivalence that cannot be represented by one directed implication.
-
-Interpret the whole CONDITIONAL CONNECTIVE and source sentence, including modifiers such as equivalents of "only", "provided", or "on the condition that". Do not infer causation or temporal order. Return only the label.
+Choose implication direction between fixed SUBORDINATE and MATRIX propositions. SUBORDINATE_TO_MATRIX means the former is sufficient for the latter. MATRIX_TO_SUBORDINATE means the latter requires the former. UNCLEAR covers ambiguity or equivalence. Use the whole connective; do not infer from time or cause. Return one label only.

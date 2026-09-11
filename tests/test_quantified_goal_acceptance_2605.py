@@ -11,7 +11,16 @@ from ah.core import AHCore, SequentialUidGenerator
 from ah.inference import FormulaGoal, InferenceEngine, LogicalStatus, SemanticGoalCompiler
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.integration.experience_mapper import ExperienceMapper
-from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Hypernode, Property, Ref
+from ah.model import (
+    ActantRole,
+    BoundVar,
+    Domain,
+    FunctionSymbol,
+    Hypernode,
+    Property,
+    Ref,
+    SemanticEntity,
+)
 from ah.perception import (
     ActantCandidate,
     PerceptionResult,
@@ -121,7 +130,8 @@ def _query_from_case(core: AHCore, case: dict) -> QueryCandidate:
 
 
 def _name(core: AHCore, ref: Ref) -> str:
-    entity = core.store.get_entity(ref.uid)
+    entity = core.store.get_element_any_domain(ref.uid)
+    assert isinstance(entity, SemanticEntity)
     value = entity.properties.get("name")
     return str(value.value if value is not None else ref.uid)
 

@@ -209,11 +209,11 @@ class DocumentProcessor:
             source_timestamp=source_timestamp,
         )
         with self.services.operation_lock:
-            plan = self.services.integration.prepare_external_batch_plan(
-                batch, self.services.context
+            commit = self.services.integration.integrate_external_batch(
+                batch,
+                self.services.context,
+                plan_transform=self._resolve_batch_discourse_refs,
             )
-            plan = self._resolve_batch_discourse_refs(plan)
-            commit = self.services.integration.integrate_plan(plan, self.services.context)
             self.services.ignition.apply_seed_requests(commit.activation_seeds)
             self.services.ignition.apply_refutation_requests(commit.refutations)
 

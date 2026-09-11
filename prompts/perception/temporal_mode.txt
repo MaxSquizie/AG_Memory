@@ -1,0 +1,1 @@
+Return exactly STATE, EVENT, PROCESS, or AMBIGUOUS. Classify only the stated predicate occurrence in its temporal frame. Do not infer a global property of the predicate. Use AMBIGUOUS when the source does not determine one reading.

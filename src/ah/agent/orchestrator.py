@@ -164,10 +164,13 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                     with lock:
                         self._enqueue_clarifications(base.integration.clarifications)
 
-        # The base no-response pass may already have autosaved the user turn. Run
-        # the post-route autosave anyway: association changes runtime excitation and
-        # a generated response may add a new H occurrence after that first save.
-        post_autosaved = self._autosave(lock)
+        # The base no-response pass already attempted persistence for the user
+        # turn. Repeat it only if this extension changed runtime/canonical state:
+        # association advances Ignition and a recorded response adds an H event.
+        # A failed response with no association must not duplicate an identical
+        # persistence write.
+        post_route_changed = bool(association_outcomes) or response_integration is not None
+        post_autosaved = self._autosave(lock) if post_route_changed else False
         autosaved = base.autosaved or post_autosaved
         return replace(
             base,

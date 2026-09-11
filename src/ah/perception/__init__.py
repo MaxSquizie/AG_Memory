@@ -1,4 +1,9 @@
-from ah.temporal import TemporalCandidate, TemporalMode, TransitionOperator
+from ah.temporal import (
+    TemporalCandidate,
+    TemporalMode,
+    TemporalModeProbeDecision,
+    TransitionOperator,
+)
 from .contracts import (
     ActDependencyCandidate,
     ActDependencyKind,
@@ -63,6 +68,12 @@ from .quantifier_formalization import (
     QuantifierFormalizer,
     QuantifierSemanticResolver,
 )
+from .temporal_mode_formalization import (
+    PredicateTemporalProfile,
+    TemporalModeFormalizationError,
+    TemporalModeFormalizer,
+    TemporalModeSemanticResolver,
+)
 
 __all__ = [
     "ActDependencyCandidate",
@@ -114,6 +125,7 @@ __all__ = [
     "TextSensoryService",
     "TemporalCandidate",
     "TemporalMode",
+    "TemporalModeProbeDecision",
     "TransitionOperator",
     "EmbeddingSemanticReranker",
     "LexicalRecovery",
@@ -123,6 +135,10 @@ __all__ = [
     "QuantifierFormalizationError",
     "QuantifierFormalizer",
     "QuantifierSemanticResolver",
+    "PredicateTemporalProfile",
+    "TemporalModeFormalizationError",
+    "TemporalModeFormalizer",
+    "TemporalModeSemanticResolver",
     "apply_speech_act_scoping",
     "GoalSemanticService",
 ]

@@ -239,8 +239,16 @@ class PlasticitySettings:
             raise ValueError("ignition.plasticity.link_kind must be additive_hebb")
         if self.hypernode_kind not in {"additive_confirmation_refutation"}:
             raise ValueError("ignition.plasticity.hypernode_kind must be additive_confirmation_refutation")
-        if not 0 <= self.link_weight_floor <= 1:
-            raise ValueError("ignition.plasticity.link_weight_floor must be in [0, 1]")
+        for field_name in (
+            "link_hebb_increment",
+            "link_async_decrement",
+            "hypernode_confirmation_increment",
+            "hypernode_refutation_decrement",
+        ):
+            if getattr(self, field_name) < 0:
+                raise ValueError(f"ignition.plasticity.{field_name} must be >= 0")
+        if not 0 < self.link_weight_floor <= 1:
+            raise ValueError("ignition.plasticity.link_weight_floor must be in (0, 1]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,7 +263,7 @@ class SeedSettings:
     resolved_symbol: float = 0.95
     # Runtime relational/query recall anchor. It is attention, not proof and not
     # an h_N confirmation event.
-    query_recall: float = 0.80
+    query_recall: float = 0.95
     correction: float = 0.65
     pacemaker: float = 0.08
 
@@ -606,7 +614,7 @@ def load_config(path: str | Path) -> AppConfig:
             experience=float(seeds.get("experience", 0.5)),
             sensory_symbol=float(seeds.get("sensory_symbol", 0.85)),
             resolved_symbol=float(seeds.get("resolved_symbol", 0.95)),
-            query_recall=float(seeds.get("query_recall", 0.80)),
+            query_recall=float(seeds.get("query_recall", 0.95)),
             correction=float(seeds.get("correction", 0.65)),
             pacemaker=float(seeds.get("pacemaker", 0.08)),
         ),

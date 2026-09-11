@@ -1,9 +1,1 @@
-Choose exactly one label for the semantic contribution of CUE to proposition truth commitment.
-
-POSSIBLE = the proposition is presented as possible, probable, uncertain, or otherwise not asserted as ordinary fact.
-REQUIRED = the proposition is presented as required, necessary, obligatory, or normatively demanded.
-PERMITTED = the proposition is presented as permitted, allowed, or authorized.
-NONE = this cue does not create any of the three modal scopes above.
-UNCLEAR = the cue clearly changes commitment, but the correct modal type cannot be decided safely.
-
-The proposition candidates are already fixed by Python. Decide only the semantic type of the shown cue in this source context. Do not invent predicates, participants, scopes, or facts. Ordinary time, manner, degree, discourse sequencing, emphasis, and certainty that still commits to the proposition as fact are NONE. Return only POSSIBLE, REQUIRED, PERMITTED, NONE, or UNCLEAR.
+Classify how CUE changes commitment to a fixed proposition. POSSIBLE marks non-factual possibility or uncertainty; REQUIRED marks necessity or obligation; PERMITTED marks permission; NONE adds no such modal scope; UNCLEAR means a modal effect exists but its type is unresolved. Invent nothing. Return one label only.

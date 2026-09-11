@@ -10,6 +10,10 @@ from typing import Any, Iterable, Mapping, MutableMapping, Sequence
 
 DEFAULT_ORACLE_FILENAME = "acceptance_oracle.json"
 
+_UNARY_ASSERTION_WRAPPERS = frozenset(
+    {"FALSE", "NOT", "START", "STOP", "CONTINUE", "AGAIN", "NO_LONGER"}
+)
+
 
 @dataclass(frozen=True, slots=True)
 class SemanticOracleCase:
@@ -396,6 +400,26 @@ def _match_assertions(
         expected_negated = bool(expected.get("negated", False))
         actual_negated = bool(actual.get("negated", False))
         _check(checks, f"{prefix}.negated", actual_negated == expected_negated, expected=expected_negated, actual=actual_negated)
+        if "temporal_mode" in expected:
+            expected_mode = expected.get("temporal_mode")
+            actual_mode = actual.get("temporal_mode")
+            _check(
+                checks,
+                f"{prefix}.temporal_mode",
+                actual_mode == expected_mode,
+                expected=expected_mode,
+                actual=actual_mode,
+            )
+        if "transition_operator" in expected:
+            expected_operator = expected.get("transition_operator")
+            actual_operator = actual.get("transition_operator")
+            _check(
+                checks,
+                f"{prefix}.transition_operator",
+                actual_operator == expected_operator,
+                expected=expected_operator,
+                actual=actual_operator,
+            )
         expected_roles = expected.get("roles", {}) or {}
         actual_roles = _role_map(actual)
         _check(checks, f"{prefix}.role_set", set(actual_roles) == set(expected_roles), expected=sorted(expected_roles), actual=sorted(actual_roles))
@@ -888,7 +912,7 @@ def _canonical_target_ref(
     uid = str(assertion_ref.get("uid", ""))
     kind = str(assertion_ref.get("kind", ""))
     item = snapshot.get(uid)
-    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"NOT", "FALSE"}:
+    if kind == "G" and isinstance(item, dict) and str(item.get("function_id", "")).upper() in _UNARY_ASSERTION_WRAPPERS:
         operands = item.get("operands", []) or []
         if len(operands) == 1 and isinstance(operands[0], dict):
             return _canonical_target_ref(snapshot, operands[0], role)
@@ -903,7 +927,10 @@ def _canonical_assertion_predicate_forms(snapshot: Mapping[str, Mapping[str, Any
     uid = str(assertion_ref.get("uid", ""))
     kind = str(assertion_ref.get("kind", ""))
     item = snapshot.get(uid)
-    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"NOT", "FALSE", "OR"}:
+    if kind == "G" and isinstance(item, dict) and (
+        str(item.get("function_id", "")).upper() in _UNARY_ASSERTION_WRAPPERS
+        or str(item.get("function_id", "")).upper() == "OR"
+    ):
         operands = item.get("operands", []) or []
         if operands and isinstance(operands[0], dict):
             return _canonical_assertion_predicate_forms(snapshot, operands[0])
@@ -925,7 +952,7 @@ def _canonical_role_set(snapshot: Mapping[str, Mapping[str, Any]], assertion_ref
     uid = str(assertion_ref.get("uid", ""))
     kind = str(assertion_ref.get("kind", ""))
     item = snapshot.get(uid)
-    if kind == "G" and isinstance(item, dict) and item.get("function_id") in {"NOT", "FALSE"}:
+    if kind == "G" and isinstance(item, dict) and str(item.get("function_id", "")).upper() in _UNARY_ASSERTION_WRAPPERS:
         operands = item.get("operands", []) or []
         if len(operands) == 1 and isinstance(operands[0], dict):
             return _canonical_role_set(snapshot, operands[0])
@@ -1088,6 +1115,36 @@ def _match_canonical_assertions(
             _check(checks, f"{prefix}.or_lift", actual_or, expected="G:OR", actual=(item or {}).get("function_id") if isinstance(item, dict) else None)
             continue
         _check(checks, f"{prefix}.negated", actual_negated == expected_negated, expected=expected_negated, actual=actual_negated)
+        if "temporal_mode" in expected:
+            node = _scoped_member_node(snapshot, ref)
+            actual_mode = (
+                node.get("meta", {}).get("temporal_mode")
+                if isinstance(node, Mapping)
+                else None
+            )
+            expected_mode = expected.get("temporal_mode")
+            _check(
+                checks,
+                f"{prefix}.temporal_mode",
+                actual_mode == expected_mode,
+                expected=expected_mode,
+                actual=actual_mode,
+            )
+        if "transition_operator" in expected:
+            expected_operator = expected.get("transition_operator")
+            top = snapshot.get(str(ref.get("uid", "")))
+            actual_operator = (
+                str(top.get("function_id", "")).upper()
+                if isinstance(top, Mapping) and top.get("kind") == "G"
+                else None
+            )
+            _check(
+                checks,
+                f"{prefix}.transition_operator",
+                actual_operator == expected_operator,
+                expected=expected_operator,
+                actual=actual_operator,
+            )
         expected_roles = expected.get("roles", {}) or {}
         actual_roles = _canonical_role_set(snapshot, ref)
         _check(checks, f"{prefix}.role_set", actual_roles == set(expected_roles), expected=sorted(expected_roles), actual=sorted(actual_roles))
@@ -1111,7 +1168,7 @@ def _scoped_member_node(
     item = snapshot.get(str(ref.get("uid", "")))
     if not isinstance(item, dict):
         return None
-    if item.get("kind") == "G" and str(item.get("function_id", "")).upper() in {"FALSE", "NOT"}:
+    if item.get("kind") == "G" and str(item.get("function_id", "")).upper() in _UNARY_ASSERTION_WRAPPERS:
         operands = item.get("operands", []) or []
         if len(operands) != 1 or not isinstance(operands[0], dict):
             return None

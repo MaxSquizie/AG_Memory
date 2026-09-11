@@ -9,7 +9,7 @@ import re
 from ah.config import LLMRoleSettings
 from ah.llm.process_backend import LLMResponse
 from ah.model import ActantRole
-from ah.temporal import TemporalMode, TransitionOperator
+from ah.temporal import TemporalMode, TemporalModeProbeDecision, TransitionOperator
 
 from .morphology import (
     MorphInfo,
@@ -23,6 +23,11 @@ from .event_normalizer import EventNormalizer
 from .quantifier_formalization import (
     QuantifierFormalizationError,
     QuantifierFormalizer,
+)
+from .temporal_mode_formalization import (
+    PredicateTemporalProfile,
+    TemporalModeFormalizationError,
+    TemporalModeFormalizer,
 )
 from .logical_formalization import LogicalFormBuilder
 from .modal_formalization import ModalScopeBuilder
@@ -1275,6 +1280,30 @@ class AdaptivePerceptionParser:
                 lambda stage, prompt, choices: self._deep_semantic_choice_probe(
                     stage, prompt, choices
                 )[0],
+                ignored_token_indices=frozenset(
+                    {
+                        *self._transition_cue_token_indices,
+                        *(
+                            token.index
+                            for token in self._candidate_graph.tokens
+                            if token.text.casefold() in _DISCOURSE_FOLLOW_MARKERS
+                        ),
+                        *(
+                            index
+                            for group in self._candidate_graph.frame_graph.coordinations
+                            for index in group.coordinator_token_indices
+                        ),
+                        *(
+                            token.index
+                            for clause in self._candidate_graph.clauses
+                            if clause.connector_span is not None
+                            for token in self._candidate_graph.tokens
+                            if clause.connector_span.start_index
+                            <= token.index
+                            <= clause.connector_span.end_index
+                        ),
+                    }
+                ),
             ).build(
                 text,
                 tuple(assertions),
@@ -1360,6 +1389,13 @@ class AdaptivePerceptionParser:
             lexical_recovery=lexical_decisions,
         )
         try:
+            result = TemporalModeFormalizer(self.morphology).formalize(
+                result,
+                resolver=self._resolve_temporal_mode_candidate,
+            )
+        except TemporalModeFormalizationError as exc:
+            raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
+        try:
             result = QuantifierFormalizer(self.morphology).formalize(
                 result,
                 resolver=self._resolve_quantifier_candidate,
@@ -1367,6 +1403,50 @@ class AdaptivePerceptionParser:
         except QuantifierFormalizationError as exc:
             raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
         return AdaptiveParseResult(result, tuple(self._traces))
+
+    def _resolve_temporal_mode_candidate(
+        self,
+        source_context: str,
+        assertion: AssertionCandidate,
+        profile: PredicateTemporalProfile,
+    ) -> TemporalModeProbeDecision:
+        """Resolve one occurrence through a closed, UID-free semantic protocol."""
+
+        frame_roles = ", ".join(
+            sorted({actant.role.value for actant in assertion.actants})
+        ) or "NONE"
+        temporal_fillers = "\n".join(
+            f"{actant.role.value}={actant.mention or actant.normalized_hint or ''}"
+            for actant in assertion.actants
+            if actant.role in {ActantRole.TIME, ActantRole.DURATION}
+        ) or "NONE"
+        morphology = (
+            f"ASPECT={','.join(profile.aspects) or 'NONE'}\n"
+            f"TENSE={','.join(profile.tenses) or 'NONE'}\n"
+            f"MOOD={','.join(profile.moods) or 'NONE'}\n"
+            f"POS={','.join(profile.poses) or 'NONE'}"
+        )
+        prompt = (
+            f"TEXT:\n{source_context}\n"
+            f"PREDICATE:\n{assertion.predicate.surface}\n"
+            f"FRAME ROLES:\n{frame_roles}\n"
+            f"TEMPORAL FILLERS:\n{temporal_fillers}\n"
+            f"MORPHOLOGY:\n{morphology}\n"
+            "QUESTION:\nClassify only how this predicate occurrence is viewed "
+            "in the stated temporal frame.\n"
+            "STATE: a condition or property holds across the interval.\n"
+            "EVENT: a bounded occurrence or change is viewed as a whole.\n"
+            "PROCESS: activity is viewed internally as unfolding over the interval.\n"
+            "AMBIGUOUS: the source does not determine one of those readings.\n"
+            "CHOICES:\nSTATE\nEVENT\nPROCESS\nAMBIGUOUS"
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "temporal_mode",
+            prompt,
+            ("STATE", "EVENT", "PROCESS", "AMBIGUOUS"),
+        )
+        assert decision is not None
+        return TemporalModeProbeDecision(decision)
 
     def _resolve_quantifier_candidate(
         self,

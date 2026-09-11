@@ -26,6 +26,15 @@ class TemporalMode(str, Enum):
     TRANSITION = "TRANSITION"
 
 
+class TemporalModeProbeDecision(str, Enum):
+    """Closed output protocol for occurrence-level temporal classification."""
+
+    STATE = "STATE"
+    EVENT = "EVENT"
+    PROCESS = "PROCESS"
+    AMBIGUOUS = "AMBIGUOUS"
+
+
 class TransitionOperator(str, Enum):
     START = "START"
     STOP = "STOP"

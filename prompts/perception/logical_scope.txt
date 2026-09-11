@@ -1,3 +1,1 @@
-Choose exactly one candidate scope Cn from CANDIDATE SCOPES, or UNCLEAR.
-
-All candidate trees use only proposition atoms and operator relations already fixed by earlier stages. Decide only the grouping/scope explicitly conveyed by the source. Use punctuation, correlatives, clause structure and semantic grouping. Do not invent an operator, remove an atom, or rewrite a candidate. If the source does not safely determine one candidate tree, return UNCLEAR. Return only the label.
+Choose one Cn from CANDIDATE SCOPES, or UNCLEAR. Candidate trees contain only fixed atoms and operators. Decide only the source grouping using punctuation, correlatives, clause structure, and meaning. Do not invent, remove, or rewrite anything. If no tree is uniquely supported, return UNCLEAR. Return one label only.

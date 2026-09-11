@@ -3,7 +3,7 @@ from __future__ import annotations
 from ah.agent import InteractionContext
 from ah.config import InferenceSettings
 from ah.core import AHCore, SequentialUidGenerator
-from ah.inference import FormulaGoal, GoalSpec, InferenceEngine, InferenceQuery, LogicalStatus, StopReason
+from ah.inference import ExistsGoal, FormulaGoal, GoalSpec, InferenceEngine, InferenceQuery, LogicalStatus, StopReason
 from ah.integration import IntegrationConfig, IntegrationService, SemanticCorrectionService
 from ah.model import ActantRole, Domain, FunctionSymbol, Property, Ref, RefKind
 from ah.perception import (
@@ -16,6 +16,9 @@ from ah.perception import (
     ConditionalCandidate,
     PerceptionResult,
     PredicateCandidate,
+    PropositionExprCandidate,
+    PropositionOperator,
+    PropositionRootCandidate,
     TemplateCandidate,
 )
 
@@ -58,6 +61,119 @@ def _assertion(local_id: str, predicate: str, subject: str, *, negated: bool = F
 
 def _solve(engine: InferenceEngine, ref: Ref):
     return engine.solve(InferenceQuery(GoalSpec(FormulaGoal(ref))))
+
+
+def test_direct_exists_uses_proved_and_leaf_without_asserting_leaf_occurrence() -> None:
+    core, context, service, engine = _env()
+    commit = service.integrate_external(
+        PerceptionResult(
+            "Иван читает и Мария пишет",
+            assertions=(
+                _assertion("A", "читать", "Иван"),
+                _assertion("B", "писать", "Мария"),
+            ),
+            proposition_roots=(
+                PropositionRootCandidate(
+                    "F1",
+                    PropositionExprCandidate(
+                        PropositionOperator.AND,
+                        members=(
+                            PropositionExprCandidate(PropositionOperator.REF, ref="A"),
+                            PropositionExprCandidate(PropositionOperator.REF, ref="B"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        context,
+    )
+    leaf_ref = next(item.ref for item in commit.assertions if item.local_id == "A")
+    leaf = core.store.get_hypernode(leaf_ref.uid)
+    assert leaf.meta.get("semantic_scope") == "LOGICAL"
+    assert leaf.meta.get("occurrence_count") == 0
+
+    outcome = engine.solve(
+        InferenceQuery(
+            GoalSpec(
+                ExistsGoal(
+                    leaf.template,
+                    {ActantRole.SUBJECT: leaf.actants[ActantRole.SUBJECT]},
+                )
+            )
+        )
+    )
+    assert outcome.status is LogicalStatus.PROVED
+    assert outcome.proof_support[0].rule_id == "AND_ELIM"
+    assert outcome.premise_refs == (commit.formulas[0].ref,)
+
+
+def test_direct_exists_does_not_accept_unasserted_scoped_content_as_witness() -> None:
+    core, context, service, engine = _env()
+    commit = service.integrate_external(
+        PerceptionResult(
+            "Иван может читать",
+            assertions=(
+                _assertion(
+                    "A", "читать", "Иван", status=AssertionStatus.EMBEDDED
+                ),
+            ),
+        ),
+        context,
+    )
+    leaf_ref = commit.assertions[0].ref
+    leaf = core.store.get_hypernode(leaf_ref.uid)
+    outcome = engine.solve(
+        InferenceQuery(
+            GoalSpec(
+                ExistsGoal(
+                    leaf.template,
+                    {ActantRole.SUBJECT: leaf.actants[ActantRole.SUBJECT]},
+                )
+            )
+        )
+    )
+    assert outcome.status is LogicalStatus.UNKNOWN
+    assert outcome.stop_reason is StopReason.SEARCH_EXHAUSTED
+
+
+def test_direct_exists_does_not_choose_one_open_or_branch_as_witness() -> None:
+    core, context, service, engine = _env()
+    commit = service.integrate_external(
+        PerceptionResult(
+            "Иван читает или Мария пишет",
+            assertions=(
+                _assertion("A", "читать", "Иван"),
+                _assertion("B", "писать", "Мария"),
+            ),
+            proposition_roots=(
+                PropositionRootCandidate(
+                    "F1",
+                    PropositionExprCandidate(
+                        PropositionOperator.OR,
+                        members=(
+                            PropositionExprCandidate(PropositionOperator.REF, ref="A"),
+                            PropositionExprCandidate(PropositionOperator.REF, ref="B"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        context,
+    )
+    leaf_ref = next(item.ref for item in commit.assertions if item.local_id == "A")
+    leaf = core.store.get_hypernode(leaf_ref.uid)
+    outcome = engine.solve(
+        InferenceQuery(
+            GoalSpec(
+                ExistsGoal(
+                    leaf.template,
+                    {ActantRole.SUBJECT: leaf.actants[ActantRole.SUBJECT]},
+                )
+            )
+        )
+    )
+    assert outcome.status is LogicalStatus.UNKNOWN
+    assert outcome.stop_reason is StopReason.SEARCH_EXHAUSTED
 
 
 def test_object_negation_is_not_and_refutes_ground_positive_without_false_correction() -> None:

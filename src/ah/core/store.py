@@ -346,7 +346,8 @@ class AHStore:
         # property lookup, N signatures and source-scope provenance must remain
         # exact even for internal callers that replace an N directly.
         indexed_meta_keys = (
-            "semantic_scope", "dedup_exempt", "event_instance", "source_ref", "batch_kind"
+            "semantic_scope", "temporal_mode", "dedup_exempt", "event_instance",
+            "source_ref", "batch_kind",
         )
         indexed_change = (
             current.template != node.template
