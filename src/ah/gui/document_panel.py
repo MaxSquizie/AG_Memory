@@ -190,6 +190,8 @@ class DocumentPanelWidget(QWidget):
             f"{state.primary_covered}/{state.source_primary_total} "
             f"({state.source_coverage_ratio:.1%}) | current/final ~{state.final_estimated_tokens} tok"
         )
+        if state.failure:
+            lines.append(f"failure={state.failure}")
         self.continuation_view.setPlainText("\n".join(lines))
 
     def set_summary(self, text: str) -> None:
