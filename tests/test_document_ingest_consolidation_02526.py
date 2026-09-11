@@ -123,10 +123,21 @@ def _runtime(results: tuple[PerceptionResult, ...]):
     return services, DocumentProcessor(services, max_chunk_chars=256)
 
 
+def _long(sentence: str) -> str:
+    assert sentence.endswith(".")
+    filler = "подробно описывая обстоятельства произошедшего " * 2
+    value = sentence[:-1] + " " + filler.strip() + "."
+    assert len(value) < 256
+    return value
+
+
 def _two_chunks(first: str, second: str):
     source = first + " " + second
+    assert len(source) > 256
     chunks = DocumentProcessor(SimpleNamespace(), max_chunk_chars=256).chunk_text(source)
     assert len(chunks) == 2
+    assert chunks[0].text == first
+    assert chunks[1].text == " " + second
     return source, chunks
 
 
@@ -172,11 +183,11 @@ def _subject_assertion(
 
 
 def test_ingest_text_binds_unique_backward_coreference_before_single_document_commit():
-    first = (
+    first = _long(
         "Иван прибыл в порт, где долго ждал разрешения на вход и спокойно наблюдал "
         "за разгрузкой большого судна у дальнего причала."
     )
-    second = (
+    second = _long(
         "Он вошёл в здание после долгого ожидания у ворот и затем спокойно закрыл "
         "за собой тяжёлую металлическую дверь."
     )
@@ -233,11 +244,11 @@ def test_ingest_text_binds_unique_backward_coreference_before_single_document_co
 
 
 def test_ingest_text_rejects_future_only_antecedent_without_any_canonical_leak():
-    first = (
+    first = _long(
         "Он вошёл в здание после долгого ожидания у ворот и затем спокойно закрыл "
         "за собой тяжёлую металлическую дверь."
     )
-    second = (
+    second = _long(
         "Иван прибыл в порт, где долго ждал разрешения на вход и спокойно наблюдал "
         "за разгрузкой большого судна у дальнего причала."
     )
@@ -289,11 +300,11 @@ def test_ingest_text_rejects_future_only_antecedent_without_any_canonical_leak()
 
 
 def test_ingest_text_rejects_multiple_backward_antecedents_without_guessing():
-    first = (
+    first = _long(
         "Иван встретил Петра у ворот большого склада и долго обсуждал с ним порядок "
         "разгрузки прибывшего утром грузового автомобиля."
     )
-    second = (
+    second = _long(
         "Он вошёл в здание после разговора у ворот и затем спокойно закрыл за собой "
         "тяжёлую металлическую дверь."
     )
@@ -354,11 +365,11 @@ def test_ingest_text_rejects_multiple_backward_antecedents_without_guessing():
 
 
 def test_late_canonical_failure_rolls_back_all_document_units():
-    first = (
+    first = _long(
         "Иван прибыл в порт, где долго ждал разрешения на вход и спокойно наблюдал "
         "за разгрузкой большого судна у дальнего причала."
     )
-    second = (
+    second = _long(
         "Иван вошёл в здание после ожидания у ворот и затем спокойно закрыл за собой "
         "тяжёлую металлическую дверь."
     )
