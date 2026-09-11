@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ah.documents import last_document_summary_runtime_state
+
 
 class DocumentPanelWidget(QWidget):
     """UI boundary for full-document ingestion and AH-only summarization."""
@@ -36,7 +38,8 @@ class DocumentPanelWidget(QWidget):
         layout.addWidget(title)
         intro = QLabel(
             "Полный проход: chunks → perception → единый DOCUMENT batch → canonical AH. "
-            "Summary получает только source-scoped AgentContext, не сырой текст."
+            "Summary получает только bounded source-scoped AgentContext slices; raw chunks "
+            "в Agent LLM не передаются."
         )
         intro.setWordWrap(True)
         layout.addWidget(intro)
@@ -76,7 +79,7 @@ class DocumentPanelWidget(QWidget):
         self.context_view = QPlainTextEdit()
         self.context_view.setReadOnly(True)
         self.context_view.setPlaceholderText("Source-scoped AgentContext")
-        self.context_view.setMinimumHeight(130)
+        self.context_view.setMinimumHeight(110)
         layout.addWidget(self.context_view, 1)
 
         request_row = QHBoxLayout()
@@ -92,10 +95,18 @@ class DocumentPanelWidget(QWidget):
         request_row.addWidget(self.summary_button)
         layout.addLayout(request_row)
 
+        self.continuation_view = QPlainTextEdit()
+        self.continuation_view.setReadOnly(True)
+        self.continuation_view.setPlaceholderText(
+            "Continuation diagnostics: slice, cursor, primary/overlap refs, budget, stop reason, coverage"
+        )
+        self.continuation_view.setMinimumHeight(115)
+        layout.addWidget(self.continuation_view)
+
         self.summary_view = QPlainTextEdit()
         self.summary_view.setReadOnly(True)
         self.summary_view.setPlaceholderText("Memory-grounded summary")
-        self.summary_view.setMinimumHeight(150)
+        self.summary_view.setMinimumHeight(130)
         layout.addWidget(self.summary_view, 1)
 
     def _browse(self) -> None:
@@ -136,6 +147,7 @@ class DocumentPanelWidget(QWidget):
             f"Готово: {len(result.source_text):,} символов, один DOCUMENT commit."
         )
         self.context_view.clear()
+        self.continuation_view.clear()
         self.summary_view.clear()
         self.activate_button.setEnabled(True)
         self.summary_button.setEnabled(True)
@@ -144,6 +156,42 @@ class DocumentPanelWidget(QWidget):
         self.context_view.setPlainText(rendered or "AgentContext пуст")
         self.status.setText(f"Source context построен; runtime Workspace: {len(workspace_refs)} refs.")
 
+    def _render_continuation_diagnostics(self) -> None:
+        if not self._source_ref:
+            self.continuation_view.clear()
+            return
+        state = last_document_summary_runtime_state(self._source_ref)
+        if state is None:
+            self.continuation_view.setPlainText("Continuation diagnostics ещё не получены.")
+            return
+        lines = []
+        for item in state.slice_diagnostics:
+            lines.append(
+                f"slice {item.slice_index:02d}: cursor {item.cursor_start}→{item.cursor_end} | "
+                f"primary={len(item.primary_refs)} | overlap={len(item.overlap_refs)} | "
+                f"workspace={len(item.workspace_refs)} | ~{item.estimated_tokens} tok | "
+                f"done={'yes' if item.done else 'no'}"
+            )
+        lines.append("")
+        lines.append(
+            f"stop={state.stop_reason} | source primary coverage="
+            f"{state.primary_covered}/{state.source_primary_total} "
+            f"({state.source_coverage_ratio:.1%}) | final ~{state.final_estimated_tokens} tok"
+        )
+        self.continuation_view.setPlainText("\n".join(lines))
+
     def set_summary(self, text: str) -> None:
         self.summary_view.setPlainText(text)
-        self.status.setText("Summary построен из source-scoped AH context.")
+        self._render_continuation_diagnostics()
+        state = (
+            last_document_summary_runtime_state(self._source_ref)
+            if self._source_ref
+            else None
+        )
+        if state is None:
+            self.status.setText("Summary построен из source-scoped AH context.")
+        else:
+            self.status.setText(
+                f"Summary готов: {len(state.slice_diagnostics)} slices, "
+                f"coverage {state.source_coverage_ratio:.1%}, stop={state.stop_reason}."
+            )
