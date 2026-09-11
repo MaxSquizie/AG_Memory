@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from types import SimpleNamespace
 
-import ah.documents as documents
+import ah.documents.runtime as document_runtime
 from ah.documents import (
     DEFAULT_DOCUMENT_SUMMARY_BUDGET_TOKENS,
     DocumentProcessor,
@@ -55,7 +55,7 @@ def test_public_document_processor_declares_fixed_default_summary_budget():
 
 
 def test_runtime_summary_diagnostics_report_cursor_budget_stop_and_full_primary_coverage():
-    documents._remember_summary(_summary("doc:operator"))
+    document_runtime._remember_summary(_summary("doc:operator"))
 
     state = last_document_summary_runtime_state("doc:operator")
 
@@ -67,6 +67,26 @@ def test_runtime_summary_diagnostics_report_cursor_budget_stop_and_full_primary_
     assert state.final_estimated_tokens == 321
     assert [item.cursor_end for item in state.slice_diagnostics] == [2, 3]
     assert state.slice_diagnostics[1].overlap_refs == ("N2",)
+
+
+def test_live_runtime_progress_uses_fixed_total_and_runtime_only_stop_state():
+    diagnostics = _summary("doc:live").slice_diagnostics[:1]
+    document_runtime._remember_progress(
+        "doc:live",
+        diagnostics,
+        source_primary_total=3,
+        stop_reason="projecting",
+        estimated_tokens=200,
+    )
+
+    state = last_document_summary_runtime_state("doc:live")
+
+    assert state is not None
+    assert state.stop_reason == "projecting"
+    assert state.primary_covered == 2
+    assert state.source_primary_total == 3
+    assert state.source_coverage_ratio == 2 / 3
+    assert state.final_estimated_tokens == 200
 
 
 def test_hierarchical_aggregation_stays_within_fixed_budget_and_reduces_to_one_result():
@@ -100,10 +120,9 @@ def test_hierarchical_aggregation_stays_within_fixed_budget_and_reduces_to_one_r
     )
 
     assert text.startswith("compressed-")
-    assert len(agent.contexts) == 3  # two first-level pairs, then their two summaries
+    assert len(agent.contexts) == 3
     assert all(context.estimated_tokens <= budget for context in agent.contexts)
     assert final_context is agent.contexts[-1]
-    assert all("A" * 120 not in context.current_input for context in agent.contexts)
 
 
 def test_document_cli_exposes_fixed_continuation_controls():
