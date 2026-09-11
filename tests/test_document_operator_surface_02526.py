@@ -65,6 +65,7 @@ def test_runtime_summary_diagnostics_report_cursor_budget_stop_and_full_primary_
     assert state.source_primary_total == 3
     assert state.source_coverage_ratio == 1.0
     assert state.final_estimated_tokens == 321
+    assert state.failure is None
     assert [item.cursor_end for item in state.slice_diagnostics] == [2, 3]
     assert state.slice_diagnostics[1].overlap_refs == ("N2",)
 
@@ -87,6 +88,27 @@ def test_live_runtime_progress_uses_fixed_total_and_runtime_only_stop_state():
     assert state.source_primary_total == 3
     assert state.source_coverage_ratio == 2 / 3
     assert state.final_estimated_tokens == 200
+    assert state.failure is None
+
+
+def test_runtime_progress_preserves_failure_category_without_entering_agent_context():
+    document_runtime._remember_progress(
+        "doc:failed",
+        (),
+        source_primary_total=4,
+        stop_reason="slice_budget_exceeded",
+        estimated_tokens=5000,
+        failure="ProjectionBudgetExceeded: deterministic budget exceeded",
+    )
+
+    state = last_document_summary_runtime_state("doc:failed")
+
+    assert state is not None
+    assert state.stop_reason == "slice_budget_exceeded"
+    assert state.failure == "ProjectionBudgetExceeded: deterministic budget exceeded"
+    assert state.primary_covered == 0
+    assert state.source_primary_total == 4
+    assert state.final_estimated_tokens == 5000
 
 
 def test_hierarchical_aggregation_stays_within_fixed_budget_and_reduces_to_one_result():
