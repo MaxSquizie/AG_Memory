@@ -89,6 +89,15 @@ def build_parser() -> argparse.ArgumentParser:
         default="data/acceptance_oracle_m1_adversarial.json",
         help="semantic oracle JSON aligned with --cases",
     )
+    semantic.add_argument(
+        "--runs-dirname",
+        default="acceptance_runs_m1_adversarial",
+        help="output directory name below configured data_dir",
+    )
+    sub.add_parser(
+        "quantifier-acceptance",
+        help="run the 78-case semantic quantifier corpus through the normal local-LLM pipeline",
+    )
     sub.add_parser(
         "m2-acceptance",
         help=(
@@ -166,14 +175,22 @@ def main(argv: list[str] | None = None) -> int:
 
     services = RuntimeServices.build(cfg)
 
-    if args.command == "semantic-acceptance":
+    if args.command in {"semantic-acceptance", "quantifier-acceptance"}:
         from ah.diagnostics import run_acceptance_suite
 
+        if args.command == "quantifier-acceptance":
+            cases_file = cfg.paths.data_dir / "acceptance_quantifiers" / "cases.txt"
+            oracle_file = cfg.paths.data_dir / "acceptance_quantifiers" / "oracle.json"
+            runs_dirname = "acceptance_runs_m1_quantifiers"
+        else:
+            cases_file = Path(args.cases)
+            oracle_file = Path(args.oracle)
+            runs_dirname = str(args.runs_dirname)
         result = run_acceptance_suite(
             services,
-            cases_file=Path(args.cases),
-            oracle_file=Path(args.oracle),
-            runs_dirname="acceptance_runs_m1_adversarial",
+            cases_file=cases_file,
+            oracle_file=oracle_file,
+            runs_dirname=runs_dirname,
         )
         print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
         return 0 if result.semantic_failed == 0 and result.failed == 0 else 1

@@ -76,6 +76,7 @@ class MetricsPanelWidget(QWidget):
         "Inversion": "acceptance_runs_m1_inversion",
         "Ellipsis": "acceptance_runs_m1_ellipsis",
         "Typo / noise": "acceptance_runs_m1_typo",
+        "Quantifiers": "acceptance_runs_m1_quantifiers",
     }
 
     def __init__(self, services, parent: QWidget | None = None) -> None:

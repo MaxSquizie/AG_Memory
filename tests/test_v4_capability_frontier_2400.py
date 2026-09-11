@@ -21,6 +21,8 @@ from ah.perception import (
     EvidenceSpan,
     PerceptionResult,
     PredicateCandidate,
+    QuantifierCandidate,
+    QuantifierKind,
     TemplateCandidate,
 )
 from ah.perception.morphology import MorphInfo
@@ -72,7 +74,14 @@ def _env(*, with_morphology: bool = False):
     return core, context, service, engine
 
 
-def _unary(local_id: str, predicate: str, mention: str, *, entity_ref: str | None = None):
+def _unary(
+    local_id: str,
+    predicate: str,
+    mention: str,
+    *,
+    entity_ref: str | None = None,
+    quantified: bool = False,
+):
     return AssertionCandidate(
         local_id,
         PredicateCandidate(
@@ -86,6 +95,11 @@ def _unary(local_id: str, predicate: str, mention: str, *, entity_ref: str | Non
                 mention=mention,
                 normalized_hint=mention.casefold(),
                 entity_ref=entity_ref,
+                quantifier=(
+                    QuantifierCandidate(QuantifierKind.EXISTS, mention)
+                    if quantified
+                    else None
+                ),
             ),
         ),
     )
@@ -126,7 +140,9 @@ def test_unknown_participant_becomes_one_exists_scope_not_fake_entity() -> None:
     result = PerceptionResult(
         "Кто-то вошёл. Он сел.",
         assertions=(
-            _unary("A1", "войти", "Кто-то", entity_ref="E1"),
+            _unary(
+                "A1", "войти", "Кто-то", entity_ref="E1", quantified=True
+            ),
             _unary("A2", "сесть", "Он", entity_ref="E1"),
         ),
     )
@@ -167,7 +183,9 @@ def test_unresolved_pronoun_can_bind_to_existential_anchor_before_atomic_commit(
     result = PerceptionResult(
         "Кто-то вошёл. Он сел.",
         assertions=(
-            _unary("A1", "войти", "Кто-то", entity_ref="E1"),
+            _unary(
+                "A1", "войти", "Кто-то", entity_ref="E1", quantified=True
+            ),
             AssertionCandidate(
                 "A2",
                 PredicateCandidate(
@@ -205,8 +223,12 @@ def test_two_independent_unknowns_remain_two_existential_scopes() -> None:
     result = PerceptionResult(
         "Кто-то вошёл. Кто-то вышел.",
         assertions=(
-            _unary("A1", "войти", "Кто-то", entity_ref="E1"),
-            _unary("A2", "выйти", "Кто-то", entity_ref="E2"),
+            _unary(
+                "A1", "войти", "Кто-то", entity_ref="E1", quantified=True
+            ),
+            _unary(
+                "A2", "выйти", "Кто-то", entity_ref="E2", quantified=True
+            ),
         ),
     )
     commit = service.integrate_external(result, context)
@@ -227,8 +249,22 @@ def test_two_unknown_roles_in_one_fact_create_nested_exists_without_m_unknown() 
                     template_candidate=TemplateCandidate((ActantRole.SUBJECT, ActantRole.OBJECT)),
                 ),
                 (
-                    ActantCandidate(ActantRole.SUBJECT, mention="Кто-то", entity_ref="E1"),
-                    ActantCandidate(ActantRole.OBJECT, mention="что-то", entity_ref="E2"),
+                    ActantCandidate(
+                        ActantRole.SUBJECT,
+                        mention="Кто-то",
+                        entity_ref="E1",
+                        quantifier=QuantifierCandidate(
+                            QuantifierKind.EXISTS, "Кто-то"
+                        ),
+                    ),
+                    ActantCandidate(
+                        ActantRole.OBJECT,
+                        mention="что-то",
+                        entity_ref="E2",
+                        quantifier=QuantifierCandidate(
+                            QuantifierKind.EXISTS, "что-то"
+                        ),
+                    ),
                 ),
             ),
         ),
@@ -360,7 +396,13 @@ def test_existential_scope_survives_persistence_roundtrip(tmp_path) -> None:
         PerceptionResult(
             "Кто-то вошёл. Он сел.",
             assertions=(
-                _unary("A1", "войти", "Кто-то", entity_ref="E1"),
+                _unary(
+                    "A1",
+                    "войти",
+                    "Кто-то",
+                    entity_ref="E1",
+                    quantified=True,
+                ),
                 _unary("A2", "сесть", "Он", entity_ref="E1"),
             ),
         ),

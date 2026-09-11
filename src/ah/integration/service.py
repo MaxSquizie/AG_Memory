@@ -1127,6 +1127,26 @@ class IntegrationService:
                         sorted((existential_vars[item] for item in variable_refs), key=lambda var: var.local_id)
                     )
                     for variable in reversed(ordered_vars):
+                        handle = next(
+                            item
+                            for item in variable_refs
+                            if existential_vars[item].local_id == variable.local_id
+                        )
+                        restriction_lemma = existential_bindings[
+                            handle
+                        ].restriction_lemma
+                        if restriction_lemma:
+                            restriction = self._ensure_class_pattern(
+                                tx,
+                                restriction_lemma,
+                                variable,
+                                domain,
+                            )
+                            restricted_g, restricted_created = tx.ensure_function(
+                                domain, "AND", (restriction, body_ref)
+                            )
+                            body_ref = tx.ref(restricted_g.uid)
+                            created_any = created_any or restricted_created
                         exists_g, exists_created = tx.ensure_function(
                             domain, "EXISTS", (variable, body_ref)
                         )
@@ -1135,7 +1155,7 @@ class IntegrationService:
                     if any(existential_bindings[item].negative for item in variable_refs):
                         if not all(existential_bindings[item].negative for item in variable_refs):
                             raise CandidateValidationError(
-                                "Cannot mix «никто» with a positive existential in one scope"
+                                "Cannot mix negative and positive existential binders in one scope"
                             )
                         not_g, not_created = tx.ensure_function(domain, "NOT", (body_ref,))
                         body_ref = tx.ref(not_g.uid)
@@ -1844,6 +1864,14 @@ class IntegrationService:
                     existential_ref=existential.ref,
                     member_refs=existential.member_refs,
                     variable_id=variable_id,
+                    restriction_lemma=next(
+                        (
+                            binding.restriction_lemma
+                            for binding in bindings.values()
+                            if binding.variable_id == variable_id
+                        ),
+                        None,
+                    ),
                 )
             )
 

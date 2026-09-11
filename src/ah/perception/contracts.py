@@ -21,6 +21,54 @@ class EvidenceSpan:
             raise ValueError("Invalid evidence span")
 
 
+class QuantifierKind(str, Enum):
+    """Runtime operator selected for one source-grounded quantified actant."""
+
+    EXISTS = "EXISTS"
+    NOT_EXISTS = "NOT_EXISTS"
+    FORALL = "FORALL"
+    NOT_FORALL = "NOT_FORALL"
+
+
+class QuantifierProbeDecision(str, Enum):
+    """Closed output protocol for the bounded quantifier semantic probe."""
+
+    NONE = "NONE"
+    EXISTS = "EXISTS"
+    NOT_EXISTS = "NOT_EXISTS"
+    FORALL = "FORALL"
+    NOT_FORALL = "NOT_FORALL"
+    AMBIGUOUS = "AMBIGUOUS"
+
+
+@dataclass(frozen=True, slots=True)
+class QuantifierCandidate:
+    """UID-free quantifier metadata consumed by deterministic Integration.
+
+    The source expression remains provenance. ``restriction_lemma`` is the
+    morphology-normalized class constrained by the binder; it is never persisted
+    as an entity standing for the quantified phrase.
+    """
+
+    kind: QuantifierKind
+    surface: str
+    restriction_lemma: str | None = None
+    evidence: EvidenceSpan | None = None
+
+    def __post_init__(self) -> None:
+        if not self.surface.strip():
+            raise ValueError("QuantifierCandidate.surface must be non-empty")
+        restriction = (
+            None
+            if self.restriction_lemma is None
+            else self.restriction_lemma.strip().casefold().replace("ё", "е")
+        )
+        if self.kind in {QuantifierKind.FORALL, QuantifierKind.NOT_FORALL} and not restriction:
+            raise ValueError("Universal quantifier requires a restriction class")
+        if self.restriction_lemma is not None:
+            object.__setattr__(self, "restriction_lemma", restriction)
+
+
 @dataclass(frozen=True, slots=True)
 class TemplateCandidate:
     """Runtime-only reusable role schema proposed for a predicate.
@@ -181,6 +229,9 @@ class ActantCandidate:
     grammatical_number: str | None = None
     # Runtime-only normalized TIME descriptor. Canonical time remains ordinary m.
     temporal: TemporalCandidate | None = None
+    # Runtime-only binder metadata. Integration maps ``entity_ref`` to BoundVar;
+    # the quantified phrase itself must never become a canonical M/S fact.
+    quantifier: QuantifierCandidate | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -201,6 +252,14 @@ class ActantCandidate:
             raise ValueError("ActantCandidate proposition cannot also use candidate_ref/entity_ref/composition")
         if self.entity_ref is not None and not self.entity_ref.strip():
             raise ValueError("entity_ref must be non-empty when provided")
+        if self.quantifier is not None and (
+            self.candidate_ref is not None
+            or self.composition is not None
+            or self.proposition is not None
+        ):
+            raise ValueError(
+                "Quantified actant cannot also use candidate_ref/composition/proposition"
+            )
         if self.parser_confidence is not None and not 0.0 <= self.parser_confidence <= 1.0:
             raise ValueError("parser_confidence must be in [0, 1]")
         if self.grammatical_number is not None:

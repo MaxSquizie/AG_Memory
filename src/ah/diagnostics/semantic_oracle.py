@@ -271,6 +271,30 @@ def _match_composition(actual: Mapping[str, Any], expected: Mapping[str, Any]) -
     return ok, {"operator": actual_operator, "members": actual_members}
 
 
+def _match_perception_quantifier(
+    actual: Mapping[str, Any], expected: Any
+) -> tuple[bool, Any]:
+    candidate = actual.get("quantifier")
+    if expected is None:
+        return candidate is None, candidate
+    if not isinstance(expected, Mapping) or not isinstance(candidate, Mapping):
+        return False, candidate
+    wanted_kind = str(expected.get("kind", "")).upper()
+    actual_kind = str(candidate.get("kind", "")).upper()
+    ok = bool(wanted_kind) and actual_kind == wanted_kind
+    if "restriction" in expected:
+        ok = ok and _norm(candidate.get("restriction_lemma")) == _norm(
+            expected.get("restriction")
+        )
+    if "surface" in expected:
+        ok = ok and _norm(candidate.get("surface")) == _norm(expected.get("surface"))
+    return ok, {
+        "kind": actual_kind,
+        "restriction": candidate.get("restriction_lemma"),
+        "surface": candidate.get("surface"),
+    }
+
+
 def _lookup_actual_path(
     path: str,
     expected_key_to_actual: Mapping[str, Mapping[str, Any]],
@@ -292,6 +316,26 @@ def _match_perception_target(
     expected_key_to_actual: Mapping[str, Mapping[str, Any]],
     expected_key_to_local: Mapping[str, str],
 ) -> tuple[bool, Any]:
+    if "quantifier" in expected:
+        quantifier_ok, actual_quantifier = _match_perception_quantifier(
+            actual, expected.get("quantifier")
+        )
+        remainder = dict(expected)
+        remainder.pop("quantifier", None)
+        if remainder:
+            target_ok, actual_target = _match_perception_target(
+                actual,
+                remainder,
+                entity_labels=entity_labels,
+                expected_key_to_actual=expected_key_to_actual,
+                expected_key_to_local=expected_key_to_local,
+            )
+        else:
+            target_ok, actual_target = True, _actual_target_label(actual, entity_labels)
+        return quantifier_ok and target_ok, {
+            "target": actual_target,
+            "quantifier": actual_quantifier,
+        }
     if expected.get("any") is True:
         return True, _actual_target_label(actual, entity_labels)
     if "assertion" in expected:
@@ -686,6 +730,13 @@ def _canonical_target_matches(
 ) -> tuple[bool, Any]:
     if actual_ref is None:
         return False, None
+    if "quantifier" in expected:
+        is_bound_var = (
+            "uid" not in actual_ref
+            and isinstance(actual_ref.get("local_id"), int)
+            and bool(actual_ref.get("sort"))
+        )
+        return is_bound_var, actual_ref
     if expected.get("any") is True:
         return True, _resolve_ref_value(snapshot, actual_ref)
     if "assertion" in expected:
@@ -904,6 +955,232 @@ def _match_integrated_conditionals(
         match_side("consequent", consequent_ref, expected_then, members[split:split + len(expected_then)])
 
 
+def _snapshot_item_for_ref(
+    snapshot: Mapping[str, Mapping[str, Any]], value: Any
+) -> Mapping[str, Any] | None:
+    if not isinstance(value, Mapping) or "uid" not in value:
+        return None
+    item = snapshot.get(str(value.get("uid", "")))
+    return item if isinstance(item, Mapping) else None
+
+
+def _bound_var_id(value: Any) -> int | None:
+    if not isinstance(value, Mapping) or "uid" in value:
+        return None
+    local_id = value.get("local_id")
+    return local_id if isinstance(local_id, int) else None
+
+
+def _restriction_predicate(
+    snapshot: Mapping[str, Mapping[str, Any]],
+    value: Any,
+    variable_id: int,
+) -> tuple[str, ...]:
+    item = _snapshot_item_for_ref(snapshot, value)
+    if not isinstance(item, Mapping) or item.get("kind") != "N":
+        return ()
+    actants = item.get("actants") or {}
+    if not isinstance(actants, Mapping) or set(actants) != {"SUBJECT"}:
+        return ()
+    if _bound_var_id(actants.get("SUBJECT")) != variable_id:
+        return ()
+    ref = {"uid": item.get("uid"), "kind": "N"}
+    return _canonical_assertion_predicate_forms(snapshot, ref)
+
+
+def _match_integrated_quantifiers(
+    checks: list[dict[str, Any]],
+    snapshot: Mapping[str, Mapping[str, Any]],
+    commit: Mapping[str, Any],
+    expected: Sequence[Mapping[str, Any]],
+    expected_ref_map: Mapping[str, Mapping[str, Any]],
+) -> None:
+    """Compare complete binder spines, restrictions and proposition bodies."""
+
+    actual: list[Mapping[str, Any]] = []
+    for collection in ("existentials", "universals"):
+        actual.extend(
+            item
+            for item in commit.get(collection, []) or []
+            if isinstance(item, Mapping)
+        )
+    _check(
+        checks,
+        "integration.quantifier_count",
+        len(actual) == len(expected),
+        expected=len(expected),
+        actual=len(actual),
+    )
+
+    for index, wanted in enumerate(expected, start=1):
+        if index > len(actual):
+            break
+        item = actual[index - 1]
+        prefix = f"integration.quantifiers.q{index}"
+        kind = str(wanted.get("kind", "")).upper()
+        root_ref = item.get("ref")
+        root = _snapshot_item_for_ref(snapshot, root_ref)
+        negative = kind in {"NOT_EXISTS", "NOT_FORALL"}
+        base_operator = "FORALL" if kind in {"FORALL", "NOT_FORALL"} else "EXISTS"
+
+        wrapper_ok = True
+        current_ref: Any = root_ref
+        if negative:
+            wrapper_ok = bool(
+                isinstance(root, Mapping)
+                and root.get("kind") == "G"
+                and str(root.get("function_id", "")).upper() == "NOT"
+                and len(root.get("operands", []) or []) == 1
+            )
+            if wrapper_ok:
+                current_ref = (root.get("operands") or [None])[0]
+        else:
+            wrapper_ok = not bool(
+                isinstance(root, Mapping)
+                and root.get("kind") == "G"
+                and str(root.get("function_id", "")).upper() == "NOT"
+            )
+        _check(
+            checks,
+            f"{prefix}.polarity_wrapper",
+            wrapper_ok,
+            expected="NOT" if negative else "NONE",
+            actual=(root or {}).get("function_id") if isinstance(root, Mapping) else None,
+        )
+
+        variable_ids = [
+            value for value in item.get("variable_ids", []) or [] if isinstance(value, int)
+        ]
+        expected_variable_count = int(wanted.get("variables", len(variable_ids)))
+        _check(
+            checks,
+            f"{prefix}.variable_count",
+            len(variable_ids) == expected_variable_count,
+            expected=expected_variable_count,
+            actual=len(variable_ids),
+        )
+        raw_restrictions = wanted.get("restrictions", wanted.get("restriction"))
+        if isinstance(raw_restrictions, list):
+            restrictions = list(raw_restrictions)
+        elif len(variable_ids) == 1:
+            restrictions = [raw_restrictions]
+        else:
+            restrictions = [None] * len(variable_ids)
+
+        spine_ok = True
+        actual_restrictions: list[Any] = []
+        for position, variable_id in enumerate(variable_ids):
+            binder = _snapshot_item_for_ref(snapshot, current_ref)
+            operands = binder.get("operands", []) if isinstance(binder, Mapping) else []
+            if not (
+                isinstance(binder, Mapping)
+                and binder.get("kind") == "G"
+                and str(binder.get("function_id", "")).upper() == base_operator
+                and len(operands) == 2
+                and _bound_var_id(operands[0]) == variable_id
+            ):
+                spine_ok = False
+                break
+            body_ref = operands[1]
+            wanted_restriction = (
+                restrictions[position] if position < len(restrictions) else None
+            )
+            if base_operator == "FORALL":
+                implication = _snapshot_item_for_ref(snapshot, body_ref)
+                implication_operands = (
+                    implication.get("operands", [])
+                    if isinstance(implication, Mapping)
+                    else []
+                )
+                if not (
+                    isinstance(implication, Mapping)
+                    and implication.get("kind") == "G"
+                    and str(implication.get("function_id", "")).upper() == "IMPLIES"
+                    and len(implication_operands) == 2
+                ):
+                    spine_ok = False
+                    break
+                forms = _restriction_predicate(
+                    snapshot, implication_operands[0], variable_id
+                )
+                actual_restrictions.append(forms)
+                if wanted_restriction is None or not any(
+                    _norm(form) == _norm(wanted_restriction) for form in forms
+                ):
+                    spine_ok = False
+                current_ref = implication_operands[1]
+            elif wanted_restriction is not None:
+                conjunction = _snapshot_item_for_ref(snapshot, body_ref)
+                conjunction_operands = (
+                    conjunction.get("operands", [])
+                    if isinstance(conjunction, Mapping)
+                    else []
+                )
+                if not (
+                    isinstance(conjunction, Mapping)
+                    and conjunction.get("kind") == "G"
+                    and str(conjunction.get("function_id", "")).upper() == "AND"
+                    and len(conjunction_operands) == 2
+                ):
+                    spine_ok = False
+                    break
+                forms = _restriction_predicate(
+                    snapshot, conjunction_operands[0], variable_id
+                )
+                actual_restrictions.append(forms)
+                if not any(
+                    _norm(form) == _norm(wanted_restriction) for form in forms
+                ):
+                    spine_ok = False
+                current_ref = conjunction_operands[1]
+            else:
+                actual_restrictions.append(None)
+                current_ref = body_ref
+
+        expected_member_keys = [str(value) for value in wanted.get("members", []) or []]
+        expected_members = [
+            expected_ref_map[key]
+            for key in expected_member_keys
+            if key in expected_ref_map
+        ]
+        actual_members = [
+            value for value in item.get("member_refs", []) or [] if isinstance(value, Mapping)
+        ]
+        _check(
+            checks,
+            f"{prefix}.members",
+            len(expected_members) == len(expected_member_keys)
+            and actual_members == expected_members,
+            expected=expected_member_keys,
+            actual=actual_members,
+        )
+        if len(actual_members) == 1:
+            body_ok = current_ref == actual_members[0]
+        else:
+            body = _snapshot_item_for_ref(snapshot, current_ref)
+            body_ok = bool(
+                isinstance(body, Mapping)
+                and body.get("kind") == "G"
+                and str(body.get("function_id", "")).upper() == "AND"
+                and (body.get("operands", []) or []) == actual_members
+            )
+        _check(
+            checks,
+            f"{prefix}.formula",
+            spine_ok and body_ok,
+            expected={
+                "kind": kind,
+                "variables": variable_ids,
+                "restrictions": restrictions,
+                "members": expected_member_keys,
+            },
+            actual={
+                "restrictions": actual_restrictions,
+                "body": current_ref,
+            },
+        )
+
+
 def _clarification_options(snapshot: Mapping[str, Mapping[str, Any]], commit: Mapping[str, Any]) -> tuple[str, ...]:
     labels: list[str] = []
     for clarification in commit.get("clarifications", []) or []:
@@ -1012,6 +1289,16 @@ def _match_integration(
     expected_conditionals = integration_expectation.get("conditionals")
     if isinstance(expected_conditionals, list):
         _match_integrated_conditionals(checks, snapshot, commit, expected_conditionals)
+
+    expected_quantifiers = integration_expectation.get("quantifiers")
+    if isinstance(expected_quantifiers, list):
+        _match_integrated_quantifiers(
+            checks,
+            snapshot,
+            commit,
+            expected_quantifiers,
+            _canonical_assertion_ref_map(record, expected_key_to_local),
+        )
 
     clarification = integration_expectation.get("clarification")
     if isinstance(clarification, dict):

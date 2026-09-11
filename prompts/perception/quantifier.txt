@@ -1,0 +1,1 @@
+Return exactly NONE, EXISTS, NOT_EXISTS, FORALL, NOT_FORALL, or AMBIGUOUS. Classify only TARGET in this event: specific referent, at least one, no witness, every member of its stated class, or denial of every-member scope. Keep negation on the predicate body unless the text assigns it to the quantifier. Plurality alone is not a binder.

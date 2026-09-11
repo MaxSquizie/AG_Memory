@@ -13,6 +13,8 @@ from ah.perception import (
     AssertionCandidate,
     PerceptionResult,
     PredicateCandidate,
+    QuantifierCandidate,
+    QuantifierKind,
     TemplateCandidate,
 )
 
@@ -44,6 +46,8 @@ def _unary(
     *,
     entity_ref: str | None = None,
     negated: bool = False,
+    quantifier_kind: QuantifierKind | None = None,
+    restriction_lemma: str | None = None,
 ):
     return AssertionCandidate(
         local_id,
@@ -58,6 +62,15 @@ def _unary(
                 mention=mention,
                 normalized_hint=mention.casefold(),
                 entity_ref=entity_ref,
+                quantifier=(
+                    None
+                    if quantifier_kind is None
+                    else QuantifierCandidate(
+                        quantifier_kind,
+                        mention,
+                        restriction_lemma,
+                    )
+                ),
             ),
         ),
         negated=negated,
@@ -114,7 +127,15 @@ def test_someone_sleeps_remains_one_exists_scope() -> None:
     core, context, service, engine = _env()
     result = PerceptionResult(
         "Кто-то спит",
-        assertions=(_unary("A1", "спать", "Кто-то", entity_ref="E1"),),
+        assertions=(
+            _unary(
+                "A1",
+                "спать",
+                "Кто-то",
+                entity_ref="E1",
+                quantifier_kind=QuantifierKind.EXISTS,
+            ),
+        ),
     )
     commit = service.integrate_external(result, context)
     assert len(commit.existentials) == 1
@@ -136,7 +157,15 @@ def test_all_humans_are_mortal_proves_ivan_via_forall_implies_mp() -> None:
     core, context, service, engine = _env()
     universal_result = PerceptionResult(
         "Все люди смертны",
-        assertions=(_unary("A1", "смертен", "все люди"),),
+        assertions=(
+            _unary(
+                "A1",
+                "смертен",
+                "все люди",
+                quantifier_kind=QuantifierKind.FORALL,
+                restriction_lemma="человек",
+            ),
+        ),
     )
     plan = service.prepare_external_plan(universal_result, context)
     assert len(plan.candidate_ir.universal_bindings) == 1
@@ -188,7 +217,15 @@ def test_nl_universal_creates_a_rule_not_an_enumerated_list() -> None:
     commit = service.integrate_external(
         PerceptionResult(
             "Все люди смертны",
-            assertions=(_unary("A1", "смертен", "все люди"),),
+            assertions=(
+                _unary(
+                    "A1",
+                    "смертен",
+                    "все люди",
+                    quantifier_kind=QuantifierKind.FORALL,
+                    restriction_lemma="человек",
+                ),
+            ),
         ),
         context,
     )
@@ -221,7 +258,14 @@ def test_nobody_sleeps_is_not_exists_without_m_nobody() -> None:
     nobody = service.integrate_external(
         PerceptionResult(
             "Никто не спит",
-            assertions=(_unary("A1", "спать", "никто", negated=True),),
+            assertions=(
+                _unary(
+                    "A1",
+                    "спать",
+                    "никто",
+                    quantifier_kind=QuantifierKind.NOT_EXISTS,
+                ),
+            ),
         ),
         context,
     )
@@ -262,14 +306,31 @@ def test_not_all_came_vs_all_did_not_come_are_different_trees() -> None:
     not_all = service.integrate_external(
         PerceptionResult(
             "Не все сотрудники пришли",
-            assertions=(_unary("A1", "прийти", "не все сотрудники", negated=True),),
+            assertions=(
+                _unary(
+                    "A1",
+                    "прийти",
+                    "не все сотрудники",
+                    quantifier_kind=QuantifierKind.NOT_FORALL,
+                    restriction_lemma="сотрудник",
+                ),
+            ),
         ),
         context,
     )
     all_not = service.integrate_external(
         PerceptionResult(
             "Все сотрудники не пришли",
-            assertions=(_unary("A2", "прийти", "все сотрудники", negated=True),),
+            assertions=(
+                _unary(
+                    "A2",
+                    "прийти",
+                    "все сотрудники",
+                    negated=True,
+                    quantifier_kind=QuantifierKind.FORALL,
+                    restriction_lemma="сотрудник",
+                ),
+            ),
         ),
         context,
     )
@@ -296,11 +357,20 @@ def test_not_all_came_vs_all_did_not_come_are_different_trees() -> None:
 
 def test_not_all_then_not_is_fail_closed() -> None:
     _core, context, service, _engine = _env()
-    with pytest.raises(CandidateValidationError, match="не все"):
+    with pytest.raises(CandidateValidationError, match="scope metadata"):
         service.integrate_external(
             PerceptionResult(
                 "Не все сотрудники не пришли",
-                assertions=(_unary("A1", "прийти", "не все сотрудники", negated=True),),
+                assertions=(
+                    _unary(
+                        "A1",
+                        "прийти",
+                        "не все сотрудники",
+                        negated=True,
+                        quantifier_kind=QuantifierKind.NOT_FORALL,
+                        restriction_lemma="сотрудник",
+                    ),
+                ),
             ),
             context,
         )
@@ -311,7 +381,15 @@ def test_boundvar_from_nl_has_no_runtime_state_or_ah_uid() -> None:
     commit = service.integrate_external(
         PerceptionResult(
             "Все люди смертны",
-            assertions=(_unary("A1", "смертен", "все люди"),),
+            assertions=(
+                _unary(
+                    "A1",
+                    "смертен",
+                    "все люди",
+                    quantifier_kind=QuantifierKind.FORALL,
+                    restriction_lemma="человек",
+                ),
+            ),
         ),
         context,
     )

@@ -23,6 +23,7 @@ class ExistentialDiscourseAnchor:
     existential_ref: Ref
     member_refs: tuple[Ref, ...]
     variable_id: int
+    restriction_lemma: str | None = None
 
     def __post_init__(self) -> None:
         if self.existential_ref.kind is not RefKind.G:
@@ -31,6 +32,9 @@ class ExistentialDiscourseAnchor:
             raise ValueError("ExistentialDiscourseAnchor requires member_refs")
         if self.variable_id < 0:
             raise ValueError("ExistentialDiscourseAnchor.variable_id must be >= 0")
+        if self.restriction_lemma is not None:
+            value = self.restriction_lemma.strip().casefold().replace("ё", "е")
+            object.__setattr__(self, "restriction_lemma", value or None)
 
 
 @dataclass(slots=True)

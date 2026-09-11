@@ -20,9 +20,15 @@ from ah.perception import (
     NominalRelationCandidate,
     PerceptionResult,
     PropositionExprCandidate,
+    QuantifierCandidate,
+    QuantifierKind,
     QueryCandidate,
     SituationRelationCandidate,
     SituationRelationHintCandidate,
+)
+from ah.perception.quantifier_formalization import (
+    QuantifierFormalizationError,
+    QuantifierFormalizer,
 )
 from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception.scoping import apply_speech_act_scoping
@@ -125,6 +131,7 @@ class ExistentialBinding:
     anchor_ref: Ref | None = None
     anchor_member_refs: tuple[Ref, ...] = ()
     negative: bool = False
+    restriction_lemma: str | None = None
 
     def __post_init__(self) -> None:
         if not self.entity_ref.strip():
@@ -137,6 +144,9 @@ class ExistentialBinding:
             raise ValueError("anchor_member_refs require anchor_ref")
         if self.negative and self.anchor_ref is not None:
             raise ValueError("negative existentials cannot continue a prior existential anchor")
+        if self.restriction_lemma is not None:
+            value = self.restriction_lemma.strip().casefold().replace("ё", "е")
+            object.__setattr__(self, "restriction_lemma", value or None)
 
 
 @dataclass(frozen=True, slots=True)
@@ -259,6 +269,14 @@ def _offset_actant(actant: ActantCandidate, offset: int) -> ActantCandidate:
     return replace(
         actant,
         evidence=_offset_evidence(actant.evidence, offset),
+        quantifier=(
+            None
+            if actant.quantifier is None
+            else replace(
+                actant.quantifier,
+                evidence=_offset_evidence(actant.quantifier.evidence, offset),
+            )
+        ),
         composition=_offset_composition(actant.composition, offset),
         nominal_relations=tuple(
             replace(relation, evidence=_offset_evidence(relation.evidence, offset))
@@ -325,6 +343,14 @@ def _namespace_actant(actant: ActantCandidate, prefix: str, source_offset: int =
         proposition=_namespace_expr(actant.proposition, prefix),
         nominal_relations=nominal_relations,
         evidence=_offset_evidence(actant.evidence, source_offset),
+        quantifier=(
+            None
+            if actant.quantifier is None
+            else replace(
+                actant.quantifier,
+                evidence=_offset_evidence(actant.quantifier.evidence, source_offset),
+            )
+        ),
         composition=_offset_composition(actant.composition, source_offset),
     )
 
@@ -478,6 +504,7 @@ class SemanticConsolidator:
         self.validator = validator or CandidateValidator()
         self.morphology = morphology or build_morphology("auto")
         self.temporal = TemporalNormalizer()
+        self.quantifier_formalizer = QuantifierFormalizer(self.morphology)
 
     @staticmethod
     def _actant_variants(assertion: AssertionCandidate, role: ActantRole) -> tuple[ActantCandidate, ...]:
@@ -612,293 +639,106 @@ class SemanticConsolidator:
                     grouped.setdefault(actant.entity_ref, []).append(actant)
         return {key: tuple(values) for key, values in grouped.items()}
 
-    _EXISTENTIAL_PRONOUNS = frozenset({
-        "кто-то", "кто-нибудь", "кто-либо", "некто",
-        "что-то", "что-нибудь", "что-либо", "нечто",
-        "someone", "somebody", "something",
-    })
-    _NEGATIVE_EXISTENTIALS = frozenset({
-        "никто", "ничто", "никакой", "никакая", "никакое", "никакие",
-        "nobody", "noone", "nothing",
-    })
-    _UNIVERSAL_DETERMINERS = frozenset({
-        "все", "весь", "вся", "всей", "всех", "всем", "всем", "всеми",
-        "каждый", "каждая", "каждое", "каждые", "каждого", "каждому", "каждым",
-        "любой", "любая", "любое", "любые", "любого", "любому",
-        "all", "every", "each",
-    })
-    _WORD_RE = re.compile(r"[A-Za-zА-Яа-яЁё-]+")
-    _NOT_ALL_RE = re.compile(
-        r"(?<![A-Za-zА-Яа-яЁё])не\s+(все|весь|вся|всей|всех|всем|каждый|каждая|каждое|каждые|"
-        r"каждый|любой|любая|любое|all|every|each)\b",
-        re.IGNORECASE,
-    )
-    _ALL_RE = re.compile(
-        r"(?<![A-Za-zА-Яа-яЁё])(все|весь|вся|всей|всех|всем|каждый|каждая|каждое|каждые|"
-        r"любой|любая|любое|all|every|each)\b",
-        re.IGNORECASE,
-    )
-    _NE_RE = re.compile(r"(?<![A-Za-zА-Яа-яЁё])не\b", re.IGNORECASE)
-
-    @classmethod
-    def _is_existential_anchor(cls, actant: ActantCandidate) -> bool:
-        """Recognize a narrow lexical class of explicit indefinite pronouns.
-
-        This is intentionally not a generic marker-word -> logic table.  These
-        pronouns themselves denote an existentially introduced, non-identified
-        referent.  Broader generalized-quantifier phrases remain outside this
-        deterministic shortcut and must be handled by later semantic analysis.
-        """
-
-        if (
-            actant.entity_ref is None
-            or actant.candidate_ref is not None
-            or actant.composition is not None
-            or actant.proposition is not None
-        ):
-            return False
-        text = (actant.normalized_hint or actant.mention or "").strip().casefold().replace("ё", "е")
-        return text in cls._EXISTENTIAL_PRONOUNS
-
-    def _lemma(self, word: str) -> str:
-        token = str(word or "").strip()
-        if not token:
-            return ""
-        try:
-            analyses = tuple(self.morphology.analyze_all(token))
-        except AttributeError:
-            item = self.morphology.analyze(token)
-            analyses = () if item is None else (item,)
-        infos = tuple(material_analyses(analyses))
-        preferred = tuple(item for item in infos if item.pos in {"NOUN", "NPRO", "ADJF"})
-        if preferred and preferred[0].normal_form:
-            return str(preferred[0].normal_form).casefold().replace("ё", "е")
-        if infos and infos[0].normal_form:
-            return str(infos[0].normal_form).casefold().replace("ё", "е")
-        return token.casefold().replace("ё", "е")
-
-    def _restriction_lemma(self, head: str) -> str:
-        words = self._WORD_RE.findall(head)
-        if not words:
-            raise CandidateValidationError("Universal quantifier requires a restriction class")
-        return self._lemma(words[-1])
-
-    def _source_quantifier_scope(self, source_text: str) -> tuple[str | None, bool]:
-        """Return (kind, extra_body_negation) from the utterance operator tree.
-
-        ``not_all`` is «не все N P». ``all`` is «все N P» or «все N не P».
-        A second ``не`` after a «не все» NP is structurally ambiguous → fail closed.
-        """
-
-        text = str(source_text or "")
-        not_all = self._NOT_ALL_RE.search(text)
-        if not_all is not None:
-            rest = text[not_all.end():]
-            if self._NE_RE.search(rest):
-                raise CandidateValidationError(
-                    "Ambiguous quantifier/predicate negation: «не все … не …» is not guessed"
-                )
-            return "not_all", False
-        all_match = self._ALL_RE.search(text)
-        if all_match is not None:
-            rest = text[all_match.end():]
-            return "all", bool(self._NE_RE.search(rest))
-        return None, False
-
-    def _determiner_attaches_to_head(self, source_text: str, mention: str) -> bool:
-        """True when a universal determiner in the utterance modifies this NP.
-
-        Used when Perception already stripped «все/каждый» off the actant mention
-        but left the restriction class.  «он открыл все окна» must not treat the
-        subject as a universal restriction just because «все» occurs later.
-        """
-
-        head = str(mention or "").strip().casefold().replace("ё", "е")
-        if not head:
-            return False
-        text = str(source_text or "").casefold().replace("ё", "е")
-        attached = re.compile(
-            r"(?<![A-Za-zА-Яа-яЁё])(?:не\s+)?(?:"
-            r"все|весь|вся|всей|всех|всем|всеми|"
-            r"каждый|каждая|каждое|каждые|каждого|каждому|каждым|"
-            r"любой|любая|любое|любые|любого|любому|all|every|each"
-            r")\s+" + re.escape(head) + r"\b",
-            re.IGNORECASE,
-        )
-        return attached.search(text) is not None
-
-    def _parse_quantifier_mention(
-        self,
-        actant: ActantCandidate,
-        *,
-        source_kind: str | None,
-        source_text: str,
-    ) -> tuple[str, str, str] | None:
-        """Return (kind, head, leftover_mention) or None.
-
-        kind is nobody | forall | not_forall.
-        """
-
-        raw = (actant.normalized_hint or actant.mention or "").strip()
-        if not raw or actant.composition is not None or actant.proposition is not None:
-            return None
-        words = [item.casefold().replace("ё", "е") for item in self._WORD_RE.findall(raw)]
-        if not words:
-            return None
-        if words[0] in self._NEGATIVE_EXISTENTIALS and len(words) == 1:
-            return "nobody", "", raw
-        if actant.role is not ActantRole.SUBJECT:
-            return None
-        not_all_prefix = len(words) >= 2 and words[0] == "не" and words[1] in self._UNIVERSAL_DETERMINERS
-        if not_all_prefix:
-            head_words = words[2:]
-            if not head_words:
-                raise CandidateValidationError("«не все» requires a restriction class")
-            return "not_forall", " ".join(head_words), " ".join(head_words)
-        if words[0] in self._UNIVERSAL_DETERMINERS:
-            head_words = words[1:]
-            if not head_words:
-                raise CandidateValidationError("Universal quantifier requires a restriction class")
-            kind = "not_forall" if source_kind == "not_all" else "forall"
-            return kind, " ".join(head_words), " ".join(head_words)
-        if (
-            source_kind in {"all", "not_all"}
-            and actant.role is ActantRole.SUBJECT
-            and self._third_person_signature(actant) is None
-            and self._determiner_attaches_to_head(source_text, raw)
-        ):
-            kind = "not_forall" if source_kind == "not_all" else "forall"
-            return kind, raw, raw
-        return None
-
     def _rewrite_quantified_actants(
         self, result: PerceptionResult
-    ) -> tuple[PerceptionResult, dict[str, tuple[str, str, bool]]]:
-        """Split universal/negative-existential determiners off actant mentions.
+    ) -> tuple[PerceptionResult, dict[str, QuantifierCandidate]]:
+        """Normalize explicit Perception binders and index their local handles.
 
-        Returns parser-local handles → (kind, restriction_lemma, negate_quantifier).
+        Quantifier recognition belongs to :class:`QuantifierFormalizer` before
+        Integration.  This boundary deliberately has no words, regular expressions
+        or semantic fallbacks: it consumes only typed ``QuantifierCandidate``
+        metadata and fails closed when alternatives disagree.
         """
 
-        source_kind, body_negated_from_source = self._source_quantifier_scope(result.source_text)
-        marks: dict[str, tuple[str, str, bool]] = {}
-        next_handle = 0
+        try:
+            rewritten = self.quantifier_formalizer.formalize(result)
+        except QuantifierFormalizationError as exc:
+            raise CandidateValidationError(str(exc)) from exc
 
-        def handle_for(actant: ActantCandidate, prefix: str) -> str:
-            nonlocal next_handle
-            if actant.entity_ref:
-                return actant.entity_ref
-            next_handle += 1
-            return f"{prefix}{next_handle}"
-
-        assertions: list[AssertionCandidate] = []
-        for assertion in result.assertions:
-            parsed: list[tuple[ActantCandidate, tuple[str, str, str]]] = []
-            for actant in assertion.actants:
-                parsed_q = self._parse_quantifier_mention(
-                    actant, source_kind=source_kind, source_text=result.source_text
-                )
-                if parsed_q is None:
-                    continue
-                parsed.append((actant, parsed_q))
-            if not parsed:
-                assertions.append(assertion)
-                continue
-            kinds = {item[1][0] for item in parsed}
-            if "nobody" in kinds and kinds - {"nobody"}:
-                raise CandidateValidationError("Cannot mix «никто» with a universal in one assertion")
-            if "forall" in kinds and "not_forall" in kinds:
-                raise CandidateValidationError("Mixed «все» / «не все» in one assertion is not guessed")
-            if len(parsed) > 1 and any(item[1][0] == "not_forall" for item in parsed):
-                raise CandidateValidationError("«не все» is supported only for a single quantified role")
-
-            new_negated = assertion.negated
-            if any(item[1][0] == "nobody" for item in parsed):
-                new_negated = False
-            elif any(item[1][0] == "not_forall" for item in parsed):
-                new_negated = False
-            elif source_kind == "all":
-                new_negated = body_negated_from_source
-
-            actants: list[ActantCandidate] = []
-            parsed_map = {id(actant): parsed_q for actant, parsed_q in parsed}
-            for actant in assertion.actants:
-                parsed_q = parsed_map.get(id(actant))
-                if parsed_q is None:
-                    actants.append(actant)
-                    continue
-                kind, head, leftover = parsed_q
-                prefix = "NX:" if kind == "nobody" else "UQ:"
-                entity_ref = handle_for(actant, prefix)
-                restriction = "" if kind == "nobody" else self._restriction_lemma(head)
-                marks[entity_ref] = (kind, restriction, kind == "not_forall")
-                mention = leftover if leftover else (actant.mention or actant.normalized_hint or kind)
-                actants.append(
-                    replace(
-                        actant,
-                        entity_ref=entity_ref,
-                        mention=mention,
-                        normalized_hint=mention.casefold(),
-                    )
-                )
-            rewritten = replace(assertion, actants=tuple(actants), negated=new_negated)
-            alternatives = tuple(
-                replace(item, actants=tuple(actants), negated=new_negated)
-                if item.local_id == assertion.local_id
-                else item
-                for item in assertion.alternatives
-            )
-            assertions.append(replace(rewritten, alternatives=alternatives))
-        return replace(result, assertions=tuple(assertions)), marks
+        marks: dict[str, QuantifierCandidate] = {}
+        for assertion in rewritten.assertions:
+            for variant in (assertion, *assertion.alternatives):
+                for actant in variant.actants:
+                    quantifier = actant.quantifier
+                    if quantifier is None:
+                        continue
+                    if actant.entity_ref is None:
+                        raise CandidateValidationError(
+                            f"Quantified actant in {assertion.local_id} has no local handle"
+                        )
+                    previous = marks.get(actant.entity_ref)
+                    if previous is not None and (
+                        previous.kind is not quantifier.kind
+                        or previous.restriction_lemma != quantifier.restriction_lemma
+                    ):
+                        raise CandidateValidationError(
+                            f"Quantifier handle {actant.entity_ref!r} has inconsistent metadata"
+                        )
+                    marks.setdefault(actant.entity_ref, quantifier)
+        return rewritten, marks
 
     def _negative_existential_bindings(
         self,
-        marks: Mapping[str, tuple[str, str, bool]],
+        marks: Mapping[str, QuantifierCandidate],
         *,
         start_at: int,
     ) -> tuple[ExistentialBinding, ...]:
-        found = [handle for handle, mark in marks.items() if mark[0] == "nobody"]
+        found = [
+            (handle, mark)
+            for handle, mark in marks.items()
+            if mark.kind is QuantifierKind.NOT_EXISTS
+        ]
         return tuple(
-            ExistentialBinding(entity_ref=handle, variable_id=start_at + index, negative=True)
-            for index, handle in enumerate(found)
+            ExistentialBinding(
+                entity_ref=handle,
+                variable_id=start_at + index,
+                negative=True,
+                restriction_lemma=mark.restriction_lemma,
+            )
+            for index, (handle, mark) in enumerate(found)
         )
 
     def _universal_bindings(
         self,
-        marks: Mapping[str, tuple[str, str, bool]],
+        marks: Mapping[str, QuantifierCandidate],
         *,
         start_at: int,
     ) -> tuple[UniversalBinding, ...]:
         found = [
-            (handle, mark) for handle, mark in marks.items() if mark[0] in {"forall", "not_forall"}
+            (handle, mark)
+            for handle, mark in marks.items()
+            if mark.kind in {QuantifierKind.FORALL, QuantifierKind.NOT_FORALL}
         ]
         return tuple(
             UniversalBinding(
                 entity_ref=handle,
                 variable_id=start_at + index,
-                restriction_lemma=lemma,
-                negate_quantifier=negate,
+                restriction_lemma=mark.restriction_lemma or "",
+                negate_quantifier=mark.kind is QuantifierKind.NOT_FORALL,
             )
-            for index, (handle, (_, lemma, negate)) in enumerate(found)
+            for index, (handle, mark) in enumerate(found)
         )
 
     def _existential_bindings(
-        self, result: PerceptionResult, *, start_at: int = 0
+        self,
+        marks: Mapping[str, QuantifierCandidate],
+        *,
+        start_at: int = 0,
     ) -> tuple[ExistentialBinding, ...]:
-        """Return stable batch-local existential variables in first-mention order."""
+        """Return typed positive existential variables in source traversal order."""
 
-        found: list[str] = []
-        for assertion in result.assertions:
-            variants = assertion.alternatives or (assertion,)
-            for variant in variants:
-                for actant in variant.actants:
-                    if not self._is_existential_anchor(actant):
-                        continue
-                    assert actant.entity_ref is not None
-                    if actant.entity_ref not in found:
-                        found.append(actant.entity_ref)
+        found = [
+            (handle, mark)
+            for handle, mark in marks.items()
+            if mark.kind is QuantifierKind.EXISTS
+        ]
         return tuple(
-            ExistentialBinding(entity_ref=entity_ref, variable_id=start_at + index)
-            for index, entity_ref in enumerate(found)
+            ExistentialBinding(
+                entity_ref=handle,
+                variable_id=start_at + index,
+                restriction_lemma=mark.restriction_lemma,
+            )
+            for index, (handle, mark) in enumerate(found)
         )
 
 
@@ -950,6 +790,7 @@ class SemanticConsolidator:
                     variable_id=anchor.variable_id,
                     anchor_ref=anchor.existential_ref,
                     anchor_member_refs=anchor.member_refs,
+                    restriction_lemma=anchor.restriction_lemma,
                 ),
             )
             return replace(actant, entity_ref=handle)
@@ -1234,7 +1075,7 @@ class SemanticConsolidator:
             (item.variable_id for item in cross_turn_existentials), default=-1
         ) + 1
         fresh_existentials = self._existential_bindings(
-            scoped, start_at=next_variable_id
+            quantifier_marks, start_at=next_variable_id
         )
         next_variable_id += len(fresh_existentials)
         negative_existentials = self._negative_existential_bindings(

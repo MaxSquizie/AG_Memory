@@ -488,6 +488,13 @@ class MainWindow(QMainWindow):
             + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_typo" / "oracle.json")
         )
         self.m1_typo_button.clicked.connect(self._run_m1_typo_acceptance)
+        self.m1_quantifier_button = QPushButton("M1: quantifier acceptance")
+        self.m1_quantifier_button.setToolTip(
+            "Semantic Quantifier Formalization: paraphrases, scope, roles and inversion.\n"
+            "Cases: " + str(self.services.config.paths.data_dir / "acceptance_quantifiers" / "cases.txt")
+            + "\nOracle: " + str(self.services.config.paths.data_dir / "acceptance_quantifiers" / "oracle.json")
+        )
+        self.m1_quantifier_button.clicked.connect(self._run_m1_quantifier_acceptance)
         self.document_acceptance_button = QPushButton("Document acceptance")
         self.document_acceptance_button.setToolTip(
             "3 вручную написанных многоабзацных текста: причинные цепочки, distractors, "
@@ -516,6 +523,7 @@ class MainWindow(QMainWindow):
         m1_buttons.addWidget(self.m1_inversion_button)
         m1_buttons.addWidget(self.m1_ellipsis_button)
         m1_buttons.addWidget(self.m1_typo_button)
+        m1_buttons.addWidget(self.m1_quantifier_button)
         diagnostic_buttons = QHBoxLayout()
         diagnostic_buttons.addWidget(self.document_acceptance_button)
         diagnostic_buttons.addWidget(self.hidden_valency_button)
@@ -1144,6 +1152,15 @@ class MainWindow(QMainWindow):
             title="M1 typo/noise acceptance",
         )
 
+    def _run_m1_quantifier_acceptance(self) -> None:
+        self._run_acceptance_pair(
+            cases_filename="acceptance_quantifiers/cases.txt",
+            oracle_filename="acceptance_quantifiers/oracle.json",
+            runs_dirname="acceptance_runs_m1_quantifiers",
+            label="M1 quantifiers",
+            title="M1 quantifier acceptance",
+        )
+
     def _run_acceptance_pair(
         self,
         *,
@@ -1182,6 +1199,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(False)
         self.m1_ellipsis_button.setEnabled(False)
         self.m1_typo_button.setEnabled(False)
+        self.m1_quantifier_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -1260,6 +1278,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(True)
         self.m1_ellipsis_button.setEnabled(True)
         self.m1_typo_button.setEnabled(True)
+        self.m1_quantifier_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1295,6 +1314,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(False)
         self.m1_ellipsis_button.setEnabled(False)
         self.m1_typo_button.setEnabled(False)
+        self.m1_quantifier_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -1356,6 +1376,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(True)
         self.m1_ellipsis_button.setEnabled(True)
         self.m1_typo_button.setEnabled(True)
+        self.m1_quantifier_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1380,6 +1401,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(False)
         self.m1_ellipsis_button.setEnabled(False)
         self.m1_typo_button.setEnabled(False)
+        self.m1_quantifier_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.send_button.setEnabled(False)
@@ -1458,6 +1480,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(True)
         self.m1_ellipsis_button.setEnabled(True)
         self.m1_typo_button.setEnabled(True)
+        self.m1_quantifier_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.send_button.setEnabled(True)
@@ -1481,6 +1504,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(False)
         self.m1_ellipsis_button.setEnabled(False)
         self.m1_typo_button.setEnabled(False)
+        self.m1_quantifier_button.setEnabled(False)
         self.document_acceptance_button.setEnabled(False)
         self.hidden_valency_button.setEnabled(False)
         self.m2_acceptance_button.setEnabled(False)
@@ -1546,6 +1570,7 @@ class MainWindow(QMainWindow):
         self.m1_inversion_button.setEnabled(True)
         self.m1_ellipsis_button.setEnabled(True)
         self.m1_typo_button.setEnabled(True)
+        self.m1_quantifier_button.setEnabled(True)
         self.document_acceptance_button.setEnabled(True)
         self.hidden_valency_button.setEnabled(True)
         self.m2_acceptance_button.setEnabled(True)
@@ -1962,6 +1987,11 @@ class MainWindow(QMainWindow):
                 "Lexical Recovery: edits, roles, inversion, ellipsis, protected OOV and ambiguity.\n"
                 "Cases: " + str(new_config.paths.data_dir / "acceptance_typo" / "cases.txt")
                 + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_typo" / "oracle.json")
+            )
+            self.m1_quantifier_button.setToolTip(
+                "Semantic Quantifier Formalization: paraphrases, scope, roles and inversion.\n"
+                "Cases: " + str(new_config.paths.data_dir / "acceptance_quantifiers" / "cases.txt")
+                + "\nOracle: " + str(new_config.paths.data_dir / "acceptance_quantifiers" / "oracle.json")
             )
         except Exception as exc:
             QMessageBox.critical(self, "Config apply", str(exc))

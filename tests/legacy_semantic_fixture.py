@@ -86,6 +86,12 @@ def legacy_semantic_answer(role: str, prompt: str) -> str | None:
             return "GOAL_LINK"
         return None
 
+    if role == "semantic_quantifier":
+        # Legacy cases predate explicit binder metadata.  Quantifier-specific
+        # tests provide their own bounded decisions instead of relying on this
+        # general compatibility backend.
+        return "NONE"
+
     if role != "perception_role_cue":
         return None
 

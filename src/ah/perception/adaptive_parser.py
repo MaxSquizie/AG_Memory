@@ -20,6 +20,10 @@ from .morphology import (
     stable_transitivity,
 )
 from .event_normalizer import EventNormalizer
+from .quantifier_formalization import (
+    QuantifierFormalizationError,
+    QuantifierFormalizer,
+)
 from .lexical_recovery import (
     LexicalRecovery,
     LexicalRecoveryStatus,
@@ -54,6 +58,7 @@ from .contracts import (
     PredicateCandidate,
     PropositionExprCandidate,
     PropositionOperator,
+    QuantifierProbeDecision,
     TemplateCandidate,
     QueryCandidate,
     QueryMode,
@@ -1301,7 +1306,68 @@ class AdaptivePerceptionParser:
             relation_hints=relation_hints,
             lexical_recovery=lexical_decisions,
         )
+        try:
+            result = QuantifierFormalizer(self.morphology).formalize(
+                result,
+                resolver=self._resolve_quantifier_candidate,
+            )
+        except QuantifierFormalizationError as exc:
+            raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
         return AdaptiveParseResult(result, tuple(self._traces))
+
+    def _resolve_quantifier_candidate(
+        self,
+        source_context: str,
+        predicate: PredicateCandidate,
+        actant: ActantCandidate,
+        predicate_negated: bool,
+    ) -> QuantifierProbeDecision:
+        """Classify one already-built actant through a closed semantic protocol.
+
+        Python has fixed the predicate frame, semantic role and target mention.
+        The model does not construct a formula or choose canonical objects; it
+        decides only whether this source occurrence introduces a binder and where
+        source negation belongs.  This deliberately replaces surface-marker tables
+        so paraphrases and inflected expressions share one semantic boundary.
+        """
+
+        evidence = actant.evidence
+        phrase = (
+            evidence.text
+            if evidence is not None and evidence.text.strip()
+            else (actant.mention or actant.normalized_hint or "")
+        ).strip()
+        prompt = (
+            f"TEXT:\n{source_context}\n"
+            f"EVENT PREDICATE:\n{predicate.surface}\n"
+            f"EVENT NEGATED:\n{'YES' if predicate_negated else 'NO'}\n"
+            f"TARGET ROLE:\n{actant.role.value}\n"
+            f"TARGET PHRASE:\n{phrase}\n"
+            "TASK:\nClassify only the semantic quantifier binding TARGET in this "
+            "event. Predicate negation is body negation unless the source assigns "
+            "it to the quantifier.\n"
+            "NONE: TARGET is an ordinary definite/specific referent.\n"
+            "EXISTS: at least one TARGET satisfies the event.\n"
+            "NOT_EXISTS: no TARGET satisfies the event.\n"
+            "FORALL: every member of TARGET's stated class satisfies the event.\n"
+            "NOT_FORALL: the source denies that every member satisfies the event.\n"
+            "AMBIGUOUS: kind or negation scope is not determined.\n"
+            "CHOICES:\nNONE\nEXISTS\nNOT_EXISTS\nFORALL\nNOT_FORALL\nAMBIGUOUS"
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "quantifier",
+            prompt,
+            (
+                "NONE",
+                "EXISTS",
+                "NOT_EXISTS",
+                "FORALL",
+                "NOT_FORALL",
+                "AMBIGUOUS",
+            ),
+        )
+        assert decision is not None
+        return QuantifierProbeDecision(decision)
 
     def _complete_contrastive_repeated_frames(
         self,

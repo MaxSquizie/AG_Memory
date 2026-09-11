@@ -17,6 +17,9 @@ from .contracts import (
     PerceptionResult,
     PropositionExprCandidate,
     PropositionOperator,
+    QuantifierCandidate,
+    QuantifierKind,
+    QuantifierProbeDecision,
     PredicateCandidate,
     TemplateCandidate,
     TemplateSelection,
@@ -45,6 +48,11 @@ from .lexical_recovery import (
     TokenCandidate,
     weighted_damerau_levenshtein,
 )
+from .quantifier_formalization import (
+    QuantifierFormalizationError,
+    QuantifierFormalizer,
+    QuantifierSemanticResolver,
+)
 
 __all__ = [
     "ActDependencyCandidate",
@@ -64,6 +72,9 @@ __all__ = [
     "PerceptionResult",
     "PropositionExprCandidate",
     "PropositionOperator",
+    "QuantifierCandidate",
+    "QuantifierKind",
+    "QuantifierProbeDecision",
     "PredicateCandidate",
     "TemplateCandidate",
     "TemplateSelection",
@@ -91,6 +102,9 @@ __all__ = [
     "LexicalRecoveryStatus",
     "TokenCandidate",
     "weighted_damerau_levenshtein",
+    "QuantifierFormalizationError",
+    "QuantifierFormalizer",
+    "QuantifierSemanticResolver",
     "apply_speech_act_scoping",
     "GoalSemanticService",
 ]
