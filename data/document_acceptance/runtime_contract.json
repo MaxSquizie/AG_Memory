@@ -12,20 +12,45 @@
     },
     "greenhouse_control": {
       "max_chunk_chars": 256,
-      "require_multiple_chunks": true
+      "require_multiple_chunks": true,
+      "source_spans": {
+        "switch_off": {"contains": "обесточился"},
+        "anna_check": {"contains": "проверила"},
+        "yield_drop": {"contains": "снизился"}
+      }
     },
     "archive_leak": {
       "max_chunk_chars": 256,
-      "require_multiple_chunks": true
+      "require_multiple_chunks": true,
+      "source_spans": {
+        "drain_clog": {"contains": "засорился"},
+        "boxes_move": {"contains": "перенесли"},
+        "door_check": {"contains": "проверила дверь"}
+      }
     },
     "house_by_pier_monolith": {
-      "require_multiple_chunks": true
+      "require_multiple_chunks": true,
+      "source_spans": {
+        "wind_rise": {"contains": "усилился"},
+        "window_jam": {"contains": "заклинилось"},
+        "marina_open_window": {"contains": "открыла окно"}
+      }
     },
     "belyaev_amphibian_mutiny": {
-      "require_multiple_chunks": true
+      "require_multiple_chunks": true,
+      "source_spans": {
+        "sailor_grab": {"contains": "ухватил"},
+        "sailors_head_hatch": {"contains": "направились"},
+        "sailors_swim_shore": {"contains": "плыли"}
+      }
     },
     "old_observatory_monolith": {
-      "require_multiple_chunks": true
+      "require_multiple_chunks": true,
+      "source_spans": {
+        "alexei_arrive": {"contains": "добрался"},
+        "curtain_touch": {"contains": "коснулась"},
+        "move_journals": {"contains": "перенёс журналы"}
+      }
     }
   }
 }
