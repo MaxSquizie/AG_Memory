@@ -107,7 +107,7 @@ def _ingestion(text: str, title: str, source_ref: str) -> DocumentIngestionResul
         perception_units=(PerceptionResult(text[:cut]), PerceptionResult(text[cut:])),
         integration=SimpleNamespace(
             assertions=(),
-            experience_ref=Ref(RefKind.N, "H1"),
+            experience_ref=Ref("H1", RefKind.N),
         ),
     )
 
