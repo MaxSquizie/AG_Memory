@@ -16,6 +16,7 @@ from .contracts import (
     QuantifierProbeDecision,
 )
 from .morphology import Morphology, material_analyses
+from .semantic_composition import SemanticCompositionError, reconcile_quantifier_scope
 
 
 class QuantifierFormalizationError(ValueError):
@@ -163,8 +164,6 @@ class QuantifierFormalizer:
             ActantRole.TOOL,
             ActantRole.MATERIAL,
         }:
-            # Scalar measures, elapsed durations, states and proposition-valued
-            # circumstances are not ENTITY binders in the current contract.
             return False
         if len(tokens) == 1 and hasattr(self.morphology, "is_known"):
             try:
@@ -186,15 +185,10 @@ class QuantifierFormalizer:
 
         has_pronominal = any(item.pos == "NPRO" for item in analyses)
         has_determiner = any(
-            bool(
-                {"Apro", "Anum", "Ques", "Dmns"}
-                & set(item.grammemes)
-            )
+            bool({"Apro", "Anum", "Ques", "Dmns"} & set(item.grammemes))
             for item in analyses
         )
         if has_pronominal or has_determiner:
-            # Personal third-person pronouns are handled by discourse identity,
-            # not quantifier binding.
             if len(tokens) == 1 and all(
                 item.pos == "NPRO" and "3per" in item.grammemes
                 for item in analyses
@@ -274,18 +268,13 @@ class QuantifierFormalizer:
                     (actant.normalized_hint or mention).strip(),
                 )
             elif resolver is not None and self._eligible(actant):
-                found = self._semantic_recognition(
-                    result, assertion, actant, resolver
-                )
+                found = self._semantic_recognition(result, assertion, actant, resolver)
             else:
                 found = None
             if found is None:
                 actants.append(actant)
                 continue
-            handle = (
-                actant.entity_ref
-                or f"Q:{assertion.local_id}:{actant.role.value}:{index}"
-            )
+            handle = actant.entity_ref or f"Q:{assertion.local_id}:{actant.role.value}:{index}"
             actants.append(
                 replace(
                     actant,
@@ -321,8 +310,6 @@ class QuantifierFormalizer:
 
         negated = assertion.negated
         if kinds & {QuantifierKind.NOT_FORALL, QuantifierKind.NOT_EXISTS}:
-            # The semantic label assigns source negation to the binder.  Ordinary
-            # FORALL/EXISTS retain any predicate-level negation on the body.
             if negated and not all(
                 item.consumes_predicate_negation
                 for item in recognized
@@ -377,4 +364,9 @@ class QuantifierFormalizer:
                         f"Quantifier alternatives disagree on polarity in {assertion.local_id}"
                     )
             assertions.append(replace(base, alternatives=alternatives))
-        return replace(result, assertions=tuple(assertions))
+        try:
+            return reconcile_quantifier_scope(result, tuple(assertions))
+        except SemanticCompositionError as exc:
+            raise QuantifierFormalizationError(
+                f"semantic composition invalid after quantifier formalization: {exc}"
+            ) from exc
