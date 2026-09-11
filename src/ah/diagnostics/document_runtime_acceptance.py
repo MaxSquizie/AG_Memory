@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import datetime
+from enum import Enum
 import json
 from pathlib import Path
 import re
@@ -35,7 +36,7 @@ _BATCH_LOCAL_RE = re.compile(r"^B(?P<unit>\d+):(?P<local>.+)$")
 
 
 def _jsonable(value: Any) -> Any:
-    if hasattr(value, "value") and value.__class__.__module__ == "enum":
+    if isinstance(value, Enum):
         return value.value
     if hasattr(value, "__dataclass_fields__"):
         return {key: _jsonable(item) for key, item in asdict(value).items()}
@@ -97,17 +98,28 @@ def _acceptance_chunk_limit(spec: DocumentSpec, contract: Mapping[str, Any]) -> 
     return max(256, min(1800, longest_authored_unit + 32))
 
 
-def _experience_count(snapshot: Mapping[str, Mapping[str, Any]], source_ref: str) -> int:
-    count = 0
-    for item in snapshot.values():
+def _source_experiences(
+    snapshot: Mapping[str, Mapping[str, Any]], source_ref: str
+) -> tuple[tuple[str, Mapping[str, Any]], ...]:
+    """Return H occurrences carrying one technical source handle.
+
+    The acceptance contract distinguishes a real DOCUMENT experience from an
+    arbitrary H node that merely copied the same source_ref metadata. This prevents
+    a MESSAGE-style write from masquerading as one atomic document commit.
+    """
+    matches: list[tuple[str, Mapping[str, Any]]] = []
+    for uid, item in snapshot.items():
         if not isinstance(item, Mapping):
             continue
         if item.get("kind") != "N" or str(item.get("domain") or "").upper() != "H":
             continue
         meta = item.get("meta") or {}
-        if isinstance(meta, Mapping) and str(meta.get("source_ref") or "") == source_ref:
-            count += 1
-    return count
+        if not isinstance(meta, Mapping):
+            continue
+        if str(meta.get("source_ref") or "") != source_ref:
+            continue
+        matches.append((str(uid), meta))
+    return tuple(matches)
 
 
 def _evidence_span(assertion: Any) -> tuple[int, int] | None:
@@ -176,13 +188,36 @@ def _runtime_checks(
 ) -> tuple[dict[str, Any], ...]:
     checks: list[dict[str, Any]] = []
     source_ref = result.source_ref
-    experience_count = _experience_count(snapshot, source_ref)
+    occurrences = _source_experiences(snapshot, source_ref)
+    document_occurrences = tuple(
+        uid
+        for uid, meta in occurrences
+        if bool(meta.get("event_instance", False))
+        and str(meta.get("batch_kind") or "").upper() == "DOCUMENT"
+    )
+    integration_experience = getattr(result.integration, "experience_ref", None)
+    integration_experience_uid = (
+        None if integration_experience is None else str(getattr(integration_experience, "uid", ""))
+    )
+    atomic_ok = (
+        len(occurrences) == 1
+        and len(document_occurrences) == 1
+        and document_occurrences[0] == integration_experience_uid
+    )
     checks.append(
         {
             "name": "runtime.atomic_document_commit",
-            "ok": experience_count == 1,
-            "expected": 1,
-            "actual": experience_count,
+            "ok": atomic_ok,
+            "expected": {
+                "source_occurrences": 1,
+                "document_event_instances": 1,
+                "matches_integration_experience_ref": True,
+            },
+            "actual": {
+                "source_occurrences": len(occurrences),
+                "document_event_uids": list(document_occurrences),
+                "integration_experience_uid": integration_experience_uid,
+            },
         }
     )
     checks.append(
@@ -379,6 +414,16 @@ def run_document_acceptance(services, *, oracle_file: str | Path | None = None) 
 
         passed = sum(item.status == "PASS" for item in verdicts)
         failed = len(verdicts) - passed
+        atomic_names = {"runtime.atomic_document_commit", "runtime.atomic_rollback"}
+        atomic_contract_ok = all(
+            any(str(check.get("name") or "") in atomic_names for check in item.graph_checks)
+            and all(
+                bool(check.get("ok"))
+                for check in item.graph_checks
+                if str(check.get("name") or "") in atomic_names
+            )
+            for item in verdicts
+        )
         manifest = {
             "mode": "WHOLE_DOCUMENT_ATOMIC",
             "oracle_file": str(oracle_source.resolve()),
@@ -389,7 +434,7 @@ def run_document_acceptance(services, *, oracle_file: str | Path | None = None) 
             "runtime_successes": runtime_successes,
             "runtime_errors": runtime_errors,
             "scenario_isolation": True,
-            "one_document_one_commit": True,
+            "one_document_one_commit": atomic_contract_ok,
             "documents": records,
         }
         _write_json(output_dir / "manifest.json", manifest)
@@ -415,6 +460,7 @@ def run_document_acceptance(services, *, oracle_file: str | Path | None = None) 
         lines = [
             f"Whole-document acceptance: PASS {passed}/{len(verdicts)}",
             f"Runtime: OK {runtime_successes} | ERROR {runtime_errors}",
+            f"Atomic contract: {'OK' if atomic_contract_ok else 'FAIL'}",
             "Mode: one DocumentProcessor.ingest_text() / one atomic DOCUMENT commit per document",
             "",
         ]
