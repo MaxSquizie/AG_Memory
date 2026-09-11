@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
 from pathlib import Path
+import re
 from typing import TYPE_CHECKING
 
 from ah.integration import BatchKind, FormalizationBatch, TemplateCompletionService
@@ -79,6 +80,9 @@ class DocumentProcessor:
     raw source or raw chunks.
     """
 
+    _SENTENCE_BOUNDARY_RE = re.compile(r"[.!?…](?:[\"'»”’)\]]+)?(?=\s|$)")
+    _CLAUSE_BOUNDARY_RE = re.compile(r"[;:](?=\s|$)")
+
     def __init__(self, services: "RuntimeServices", *, max_chunk_chars: int = 6000) -> None:
         if max_chunk_chars < 256:
             raise ValueError("max_chunk_chars must be >= 256")
@@ -109,6 +113,35 @@ class DocumentProcessor:
             f"Unsupported document format: {suffix or '<none>'}; use TXT, Markdown or DOCX"
         )
 
+    @classmethod
+    def _latest_structural_boundary(cls, text: str, start: int, hard_end: int) -> int | None:
+        """Return the latest source-grounded boundary at or before ``hard_end``.
+
+        Operational chunks may end at paragraph, line, sentence or explicit clause
+        punctuation. Ordinary spaces are deliberately not boundaries: splitting at
+        a random whitespace can sever a predicate from its frame or actants.
+        """
+        candidates: list[tuple[int, int]] = []
+        window = text[start:hard_end]
+
+        paragraph = window.rfind("\n\n")
+        if paragraph >= 0:
+            candidates.append((4, start + paragraph + 2))
+        line = window.rfind("\n")
+        if line >= 0:
+            candidates.append((3, start + line + 1))
+        for match in cls._SENTENCE_BOUNDARY_RE.finditer(window):
+            candidates.append((2, start + match.end()))
+        for match in cls._CLAUSE_BOUNDARY_RE.finditer(window):
+            candidates.append((1, start + match.end()))
+
+        viable = tuple(item for item in candidates if start < item[1] <= hard_end)
+        if not viable:
+            return None
+        # Prefer the furthest safe point so chunks remain bounded and useful. The
+        # structural rank is only a deterministic tie-break for coincident points.
+        return max(viable, key=lambda item: (item[1], item[0]))[1]
+
     def chunk_text(self, text: str) -> tuple[DocumentChunk, ...]:
         if not text.strip():
             raise DocumentProcessingError("Document text is empty")
@@ -116,21 +149,24 @@ class DocumentProcessor:
         start = 0
         while start < len(text):
             hard_end = min(len(text), start + self.max_chunk_chars)
-            end = hard_end
-            if hard_end < len(text):
-                boundary = max(
-                    text.rfind("\n\n", start, hard_end),
-                    text.rfind("\n", start, hard_end),
-                    text.rfind(" ", start, hard_end),
-                )
-                if boundary > start + self.max_chunk_chars // 2:
-                    end = boundary
+            if hard_end == len(text):
+                end = hard_end
+            else:
+                end = self._latest_structural_boundary(text, start, hard_end)
+                if end is None:
+                    raise DocumentProcessingError(
+                        "Semantic unit exceeds max_chunk_chars without a source-grounded "
+                        f"paragraph/sentence/clause boundary at source offset {start}; "
+                        "document ingestion is fail-closed rather than splitting the unit"
+                    )
             if end <= start:
                 raise DocumentProcessingError("Chunking produced an empty chunk")
             chunks.append(DocumentChunk(len(chunks), text[start:end], start, end))
             start = end
         if "".join(chunk.text for chunk in chunks) != text:
             raise DocumentProcessingError("Document chunk coverage invariant failed")
+        if any(left.end != right.start for left, right in zip(chunks, chunks[1:])):
+            raise DocumentProcessingError("Document chunk offsets are not contiguous")
         return tuple(chunks)
 
     def _resolve_batch_discourse_refs(self, plan):
