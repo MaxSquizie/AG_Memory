@@ -54,11 +54,33 @@ def test_main_window_keeps_documents_and_metrics_out_of_monitor_preset_and_feeds
     assert "metrics_dock" not in monitor_block
 
 
-def test_document_pipeline_uses_public_completion_one_document_batch_and_complete_source_context():
-    source = (ROOT / "src" / "ah" / "documents" / "pipeline.py").read_text(encoding="utf-8")
-    assert "TemplateCompletionService" in source
-    assert "_complete_dynamic_templates" not in source
-    assert "integrate_external_batch" in source
-    assert "BatchKind.DOCUMENT" in source
-    assert "build_complete_source" in source
-    assert "agent.respond(context.agent_context)" in source
+def test_document_pipeline_uses_one_document_batch_and_bounded_source_continuation():
+    pipeline = (ROOT / "src" / "ah" / "documents" / "pipeline.py").read_text(encoding="utf-8")
+    runtime = (ROOT / "src" / "ah" / "documents" / "runtime.py").read_text(encoding="utf-8")
+    public_api = (ROOT / "src" / "ah" / "documents" / "__init__.py").read_text(encoding="utf-8")
+    module_cli = (ROOT / "src" / "ah" / "documents" / "__main__.py").read_text(encoding="utf-8")
+    panel = (ROOT / "src" / "ah" / "gui" / "document_panel.py").read_text(encoding="utf-8")
+
+    assert "TemplateCompletionService" in pipeline
+    assert "_complete_dynamic_templates" not in pipeline
+    assert "integrate_external_batch" in pipeline
+    assert "BatchKind.DOCUMENT" in pipeline
+    assert "build_source_slice" in pipeline
+    assert "SourceProjectionCursor" in pipeline
+    assert "raw source/chunk" in pipeline
+
+    assert "DEFAULT_DOCUMENT_SUMMARY_BUDGET_TOKENS = 4096" in runtime
+    assert "_reduce_partial_results" in runtime
+    assert "ProjectionBudgetExceeded" in runtime
+    assert "source_primary_total" in runtime
+    assert "stop_reason" in runtime
+    assert "failure" in runtime
+    assert "from .runtime import" in public_api
+    assert "DocumentProcessor" in public_api
+    assert "from .cli import main" in module_cli
+
+    assert "last_document_summary_runtime_state" in panel
+    assert "cursor" in panel
+    assert "overlap" in panel
+    assert "stop=" in panel
+    assert "failure=" in panel
