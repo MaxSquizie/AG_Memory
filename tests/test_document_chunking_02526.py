@@ -37,18 +37,24 @@ def test_chunking_prefers_real_sentence_boundary_and_preserves_exact_offsets():
     assert "".join(chunk.text for chunk in chunks) == text
 
 
-def test_chunking_can_use_explicit_clause_boundary_without_losing_source_bytes():
+def test_semicolon_is_not_treated_as_safe_relation_boundary():
     processor = _processor()
     first_clause = "А" * 190 + ";"
-    second_clause = " " + ("Б" * 120) + "."
+    second_clause = " поэтому " + ("Б" * 120) + "."
     text = first_clause + second_clause
 
-    chunks = processor.chunk_text(text)
+    with pytest.raises(DocumentProcessingError, match="source-grounded"):
+        processor.chunk_text(text)
 
-    assert len(chunks) == 2
-    assert chunks[0].end == len(first_clause)
-    assert chunks[1].start == chunks[0].end
-    assert "".join(chunk.text for chunk in chunks) == text
+
+def test_single_newline_is_not_treated_as_safe_semantic_boundary():
+    processor = _processor()
+    first_line = "А" * 190 + "\n"
+    second_line = "потому что " + ("Б" * 120) + "."
+    text = first_line + second_line
+
+    with pytest.raises(DocumentProcessingError, match="source-grounded"):
+        processor.chunk_text(text)
 
 
 def test_paragraph_chunks_cover_source_once_with_contiguous_global_offsets():
