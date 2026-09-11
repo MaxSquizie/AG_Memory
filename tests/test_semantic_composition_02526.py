@@ -116,6 +116,61 @@ def test_modal_scope_keeps_modal_operator_while_leaf_polarity_is_reconciled() ->
     assert expr.members == (_and(_ref("a1"), _ref("a2")),)
 
 
+def test_conditional_scope_copy_is_reconciled_with_formula_root() -> None:
+    antecedent = _assertion("a1", negated=True)
+    consequent = _assertion("a2")
+    before = PerceptionResult(
+        "if not every engineer approves then alarm sounds",
+        assertions=(antecedent, consequent),
+        conditionals=(
+            ConditionalCandidate(
+                ("a1",),
+                ("a2",),
+                antecedent_expr=_not(_ref("a1")),
+                consequent_expr=_ref("a2"),
+            ),
+        ),
+        proposition_roots=(
+            PropositionRootCandidate(
+                "F1",
+                PropositionExprCandidate(
+                    PropositionOperator.IMPLIES,
+                    members=(_not(_ref("a1")), _ref("a2")),
+                ),
+            ),
+        ),
+    )
+
+    after = reconcile_quantifier_scope(
+        before,
+        (replace(antecedent, negated=False), consequent),
+    )
+
+    assert after.conditionals[0].antecedent_expr == _ref("a1")
+    assert after.proposition_roots[0].expression.members[0] == _ref("a1")
+
+
+def test_nested_proposition_scope_is_reconciled() -> None:
+    child = _assertion("a2", negated=True)
+    parent = _assertion(
+        "a1",
+        actants=(
+            ActantCandidate(
+                role=ActantRole.OBJECT,
+                proposition=_not(_ref("a2")),
+            ),
+        ),
+    )
+    before = PerceptionResult("source", assertions=(parent, child))
+
+    after = reconcile_quantifier_scope(
+        before,
+        (parent, replace(child, negated=False)),
+    )
+
+    assert after.assertions[0].actants[0].proposition == _ref("a2")
+
+
 def test_missing_leaf_polarity_wrapper_fails_closed_after_consumption() -> None:
     before = PerceptionResult(
         "not every engineer approved and alarm sounded",
