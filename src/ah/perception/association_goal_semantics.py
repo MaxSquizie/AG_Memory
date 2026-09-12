@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from .association_semantics import AssociationActRelationCandidate
+from .association_semantics import (
+    AssociationActRelationCandidate,
+    AssociationProbeError,
+)
 from .contracts import CommandCandidate, PerceptionResult, QueryCandidate
 from .goal_semantics import GoalSemanticService as _BaseGoalSemanticService
+from .llm_parser import PerceptionParseError
 
 
 class AssociationGoalSemanticService(_BaseGoalSemanticService):
@@ -14,6 +18,11 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
     decides whether the current act requests associative convergence and, if so,
     which parser-local endpoints participate. Canonical refs remain unavailable at
     this layer.
+
+    Association classification is an optional semantic overlay on an already parsed
+    query/command. If the bounded probe explicitly returns UNKNOWN, fail closed only
+    for the association operation: do not attach an ASSOCIATION marker, but preserve
+    the completed ordinary speech act. Transport/protocol failures still propagate.
     """
 
     @staticmethod
@@ -25,6 +34,19 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
         if isinstance(root, CommandCandidate) and root.negated:
             return False
         return bool(root.actants)
+
+    @staticmethod
+    def _explicit_unknown(exc: BaseException) -> bool:
+        probe_error: AssociationProbeError | None = None
+        if isinstance(exc, AssociationProbeError):
+            probe_error = exc
+        elif isinstance(exc, PerceptionParseError) and isinstance(
+            exc.__cause__, AssociationProbeError
+        ):
+            probe_error = exc.__cause__
+        if probe_error is None or not probe_error.attempts:
+            return False
+        return probe_error.attempts[-1].normalized_answer == "UNKNOWN"
 
     def complete(self, result: PerceptionResult) -> PerceptionResult:
         completed = super().complete(result)
@@ -44,7 +66,17 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
         for root in (*completed.queries, *completed.commands):
             if not self._eligible(root) or root.local_id in covered:
                 continue
-            decision = classify(completed.source_text, root)
+            try:
+                decision = classify(completed.source_text, root)
+            except (AssociationProbeError, PerceptionParseError) as exc:
+                # UNKNOWN is uncertainty about the optional association overlay, not
+                # evidence that an already well-formed ordinary query is invalid.
+                # Keeping no ASSOCIATION marker is the conservative/fail-closed
+                # outcome. Backend/protocol failures are not semantic uncertainty
+                # and must remain visible to the caller.
+                if self._explicit_unknown(exc):
+                    continue
+                raise
             if decision is None:
                 continue
 
