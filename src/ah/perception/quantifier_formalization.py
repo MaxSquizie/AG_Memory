@@ -50,6 +50,7 @@ class QuantifierFormalizer:
 
     _WORD_RE = re.compile(r"[A-Za-zА-Яа-яЁё-]+")
     _QUOTE_CHARS = frozenset({'"', "'", "«", "»", "„", "“", "”", "‘", "’"})
+    _NEGATION_PARTICLES = frozenset({"не", "ни"})
 
     def __init__(self, morphology: Morphology) -> None:
         self.morphology = morphology
@@ -90,6 +91,64 @@ class QuantifierFormalizer:
         left = source_text[evidence.start - 1] if evidence.start > 0 else ""
         right = source_text[evidence.end] if evidence.end < len(source_text) else ""
         return left in cls._QUOTE_CHARS and right in cls._QUOTE_CHARS
+
+    @classmethod
+    def _predicate_has_local_negation(
+        cls, source_text: str, predicate: PredicateCandidate
+    ) -> bool:
+        """Return whether an overt grammatical negation directly precedes the predicate.
+
+        This is a source-span check, not semantic quantifier recognition.  It is
+        intentionally narrow: only an independently visible ``не``/``ни`` token
+        immediately before the predicate (modulo punctuation/whitespace) counts as
+        body-level negation evidence.  Wider scope remains the bounded semantic
+        resolver's responsibility.
+        """
+
+        evidence = predicate.evidence
+        if (
+            evidence is None
+            or evidence.start is None
+            or evidence.start <= 0
+            or evidence.start > len(source_text)
+        ):
+            return False
+        prefix = source_text[: evidence.start]
+        matches = tuple(cls._WORD_RE.finditer(prefix))
+        if not matches:
+            return False
+        previous = matches[-1]
+        between = prefix[previous.end() :]
+        if any(char.isalnum() for char in between):
+            return False
+        return cls._fold(previous.group(0)) in cls._NEGATION_PARTICLES
+
+    @classmethod
+    def _independent_negative_scope_conflict(
+        cls,
+        source_text: str,
+        predicate: PredicateCandidate,
+        phrase: str,
+        *,
+        predicate_negated: bool,
+    ) -> bool:
+        """Detect two source-visible negative sites that cannot be collapsed safely.
+
+        ``NOT_FORALL`` expressions often contain their own standalone ``не`` while
+        Russian negative existentials use concord (e.g. a ``ни``-phrase plus verbal
+        ``не``).  If a binder phrase itself contains standalone ``не`` *and* the
+        predicate has a separate local negation, there are two independently visible
+        scope sites.  A single NOT_FORALL/NOT_EXISTS label is insufficient to decide
+        whether the second negation belongs inside or outside the binder, so the
+        formalizer must fail closed rather than consume it.
+        """
+
+        if not predicate_negated:
+            return False
+        phrase_tokens = tuple(cls._fold(token) for token in cls._tokens(phrase))
+        if "не" not in phrase_tokens:
+            return False
+        return cls._predicate_has_local_negation(source_text, predicate)
 
     def _nominal_restriction(
         self, actant: ActantCandidate, phrase: str
@@ -229,6 +288,20 @@ class QuantifierFormalizer:
             )
 
         kind = QuantifierKind(decision.value)
+        if (
+            kind in {QuantifierKind.NOT_EXISTS, QuantifierKind.NOT_FORALL}
+            and self._independent_negative_scope_conflict(
+                result.source_text,
+                assertion.predicate,
+                phrase,
+                predicate_negated=assertion.negated,
+            )
+        ):
+            raise QuantifierFormalizationError(
+                "Negative binder and predicate body contain independent source "
+                f"negation sites for {phrase!r}; relative scope is unresolved"
+            )
+
         restriction, head_surface = self._nominal_restriction(actant, phrase)
         if kind in {QuantifierKind.FORALL, QuantifierKind.NOT_FORALL} and not restriction:
             raise QuantifierFormalizationError(
