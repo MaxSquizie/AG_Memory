@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ah.model import ActantRole
 from ah.perception import (
+    ActantCandidate,
     AssociationActRelationCandidate,
     CommandCandidate,
     PropositionExprCandidate,
     QueryCandidate,
+    TemplateCandidate,
 )
 
 from .candidate_validator_base import CandidateValidator as _BaseCandidateValidator
@@ -41,50 +44,103 @@ class CandidateValidator(_BaseCandidateValidator):
 
     @staticmethod
     def _base_validation_view(result, ordinary_relations):
-        """Expose candidate-ref content as proposition content to logical validation.
+        """Expose logical operator provenance through one validation-only view.
 
-        Adaptive perception may initially represent a matrix/content dependency as
-        ``candidate_ref`` and only later lift that same local edge into a proposition
-        formula.  For a frame consumed as ``operator_source_refs`` those two runtime
-        encodings are semantically equivalent: the matrix structurally governs an
-        already parsed proposition.  The base validator historically recognized only
-        ``actant.proposition`` and therefore rejected valid impersonal modal shells
-        such as REQUIRED/PERMITTED when their content was still carried by
-        ``candidate_ref``.
+        Adaptive perception can encode an operator source in two equivalent source
+        shapes before canonical Integration:
 
-        This is a validation-only view.  The original PerceptionResult is returned to
-        Integration unchanged, so no canonical mutation, role binding or UID choice is
-        delegated to this adapter.
+        * a matrix/content edge carried by ``candidate_ref``;
+        * a detached preamble whose relation to the already-built proposition is
+          represented only by ``PropositionRootCandidate.operator_source_refs``.
+
+        The base validator historically recognized only ``actant.proposition`` as
+        evidence that an operator frame governs proposition content.  That rejected
+        valid impersonal modal shells and made a detached logical preamble survive as
+        an ordinary world fact merely because its internal parser frame did not also
+        duplicate the proposition edge.
+
+        Build a *copy used only for validation* in which every authorized operator
+        source exposes the exact root expression as proposition content.  Integration
+        still receives the original PerceptionResult, so this adapter cannot change
+        a role binding, choose a UID, or create canonical semantics.  The explicit
+        ``operator_source_refs`` topology remains the authorization boundary.
         """
 
-        operator_sources = {
-            ref
-            for root in result.proposition_roots
-            for ref in root.operator_source_refs
-        }
+        source_expr: dict[str, PropositionExprCandidate] = {}
+        for root in result.proposition_roots:
+            for ref in root.operator_source_refs:
+                source_expr.setdefault(ref, root.expression)
+        operator_sources = set(source_expr)
         if not operator_sources:
             return replace(result, act_relations=ordinary_relations)
 
         assertions = []
         for assertion in result.assertions:
-            if assertion.local_id not in operator_sources:
+            expression = source_expr.get(assertion.local_id)
+            if expression is None:
                 assertions.append(assertion)
                 continue
-            actants = tuple(
-                replace(
-                    actant,
-                    candidate_ref=None,
-                    proposition=PropositionExprCandidate.ref_expr(actant.candidate_ref),
+
+            actants = list(assertion.actants)
+            changed = False
+
+            # First preserve the strongest pre-existing structural edge. A local
+            # candidate_ref already names one proposition leaf and only needs to be
+            # expressed through the typed proposition channel for base validation.
+            for index, actant in enumerate(actants):
+                if (
+                    actant.candidate_ref is not None
+                    and actant.proposition is None
+                    and actant.composition is None
+                ):
+                    actants[index] = replace(
+                        actant,
+                        candidate_ref=None,
+                        proposition=PropositionExprCandidate.ref_expr(
+                            actant.candidate_ref
+                        ),
+                    )
+                    changed = True
+
+            # Detached preambles have no matrix/content actant by construction: the
+            # bounded logical formalizer recorded the exact governed formula on the
+            # root itself.  Project that existing expression into one source role in
+            # the validation copy so the old validator can check its leaf refs.
+            if not any(item.proposition is not None for item in actants):
+                if actants:
+                    first = actants[0]
+                    actants[0] = replace(
+                        first,
+                        candidate_ref=None,
+                        entity_ref=None,
+                        composition=None,
+                        proposition=expression,
+                        quantifier=None,
+                    )
+                    predicate = assertion.predicate
+                else:
+                    role = ActantRole.OBJECT
+                    actants.append(ActantCandidate(role, proposition=expression))
+                    predicate = assertion.predicate
+                    proposed = predicate.template_candidate
+                    if proposed is not None and role not in proposed.roles:
+                        predicate = replace(
+                            predicate,
+                            template_candidate=TemplateCandidate(
+                                tuple((*proposed.roles, role))
+                            ),
+                        )
+                assertion = replace(
+                    assertion,
+                    predicate=predicate,
+                    actants=tuple(actants),
                 )
-                if actant.candidate_ref is not None
-                and actant.proposition is None
-                and actant.composition is None
-                else actant
-                for actant in assertion.actants
-            )
-            assertions.append(
-                assertion if actants == assertion.actants else replace(assertion, actants=actants)
-            )
+                changed = False
+            elif changed:
+                assertion = replace(assertion, actants=tuple(actants))
+
+            assertions.append(assertion)
+
         return replace(
             result,
             assertions=tuple(assertions),
