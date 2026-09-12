@@ -3,15 +3,20 @@ from __future__ import annotations
 """Public semantic-oracle facade with source-formula-aware canonical grading.
 
 The large baseline grader lives in :mod:`semantic_oracle_core`.  This facade keeps
-its public API stable while fixing one architectural seam: Integration deliberately
-maps a source-level formula leaf to the positive scoped ``N`` and materializes local
-polarity in the proposition formula.  A suite that does not explicitly grade
-``proposition_roots`` must therefore inspect the *actual* source formula before it
-can decide whether the leaf ref itself should be ``G:NOT``.
+its public API stable while fixing two architectural seams around source formulae:
 
-This is diagnostics only.  It does not repair perception, Integration or an oracle;
-it prevents the acceptance grader from demanding a second NOT wrapper that would
-change the represented formula.
+* Integration deliberately maps a source-level formula leaf to the positive scoped
+  ``N`` and materializes local polarity in the proposition formula.  The grader must
+  therefore inspect the actual source formula before deciding whether the leaf ref
+  itself should be ``G:NOT``.
+* A matrix frame consumed through ``PropositionRootCandidate.operator_source_refs``
+  is linguistic operator scaffolding, not an additional world assertion.  It must
+  remain available to CandidateValidator/Integration as provenance, while semantic
+  acceptance compares only the proposition leaves and verifies separately that the
+  operator frame was not integrated as a world fact.
+
+This module changes diagnostics only.  It never repairs perception, Integration or
+an authored oracle.
 """
 
 from copy import deepcopy
@@ -33,6 +38,61 @@ load_semantic_oracle = _core.load_semantic_oracle
 validate_oracle_alignment = _core.validate_oracle_alignment
 summarize_semantic_verdicts = _core.summarize_semantic_verdicts
 apply_ah_diff = _core.apply_ah_diff
+
+
+def _operator_source_locals(
+    perception: Mapping[str, Any] | None,
+) -> frozenset[str]:
+    if not isinstance(perception, Mapping):
+        return frozenset()
+    return frozenset(
+        str(ref)
+        for root in perception.get("proposition_roots", []) or []
+        if isinstance(root, Mapping)
+        for ref in root.get("operator_source_refs", []) or []
+        if str(ref).strip()
+    )
+
+
+def _semantic_grading_record(
+    record: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], frozenset[str]]:
+    """Return a diagnostics-only view with linguistic operator frames projected out.
+
+    ``operator_source_refs`` deliberately point at ordinary parser-local assertions
+    because the validator and Integration need their source evidence.  They are not
+    proposition leaves and Integration is required to avoid canonicalizing them.
+    The semantic oracle therefore removes only those source frames from its
+    *perception assertion comparison* and clears the provenance-only source-ref list
+    on the copied roots.  The original integration commit and AH diff are untouched.
+    """
+
+    perception = _core._decoded_perception(record)
+    sources = _operator_source_locals(perception)
+    if not sources or not isinstance(perception, Mapping):
+        return record, sources
+
+    projected_perception = deepcopy(dict(perception))
+    projected_perception["assertions"] = [
+        deepcopy(item)
+        for item in perception.get("assertions", []) or []
+        if isinstance(item, Mapping)
+        and str(item.get("local_id", "")) not in sources
+    ]
+    roots: list[dict[str, Any]] = []
+    for root in perception.get("proposition_roots", []) or []:
+        if not isinstance(root, Mapping):
+            continue
+        copied = deepcopy(dict(root))
+        copied["operator_source_refs"] = []
+        roots.append(copied)
+    projected_perception["proposition_roots"] = roots
+
+    projected_record = deepcopy(dict(record))
+    # _decoded_perception prefers this direct channel, so we need not rewrite
+    # historical parser_diagnostics payloads in saved acceptance bundles.
+    projected_record["perception_result"] = projected_perception
+    return projected_record, sources
 
 
 def _actual_formula_scope(
@@ -215,23 +275,97 @@ def _repair_formula_leaf_canonical_checks(
     )
 
 
+def _with_operator_source_checks(
+    verdict: SemanticCaseVerdict,
+    record: Mapping[str, Any],
+    oracle_case: SemanticOracleCase,
+    sources: frozenset[str],
+) -> SemanticCaseVerdict:
+    if not sources:
+        return verdict
+
+    perception = _core._decoded_perception(record)
+    actual_assertion_ids = {
+        str(item.get("local_id", ""))
+        for item in (perception.get("assertions", []) or [])
+        if isinstance(perception, Mapping) and isinstance(item, Mapping)
+    }
+    provenance_ok = sources.issubset(actual_assertion_ids)
+
+    commit = record.get("integration_commit")
+    integrated_locals = {
+        str(item.get("local_id", ""))
+        for item in (commit.get("assertions", []) or [])
+        if isinstance(commit, Mapping) and isinstance(item, Mapping)
+    }
+    integrated_sources = sorted(sources & integrated_locals)
+    not_integrated_ok = (
+        str(record.get("status", "ERROR")) != "OK"
+        or not integrated_sources
+    )
+
+    checks = [dict(item) for item in verdict.checks]
+    checks.append(
+        {
+            "name": "perception.operator_sources.provenance_present",
+            "ok": provenance_ok,
+            "expected": sorted(sources),
+            "actual": sorted(actual_assertion_ids & sources),
+            "detail": "Linguistic operator frames remain available as source provenance even though they are excluded from world-assertion grading.",
+        }
+    )
+    checks.append(
+        {
+            "name": "integration.operator_sources.not_integrated",
+            "ok": not_integrated_ok,
+            "expected": [],
+            "actual": integrated_sources,
+            "detail": "A frame consumed as a logical/modal operator source must never become an independent canonical world assertion.",
+        }
+    )
+
+    has_failures = any(not item.get("ok", False) for item in checks)
+    if has_failures:
+        status = "FAIL"
+    elif oracle_case.grade == "ARCHITECTURE_GAP":
+        status = "GAP"
+    else:
+        status = "PASS"
+    return SemanticCaseVerdict(
+        verdict.index,
+        verdict.text,
+        status,
+        tuple(checks),
+        verdict.note,
+        verdict.family,
+        verdict.tags,
+    )
+
+
 def evaluate_semantic_case(
     record: Mapping[str, Any],
     oracle_case: SemanticOracleCase,
     after_snapshot: Mapping[str, Mapping[str, Any]],
     required_template_roles: MutableMapping[str, set[str]],
 ) -> SemanticCaseVerdict:
+    grading_record, operator_sources = _semantic_grading_record(record)
     baseline = _core.evaluate_semantic_case(
-        record,
+        grading_record,
         oracle_case,
         after_snapshot,
         required_template_roles,
     )
-    return _repair_formula_leaf_canonical_checks(
+    repaired = _repair_formula_leaf_canonical_checks(
         baseline,
-        record,
+        grading_record,
         oracle_case,
         after_snapshot,
+    )
+    return _with_operator_source_checks(
+        repaired,
+        record,
+        oracle_case,
+        operator_sources,
     )
 
 
