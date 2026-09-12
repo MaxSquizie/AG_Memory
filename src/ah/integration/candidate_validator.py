@@ -5,6 +5,7 @@ from dataclasses import replace
 from ah.perception import (
     AssociationActRelationCandidate,
     CommandCandidate,
+    PropositionExprCandidate,
     QueryCandidate,
 )
 
@@ -38,6 +39,58 @@ class CandidateValidator(_BaseCandidateValidator):
                 f"ASSOCIATION {label} member index {member_index} is out of range"
             )
 
+    @staticmethod
+    def _base_validation_view(result, ordinary_relations):
+        """Expose candidate-ref content as proposition content to logical validation.
+
+        Adaptive perception may initially represent a matrix/content dependency as
+        ``candidate_ref`` and only later lift that same local edge into a proposition
+        formula.  For a frame consumed as ``operator_source_refs`` those two runtime
+        encodings are semantically equivalent: the matrix structurally governs an
+        already parsed proposition.  The base validator historically recognized only
+        ``actant.proposition`` and therefore rejected valid impersonal modal shells
+        such as REQUIRED/PERMITTED when their content was still carried by
+        ``candidate_ref``.
+
+        This is a validation-only view.  The original PerceptionResult is returned to
+        Integration unchanged, so no canonical mutation, role binding or UID choice is
+        delegated to this adapter.
+        """
+
+        operator_sources = {
+            ref
+            for root in result.proposition_roots
+            for ref in root.operator_source_refs
+        }
+        if not operator_sources:
+            return replace(result, act_relations=ordinary_relations)
+
+        assertions = []
+        for assertion in result.assertions:
+            if assertion.local_id not in operator_sources:
+                assertions.append(assertion)
+                continue
+            actants = tuple(
+                replace(
+                    actant,
+                    candidate_ref=None,
+                    proposition=PropositionExprCandidate.ref_expr(actant.candidate_ref),
+                )
+                if actant.candidate_ref is not None
+                and actant.proposition is None
+                and actant.composition is None
+                else actant
+                for actant in assertion.actants
+            )
+            assertions.append(
+                assertion if actants == assertion.actants else replace(assertion, actants=actants)
+            )
+        return replace(
+            result,
+            assertions=tuple(assertions),
+            act_relations=ordinary_relations,
+        )
+
     def validate(self, result) -> None:
         association = tuple(
             item
@@ -51,7 +104,7 @@ class CandidateValidator(_BaseCandidateValidator):
         )
         # The base validator owns world-relation semantics (currently IS-A). A
         # runtime association goal is intentionally removed from that whitelist.
-        super().validate(replace(result, act_relations=ordinary))
+        super().validate(self._base_validation_view(result, ordinary))
         if not association:
             return
 
