@@ -47,6 +47,13 @@ class MainWindow(_BaseMainWindow):
         ),
         _SemanticSuite(
             "acceptance",
+            "Core · frozen regression40",
+            "acceptance_cases_regression40.txt",
+            "acceptance_oracle_regression40.json",
+            "acceptance_runs_regression40",
+        ),
+        _SemanticSuite(
+            "acceptance",
             "M1 · adversarial semantics",
             "acceptance_cases_m1_adversarial.txt",
             "acceptance_oracle_m1_adversarial.json",
@@ -75,6 +82,13 @@ class MainWindow(_BaseMainWindow):
         ),
         _SemanticSuite(
             "acceptance",
+            "Quantifiers · semantic formalization",
+            "acceptance_quantifiers/cases.txt",
+            "acceptance_quantifiers/oracle.json",
+            "acceptance_runs_quantifiers",
+        ),
+        _SemanticSuite(
+            "acceptance",
             "Logic · AND / OR / XOR / NOT / IMPLIES",
             "acceptance_logic/cases.txt",
             "acceptance_logic/oracle.json",
@@ -86,6 +100,13 @@ class MainWindow(_BaseMainWindow):
             "acceptance_modal/cases.txt",
             "acceptance_modal/oracle.json",
             "acceptance_runs_modal",
+        ),
+        _SemanticSuite(
+            "acceptance",
+            "TemporalMode · STATE / PROCESS / EVENT / TRANSITION",
+            "acceptance_temporal_modes/cases.txt",
+            "acceptance_temporal_modes/oracle.json",
+            "acceptance_runs_temporal_modes",
         ),
         _SemanticSuite("hidden_valency", "Hidden valency · semantic micro-probe"),
         _SemanticSuite(
