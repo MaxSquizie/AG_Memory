@@ -1,7 +1,8 @@
 from ah.agent import InteractionContext
 from ah.core import AHCore, SequentialUidGenerator
 from ah.diagnostics.semantic_oracle import _semantic_grading_record
-from ah.integration import CandidateValidator, IntegrationConfig, IntegrationService
+from ah.integration import IntegrationConfig, IntegrationService
+from ah.integration.candidate_validator import CandidateValidator
 from ah.model import ActantRole, Domain, FunctionSymbol, Property
 from ah.perception import (
     ActantCandidate,
