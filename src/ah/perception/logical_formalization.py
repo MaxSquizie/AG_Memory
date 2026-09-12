@@ -63,6 +63,7 @@ class LogicalFormBuilder:
     _WHOLE_NEGATION_CHOICES = ("WHOLE_NOT", "NO", "UNCLEAR")
     _CONTENT_OPERATOR_CHOICES = ("NOT_CONTENT", "NONE", "UNCLEAR")
     _OR_EXCLUSIVITY_CHOICES = ("EXCLUSIVE", "INCLUSIVE_OR", "UNCLEAR")
+    _OPERATOR_SOURCE_CHOICES = ("OPERATOR_SOURCE", "INDEPENDENT", "UNCLEAR")
     _MAX_SCOPE_CHOICES = 24
 
     def __init__(
@@ -349,12 +350,161 @@ class LogicalFormBuilder:
             for index, (_start, _kind, expr, evidence, operator_refs)
             in enumerate(provisional, start=1)
         )
+        roots = self._attach_detached_operator_sources(
+            source_text,
+            assertions,
+            assertion_spans,
+            roots,
+        )
+        if self._unresolved is not None:
+            return LogicalFormalizationResult(
+                (),
+                tuple(self._diagnostics),
+                self._unresolved,
+                tuple(refined_conditionals),
+            )
         return LogicalFormalizationResult(
             roots,
             tuple(self._diagnostics),
             self._unresolved,
             tuple(refined_conditionals),
         )
+
+    def _attach_detached_operator_sources(
+        self,
+        source_text: str,
+        assertions: Sequence[AssertionCandidate],
+        assertion_spans: Mapping[str, object | None],
+        roots: Sequence[PropositionRootCandidate],
+    ) -> tuple[PropositionRootCandidate, ...]:
+        """Consume a detached preamble only after the formula is independently built.
+
+        Natural language can state a truth-functional instruction before the actual
+        proposition sequence (for example an exclusivity constraint before two
+        alternatives).  Such material can itself be parsed as a shallow assertion.
+        If it is left untouched, the same source words become both an operator and a
+        world fact.
+
+        This pass deliberately has no phrase inventory.  Python opens the question
+        only when source geometry is strong: an asserted, unclaimed frame occurs in
+        the same sentence before a non-bare formula and a colon/dash separates that
+        frame from the formula leaves.  The model then makes one bounded decision:
+        operator-source, independent proposition, or unresolved.  Only the first
+        outcome records ``operator_source_refs``; unresolved fails closed.
+        """
+
+        if not roots:
+            return tuple(roots)
+        by_id = {item.local_id: item for item in assertions}
+        claimed = {
+            ref
+            for root in roots
+            for ref in (*root.expression.leaf_refs(), *root.operator_source_refs)
+        }
+        root_rows: list[tuple[int, int, int]] = []
+        for root_index, root in enumerate(roots):
+            sentence_ids: set[int] = set()
+            starts: list[int] = []
+            for ref in root.expression.leaf_refs():
+                assertion = by_id.get(ref)
+                if assertion is None:
+                    continue
+                atom = self._atom(assertion, assertion_spans.get(ref))
+                if atom is not None:
+                    sentence_ids.add(atom.sentence_id)
+                evidence = assertion.predicate.evidence or assertion.evidence
+                if evidence is not None and evidence.start is not None:
+                    starts.append(int(evidence.start))
+            if len(sentence_ids) == 1 and starts:
+                root_rows.append((min(starts), next(iter(sentence_ids)), root_index))
+        if not root_rows:
+            return tuple(roots)
+
+        rewritten = list(roots)
+        candidates = [
+            item
+            for item in assertions
+            if item.local_id not in claimed
+            and item.status is AssertionStatus.ASSERTED
+            and not item.quoted
+        ]
+        candidates.sort(
+            key=lambda item: (
+                (item.predicate.evidence or item.evidence).start
+                if (item.predicate.evidence or item.evidence) is not None
+                else 10**12,
+                item.local_id,
+            )
+        )
+
+        for source in candidates:
+            source_atom = self._atom(
+                source, assertion_spans.get(source.local_id)
+            )
+            source_evidence = source.predicate.evidence or source.evidence
+            if (
+                source_atom is None
+                or source_evidence is None
+                or source_evidence.end is None
+            ):
+                continue
+            eligible = [
+                row
+                for row in root_rows
+                if row[1] == source_atom.sentence_id
+                and int(source_evidence.end) <= row[0]
+            ]
+            if not eligible:
+                continue
+            root_start, _sentence_id, root_index = min(eligible)
+            boundary = source_text[int(source_evidence.end) : root_start]
+            if not any(marker in boundary for marker in (":", "—", "–", "-")):
+                continue
+            if any(marker in boundary for marker in (".", "!", "?", ";")):
+                continue
+
+            root = rewritten[root_index]
+            prompt = (
+                f"TEXT:\n{source_text}\n"
+                f"PREAMBLE ({source.local_id}):\n"
+                f"{source.evidence.text if source.evidence else source.predicate.surface}\n"
+                f"ALREADY BUILT FORMULA:\n{self._render(root.expression)}\n"
+                "QUESTION:\nDoes PREAMBLE function only as the source-language "
+                "truth-functional instruction/constraint for this formula, rather "
+                "than assert an additional world proposition?\n"
+                "OPERATOR_SOURCE: it only constrains/interprets the formula.\n"
+                "INDEPENDENT: it states a separate proposition in addition to the formula.\n"
+                "UNCLEAR: the source does not determine this safely.\n"
+                "CHOICES:\nOPERATOR_SOURCE\nINDEPENDENT\nUNCLEAR"
+            )
+            decision = self.probe(
+                "logical_operator_source",
+                prompt,
+                self._OPERATOR_SOURCE_CHOICES,
+            )
+            if decision == "INDEPENDENT":
+                continue
+            if decision != "OPERATOR_SOURCE":
+                self._diagnostics.append(
+                    f"LOGIC:{source.local_id}:operator_source_unclear"
+                )
+                self._unresolved = (
+                    f"logical operator source unresolved for {source.local_id}"
+                )
+                return tuple(rewritten)
+
+            rewritten[root_index] = replace(
+                root,
+                operator_source_refs=tuple(
+                    dict.fromkeys((*root.operator_source_refs, source.local_id))
+                ),
+            )
+            claimed.add(source.local_id)
+            self._diagnostics.append(
+                f"LOGIC:{source.local_id}:detached_operator_source:{root.local_id}"
+            )
+
+        return tuple(rewritten)
 
     @staticmethod
     def _flat_expr(
