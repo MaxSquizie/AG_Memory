@@ -28,20 +28,18 @@ from .query_semantics import EventSetQueryCandidate
 class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
     """Production source-operator boundary for ordinary runtime parsing.
 
-    Two source classes must be consumed before generic actant-role probing:
+    Source material whose semantic class is already established must be consumed
+    before generic role probing.  Two classes are especially important here:
 
-    * expressions already recognized by the canonical ``TemporalNormalizer`` are
-      explicit TIME material.  They are staged as TIME even when the local model
-      would otherwise stop actant enumeration or misclassify an adverb;
-    * pure adverb/particle spans receive one bounded *scope* decision before role
-      classification.  Event-internal adverbs remain available to ordinary role
-      semantics, transition operators are reserved for transition normalization,
-      and utterance/query operators are consumed as discourse material.
+    * expressions recognized by the canonical ``TemporalNormalizer`` become TIME
+      before a weak model can skip or relabel them;
+    * adverb/particle spans receive one bounded scope decision before ordinary role
+      classification, so transition and discourse operators cannot also become
+      ordinary actants.
 
-    This layer contains no surface-word dictionary.  Candidate spans and POS come
-    from the existing source graph, temporal recognition comes from the canonical
-    deterministic normalizer, and the only model decision is over the fixed
-    EVENT_RELATION / EVENT_TRANSITION / DISCOURSE_OPERATOR / UNCLEAR protocol.
+    Candidate spans and morphology remain deterministic/source-grounded.  The only
+    new model decision is the fixed EVENT_RELATION / EVENT_TRANSITION /
+    DISCOURSE_OPERATOR / UNCLEAR scope protocol.  There is no surface-word table.
     """
 
     _ADVERBIAL_SCOPE_CHOICES = (
@@ -56,6 +54,34 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
         self._runtime_temporal_normalizer = TemporalNormalizer()
         self._runtime_adverbial_scope: dict[tuple[int, int], str] = {}
         self._runtime_discourse_operator_spans: list[EvidenceSpan] = []
+
+    @staticmethod
+    def _span_contains(container, value) -> bool:
+        """Preserve both base parser span semantics and naming evidence semantics.
+
+        ``GeneralizedNamingAdaptiveParser`` historically introduced a helper with
+        the same private name as ``AdaptivePerceptionParser._span_contains`` but a
+        different signature.  The production subclass is used by every live parse,
+        so make that boundary explicitly polymorphic: parser ``_Span + token index``
+        calls keep the base contract, while naming ``EvidenceSpan + token`` calls
+        keep their source-offset contract.
+        """
+        if hasattr(container, "start_index") and hasattr(container, "end_index"):
+            return (
+                isinstance(value, int)
+                and container.start_index <= value <= container.end_index
+            )
+        evidence = container
+        token = value
+        return (
+            evidence is not None
+            and getattr(evidence, "start", None) is not None
+            and getattr(evidence, "end", None) is not None
+            and hasattr(token, "start")
+            and hasattr(token, "end")
+            and evidence.start <= token.start
+            and token.end <= evidence.end
+        )
 
     @staticmethod
     def _span_key(span) -> tuple[int, int]:
@@ -75,10 +101,92 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
             return False
         for token in lexical:
             analyses = tuple(self._material_morph_analyses(token))
-            poses = {item.pos for item in analyses if item.pos is not None}
-            if not poses or not poses.issubset({"ADVB", "PRCL"}):
+            if not analyses:
+                return False
+            if not any(item.pos in {"ADVB", "PRCL"} for item in analyses):
+                return False
+            # A materially plausible nominal/verbal reading means this is not a
+            # pure operator/circumstance token and must stay in the ordinary parser.
+            if any(
+                item.pos in {
+                    "NOUN", "NPRO", "VERB", "INFN", "GRND",
+                    "ADJF", "ADJS", "PRTF", "PRTS", "NUMR",
+                }
+                for item in analyses
+            ):
                 return False
         return True
+
+    def _temporal_candidate_spans(
+        self,
+        text,
+        tokens,
+        predicate_span,
+        requested_spans,
+    ):
+        """Return deterministic temporal source spans without relying on LLM selection.
+
+        Candidate-phrase chunking remains useful for multi-token dates/intervals,
+        but a single lexical temporal adverb such as ``вчера`` must survive even if
+        another parser stage would not have selected that phrase.  Therefore every
+        source token in the current predicate argument window is also tested as a
+        singleton against the same canonical TemporalNormalizer.
+        """
+        clause_start, clause_end = self._predicate_argument_bounds(
+            predicate_span,
+            tokens,
+        )
+        candidates = list(
+            self._candidate_phrase_spans(
+                text,
+                tokens,
+                predicate_span,
+                [],
+                requested_spans=requested_spans,
+            )
+        )
+        for index in range(clause_start, clause_end + 1):
+            if predicate_span is not None and predicate_span.start_index <= index <= predicate_span.end_index:
+                continue
+            singleton = self._resolve_span_from_source(tokens, index, index)
+            if self._overlaps_any(singleton, requested_spans):
+                continue
+            if not re.search(r"\w", tokens[index - 1].text, flags=re.UNICODE):
+                continue
+            candidates.append(singleton)
+
+        recognized = {}
+        for span in candidates:
+            if self._overlaps_any(span, requested_spans):
+                continue
+            semantic = self._semantic_span(span)
+            if self._runtime_temporal_normalizer.normalize(
+                semantic.text,
+                TemporalAnchorContext(),
+            ) is None:
+                continue
+            recognized[self._span_key(span)] = span
+
+        # Prefer a wider already-recognized phrase over its recognized singleton
+        # fragments.  The source semantics are identical but the wider evidence is
+        # more faithful and avoids manufacturing multiple TIME values.
+        ordered = sorted(
+            recognized.values(),
+            key=lambda item: (
+                -(item.end_index - item.start_index),
+                item.start_index,
+            ),
+        )
+        maximal = []
+        for span in ordered:
+            if any(
+                other.start_index <= span.start_index
+                and span.end_index <= other.end_index
+                for other in maximal
+            ):
+                continue
+            maximal.append(span)
+        return tuple(sorted(maximal, key=lambda item: item.start_index))
 
     def _temporal_source_span(
         self,
@@ -95,30 +203,22 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
         if role_whitelist is not None and ActantRole.TIME not in role_whitelist:
             return None
 
-        candidates = self._candidate_phrase_spans(
-            text,
-            tokens,
-            predicate_span,
-            [],
-            requested_spans=requested_spans,
+        temporal = list(
+            self._temporal_candidate_spans(
+                text,
+                tokens,
+                predicate_span,
+                requested_spans,
+            )
         )
-        temporal = []
-        for span in candidates:
-            semantic = self._semantic_span(span)
-            if self._runtime_temporal_normalizer.normalize(
-                semantic.text,
-                TemporalAnchorContext(),
-            ) is not None:
-                temporal.append(span)
-
         if not temporal:
             return None
         if len(temporal) == 1:
             return temporal[0]
 
-        # Several adjacent source fragments may jointly denote one temporal value
-        # (for example a relative day plus a clock point).  Merge only when the
-        # same deterministic normalizer recognizes the complete source interval.
+        # Several fragments may jointly denote one temporal value, e.g. a relative
+        # day plus a clock point.  Merge only if the canonical normalizer recognizes
+        # the complete source interval as one value.
         ordered = sorted(temporal, key=lambda item: item.start_index)
         merged = self._resolve_span_from_source(
             tokens,
@@ -126,17 +226,17 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
             ordered[-1].end_index,
         )
         if (
-            predicate_span is None or not merged.overlaps(predicate_span)
-        ) and not self._overlaps_any(merged, requested_spans):
-            semantic = self._semantic_span(merged)
-            if self._runtime_temporal_normalizer.normalize(
-                semantic.text,
+            (predicate_span is None or not merged.overlaps(predicate_span))
+            and not self._overlaps_any(merged, requested_spans)
+            and self._runtime_temporal_normalizer.normalize(
+                self._semantic_span(merged).text,
                 TemporalAnchorContext(),
-            ) is not None:
-                return merged
+            ) is not None
+        ):
+            return merged
 
-        # One canonical frame has one TIME slot.  Distinct temporal source values
-        # require an explicit richer representation; never silently drop one.
+        # One canonical frame has one TIME role.  Distinct temporal values require
+        # explicit temporal composition; silently keeping just one would corrupt M1.
         raise AdaptiveParseError(
             "multiple independent temporal source spans require explicit temporal composition",
             tuple(self._traces),
@@ -158,7 +258,7 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
             "same predicate occurrence: beginning, stopping, continuing, occurring "
             "again, or no longer holding.\n"
             "DISCOURSE_OPERATOR: TARGET modifies the utterance/question/focus or the "
-            "set of requested/available answers, rather than the predicate event. "
+            "set of requested/available answers rather than the predicate event. "
             "Requesting an additional or alternative answer belongs here.\n"
             "UNCLEAR: the source does not determine the scope safely.\n"
             "CHOICES:\n"
@@ -215,9 +315,9 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
                 continue
             blocked.update(indices)
             if decision == "EVENT_TRANSITION":
-                # The separate transition-normalization pass owns START/STOP/etc.
-                # This scope decision merely prevents the operator source from also
-                # becoming an ordinary actant.
+                # START/STOP/CONTINUE/AGAIN/NO_LONGER remain owned by the existing
+                # transition-normalization pass.  This scope gate only prevents the
+                # source cue from simultaneously becoming an ordinary actant.
                 self._transition_cue_token_indices.update(indices)
             elif decision == "DISCOURSE_OPERATOR":
                 evidence = span.evidence
@@ -226,9 +326,9 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
         return blocked
 
     def _role_cue_probe(self, *args, **kwargs):
-        # Once the dedicated scope probe has established EVENT_RELATION, the same
-        # span must not be allowed to reverse that decision by selecting
-        # TRANSITION_OPERATOR inside the generic role inventory.
+        # EVENT_RELATION was already selected by a smaller, dedicated scope probe;
+        # generic role classification may choose its event role but may not reverse
+        # that scope decision and call it a transition operator.
         span = kwargs.get("span")
         if span is not None:
             decision = self._runtime_adverbial_scope.get(self._span_key(span))
@@ -308,8 +408,6 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
         self._runtime_adverbial_scope = {}
         self._runtime_discourse_operator_spans = []
         parsed = super().parse(text, structural_resolution=structural_resolution)
-        if not self._runtime_discourse_operator_spans:
-            return parsed
 
         queries = []
         changed = False
@@ -317,7 +415,16 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
             if not isinstance(query, EventSetQueryCandidate):
                 queries.append(query)
                 continue
+
             evidence = list(query.query_operator_evidence)
+            # Preserve the same structural WH evidence that created the event-set
+            # query; presentation must not rediscover it from a word list.
+            for item in self._event_query_operator_evidence(query):
+                if item not in evidence:
+                    evidence.append(item)
+            # Discourse/focus operators consumed before actant extraction are also
+            # query-operator provenance.  For example an additive query modifier is
+            # not a transition actant and must remain visible in M1.
             for item in self._runtime_discourse_operator_spans:
                 if item not in evidence:
                     evidence.append(item)
@@ -325,6 +432,7 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
                 query = replace(query, query_operator_evidence=tuple(evidence))
                 changed = True
             queries.append(query)
+
         if not changed:
             return parsed
         return replace(
