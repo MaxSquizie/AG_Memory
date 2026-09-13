@@ -31,7 +31,7 @@ from .bindings import BindingEnvironment
 from .runtime import GoalRuntime
 from .context import BranchContext, CounterfactualContext, ProofContext
 from .schema import InferenceSchema, InferenceSchemaRegistry
-from .materialization import InferenceMaterializer, MaterializationResult
+from .materialization import MaterializationResult
 from .query_builder import QueryBuildResult, QueryGoalBuilder as _BaseQueryGoalBuilder
 from .counterfactual_goal import CounterfactualSemanticGoalCompiler
 from .modal_goal import (
@@ -47,14 +47,20 @@ from .identity_query import (
     EntityIdentityInferenceEngine,
     EntityIdentityQueryGoalBuilder,
 )
+from .quantified_exists import (
+    DerivedAtomConclusion,
+    QuantifiedExistsInferenceEngine,
+    QuantifiedInferenceMaterializer,
+)
 from .modal_dispatch import ModalTurnGoalCompiler
 from .association_goal import AssociationQueryBuildResult, AssociationTurnGoalCompiler
 
 # Public runtime composes independent GoalCompiler/Inference extensions. Open-event
-# retrieval and entity-identity lookup are InferenceEngine extensions, while
-# association execution itself remains outside InferenceEngine and is routed to
-# AssociationCoordinator by the agent orchestrator.
-InferenceEngine = EntityIdentityInferenceEngine
+# retrieval, identity/description lookup and quantified ground-atom derivation are
+# InferenceEngine extensions. Association execution remains outside InferenceEngine
+# and is routed to AssociationCoordinator by the agent orchestrator.
+InferenceEngine = QuantifiedExistsInferenceEngine
+InferenceMaterializer = QuantifiedInferenceMaterializer
 QueryGoalBuilder = EntityIdentityQueryGoalBuilder
 SemanticGoalCompiler = AssociationTurnGoalCompiler
 TurnGoalBuilder = AssociationTurnGoalCompiler
@@ -72,6 +78,7 @@ __all__ = [
     "CognitiveEventKind",
     "CognitiveTraceEvent",
     "CompositeConclusion",
+    "DerivedAtomConclusion",
     "DerivedLinkConclusion",
     "EventMatchGoal",
     "EventQueryGoalBuilder",
@@ -105,6 +112,8 @@ __all__ = [
     "MultiRoleFillGoal",
     "QueryBuildResult",
     "QueryGoalBuilder",
+    "QuantifiedExistsInferenceEngine",
+    "QuantifiedInferenceMaterializer",
     "SemanticGoalCompiler",
     "TurnGoalBuilder",
     "RelationGoal",
