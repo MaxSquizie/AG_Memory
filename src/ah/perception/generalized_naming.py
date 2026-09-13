@@ -16,12 +16,13 @@ from .llm_parser import (
     PerceptionParseError,
 )
 from .naming_semantics import NamingAssertionCandidate
+from .query_semantics import EventSetQueryCandidate
 from .structural_speech_act import StructuralSpeechActAdaptiveParser
 from ah.model import ActantRole
 
 
 class GeneralizedNamingAdaptiveParser(StructuralSpeechActAdaptiveParser):
-    """Extend naming semantics to verbal source structures without phrase lists.
+    """Extend source-grounded speech semantics without phrase dictionaries.
 
     The existing structural parser already handles nominal naming shells such as
     ``Моё имя — Илья``. Russian also expresses the same semantic relation through
@@ -34,9 +35,9 @@ class GeneralizedNamingAdaptiveParser(StructuralSpeechActAdaptiveParser):
     * a bounded semantic probe may select exactly one value, reject naming, or
       return UNCLEAR.
 
-    Thus the model never constructs roles/UIDs and ordinary sentences such as
-    ``Меня встретила Мария`` remain ordinary predication when the probe rejects
-    the naming interpretation.
+    The same layer also preserves interrogative source evidence for the typed
+    open-event query that the parent parser has already decided structurally. It
+    does not infer question semantics a second time.
     """
 
     _NAME_VALUE_ROLES = frozenset(
@@ -58,6 +59,56 @@ class GeneralizedNamingAdaptiveParser(StructuralSpeechActAdaptiveParser):
             and evidence.start <= token.start
             and token.end <= evidence.end
         )
+
+    def _event_query_operator_evidence(
+        self,
+        query: EventSetQueryCandidate,
+    ) -> tuple[EvidenceSpan, ...]:
+        """Reuse the structural WH decision and preserve its exact source spans."""
+        graph = self._candidate_graph
+        predicate_evidence = query.predicate.evidence
+        if (
+            graph is None
+            or predicate_evidence is None
+            or predicate_evidence.start is None
+            or predicate_evidence.end is None
+        ):
+            return ()
+        predicate_tokens = [
+            token
+            for token in graph.tokens
+            if token.start == predicate_evidence.start
+            and token.end == predicate_evidence.end
+        ]
+        if len(predicate_tokens) != 1:
+            return ()
+        source_tokens = self._source_tokens_from_graph(graph)
+        predicate_token = predicate_tokens[0]
+        predicate_span = self._resolve_span_from_source(
+            source_tokens,
+            predicate_token.index,
+            predicate_token.index,
+        )
+        words = self._explicit_question_words(source_tokens, predicate_span)
+        return tuple(
+            EvidenceSpan(word.text, word.start, word.end)
+            for word in words
+        )
+
+    def _rewrite_open_event_queries(self, source_text: str, queries):
+        rewritten, changed = super()._rewrite_open_event_queries(source_text, queries)
+        enriched = []
+        for query in rewritten:
+            if (
+                isinstance(query, EventSetQueryCandidate)
+                and not query.query_operator_evidence
+            ):
+                evidence = self._event_query_operator_evidence(query)
+                if evidence:
+                    query = replace(query, query_operator_evidence=evidence)
+                    changed = True
+            enriched.append(query)
+        return tuple(enriched), changed
 
     def _verbal_deictic_owner(self, assertion) -> ActantCandidate | None:
         """Find one grammatical 1st/2nd-person oblique participant.
