@@ -55,6 +55,10 @@ class ModalScopeBuilder:
       * an asserted zero-actant predicative shell next to another proposition;
       * unconsumed adverbial/predicative/particle material in a proposition sentence.
 
+    Callers must ignore already-recognized copular linkers (dash / ``это``) and
+    speech-act complements. Those are proposition topology, not modality; a tiny
+    on-device model otherwise labels copular ``это`` as POSSIBLE.
+
     NONE leaves the original factual structure untouched. UNCLEAR/protocol failure
     fails closed because silently asserting P would be stronger than an unresolved
     modal reading.
@@ -354,10 +358,13 @@ class ModalScopeBuilder:
         assertions: Sequence[AssertionCandidate],
         assertion_spans: Mapping[str, object | None],
         roots: Sequence[PropositionRootCandidate] = (),
+        *,
+        excluded_assertion_ids: frozenset[str] = frozenset(),
     ) -> ModalFormalizationResult:
         self._diagnostics = []
         self._unresolved = None
         self._by_id = {item.local_id: item for item in assertions}
+        self._excluded_assertion_ids = excluded_assertion_ids
         root_list = list(roots)
         nested = self._nested_refs(assertions)
         root_leafs = {
@@ -366,6 +373,19 @@ class ModalScopeBuilder:
         source_refs = {
             ref for root in root_list for ref in root.operator_source_refs
         }
+
+        def is_bare_target(item: AssertionCandidate) -> bool:
+            # Speech-act complements stay ASSERTED until apply_speech_act_scoping.
+            # Wrapping them here would emit a top-level POSSIBLE/REQUIRED leaf that
+            # later becomes EMBEDDED and fails CandidateValidationError.
+            return (
+                item.local_id not in root_leafs
+                and item.local_id not in source_refs
+                and item.local_id not in nested
+                and item.local_id not in self._excluded_assertion_ids
+                and item.status is AssertionStatus.ASSERTED
+                and not item.quoted
+            )
 
         # Every sentence target is either an existing non-bare formula root or one
         # ordinary top-level assertion not already represented inside such a root.
@@ -376,13 +396,7 @@ class ModalScopeBuilder:
                 if leaf is not None and self._sentence_id(leaf, assertion_spans) == sentence_id:
                     count += 1
             for item in assertions:
-                if (
-                    item.local_id in root_leafs
-                    or item.local_id in source_refs
-                    or item.local_id in nested
-                    or item.status is not AssertionStatus.ASSERTED
-                    or item.quoted
-                ):
+                if not is_bare_target(item):
                     continue
                 if self._sentence_id(item.local_id, assertion_spans) == sentence_id:
                     count += 1
@@ -447,13 +461,11 @@ class ModalScopeBuilder:
                 ref for root in root_list for ref in root.operator_source_refs
             }
             for item in assertions:
+                if item.local_id == cue.source_ref or not is_bare_target(item):
+                    continue
                 if (
-                    item.local_id == cue.source_ref
-                    or item.local_id in current_root_leafs
+                    item.local_id in current_root_leafs
                     or item.local_id in current_source_refs
-                    or item.local_id in nested
-                    or item.status is not AssertionStatus.ASSERTED
-                    or item.quoted
                 ):
                     continue
                 if self._sentence_id(item.local_id, assertion_spans) == cue.sentence_id:

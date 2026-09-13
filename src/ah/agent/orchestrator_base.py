@@ -322,7 +322,11 @@ class AgentOrchestrator:
             from ah.diagnostics.session_log import emit
 
             error = self._safe_response_error(exc)
-            emit("agent_response_generation_failed", error=error)
+            emit(
+                "agent_response_generation_failed",
+                error=error,
+                error_type=type(exc).__name__,
+            )
             return None, error
 
     def _autosave(self, lock) -> bool:
@@ -593,10 +597,16 @@ class AgentOrchestrator:
                 clarification_request=request,
                 response_error=response_error,
             )
-        except PerceptionParseError:
+        except PerceptionParseError as exc:
             # Semantic failure never erases the fact that the external communication
             # happened. Preserve only its raw H experience and re-raise the original
             # parse error; no failed semantic candidate is committed.
+            emit_pipeline_event(
+                "pipeline_perception_failed",
+                error=str(exc),
+                error_type=type(exc).__name__,
+                text=text,
+            )
             self._record_raw_external_experience(
                 text, lock, source_timestamp=turn_timestamp
             )
@@ -611,11 +621,17 @@ class AgentOrchestrator:
                 )
                 self.ignition.apply_seed_requests(integration.activation_seeds)
                 self.ignition.apply_refutation_requests(integration.refutations)
-        except IntegrationError:
+        except IntegrationError as exc:
             # Validation/canonicalization can reject an otherwise completed
             # PerceptionResult. The source turn is still an experienced H event,
             # exactly as for a perception failure, while the failed semantic
             # transaction remains rolled back.
+            emit_pipeline_event(
+                "pipeline_integration_failed",
+                error=str(exc),
+                error_type=type(exc).__name__,
+                text=text,
+            )
             self._record_raw_external_experience(
                 text, lock, source_timestamp=turn_timestamp
             )
@@ -731,6 +747,15 @@ class AgentOrchestrator:
                 # but letting the response LLM answer from it would recreate the
                 # black-box path the proof system is meant to eliminate. Fail closed
                 # and expose the compiler failure through diagnostics/Proof Explorer.
+                emit_pipeline_event(
+                    "pipeline_unresolved_goal",
+                    text=text,
+                    diagnostics=[
+                        list(execution.diagnostics)
+                        for execution in query_results
+                        if execution.outcome is None
+                    ],
+                )
                 producer = lambda: self._unresolved_goal_response(text)
             else:
                 producer = lambda: self.agent.respond(agent_context)

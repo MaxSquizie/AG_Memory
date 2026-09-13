@@ -9,6 +9,7 @@ from ah.model import ActantRole
 from .contracts import (
     ActantCandidate,
     AssertionCandidate,
+    NominalRelationKind,
     PerceptionResult,
     PredicateCandidate,
     QuantifierCandidate,
@@ -200,12 +201,40 @@ class QuantifierFormalizer:
                 for item in analyses
             ):
                 return False
+            if self._is_definite_possessive_np(actant, analyses):
+                return False
             return True
         nominal_count = sum(item.pos == "NOUN" for item in analyses)
         has_particle = any(item.pos == "PRCL" for item in analyses)
         if len(tokens) > 1 and (nominal_count > 1 or (has_particle and nominal_count)):
             return True
         return False
+
+    @staticmethod
+    def _is_definite_possessive_np(
+        actant: ActantCandidate,
+        analyses: list,
+    ) -> bool:
+        """Possessive Apro + one common noun is a definite description, not a binder.
+
+        ``мой кот`` already carries POSSESSOR structure.  Universal/interrogative
+        determiners stay eligible: they lack POSSESSOR or carry Ques/Anum/Dmns.
+        """
+        if not any(
+            relation.kind is NominalRelationKind.POSSESSOR
+            for relation in actant.nominal_relations
+        ):
+            return False
+        if any(item.pos == "PRCL" for item in analyses):
+            return False
+        if any(
+            {"Anum", "Ques", "Dmns"} & set(item.grammemes)
+            for item in analyses
+        ):
+            return False
+        has_apro = any("Apro" in item.grammemes for item in analyses)
+        noun_count = sum(item.pos == "NOUN" for item in analyses)
+        return has_apro and noun_count == 1
 
     def _semantic_recognition(
         self,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from typing import Protocol
 
 from ah.llm.process_backend import LLMResponse
@@ -13,6 +14,16 @@ from .contracts import (
     CommandCandidate,
     QueryCandidate,
 )
+
+# WH placeholders are query gaps, not associative endpoints.  Matching the
+# parser's independent interrogative inventory keeps the skip morphology-free
+# at this layer: Perception already classified the act; we only refuse to treat
+# an unanswered gap as a stored concept origin.
+_QUERY_GAP_WORDS = frozenset({
+    "кто", "кого", "кому", "кем", "что", "чего", "чему", "чем",
+    "где", "куда", "откуда", "когда", "сколько", "почему", "отчего", "зачем", "как",
+})
+_ABOUTNESS_PREPS = frozenset({"о", "об", "обо", "про"})
 from .llm_parser import (
     LLMPerceptionService as _BaseLLMPerceptionService,
     PerceptionAttemptDiagnostic,
@@ -132,8 +143,8 @@ class AssociationSemanticClassifier:
 
     Deterministic parsing enumerates source-grounded endpoint candidates first. The
     model sees only local E1/E2 labels plus human-readable source text; it never sees
-    canonical UIDs and never constructs AssociationGoal. Output is one finite cue:
-    ORDINARY, UNKNOWN, or ASSOCIATION:Ea:Eb.
+    canonical UIDs and never constructs AssociationGoal. Output is one finite cue
+    copied from CHOICES (ORDINARY, UNKNOWN, or ASSOCIATION:E1:E2).
     """
 
     PROMPT_NAME = "association_query.txt"
@@ -183,22 +194,55 @@ class AssociationSemanticClassifier:
             return "entity referenced by this actant in TEXT"
         return "endpoint expressed by this actant in TEXT"
 
+    @staticmethod
+    def _is_query_gap_text(text: str | None) -> bool:
+        if not text:
+            return False
+        folded = text.strip().casefold()
+        return folded in _QUERY_GAP_WORDS
+
+    @staticmethod
+    def _is_aboutness_text(text: str | None) -> bool:
+        """``о/про NP`` is an aboutness complement, not an associative origin."""
+        if not text:
+            return False
+        tokens = re.findall(r"[A-Za-zА-Яа-яЁё-]+", text.casefold().replace("ё", "е"))
+        return bool(tokens) and tokens[0] in _ABOUTNESS_PREPS
+
     @classmethod
     def endpoint_candidates(
         cls,
         actants: tuple[ActantCandidate, ...],
+        *,
+        skip_roles: frozenset[ActantRole] = frozenset(),
     ) -> tuple[_EndpointCandidate, ...]:
         """Enumerate endpoints from parser structure, never from lexical markers."""
         result: list[_EndpointCandidate] = []
         seen: set[AssociationEndpointSelector] = set()
         for actant in actants:
+            if actant.role in skip_roles:
+                continue
             if actant.composition is not None:
                 for index, member in enumerate(actant.composition.members):
+                    if cls._is_query_gap_text(member.lookup_text):
+                        continue
+                    if cls._is_aboutness_text(member.lookup_text):
+                        continue
                     selector = AssociationEndpointSelector(actant.role, index)
                     if selector in seen:
                         continue
                     seen.add(selector)
                     result.append(_EndpointCandidate(selector, member.lookup_text))
+                continue
+            if cls._is_query_gap_text(actant.lookup_text) or cls._is_query_gap_text(
+                cls._direct_endpoint_text(actant)
+            ):
+                continue
+            if (
+                cls._is_aboutness_text(actant.mention)
+                or cls._is_aboutness_text(actant.lookup_text)
+                or cls._is_aboutness_text(cls._direct_endpoint_text(actant))
+            ):
                 continue
             selector = AssociationEndpointSelector(actant.role)
             if selector in seen:
@@ -214,7 +258,10 @@ class AssociationSemanticClassifier:
         source_text: str,
         act: QueryCandidate | CommandCandidate,
     ) -> tuple[AssociationQueryDecision | None, tuple[AssociationProbeAttempt, ...]]:
-        candidates = self.endpoint_candidates(act.actants)
+        skip_roles: set[ActantRole] = {ActantRole.STATE}
+        if isinstance(act, QueryCandidate):
+            skip_roles.update(act.requested_roles)
+        candidates = self.endpoint_candidates(act.actants, skip_roles=frozenset(skip_roles))
         if len(candidates) < 2:
             return None, ()
 
@@ -275,13 +322,8 @@ class AssociationSemanticClassifier:
                 attempts.append(
                     AssociationProbeAttempt(response.text, label, None, retry_index)
                 )
-                if label == "ORDINARY":
+                if label == "ORDINARY" or label == "UNKNOWN":
                     return None, tuple(attempts)
-                if label == "UNKNOWN":
-                    raise AssociationProbeError(
-                        "association query intent/endpoints are semantically unresolved",
-                        tuple(attempts),
-                    )
                 _, left_label, right_label = label.split(":", 2)
                 return (
                     AssociationQueryDecision(
@@ -302,10 +344,10 @@ class AssociationSemanticClassifier:
                     "Return exactly one line copied from CHOICES and nothing else."
                 )
 
-        raise AssociationProbeError(
-            "association semantic probe returned no valid bounded choice",
-            tuple(attempts),
-        )
+        # Protocol echo such as ASSOCIATION:Ea:Eb is not a listed choice.  The
+        # overlay is optional: keep the already parsed QUERY/COMMAND rather than
+        # fail-closing Perception on a small-model template copy.
+        return None, tuple(attempts)
 
 
 class AssociationLLMPerceptionService(_BaseLLMPerceptionService):

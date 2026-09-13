@@ -156,6 +156,31 @@ class LLMPerceptionService:
                     final_error=final_error,
                 )
             )
+        from ah.diagnostics.session_log import emit, protocol_preview
+
+        failed = [
+            {
+                "stage": item.role,
+                "error": item.error,
+                "retry": item.retry_index,
+                "raw_preview": protocol_preview(item.raw_text),
+            }
+            for item in attempts
+            if item.error
+        ]
+        emit(
+            "pipeline_parse_summary",
+            source_text=source_text,
+            ok=decoded is not None and not final_error,
+            error=final_error,
+            probe_count=len(attempts),
+            failed_count=len(failed),
+            failed=failed[-12:],
+            last_failed=failed[-1] if failed else None,
+            assertion_count=len(getattr(decoded, "assertions", ()) or ()) if decoded else 0,
+            query_count=len(getattr(decoded, "queries", ()) or ()) if decoded else 0,
+            command_count=len(getattr(decoded, "commands", ()) or ()) if decoded else 0,
+        )
 
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
         if self.settings.protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:

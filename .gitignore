@@ -7,6 +7,14 @@ __pycache__/
 .DS_Store
 
 data/ah_memory.json
+data/ah_android_memory.json
+
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/build/
+android/build/
+android/app/src/main/python/ah/
 
 /personal_docs/
 /logs/

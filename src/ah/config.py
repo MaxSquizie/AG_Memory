@@ -140,8 +140,8 @@ class LLMConfig:
             raise ValueError("llm.perception.morphology_backend must be auto, pymorphy3, or none")
         if self.agent_repair_attempts < 0 or self.agent_repair_attempts > 2:
             raise ValueError("llm.agent.repair_attempts must be in [0, 2]")
-        if self.backend not in {"builtin_process", "ollama", "lmstudio"}:
-            raise ValueError("llm.backend must be builtin_process, ollama, or lmstudio")
+        if self.backend not in {"builtin_process", "ollama", "lmstudio", "android_npu"}:
+            raise ValueError("llm.backend must be builtin_process, ollama, lmstudio, or android_npu")
         if not str(self.ollama_base_url).strip():
             raise ValueError("llm.ollama_base_url must not be empty")
         if not str(self.lmstudio_base_url).strip():

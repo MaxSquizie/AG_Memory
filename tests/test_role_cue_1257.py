@@ -100,6 +100,39 @@ class RuntimeRoleCue1257Tests(unittest.TestCase):
                 allowed_roles={ActantRole.TOOL, ActantRole.MATERIAL},
             )
 
+    def test_role_cue_prompt_does_not_use_question_heading(self):
+        backend = ScriptedBackend({"perception_role_cue": ["ORIGIN"]})
+        parser = make_parser(backend)
+        span = _Span(1, 1, "TARGET_X", EvidenceSpan("TARGET_X", 0, 8))
+        parser._classify_role(
+            "PRED TARGET_X", PredicateCandidate("PRED"), span, set(), None,
+            requested=False,
+            allowed_roles={ActantRole.SOURCE, ActantRole.MATERIAL},
+        )
+        prompt = backend.calls[0][1]
+        self.assertNotIn("\nQUESTION:\n", prompt)
+        self.assertIn("CHOICES:\n1 ORIGIN\n2 CONSTITUENT_MATERIAL", prompt)
+
+    def test_role_cue_accepts_option_number_and_rejects_heading_echo(self):
+        backend = ScriptedBackend({"perception_role_cue": ["2"]})
+        parser = make_parser(backend)
+        span = _Span(1, 1, "TARGET_X", EvidenceSpan("TARGET_X", 0, 8))
+        role = parser._classify_role(
+            "PRED TARGET_X", PredicateCandidate("PRED"), span, set(), None,
+            requested=False,
+            allowed_roles={ActantRole.SOURCE, ActantRole.MATERIAL},
+        )
+        self.assertEqual(role, ActantRole.MATERIAL)
+
+        backend = ScriptedBackend({"perception_role_cue": ["QUESTION"]})
+        parser = make_parser(backend)
+        with self.assertRaisesRegex(Exception, "role_cue expected exactly one of"):
+            parser._classify_role(
+                "PRED TARGET_X", PredicateCandidate("PRED"), span, set(), None,
+                requested=False,
+                allowed_roles={ActantRole.SOURCE, ActantRole.MATERIAL},
+            )
+
 
 class PronounPersonCompatibility1257Tests(unittest.TestCase):
     def test_third_person_anaphor_does_not_create_speaker_coreference_alternative(self):

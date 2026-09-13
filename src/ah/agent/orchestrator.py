@@ -151,6 +151,13 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                     base.clarification_request
                 )
             elif unresolved:
+                from ah.diagnostics.session_log import emit as emit_unresolved
+
+                emit_unresolved(
+                    "pipeline_unresolved_goal",
+                    text=text,
+                    diagnostics=[list(item) for item in unresolved],
+                )
                 producer = lambda: self._unresolved_goal_response(text)
             else:
                 producer = lambda: self.agent.respond(agent_context)

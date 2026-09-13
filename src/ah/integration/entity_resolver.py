@@ -7,7 +7,7 @@ import re
 from ah.agent import InteractionContext
 from ah.core import AHCore
 from ah.model import ActantRole, Domain, Ref, RefKind, SemanticEntity
-from ah.perception import ActantCandidate
+from ah.perception import ActantCandidate, NominalRelationKind
 from ah.perception.morphology import build_morphology, stable_normal_form
 
 from .deixis_resolver import DeixisResolver
@@ -332,6 +332,52 @@ class EntityResolver:
                     tuple(self.core.ref(entity.uid) for entity in descriptor_matches),
                     candidate.mention or text,
                 )
+
+            # Unnamed possessive (``мой кот``): identity is the class lemma, so
+            # do not collapse onto that class entity.  Named appositions
+            # (``мой друг Дима``) keep ordinary name lookup.
+            class_lemma = next(
+                (
+                    (relation.head_normalized_hint or relation.head_mention or "").strip()
+                    for relation in candidate.nominal_relations
+                    if relation.kind is NominalRelationKind.POSSESSOR
+                ),
+                "",
+            )
+            identity = (candidate.normalized_hint or "").strip()
+            unnamed = bool(
+                class_lemma
+                and identity
+                and class_lemma.casefold().replace("ё", "е")
+                == identity.casefold().replace("ё", "е")
+            )
+            if unnamed:
+                mention_name = (candidate.mention or text).strip()
+                if mention_name:
+                    owned = self.core.store.find_entities_by_name(
+                        mention_name, preferred_domain
+                    )
+                    owned = self._filter_by_grammatical_number(
+                        owned, candidate.grammatical_number
+                    )
+                    if len(owned) == 1:
+                        return ExistingEntity(self.core.ref(owned[0].uid))
+                    if len(owned) > 1:
+                        active = {ref.uid for ref in attention_refs}
+                        active_matches = [
+                            entity for entity in owned if entity.uid in active
+                        ]
+                        if len(active_matches) == 1:
+                            return ExistingEntity(self.core.ref(active_matches[0].uid))
+                        return AmbiguousEntityPlan(
+                            tuple(self.core.ref(entity.uid) for entity in owned),
+                            mention_name,
+                        )
+                    return NewEntityPlan(
+                        mention_name,
+                        candidate.semantic_hint,
+                        grammatical_number=candidate.grammatical_number,
+                    )
 
         for lookup in lookup_forms:
             # Name/alias is a retrieval index, never a cross-domain identity key.

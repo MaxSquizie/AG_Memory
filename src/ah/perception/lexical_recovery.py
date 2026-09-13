@@ -167,6 +167,14 @@ for _row_index, _row in enumerate(_KEYBOARD_ROWS):
         _near.discard(_char)
         _KEYBOARD_NEIGHBOURS[_char] = frozenset(_near)
 
+# Number row sits immediately above ``йцукенгшщз``.  A single digit in an
+# otherwise Cyrillic token is the same noisy channel as an adjacent-letter typo
+# (``чай`` → ``ча1``), not an identifier/code.
+_NUMBER_ROW_LETTERS = tuple(zip("1234567890", "йцукенгшщз"))
+for _digit, _letter in _NUMBER_ROW_LETTERS:
+    _KEYBOARD_NEIGHBOURS[_digit] = frozenset({_letter})
+    _KEYBOARD_NEIGHBOURS[_letter] = frozenset(_KEYBOARD_NEIGHBOURS.get(_letter, ())) | {_digit}
+
 
 def weighted_damerau_levenshtein(left: str, right: str) -> float:
     """Optimal-string-alignment distance with a conservative typing-error model.
@@ -261,6 +269,35 @@ class LexicalRecovery:
     @staticmethod
     def _is_word(text: str) -> bool:
         return _CYRILLIC_WORD.fullmatch(text) is not None
+
+    @staticmethod
+    def _cyrillic_number_row_substitutions(raw: str) -> tuple[str, ...]:
+        """Map a single number-row digit onto the letter keyed below it.
+
+        Latin/digit codes (``QX17``, ``ZETA9``) stay protected.  Only an otherwise
+        Cyrillic token with exactly one digit is a keyboard miss, not an identifier.
+        """
+        if not raw or (raw.isupper() and any(ch.isascii() and ch.isalpha() for ch in raw)):
+            return ()
+        digits = [ch for ch in raw if ch.isdigit()]
+        if len(digits) != 1:
+            return ()
+        if any(ch.isascii() and ch.isalpha() for ch in raw):
+            return ()
+        letters = [ch for ch in raw if ch.isalpha()]
+        if not letters:
+            return ()
+        if any(ch.isalpha() and _CYRILLIC_WORD.fullmatch(ch) is None for ch in letters):
+            return ()
+        digit = digits[0]
+        mapping = dict(_NUMBER_ROW_LETTERS)
+        letter = mapping.get(digit)
+        if letter is None:
+            return ()
+        repaired = raw.replace(digit, letter, 1)
+        if _CYRILLIC_WORD.fullmatch(repaired) is None:
+            return ()
+        return (repaired,)
 
     @staticmethod
     def _restore_case(raw: str, candidate: str) -> str:
@@ -991,26 +1028,61 @@ class LexicalRecovery:
                 decisions.append(prior)
                 continue
 
+            number_row_repaired = False
             if not self._is_word(raw):
-                word_like = bool(re.search(r"\w", raw, flags=re.UNICODE))
-                decisions.append(
-                    TokenCandidate(
-                        token.index,
-                        raw,
-                        raw,
-                        (
-                            LexicalRecoveryStatus.UNKNOWN_TOKEN
-                            if word_like else LexicalRecoveryStatus.EXACT
-                        ),
-                        confidence=0.0 if word_like else 1.0,
-                        reason=(
-                            "protected non-Cyrillic/alphanumeric token"
-                            if word_like else "non-lexical token"
-                        ),
+                substitutions = self._cyrillic_number_row_substitutions(raw)
+                if not substitutions:
+                    word_like = bool(re.search(r"\w", raw, flags=re.UNICODE))
+                    decisions.append(
+                        TokenCandidate(
+                            token.index,
+                            raw,
+                            raw,
+                            (
+                                LexicalRecoveryStatus.UNKNOWN_TOKEN
+                                if word_like else LexicalRecoveryStatus.EXACT
+                            ),
+                            confidence=0.0 if word_like else 1.0,
+                            reason=(
+                                "protected non-Cyrillic/alphanumeric token"
+                                if word_like else "non-lexical token"
+                            ),
+                        )
                     )
+                    continue
+                generated_forms: list[str] = []
+                seen_forms: set[str] = set()
+                for form in substitutions:
+                    if is_known(form):
+                        seeds = (form,)
+                    else:
+                        seeds = tuple(
+                            indexed_candidates(
+                                form, max_distance=1, limit=self.max_candidates
+                            )
+                        )
+                    for item in seeds:
+                        key = item.casefold()
+                        if key in seen_forms:
+                            continue
+                        seen_forms.add(key)
+                        generated_forms.append(item)
+                if not generated_forms:
+                    decisions.append(
+                        TokenCandidate(
+                            token.index, raw, raw, LexicalRecoveryStatus.UNKNOWN_TOKEN,
+                            confidence=0.0, reason="number-row substitution has no indexed candidate",
+                        )
+                    )
+                    continue
+                ranked = self._rank_candidates(
+                    token, tuple(generated_forms), tokens, graph
                 )
-                continue
-            if is_known(raw):
+                display = tuple(
+                    self._restore_case(raw, item.text) for item in ranked[:8]
+                )
+                number_row_repaired = True
+            elif is_known(raw):
                 decisions.append(
                     TokenCandidate(
                         token.index, raw, raw, LexicalRecoveryStatus.EXACT,
@@ -1018,36 +1090,37 @@ class LexicalRecovery:
                     )
                 )
                 continue
-            if len(raw.replace("-", "")) < 3:
-                decisions.append(
-                    TokenCandidate(
-                        token.index, raw, raw, LexicalRecoveryStatus.UNKNOWN_TOKEN,
-                        confidence=0.0, reason="short OOV is unsafe to autocorrect",
+            if not number_row_repaired:
+                if len(raw.replace("-", "")) < 3:
+                    decisions.append(
+                        TokenCandidate(
+                            token.index, raw, raw, LexicalRecoveryStatus.UNKNOWN_TOKEN,
+                            confidence=0.0, reason="short OOV is unsafe to autocorrect",
+                        )
                     )
-                )
-                continue
+                    continue
 
-            generated = tuple(indexed_candidates(
-                raw, max_distance=1, limit=self.max_candidates
-            ))
-            if not generated and len(raw.replace("-", "")) >= 7:
                 generated = tuple(indexed_candidates(
-                    raw, max_distance=2, limit=self.max_candidates
+                    raw, max_distance=1, limit=self.max_candidates
                 ))
-            ranked = self._rank_candidates(token, generated, tokens, graph)
-            display = tuple(
-                self._restore_case(raw, item.text) for item in ranked[:8]
-            )
-
-            if self._protected_oov(token, tokens, graph, ranked):
-                decisions.append(
-                    TokenCandidate(
-                        token.index, raw, raw, LexicalRecoveryStatus.UNKNOWN_TOKEN,
-                        alternatives=display, confidence=0.0,
-                        reason="protected name/term/acronym OOV",
-                    )
+                if not generated and len(raw.replace("-", "")) >= 7:
+                    generated = tuple(indexed_candidates(
+                        raw, max_distance=2, limit=self.max_candidates
+                    ))
+                ranked = self._rank_candidates(token, generated, tokens, graph)
+                display = tuple(
+                    self._restore_case(raw, item.text) for item in ranked[:8]
                 )
-                continue
+
+                if self._protected_oov(token, tokens, graph, ranked):
+                    decisions.append(
+                        TokenCandidate(
+                            token.index, raw, raw, LexicalRecoveryStatus.UNKNOWN_TOKEN,
+                            alternatives=display, confidence=0.0,
+                            reason="protected name/term/acronym OOV",
+                        )
+                    )
+                    continue
             if not ranked:
                 decisions.append(
                     TokenCandidate(

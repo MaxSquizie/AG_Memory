@@ -1,0 +1,6 @@
+libLiteRtDispatch_GoogleTensor.so
+libLiteRtCompilerPlugin_google_tensor.so
+LiteRT v2.2.0 google_tensor_runtime (matches LiteRT-LM 0.16.x @litert pin ~2026-08-04)
+https://github.com/google-ai-edge/LiteRT/releases/download/v2.2.0/litert_npu_runtime_libraries_jit.zip
+dispatch sha256 35b59265eb8595a1d28c2f69693b1cad39d1fa4a38c2c18d5d54550d079264ac
+plugin   sha256 64125c3528277cfded9d40196d12c6f96003ae079e4b8854745257ef1d56359c

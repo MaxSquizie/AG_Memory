@@ -238,6 +238,12 @@ _COMPOUND_SUBORDINATORS: dict[tuple[str, ...], str | None] = {
 _SUBORDINATOR_MARKERS = frozenset(_SUBORDINATORS) | frozenset("_".join(parts) for parts in _COMPOUND_SUBORDINATORS)
 _RELATIVE_PREFIXES = ("котор",)
 _RELATIVE_ADVERBS = {"где", "куда", "откуда", "когда"}
+# Independent interrogative pronouns.  Relative adverbs above are also WH, but
+# ``Ques`` morphology is the primary cue; this set only covers scoreless test
+# morphologies that omit that grammeme.
+_INDEPENDENT_WH = {
+    "кто", "кого", "кому", "кем", "что", "чего", "чему", "чем",
+}
 _CLAUSE_COORDINATORS = {"а", "но", "однако"}
 _COORD_AND = {"и", "да"}
 _COORD_OR = {"или", "либо"}
@@ -584,6 +590,140 @@ class LinguisticCandidateBuilder:
                 continue
             if agreeing_nominal_with(finite, token):
                 suppressed.add(head.token_index)
+
+        # Dictionary morphology may expose a prenominal possessive adjective as a
+        # 2sg imperative (``мой`` = ADJF and VERB mood=impr of ``мыть``).  Treating
+        # that VERB reading as a clause head turns ``мой друг`` into a wash-command
+        # and, when it is the only verb, beats independent WH force.  Suppress only
+        # when the same token is also ADJF, the next word is an agreeing nominal,
+        # and local syntax licenses the possessive reading over the imperative.
+        def next_content(index: int) -> SourceToken | None:
+            for token in tokens[index:]:
+                if token.text in hard_separators:
+                    return None
+                if re.search(r"\w", token.text):
+                    return token
+            return None
+
+        def adjf_agrees_with_nominal(adj_token: SourceToken, noun_token: SourceToken) -> bool:
+            adjectives = [
+                item for item in self._material_analyses(adj_token) if item.pos == "ADJF"
+            ]
+            nominals = [
+                item for item in self._material_analyses(noun_token)
+                if item.pos in {"NOUN", "NPRO"}
+            ]
+            if not adjectives or not nominals:
+                return False
+            for adj in adjectives:
+                for nom in nominals:
+                    if adj.case and nom.case and adj.case != nom.case:
+                        continue
+                    if adj.number and nom.number and adj.number != nom.number:
+                        continue
+                    if (
+                        adj.gender
+                        and nom.gender
+                        and adj.number != "plur"
+                        and nom.number != "plur"
+                        and adj.gender != nom.gender
+                    ):
+                        continue
+                    return True
+            return False
+
+        def animate_nominative_not_accusative(token: SourceToken) -> bool:
+            material = self._material_analyses(token)
+            nominative = [
+                item for item in material
+                if item.pos in {"NOUN", "NPRO"} and item.case == "nomn"
+            ]
+            if not nominative:
+                return False
+            accusative = [
+                item for item in material
+                if item.pos in {"NOUN", "NPRO"} and item.case == "accs"
+            ]
+            if any(item.animacy == "anim" for item in nominative) and not accusative:
+                return True
+            return bool(
+                any(item.animacy == "anim" for item in nominative)
+                and all(item.animacy != "anim" for item in accusative)
+            )
+
+        def segment_bounds(index: int) -> tuple[int, int]:
+            left = 1
+            right = len(tokens)
+            for token in tokens:
+                if token.index < index and token.text in hard_separators:
+                    left = token.index + 1
+                elif token.index > index and token.text in hard_separators:
+                    right = token.index - 1
+                    break
+            return left, right
+
+        def later_indicative_finite(head_index: int) -> bool:
+            left, right = segment_bounds(head_index)
+            for other in finite_heads:
+                if other.token_index <= head_index or other.token_index > right:
+                    continue
+                if other.token_index < left:
+                    continue
+                between = tokens[head_index:other.token_index - 1]
+                if any(
+                    item.text in hard_separators or item.text.casefold() in coordinators
+                    for item in between
+                ):
+                    continue
+                verbs = [
+                    item for item in self._material_analyses(tokens[other.token_index - 1])
+                    if item.pos == "VERB"
+                ]
+                if not verbs:
+                    continue
+                moods = {item.mood for item in verbs if item.mood}
+                if "indc" in moods or (moods and "impr" not in moods):
+                    return True
+                if not moods:
+                    return True
+            return False
+
+        def local_wh(head_index: int) -> bool:
+            left, right = segment_bounds(head_index)
+            for token in tokens:
+                if token.index < left or token.index > right:
+                    continue
+                folded = token.text.casefold()
+                if folded in _INDEPENDENT_WH or folded in _RELATIVE_ADVERBS:
+                    return True
+                if any("Ques" in item.grammemes for item in self._material_analyses(token)):
+                    return True
+            return False
+
+        for head in result:
+            if head.token_index in suppressed:
+                continue
+            if not (head.finite and head.strength >= 2):
+                continue
+            token = tokens[head.token_index - 1]
+            material = self._material_analyses(token)
+            verbs = [item for item in material if item.pos == "VERB"]
+            adjectives = [item for item in material if item.pos == "ADJF"]
+            if not verbs or not adjectives:
+                continue
+            moods = {item.mood for item in verbs if item.mood}
+            if moods != {"impr"}:
+                continue
+            following = next_content(head.token_index)
+            if following is None or not adjf_agrees_with_nominal(token, following):
+                continue
+            if not (
+                animate_nominative_not_accusative(following)
+                or later_indicative_finite(head.token_index)
+                or local_wh(head.token_index)
+            ):
+                continue
+            suppressed.add(head.token_index)
 
         return tuple(head for head in result if head.token_index not in suppressed)
 

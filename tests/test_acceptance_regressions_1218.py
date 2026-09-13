@@ -115,6 +115,8 @@ class AcceptanceRegressions1218(unittest.TestCase):
             ("Что Иван подарил Марии?", ActantRole.OBJECT),
             ("Кому Иван подарил книгу?", ActantRole.RECIPIENT),
             ("Кто любит чай?", ActantRole.SUBJECT),
+            ("кто любит чай", ActantRole.SUBJECT),
+            ("Что Иван подарил Марии", ActantRole.OBJECT),
         ]
         for text, requested in cases:
             with self.subTest(text=text):

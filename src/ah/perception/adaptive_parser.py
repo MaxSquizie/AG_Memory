@@ -943,6 +943,17 @@ class AdaptivePerceptionParser:
                         self._predicate_start_prompt(text, tokens, used_predicates, morph_candidates),
                         predicate_start,
                     )
+                elif self._wh_licenses_implicit_predicate(tokens, used_predicates):
+                    # ``что с моим котом`` has no finite verb.  Morphology may tag
+                    # ``что`` as CONJ, so the zero-copula shell does not fire, and
+                    # a predicate_start probe then takes the WH as the head.
+                    implicit_copula = True
+                    predicate_start = 0
+                    self._deterministic_trace(
+                        "predicate_start",
+                        self._predicate_start_prompt(text, tokens, used_predicates, morph_candidates),
+                        0,
+                    )
                 else:
                     candidate_filter = None
                     predicate_start = self._probe(
@@ -1283,6 +1294,7 @@ class AdaptivePerceptionParser:
                 ignored_token_indices=frozenset(
                     {
                         *self._transition_cue_token_indices,
+                        *self._nominal_linker_tokens,
                         *(
                             token.index
                             for token in self._candidate_graph.tokens
@@ -1309,6 +1321,11 @@ class AdaptivePerceptionParser:
                 tuple(assertions),
                 assertion_spans,
                 proposition_roots,
+                excluded_assertion_ids=frozenset(
+                    self._speech_act_embedded_assertion_ids(
+                        assertions, queries, commands, act_dependencies
+                    )
+                ),
             )
             if modal.unresolved is not None:
                 raise AdaptiveParseError(
@@ -3345,8 +3362,20 @@ class AdaptivePerceptionParser:
         if embedded and not quoted:
             return "ASSERTION"
 
+        # Chat/SMS often omits ``?``. A clause-local WH placeholder is still
+        # interrogative syntax: treating ``кто любит чай`` as ASSERTION would
+        # mint a dummy SUBJECT entity instead of a FILL_ROLE query.
+        if not embedded or quoted:
+            predicate_span = None
+            if predicate_candidates:
+                focus = predicate_candidates[0]
+                predicate_span = self._resolve_span_from_source(tokens, focus, focus)
+            if self._explicit_question_words(tokens, predicate_span):
+                return "QUERY"
+
         explicit_subject = any(
             self._has_structural_morph(tokens[i - 1], poses={"NOUN", "NPRO"}, case="nomn")
+            and tokens[i - 1].text.casefold() not in _QUESTION_WORDS
             for i in range(start, end + 1)
             if self._is_word_token(tokens[i - 1])
         )
@@ -3426,6 +3455,47 @@ class AdaptivePerceptionParser:
             seen.add(key)
             result.append(ActDependencyCandidate(parents[0], children[0], kind))
         return tuple(result)
+
+    @staticmethod
+    def _speech_act_embedded_assertion_ids(
+        assertions: list[AssertionCandidate],
+        queries: list[QueryCandidate],
+        commands: list[CommandCandidate],
+        dependencies: tuple[ActDependencyCandidate, ...],
+    ) -> set[str]:
+        """Assertion ids that will become EMBEDDED under a query or command.
+
+        Modal wrapping runs before ``apply_speech_act_scoping``. A token-cue
+        POSSIBLE/REQUIRED wrapper over such a leaf has empty operator_source_refs,
+        so integration later rejects it: ``Top-level logical formula leaf must be
+        ASSERTED``. Copular ``это`` in ``докажи что кот это Y`` is the live case.
+        """
+        root_ids = {
+            item.local_id
+            for item in (*queries, *commands)
+            if item.local_id is not None and not item.quoted
+        }
+        if not root_ids or not dependencies:
+            return set()
+        adjacency: dict[str, list[str]] = {}
+        for edge in dependencies:
+            if edge.kind is ActDependencyKind.QUOTED:
+                continue
+            adjacency.setdefault(edge.parent_ref, []).append(edge.child_ref)
+        assertion_ids = {item.local_id for item in assertions}
+        embedded: set[str] = set()
+        for root_id in root_ids:
+            queue = list(adjacency.get(root_id, ()))
+            seen = {root_id}
+            while queue:
+                child = queue.pop()
+                if child in seen:
+                    continue
+                seen.add(child)
+                if child in assertion_ids:
+                    embedded.add(child)
+                queue.extend(adjacency.get(child, ()))
+        return embedded
 
     def _mark_quoted_acts(
         self,
@@ -8469,8 +8539,12 @@ class AdaptivePerceptionParser:
         # A structurally decomposed NP must resolve the actant identity from its
         # nominal head, not from the whole source phrase.  The full source mention
         # remains evidence, while internal possessive/genitive structure is carried
-        # separately and canonicalized by Integration.
-        if nominal_relations:
+        # separately and canonicalized by Integration.  A same-case personal name
+        # after a common noun (``друг Дима``) is the referent of the NP.
+        name_hint = None if role in {ActantRole.TIME, ActantRole.DURATION} else self._appositive_personal_name_hint(span)
+        if name_hint:
+            normalized_hint = name_hint
+        elif nominal_relations:
             head_hint = nominal_relations[0].head_normalized_hint
             if head_hint:
                 normalized_hint = head_hint
@@ -9041,6 +9115,17 @@ class AdaptivePerceptionParser:
         # participants in case-syncretic sequences such as ``его Марии``.
         if not self._has_structural_morph(tokens[cursor - 1], poses={"NOUN"}):
             return end
+
+        # Common noun + immediately following personal name in the same case
+        # (``друг Дима``) is one NP.  The name is the referent; it is not a
+        # second nominative participant of the clause.
+        name_index = cursor + 1
+        if name_index <= limit and name_index not in blocked:
+            if self._same_case_personal_name(
+                tokens[cursor - 1], tokens[name_index - 1]
+            ):
+                end = name_index
+                cursor = name_index
 
         genitive_family = {"gent", "gen1", "gen2"}
         cursor += 1
@@ -9766,14 +9851,22 @@ class AdaptivePerceptionParser:
 
         # A lexical copula plus an adjectival/predicative complement directly
         # encodes predication of state/property.  This is predicate-structure
-        # evidence, not an arbitrary case/preposition mapping.
-        if self._is_copular_lookup(predicate.lookup_form) and any(
-            self._has_morph(
-                tokens[i - 1], poses={"ADJF", "ADJS", "PRTF", "PRTS", "PRED"}
+        # evidence, not an arbitrary case/preposition mapping.  A nominal head
+        # inside the same span (``мой друг``) means the adjective is attributive,
+        # so the NP is not itself a copular STATE.
+        if self._is_copular_lookup(predicate.lookup_form):
+            has_predicative = any(
+                self._has_morph(
+                    tokens[i - 1], poses={"ADJF", "ADJS", "PRTF", "PRTS", "PRED"}
+                )
+                for i in range(span.start_index, span.end_index + 1)
             )
-            for i in range(span.start_index, span.end_index + 1)
-        ):
-            return (ActantRole.STATE,)
+            has_nominal_head = any(
+                self._has_morph(tokens[i - 1], poses={"NOUN", "NPRO"})
+                for i in range(span.start_index, span.end_index + 1)
+            )
+            if has_predicative and not has_nominal_head:
+                return (ActantRole.STATE,)
 
         # A lexically opaque bare token (code/new term) can still occupy a
         # structurally forced direct-filler slot.  This is not UNKNOWN->OBJECT:
@@ -10127,6 +10220,19 @@ class AdaptivePerceptionParser:
                 candidates = nominal_candidates(
                     predicate_span.end_index + 1, clause_end, exclude_preposition_governed=True
                 )
+        if len(candidates) > 1:
+            covered: set[int] = set()
+            collapsed: list[int] = []
+            for index in candidates:
+                if index in covered:
+                    continue
+                nxt = index + 1
+                if nxt in candidates and self._same_case_personal_name(
+                    tokens[index - 1], tokens[nxt - 1]
+                ):
+                    covered.add(nxt)
+                collapsed.append(index)
+            candidates = collapsed
         if len(candidates) != 1:
             return None
         head = candidates[0]
@@ -10147,6 +10253,10 @@ class AdaptivePerceptionParser:
         # possessive anaphor; no lexical list or semantic guess is involved.
         if head < clause_end and self._is_postnominal_possessive_anaphor(tokens[head]):
             end = head + 1
+        if end < clause_end and self._same_case_personal_name(
+            tokens[head - 1], tokens[end]
+        ):
+            end = end + 1
         return self._resolve_span_from_source(tokens, start, end)
 
     def _deterministic_copular_holder_span(
@@ -10196,6 +10306,24 @@ class AdaptivePerceptionParser:
                 if token.index >= 3 and tokens[token.index - 2].text.casefold() in _COORDINATORS:
                     if self._has_morph(tokens[token.index - 3], poses={"ADJF", "ADJS", "PRTS", "PRTF", "PRED"}):
                         continue
+                # Prenominal ADJF that heads a larger NP (``мой друг``) is an
+                # attributive modifier, not a predicative copular complement.
+                # Treating it as STATE splits the NP and leaves the noun as a
+                # fake second association endpoint.
+                blocked: set[int] = set()
+                if predicate_span is not None:
+                    blocked.update(
+                        range(predicate_span.start_index, predicate_span.end_index + 1)
+                    )
+                for span in selected:
+                    blocked.update(range(span.start_index, span.end_index + 1))
+                for span in requested_spans:
+                    blocked.update(range(span.start_index, span.end_index + 1))
+                np_end = self._nominal_phrase_end(
+                    tokens, token.index, clause_end, blocked
+                )
+                if np_end is not None and np_end > token.index:
+                    continue
                 starts.append(token.index)
         if len(starts) != 1:
             return None
@@ -10435,6 +10563,9 @@ class AdaptivePerceptionParser:
         if not allowed_cues:
             raise AdaptiveParseError("role cue probe has no admissible cues")
         mode = "MISSING INFORMATION" if requested else "TARGET"
+        numbered = "\n".join(
+            f"{index} {label}" for index, label in enumerate(allowed_labels, start=1)
+        )
         prompt = (
             f"TEXT:\n{text}\nPREDICATE:\n{predicate.surface}\n{mode}:\n{span.text}\n"
             "CANDIDATE RELATIONS:\n"
@@ -10447,7 +10578,7 @@ class AdaptivePerceptionParser:
                 "repeats, or no longer holds"
                 if allow_transition_operator else ""
             )
-            + "\nQUESTION:\nWhich single relation does TARGET have in this event? "
+            + "\nWhich single relation does TARGET have in this event? "
             "Use the whole sentence. Grammatical negation (НЕ) negates the proposition "
             "or contrasts a filler; by itself it never changes that filler's semantic role "
             "and never means ABSENT_ENTITY. Choose ABSENT_ENTITY only when TARGET itself "
@@ -10457,16 +10588,16 @@ class AdaptivePerceptionParser:
             "affected or resulting entity; if TARGET is itself the affected/content/result "
             "entity, it is not MATERIAL. "
             "Choose only among the listed candidate relations.\n"
-            "CHOICES:\n" + "\n".join(allowed_labels)
+            "CHOICES:\n" + numbered
         )
 
         def parse_label(raw: str) -> str:
-            label = raw.strip().upper()
-            if label not in allowed_labels:
+            try:
+                return AdaptivePerceptionParser._parse_role_cue_label(raw, allowed_labels)
+            except AdaptiveParseError as exc:
                 raise AdaptiveParseError(
                     "role_cue expected exactly one of: " + ", ".join(allowed_labels)
-                )
-            return label
+                ) from exc
 
         label = self._probe(
             "role_cue",
@@ -10591,17 +10722,21 @@ class AdaptivePerceptionParser:
         normalized: str | None,
         retry_index: int,
         error: str | None,
+        choices: tuple[str, ...] | None = None,
     ) -> None:
-        from ah.diagnostics.session_log import emit
+        from ah.diagnostics.session_log import emit, protocol_preview
 
         emit(
             "pipeline_probe",
             stage=stage,
             role=role,
-            raw=raw,
+            raw=raw[:500],
+            raw_preview=protocol_preview(raw),
             normalized=normalized,
             retry_index=retry_index,
             error=error,
+            accepted=error is None,
+            choices=list(choices) if choices else None,
         )
 
     def _exact_choice_probe(
@@ -10630,8 +10765,8 @@ class AdaptivePerceptionParser:
             role=f"perception_{stage}",
         )
         raw = response.text.strip()
-        label = raw.upper()
-        if label not in choices:
+        label = self._protocol_choice_label(raw, choices)
+        if label is None:
             error = f"expected exactly one of: {', '.join(choices)}"
             self._traces.append(
                 ProbeTrace(stage, user_prompt, raw, None, 0, error)
@@ -10639,14 +10774,17 @@ class AdaptivePerceptionParser:
             self._emit_probe_diagnostic(
                 stage, role=f"perception_{stage}", raw=raw,
                 normalized=None, retry_index=0, error=error,
+                choices=choices,
             )
             raise AdaptiveParseError(
-                f"{stage} expected exactly one of: {', '.join(choices)}"
+                f"{stage} expected exactly one of: {', '.join(choices)}",
+                tuple(self._traces),
             )
         self._traces.append(ProbeTrace(stage, user_prompt, raw, label, 0, None))
         self._emit_probe_diagnostic(
             stage, role=f"perception_{stage}", raw=raw,
             normalized=label, retry_index=0, error=None,
+            choices=choices,
         )
         return label, float("inf")
 
@@ -10689,8 +10827,8 @@ class AdaptivePerceptionParser:
             role=f"semantic_{stage}",
         )
         raw = response.text.strip()
-        label = raw.upper()
-        if label not in choices:
+        label = self._protocol_choice_label(raw, choices)
+        if label is None:
             error = f"expected exactly one of: {', '.join(choices)}"
             self._traces.append(
                 ProbeTrace(stage, user_prompt, raw, None, 0, error)
@@ -10698,14 +10836,16 @@ class AdaptivePerceptionParser:
             self._emit_probe_diagnostic(
                 stage, role=f"semantic_{stage}", raw=raw,
                 normalized=None, retry_index=0, error=error,
+                choices=choices,
             )
             if optional:
                 return None, float("inf")
-            raise AdaptiveParseError(f"{stage} {error}")
+            raise AdaptiveParseError(f"{stage} {error}", tuple(self._traces))
         self._traces.append(ProbeTrace(stage, user_prompt, raw, label, 0, None))
         self._emit_probe_diagnostic(
             stage, role=f"semantic_{stage}", raw=raw,
             normalized=label, retry_index=0, error=None,
+            choices=choices,
         )
         return label, float("inf")
 
@@ -10909,12 +11049,61 @@ class AdaptivePerceptionParser:
         return int(match.group(1))
 
     @classmethod
+    def _protocol_choice_label(cls, raw: str, choices: tuple[str, ...]) -> str | None:
+        """Return a listed protocol label, including a unique numeric suffix.
+
+        Small on-device models often emit ``1`` for ``P1``/``C1``/``R1``.  A bare
+        integer is accepted only when exactly one listed choice has that numeric
+        suffix, so ``NONE``/``CAUSE`` inventories stay exact-match.
+        """
+        label = raw.strip().upper()
+        if label in choices:
+            return label
+        if re.fullmatch(r"\d+", label) is None:
+            return None
+        numbered: dict[str, list[str]] = {}
+        for choice in choices:
+            match = re.fullmatch(r"[A-Z]+(\d+)", choice)
+            if match is None:
+                continue
+            numbered.setdefault(match.group(1), []).append(choice)
+        matches = numbered.get(label, ())
+        if len(matches) == 1:
+            return matches[0]
+        return None
+
+    @classmethod
     def _number_choice(cls, raw: str, choices: dict[int, T]) -> T:
         number = cls._integer(raw)
         if number not in choices:
             allowed = ", ".join(str(n) for n in sorted(choices))
             raise AdaptiveParseError(f"expected one option number: {allowed}")
         return choices[number]
+
+    @classmethod
+    def _parse_role_cue_label(cls, raw: str, allowed_labels: tuple[str, ...]) -> str:
+        """Accept a runtime cue label or its 1-based CHOICES index.
+
+        Small on-device models often echo a prompt heading such as ``QUESTION``
+        or copy a numbered choice line. Headings are not cues. A number, a cue
+        label, or ``<n> <LABEL>`` is accepted only when it names one listed choice.
+        """
+        if not allowed_labels:
+            raise AdaptiveParseError("role cue has no admissible labels")
+        scalar = cls._scalar(raw).upper().replace("-", "_").replace(" ", "_")
+        if scalar in allowed_labels:
+            return scalar
+        match = re.fullmatch(r"(\d+)[_:.\-]*([A-Z][A-Z_]*)?", scalar)
+        if match is not None:
+            index = int(match.group(1))
+            if 1 <= index <= len(allowed_labels):
+                label = allowed_labels[index - 1]
+                rest = match.group(2)
+                if rest in {None, "", label}:
+                    return label
+        raise AdaptiveParseError(
+            "role_cue expected exactly one of: " + ", ".join(allowed_labels)
+        )
 
     @classmethod
     def _word_choice(cls, raw: str, choices: dict[str, T]) -> T:
@@ -11074,6 +11263,61 @@ class AdaptivePerceptionParser:
                 ]
         return tuple(material)
 
+    _PERSONAL_NAME_GRAMMEMES = frozenset({"Name", "Surn", "Patr"})
+
+    def _personal_name_infos(self, token: _SourceToken) -> tuple[MorphInfo, ...]:
+        return tuple(
+            info for info in self._structural_nominal_infos(token)
+            if info.pos == "NOUN" and info.grammemes & self._PERSONAL_NAME_GRAMMEMES
+        )
+
+    def _same_case_personal_name(
+        self,
+        head: _SourceToken,
+        candidate: _SourceToken,
+    ) -> bool:
+        """Whether ``candidate`` is a same-case personal name after a common noun."""
+        name_infos = self._personal_name_infos(candidate)
+        if not name_infos:
+            return False
+        head_infos = tuple(
+            info for info in self._structural_nominal_infos(head)
+            if info.pos == "NOUN" and not (info.grammemes & self._PERSONAL_NAME_GRAMMEMES)
+        )
+        if not head_infos:
+            return False
+        head_cases = {info.case for info in head_infos if info.case}
+        name_cases = {info.case for info in name_infos if info.case}
+        if head_cases and name_cases and head_cases.isdisjoint(name_cases):
+            return False
+        head_numbers = {info.number for info in head_infos if info.number}
+        name_numbers = {info.number for info in name_infos if info.number}
+        if head_numbers and name_numbers and head_numbers.isdisjoint(name_numbers):
+            return False
+        return True
+
+    def _appositive_personal_name_hint(self, span: _Span) -> str | None:
+        graph = self._candidate_graph
+        if graph is None:
+            return None
+        tokens = [
+            graph.token(index)
+            for index in range(span.start_index, span.end_index + 1)
+            if re.search(r"\w", graph.token(index).text)
+        ]
+        for position, token in enumerate(tokens[:-1]):
+            nxt = tokens[position + 1]
+            if self._same_case_personal_name(token, nxt):
+                form = stable_normal_form(
+                    self._personal_name_infos(nxt), poses={"NOUN"}
+                )
+                if form:
+                    if nxt.text[:1].isupper():
+                        return form[:1].upper() + form[1:]
+                    return form
+                return nxt.text
+        return None
+
     def _has_structural_morph(
         self,
         token: _SourceToken,
@@ -11132,6 +11376,35 @@ class AdaptivePerceptionParser:
                 continue
             return True
         return False
+
+    def _wh_licenses_implicit_predicate(
+        self,
+        tokens: tuple[_SourceToken, ...],
+        excluded: list[_Span],
+    ) -> bool:
+        """True when a WH-clause has no verbal head and needs implicit быть."""
+        if getattr(self.morphology, "name", None) == "none":
+            return False
+        excluded_positions = {
+            i
+            for span in excluded
+            for i in range(span.start_index, span.end_index + 1)
+        }
+        words = [
+            token
+            for token in tokens
+            if self._is_word_token(token) and token.index not in excluded_positions
+        ]
+        if not words:
+            return False
+        if not any(token.text.casefold() in _QUESTION_WORDS for token in words):
+            return False
+        return not any(
+            self._has_morph(
+                token, poses={"VERB", "PRED", "INFN", "GRND", "ADJS", "PRTS"}
+            )
+            for token in words
+        )
 
     def _predicate_morph_candidates(
         self,

@@ -3254,6 +3254,120 @@ class IntegrationService:
                     refs_by_key[dep_key] = dependent_ref
         return tuple(integrated)
 
+    _FIRST_POSSESSIVE = {
+        "мой", "моя", "моё", "мое", "мои", "моего", "моей", "моему",
+        "моим", "моими", "моих", "мою",
+    }
+    _SECOND_POSSESSIVE = {
+        "твой", "твоя", "твоё", "твое", "твои", "твоего", "твоей", "твоему",
+        "твоим", "твоими", "твоих", "твою",
+    }
+
+    @classmethod
+    def _possessive_class_lemma(cls, actant: ActantCandidate) -> str | None:
+        """Return the class head of a possessive NP, named or unnamed.
+
+        ``мой друг Дима`` has a distinct Name identity. ``мой кот`` uses the
+        class lemma as the NP head; Integration still needs that lemma to mint
+        ``есть(USER, кот, individual)`` rather than collapsing onto the class.
+        """
+        possessor = next(
+            (
+                relation for relation in actant.nominal_relations
+                if relation.kind is NominalRelationKind.POSSESSOR
+            ),
+            None,
+        )
+        if possessor is None:
+            return None
+        class_lemma = (possessor.head_normalized_hint or possessor.head_mention or "").strip()
+        if not class_lemma:
+            return None
+        mention = (actant.mention or "").casefold()
+        if class_lemma.casefold() not in mention:
+            return None
+        return class_lemma
+
+    def _materialize_possessive_named_referent(
+        self,
+        core: AHCore,
+        source_actants: tuple[ActantCandidate, ...],
+        canonical_actants: dict[ActantRole, Ref | BoundVar],
+        context: InteractionContext,
+        *,
+        domain: Domain,
+        speaker_ref: Ref,
+        addressee_ref: Ref | None,
+        semantic_scope: str | None,
+    ) -> None:
+        """Canonicalize possessive NPs as есть(USER, class, referent).
+
+        Named (``мой друг Дима``) and unnamed (``мой кот``) share this N_ЕСТЬ
+        pattern.  Relational recall then follows the third participant; no
+        NAME/DENOTES ontology is introduced.
+        """
+        if semantic_scope is not None:
+            return
+        resolver = EntityResolver(core)
+        for actant in source_actants:
+            referent = canonical_actants.get(actant.role)
+            if not isinstance(referent, Ref):
+                continue
+            class_lemma = self._possessive_class_lemma(actant)
+            if class_lemma is None:
+                continue
+            owner = None
+            tokens = {
+                token.casefold().replace("ё", "е")
+                for token in re.findall(r"[A-Za-zА-Яа-яЁё-]+", actant.mention or "")
+            }
+            if tokens & {item.replace("ё", "е") for item in self._FIRST_POSSESSIVE}:
+                owner = speaker_ref
+            elif tokens & {item.replace("ё", "е") for item in self._SECOND_POSSESSIVE}:
+                owner = addressee_ref
+            if owner is None:
+                continue
+            class_resolution = resolver.resolve(
+                ActantCandidate(
+                    role=ActantRole.OBJECT,
+                    mention=class_lemma,
+                    normalized_hint=class_lemma,
+                ),
+                context,
+                first_person_ref=speaker_ref,
+                second_person_ref=addressee_ref,
+                preferred_domain=domain,
+            )
+            class_plan = (
+                class_resolution.ref
+                if isinstance(class_resolution, ExistingEntity)
+                else class_resolution
+            )
+            class_ref, _ = self._materialize_entity_plan(core, class_plan, domain)
+            if class_ref == referent or class_ref == owner:
+                continue
+            template = TemplateResolver(core, template_domain=domain).resolve(
+                PredicateCandidate(
+                    "есть",
+                    normalized_hint="есть",
+                    template_candidate=TemplateCandidate(
+                        (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.AUXILLIARY)
+                    ),
+                ),
+                (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.AUXILLIARY),
+            ).template
+            core.add_or_enrich_hypernode(
+                domain,
+                core.ref(template.uid),
+                {
+                    ActantRole.SUBJECT: owner,
+                    ActantRole.OBJECT: class_ref,
+                    ActantRole.AUXILLIARY: referent,
+                },
+                weight=self.config.initial_hypernode_weight,
+                count_occurrence=False,
+            )
+
     def _integrate_assertion(
         self,
         core: AHCore,
@@ -3626,6 +3740,16 @@ class IntegrationService:
             speaker_ref=speaker_ref,
             addressee_ref=addressee_ref,
             entity_local_refs=entity_local_refs,
+            semantic_scope=(semantic_scope or ("NEGATED" if candidate.negated else None)),
+        )
+        self._materialize_possessive_named_referent(
+            core,
+            effective_actants,
+            actants,
+            context,
+            domain=domain,
+            speaker_ref=speaker_ref,
+            addressee_ref=addressee_ref,
             semantic_scope=(semantic_scope or ("NEGATED" if candidate.negated else None)),
         )
 

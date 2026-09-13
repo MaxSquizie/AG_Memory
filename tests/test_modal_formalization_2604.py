@@ -499,3 +499,66 @@ def test_subject_bearing_attitude_is_not_consumed_as_impersonal_modal_shell() ->
     assert result.roots == ()
     assert result.unresolved is None
     assert calls == []
+
+
+def _taxonomy_graph():
+    text = "кот это млекопитающее"
+    graph = _graph(
+        text,
+        (
+            ("кот", "NOUN"),
+            ("это", "PRCL"),
+            ("млекопитающее", "NOUN"),
+        ),
+    )
+    assertion = _assertion(
+        "A1", "млекопитающее", "кот", "кот это млекопитающее", text
+    )
+    return text, graph, assertion
+
+
+def test_unoccupied_particle_eto_is_eligible_as_modal_cue() -> None:
+    """Live pymorphy tags copular это as PRCL; that reading is a modal cue."""
+    text, graph, assertion = _taxonomy_graph()
+    result = ModalScopeBuilder(
+        graph,
+        lambda stage, *_args: "POSSIBLE" if stage == "modal_operator" else "UNCLEAR",
+    ).build(text, (assertion,), {"A1": _Span(3, 3)})
+    assert result.unresolved is None
+    assert len(result.roots) == 1
+    assert _render(result.roots[0].expression) == "POSSIBLE(A1)"
+
+
+def test_copular_eto_linker_token_is_not_a_modal_cue() -> None:
+    text, graph, assertion = _taxonomy_graph()
+    calls = []
+
+    def probe(stage: str, _prompt: str, _choices: tuple[str, ...]) -> str:
+        calls.append(stage)
+        return "POSSIBLE"
+
+    result = ModalScopeBuilder(
+        graph, probe, ignored_token_indices=frozenset({2})
+    ).build(text, (assertion,), {"A1": _Span(3, 3)})
+    assert result.roots == ()
+    assert result.unresolved is None
+    assert calls == []
+
+
+def test_speech_act_complement_is_not_wrapped_as_top_level_modal() -> None:
+    text, graph, assertion = _taxonomy_graph()
+    calls = []
+
+    def probe(stage: str, _prompt: str, _choices: tuple[str, ...]) -> str:
+        calls.append(stage)
+        return "POSSIBLE"
+
+    result = ModalScopeBuilder(graph, probe).build(
+        text,
+        (assertion,),
+        {"A1": _Span(3, 3)},
+        excluded_assertion_ids=frozenset({"A1"}),
+    )
+    assert result.roots == ()
+    assert result.unresolved is None
+    assert calls == []
