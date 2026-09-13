@@ -197,6 +197,21 @@ class QuantifierFormalizer:
                 )
         return binder, nominal
 
+    def _has_attributive_binder_signal(self, phrase: str) -> bool:
+        """Return whether morphology licenses a following nominal restriction.
+
+        A bare personal pronoun is a complete actant, not a detached determiner.
+        Split nominal reconstruction therefore requires an attributive or numeral
+        analysis; generic ``NPRO`` is intentionally insufficient here.
+        """
+
+        return any(
+            item.pos == "NUMR"
+            or bool({"Apro", "Anum", "Ques", "Dmns"} & set(item.grammemes))
+            for token in self._tokens(phrase)
+            for item in material_analyses(self._analyses(token))
+        )
+
     def _analyses(self, token: str):
         try:
             return tuple(self.morphology.analyze_all(token))
@@ -301,9 +316,13 @@ class QuantifierFormalizer:
                 continue
             left_phrase = source_text[left_evidence.start : left_evidence.end]
             right_phrase = source_text[right_evidence.start : right_evidence.end]
-            left_binder, left_nominal = self._phrase_profile(left_phrase)
+            _left_binder, left_nominal = self._phrase_profile(left_phrase)
             _right_binder, right_nominal = self._phrase_profile(right_phrase)
-            if not left_binder or left_nominal or not right_nominal:
+            if (
+                not self._has_attributive_binder_signal(left_phrase)
+                or left_nominal
+                or not right_nominal
+            ):
                 continue
 
             start = int(left_evidence.start)

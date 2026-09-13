@@ -319,6 +319,45 @@ def test_split_partitive_binder_is_fused_with_nominal_restriction(
     assert actants[0].quantifier.restriction_lemma == restriction
 
 
+def test_bare_pronoun_is_not_fused_with_adjacent_dative_actant() -> None:
+    class PronounGrammar(Grammar):
+        def analyze_all(self, word: str):
+            values = {
+                "его": (MorphInfo("он", "NPRO", case="accs", score=1.0),),
+                "Марии": (MorphInfo("Мария", "NOUN", case="datv", score=1.0),),
+            }
+            return values.get(word, super().analyze_all(word))
+
+    text = "Иван отправил его Марии."
+    left_start = text.index("его")
+    right_start = text.index("Марии")
+    assertion_candidate = AssertionCandidate(
+        "A1",
+        PredicateCandidate("отправил", "отправить"),
+        (
+            ActantCandidate(
+                ActantRole.OBJECT,
+                mention="его",
+                evidence=EvidenceSpan("его", left_start, left_start + 3),
+            ),
+            ActantCandidate(
+                ActantRole.RECIPIENT,
+                mention="Марии",
+                evidence=EvidenceSpan("Марии", right_start, right_start + 5),
+            ),
+        ),
+    )
+    result = QuantifierFormalizer(PronounGrammar()).formalize(
+        PerceptionResult(text, assertions=(assertion_candidate,)),
+        resolver=lambda *_args: QuantifierProbeDecision.NONE,
+    )
+
+    assert [(item.role, item.mention) for item in result.assertions[0].actants] == [
+        (ActantRole.OBJECT, "его"),
+        (ActantRole.RECIPIENT, "Марии"),
+    ]
+
+
 def test_hyphenated_role_binder_is_fused_with_its_head_noun() -> None:
     text = "Он открыл дверь каким-нибудь ключом."
     result = _split_binder_result(
