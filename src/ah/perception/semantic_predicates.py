@@ -27,22 +27,36 @@ from .llm_parser import (
 class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
     """Production semantic normalization after source-structural parsing.
 
-    This layer contains no phrase inventory.  It does three bounded jobs:
-
-    * for an implicit nominal *question*, provide provisional grammatical roles so
-      the base parser can finish before the existing identity-query rewrite decides
-      whether the construction is identity or ordinary predication;
-    * distinguish a possession relation from an unrelated binary predicate and give
-      all possession paraphrases one canonical predicate lemma;
-    * when a possession question contains a bare nominal SUBJECT, distinguish a
-      generic class-level question from a question about one specific entity.  A
-      generic reading becomes the existing typed FORALL query contract instead of
-      fabricating an entity named after the class.
-
-    Canonical AH UIDs are unavailable here.
+    This layer contains no phrase inventory. It supplies source-structural staging
+    for zero-copula identity questions, normalizes possession paraphrases to one
+    semantic predicate, and can promote a genuinely generic possession question to
+    the existing typed FORALL-query contract. Canonical AH UIDs are unavailable.
     """
 
     _POSSESSION_CANONICAL_PREDICATE = "иметь"
+
+    def _explicit_question_words(self, tokens, predicate_span=None):
+        """Keep WH material as an actant inside a zero-copula nominal question.
+
+        In ``Кто Илья?`` there is no written predicate. Treating ``Кто`` as a role
+        gap removes it before the identity layer can see the complete nominal shell.
+        When no predicate span exists and the same clause also contains ordinary
+        nominal material, the interrogative remains source material of the implicit
+        copula. Clause force is still QUERY because ``_question_form`` is unchanged.
+        """
+        result = super()._explicit_question_words(tokens, predicate_span)
+        if predicate_span is not None or not result:
+            return result
+        graph = self._candidate_graph
+        if graph is None:
+            return result
+        question_indices = {token.index for token in result}
+        has_non_question_nominal = any(
+            token.index not in question_indices
+            and self._structural_nominal_infos(token)
+            for token in tokens
+        )
+        return () if has_non_question_nominal else result
 
     def _deterministic_role_candidates(
         self,
@@ -51,13 +65,9 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
         predicate,
         span,
     ):
-        # ``Кто Илья?`` contains no written copula.  The generic role probe sees two
-        # bare nominals and can legitimately return UNCLEAR before the higher-level
-        # identity layer gets a chance to inspect the complete shell.  For an
-        # IMPLICIT copula only, morphology already tells us which source token is
-        # interrogative.  SUBJECT/STATE are provisional copular roles, not the final
-        # identity interpretation; the bounded identity decision consumes them when
-        # appropriate.  Assertions such as ``Я Илья`` are deliberately untouched.
+        # Provisional roles for an implicit nominal question. They only let the
+        # base parser finish; IdentityQueryAdaptiveParser subsequently decides
+        # identity-vs-ordinary predication from the whole source.
         if (predicate.sense_hint or "").upper() == "IMPLICIT":
             graph = self._candidate_graph
             clause = None if graph is None else graph.clause_for_token(span.start_index)
@@ -141,10 +151,6 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
             predicate,
             normalized_hint=canonical,
             sense_hint="POSSESSION",
-            # A selection made for a lexically different predicate cannot survive
-            # semantic canonicalization. Integration will deterministically resolve
-            # the canonical predicate/template again. If it was already canonical,
-            # preserve the existing selection.
             template_selection=(predicate.template_selection if same_lookup else None),
         )
         if rewritten_predicate == predicate:
