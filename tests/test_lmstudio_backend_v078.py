@@ -368,6 +368,40 @@ def test_lmstudio_backend_uses_native_reasoning_off_transport_for_bounded_protoc
     assert diag.response_text == "SUBJECT"
 
 
+def test_lmstudio_backend_routes_lexical_choice_through_reasoning_off_transport():
+    cfg = load_config(PROJECT / "config" / "lmstudio.toml")
+    backend = LMStudioBackend(cfg)
+    backend._running = backend._ready = True
+    backend._active_model = "new/model"
+    captured = {}
+
+    def fake_native_chat(**kwargs):
+        captured.update(kwargs)
+        return {
+            "output": [{"type": "message", "content": "C2"}],
+            "stats": {
+                "input_tokens": 40,
+                "total_output_tokens": 1,
+                "reasoning_output_tokens": 0,
+            },
+        }
+
+    with patch.object(
+        backend._client, "native_chat", side_effect=fake_native_chat
+    ), patch.object(backend._client, "chat_completions") as compat:
+        response = backend.generate(
+            "Choose C1, C2, or UNKNOWN.",
+            system="Protocol only.",
+            role="lexical_recovery_choice",
+            override={"max_new_tokens": 4, "enable_thinking": False},
+        )
+
+    assert response.text == "C2"
+    assert captured["reasoning"] == "off"
+    assert captured["max_tokens"] == 4
+    compat.assert_not_called()
+
+
 def test_lmstudio_backend_keeps_openai_compat_transport_for_nonprobe_generation():
     cfg = load_config(PROJECT / "config" / "lmstudio.toml")
     backend = LMStudioBackend(cfg)
