@@ -11,7 +11,7 @@ from ah.integration.entity_resolver import (
 )
 from ah.integration.identity_entity_resolver import IdentityAwareEntityResolver
 from ah.integration.identity_graph import identity_name_refs_for_owner, identity_name_text
-from ah.model import Ref, RefKind, SemanticEntity
+from ah.model import ActantRole, Domain, Ref, RefKind, SemanticEntity
 from ah.perception.query_semantics import EntityIdentityQueryCandidate
 
 from .attention import InferenceAttention
@@ -32,7 +32,7 @@ from .context import ProofContext
 
 @dataclass(frozen=True, slots=True)
 class EntityIdentityGoal:
-    """Read explicit canonical identity-name semantics for one entity M."""
+    """Describe one canonical entity from explicit identity/classification evidence."""
 
     target: Ref
 
@@ -42,7 +42,7 @@ class EntityIdentityGoal:
 
 
 class EntityIdentityQueryGoalBuilder(IdentityAwareEventQueryGoalBuilder):
-    """Resolve one typed identity-query target through canonical name graph edges."""
+    """Resolve one typed identity-query target through canonical entity semantics."""
 
     def build(
         self,
@@ -87,13 +87,20 @@ class EntityIdentityQueryGoalBuilder(IdentityAwareEventQueryGoalBuilder):
             attention.append(ref)
         return QueryBuildResult(
             InferenceQuery(GoalSpec(EntityIdentityGoal(resolution.ref))),
-            ("semantic:entity_identity", "semantic:identity_name_graph"),
+            ("semantic:entity_identity", "semantic:identity_or_description"),
             tuple(attention),
         )
 
 
 class EntityIdentityInferenceEngine(EventSetInferenceEngine):
-    """Inference extension for explicit canonical entity-name relations."""
+    """Inference extension for explicit identity names and factual class descriptors.
+
+    ``Кто X?`` is not merely a request to echo X's lexical label.  A useful answer
+    requires canonical evidence that identifies/describes the entity: an explicit
+    IDENTITY_NAME edge or an asserted unary conceptual proposition such as
+    ``студент(SUBJECT=Алексей)``.  Descriptor lookup is reverse-indexed from the
+    target M and therefore does not scan the AH.
+    """
 
     @staticmethod
     def _append_unique(values: list[str], value: object) -> None:
@@ -129,6 +136,40 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
             if value is not None:
                 self._append_unique(values, value)
         return tuple(values), explicit_refs
+
+    def _descriptor_refs(self, target: Ref, runtime: GoalRuntime) -> tuple[Ref, ...]:
+        """Return asserted unary C-domain descriptions whose SUBJECT is target."""
+        candidates = tuple(self.core.store.hypernodes_for_actant(target.uid))
+        runtime.memory_query(
+            "ENTITY_DESCRIPTORS",
+            f"subject={target.uid}",
+            logical_depth=0,
+            focus_ref=target,
+            candidate_count=len(candidates),
+            detail="reverse actant index; only asserted unary conceptual SUBJECT facts qualify",
+        )
+        out: list[Ref] = []
+        for node in candidates:
+            if self.core.store.domain_of(node.uid) is not Domain.C:
+                continue
+            if node.meta.get("semantic_scope"):
+                continue
+            if int(node.meta.get("occurrence_count", 0)) <= 0:
+                continue
+            if node.actants.get(ActantRole.SUBJECT) != target:
+                continue
+            try:
+                template = self.core.store.get_template(node.template.uid)
+            except KeyError:
+                continue
+            if tuple(template.roles) != (ActantRole.SUBJECT,):
+                continue
+            ref = self.core.ref(node.uid)
+            if self.conflicts.is_conflicted(ref) or self._false_wrapper(node.uid) is not None:
+                continue
+            out.append(ref)
+        out.sort(key=lambda ref: self.core.store.creation_sequence(ref.uid))
+        return tuple(out)
 
     def _solve_goal(
         self,
@@ -189,15 +230,20 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
             )
 
         labels, explicit_name_refs = self._identity_labels(goal.target, entity)
+        descriptor_refs = self._descriptor_refs(goal.target, runtime)
         runtime.memory_query(
             "ENTITY_IDENTITY",
             goal.target.uid,
             logical_depth=0,
             focus_ref=goal.target,
-            candidate_count=len(labels),
-            detail="read indexed IDENTITY_NAME edges plus canonical name/alias properties",
+            candidate_count=len(explicit_name_refs) + len(descriptor_refs),
+            detail="explicit IDENTITY_NAME support plus asserted unary conceptual descriptions",
         )
-        if not labels:
+
+        # A primary ``name`` property alone merely lets lexical resolution find the
+        # entity.  It is not by itself an answer to "who/what is X?"; otherwise any
+        # freshly mentioned unknown entity would tautologically identify itself.
+        if not explicit_name_refs and not descriptor_refs:
             return InferenceOutcome(
                 LogicalStatus.UNKNOWN,
                 StopReason.SEARCH_EXHAUSTED,
@@ -206,19 +252,21 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
                 (goal.target,),
                 self.core.store.domain_of(goal.target.uid),
                 1,
-                ("Entity has no asserted canonical identity label",),
+                ("Entity is addressable but has no asserted identity/classification evidence",),
                 proof_context=proof_context,
             )
 
+        for ref in (*explicit_name_refs, *descriptor_refs):
+            runtime.focus(ref, logical_depth=0, reason="entity identity/description support")
         runtime.rule(
             "ENTITY_IDENTITY",
             logical_depth=0,
             detail=(
-                f"{len(labels)} identifying label(s); "
-                f"{len(explicit_name_refs)} explicit IDENTITY_NAME node(s)"
+                f"labels={len(labels)}; explicit_names={len(explicit_name_refs)}; "
+                f"descriptors={len(descriptor_refs)}"
             ),
         )
-        proof_refs = (goal.target, *explicit_name_refs)
+        proof_refs = (goal.target, *explicit_name_refs, *descriptor_refs)
         return InferenceOutcome(
             LogicalStatus.PROVED,
             StopReason.GOAL_SATISFIED,
@@ -227,7 +275,7 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
             proof_refs,
             self.core.store.domain_of(goal.target.uid),
             1,
-            ("Resolved entity identity from explicit canonical identity-name graph",),
+            ("Resolved entity identity/description from explicit canonical evidence",),
             proof_support=(),
             proof_context=proof_context,
         )
