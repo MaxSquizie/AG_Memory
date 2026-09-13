@@ -1761,18 +1761,31 @@ class AdaptivePerceptionParser:
         )
 
     def _unique_realization_roles(self, source_actants, target_evidence, tokens):
+        aligned_indices = self._unique_realization_slots(
+            source_actants, target_evidence, tokens
+        )
+        return {
+            target_index: source_actants[source_index].role
+            for target_index, source_index in aligned_indices.items()
+        }
+
+    def _unique_realization_slots(self, source_actants, target_evidence, tokens):
+        """Return isolated target-index -> source-index grammatical matches."""
+
         # Compatibility is grammatical possibility, not analyser-score ranking.
         # Transfer only isolated edges of the bipartite correspondence: neither
         # the source slot nor the target phrase may have a competing counterpart.
-        source = [(item.role, self._realization_signature(item.evidence, tokens))
-                  for item in source_actants]
+        source = [
+            self._realization_signature(item.evidence, tokens)
+            for item in source_actants
+        ]
         target = [self._realization_signature(evidence, tokens) for evidence in target_evidence]
         aligned = {}
         used_source = set()
         # Preserve exact parallel feature bundles first. Context can then narrow
         # case-syncretic remaining phrases, but cannot displace an exact pair.
         for exact in (True, False):
-            edges = [(i, j) for i, (_, signature) in enumerate(source)
+            edges = [(i, j) for i, signature in enumerate(source)
                      for j, other in enumerate(target)
                      if i not in used_source and j not in aligned
                      and signature is not None and other is not None
@@ -1781,7 +1794,7 @@ class AdaptivePerceptionParser:
                         if sum(a == i for a, _ in edges) == 1
                         and sum(b == j for _, b in edges) == 1]
             for i, j in isolated:
-                aligned[j] = source[i][0]
+                aligned[j] = i
                 used_source.add(i)
         return aligned
 
@@ -2167,6 +2180,31 @@ class AdaptivePerceptionParser:
                     spans_out.pop(local_id, None)
                 source_by_clause.pop(clause.clause_id, None)
 
+            # A rooted control frame may contain the same canonical role at
+            # different levels (matrix RECIPIENT and embedded RECIPIENT), while
+            # one controller identity also occupies two roles (matrix RECIPIENT
+            # and child SUBJECT). A flat role map cannot represent that topology.
+            # Keep one source slot per explicit identity and let grammatical
+            # realization align the target phrases to those identities.
+            identity_slots: list[ActantCandidate] = []
+            identity_slot_keys: list[tuple[object, ...]] = []
+            for source_item in component:
+                for source_actant in source_item.actants:
+                    if (
+                        source_actant.candidate_ref is not None
+                        or source_actant.proposition is not None
+                    ):
+                        continue
+                    identity = actant_identity(source_actant)
+                    if identity is None or identity in identity_slot_keys:
+                        continue
+                    identity_slot_keys.append(identity)
+                    identity_slots.append(source_actant)
+            hierarchical_identity_frame = len(identity_slots) > len(source_slots)
+            hierarchical_replacements: dict[
+                tuple[object, ...], ActantCandidate
+            ] | None = None
+
             old_hints = getattr(self, "_ellipsis_role_hints", {})
             old_active_clause = self._active_implicit_clause_id
             old_blocked = set(getattr(self, "_runtime_blocked_token_indices", set()))
@@ -2178,30 +2216,52 @@ class AdaptivePerceptionParser:
             self._runtime_reclaimed_predicate_indices = old_reclaimed | reclaimed_predicates
             try:
                 target_spans = self._candidate_phrase_spans(text, tokens, None, [], requested_spans=())
-                target_source = realization_representatives(
-                    source_slots,
-                    candidates,
-                    tuple(span.evidence for span in target_spans),
-                )
-                aligned = self._unique_realization_roles(
-                    target_source,
-                    [span.evidence for span in target_spans],
-                    tokens,
-                )
-                self._ellipsis_role_hints = {
-                    (target_spans[index].start_index, target_spans[index].end_index): role
-                    for index, role in aligned.items()
-                }
-                target_actants, _ = self._extract_actants(
-                    text,
-                    tokens,
-                    None,
-                    source.predicate,
-                    act_type="ASSERTION",
-                    requested_roles=(),
-                    requested_spans=(),
-                    role_whitelist=source_roles,
-                )
+                if hierarchical_identity_frame:
+                    slot_alignment = self._unique_realization_slots(
+                        identity_slots,
+                        [span.evidence for span in target_spans],
+                        tokens,
+                    )
+                    if (
+                        len(target_spans) != len(identity_slots)
+                        or len(slot_alignment) != len(target_spans)
+                    ):
+                        unresolved(clause, "hierarchical_slot_alignment_not_unique")
+                    hierarchical_replacements = {}
+                    built: list[ActantCandidate] = []
+                    for target_index, target_span in enumerate(target_spans):
+                        source_index = slot_alignment[target_index]
+                        source_slot = identity_slots[source_index]
+                        identity = identity_slot_keys[source_index]
+                        replacement = self._make_actant(source_slot.role, target_span)
+                        hierarchical_replacements[identity] = replacement
+                        built.append(replacement)
+                    target_actants = tuple(built)
+                else:
+                    target_source = realization_representatives(
+                        source_slots,
+                        candidates,
+                        tuple(span.evidence for span in target_spans),
+                    )
+                    aligned = self._unique_realization_roles(
+                        target_source,
+                        [span.evidence for span in target_spans],
+                        tokens,
+                    )
+                    self._ellipsis_role_hints = {
+                        (target_spans[index].start_index, target_spans[index].end_index): role
+                        for index, role in aligned.items()
+                    }
+                    target_actants, _ = self._extract_actants(
+                        text,
+                        tokens,
+                        None,
+                        source.predicate,
+                        act_type="ASSERTION",
+                        requested_roles=(),
+                        requested_spans=(),
+                        role_whitelist=source_roles,
+                    )
             finally:
                 self._ellipsis_role_hints = old_hints
                 self._active_implicit_clause_id = old_active_clause
@@ -2229,63 +2289,72 @@ class AdaptivePerceptionParser:
             # Exact source-grounded bundles are aligned before compatible
             # syncretic bundles, even if a bounded semantic probe initially swaps
             # two roles in the target frame.
-            target_source = realization_representatives(
-                source_slots,
-                candidates,
-                tuple(item.evidence for item in target_actants),
-            )
-            alignment = self._unique_realization_roles(
-                target_source,
-                [item.evidence for item in target_actants],
-                tokens,
-            )
-            aligned: list[ActantCandidate] = []
-            alignment_changed = False
-            for index, target_actant in enumerate(target_actants):
-                aligned_role = alignment.get(index)
-                if aligned_role is not None and aligned_role is not target_actant.role:
-                    target_actant = replace(target_actant, role=aligned_role)
-                    alignment_changed = True
-                aligned.append(target_actant)
-            if alignment_changed:
-                target_actants = tuple(aligned)
-                self._deterministic_trace(
-                    "ellipsis_slot_alignment",
-                    f"SOURCE:{source.local_id}\nTARGET_CLAUSE:{clause.span.text}",
-                    ",".join(f"{item.role.value}:{item.mention or item.normalized_hint or '?'}" for item in target_actants),
+            if hierarchical_replacements is None:
+                target_source = realization_representatives(
+                    source_slots,
+                    candidates,
+                    tuple(item.evidence for item in target_actants),
                 )
+                alignment = self._unique_realization_roles(
+                    target_source,
+                    [item.evidence for item in target_actants],
+                    tokens,
+                )
+                aligned: list[ActantCandidate] = []
+                alignment_changed = False
+                for index, target_actant in enumerate(target_actants):
+                    aligned_role = alignment.get(index)
+                    if aligned_role is not None and aligned_role is not target_actant.role:
+                        target_actant = replace(target_actant, role=aligned_role)
+                        alignment_changed = True
+                    aligned.append(target_actant)
+                if alignment_changed:
+                    target_actants = tuple(aligned)
+                    self._deterministic_trace(
+                        "ellipsis_slot_alignment",
+                        f"SOURCE:{source.local_id}\nTARGET_CLAUSE:{clause.span.text}",
+                        ",".join(f"{item.role.value}:{item.mention or item.normalized_hint or '?'}" for item in target_actants),
+                    )
 
             # One canonical slot cannot silently keep only the final filler.
             # Coordinated fillers must arrive as one explicit composition.
             if not target_actants:
                 unresolved(clause, "no_explicit_target_roles")
-            explicit_by_role = {actant.role: actant for actant in target_actants}
-            if len(explicit_by_role) != len(target_actants):
-                unresolved(clause, "duplicate_target_roles")
-            if not set(explicit_by_role) <= source_roles:
-                unresolved(clause, "target_role_outside_source_frame")
-            unresolved_inherited = set(ambiguous_source_roles or ()) - set(explicit_by_role)
-            if unresolved_inherited:
-                unresolved(
-                    clause,
-                    "source_identity_ambiguity_would_be_inherited:"
-                    + ",".join(sorted(role.value for role in unresolved_inherited)),
-                )
-            replacement_by_identity: dict[tuple[object, ...], ActantCandidate] = {}
-            for role, replacement in explicit_by_role.items():
-                source_slot = source_slots.get(role)
-                identity = None if source_slot is None else actant_identity(source_slot)
-                if identity is None:
-                    unresolved(clause, "explicit_role_has_no_source_identity")
-                previous = replacement_by_identity.get(identity)
-                if previous is not None and previous != replacement:
-                    unresolved(clause, "conflicting_correlated_role_replacements")
-                replacement_by_identity[identity] = replacement
+            if hierarchical_replacements is None:
+                explicit_by_role = {actant.role: actant for actant in target_actants}
+                if len(explicit_by_role) != len(target_actants):
+                    unresolved(clause, "duplicate_target_roles")
+                if not set(explicit_by_role) <= source_roles:
+                    unresolved(clause, "target_role_outside_source_frame")
+                unresolved_inherited = set(ambiguous_source_roles or ()) - set(explicit_by_role)
+                if unresolved_inherited:
+                    unresolved(
+                        clause,
+                        "source_identity_ambiguity_would_be_inherited:"
+                        + ",".join(sorted(role.value for role in unresolved_inherited)),
+                    )
+                replacement_by_identity: dict[tuple[object, ...], ActantCandidate] = {}
+                for role, replacement in explicit_by_role.items():
+                    source_slot = source_slots.get(role)
+                    identity = None if source_slot is None else actant_identity(source_slot)
+                    if identity is None:
+                        unresolved(clause, "explicit_role_has_no_source_identity")
+                    previous = replacement_by_identity.get(identity)
+                    if previous is not None and previous != replacement:
+                        unresolved(clause, "conflicting_correlated_role_replacements")
+                    replacement_by_identity[identity] = replacement
 
-            inherited_roles = sorted(
-                role.value for role in source_roles if role not in explicit_by_role
-            )
-            replaced_roles = sorted(role.value for role in explicit_by_role)
+                inherited_roles = sorted(
+                    role.value for role in source_roles if role not in explicit_by_role
+                )
+                replaced_roles = sorted(role.value for role in explicit_by_role)
+            else:
+                replacement_by_identity = hierarchical_replacements
+                inherited_roles = []
+                replaced_roles = sorted(
+                    f"{item.role.value}@{index}"
+                    for index, item in enumerate(identity_slots, start=1)
+                )
 
             kind = clause.ellipsis_kind
             if kind is EllipsisKind.PROPOSITION_NEGATION and source.negated:
