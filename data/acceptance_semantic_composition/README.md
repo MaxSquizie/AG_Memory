@@ -16,3 +16,10 @@ corresponding existential.
 The sentence corpus is oracle data, not a phrase dictionary.  Production code may
 use morphology/structure to narrow a candidate and one bounded semantic choice to
 classify it, but may not contain these strings or enumerate their paraphrases.
+
+## A2 — proposition query goals
+
+`a2_cases.txt` and `a2_oracle.json` specify read-only OR/XOR expression goals and
+compound proposition-valued matrix queries.  The contract distinguishes explicit
+falsehood from open-world `UNKNOWN`, requires exact-one XOR semantics, and forbids
+query-side canonical writes.

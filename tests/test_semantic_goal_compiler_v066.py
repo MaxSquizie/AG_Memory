@@ -7,8 +7,10 @@ from ah.config import InferenceSettings, IntegrationSettings
 from ah.core import AHCore, SequentialUidGenerator
 from ah.inference import (
     AllOfGoal,
+    AnyOfGoal,
     CauseEntailmentGoal,
     InferenceEngine,
+    ExactlyOneOfGoal,
     LogicalStatus,
     RelationGoal,
     SemanticGoalCompiler,
@@ -244,7 +246,7 @@ def test_cause_entailment_uses_asserted_source_as_explicit_premise():
     assert outcome.logical_depth == 2
 
 
-def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and():
+def test_explicit_proposition_and_or_xor_compile_to_distinct_typed_goals():
     core, context, integration, engine = _runtime()
     a = core.add_entity(Domain.C, properties={"name": Property("name", "A", "str")})
     b = core.add_entity(Domain.C, properties={"name": Property("name", "B", "str")})
@@ -297,8 +299,9 @@ def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and(
     commit_or = integration.integrate_external(perception_or, context)
     built_or = SemanticGoalCompiler(core).build(commit_or, context, perception_or)
     assert len(built_or) == 1
-    assert built_or[0].goal is None
-    assert built_or[0].diagnostics == ("semantic:OR_goal_not_supported",)
+    assert isinstance(built_or[0].goal.goal.target, AnyOfGoal)
+    assert built_or[0].diagnostics[0] == "semantic:explicit_OR"
+    assert engine.solve(built_or[0].goal).status is LogicalStatus.PROVED
 
     xor_expr = PropositionExprCandidate(
         PropositionOperator.XOR,
@@ -320,10 +323,10 @@ def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and(
         commit_xor, context, perception_xor
     )
     assert len(built_xor) == 1
-    assert built_xor[0].goal is None
-    assert built_xor[0].diagnostics == (
-        "semantic:XOR_goal_not_supported",
-    )
+    assert isinstance(built_xor[0].goal.goal.target, ExactlyOneOfGoal)
+    assert built_xor[0].diagnostics[0] == "semantic:explicit_XOR"
+    # Both structural relation branches are proved, so exact-one is false.
+    assert engine.solve(built_xor[0].goal).status is LogicalStatus.DISPROVED
 
 
 def test_modal_proposition_goal_is_read_only_and_does_not_prove_operand():

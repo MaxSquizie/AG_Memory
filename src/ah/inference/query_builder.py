@@ -26,8 +26,10 @@ from ah.integration.entity_resolver import (
 
 from .contracts import (
     AllOfGoal,
+    AnyOfGoal,
     CauseEntailmentGoal,
     ExistsGoal,
+    ExactlyOneOfGoal,
     FormulaGoal,
     GoalSpec,
     InferenceQuery,
@@ -249,7 +251,7 @@ class SemanticGoalCompiler:
                         return QueryBuildResult(
                             None,
                             (
-                                "semantic:matrix_query_compound_proposition_not_supported",
+                                "semantic:matrix_query_formula_pattern_unresolved",
                             ),
                         )
                     assert expr.ref is not None
@@ -370,16 +372,16 @@ class SemanticGoalCompiler:
         return None
 
     @staticmethod
-    def _has_explicit_alternative(
+    def _explicit_alternative_operator(
         expressions: tuple[PropositionExprCandidate, ...], target_ids: set[str]
-    ) -> bool:
+    ) -> PropositionOperator | None:
         for expr in expressions:
             if (
                 expr.operator in {PropositionOperator.OR, PropositionOperator.XOR}
                 and set(expr.leaf_refs()) == target_ids
             ):
-                return True
-        return False
+                return expr.operator
+        return None
 
     def _resolve_query_relation(
         self,
@@ -549,6 +551,64 @@ class SemanticGoalCompiler:
         )
         return [merged, *invalid]
 
+    @staticmethod
+    def _merge_alternative_queries(
+        parts: list[QueryBuildResult],
+        *,
+        operator: PropositionOperator,
+    ) -> list[QueryBuildResult]:
+        valid = [item for item in parts if item.goal is not None]
+        invalid = [item for item in parts if item.goal is None]
+        if invalid or len(valid) < 2:
+            return [
+                QueryBuildResult(
+                    None,
+                    (
+                        f"semantic:{operator.value}_goal_unresolved",
+                        *(
+                            diagnostic
+                            for item in invalid
+                            for diagnostic in item.diagnostics
+                        ),
+                    ),
+                ),
+            ]
+
+        children = tuple(item.goal.goal.target for item in valid)
+        target = (
+            AnyOfGoal(children)
+            if operator is PropositionOperator.OR
+            else ExactlyOneOfGoal(children)
+        )
+        premises: list[Ref] = []
+        attention: list[Ref] = []
+        premise_seen: set[tuple[str, str]] = set()
+        attention_seen: set[tuple[str, str]] = set()
+        diagnostics = [f"semantic:explicit_{operator.value}"]
+        for item in valid:
+            diagnostics.extend(item.diagnostics)
+            assert item.goal is not None
+            for ref in item.goal.premise_refs:
+                key = (ref.kind.value, ref.uid)
+                if key not in premise_seen:
+                    premise_seen.add(key)
+                    premises.append(ref)
+            for ref in item.attention_refs:
+                key = (ref.kind.value, ref.uid)
+                if key not in attention_seen:
+                    attention_seen.add(key)
+                    attention.append(ref)
+        return [
+            QueryBuildResult(
+                InferenceQuery(
+                    GoalSpec(target),
+                    premise_refs=tuple(premises),
+                ),
+                tuple(diagnostics),
+                tuple(attention),
+            )
+        ]
+
     def _compile_scope(
         self,
         *,
@@ -576,24 +636,9 @@ class SemanticGoalCompiler:
                     ),
                 )
             ]
-        if self._has_explicit_alternative(expressions, target_ids):
-            operator = next(
-                (
-                    expr.operator.value
-                    for expr in expressions
-                    if expr.operator in {
-                        PropositionOperator.OR, PropositionOperator.XOR
-                    }
-                    and set(expr.leaf_refs()) == target_ids
-                ),
-                "ALTERNATIVE",
-            )
-            return [
-                QueryBuildResult(
-                    None,
-                    (f"semantic:{operator}_goal_not_supported",),
-                )
-            ]
+        alternative_operator = self._explicit_alternative_operator(
+            expressions, target_ids
+        )
         explicit_and = self._has_explicit_and(expressions, target_ids)
         parts: list[QueryBuildResult] = []
         covered: set[str] = set()
@@ -673,6 +718,11 @@ class SemanticGoalCompiler:
             if integrated is not None:
                 parts.append(self._embedded_exists(integrated))
 
+        if alternative_operator is not None:
+            return self._merge_alternative_queries(
+                parts,
+                operator=alternative_operator,
+            )
         return self._merge_queries(
             parts,
             conjunction=explicit_and,

@@ -170,7 +170,29 @@ class AllOfGoal:
             raise ValueError("AllOfGoal requires at least two child goals")
 
 
-InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal
+@dataclass(frozen=True, slots=True)
+class AnyOfGoal:
+    """Disjunctive typed target; one proved child is sufficient."""
+
+    goals: tuple["InferenceGoal", ...]
+
+    def __post_init__(self) -> None:
+        if len(self.goals) < 2:
+            raise ValueError("AnyOfGoal requires at least two child goals")
+
+
+@dataclass(frozen=True, slots=True)
+class ExactlyOneOfGoal:
+    """Exclusive typed target; exactly one child must be proved."""
+
+    goals: tuple["InferenceGoal", ...]
+
+    def __post_init__(self) -> None:
+        if len(self.goals) < 2:
+            raise ValueError("ExactlyOneOfGoal requires at least two child goals")
+
+
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal | AnyOfGoal | ExactlyOneOfGoal
 GoalTarget = InferenceGoal | AssociationGoal
 
 

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import Mapping
 
 from ah.agent import InteractionContext
 from ah.integration.contracts import IntegrationCommit
-from ah.model import FunctionSymbol, Ref, RefKind
+from ah.model import ActantRole, FunctionSymbol, Ref, RefKind
 from ah.perception import (
     AssertionStatus,
     PerceptionResult,
@@ -19,13 +20,18 @@ from .contracts import (
     AllOfGoal,
     FormulaGoal,
     GoalSpec,
+    ExistingRefConclusion,
     InferenceOutcome,
     InferenceQuery,
     LogicalStatus,
+    MultiRoleBindingConclusion,
+    ProofSupport,
+    RoleBindingConclusion,
     StopReason,
 )
 from .counterfactual_goal import CounterfactualSemanticGoalCompiler
 from .engine import InferenceEngine as _BaseInferenceEngine
+from .domain import domain_from_premises
 from .query_builder import QueryBuildResult
 from .runtime import GoalRuntime
 
@@ -89,6 +95,30 @@ class FormulaPatternGoal:
     pattern: FormulaPattern
 
 
+@dataclass(frozen=True, slots=True)
+class MatrixFormulaPatternGoal:
+    """Read-only matrix proposition match with structural formula-valued roles."""
+
+    template_ref: Ref
+    known_roles: Mapping[ActantRole, Ref]
+    proposition_roles: Mapping[ActantRole, FormulaPattern]
+    requested_roles: tuple[ActantRole, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.template_ref.kind is not RefKind.T:
+            raise ValueError("MatrixFormulaPatternGoal.template_ref must reference T")
+        if not self.proposition_roles:
+            raise ValueError("MatrixFormulaPatternGoal requires a proposition role")
+        if set(self.known_roles) & set(self.proposition_roles):
+            raise ValueError("MatrixFormulaPatternGoal role constraints must not overlap")
+        if len(set(self.requested_roles)) != len(self.requested_roles):
+            raise ValueError("MatrixFormulaPatternGoal.requested_roles must be unique")
+        if set(self.requested_roles) & (
+            set(self.known_roles) | set(self.proposition_roles)
+        ):
+            raise ValueError("Requested matrix roles cannot also be constrained")
+
+
 class ModalSemanticGoalCompiler(CounterfactualSemanticGoalCompiler):
     """Compile typed modal query AST into a read-only structural formula goal.
 
@@ -107,6 +137,21 @@ class ModalSemanticGoalCompiler(CounterfactualSemanticGoalCompiler):
         if expr.operator.value in _MODAL_OPERATORS:
             return True
         return any(ModalSemanticGoalCompiler._contains_modal(item) for item in expr.members)
+
+    @staticmethod
+    def _requires_pattern_goal(expr: PropositionExprCandidate) -> bool:
+        if expr.operator in {
+            PropositionOperator.OR,
+            PropositionOperator.XOR,
+            PropositionOperator.POSSIBLE,
+            PropositionOperator.REQUIRED,
+            PropositionOperator.PERMITTED,
+        }:
+            return True
+        return any(
+            ModalSemanticGoalCompiler._requires_pattern_goal(item)
+            for item in expr.members
+        )
 
     def _pattern_for_canonical_ref(self, ref: Ref) -> FormulaPattern:
         """Expand ground g wrappers so scoped N identity can be matched underneath."""
@@ -258,29 +303,32 @@ class ModalSemanticGoalCompiler(CounterfactualSemanticGoalCompiler):
         integrated_by_id: dict[str, object],
     ) -> list[QueryBuildResult]:
         expressions = self._root_expressions(root)
-        modal_owners = tuple(
+        pattern_owners = tuple(
             expr
             for expr in expressions
             if self._contains_modal(expr) and set(expr.leaf_refs()) == target_ids
         )
-        if not modal_owners:
+        if not pattern_owners:
             return super()._compile_scope(
                 root=root,
                 target_ids=target_ids,
                 perception=perception,
                 integrated_by_id=integrated_by_id,
             )
-        if len(modal_owners) != 1:
+        if len(pattern_owners) != 1:
             return [
                 QueryBuildResult(
                     None,
-                    (f"semantic:modal_formula_scope_not_unique:{len(modal_owners)}",),
+                    (
+                        "semantic:formula_pattern_scope_not_unique:"
+                        f"{len(pattern_owners)}",
+                    ),
                 )
             ]
 
         assertion_by_id = {item.local_id: item for item in perception.assertions}
         goal = self._goal_from_modal_expr(
-            modal_owners[0], integrated_by_id, assertion_by_id
+            pattern_owners[0], integrated_by_id, assertion_by_id
         )
         if goal is None:
             return [
@@ -293,7 +341,7 @@ class ModalSemanticGoalCompiler(CounterfactualSemanticGoalCompiler):
         attention: list[Ref] = []
         seen: set[tuple[str, str]] = set()
         pattern = self._pattern_from_expr(
-            modal_owners[0], integrated_by_id, assertion_by_id
+            pattern_owners[0], integrated_by_id, assertion_by_id
         )
         if pattern is not None:
             for ref in pattern.refs():
@@ -307,13 +355,16 @@ class ModalSemanticGoalCompiler(CounterfactualSemanticGoalCompiler):
             {
                 item.operator
                 for item in self._walk_patterns(pattern)
-                if item.operator in _MODAL_OPERATORS
+                if item.operator in (_MODAL_OPERATORS | {"OR", "XOR"})
             }
         ) if pattern is not None else []
-        diagnostic = (
-            "semantic:modal_formula_goal:"
-            + ("+".join(operators) if operators else "MODAL")
-        )
+        if operators and set(operators).issubset(_MODAL_OPERATORS):
+            diagnostic = "semantic:modal_formula_goal:" + "+".join(operators)
+        else:
+            diagnostic = (
+                "semantic:proposition_formula_goal:"
+                + ("+".join(operators) if operators else "COMPOUND")
+            )
         return [
             QueryBuildResult(
                 InferenceQuery(GoalSpec(goal)),
@@ -449,6 +500,12 @@ class ModalInferenceEngine(_BaseInferenceEngine):
                 proof_context=proof_context,
                 runtime=runtime,
             )
+        if isinstance(goal, MatrixFormulaPatternGoal):
+            return self._matrix_formula_pattern(
+                goal,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
         return super()._solve_goal(
             goal,
             query,
@@ -476,20 +533,6 @@ class ModalInferenceEngine(_BaseInferenceEngine):
             candidate_count=len(candidates),
             detail="T-index + reverse function-parent structural lookup; read-only",
         )
-        if not candidates:
-            return InferenceOutcome(
-                LogicalStatus.UNKNOWN,
-                StopReason.SEARCH_EXHAUSTED,
-                None,
-                (),
-                (),
-                None,
-                0,
-                ("No canonical formula matches the runtime modal pattern",),
-                logical_depth=0,
-                proof_context=proof_context,
-            )
-
         first_disproved: InferenceOutcome | None = None
         first_unknown: InferenceOutcome | None = None
         for candidate in candidates:
@@ -524,8 +567,39 @@ class ModalInferenceEngine(_BaseInferenceEngine):
                 return decorated
             if outcome.status is LogicalStatus.DISPROVED and first_disproved is None:
                 first_disproved = decorated
-            elif outcome.status is LogicalStatus.UNKNOWN and first_unknown is None:
+            elif (
+                outcome.status is LogicalStatus.UNKNOWN
+                and first_unknown is None
+                and (
+                    outcome.premise_refs
+                    or outcome.stop_reason
+                    in {
+                        StopReason.CONFLICTED,
+                        StopReason.BUDGET_EXHAUSTED,
+                        StopReason.DEPTH_EXHAUSTED,
+                        StopReason.RESOURCE_LIMIT,
+                    }
+                )
+            ):
+                # A zero-occurrence scoped N is often the query's structural
+                # anchor, not competing evidence. Its empty SEARCH_EXHAUSTED must
+                # not override explicit negative support on an equivalent fact.
                 first_unknown = decorated
+
+        # An OR/XOR question does not require a pre-existing canonical wrapper.
+        # Evaluate its runtime-only children using the same open-world rules as a
+        # canonical ground formula, without calling ensure_function.
+        if goal.pattern.operator in {"OR", "XOR"}:
+            derived = self._logical_pattern(
+                goal.pattern,
+                query,
+                workspace_refs,
+                attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
+            if derived.status is not LogicalStatus.UNKNOWN:
+                return derived
 
         # Open-world uncertainty dominates a negative candidate: when equivalent
         # canonical shapes disagree between DISPROVED and UNKNOWN, there is no
@@ -542,8 +616,263 @@ class ModalInferenceEngine(_BaseInferenceEngine):
             (),
             None,
             0,
-            ("Formula pattern candidates produced no admissible proof",),
+            (
+                "No canonical formula matches the runtime pattern"
+                if not candidates
+                else "Formula pattern candidates produced no admissible proof",
+            ),
             logical_depth=0,
+            proof_context=proof_context,
+        )
+
+    @staticmethod
+    def _merged_refs(
+        outcomes: tuple[InferenceOutcome, ...], attribute: str
+    ) -> tuple[Ref, ...]:
+        refs: list[Ref] = []
+        seen: set[tuple[str, str]] = set()
+        for outcome in outcomes:
+            for ref in getattr(outcome, attribute):
+                key = (ref.kind.value, ref.uid)
+                if key in seen:
+                    continue
+                seen.add(key)
+                refs.append(ref)
+        return tuple(refs)
+
+    def _logical_pattern(
+        self,
+        pattern: FormulaPattern,
+        query: InferenceQuery,
+        workspace_refs: tuple[Ref, ...],
+        attention: InferenceAttention | None,
+        *,
+        proof_context: ProofContext,
+        runtime: GoalRuntime,
+    ) -> InferenceOutcome:
+        assert pattern.operator in {"OR", "XOR"}
+        outcomes = tuple(
+            self._formula_pattern(
+                FormulaPatternGoal(member),
+                query,
+                workspace_refs,
+                attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
+            for member in pattern.members
+        )
+        proved = tuple(
+            item for item in outcomes if item.status is LogicalStatus.PROVED
+        )
+        disproved = tuple(
+            item for item in outcomes if item.status is LogicalStatus.DISPROVED
+        )
+
+        rule_id: str | None = None
+        status = LogicalStatus.UNKNOWN
+        stop_reason = StopReason.SEARCH_EXHAUSTED
+        selected: tuple[InferenceOutcome, ...] = ()
+        if pattern.operator == "OR":
+            if proved:
+                status = LogicalStatus.PROVED
+                stop_reason = StopReason.GOAL_SATISFIED
+                rule_id = "OR_INTRO"
+                selected = (proved[0],)
+            elif outcomes and len(disproved) == len(outcomes):
+                status = LogicalStatus.DISPROVED
+                stop_reason = StopReason.GOAL_REFUTED
+                rule_id = "OR_REFUTED"
+                selected = outcomes
+        elif len(proved) >= 2:
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            rule_id = "XOR_MULTI_TRUE"
+            selected = proved[:2]
+        elif len(proved) == 1 and len(disproved) == len(outcomes) - 1:
+            status = LogicalStatus.PROVED
+            stop_reason = StopReason.GOAL_SATISFIED
+            rule_id = "XOR_INTRO"
+            selected = outcomes
+        elif outcomes and len(disproved) == len(outcomes):
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            rule_id = "XOR_ALL_FALSE"
+            selected = outcomes
+
+        if rule_id is None:
+            return InferenceOutcome(
+                LogicalStatus.UNKNOWN,
+                StopReason.SEARCH_EXHAUSTED,
+                None,
+                (),
+                (),
+                None,
+                sum(item.expanded_states for item in outcomes),
+                (
+                    f"Runtime {pattern.operator} has an UNKNOWN branch; "
+                    "open-world inference cannot close it",
+                ),
+                logical_depth=max(
+                    (item.logical_depth for item in outcomes), default=0
+                ),
+                proof_context=proof_context,
+            )
+
+        premises = self._merged_refs(selected, "premise_refs")
+        trace = self._merged_refs(selected, "uid_trace")
+        logical_depth = max(
+            (item.logical_depth for item in selected), default=0
+        )
+        runtime.rule(
+            rule_id,
+            logical_depth=logical_depth,
+            detail=f"runtime-only {pattern.operator} expression goal",
+        )
+        return InferenceOutcome(
+            status,
+            stop_reason,
+            None,
+            premises,
+            trace,
+            domain_from_premises(self.core, premises) if premises else None,
+            sum(item.expanded_states for item in outcomes),
+            (f"Resolved runtime-only {pattern.operator} expression goal",),
+            logical_depth=logical_depth,
+            proof_support=(ProofSupport(premises, rule_id=rule_id),),
+            proof_context=proof_context,
+        )
+
+    def _matrix_formula_pattern(
+        self,
+        goal: MatrixFormulaPatternGoal,
+        *,
+        proof_context: ProofContext,
+        runtime: GoalRuntime,
+    ) -> InferenceOutcome:
+        runtime.focus(
+            goal.template_ref,
+            logical_depth=0,
+            reason="matrix formula-pattern template seed",
+        )
+        candidates = tuple(
+            self.core.store.find_hypernodes_by_template(goal.template_ref.uid)
+        )
+        runtime.memory_query(
+            "MATRIX_FORMULA_PATTERN",
+            f"T={goal.template_ref.uid}|formula_roles="
+            + ",".join(sorted(role.value for role in goal.proposition_roles)),
+            logical_depth=0,
+            candidate_count=len(candidates),
+            detail="template index + structural formula matching; read-only",
+        )
+        resolver = _FormulaPatternResolver(self)
+        matched = []
+        for node in candidates:
+            if node.meta.get("semantic_scope"):
+                continue
+            if not all(
+                node.actants.get(role) == ref
+                for role, ref in goal.known_roles.items()
+            ):
+                continue
+            if not all(
+                isinstance(node.actants.get(role), Ref)
+                and resolver._matches(node.actants[role], pattern)
+                for role, pattern in goal.proposition_roles.items()
+            ):
+                continue
+            matched.append(node)
+
+        conflicted: list[Ref] = []
+        refuted: list[tuple[Ref, Ref]] = []
+        for node in sorted(matched, key=lambda item: item.uid):
+            fact_ref = self.core.ref(node.uid)
+            if self.conflicts.is_conflicted(fact_ref):
+                conflicted.append(fact_ref)
+                continue
+            false_ref = self._false_wrapper(node.uid)
+            if false_ref is not None:
+                refuted.append((fact_ref, false_ref))
+                continue
+
+            runtime.focus(fact_ref, logical_depth=0, reason="matched matrix fact")
+            if len(goal.requested_roles) == 1:
+                role = goal.requested_roles[0]
+                value = node.actants.get(role)
+                if not isinstance(value, Ref):
+                    continue
+                conclusion = RoleBindingConclusion(role, value, fact_ref)
+                trace = (fact_ref, value)
+            elif goal.requested_roles:
+                bindings = tuple(
+                    (role, node.actants.get(role))
+                    for role in goal.requested_roles
+                )
+                if any(not isinstance(value, Ref) for _role, value in bindings):
+                    continue
+                conclusion = MultiRoleBindingConclusion(bindings, fact_ref)
+                trace = (fact_ref, *(value for _role, value in bindings))
+            else:
+                conclusion = ExistingRefConclusion(fact_ref)
+                trace = (fact_ref,)
+            runtime.rule(
+                "FACT_MATCH", logical_depth=0, detail="matrix formula pattern"
+            )
+            premises = (fact_ref,)
+            return InferenceOutcome(
+                LogicalStatus.PROVED,
+                StopReason.GOAL_SATISFIED,
+                conclusion,
+                premises,
+                trace,
+                domain_from_premises(self.core, premises),
+                len(candidates),
+                proof_support=(ProofSupport(premises, rule_id="FACT_MATCH"),),
+                proof_context=proof_context,
+            )
+
+        conflict = self._conflict_outcome(
+            tuple(conflicted), expanded=len(candidates)
+        )
+        if conflict is not None:
+            return replace(conflict, proof_context=proof_context)
+        template = self.core.store.get_template(goal.template_ref.uid)
+        if (
+            not goal.requested_roles
+            and refuted
+            and set(template.roles)
+            == set(goal.known_roles) | set(goal.proposition_roles)
+        ):
+            fact_ref, false_ref = refuted[0]
+            premises = (false_ref, fact_ref)
+            runtime.rule(
+                "EXPLICIT_REFUTATION",
+                logical_depth=0,
+                detail="exact matrix formula pattern",
+            )
+            return InferenceOutcome(
+                LogicalStatus.DISPROVED,
+                StopReason.GOAL_REFUTED,
+                ExistingRefConclusion(false_ref),
+                premises,
+                premises,
+                domain_from_premises(self.core, premises),
+                len(candidates),
+                proof_support=(
+                    ProofSupport(premises, rule_id="EXPLICIT_REFUTATION"),
+                ),
+                proof_context=proof_context,
+            )
+        return InferenceOutcome(
+            LogicalStatus.UNKNOWN,
+            StopReason.SEARCH_EXHAUSTED,
+            None,
+            (),
+            (),
+            None,
+            len(candidates),
+            ("No asserted matrix fact matches the formula-valued role",),
             proof_context=proof_context,
         )
 
