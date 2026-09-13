@@ -29,8 +29,6 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
     def _eligible(root: QueryCandidate | CommandCandidate) -> bool:
         if root.local_id is None or root.quoted:
             return False
-        if isinstance(root, QueryCandidate) and root.quantified is not None:
-            return False
         if isinstance(root, CommandCandidate) and root.negated:
             return False
         return bool(root.actants)

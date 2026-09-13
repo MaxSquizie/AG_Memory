@@ -250,7 +250,11 @@ class InferenceEngine:
         )
         runtime.subgoal(
             logical_depth=0,
-            ref=goal.target.expression,
+            ref=(
+                goal.target.expression
+                if isinstance(goal.target, FormulaGoal)
+                else None
+            ),
             detail=f"counterfactual overlay with {len(assumptions)} explicit assumption(s)",
         )
         outcome = self._solve_goal(

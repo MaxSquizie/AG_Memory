@@ -23,3 +23,11 @@ classify it, but may not contain these strings or enumerate their paraphrases.
 compound proposition-valued matrix queries.  The contract distinguishes explicit
 falsehood from open-world `UNKNOWN`, requires exact-one XOR semantics, and forbids
 query-side canonical writes.
+
+## A3 — recursive orthogonal scopes
+
+`a3_cases.txt` and `a3_oracle.json` specify typed nesting for quantified, modal,
+counterfactual, relation and association goals.  Each semantic layer remains
+visible in the runtime goal: a modal or counterfactual wrapper must never be
+discarded to obtain an ordinary factual `ExistsGoal`.  Compilation and inference
+are read-only after Integration has produced the canonical quantified body.

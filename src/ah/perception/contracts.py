@@ -501,6 +501,11 @@ class QueryCandidate:
     local_id: str | None = None
     quoted: bool = False
     quantified: QuantifiedQuerySpec | None = None
+    # Outermost-first semantic wrappers over the already typed query goal. This
+    # is runtime AST metadata, not a lexical marker channel. It is primarily used
+    # when a quantifier owns the predicate body while modal scope remains
+    # orthogonal to that body (for example POSSIBLE(FORALL(...))).
+    scope_operators: tuple[PropositionOperator, ...] = ()
 
     def __post_init__(self) -> None:
         roles = self.requested_roles
@@ -514,6 +519,22 @@ class QueryCandidate:
             raise ValueError("EXISTS query cannot request role fillers")
         if self.query_mode is QueryMode.FILL_ROLE and not roles:
             raise ValueError("FILL_ROLE query requires at least one requested role")
+        if any(
+            operator
+            not in {
+                PropositionOperator.POSSIBLE,
+                PropositionOperator.REQUIRED,
+                PropositionOperator.PERMITTED,
+            }
+            for operator in self.scope_operators
+        ):
+            raise ValueError(
+                "QueryCandidate.scope_operators accepts modal operators only"
+            )
+        if self.scope_operators and self.quantified is None:
+            raise ValueError(
+                "QueryCandidate.scope_operators requires a quantified query body"
+            )
         object.__setattr__(self, "requested_roles", tuple(roles))
         # Preserve the old scalar view only when the query genuinely has one gap.
         object.__setattr__(self, "requested_role", roles[0] if len(roles) == 1 else None)

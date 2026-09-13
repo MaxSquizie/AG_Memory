@@ -538,11 +538,19 @@ class GroundFormulaReasoner:
         pattern = self.core.store.get_hypernode(pattern_ref.uid)
         out: list[_BoundProof] = []
         for ground in self.core.store.find_hypernodes_by_template(pattern.template.uid):
-            if ground.uid == pattern.uid or ground.meta.get("semantic_scope"):
+            if ground.uid == pattern.uid:
+                continue
+            ground_ref = self.core.ref(ground.uid)
+            # Scoped propositions are not ordinary witnesses, but an explicit
+            # counterfactual assumption is a premise inside its temporary proof
+            # context.  Keeping that exception here lets EXISTS/FORALL bodies use
+            # the same overlay semantics as ground FormulaGoal evaluation.
+            if ground.meta.get("semantic_scope") and not self._assumption_positive(
+                ground_ref
+            ):
                 continue
             if not self._consume():
                 break
-            ground_ref = self.core.ref(ground.uid)
             matched = self._match_pattern_node(pattern, ground, env)
             if matched is None:
                 continue
@@ -577,11 +585,16 @@ class GroundFormulaReasoner:
         pattern = self.core.store.get_hypernode(pattern_ref.uid)
         out: list[_BoundProof] = []
         for ground in self.core.store.find_hypernodes_by_template(pattern.template.uid):
-            if ground.uid == pattern.uid or ground.meta.get("semantic_scope"):
+            if ground.uid == pattern.uid:
+                continue
+            ground_ref = self.core.ref(ground.uid)
+            if (
+                ground.meta.get("semantic_scope")
+                and self._assumption_not_for(ground_ref) is None
+            ):
                 continue
             if not self._consume():
                 break
-            ground_ref = self.core.ref(ground.uid)
             matched = self._match_pattern_node(pattern, ground, env)
             if matched is None:
                 continue

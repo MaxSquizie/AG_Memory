@@ -20,6 +20,13 @@ class CandidateValidator(_BaseCandidateValidator):
     """Validate runtime ASSOCIATION goals separately from canonical AH relations."""
 
     @staticmethod
+    def _selected_actant(act, selector):
+        matches = tuple(item for item in act.actants if item.role is selector.role)
+        if len(matches) != 1 or selector.member_index is not None:
+            return None
+        return matches[0]
+
+    @staticmethod
     def _validate_selector(act, *, role, member_index, label: str) -> None:
         matches = tuple(item for item in act.actants if item.role is role)
         if len(matches) != 1:
@@ -213,11 +220,6 @@ class CandidateValidator(_BaseCandidateValidator):
                 raise CandidateValidationError(
                     f"Quoted act {relation.act_ref!r} cannot execute ASSOCIATION"
                 )
-            if isinstance(act, QueryCandidate) and act.quantified is not None:
-                raise CandidateValidationError(
-                    "Quantified+association goal composition requires an explicit "
-                    "combined contract and is not supported"
-                )
             if isinstance(act, CommandCandidate) and act.negated:
                 raise CandidateValidationError(
                     f"Negated command {relation.act_ref!r} cannot execute ASSOCIATION"
@@ -235,3 +237,18 @@ class CandidateValidator(_BaseCandidateValidator):
                 member_index=relation.target_member_index,
                 label="target",
             )
+            if isinstance(act, QueryCandidate) and act.quantified is not None:
+                selected = (
+                    self._selected_actant(act, relation.source_selector),
+                    self._selected_actant(act, relation.target_selector),
+                )
+                bound_handles = {
+                    binding.entity_ref for binding in act.quantified.bindings
+                }
+                if not any(
+                    item is not None and item.entity_ref in bound_handles
+                    for item in selected
+                ):
+                    raise CandidateValidationError(
+                        "Quantified ASSOCIATION must select at least one bound endpoint"
+                    )

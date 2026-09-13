@@ -11,9 +11,10 @@ from ah.perception import (
     QueryMode,
 )
 
-from .contracts import GoalSpec, InferenceQuery
+from .contracts import FormulaGoal, GoalSpec, InferenceQuery
 from .modal_goal import (
     FormulaPattern,
+    FormulaPatternGoal,
     MatrixFormulaPatternGoal,
     ModalSemanticGoalCompiler,
 )
@@ -274,13 +275,57 @@ class ModalTurnGoalCompiler(ModalSemanticGoalCompiler):
         query: QueryCandidate,
         integration: IntegrationCommit,
     ) -> QueryBuildResult:
-        # The current quantified-query materializer creates only the quantified
-        # formula. If the same query also carries an explicit modal AST, compiling
-        # it as quantified-only would silently erase modal scope. Until a combined
-        # quantified-modal FormulaGoal contract exists, fail closed.
-        if query.quantified is not None and self._modal_expressions(query):
+        base = super()._build_quantified_formula_goal(query, integration)
+        modal_expressions = self._modal_expressions(query)
+        operators = query.scope_operators
+        if not modal_expressions and not operators:
+            return base
+        if base.goal is None:
+            return base
+        target = base.goal.goal.target
+        if not isinstance(target, FormulaGoal):
             return QueryBuildResult(
                 None,
-                ("semantic:quantified_modal_target_not_supported",),
+                ("semantic:quantified_modal_base_not_formula",),
             )
-        return super()._build_quantified_formula_goal(query, integration)
+        pattern = self._pattern_for_canonical_ref(target.expression)
+        if operators:
+            for operator in reversed(operators):
+                pattern = FormulaPattern(
+                    operator=operator.value,
+                    members=(pattern,),
+                )
+        else:
+            if len(modal_expressions) != 1:
+                return QueryBuildResult(
+                    None,
+                    (
+                        "semantic:quantified_modal_scope_not_unique:"
+                        f"{len(modal_expressions)}",
+                    ),
+                )
+            expression = modal_expressions[0]
+            if len(expression.leaf_refs()) != 1:
+                return QueryBuildResult(
+                    None,
+                    ("semantic:quantified_modal_leaf_not_unique",),
+                )
+
+            def substitute(item: PropositionExprCandidate) -> FormulaPattern:
+                if item.operator is PropositionOperator.REF:
+                    return pattern
+                return FormulaPattern(
+                    operator=(
+                        "NOT"
+                        if item.operator is PropositionOperator.FALSE
+                        else item.operator.value
+                    ),
+                    members=tuple(substitute(child) for child in item.members),
+                )
+
+            pattern = substitute(expression)
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(FormulaPatternGoal(pattern))),
+            ("semantic:quantified_modal_formula_goal", *base.diagnostics),
+            base.attention_refs,
+        )

@@ -625,14 +625,15 @@ class SemanticGoalCompiler:
             expressions, target_ids
         )
         if modal_operator is not None:
-            # Until a dedicated modal query goal exists, never compile M(P) as a
-            # request to prove ordinary P. This is the query-side counterpart of
-            # the canonical nonfactivity barrier in GroundFormulaReasoner.
+            # The public compiler has a dedicated modal layer.  If this base class
+            # is used directly, fail closed without claiming that the semantic
+            # combination is unsupported: the typed target merely could not be
+            # resolved by this deliberately narrower compiler.
             return [
                 QueryBuildResult(
                     None,
                     (
-                        f"semantic:{modal_operator.value}_goal_not_supported",
+                        f"semantic:{modal_operator.value}_goal_unresolved",
                     ),
                 )
             ]

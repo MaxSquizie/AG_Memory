@@ -204,7 +204,29 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
         context: InteractionContext,
         integration: IntegrationCommit,
         attention_refs: tuple[Ref, ...],
+        root: QueryCandidate | CommandCandidate | None = None,
     ) -> _EndpointResolution:
+        if (
+            isinstance(root, QueryCandidate)
+            and root.quantified is not None
+            and candidate.entity_ref
+            in {binding.entity_ref for binding in root.quantified.bindings}
+        ):
+            matches = tuple(
+                item
+                for item in integration.quantified_queries
+                if item.local_id == root.local_id
+            )
+            if len(matches) != 1:
+                return _EndpointResolution(
+                    None,
+                    diagnostic="semantic:association_quantified_endpoint_unresolved",
+                )
+            quantified = matches[0]
+            return _EndpointResolution(
+                quantified.ref,
+                quantified.member_refs,
+            )
         if candidate.candidate_ref is not None:
             ref = self._local_ref_map(integration).get(candidate.candidate_ref)
             if ref is None:
@@ -311,6 +333,7 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
                 context,
                 integration,
                 attention_refs,
+                root,
             )
             if resolved.ref is None:
                 suffix = f":{candidate.role.value}"
@@ -329,9 +352,14 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
         # depth zero. Distinct parser selectors are enforced upstream, while the
         # coordinator intentionally owns this trivial convergence case.
         goal = AssociationGoal(endpoints[0], endpoints[1])
+        diagnostic = (
+            "semantic:quantified_association_goal"
+            if isinstance(root, QueryCandidate) and root.quantified is not None
+            else "semantic:association_goal"
+        )
         return AssociationQueryBuildResult(
             None,
-            ("semantic:association_goal",),
+            (diagnostic,),
             tuple(attention),
             association_goal=goal,
         )
@@ -371,17 +399,30 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
             for item in perception.act_relations
             if item.canonical_relation_id == "ASSOCIATION"
         }
+        association_query_ids = {
+            item.local_id
+            for item in perception.queries
+            if item.local_id in association_relations
+            and item.quantified is not None
+            and not item.quoted
+        }
         association_command_ids = {
             item.local_id
             for item in perception.commands
             if item.local_id in association_relations and not item.quoted
         }
 
+        association_root_ids = association_query_ids | association_command_ids
         base_perception = (
             perception
-            if not association_command_ids
+            if not association_root_ids
             else replace(
                 perception,
+                queries=tuple(
+                    item
+                    for item in perception.queries
+                    if item.local_id not in association_query_ids
+                ),
                 commands=tuple(
                     item
                     for item in perception.commands
@@ -401,13 +442,17 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
                     attention_refs=attention_refs,
                 )
             )
-            for command in perception.commands:
-                relation = association_relations.get(command.local_id)
-                if relation is None or command.quoted:
+            for root in (*perception.queries, *perception.commands):
+                relation = association_relations.get(root.local_id)
+                if (
+                    relation is None
+                    or root.quoted
+                    or root.local_id not in association_root_ids
+                ):
                     continue
                 results.append(
                     self._resolve_association_root(
-                        command, relation, context, attention_refs
+                        root, relation, context, attention_refs
                     )
                 )
             return tuple(results)

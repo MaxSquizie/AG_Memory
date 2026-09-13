@@ -136,14 +136,14 @@ class AssociationGoal:
 
 @dataclass(frozen=True, slots=True)
 class CounterfactualGoal:
-    """Evaluate one formula under explicit temporary assumptions.
+    """Evaluate one typed goal under explicit temporary assumptions.
 
     Assumptions are canonical N/g proposition references used only by a runtime
     CounterfactualContext. They never mutate, duplicate or replace canonical AH.
     """
 
     assumptions: tuple[Ref, ...]
-    target: FormulaGoal
+    target: "InferenceGoal"
 
     def __post_init__(self) -> None:
         if not self.assumptions:

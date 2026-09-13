@@ -266,33 +266,54 @@ class ModalSemanticGoalCompiler(CounterfactualSemanticGoalCompiler):
         pattern = self._pattern_from_expr(expr, integrated_by_id, assertion_by_id)
         return None if pattern is None else FormulaPatternGoal(pattern)
 
-    def _counterfactual_result(
+    def _counterfactual_scoped_target(
         self,
         root: QueryCandidate,
-        integration: IntegrationCommit,
+        target_ids: tuple[str, ...],
+        integrated_by_id: dict[str, object],
         perception: PerceptionResult,
-    ) -> QueryBuildResult | None:
-        descendants = (
-            set()
-            if root.local_id is None
-            else self._descendants(perception, root.local_id)
+    ) -> QueryBuildResult:
+        expressions = self._root_expressions(root)
+        owners = tuple(
+            expr
+            for expr in expressions
+            if self._contains_modal(expr)
+            and set(expr.leaf_refs()) == set(target_ids)
         )
-        has_hypothesis = any(
-            item.local_id in descendants
-            and item.status is AssertionStatus.HYPOTHETICAL
-            and not item.quoted
-            for item in perception.assertions
-        )
-        if has_hypothesis and any(
-            self._contains_modal(expr) for expr in self._root_expressions(root)
-        ):
-            # Counterfactual+modal scope composition needs an explicit combined
-            # proof contract. Dropping either operator would be semantically wrong.
+        if not owners:
+            return super()._counterfactual_scoped_target(
+                root,
+                target_ids,
+                integrated_by_id,
+                perception,
+            )
+        if len(owners) != 1:
             return QueryBuildResult(
                 None,
-                ("semantic:counterfactual_modal_target_not_supported",),
+                (
+                    "semantic:counterfactual_modal_scope_not_unique:"
+                    f"{len(owners)}",
+                ),
             )
-        return super()._counterfactual_result(root, integration, perception)
+        assertion_by_id = {
+            item.local_id: item for item in perception.assertions
+        }
+        goal = self._goal_from_modal_expr(
+            owners[0], integrated_by_id, assertion_by_id
+        )
+        pattern = self._pattern_from_expr(
+            owners[0], integrated_by_id, assertion_by_id
+        )
+        if goal is None or pattern is None:
+            return QueryBuildResult(
+                None,
+                ("semantic:counterfactual_modal_target_unresolved",),
+            )
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(goal)),
+            ("semantic:counterfactual_modal_target",),
+            pattern.refs(),
+        )
 
     def _compile_scope(
         self,
