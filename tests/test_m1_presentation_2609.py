@@ -142,3 +142,93 @@ def test_logical_root_is_presented_as_simple_operator_over_frames():
     assert "Итоговая схема смысла" in html
     assert "ИЛИ (OR)" in html
     assert "Человеческое прочтение" in html
+
+
+def test_typed_naming_is_presented_as_name_relation_not_bad_source_roles():
+    source = "Меня зовут Илья"
+    perception = {
+        "source_text": source,
+        "assertions": [
+            {
+                "local_id": "a1",
+                "predicate": _predicate("зовут", "звать"),
+                "status": "ASSERTED",
+                "actants": [
+                    {
+                        "role": "SUBJECT",
+                        "mention": "Меня",
+                        "evidence": {"text": "Меня"},
+                    },
+                    {
+                        "role": "STATE",
+                        "mention": "Илья",
+                        "normalized_hint": "илья",
+                        "evidence": {"text": "Илья"},
+                    },
+                ],
+                "owner": {
+                    "role": "SUBJECT",
+                    "mention": "Меня",
+                    "evidence": {"text": "Меня"},
+                },
+                "name_value": "Илья",
+                "name_normalized_hint": "илья",
+            }
+        ],
+    }
+
+    view = build_m1_formalization_view(perception)
+
+    assert view.prompt_type == "ФАКТ · ИМЕНОВАНИЕ"
+    assert view.prompt_detail == "Задаёт имя существующей сущности"
+    assert view.frames[0].kind == "ИМЕНОВАНИЕ"
+    assert view.frames[0].predicate == "NAME_OF"
+    assert [(role.role, role.value) for role in view.frames[0].roles] == [
+        ("ENTITY", "Меня"),
+        ("NAME", "Илья"),
+    ]
+    labels = {word.text: word.label for word in view.words}
+    assert labels["Меня"] == "ENTITY"
+    assert labels["зовут"] == "Именование"
+    assert labels["Илья"] == "NAME"
+    assert "«Илья» — имя сущности «Меня»" in view.interpretation
+
+
+def test_event_set_query_is_shown_as_open_event_search_not_predicate_exists():
+    source = "Что вчера делал Илья"
+    perception = {
+        "source_text": source,
+        "queries": [
+            {
+                "local_id": "q1",
+                "predicate": _predicate("делал", "делать"),
+                "query_mode": "EXISTS",
+                "event_set": True,
+                "requested_roles": [],
+                "actants": [
+                    {
+                        "role": "TIME",
+                        "mention": "вчера",
+                        "evidence": {"text": "вчера"},
+                    },
+                    {
+                        "role": "SUBJECT",
+                        "mention": "Илья",
+                        "evidence": {"text": "Илья"},
+                    },
+                ],
+            }
+        ],
+    }
+
+    view = build_m1_formalization_view(perception)
+
+    assert view.prompt_type == "ЗАПРОС"
+    assert view.prompt_detail == "Найти события по заданным ограничениям"
+    assert view.frames[0].kind == "ЗАПРОС СОБЫТИЙ"
+    assert view.frames[0].predicate == "СОБЫТИЕ"
+    labels = {word.text: word.label for word in view.words}
+    assert labels["делал"] == "Открытый предикат"
+    assert labels["вчера"] == "TIME"
+    assert labels["Илья"] == "SUBJECT"
+    assert "Нужно найти события" in view.interpretation
