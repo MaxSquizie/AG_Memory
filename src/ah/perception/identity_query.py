@@ -15,7 +15,7 @@ from .llm_parser import (
     PerceptionParseError,
 )
 from .query_semantics import EntityIdentityQueryCandidate, EventSetQueryCandidate
-from .runtime_semantics import (
+from .runtime_invariants import (
     RuntimeSemanticAdaptiveParser,
     RuntimeSemanticLLMPerceptionService,
 )
