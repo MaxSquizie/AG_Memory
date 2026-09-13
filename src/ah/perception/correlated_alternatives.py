@@ -5,9 +5,20 @@ from typing import Protocol
 
 from ah.llm.process_backend import LLMResponse
 
+from .adaptive_parser import (
+    AdaptiveParseError,
+    AdaptiveSettings,
+    AdaptiveStructuralClarificationRequired,
+)
 from .association_semantics import AssociationLLMPerceptionService
 from .contracts import ActantCandidate, AssertionCandidate, PerceptionResult
-from .llm_parser import PerceptionAttemptDiagnostic, PerceptionParseError
+from .lexical_recovery import EmbeddingSemanticReranker
+from .llm_parser import (
+    PerceptionAttemptDiagnostic,
+    PerceptionClarificationRequired,
+    PerceptionParseError,
+)
+from .structural_speech_act import StructuralSpeechActAdaptiveParser
 
 
 class _TextGenerator(Protocol):
@@ -123,16 +134,101 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
     PROMPT_NAME = "correlated_frame_choice.txt"
 
     def parse(self, text, interaction_context):
-        result = super().parse(text, interaction_context)
+        if self.settings.protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            result = self._parse_structural_adaptive(text)
+        else:
+            result = super().parse(text, interaction_context)
         return self._resolve_correlated_alternatives(text, result)
 
     def parse_with_structural_resolution(
         self, text, interaction_context, resolution_key
     ):
-        result = super().parse_with_structural_resolution(
-            text, interaction_context, resolution_key
-        )
+        if self.settings.protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            result = self._parse_structural_adaptive(
+                text, structural_resolution=resolution_key
+            )
+        else:
+            result = super().parse_with_structural_resolution(
+                text, interaction_context, resolution_key
+            )
         return self._resolve_correlated_alternatives(text, result)
+
+    def _parse_structural_adaptive(
+        self,
+        text: str,
+        *,
+        structural_resolution: str | None = None,
+    ) -> PerceptionResult:
+        """Run the normal adaptive pipeline with structural speech-act force.
+
+        This is not a repair pass: the specialized parser is the only adaptive
+        parser invoked for the turn.  It differs from the base class solely in
+        punctuation-independent top-level interrogative recognition.
+        """
+        semantic_reranker = (
+            EmbeddingSemanticReranker(self.backend)  # type: ignore[arg-type]
+            if self.settings.embedding_model.strip()
+            and callable(getattr(self.backend, "embed_texts", None))
+            else None
+        )
+        parser = StructuralSpeechActAdaptiveParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+            semantic_reranker=semantic_reranker,
+        )
+        try:
+            parsed = parser.parse(text, structural_resolution=structural_resolution)
+        except AdaptiveStructuralClarificationRequired as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(text, attempts, None, str(exc))
+            raise PerceptionClarificationRequired(exc.spec) from exc
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage,
+                    raw_text=trace.raw_text,
+                    error=trace.error,
+                    prompt=trace.prompt,
+                    normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            final_error = str(exc)
+            self._record_diagnostic(text, attempts, None, final_error)
+            raise PerceptionParseError(final_error) from exc
+
+        attempts = [
+            PerceptionAttemptDiagnostic(
+                role=trace.stage,
+                raw_text=trace.raw_text,
+                error=trace.error,
+                prompt=trace.prompt,
+                normalized_answer=trace.normalized_answer,
+                retry_index=trace.retry_index,
+            )
+            for trace in parsed.traces
+        ]
+        self._record_diagnostic(text, attempts, parsed.perception)
+        return parsed.perception
 
     def _resolve_correlated_alternatives(
         self,
