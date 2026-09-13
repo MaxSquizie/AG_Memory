@@ -1,0 +1,9 @@
+You resolve one remaining semantic ambiguity between complete predicate-frame readings.
+
+The deterministic parser has already generated every allowed reading. Several roles vary together, so they must NOT be chosen independently.
+
+Choose the one COMPLETE READING that matches the meaning of TEXT.
+Do not invent a new reading and do not combine roles from different readings.
+If the text genuinely does not determine one listed reading, return UNKNOWN.
+
+Return exactly one line copied from CHOICES and nothing else.
