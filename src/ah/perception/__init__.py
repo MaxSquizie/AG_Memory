@@ -49,11 +49,13 @@ from .llm_parser import (
     PerceptionClarificationRequired,
 )
 from .association_semantics import (
-    AssociationLLMPerceptionService as LLMPerceptionService,
     AssociationActRelationCandidate,
     AssociationEndpointSelector,
     AssociationQueryDecision,
     AssociationSemanticClassifier,
+)
+from .correlated_alternatives import (
+    CorrelatedAlternativeLLMPerceptionService as LLMPerceptionService,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
