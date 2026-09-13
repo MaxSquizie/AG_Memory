@@ -17,7 +17,14 @@ from ah.model import (
 )
 from ah.perception.scoping import apply_speech_act_scoping
 from ah.inference.schema import InferenceSchemaRegistry
-from ah.temporal import StateTracker, ensure_time_entity, exact_datetime_from_ref
+from ah.temporal import (
+    StateTracker,
+    TemporalKind,
+    TemporalPrecision,
+    TemporalValue,
+    ensure_time_entity,
+    exact_datetime_from_ref,
+)
 from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception import (
     ActantCandidate,
@@ -47,6 +54,7 @@ from .contracts import (
     IntegratedExistential,
     IntegratedFormula,
     IntegratedQuantifiedQuery,
+    IntegratedTemporalScope,
     IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
@@ -451,6 +459,9 @@ class IntegrationService:
             discourse_refs=[item.local_id for item in ir.discourse_refs],
             existential_variable_ids=[item.variable_id for item in ir.existential_bindings],
             universal_variable_ids=[item.variable_id for item in ir.universal_bindings],
+            temporal_scope_variable_ids=[
+                item.variable_id for item in ir.temporal_scope_bindings
+            ],
             unresolved_temporal_refs=[item.local_id for item in ir.temporal_refs],
             query_count=len(ir.perception.queries),
             quantified_query_count=sum(
@@ -781,6 +792,7 @@ class IntegrationService:
         existentials: list[IntegratedExistential] = []
         universals: list[IntegratedExistential] = []
         quantified_queries: list[IntegratedQuantifiedQuery] = []
+        temporal_scopes: list[IntegratedTemporalScope] = []
         conflicts: list[IntegratedConflict] = []
         local_refs: dict[str, Ref] = {}
         entity_local_refs: dict[str, Ref] = {}
@@ -791,6 +803,10 @@ class IntegrationService:
         universal_bindings = {
             item.entity_ref: item for item in plan.candidate_ir.universal_bindings
         }
+        temporal_scope_bindings = {
+            item.assertion_id: item
+            for item in plan.candidate_ir.temporal_scope_bindings
+        }
         existential_vars = {
             item.entity_ref: BoundVar(item.variable_id, item.sort)
             for item in plan.candidate_ir.existential_bindings
@@ -799,7 +815,11 @@ class IntegrationService:
             item.entity_ref: BoundVar(item.variable_id, item.sort)
             for item in plan.candidate_ir.universal_bindings
         }
-        bound_vars = {**existential_vars, **universal_vars}
+        temporal_vars = {
+            item.variable_ref: BoundVar(item.variable_id, VariableSort.TIME)
+            for item in plan.candidate_ir.temporal_scope_bindings
+        }
+        bound_vars = {**existential_vars, **universal_vars, **temporal_vars}
 
         assertion_by_id = {item.local_id: item for item in ordered}
         ordinary_formula_roots = tuple(
@@ -948,6 +968,126 @@ class IntegrationService:
                     candidate.local_id in existential_assertion_vars
                     or candidate.local_id in universal_assertion_vars
                 )
+                temporal_scope_binding = temporal_scope_bindings.get(
+                    candidate.local_id
+                )
+                if temporal_scope_binding is not None:
+                    if quantified:
+                        raise CandidateValidationError(
+                            "Temporal NEVER combined with entity quantifiers belongs to "
+                            "the recursive scope-composition slice"
+                        )
+                    if candidate.temporal_scope is None or candidate.negated:
+                        raise CandidateValidationError(
+                            "Temporal NEVER reached Integration without normalized typed scope"
+                        )
+                    if candidate.transition_operator is not None:
+                        raise CandidateValidationError(
+                            "Temporal NEVER cannot wrap a transition occurrence"
+                        )
+
+                    if candidate.quoted:
+                        source_scope = "QUOTED"
+                    elif formula_leaf:
+                        source_scope = "LOGICAL"
+                    elif candidate.status is not AssertionStatus.ASSERTED:
+                        source_scope = candidate.status.value
+                    else:
+                        source_scope = None
+
+                    integrated = self._integrate_assertion(
+                        tx,
+                        candidate,
+                        context,
+                        local_refs,
+                        entity_local_refs,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
+                        entity_anchors=entity_anchors,
+                        speaker_ref=speaker_ref,
+                        addressee_ref=addressee_ref,
+                        count_occurrence=False,
+                        semantic_scope="TEMPORAL_NEVER",
+                        source_scope=source_scope,
+                        existential_vars=temporal_vars,
+                    )
+                    variable = temporal_vars[temporal_scope_binding.variable_ref]
+                    anchor_timestamp = temporal_scope_binding.anchor_timestamp
+                    anchor_value = TemporalValue(
+                        TemporalKind.POINT,
+                        anchor_timestamp.isoformat(),
+                        None,
+                        TemporalPrecision.SECOND,
+                        timezone=str(anchor_timestamp.tzinfo),
+                        source_text="relevant-past anchor",
+                    )
+                    anchor_ref, anchor_created = ensure_time_entity(
+                        tx, anchor_value, domain=Domain.C
+                    )
+                    relevant_past_g, relevant_past_created = tx.ensure_function(
+                        integrated.domain,
+                        "RELEVANT_PAST",
+                        (variable, anchor_ref),
+                    )
+                    relevant_past_ref = tx.ref(relevant_past_g.uid)
+                    body_g, body_created = tx.ensure_function(
+                        integrated.domain,
+                        "AND",
+                        # Prove/bind the event occurrence first, then validate the
+                        # resulting TIME binding against the explicit anchor.
+                        (integrated.ref, relevant_past_ref),
+                    )
+                    body_ref = tx.ref(body_g.uid)
+                    exists_g, exists_created = tx.ensure_function(
+                        integrated.domain,
+                        "EXISTS",
+                        (variable, body_ref),
+                    )
+                    exists_ref = tx.ref(exists_g.uid)
+                    not_g, not_created = tx.ensure_function(
+                        integrated.domain,
+                        "NOT",
+                        (exists_ref,),
+                    )
+                    never_ref = tx.ref(not_g.uid)
+                    created = any(
+                        (
+                            integrated.created,
+                            anchor_created,
+                            relevant_past_created,
+                            body_created,
+                            exists_created,
+                            not_created,
+                        )
+                    )
+                    final = IntegratedAssertion(
+                        local_id=integrated.local_id,
+                        ref=never_ref,
+                        domain=integrated.domain,
+                        created=created,
+                        ambiguous=integrated.ambiguous,
+                        semantic_scope=source_scope,
+                    )
+                    assertions.append(final)
+                    local_refs[candidate.local_id] = never_ref
+                    temporal_scopes.append(
+                        IntegratedTemporalScope(
+                            local_id=candidate.local_id,
+                            ref=never_ref,
+                            existential_ref=exists_ref,
+                            member_refs=(integrated.ref,),
+                            anchor_ref=anchor_ref,
+                            variable_id=variable.local_id,
+                            created=created,
+                        )
+                    )
+                    if source_scope is None and not formula_leaf:
+                        seeds.append(
+                            ActivationSeedRequest(
+                                never_ref,
+                                SeedReason.NEW_FACT if created else SeedReason.REACTIVATED_FACT,
+                            )
+                        )
+                    continue
                 if quantified:
                     # A quantified participant is not a semantic entity. Source
                     # assertions become QUANTIFIED pattern N and are asserted only
@@ -1905,6 +2045,7 @@ class IntegrationService:
             universals=tuple(universals),
             conflicts=tuple(conflicts),
             quantified_queries=tuple(quantified_queries),
+            temporal_scopes=tuple(temporal_scopes),
         )
         from ah.diagnostics.session_log import emit
 
@@ -1941,6 +2082,16 @@ class IntegrationService:
                     "variable_ids": list(item.variable_ids),
                 }
                 for item in commit.quantified_queries
+            ],
+            temporal_scopes=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "exists_uid": item.existential_ref.uid,
+                    "anchor_uid": item.anchor_ref.uid,
+                    "variable_id": item.variable_id,
+                }
+                for item in commit.temporal_scopes
             ],
             formulas=[
                 {
@@ -3268,6 +3419,7 @@ class IntegrationService:
         addressee_ref: Ref | None,
         count_occurrence: bool = True,
         semantic_scope: str | None = None,
+        source_scope: str | None = None,
         _allow_or_lift: bool = True,
         existential_vars: dict[str, BoundVar] | None = None,
     ) -> IntegratedAssertion:
@@ -3632,6 +3784,8 @@ class IntegrationService:
         scoped_meta: dict[str, object] = {}
         if semantic_scope:
             scoped_meta["semantic_scope"] = semantic_scope
+        if source_scope:
+            scoped_meta["source_scope"] = source_scope
         if candidate.temporal_mode is not None:
             scoped_meta["temporal_mode"] = candidate.temporal_mode.value
         node, created = core.add_or_enrich_hypernode(

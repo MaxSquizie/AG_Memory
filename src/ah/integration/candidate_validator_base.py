@@ -42,6 +42,24 @@ class CandidateValidator:
             self._validate_template_roles(
                 candidate.predicate, roles, label=candidate.local_id
             )
+            if candidate.temporal_scope is not None:
+                if candidate.negated:
+                    raise CandidateValidationError(
+                        f"Temporal scope in {candidate.local_id} must consume predicate negation"
+                    )
+                scope_actants = tuple(
+                    actant
+                    for actant in candidate.actants
+                    if actant.entity_ref == candidate.temporal_scope.variable_ref
+                )
+                if len(scope_actants) != 1 or scope_actants[0].role is not ActantRole.TIME:
+                    raise CandidateValidationError(
+                        f"Temporal scope in {candidate.local_id} requires one bound TIME role"
+                    )
+                if scope_actants[0].quantifier is not None or scope_actants[0].temporal is not None:
+                    raise CandidateValidationError(
+                        f"Temporal scope TIME in {candidate.local_id} cannot be an entity quantifier/calendar value"
+                    )
 
             if candidate.alternatives:
                 alternative_role_sets: list[set] = []
@@ -62,6 +80,24 @@ class CandidateValidator:
                         alternative.negated != candidate.negated
                         or alternative.status is not candidate.status
                         or alternative.quoted != candidate.quoted
+                        or (
+                            None
+                            if alternative.temporal_scope is None
+                            else (
+                                alternative.temporal_scope.kind,
+                                alternative.temporal_scope.variable_ref,
+                                alternative.temporal_scope.anchor,
+                            )
+                        )
+                        != (
+                            None
+                            if candidate.temporal_scope is None
+                            else (
+                                candidate.temporal_scope.kind,
+                                candidate.temporal_scope.variable_ref,
+                                candidate.temporal_scope.anchor,
+                            )
+                        )
                     ):
                         raise CandidateValidationError(
                             f"Alternative assertion status/scope mismatch in {candidate.local_id}"

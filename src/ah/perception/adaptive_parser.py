@@ -29,6 +29,10 @@ from .temporal_mode_formalization import (
     TemporalModeFormalizationError,
     TemporalModeFormalizer,
 )
+from .temporal_scope_formalization import (
+    TemporalScopeFormalizationError,
+    TemporalScopeFormalizer,
+)
 from .logical_formalization import LogicalFormBuilder
 from .modal_formalization import ModalScopeBuilder
 from .lexical_recovery import (
@@ -66,6 +70,7 @@ from .contracts import (
     PropositionExprCandidate,
     PropositionOperator,
     QuantifierProbeDecision,
+    TemporalScopeProbeDecision,
     TemplateCandidate,
     QueryCandidate,
     QueryMode,
@@ -1389,6 +1394,13 @@ class AdaptivePerceptionParser:
             lexical_recovery=lexical_decisions,
         )
         try:
+            result = TemporalScopeFormalizer(self.morphology).formalize(
+                result,
+                resolver=self._resolve_temporal_scope_candidate,
+            )
+        except TemporalScopeFormalizationError as exc:
+            raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
+        try:
             result = TemporalModeFormalizer(self.morphology).formalize(
                 result,
                 resolver=self._resolve_temporal_mode_candidate,
@@ -1403,6 +1415,36 @@ class AdaptivePerceptionParser:
         except QuantifierFormalizationError as exc:
             raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
         return AdaptiveParseResult(result, tuple(self._traces))
+
+    def _resolve_temporal_scope_candidate(
+        self,
+        source_context: str,
+        assertion: AssertionCandidate,
+        candidates: tuple[EvidenceSpan, ...],
+    ) -> TemporalScopeProbeDecision:
+        """Classify one structurally narrowed negative occurrence, UID-free."""
+
+        options = "\n".join(
+            f"C{index}={item.text}" for index, item in enumerate(candidates, start=1)
+        )
+        prompt = (
+            f"TEXT:\n{source_context}\n"
+            f"PREDICATE:\n{assertion.predicate.surface}\n"
+            f"TEMPORAL CANDIDATES:\n{options or 'NONE'}\n"
+            "QUESTION:\nDoes this source assert that the positive proposition had no "
+            "occurrence anywhere in the contextually relevant past, or does it only "
+            "negate a proposition at a particular/unspecified time? Frequency meanings "
+            "such as almost never are ambiguous for this binary scope.\n"
+            "CHOICES:\nNEVER\nPLAIN_NEGATION\nAMBIGUOUS"
+        )
+        label, _margin = self._deep_semantic_choice_probe(
+            "temporal_scope",
+            prompt,
+            ("NEVER", "PLAIN_NEGATION", "AMBIGUOUS"),
+            instruction_stage="negation",
+        )
+        assert label is not None
+        return TemporalScopeProbeDecision(label)
 
     def _resolve_temporal_mode_candidate(
         self,
@@ -10657,6 +10699,7 @@ class AdaptivePerceptionParser:
         choices: tuple[str, ...],
         *,
         optional: bool = False,
+        instruction_stage: str | None = None,
     ) -> tuple[str | None, float]:
         """Resolve one rare local semantic cue without enabling model thinking.
 
@@ -10676,7 +10719,7 @@ class AdaptivePerceptionParser:
         """
         if not choices or len(set(choices)) != len(choices):
             raise AdaptiveParseError(f"{stage} requires unique fixed choices")
-        instruction = self._instruction(stage)
+        instruction = self._instruction(instruction_stage or stage)
         user_prompt = self._compose_probe_prompt(prompt, instruction)
         override = self._generation_override(8)
         # Never opt a machine-protocol semantic probe into a reasoning channel.

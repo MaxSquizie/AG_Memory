@@ -25,6 +25,9 @@ from .contracts import (
     QuantifierCandidate,
     QuantifierKind,
     QuantifierProbeDecision,
+    TemporalScopeCandidate,
+    TemporalScopeKind,
+    TemporalScopeProbeDecision,
     PropositionRootCandidate,
     PredicateCandidate,
     TemplateCandidate,
@@ -76,6 +79,11 @@ from .temporal_mode_formalization import (
     TemporalModeFormalizer,
     TemporalModeSemanticResolver,
 )
+from .temporal_scope_formalization import (
+    TemporalScopeFormalizationError,
+    TemporalScopeFormalizer,
+    TemporalScopeSemanticResolver,
+)
 
 __all__ = [
     "ActDependencyCandidate",
@@ -98,6 +106,9 @@ __all__ = [
     "QuantifierCandidate",
     "QuantifierKind",
     "QuantifierProbeDecision",
+    "TemporalScopeCandidate",
+    "TemporalScopeKind",
+    "TemporalScopeProbeDecision",
     "PropositionRootCandidate",
     "PredicateCandidate",
     "TemplateCandidate",
@@ -141,6 +152,9 @@ __all__ = [
     "TemporalModeFormalizationError",
     "TemporalModeFormalizer",
     "TemporalModeSemanticResolver",
+    "TemporalScopeFormalizationError",
+    "TemporalScopeFormalizer",
+    "TemporalScopeSemanticResolver",
     "apply_speech_act_scoping",
     "GoalSemanticService",
 ]

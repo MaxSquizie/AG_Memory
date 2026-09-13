@@ -6,6 +6,7 @@ from ah.config import InferenceSettings
 from ah.conflict import ConflictEngine
 from ah.core import AHCore
 from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Group, Hypernode, Ref, RefKind
+from ah.temporal import TemporalReasoner, TemporalRelation, TemporalTruth
 
 from .attention import InferenceAttention
 from .bindings import BindingEnvironment
@@ -254,7 +255,8 @@ class GroundFormulaReasoner:
         if ref.kind is RefKind.N:
             node = self.core.store.get_hypernode(ref.uid)
             scope = str(node.meta.get("semantic_scope") or "").upper()
-            return {scope} if scope else set()
+            source_scope = str(node.meta.get("source_scope") or "").upper()
+            return {item for item in (scope, source_scope) if item}
         if ref.kind is not RefKind.G:
             return set()
         obj = self.core.store.get_element_any_domain(ref.uid)
@@ -330,6 +332,38 @@ class GroundFormulaReasoner:
             out.append((self.core.ref(obj.uid), obj))
         out.sort(key=lambda item: item[0].uid)
         return tuple(out)
+
+    def _is_relevant_past_exists(self, obj: FunctionSymbol) -> bool:
+        """Whether EXISTS owns the explicit temporal-NEVER restriction shape."""
+
+        if len(obj.operands) != 2:
+            return False
+        variable, body_ref = obj.operands
+        if not isinstance(variable, BoundVar) or not isinstance(body_ref, Ref):
+            return False
+        if body_ref.kind is not RefKind.G or not self.core.store.has_uid(body_ref.uid):
+            return False
+        body = self.core.store.get_element_any_domain(body_ref.uid)
+        if not isinstance(body, FunctionSymbol):
+            return False
+        try:
+            if self.core.function_registry.canonical_id(body.function_id) != "AND":
+                return False
+        except KeyError:
+            return False
+        for operand in body.operands:
+            if not isinstance(operand, Ref) or operand.kind is not RefKind.G:
+                continue
+            child = self.core.store.get_element_any_domain(operand.uid)
+            if not isinstance(child, FunctionSymbol):
+                continue
+            try:
+                canonical = self.core.function_registry.canonical_id(child.function_id)
+            except KeyError:
+                continue
+            if canonical == "RELEVANT_PAST" and child.operands[:1] == (variable,):
+                return True
+        return False
 
     def _alternative_parents(
         self, ref: Ref
@@ -666,6 +700,32 @@ class GroundFormulaReasoner:
                     branch.logical_depth,
                 )
                 for branch in out
+            )
+
+        if canonical == "RELEVANT_PAST":
+            if len(obj.operands) != 2:
+                return ()
+            variable, anchor = obj.operands
+            if not isinstance(variable, BoundVar) or not isinstance(anchor, Ref):
+                return ()
+            value = env.resolve(variable)
+            if value is None:
+                return ()
+            comparison = TemporalReasoner(self.core).compare(value, anchor)
+            if (
+                comparison.status is not TemporalTruth.PROVED
+                or comparison.relation is not TemporalRelation.BEFORE
+            ):
+                return ()
+            self._focus(value, depth)
+            self._focus(anchor, depth)
+            return (
+                _BoundProof(
+                    env.copy(),
+                    (value, anchor),
+                    (value, anchor, ref),
+                    depth,
+                ),
             )
 
         if canonical in {"POSSIBLE", "REQUIRED", "PERMITTED"}:
@@ -1655,7 +1715,25 @@ class GroundFormulaReasoner:
             )
 
         if canonical == "EXISTS":
-            if self._asserted_function(ref, obj):
+            asserted = self._asserted_function(ref, obj)
+            asserted_not = (
+                self._asserted_not_parent(ref)
+                if self._is_relevant_past_exists(obj)
+                else None
+            )
+            if asserted and asserted_not is not None:
+                self._focus(ref, depth)
+                self._focus(asserted_not, depth)
+                return self._outcome(
+                    LogicalStatus.UNKNOWN,
+                    StopReason.CONFLICTED,
+                    None,
+                    (ref, asserted_not),
+                    (ref, asserted_not),
+                    depth=depth,
+                    diagnostics=("Both EXISTS and NOT(EXISTS) are asserted",),
+                )
+            if asserted:
                 self._focus(ref, depth)
                 return self._outcome(
                     LogicalStatus.PROVED,
@@ -1692,6 +1770,22 @@ class GroundFormulaReasoner:
             witnesses = self._prove_bound(body, scoped, depth=depth + 1, stack=stack)
             if witnesses:
                 witness = witnesses[0]
+                if asserted_not is not None:
+                    premises = self._merge_refs(
+                        witness.premise_refs, (asserted_not,)
+                    )
+                    self._focus(asserted_not, depth)
+                    return self._outcome(
+                        LogicalStatus.UNKNOWN,
+                        StopReason.CONFLICTED,
+                        None,
+                        premises,
+                        (*witness.uid_trace, asserted_not, ref),
+                        depth=witness.logical_depth,
+                        diagnostics=(
+                            "A relevant-past EXISTS witness conflicts with asserted NOT(EXISTS)",
+                        ),
+                    )
                 self._focus(ref, depth)
                 premises = witness.premise_refs
                 return self._outcome(
@@ -1704,6 +1798,19 @@ class GroundFormulaReasoner:
                     diagnostics=("EXISTS witness found",),
                     rule_id="EXISTS_WITNESS",
                     bindings=witness.bindings,
+                )
+            if asserted_not is not None:
+                self._focus(asserted_not, depth)
+                self._focus(ref, depth)
+                return self._outcome(
+                    LogicalStatus.DISPROVED,
+                    StopReason.GOAL_REFUTED,
+                    asserted_not,
+                    (asserted_not,),
+                    (asserted_not, ref),
+                    depth=depth,
+                    diagnostics=("Asserted NOT(EXISTS)",),
+                    rule_id="NOT_ASSERTED",
                 )
             return self._outcome(
                 LogicalStatus.UNKNOWN,

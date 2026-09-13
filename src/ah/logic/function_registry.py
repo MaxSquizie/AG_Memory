@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from ah.model import BoundVar, Operand, Ref, RefKind
+from ah.model import BoundVar, Operand, Ref, RefKind, VariableSort
 
 
 OperandValidator = Callable[[tuple[Operand, ...]], None]
@@ -37,6 +37,14 @@ def _quantifier(operands: tuple[Operand, ...]) -> None:
     body = operands[1]
     if not isinstance(body, Ref) or body.kind not in {RefKind.N, RefKind.G}:
         raise ValueError("Quantifier body must reference a proposition/formula (N/G)")
+
+
+def _relevant_past(operands: tuple[Operand, ...]) -> None:
+    variable, anchor = operands
+    if not isinstance(variable, BoundVar) or variable.sort is not VariableSort.TIME:
+        raise ValueError("RELEVANT_PAST first operand must be a TIME BoundVar")
+    if not isinstance(anchor, Ref) or anchor.kind is not RefKind.M:
+        raise ValueError("RELEVANT_PAST anchor must reference semantic time M")
 
 
 def _render_quantifier(name: str, operands: tuple[str, ...]) -> str:
@@ -194,6 +202,14 @@ class FunctionRegistry:
                 lambda xs: _render_quantifier("EXISTS", xs),
                 reasoner_handler="EXISTS",
                 operand_validator=_quantifier,
+            )
+        )
+        self.register(
+            FunctionSpec(
+                "RELEVANT_PAST", 2, 2,
+                lambda xs: f"RELEVANT_PAST ({xs[0]}, {xs[1]})",
+                reasoner_handler="RELEVANT_PAST",
+                operand_validator=_relevant_past,
             )
         )
         for temporal_id in ("START", "STOP", "CONTINUE", "AGAIN", "NO_LONGER"):

@@ -148,6 +148,8 @@ class TemporalModeFormalizer:
         if assertion.temporal_mode is not None:
             return assertion
         if (
+            assertion.temporal_scope is not None
+            or
             assertion.status is not AssertionStatus.ASSERTED
             or assertion.quoted
             or assertion.local_id in scoped_refs
