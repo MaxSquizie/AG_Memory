@@ -72,4 +72,4 @@ def test_embedded_negation_keeps_scope_and_does_not_become_asserted_positive_fac
     operand = _not_operand(core, integrated.ref)
     assert operand.meta.get("semantic_scope") == AssertionStatus.EMBEDDED.value
     assert integrated.semantic_scope == AssertionStatus.EMBEDDED.value
-    assert all(seed.ref != operand for seed in commit.activation_seeds)
+    assert all(seed.ref.uid != operand.uid for seed in commit.activation_seeds)
