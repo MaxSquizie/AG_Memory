@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from ah.config import LLMRoleSettings
+from ah.model import ActantRole
+from ah.perception import ActantCandidate, AssertionCandidate, EvidenceSpan, PredicateCandidate
 from ah.perception.adaptive_parser import AdaptiveSettings
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import MorphInfo
@@ -55,6 +57,18 @@ class _Morphology:
             MorphInfo(
                 "знать", "VERB", number="sing", mood="indc",
                 transitivity="tran", score=1.0,
+            ),
+        ),
+        "моё": (
+            MorphInfo(
+                "мой", "ADJF", case="nomn", number="sing", gender="neut",
+                grammemes=frozenset({"Apro"}), score=1.0,
+            ),
+        ),
+        "имя": (
+            MorphInfo(
+                "имя", "NOUN", case="nomn", number="sing", gender="neut",
+                score=1.0,
             ),
         ),
     }
@@ -130,3 +144,52 @@ def test_embedded_wh_does_not_turn_matrix_into_query() -> None:
 
     assert force == "ASSERTION"
     assert placeholders == ()
+
+
+def test_relative_day_is_time_before_free_role_classification() -> None:
+    parser, graph, tokens = _parser_and_graph("Что вчера делал Илья")
+    predicate_index = _predicate_index(graph, "делал")
+    time_index = _predicate_index(graph, "вчера")
+    predicate_span = parser._resolve_span_from_source(
+        tokens, predicate_index, predicate_index
+    )
+    time_span = parser._resolve_span_from_source(tokens, time_index, time_index)
+
+    roles = parser._deterministic_role_candidates(
+        tokens,
+        predicate_span,
+        PredicateCandidate("делал", normalized_hint="делать"),
+        time_span,
+    )
+
+    assert roles == (ActantRole.TIME,)
+
+
+def test_deictic_nominal_owner_is_recovered_from_morphology_not_name_phrase_table() -> None:
+    parser, graph, _tokens = _parser_and_graph("Моё имя — Илья")
+    possessive = next(token for token in graph.tokens if token.text.casefold() == "моё")
+    noun = next(token for token in graph.tokens if token.text.casefold() == "имя")
+    phrase_start = min(possessive.start, noun.start)
+    phrase_end = max(possessive.end, noun.end)
+    assertion = AssertionCandidate(
+        local_id="A1",
+        predicate=PredicateCandidate(
+            "Илья",
+            normalized_hint="илья",
+            sense_hint="NOMINAL_PREDICATION",
+        ),
+        actants=(
+            ActantCandidate(
+                ActantRole.STATE,
+                mention="Моё имя",
+                normalized_hint="имя",
+                evidence=EvidenceSpan("Моё имя", phrase_start, phrase_end),
+            ),
+        ),
+    )
+
+    owner = parser._deictic_nominal_owner(assertion)
+
+    assert owner is not None
+    assert owner.role is ActantRole.SUBJECT
+    assert owner.mention == "Моё"
