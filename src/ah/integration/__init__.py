@@ -42,8 +42,14 @@ from .formalization import (
     merge_formalization_units,
     namespace_perception_result,
 )
-from .service import IntegrationConfig, IntegrationService
+from .service import IntegrationConfig, IntegrationService as _BaseIntegrationService
+from .naming_service import NamingAwareIntegrationService
 from .template_completion import TemplateCompletionService
+
+# Runtime construction imports IntegrationService from the package. Keep the large
+# canonical writer unchanged and expose a narrow semantic adapter that consumes
+# naming assertions/open-event query shells before they can be mistaken for facts/T.
+IntegrationService = NamingAwareIntegrationService
 
 __all__ = [
     "namespace_perception_result",
@@ -80,6 +86,7 @@ __all__ = [
     "UnresolvedDiscourseReferenceError",
     "UnresolvedTemporalReferenceError",
     "IntegrationService",
+    "NamingAwareIntegrationService",
     "TemplateCompletionService",
     "RefutationRequest",
     "RefutationCommit",
