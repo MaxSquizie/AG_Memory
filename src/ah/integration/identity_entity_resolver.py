@@ -9,7 +9,6 @@ from .entity_resolver import (
     EntityResolver,
     EntityResolution,
     ExistingEntity,
-    NewEntityPlan,
 )
 from .identity_graph import identity_owners_for_name_ref, is_identity_name_entity
 
@@ -23,8 +22,10 @@ class IdentityAwareEntityResolver(EntityResolver):
     latter is never treated as a competing person/entity: it is traversed through
     indexed ``IDENTITY_NAME`` links to its owner(s), then all owner refs are deduped.
 
-    This keeps resolution bounded to the existing name and incoming-link indexes and
-    supports future memories where the alias optimization is absent entirely.
+    Only genuine grammatical deixis (``я``, ``ты`` and inflected equivalents)
+    bypasses that graph. A lexical name such as ``Илья`` must carry its explicit
+    name-M as support even if the owner's legacy alias index already points directly
+    at USER.
     """
 
     def _identity_expanded_matches(
@@ -35,11 +36,6 @@ class IdentityAwareEntityResolver(EntityResolver):
         grammatical_number: str | None,
     ) -> tuple[tuple[SemanticEntity, tuple[Ref, ...]], ...]:
         matches = self.core.store.find_entities_by_name(lookup, preferred_domain)
-
-        # When a preferred domain is requested (event queries normally prefer the
-        # personalized P identity), the C label is outside that direct lookup. Read
-        # the exact C label index separately so the explicit relation remains a
-        # valid fallback even if the owner's alias property is missing.
         label_matches = self.core.store.find_entities_by_name(lookup, Domain.C)
         combined: list[SemanticEntity] = []
         for entity in (*matches, *label_matches):
@@ -93,9 +89,19 @@ class IdentityAwareEntityResolver(EntityResolver):
         preferred_domain: Domain | None = None,
         attention_refs: tuple[Ref, ...] = (),
     ) -> EntityResolution:
-        # Preserve deixis, literals, possessive descriptions, structured handles,
-        # and all other mature resolution behavior. We only intervene when the base
-        # resolver would use or create a plain lexical entity.
+        # Deixis is a stronger source-grounded identity signal than any lexical name
+        # edge, so preserve the mature direct path for grammatical USER/SELF forms.
+        deictic = self.deixis.resolve(
+            candidate,
+            context,
+            first_person_ref=first_person_ref,
+            second_person_ref=second_person_ref,
+        )
+        if deictic is not None:
+            return ExistingEntity(deictic)
+
+        # Keep every non-name mature behavior as a fallback (literals, possessive
+        # descriptions, ordinary indexed entities, unseen NewEntityPlan, etc.).
         base = super().resolve(
             candidate,
             context,
@@ -104,12 +110,6 @@ class IdentityAwareEntityResolver(EntityResolver):
             preferred_domain=preferred_domain,
             attention_refs=attention_refs,
         )
-        if isinstance(base, ExistingEntity) and base.ref.uid in {
-            ref.uid
-            for ref in (first_person_ref, second_person_ref, context.user_ref, context.self_ref)
-            if ref is not None
-        }:
-            return base
 
         lookup_forms: list[str] = []
         for value in (candidate.normalized_hint, candidate.mention):
@@ -136,6 +136,4 @@ class IdentityAwareEntityResolver(EntityResolver):
                     lookup,
                 )
 
-        # No explicit identity graph evidence exists. Keep the mature base result,
-        # including NewEntityPlan for genuinely unseen names/descriptions.
         return base
