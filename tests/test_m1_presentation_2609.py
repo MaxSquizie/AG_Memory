@@ -204,6 +204,9 @@ def test_event_set_query_is_shown_as_open_event_search_not_predicate_exists():
                 "predicate": _predicate("делал", "делать"),
                 "query_mode": "EXISTS",
                 "event_set": True,
+                "query_operator_evidence": [
+                    {"text": "Что", "start": 0, "end": 3}
+                ],
                 "requested_roles": [],
                 "actants": [
                     {
@@ -228,6 +231,7 @@ def test_event_set_query_is_shown_as_open_event_search_not_predicate_exists():
     assert view.frames[0].kind == "ЗАПРОС СОБЫТИЙ"
     assert view.frames[0].predicate == "СОБЫТИЕ"
     labels = {word.text: word.label for word in view.words}
+    assert labels["Что"] == "Оператор запроса"
     assert labels["делал"] == "Открытый предикат"
     assert labels["вчера"] == "TIME"
     assert labels["Илья"] == "SUBJECT"
