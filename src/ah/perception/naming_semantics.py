@@ -9,11 +9,14 @@ from .contracts import ActantCandidate, AssertionCandidate
 class NamingAssertionCandidate(AssertionCandidate):
     """Runtime assertion that assigns a conventional name to an entity.
 
-    The ordinary nominal-predication shell is retained for source evidence only;
-    Integration consumes this typed assertion as identity metadata instead of
-    materializing the shell as a world proposition such as ``Илья(STATE=имя)``.
-    ``owner`` is a source-grounded deictic/referential candidate and ``name_value``
-    is the already parsed nominal predicate surface. No canonical UID is exposed.
+    The ordinary source shell is retained for evidence only. It may originate from
+    nominal predication (``Моё имя — Илья``) or a finite verbal construction
+    (``Меня зовут Илья``); Integration consumes this typed assertion as identity
+    metadata instead of materializing the surface shell as an ordinary world fact.
+
+    ``owner`` and ``name_value`` are source-grounded perception results. They expose
+    no canonical UID: Integration remains the only layer that may resolve the owner
+    to USER/SELF/another existing entity and update canonical identity metadata.
     """
 
     owner: ActantCandidate | None = None
