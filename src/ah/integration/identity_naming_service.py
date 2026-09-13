@@ -8,20 +8,25 @@ from ah.perception.naming_semantics import NamingAssertionCandidate
 
 from .entity_resolver import EntityResolver, ExistingEntity
 from .errors import CandidateValidationError
+from .identity_graph import IDENTITY_NAME_RELATION, ensure_identity_name_entity
 from .naming_service import NamingAwareIntegrationService
 
 
 class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
-    """Normalize a source name before indexing it as an entity alias.
+    """Materialize naming as explicit graph semantics plus a retrieval alias.
 
-    ``NamingAssertionCandidate`` intentionally keeps both the source realization
-    (``name_value``) and a morphology-normalized lookup form
-    (``name_normalized_hint``).  The source form belongs to diagnostics/M1; entity
-    retrieval must use the normalized form so case-inflected naming statements such
-    as ``Я являюсь Ильёй`` can later resolve the ordinary nominative ``Илья``.
+    Perception has already decided that the source is naming rather than ordinary
+    predication. Integration therefore performs two distinct operations:
 
-    No identity decision happens here: Perception has already classified the source
-    as naming, and EntityResolver still deterministically resolves the named owner.
+    * keep the morphology-normalized value in the owner's ``aliases`` property as a
+      bounded lexical retrieval index, preserving fast ordinary entity resolution;
+    * create/reuse an excitable canonical C-domain M for the conventional name and
+      connect the named entity to it with ``IDENTITY_NAME``.
+
+    The explicit M/L pair is authoritative graph evidence. The alias is only a
+    retrieval aid and must never replace the graph relation. Thus ``Я Илья`` yields
+    USER --IDENTITY_NAME--> M("Илья") without manufacturing a generic copular fact,
+    while ``Я инженер`` remains ordinary predication and does not enter this path.
     """
 
     def _apply_naming_assertions(
@@ -85,12 +90,25 @@ class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
                 meta["grammatical_number"] = "sing"
                 changed = True
 
-            if not changed:
-                continue
-            domain = core.store.domain_of(entity.uid)
-            if domain is None:
-                raise CandidateValidationError("Naming owner has no semantic domain")
-            core.edit_element(
-                domain,
-                replace(entity, properties=properties, meta=meta),
+            if changed:
+                domain = core.store.domain_of(entity.uid)
+                if domain is None:
+                    raise CandidateValidationError("Naming owner has no semantic domain")
+                core.edit_element(
+                    domain,
+                    replace(entity, properties=properties, meta=meta),
+                )
+
+            # Graph identity is explicit even when the lexical alias was already
+            # present from an older memory. This also upgrades such memories on the
+            # next naming assertion instead of silently keeping alias-only state.
+            try:
+                name_ref = ensure_identity_name_entity(core, alias)
+            except ValueError as exc:
+                raise CandidateValidationError(str(exc)) from exc
+            core.ensure_link(
+                IDENTITY_NAME_RELATION,
+                resolved.ref,
+                name_ref,
+                self.config.nominal_relation_link_weight,
             )
