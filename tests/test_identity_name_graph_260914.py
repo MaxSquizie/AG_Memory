@@ -105,11 +105,10 @@ def test_naming_creates_excitable_name_m_and_identity_link() -> None:
     assert core.store.find_link(
         IDENTITY_NAME_RELATION, context.user_ref.uid, name_ref.uid
     ) is not None
-    # C/P M nodes own runtime excitation state; the name is not hidden metadata.
     assert core.store.runtime_state(name_ref.uid) is not None
 
 
-def test_reverse_name_resolution_returns_named_user_not_label_node() -> None:
+def test_reverse_name_resolution_returns_named_user_via_name_node() -> None:
     core, context, integration = _runtime()
     when = datetime(2026, 9, 14, 0, 0, tzinfo=timezone(timedelta(hours=3)))
     _name_user(integration, context, when)
@@ -122,6 +121,8 @@ def test_reverse_name_resolution_returns_named_user_not_label_node() -> None:
     )
     resolved = IdentityAwareEntityResolver(core).resolve(candidate, context)
     assert resolved.ref == context.user_ref
+    name_refs = identity_name_refs_for_owner(core, context.user_ref)
+    assert resolved.support_refs == name_refs
 
 
 def test_who_is_ilya_proves_identity_through_explicit_graph() -> None:
@@ -138,12 +139,13 @@ def test_who_is_ilya_proves_identity_through_explicit_graph() -> None:
     normalized = commit.unresolved_queries[0]
     built = QueryGoalBuilder(core).build(normalized, context)
     assert built.goal is not None, built.diagnostics
-    outcome = InferenceEngine(core, InferenceSettings()).solve(built.goal)
+    name_refs = identity_name_refs_for_owner(core, context.user_ref)
+    assert name_refs[0] in built.attention_refs
 
+    outcome = InferenceEngine(core, InferenceSettings()).solve(built.goal)
     assert outcome.status is LogicalStatus.PROVED
     assert isinstance(outcome.conclusion, ExistingRefConclusion)
     assert outcome.conclusion.ref == context.user_ref
-    name_refs = identity_name_refs_for_owner(core, context.user_ref)
     assert name_refs[0] in outcome.uid_trace
 
     projected = ContextProjector(core, ContextSettings()).project(
