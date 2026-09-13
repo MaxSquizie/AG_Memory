@@ -92,7 +92,12 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
                 continue
             if any(left <= token.index <= right for left, right in nested_ranges):
                 continue
-            analyses = self._material_morph_analyses(token)
+            # Ques is a closed grammatical-function tag. Keep every dictionary
+            # reading for this one check instead of applying the generic open-class
+            # probability floor: a frequent complementizer reading of the same
+            # surface form must not erase a valid interrogative-pronoun reading
+            # before clause structure has established that the token is top-level.
+            analyses = self._morph_all(token)
             if any("Ques" in info.grammemes for info in analyses):
                 return "QUERY"
         return base
