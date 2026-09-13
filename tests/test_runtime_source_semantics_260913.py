@@ -47,6 +47,12 @@ class _Morphology:
                 transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
             ),
         ),
+        "делал": (
+            MorphInfo(
+                "делать", "VERB", number="sing", gender="masc", mood="indc",
+                transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
+            ),
+        ),
         "выпил": (
             MorphInfo(
                 "выпить", "VERB", number="sing", gender="masc", mood="indc",
@@ -176,6 +182,48 @@ def test_fronted_yesterday_is_preconsumed_as_time_before_generic_roles() -> None
     assert by_role[ActantRole.SUBJECT].mention == "я"
     assert by_role[ActantRole.OBJECT].mention == "чай"
     assert by_role[ActantRole.TIME].mention.casefold() == "вчера"
+
+
+def _assert_absolute_date_is_one_time_actant(text: str, expected: str) -> None:
+    parser, tokens = _parser_for(text)
+    predicate_index = next(token.index for token in tokens if token.text.casefold() == "делал")
+    predicate_span, predicate = _predicate(parser, tokens, predicate_index, "делать")
+    requested = parser._resolve_span_from_source(tokens, 1, 1)
+
+    actants, spans = parser._extract_actants(
+        text,
+        tokens,
+        predicate_span,
+        predicate,
+        act_type="QUERY",
+        requested_roles=(),
+        requested_spans=(requested,),
+    )
+
+    times = [item for item in actants if item.role is ActantRole.TIME]
+    assert len(times) == 1
+    assert times[0].mention == expected
+    assert any(span.text == expected for span in spans)
+    # Numeric fragments of the same literal must never escape into ordinary roles.
+    assert all(
+        item.mention not in {"2026", "09", "12"}
+        for item in actants
+        if item.role is not ActantRole.TIME
+    )
+
+
+def test_dotted_absolute_date_is_consumed_as_one_time_span() -> None:
+    _assert_absolute_date_is_one_time_actant(
+        "Что я делал 12.09.2026?",
+        "12.09.2026",
+    )
+
+
+def test_iso_absolute_date_is_consumed_as_one_time_span() -> None:
+    _assert_absolute_date_is_one_time_actant(
+        "Что я делал 2026-09-12?",
+        "2026-09-12",
+    )
 
 
 def test_query_additivity_is_consumed_as_discourse_not_transition_actant() -> None:
