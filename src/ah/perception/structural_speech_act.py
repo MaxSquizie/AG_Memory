@@ -239,10 +239,10 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
                 for actant in assertion.actants
             )
             + f"\nNAME VALUE CANDIDATE:\n{assertion.predicate.surface}\n"
-            "QUESTION:\nDoes the source explicitly assign NAME VALUE CANDIDATE as "
+            "Decision criterion:\nDoes the source explicitly assign NAME VALUE CANDIDATE as "
             "the conventional name/label by which OWNER is called, or is this an "
             "ordinary nominal predication?\n"
-            "CHOICES:\nENTITY_NAME\nOTHER_PREDICATION\nUNCLEAR"
+            "Candidate labels:\nENTITY_NAME\nOTHER_PREDICATION\nUNCLEAR"
         )
         decision, _ = self._deep_semantic_choice_probe(
             "naming_predication",
@@ -310,10 +310,10 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
             f"SOURCE PREDICATE:\n{query.predicate.surface}\n"
             f"KNOWN EVENT ROLES:\n{known}\n"
             f"CURRENT WH ROLE READING:\n{requested}\n"
-            "QUESTION:\nDoes the interrogative ask for a missing value inside the "
+            "Decision criterion:\nDoes the interrogative ask for a missing value inside the "
             "stated predicate, or does it ask which event/action/state itself "
             "occurred under the known constraints?\n"
-            "CHOICES:\nROLE_FILL\nEVENT_SET\nUNCLEAR"
+            "Candidate labels:\nROLE_FILL\nEVENT_SET\nUNCLEAR"
         )
         decision, _ = self._deep_semantic_choice_probe(
             "query_target",

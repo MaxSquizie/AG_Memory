@@ -101,33 +101,6 @@ class LLMControlWidget(QWidget):
     AH/H and never affect AgentContext.
     """
 
-    PROBE_PROMPTS = (
-        "probe_system",
-        "act_type",
-        "predicate_start",
-        "predicate_end",
-        "predicate_symbol",
-        "predicate_symbol_verify",
-        "negation",
-        "actant_start",
-        "actant_end",
-        "role_family",
-        "role_participant",
-        "role_description",
-        "role_circumstance",
-        "frame_relation",
-        "relative_role",
-        "role_cue",
-        "lexeme_hypothesis",
-        "antecedent_choice",
-        "content_addressee",
-        "control_subject",
-        "template_hidden_valency",
-        "clarification_answer",
-        "query_mode",
-        "requested_role",
-    )
-
     start_requested = Signal()
     stop_requested = Signal()
     restart_requested = Signal()
@@ -213,7 +186,13 @@ class LLMControlWidget(QWidget):
         self.probe_prompt_widget = QWidget()
         probe_layout = QVBoxLayout(self.probe_prompt_widget)
         self.probe_selector = QComboBox()
-        self.probe_selector.addItems(self.PROBE_PROMPTS)
+        probe_root = self.services.config.paths.perception_prompt_dir
+        probe_names = (
+            tuple(sorted(path.stem for path in probe_root.glob("*.txt")))
+            if probe_root is not None and probe_root.is_dir()
+            else ()
+        )
+        self.probe_selector.addItems(probe_names)
         self.perception_editor = QPlainTextEdit()
         probe_layout.addWidget(self.probe_selector)
         probe_layout.addWidget(self.perception_editor, 1)

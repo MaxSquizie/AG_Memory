@@ -13,7 +13,7 @@ from ah.diagnostics.hidden_valency_diagnostic import run_hidden_valency_diagnost
 from ah.llm.process_backend import LLMResponse
 
 
-_CHOICES_RE = re.compile(r"CHOICES:\n([A-Z_]+)\n([A-Z_]+)")
+_CHOICES_RE = re.compile(r"Answer options:\n-?\d+ = ([A-Z_]+)\n-?\d+ = ([A-Z_]+)")
 
 
 class _FirstChoiceBackend:

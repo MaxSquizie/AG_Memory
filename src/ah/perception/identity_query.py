@@ -73,14 +73,14 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
             f"KNOWN ENTITY CANDIDATE:\n{target.lookup_text or target.mention or ''}\n"
             f"INTERROGATIVE CANDIDATE:\n"
             f"{interrogative.lookup_text or interrogative.mention or ''}\n"
-            "QUESTION:\nWhat information does this question request?\n"
+            "Decision criterion:\nWhat information does this question request?\n"
             "ENTITY_IDENTITY: it asks who/what the already known entity is called or "
             "which concrete identity/name denotes that entity.\n"
             "ORDINARY_PREDICATION: it asks whether/who satisfies a profession, class, "
             "property, role, state, relation, or other ordinary predicate; the known "
             "candidate is not merely an entity whose stored identity/name is requested.\n"
             "UNCLEAR: the source does not safely distinguish these readings.\n"
-            "CHOICES:\n"
+            "Candidate labels:\n"
             + "\n".join(self._IDENTITY_CHOICES)
         )
         decision, _ = self._deep_semantic_choice_probe(

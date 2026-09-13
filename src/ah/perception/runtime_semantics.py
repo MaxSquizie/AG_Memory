@@ -295,7 +295,7 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
             "set of requested/available answers rather than the predicate event. "
             "Requesting an additional or alternative answer belongs here.\n"
             "UNCLEAR: the source does not determine the scope safely.\n"
-            "CHOICES:\n"
+            "Candidate labels:\n"
             + "\n".join(self._ADVERBIAL_SCOPE_CHOICES)
         )
         decision, _ = self._deep_semantic_choice_probe(

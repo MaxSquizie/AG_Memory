@@ -1,1 +1,1 @@
-Classify negation scope. WHOLE_NOT denies the entire CANDIDATE FORMULA. NO leaves whole-formula truth undenied; listed local negations remain local. A restriction on one subexpression is not whole negation. UNCLEAR means whole versus local scope is unresolved. Return only WHOLE_NOT, NO, or UNCLEAR.
+Classify negation scope. WHOLE_NOT denies the entire CANDIDATE FORMULA. NO leaves whole-formula truth undenied; listed local negations remain local. A restriction on one subexpression is not whole negation. UNCLEAR means whole versus local scope is unresolved.

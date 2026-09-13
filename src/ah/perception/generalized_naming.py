@@ -379,12 +379,12 @@ class GeneralizedNamingAdaptiveParser(StructuralSpeechActAdaptiveParser):
             f"PREDICATE:\n{assertion.predicate.surface}\n"
             f"ENTITY CANDIDATE:\n{owner.mention or owner.lookup_text or ''}\n"
             f"PREDICATIVE VALUE CANDIDATES:\n{rows}\n"
-            "QUESTION:\nDoes this source explicitly assign one PREDICATIVE VALUE "
+            "Decision criterion:\nDoes this source explicitly assign one PREDICATIVE VALUE "
             "CANDIDATE as the conventional personal/entity name or identifying "
             "label of ENTITY CANDIDATE? Select that value only for naming/identity. "
             "A profession, class, property, role, condition, appointment, action, "
             "description, or encounter is OTHER_PREDICATION.\n"
-            "CHOICES:\n"
+            "Candidate labels:\n"
             + "\n".join((*labels, "OTHER_PREDICATION", "UNCLEAR"))
         )
         decision, _ = self._deep_semantic_choice_probe(

@@ -1,1 +1,1 @@
-Choose exactly one English label from OPTIONS. Return only the label. Choose NONE if the relation is not clear.
+Classify the relative connector's semantic role in its clause. Use NONE if the supplied text does not establish one.

@@ -204,7 +204,7 @@ def test_temporal_scope_probe_is_nonthinking_fixed_choice_and_uid_free() -> None
     role, prompt, override = backend.calls[0]
     assert role == "semantic_temporal_scope"
     assert override["enable_thinking"] is False
-    assert "CHOICES:\nNEVER\nPLAIN_NEGATION\nAMBIGUOUS" in prompt
+    assert "Answer options:\n1 = NEVER\n2 = PLAIN_NEGATION\n3 = AMBIGUOUS" in prompt
     assert "UID" not in prompt.upper()
 
 

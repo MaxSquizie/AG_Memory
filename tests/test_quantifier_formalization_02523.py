@@ -506,7 +506,7 @@ def test_quantifier_probe_uses_one_non_thinking_fixed_label_call() -> None:
     assert role == "semantic_quantifier"
     assert override["enable_thinking"] is False
     assert "TARGET ROLE:\nSUBJECT" in prompt
-    assert "CHOICES:\nNONE\nEXISTS\nNOT_EXISTS\nFORALL\nNOT_FORALL\nAMBIGUOUS" in prompt
+    assert "Answer options:\n1 = NONE\n2 = EXISTS\n3 = NOT_EXISTS\n4 = FORALL\n5 = NOT_FORALL\n6 = AMBIGUOUS" in prompt
     assert "UID" not in prompt.upper()
 
 

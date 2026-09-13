@@ -1,1 +1,1 @@
-Choose the listed proposition subtree Cn modified by the classified modal cue. Candidates are fixed. Do not regroup operators, move negation, invent a subtree, or change modal type. If the source does not determine one scope safely, return UNCLEAR. Return one listed Cn or UNCLEAR.
+Choose the listed proposition subtree Cn modified by the classified modal cue. Candidates are fixed. Do not regroup operators, move negation, invent a subtree, or change modal type. Use UNCLEAR if the source does not determine one scope safely.

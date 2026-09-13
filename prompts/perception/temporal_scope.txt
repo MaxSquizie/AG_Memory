@@ -1,0 +1,1 @@
+Classify the scope of source negation. NEVER means the positive proposition has no occurrence anywhere in the contextually relevant past. PLAIN_NEGATION denies it only at a particular or unspecified time. Use AMBIGUOUS for unresolved frequency or temporal scope.

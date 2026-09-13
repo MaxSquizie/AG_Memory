@@ -1,1 +1,1 @@
-Choose exactly one English label from OPTIONS. Return only the label.
+Classify whether the fixed predicate occurrence is affirmed, negated, or unresolved using the supplied meanings.

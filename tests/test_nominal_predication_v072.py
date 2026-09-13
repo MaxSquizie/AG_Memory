@@ -358,7 +358,7 @@ def test_nominal_label_semantics_uses_isolated_non_thinking_request_mode():
     assert len(backend.semantic_overrides) == 2
     assert all(item.get("enable_thinking") is False for item in backend.semantic_overrides)
     assert all(item.get("temperature") == 0.0 for item in backend.semantic_overrides)
-    assert all(item.get("max_new_tokens") <= 8 for item in backend.semantic_overrides)
+    assert all(item.get("max_new_tokens") <= 10 for item in backend.semantic_overrides)
 
 
 
@@ -413,7 +413,7 @@ def test_invalid_optional_nominal_projection_does_not_discard_primary_parse():
     assert predicates == {"название", "имя"}
     failures = [t for t in result.traces if t.stage == "nominal_label_semantics" and t.error]
     assert len(failures) == 2
-    assert all("expected exactly one of: YES, NO, UNCLEAR" in t.error for t in failures)
+    assert all("expected exactly one current option: YES, NO, UNCLEAR" in t.error for t in failures)
 
 
 def test_nominal_label_semantics_is_not_related_noun_copy():

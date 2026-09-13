@@ -15,8 +15,9 @@ class SLMPromptPolicy1227Tests(unittest.TestCase):
 
     def test_template_hidden_valency_uses_binary_generation_protocol(self):
         text = (PROJECT / "prompts/perception" / "template_hidden_valency.txt").read_text(encoding="utf-8")
-        self.assertIn("Choose exactly one label from CHOICES", text)
-        self.assertIn("Known roles", text)
+        self.assertIn("known roles", text)
+        self.assertNotIn("CHOICES", text)
+        self.assertNotIn("Return only", text)
         self.assertNotIn("RECIPIENT,SOURCE", text)
         self.assertNotIn("AMBIGUOUS", text)
         self.assertNotIn("likelihood", text.casefold())
@@ -25,14 +26,16 @@ class SLMPromptPolicy1227Tests(unittest.TestCase):
         self.assertFalse((PROJECT / "prompts/perception" / "semantic_completion_system.txt").exists())
 
 
-    def test_semantic_probes_use_small_contrastive_or_direct_choices_without_abstention_labels(self):
+    def test_semantic_probe_files_define_meaning_not_wire_format(self):
         for name in (
             "frame_relation.txt", "control_subject.txt",
             "role_family.txt", "role_participant.txt", "role_description.txt",
             "role_circumstance.txt",
         ):
             text = (PROJECT / "prompts/perception" / name).read_text(encoding="utf-8")
-            self.assertIn("Choose exactly one label", text, name)
+            self.assertNotIn("CHOICES", text, name)
+            self.assertNotIn("OPTIONS", text, name)
+            self.assertNotIn("Return only", text, name)
             self.assertNotIn("YES or NO", text, name)
             self.assertNotIn("UNKNOWN", text, name)
             self.assertNotIn("NONE", text, name)

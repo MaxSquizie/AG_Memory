@@ -246,7 +246,7 @@ def test_temporal_mode_probe_is_nonthinking_fixed_choice_and_uid_free() -> None:
     role, prompt, override = backend.calls[0]
     assert role == "semantic_temporal_mode"
     assert override["enable_thinking"] is False
-    assert "CHOICES:\nSTATE\nEVENT\nPROCESS\nAMBIGUOUS" in prompt
+    assert "Answer options:\n1 = STATE\n2 = EVENT\n3 = PROCESS\n4 = AMBIGUOUS" in prompt
     assert "UID" not in prompt.upper()
 
 

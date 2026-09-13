@@ -18,6 +18,12 @@ from .llm_parser import (
     PerceptionClarificationRequired,
     PerceptionParseError,
 )
+from .probe_protocol import (
+    CHOICE_MAX_NEW_TOKENS,
+    ProbeProtocolError,
+    compose_choice_prompt,
+    decode_choice,
+)
 from .structural_speech_act import StructuralSpeechActAdaptiveParser
 
 
@@ -274,14 +280,25 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
             )
         prompt_path = self.settings.probe_prompt_dir / self.PROMPT_NAME
         try:
-            system = prompt_path.read_text(encoding="utf-8").strip()
+            instruction = prompt_path.read_text(encoding="utf-8").strip()
         except FileNotFoundError as exc:
             raise PerceptionParseError(
                 f"missing correlated-frame prompt: {prompt_path}"
             ) from exc
-        if not system:
+        if not instruction:
             raise PerceptionParseError(
                 f"empty correlated-frame prompt: {prompt_path}"
+            )
+        system_path = self.settings.probe_prompt_dir / "probe_system.txt"
+        try:
+            system = system_path.read_text(encoding="utf-8").strip()
+        except FileNotFoundError as exc:
+            raise PerceptionParseError(
+                f"missing shared probe system prompt: {system_path}"
+            ) from exc
+        if not system:
+            raise PerceptionParseError(
+                f"empty shared probe system prompt: {system_path}"
             )
 
         labels = tuple(f"A{index}" for index in range(1, len(variants) + 1))
@@ -290,21 +307,31 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
             f"{label}: {_variant_text(variant, referent_labels)}"
             for label, variant in zip(labels, variants)
         )
-        prompt = (
+        context = (
             f"TEXT:\n{source_text}\n"
             f"PREDICATE:\n{assertion.predicate.surface}\n"
             f"CORRELATED ROLES:\n{', '.join(varying_roles)}\n"
-            f"COMPLETE READINGS:\n{frames}\n"
-            "CHOICES:\n" + "\n".join(choices)
+            f"COMPLETE READINGS:\n{frames}"
         )
         attempts: list[PerceptionAttemptDiagnostic] = []
         for retry_index in range(self.settings.probe_retry_attempts + 1):
+            try:
+                prompt = compose_choice_prompt(
+                    context,
+                    instruction,
+                    choices,
+                    retry=retry_index > 0,
+                )
+            except ProbeProtocolError as exc:
+                raise PerceptionParseError(
+                    f"invalid correlated-frame choice protocol: {exc}"
+                ) from exc
             try:
                 response = self.backend.generate(
                     prompt,
                     system=system,
                     override={
-                        "max_new_tokens": 8,
+                        "max_new_tokens": CHOICE_MAX_NEW_TOKENS,
                         "temperature": 0.0,
                         "repetition_penalty": 1.0,
                         "no_repeat_ngram_size": 0,
@@ -327,7 +354,10 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
                     "correlated frame semantic probe backend failed"
                 ) from exc
 
-            label = response.text.strip().upper()
+            try:
+                label = decode_choice(response.text, choices)
+            except ProbeProtocolError:
+                label = None
             if label in labels:
                 return variants[labels.index(label)]
             if label == "UNKNOWN":
@@ -353,11 +383,6 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
                     retry_index=retry_index,
                 )
             )
-            if retry_index < self.settings.probe_retry_attempts:
-                prompt = (
-                    prompt
-                    + "\nRETRY CONSTRAINT:\nReturn exactly one line copied from CHOICES."
-                )
 
         message = "correlated frame semantic probe returned no valid bounded choice"
         self._record_diagnostic(source_text, attempts, None, message)

@@ -14,6 +14,12 @@ def _section(prompt: str, name: str) -> str:
     return match.group(1).strip() if match else ""
 
 
+def _choice_labels(prompt: str) -> list[str]:
+    """Read the current numeric-first wire menu used by production probes."""
+
+    return re.findall(r"^\s*-?\d+\s*=\s*([^\s]+)\s*$", prompt, flags=re.MULTILINE)
+
+
 def legacy_semantic_answer(role: str, prompt: str) -> str | None:
     if role == "perception_modifier_attachment":
         # Generic attachment probe is intentionally ambiguity-preserving in the
@@ -73,8 +79,7 @@ def legacy_semantic_answer(role: str, prompt: str) -> str | None:
 
     if role == "perception_frame_relation":
         text = _section(prompt, "TEXT").casefold()
-        choices_block = prompt.split("CHOICES:\n", 1)[1] if "CHOICES:\n" in prompt else ""
-        choices = [line.strip() for line in choices_block.splitlines() if line.strip()]
+        choices = _choice_labels(prompt)
         if any(marker in text for marker in ("потому что", "потому, что")) and "CAUSE_LINK" in choices:
             return "CAUSE_LINK"
         if any(marker in text for marker in (

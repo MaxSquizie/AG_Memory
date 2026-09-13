@@ -1,1 +1,1 @@
-Choose exactly one English label from OPTIONS. Return only the label.
+Classify whether the fixed query asks for existence or truth, or for one missing semantic role.

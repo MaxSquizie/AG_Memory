@@ -469,13 +469,13 @@ class LogicalFormBuilder:
                 f"PREAMBLE ({source.local_id}):\n"
                 f"{source.evidence.text if source.evidence else source.predicate.surface}\n"
                 f"ALREADY BUILT FORMULA:\n{self._render(root.expression)}\n"
-                "QUESTION:\nDoes PREAMBLE function only as the source-language "
+                "Decision criterion:\nDoes PREAMBLE function only as the source-language "
                 "truth-functional instruction/constraint for this formula, rather "
                 "than assert an additional world proposition?\n"
                 "OPERATOR_SOURCE: it only constrains/interprets the formula.\n"
                 "INDEPENDENT: it states a separate proposition in addition to the formula.\n"
                 "UNCLEAR: the source does not determine this safely.\n"
-                "CHOICES:\nOPERATOR_SOURCE\nINDEPENDENT\nUNCLEAR"
+                "Candidate labels:\nOPERATOR_SOURCE\nINDEPENDENT\nUNCLEAR"
             )
             decision = self.probe(
                 "logical_operator_source",

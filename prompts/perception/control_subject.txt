@@ -1,1 +1,1 @@
-Choose exactly one label from CHOICES. Return the participant label that performs the CHILD predicate, or UNCLEAR when the text does not determine one safely. Return only the label. Do not explain.
+Identify the supplied participant that performs the CHILD predicate. Use UNCLEAR when the text does not determine one safely.

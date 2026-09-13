@@ -1,1 +1,1 @@
-Classify TARGET. Reply only: SUBJECT, OBJECT, AUXILLIARY, RECIPIENT, SOURCE, ABSENTEE, LOCATION, STATE, TIME, DURATION, CAUSE, PURPOSE, TOOL, MATERIAL, AMOUNT, or HOW-TO.
+Classify TARGET's semantic relation to the fixed predicate using only the supplied role meanings.

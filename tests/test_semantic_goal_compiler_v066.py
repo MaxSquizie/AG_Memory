@@ -501,7 +501,7 @@ def test_adaptive_act_relation_probe_is_fixed_choice_and_uid_free():
     assert len(backend.prompts) == 1
     prompt, _system, _override, role = backend.prompts[0]
     assert role == "perception_act_relation"
-    assert "CHOICES:" in prompt and "NONE" in prompt and "R1" in prompt
+    assert "Answer options:" in prompt and "1 = NONE" in prompt and "2 = R1" in prompt
     assert "UID" not in prompt
 
 

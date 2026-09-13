@@ -1,1 +1,1 @@
-Choose exactly one English label from OPTIONS. Return only the label.
+Classify the source as no semantic act, an assertion, a query, a command, or genuinely unclear using the supplied candidate meanings.

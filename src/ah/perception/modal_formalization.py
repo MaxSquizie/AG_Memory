@@ -506,7 +506,7 @@ class ModalScopeBuilder:
             operator_prompt = (
                 f"TEXT:\n{source_text}\n"
                 f"CUE:\n{cue.text}\n"
-                "QUESTION:\nDoes this source cue change the truth commitment of a proposition "
+                "Decision criterion:\nDoes this source cue change the truth commitment of a proposition "
                 "to possibility, requirement/necessity, or permission?\n"
                 "POSSIBLE: proposition is presented only as possible/probable/uncertain.\n"
                 "REQUIRED: proposition is presented as required/necessary/obligatory.\n"
@@ -514,7 +514,7 @@ class ModalScopeBuilder:
                 "FACTUAL: cue only confirms actuality/certainty; proposition stays factual.\n"
                 "NONE: this cue does not create one of those proposition scopes.\n"
                 "UNCLEAR: it does affect commitment but the type cannot be decided safely.\n"
-                "CHOICES:\nPOSSIBLE\nREQUIRED\nPERMITTED\nFACTUAL\nNONE\nUNCLEAR"
+                "Candidate labels:\nPOSSIBLE\nREQUIRED\nPERMITTED\nFACTUAL\nNONE\nUNCLEAR"
             )
             decision = self.probe(
                 "modal_operator", operator_prompt, self._OPERATOR_CHOICES

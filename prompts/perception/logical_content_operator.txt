@@ -1,1 +1,1 @@
-Classify MATRIX relative to fixed CONTENT. NOT_CONTENT means MATRIX only denies CONTENT as a whole. NONE means MATRIX has its own semantic relation to CONTENT. UNCLEAR means this distinction is unresolved. Ignore local predicate negation inside CONTENT. Return only NOT_CONTENT, NONE, or UNCLEAR.
+Classify MATRIX relative to fixed CONTENT. NOT_CONTENT means MATRIX only denies CONTENT as a whole. NONE means MATRIX has its own semantic relation to CONTENT. UNCLEAR means this distinction is unresolved. Ignore local predicate negation inside CONTENT.

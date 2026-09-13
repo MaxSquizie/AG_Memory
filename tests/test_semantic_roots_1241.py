@@ -102,7 +102,7 @@ class SemanticRoots1241Tests(unittest.TestCase):
             if role == "perception_control_subject"
         )
         self.assertIn("PARTICIPANTS:\nFIRST =", controller_prompt)
-        self.assertIn("CHOICES:\nFIRST\nSECOND", controller_prompt)
+        self.assertIn("Answer options:\n1 = FIRST\n2 = SECOND", controller_prompt)
         self.assertNotIn("CONTROLLER OPTIONS:", controller_prompt)
 
     def test_personal_provenance_blocks_cross_domain_name_hijack(self):

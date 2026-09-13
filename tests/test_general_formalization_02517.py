@@ -54,7 +54,7 @@ class GraphEllipsisFixture:
             return LLMResponse("NONASSERTED_CONTENT", {})
         if role == "perception_control_subject":
             participants = prompt.split("PARTICIPANTS:\n", 1)[1].split(
-                "\nCHOICES:", 1
+                "\nCandidate labels:", 1
             )[0]
             for line in participants.splitlines():
                 if any(name in line.casefold() for name in ("нина", "вера")):

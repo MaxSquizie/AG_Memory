@@ -10,13 +10,17 @@ from ah.llm.process_backend import LLMResponse
 from ah.model import ActantRole
 from ah.perception import (
     ActRelationCandidate,
+    ActantCompositionCandidate,
     ActantCandidate,
     AssociationActRelationCandidate,
     AssociationSemanticClassifier,
+    CompositionMemberCandidate,
+    CompositionOperator,
     PerceptionResult,
     PredicateCandidate,
     QueryCandidate,
 )
+from ah.perception.association_semantics import AssociationProbeError
 
 
 class _Backend:
@@ -67,6 +71,29 @@ def test_association_probe_is_bounded_uid_free_and_non_thinking() -> None:
     assert override["enable_thinking"] is False
     assert "ASSOCIATION:E1:E2" in str(call["prompt"])
     assert "UID" not in str(call["prompt"]).upper()
+
+
+def test_association_probe_rejects_endpoint_sets_that_expand_past_wire_bound() -> None:
+    backend = _Backend("1")
+    prompt_dir = Path(__file__).resolve().parents[1] / "prompts" / "perception"
+    classifier = AssociationSemanticClassifier(backend, prompt_dir, retry_attempts=0)
+    members = tuple(
+        CompositionMemberCandidate(f"endpoint {index}") for index in range(9)
+    )
+    query = QueryCandidate(
+        PredicateCandidate("connect"),
+        (
+            ActantCandidate(
+                ActantRole.OBJECT,
+                composition=ActantCompositionCandidate(CompositionOperator.AND, members),
+            ),
+        ),
+        local_id="Q1",
+    )
+
+    with pytest.raises(AssociationProbeError, match="bounded semantic probe capacity"):
+        classifier.classify("What connects these endpoints?", query)
+    assert backend.calls == []
 
 
 def test_association_and_world_relation_cannot_compete_by_relation_order() -> None:

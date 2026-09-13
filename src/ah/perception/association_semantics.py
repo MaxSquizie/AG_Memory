@@ -18,6 +18,13 @@ from .llm_parser import (
     PerceptionAttemptDiagnostic,
     PerceptionParseError,
 )
+from .probe_protocol import (
+    CHOICE_MAX_NEW_TOKENS,
+    MAX_CHOICE_OPTIONS,
+    ProbeProtocolError,
+    compose_choice_prompt,
+    decode_choice,
+)
 
 
 class _TextGenerator(Protocol):
@@ -133,7 +140,7 @@ class AssociationSemanticClassifier:
     Deterministic parsing enumerates source-grounded endpoint candidates first. The
     model sees only local E1/E2 labels plus human-readable source text; it never sees
     canonical UIDs and never constructs AssociationGoal. Output is one finite cue:
-    ORDINARY, UNKNOWN, or ASSOCIATION:Ea:Eb.
+    ORDINARY, UNKNOWN, or one exact local endpoint-pair option.
     """
 
     PROMPT_NAME = "association_query.txt"
@@ -151,7 +158,7 @@ class AssociationSemanticClassifier:
         self.prompt_dir = prompt_dir
         self.retry_attempts = retry_attempts
 
-    def _system_prompt(self) -> str:
+    def _instruction(self) -> str:
         if self.prompt_dir is None:
             raise AssociationProbeError(
                 "association semantic probe requires perception probe_prompt_dir"
@@ -167,6 +174,22 @@ class AssociationSemanticClassifier:
             raise AssociationProbeError(
                 f"empty association semantic prompt: {path}"
             )
+        return text
+
+    def _protocol_system(self) -> str:
+        if self.prompt_dir is None:
+            raise AssociationProbeError(
+                "association semantic probe requires perception probe_prompt_dir"
+            )
+        path = self.prompt_dir / "probe_system.txt"
+        try:
+            text = path.read_text(encoding="utf-8").strip()
+        except FileNotFoundError as exc:
+            raise AssociationProbeError(
+                f"missing shared probe system prompt: {path}"
+            ) from exc
+        if not text:
+            raise AssociationProbeError(f"empty shared probe system prompt: {path}")
         return text
 
     @staticmethod
@@ -228,27 +251,42 @@ class AssociationSemanticClassifier:
             for right in range(left + 1, len(labels))
         )
         choices = ("ORDINARY", *pair_choices, "UNKNOWN")
+        if len(choices) > MAX_CHOICE_OPTIONS:
+            raise AssociationProbeError(
+                "association endpoint set exceeds the bounded semantic probe capacity"
+            )
         endpoint_lines = "\n".join(
             f"{label}: role={candidate.selector.role.value}; text={candidate.text}"
             for label, candidate in zip(labels, candidates)
         )
         act_kind = "QUERY" if isinstance(act, QueryCandidate) else "COMMAND"
-        prompt = (
+        context = (
             f"TEXT:\n{source_text}\nACT TYPE:\n{act_kind}\n"
             f"PREDICATE:\n{act.predicate.surface}\n"
-            f"EXPLICIT ENDPOINT CANDIDATES:\n{endpoint_lines}\n"
-            "CHOICES:\n" + "\n".join(choices)
+            f"EXPLICIT ENDPOINT CANDIDATES:\n{endpoint_lines}"
         )
-        system = self._system_prompt()
+        instruction = self._instruction()
+        system = self._protocol_system()
         attempts: list[AssociationProbeAttempt] = []
 
         for retry_index in range(self.retry_attempts + 1):
+            try:
+                prompt = compose_choice_prompt(
+                    context,
+                    instruction,
+                    choices,
+                    retry=retry_index > 0,
+                )
+            except ProbeProtocolError as exc:
+                raise AssociationProbeError(
+                    f"invalid association choice protocol: {exc}", tuple(attempts)
+                ) from exc
             try:
                 response = self.backend.generate(
                     prompt,
                     system=system,
                     override={
-                        "max_new_tokens": 12,
+                        "max_new_tokens": CHOICE_MAX_NEW_TOKENS,
                         "temperature": 0.0,
                         "repetition_penalty": 1.0,
                         "no_repeat_ngram_size": 0,
@@ -270,8 +308,12 @@ class AssociationSemanticClassifier:
                     tuple(attempts),
                 ) from exc
 
-            label = response.text.strip().upper()
-            if label in choices:
+            try:
+                label = decode_choice(response.text, choices)
+            except ProbeProtocolError as exc:
+                label = None
+                error = str(exc)
+            if label is not None:
                 attempts.append(
                     AssociationProbeAttempt(response.text, label, None, retry_index)
                 )
@@ -291,16 +333,9 @@ class AssociationSemanticClassifier:
                     tuple(attempts),
                 )
 
-            error = "expected exactly one enumerated association-query choice"
             attempts.append(
                 AssociationProbeAttempt(response.text, None, error, retry_index)
             )
-            if retry_index < self.retry_attempts:
-                prompt = (
-                    prompt
-                    + "\nRETRY CONSTRAINT:\nYour previous answer was invalid. "
-                    "Return exactly one line copied from CHOICES and nothing else."
-                )
 
         raise AssociationProbeError(
             "association semantic probe returned no valid bounded choice",

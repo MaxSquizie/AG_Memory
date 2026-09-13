@@ -1,1 +1,1 @@
-Choose exactly one label from CHOICES. Decide only whether the tested additional slot exists beyond Known roles. Do not count a shown SUBJECT or OBJECT again. Return only the label.
+Decide only whether the tested additional slot exists beyond the known roles. Do not count a shown SUBJECT or OBJECT again. Use UNCLEAR when the sentence does not decide.

@@ -230,7 +230,7 @@ class LLMRoleTests(unittest.TestCase):
         self.assertTrue(all(len(call[2]) < 360 for call in backend.calls))
         self.assertTrue(all(call[3]["max_new_tokens"] <= 10 for call in backend.calls))
         for role, prompt, _system, override in backend.calls:
-            if "OPTIONS:" in prompt or "CHOICES:" in prompt:
+            if "Answer options:" in prompt:
                 self.assertNotIn("choice_outputs", override, role)
         self.assertNotIn("perception_negation", [call[0] for call in backend.calls])
         diag = parser.diagnostics()[-1]
@@ -352,7 +352,7 @@ class LLMRoleTests(unittest.TestCase):
         )
         with self.assertRaises(PerceptionParseError):
             parser.parse("Яблоки бывают красные", InteractionContext())
-        self.assertIn("expected one integer option number", parser.diagnostics()[-1].final_error or "")
+        self.assertIn("expected exactly one current option", parser.diagnostics()[-1].final_error or "")
 
     def test_adaptive_probe_retry_is_clean_and_never_receives_previous_bad_answer(self) -> None:
         class RetryBackend:
@@ -384,8 +384,13 @@ class LLMRoleTests(unittest.TestCase):
         result = parser.parse("привет", InteractionContext())
         self.assertEqual(result.acts_count, 0)
         self.assertEqual(len(backend.calls), 2)
-        self.assertEqual(backend.calls[0][1], backend.calls[1][1])
+        self.assertNotEqual(backend.calls[0][1], backend.calls[1][1])
         self.assertNotIn("I choose 1", backend.calls[1][1])
+        self.assertIn("Format correction:", backend.calls[1][1])
+        self.assertEqual(
+            backend.calls[0][1].split("Answer options:\n", 1)[1].split("\n\n", 1)[0],
+            backend.calls[1][1].split("Answer options:\n", 1)[1].split("\n\n", 1)[0],
+        )
         diag = parser.diagnostics()[-1]
         self.assertIsNotNone(diag.attempts[0].error)
         self.assertEqual(diag.attempts[1].normalized_answer, "NONE")
@@ -398,7 +403,7 @@ class LLMRoleTests(unittest.TestCase):
         for anchor in ("for example", "e.g.", "example", "например"):
             self.assertNotIn(anchor, joined.casefold())
         self.assertIn("without brackets", (probe_dir / "predicate_start.txt").read_text(encoding="utf-8"))
-        self.assertIn("Choose exactly one label", (probe_dir / "role_family.txt").read_text(encoding="utf-8"))
+        self.assertIn("broad semantic relation family", (probe_dir / "role_family.txt").read_text(encoding="utf-8"))
 
     def test_template_predicate_s_reuses_source_lexeme_and_registers_surface_form(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
@@ -422,7 +427,7 @@ class LLMRoleTests(unittest.TestCase):
             def __init__(self):
                 self.call = None
             def generate(self, prompt, *, system="", override=None, role="generic"):
-                self.call = (prompt, system, role)
+                self.call = (prompt, system, role, dict(override or {}))
                 return LLMResponse("0", {})
 
         backend = Backend()
@@ -435,16 +440,20 @@ class LLMRoleTests(unittest.TestCase):
             ),
         )
         parser.parse("Яблоки бывают зелёные", InteractionContext())
-        prompt, system, role = backend.call
+        prompt, system, role, override = backend.call
         self.assertEqual(role, "perception_act_type")
         self.assertIn("TEXT:\nЯблоки бывают зелёные", prompt)
         self.assertNotIn("TOKENS:", prompt)
-        self.assertIn("OPTIONS:\nNONE: none or unclear", prompt)
+        self.assertIn("NONE: the source contains no semantic act", prompt)
         self.assertIn("ASSERTION: states information as a claim/fact", prompt)
-        self.assertIn("\n\nTASK:\n", prompt)
-        self.assertTrue(prompt.rstrip().endswith("Return only the label."))
+        self.assertIn("\n\nDecision rule:\n", prompt)
+        self.assertIn("Answer options:\n0 = NONE\n1 = ASSERTION", prompt)
+        self.assertTrue(prompt.rstrip().endswith("Write only one option number."))
+        self.assertNotIn("QUESTION:", prompt)
+        self.assertNotIn("TASK:", prompt)
         self.assertNotIn("example", prompt.casefold())
-        self.assertIn("Do not copy", system)
+        self.assertIn("Never copy", system)
+        self.assertIs(override["enable_thinking"], False)
 
     def test_worker_chat_template_is_tokenized_once_without_duplicate_special_tokens(self) -> None:
         from ah.llm.worker import _encode_prompt

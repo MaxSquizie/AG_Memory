@@ -18,6 +18,12 @@ from typing import Any, Mapping, Sequence
 
 from . import lexical_recovery_core as _core
 from .lexical_recovery_core import *  # noqa: F401,F403 - stable public surface
+from .probe_protocol import (
+    CHOICE_MAX_NEW_TOKENS,
+    ProbeProtocolError,
+    compose_choice_prompt,
+    decode_choice,
+)
 
 
 LexicalRecoveryStatus = _core.LexicalRecoveryStatus
@@ -61,26 +67,33 @@ class EmbeddingSemanticReranker(_core.EmbeddingSemanticReranker):
             raise FileNotFoundError(
                 f"lexical recovery choice prompt is missing: {self.choice_prompt_path}"
             )
-        system = self.choice_prompt_path.read_text(encoding="utf-8").strip()
-        if not system:
+        instruction = self.choice_prompt_path.read_text(encoding="utf-8").strip()
+        if not instruction:
             raise ValueError("lexical recovery choice prompt is empty")
+        system_path = self.choice_prompt_path.with_name("probe_system.txt")
+        if not system_path.is_file():
+            raise FileNotFoundError(
+                f"shared probe system prompt is missing: {system_path}"
+            )
+        system = system_path.read_text(encoding="utf-8").strip()
+        if not system:
+            raise ValueError("shared probe system prompt is empty")
 
         labels = tuple(f"C{index}" for index in range(1, len(candidates) + 1))
         options = "\n".join(
             f"{label} = {candidate}"
             for label, candidate in zip(labels, candidates)
         )
-        prompt = (
-            f"CONTEXT:\n{context}\n\n"
-            f"CANDIDATES:\n{options}\n\n"
-            f"ALLOWED: {', '.join((*labels, 'UNKNOWN'))}\n"
-            "ANSWER:"
+        prompt = compose_choice_prompt(
+            f"CONTEXT:\n{context}\n\nCANDIDATES:\n{options}",
+            instruction,
+            (*labels, "UNKNOWN"),
         )
         response = generate(
             prompt,
             system=system,
             override={
-                "max_new_tokens": 4,
+                "max_new_tokens": CHOICE_MAX_NEW_TOKENS,
                 "temperature": 0.0,
                 "top_p": 1.0,
                 "top_k": 0,
@@ -93,12 +106,13 @@ class EmbeddingSemanticReranker(_core.EmbeddingSemanticReranker):
             },
             role="lexical_recovery_choice",
         )
-        raw = str(getattr(response, "text", "")).strip().upper()
-        if raw == "UNKNOWN":
+        try:
+            label = decode_choice(str(getattr(response, "text", "")), (*labels, "UNKNOWN"))
+        except ProbeProtocolError:
             return None
-        if raw not in labels:
+        if label == "UNKNOWN":
             return None
-        return candidates[labels.index(raw)]
+        return candidates[labels.index(label)]
 
 
 class LexicalRecovery(_core.LexicalRecovery):

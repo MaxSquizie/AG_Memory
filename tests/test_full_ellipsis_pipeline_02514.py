@@ -4,6 +4,7 @@ Only bounded model answers are fixtures. No parser/recovery/extraction method is
 patched. Expected predicate/role frames are specified independently below.
 """
 from pathlib import Path
+import re
 
 import pytest
 
@@ -36,7 +37,8 @@ class SemanticFixture:
                       else 'AFFECTED_OR_CONTENT' if target in self.objects
                       else 'PLACE' if target in self.places else None)
             if answer is not None:
-                assert answer in prompt.split('CHOICES:\n')[1].split('\n\nTASK:')[0].splitlines()
+                offered = re.findall(r"^-?\d+\s*=\s*([^\n]+)$", prompt, re.MULTILINE)
+                assert answer in offered
                 return LLMResponse(answer, {})
         if role == 'perception_lexeme_comparison' and 'TARGET:\nполку\n' in prompt:
             for label in ('A', 'B'):
