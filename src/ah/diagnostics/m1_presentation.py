@@ -76,8 +76,6 @@ _ROLE_RU = {
     "HOW-TO": "способ",
     "MANNER": "способ",
     "STATE": "состояние",
-    # Presentation-only names for typed NamingAssertionCandidate. They are not
-    # canonical ActantRole additions and never flow back into Perception/AH.
     "ENTITY": "именуемая сущность",
     "NAME": "имя",
 }
@@ -241,8 +239,6 @@ def _frame_from_act(candidate: Any, kind: str, index: int) -> M1FrameView:
         )
 
     if kind == "ЗАПРОС" and _is_event_set_query(candidate):
-        # The surface verb is an interrogative event-class shell and deliberately
-        # does not constrain the canonical predicate searched by M2.
         return M1FrameView(
             local_id=local_id,
             kind="ЗАПРОС СОБЫТИЙ",
@@ -304,6 +300,23 @@ def _source_assignments(
         if located is not None:
             assignments.append((*located, label, detail, priority))
 
+    def add_span(evidence: Any, label: str, detail: str, priority: int) -> None:
+        if evidence is None:
+            return
+        text = str(_get(evidence, "text", "") or "").strip()
+        if not text:
+            return
+        start = _get(evidence, "start")
+        end = _get(evidence, "end")
+        located = _locate_text(
+            source,
+            text,
+            start if isinstance(start, int) else None,
+            end if isinstance(end, int) else None,
+        )
+        if located is not None:
+            assignments.append((*located, label, detail, priority))
+
     acts = (
         [(item, "ФАКТ") for item in _items(perception, "assertions")]
         + [(item, "ЗАПРОС") for item in _items(perception, "queries")]
@@ -336,13 +349,12 @@ def _source_assignments(
             if len(selected) == 1:
                 add_evidence(selected[0], "NAME", "имя", 110)
             else:
-                # name_value itself comes from an already selected source
-                # candidate. Locating that exact surface is presentation only; no
-                # semantic decision is made here.
                 add_surface(name_value, "NAME", "имя", 105)
             continue
 
         if kind == "ЗАПРОС" and _is_event_set_query(act):
+            for query_evidence in _items(act, "query_operator_evidence"):
+                add_span(query_evidence, "Оператор запроса", "QUERY", 115)
             add_evidence(
                 predicate,
                 "Открытый предикат",
