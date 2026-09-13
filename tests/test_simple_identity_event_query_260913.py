@@ -81,8 +81,57 @@ def _assertion(predicate: str, object_name: str, local_id: str) -> AssertionCand
     )
 
 
+def _name_user_ilya(integration, context, turn_time) -> None:
+    naming = NamingAssertionCandidate(
+        local_id="NAME1",
+        predicate=PredicateCandidate(
+            "Илья",
+            normalized_hint="Илья",
+            sense_hint="NOMINAL_PREDICATION",
+        ),
+        actants=(
+            ActantCandidate(
+                ActantRole.STATE,
+                mention="Моё имя",
+                normalized_hint="имя",
+            ),
+        ),
+        owner=ActantCandidate(ActantRole.SUBJECT, mention="моё"),
+        name_value="Илья",
+        name_normalized_hint="Илья",
+    )
+    integration.integrate_external(
+        PerceptionResult("Моё имя — Илья", assertions=(naming,)),
+        context,
+        source_timestamp=turn_time,
+    )
+
+
+def _seed_yesterday_events(integration, context, turn_time):
+    first = integration.integrate_external(
+        PerceptionResult(
+            "Я вчера сделал последний запрос к системе",
+            assertions=(_assertion("сделать", "запрос", "A1"),),
+        ),
+        context,
+        source_timestamp=turn_time,
+    )
+    second = integration.integrate_external(
+        PerceptionResult(
+            "Вчера я выпил зелёного чаю",
+            assertions=(_assertion("выпить", "чай", "A2"),),
+        ),
+        context,
+        source_timestamp=turn_time,
+    )
+    return first, second
+
+
 def test_naming_assertion_enriches_user_identity_without_false_world_fact() -> None:
     core, context, integration = _runtime()
+    turn_time = datetime(
+        2026, 9, 13, 18, 0, tzinfo=timezone(timedelta(hours=3))
+    )
     naming = NamingAssertionCandidate(
         local_id="NAME1",
         predicate=PredicateCandidate(
@@ -105,7 +154,7 @@ def test_naming_assertion_enriches_user_identity_without_false_world_fact() -> N
     commit = integration.integrate_external(
         PerceptionResult("Моё имя — Илья", assertions=(naming,)),
         context,
-        source_timestamp=datetime(2026, 9, 13, 18, 0, tzinfo=timezone(timedelta(hours=3))),
+        source_timestamp=turn_time,
     )
 
     assert commit.assertions == ()
@@ -124,39 +173,8 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
         2026, 9, 13, 18, 0, tzinfo=timezone(timedelta(hours=3))
     )
 
-    naming = NamingAssertionCandidate(
-        local_id="NAME1",
-        predicate=PredicateCandidate(
-            "Илья",
-            normalized_hint="Илья",
-            sense_hint="NOMINAL_PREDICATION",
-        ),
-        actants=(ActantCandidate(ActantRole.STATE, mention="Моё имя", normalized_hint="имя"),),
-        owner=ActantCandidate(ActantRole.SUBJECT, mention="моё"),
-        name_value="Илья",
-    )
-    integration.integrate_external(
-        PerceptionResult("Моё имя — Илья", assertions=(naming,)),
-        context,
-        source_timestamp=turn_time,
-    )
-
-    first = integration.integrate_external(
-        PerceptionResult(
-            "Я вчера сделал последний запрос к системе",
-            assertions=(_assertion("сделать", "запрос", "A1"),),
-        ),
-        context,
-        source_timestamp=turn_time,
-    )
-    second = integration.integrate_external(
-        PerceptionResult(
-            "Вчера я выпил зелёного чаю",
-            assertions=(_assertion("выпить", "чай", "A2"),),
-        ),
-        context,
-        source_timestamp=turn_time,
-    )
+    _name_user_ilya(integration, context, turn_time)
+    first, second = _seed_yesterday_events(integration, context, turn_time)
 
     first_node = core.store.get_hypernode(first.assertions[0].ref.uid)
     second_node = core.store.get_hypernode(second.assertions[0].ref.uid)
@@ -226,3 +244,64 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
     materialized = InferenceMaterializer(core, IntegrationSettings()).materialize(outcome)
     assert materialized.ref is None
     assert materialized.created is False
+
+
+def test_absolute_date_spellings_match_facts_recorded_with_relative_yesterday() -> None:
+    core, context, integration = _runtime()
+    turn_time = datetime(
+        2026, 9, 13, 18, 0, tzinfo=timezone(timedelta(hours=3))
+    )
+    _name_user_ilya(integration, context, turn_time)
+    first, second = _seed_yesterday_events(integration, context, turn_time)
+    expected_refs = {
+        first.assertions[0].ref.uid,
+        second.assertions[0].ref.uid,
+    }
+
+    for index, (source_text, time_text) in enumerate(
+        (
+            ("Что я делал 12.09.2026?", "12.09.2026"),
+            ("Что я делал 2026-09-12?", "2026-09-12"),
+        ),
+        start=1,
+    ):
+        query = EventSetQueryCandidate(
+            predicate=PredicateCandidate("делал", normalized_hint="делать"),
+            actants=(
+                ActantCandidate(
+                    ActantRole.SUBJECT,
+                    mention="я",
+                    normalized_hint="я",
+                    grammatical_number="sing",
+                ),
+                ActantCandidate(
+                    ActantRole.TIME,
+                    mention=time_text,
+                    normalized_hint=time_text,
+                ),
+            ),
+            query_mode=QueryMode.EXISTS,
+            local_id=f"QABS{index}",
+        )
+        commit = integration.integrate_external(
+            PerceptionResult(source_text, queries=(query,)),
+            context,
+            source_timestamp=turn_time,
+        )
+        normalized_query = commit.unresolved_queries[0]
+        time_actant = next(
+            item for item in normalized_query.actants if item.role is ActantRole.TIME
+        )
+        assert time_actant.temporal is not None and time_actant.temporal.resolved
+        assert time_actant.temporal.value.start == "2026-09-12"
+
+        built = QueryGoalBuilder(core).build(normalized_query, context)
+        assert built.goal is not None, built.diagnostics
+        outcome = InferenceEngine(core, InferenceSettings()).solve(built.goal)
+        assert outcome.status is LogicalStatus.PROVED
+        assert isinstance(outcome.conclusion, CompositeConclusion)
+        assert {
+            item.ref.uid
+            for item in outcome.conclusion.conclusions
+            if isinstance(item, ExistingRefConclusion)
+        } == expected_refs
