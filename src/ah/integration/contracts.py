@@ -109,7 +109,7 @@ class ClarificationOption:
 
 @dataclass(frozen=True, slots=True)
 class ClarificationUse:
-    """A fact/role position currently pointing at k_AMBIGUOUS."""
+    """A canonical fact/role position containing the ambiguity target."""
 
     fact_ref: Ref
     roles: tuple[ActantRole, ...]

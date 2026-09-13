@@ -17,10 +17,21 @@ def _refs_only(operands: tuple[Operand, ...]) -> None:
 
 def _proposition_refs(operands: tuple[Operand, ...]) -> None:
     _refs_only(operands)
-    invalid = [item for item in operands if isinstance(item, Ref) and item.kind not in {RefKind.N, RefKind.G}]
+    # A K operand is reserved for a canonical AMBIGUOUS_PROPOSITION group.  The
+    # registry cannot inspect graph metadata, so Integration owns that stronger
+    # validation and clarification rewires the K to its selected N/G before the
+    # formula is evaluated.
+    invalid = [
+        item
+        for item in operands
+        if isinstance(item, Ref)
+        and item.kind not in {RefKind.N, RefKind.G, RefKind.K}
+    ]
     if invalid:
         kinds = ", ".join(item.kind.value for item in invalid)
-        raise ValueError(f"Function expects proposition refs (N/G), got: {kinds}")
+        raise ValueError(
+            f"Function expects proposition refs (N/G or pending proposition K), got: {kinds}"
+        )
 
 
 def _quantifier(operands: tuple[Operand, ...]) -> None:
@@ -35,8 +46,15 @@ def _quantifier(operands: tuple[Operand, ...]) -> None:
     if len(operands) == 1:
         return
     body = operands[1]
-    if not isinstance(body, Ref) or body.kind not in {RefKind.N, RefKind.G}:
-        raise ValueError("Quantifier body must reference a proposition/formula (N/G)")
+    if not isinstance(body, Ref) or body.kind not in {
+        RefKind.N,
+        RefKind.G,
+        RefKind.K,
+    }:
+        raise ValueError(
+            "Quantifier body must reference a proposition/formula "
+            "(N/G or pending proposition K)"
+        )
 
 
 def _relevant_past(operands: tuple[Operand, ...]) -> None:

@@ -592,6 +592,40 @@ class SemanticConsolidator:
         self.temporal_scope_formalizer = TemporalScopeFormalizer(self.morphology)
 
     @staticmethod
+    def _flatten_runtime_alternatives(
+        result: PerceptionResult,
+    ) -> PerceptionResult:
+        """Normalize a nested alternative tree to complete correlated leaves.
+
+        Every leaf is already a complete ``AssertionCandidate`` reading.  Flattening
+        therefore preserves each source-supported role tuple while preventing later
+        passes from independently combining per-role options.  The root candidate
+        remains the source-facing placeholder and is never treated as an extra
+        reading merely because it owns the tree.
+        """
+
+        def flatten(candidate: AssertionCandidate) -> AssertionCandidate:
+            if not candidate.alternatives:
+                return candidate
+            leaves: list[AssertionCandidate] = []
+
+            def walk(item: AssertionCandidate) -> None:
+                if not item.alternatives:
+                    leaves.append(replace(item, alternatives=()))
+                    return
+                for child in item.alternatives:
+                    walk(child)
+
+            for alternative in candidate.alternatives:
+                walk(alternative)
+            return replace(candidate, alternatives=tuple(leaves))
+
+        assertions = tuple(flatten(item) for item in result.assertions)
+        if assertions == result.assertions:
+            return result
+        return replace(result, assertions=assertions)
+
+    @staticmethod
     def _actant_variants(assertion: AssertionCandidate, role: ActantRole) -> tuple[ActantCandidate, ...]:
         if assertion.alternatives:
             return tuple(
@@ -1202,7 +1236,8 @@ class SemanticConsolidator:
         source_timestamp: datetime | None = None,
         experience_timestamp: datetime | None = None,
     ) -> MutationPlan:
-        scoped = apply_speech_act_scoping(result)
+        flattened = self._flatten_runtime_alternatives(result)
+        scoped = apply_speech_act_scoping(flattened)
         scoped, cross_turn_existentials = self._bind_cross_turn_existential_pronouns(
             scoped, context
         )
