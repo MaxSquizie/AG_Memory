@@ -1232,28 +1232,41 @@ class IntegrationService:
                         semantic_scope="TRANSITION_OPERAND",
                     )
                     node = tx.store.get_hypernode(integrated.ref.uid)
+                    # A source-explicit transition is a proposition in its own
+                    # right. Materialize it before attempting the optional state
+                    # interval projection so an unavailable/non-orderable clock
+                    # point or an unmet state precondition cannot erase g_OP(P).
+                    transition_g, transition_created = tx.ensure_function(
+                        integrated.domain,
+                        candidate.transition_operator.value,
+                        (integrated.ref,),
+                    )
+                    transition_ref = tx.ref(transition_g.uid)
                     time_ref = node.actants.get(ActantRole.TIME)
                     if isinstance(time_ref, Ref) and time_ref.kind is RefKind.M:
-                        transition_ref = StateTracker(
-                            tx, default_weight=self.config.initial_hypernode_weight
-                        ).apply(
-                            integrated.ref,
-                            candidate.transition_operator,
-                            time_ref,
-                        ).transition_ref
-                        transition_created = True
-                    else:
-                        # The transition proposition itself is source-explicit even
-                        # when no calendar anchor is stated.  Materialize g_OP(P)
-                        # without inventing a TIME point or mutating state intervals;
-                        # StateTracker remains the sole authority for interval
-                        # effects once an explicit/resolved TIME exists.
-                        transition_g, transition_created = tx.ensure_function(
-                            integrated.domain,
-                            candidate.transition_operator.value,
-                            (integrated.ref,),
-                        )
-                        transition_ref = tx.ref(transition_g.uid)
+                        try:
+                            # State intervals are a derived secondary effect. A
+                            # nested transaction gives that effect its own failure
+                            # boundary while preserving the outer proposition.
+                            with tx.transaction() as state_tx:
+                                StateTracker(
+                                    state_tx,
+                                    default_weight=self.config.initial_hypernode_weight,
+                                ).apply(
+                                    integrated.ref,
+                                    candidate.transition_operator,
+                                    time_ref,
+                                )
+                        except ValueError as exc:
+                            from ah.diagnostics.session_log import emit
+
+                            emit(
+                                "state_transition_projection_skipped",
+                                local_id=candidate.local_id,
+                                operator=candidate.transition_operator.value,
+                                time_uid=time_ref.uid,
+                                reason=str(exc),
+                            )
                     final = IntegratedAssertion(
                         local_id=integrated.local_id,
                         ref=transition_ref,

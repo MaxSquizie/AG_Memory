@@ -341,11 +341,11 @@ _ROLE_GROUPS: dict[str, tuple[tuple[ActantRole, str], ...]] = {
         ),
         (
             ActantRole.TIME,
-            "TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed",
+            "TARGET locates the event on a timeline and answers when it happens, including a start/end boundary or deadline; it is not an elapsed amount of time and does not describe how the event is performed",
         ),
         (
             ActantRole.DURATION,
-            "TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts",
+            "TARGET specifies an elapsed amount of time and answers how long the event/state lasts; a temporal endpoint, boundary, or deadline is TIME rather than DURATION",
         ),
         (
             ActantRole.AMOUNT,
@@ -1496,7 +1496,10 @@ class AdaptivePerceptionParser:
             "in the stated temporal frame.\n"
             "STATE: a condition or property holds across the interval.\n"
             "EVENT: a bounded occurrence or change is viewed as a whole.\n"
-            "PROCESS: activity is viewed internally as unfolding over the interval.\n"
+            "PROCESS: an activity or change is viewed internally as unfolding over "
+            "the interval. Stable knowledge, preference, possession, status, or "
+            "condition is STATE even when expressed by an imperfective verb; use "
+            "PROCESS only when the source presents internal activity/development.\n"
             "AMBIGUOUS: the source does not determine one of those readings.\n"
             "CHOICES:\nSTATE\nEVENT\nPROCESS\nAMBIGUOUS"
         )
@@ -5094,6 +5097,14 @@ class AdaptivePerceptionParser:
                     "QUESTION:\nWhich transition over the OPERAND is explicitly "
                     "asserted in this occurrence?\n"
                 )
+                + "START: an explicit onset/beginning of OPERAND.\n"
+                + "STOP: an explicit cessation/change event that ends OPERAND.\n"
+                + "CONTINUE: OPERAND explicitly persists without ending.\n"
+                + "AGAIN: OPERAND explicitly starts or occurs again.\n"
+                + "NO_LONGER: the source presents the resulting current condition "
+                + "that OPERAND does not hold anymore, rather than the cessation "
+                + "event itself.\n"
+                + "NONE: no transition meaning is contributed.\n"
                 + "CHOICES:\nSTART\nSTOP\nCONTINUE\nAGAIN\nNO_LONGER\nNONE\nUNCLEAR"
             )
             label, _margin = self._deep_semantic_choice_probe(
@@ -8068,6 +8079,7 @@ class AdaptivePerceptionParser:
                 )
 
         actants = self._split_quantified_nominal_actants(text, actants)
+        actants = self._fuse_clock_time_actants(text, actants)
         actants = self._fuse_quantified_duration_actants(text, actants)
 
         return tuple(actants), tuple(spans)
@@ -8223,6 +8235,73 @@ class AdaptivePerceptionParser:
             )
             result[result.index(duration)] = fused
             result.remove(quantity)
+        return result
+
+    @staticmethod
+    def _fuse_clock_time_actants(
+        text: str,
+        actants: list[ActantCandidate],
+    ) -> list[ActantCandidate]:
+        """Rejoin tokenizer-split ``HH:MM``/``HH:MM:SS`` TIME evidence.
+
+        This is source-shape normalization, not temporal classification: at least
+        one fragment must already have been resolved semantically as TIME. The
+        numeric ranges and literal colon adjacency distinguish a clock reading
+        from unrelated neighbouring quantities without phrase vocabulary.
+        """
+        result = list(actants)
+        eligible_roles = {ActantRole.TIME, ActantRole.DURATION, ActantRole.AMOUNT}
+        evidence_items = [
+            item
+            for item in result
+            if item.role in eligible_roles
+            and item.evidence is not None
+            and item.evidence.start is not None
+            and item.evidence.end is not None
+        ]
+        ordered = sorted(
+            evidence_items,
+            key=lambda item: item.evidence.start,  # type: ignore[union-attr]
+        )
+        for size in (3, 2):
+            for offset in range(len(ordered) - size + 1):
+                group = ordered[offset:offset + size]
+                if not any(item.role is ActantRole.TIME for item in group):
+                    continue
+                spans = [item.evidence for item in group]
+                assert all(span is not None for span in spans)
+                start = spans[0].start
+                end = spans[-1].end
+                assert start is not None and end is not None
+                if any(
+                    text[left.end:right.start] != ":"
+                    for left, right in zip(spans, spans[1:])
+                    if left is not None and right is not None
+                ):
+                    continue
+                value = text[start:end]
+                match = re.fullmatch(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", value)
+                if match is None:
+                    continue
+                hour, minute, second = (
+                    int(part) if part is not None else None
+                    for part in match.groups()
+                )
+                if hour > 23 or minute > 59 or (second is not None and second > 59):
+                    continue
+                first = group[0]
+                fused_evidence = EvidenceSpan(value, start, end)
+                fused = replace(
+                    first,
+                    role=ActantRole.TIME,
+                    mention=value,
+                    normalized_hint=None,
+                    evidence=fused_evidence,
+                )
+                result[result.index(first)] = fused
+                for item in group[1:]:
+                    result.remove(item)
+                return result
         return result
 
     @staticmethod
@@ -9082,6 +9161,7 @@ class AdaptivePerceptionParser:
         if start > limit or start in blocked:
             return None
         cursor = start
+        compatible_modifier_cases: set[str] | None = None
         while cursor <= limit and cursor not in blocked and self._has_morph(
             tokens[cursor - 1], poses={"ADJF", "PRTF", "NUMR"}
         ):
@@ -9091,6 +9171,28 @@ class AdaptivePerceptionParser:
             # following noun: ``отправил его Марии`` contains two participants.
             if self._has_structural_morph(tokens[cursor - 1], poses={"NPRO"}):
                 break
+            current_cases = {
+                info.case
+                for info in self._material_morph_analyses(tokens[cursor - 1])
+                if info.pos in {"ADJF", "PRTF", "NUMR"}
+                and info.case is not None
+            }
+            if (
+                compatible_modifier_cases is not None
+                and current_cases
+                and not (compatible_modifier_cases & current_cases)
+            ):
+                # Adjacent adjective-like material with incompatible agreement
+                # cannot jointly modify one following nominal head. Preserve the
+                # boundary so a predicative complement and a temporal/participant
+                # NP are offered as separate semantic candidates.
+                break
+            if current_cases:
+                compatible_modifier_cases = (
+                    current_cases
+                    if compatible_modifier_cases is None
+                    else compatible_modifier_cases & current_cases
+                )
             cursor += 1
         if cursor > limit or cursor in blocked or not self._has_morph(
             tokens[cursor - 1], poses={"NOUN", "NPRO"}
