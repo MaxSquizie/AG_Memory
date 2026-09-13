@@ -66,6 +66,12 @@ from .propagation_audit import (
     FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
 )
 
+# M1 adapters consume only already-typed Perception contracts. Installing them at
+# diagnostics package import time keeps the existing GUI import surface stable while
+# allowing newly introduced semantic query types to own an explicit presentation.
+from .m1_identity_presentation import install_identity_m1_presentation
+install_identity_m1_presentation()
+
 __all__ = [
     "AcceptanceCase",
     "AcceptanceRunResult",
