@@ -42,15 +42,20 @@ from .modal_goal import (
     ModalSemanticGoalCompiler,
 )
 from .event_query import EventMatchGoal, EventQueryGoalBuilder, EventSetInferenceEngine
+from .identity_query import (
+    EntityIdentityGoal,
+    EntityIdentityInferenceEngine,
+    EntityIdentityQueryGoalBuilder,
+)
 from .modal_dispatch import ModalTurnGoalCompiler
 from .association_goal import AssociationQueryBuildResult, AssociationTurnGoalCompiler
 
-# Public runtime composes independent GoalCompiler/Inference extensions.  Open-event
-# retrieval is an InferenceEngine extension, while association execution itself
-# remains outside InferenceEngine and is routed to AssociationCoordinator by the
-# agent orchestrator.
-InferenceEngine = EventSetInferenceEngine
-QueryGoalBuilder = EventQueryGoalBuilder
+# Public runtime composes independent GoalCompiler/Inference extensions. Open-event
+# retrieval and entity-identity lookup are InferenceEngine extensions, while
+# association execution itself remains outside InferenceEngine and is routed to
+# AssociationCoordinator by the agent orchestrator.
+InferenceEngine = EntityIdentityInferenceEngine
+QueryGoalBuilder = EntityIdentityQueryGoalBuilder
 SemanticGoalCompiler = AssociationTurnGoalCompiler
 TurnGoalBuilder = AssociationTurnGoalCompiler
 
@@ -71,6 +76,9 @@ __all__ = [
     "EventMatchGoal",
     "EventQueryGoalBuilder",
     "EventSetInferenceEngine",
+    "EntityIdentityGoal",
+    "EntityIdentityInferenceEngine",
+    "EntityIdentityQueryGoalBuilder",
     "ExistingRefConclusion",
     "ExistsGoal",
     "ExactlyOneOfGoal",
