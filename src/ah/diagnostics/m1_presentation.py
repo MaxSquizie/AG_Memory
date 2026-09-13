@@ -60,16 +60,26 @@ _ROLE_RU = {
     "SUBJECT": "субъект",
     "OBJECT": "объект",
     "RECIPIENT": "адресат",
+    "AUXILLIARY": "соучастник",
+    "ABSENTEE": "отсутствующий участник",
     "LOCATION": "место",
     "TIME": "время",
     "DURATION": "длительность",
+    "TOOL": "инструмент",
     "INSTRUMENT": "инструмент",
+    "MATERIAL": "материал",
     "SOURCE": "источник",
     "DESTINATION": "направление",
     "CAUSE": "причина",
     "PURPOSE": "цель",
+    "AMOUNT": "количество",
+    "HOW-TO": "способ",
     "MANNER": "способ",
     "STATE": "состояние",
+    # Presentation-only names for typed NamingAssertionCandidate. They are not
+    # canonical ActantRole additions and never flow back into Perception/AH.
+    "ENTITY": "именуемая сущность",
+    "NAME": "имя",
 }
 
 _OPERATOR_RU = {
@@ -127,7 +137,12 @@ def _evidence(value: Any) -> tuple[str, int | None, int | None] | None:
     return text, start if isinstance(start, int) else None, end if isinstance(end, int) else None
 
 
-def _locate_text(source: str, text: str, start: int | None = None, end: int | None = None) -> tuple[int, int] | None:
+def _locate_text(
+    source: str,
+    text: str,
+    start: int | None = None,
+    end: int | None = None,
+) -> tuple[int, int] | None:
     """Locate already-grounded source material without inferring its semantics."""
     if start is not None and end is not None and 0 <= start <= end <= len(source):
         if _norm(source[start:end]) == _norm(text):
@@ -159,12 +174,33 @@ def _actant_value(actant: Any) -> str:
         operator = _enum(_get(composition, "operator"), "AND")
         members = []
         for member in _items(composition, "members"):
-            members.append(str(_get(member, "mention", "") or _get(member, "normalized_hint", "") or "?").strip())
+            members.append(
+                str(
+                    _get(member, "mention", "")
+                    or _get(member, "normalized_hint", "")
+                    or "?"
+                ).strip()
+            )
         return f" {operator} ".join(item for item in members if item)
     if _get(actant, "proposition") is not None:
         return "вложенное высказывание"
-    entity_ref = str(_get(actant, "entity_ref", "") or _get(actant, "candidate_ref", "") or "").strip()
+    entity_ref = str(
+        _get(actant, "entity_ref", "")
+        or _get(actant, "candidate_ref", "")
+        or ""
+    ).strip()
     return entity_ref or "?"
+
+
+def _is_naming(candidate: Any) -> bool:
+    return (
+        _get(candidate, "owner") is not None
+        and bool(str(_get(candidate, "name_value", "") or "").strip())
+    )
+
+
+def _is_event_set_query(candidate: Any) -> bool:
+    return bool(_get(candidate, "event_set", False))
 
 
 def _role_view(actant: Any) -> M1RoleView:
@@ -186,9 +222,42 @@ def _role_view(actant: Any) -> M1RoleView:
 
 
 def _frame_from_act(candidate: Any, kind: str, index: int) -> M1FrameView:
+    local_id = str(_get(candidate, "local_id", "") or f"{kind.lower()}_{index}")
+    status = _enum(_get(candidate, "status"), "ASSERTED")
+
+    if _is_naming(candidate):
+        owner = _get(candidate, "owner")
+        name_value = str(_get(candidate, "name_value", "") or "").strip()
+        return M1FrameView(
+            local_id=local_id,
+            kind="ИМЕНОВАНИЕ",
+            predicate="NAME_OF",
+            roles=(
+                M1RoleView("ENTITY", _actant_value(owner)),
+                M1RoleView("NAME", name_value),
+            ),
+            negated=False,
+            status=status,
+        )
+
+    if kind == "ЗАПРОС" and _is_event_set_query(candidate):
+        # The surface verb is an interrogative event-class shell and deliberately
+        # does not constrain the canonical predicate searched by M2.
+        return M1FrameView(
+            local_id=local_id,
+            kind="ЗАПРОС СОБЫТИЙ",
+            predicate="СОБЫТИЕ",
+            roles=tuple(_role_view(item) for item in _items(candidate, "actants")),
+            negated=False,
+            status=status,
+        )
+
     roles = [_role_view(item) for item in _items(candidate, "actants")]
     if kind == "ЗАПРОС":
-        requested = {_enum(item) for item in (_get(candidate, "requested_roles", ()) or ())}
+        requested = {
+            _enum(item)
+            for item in (_get(candidate, "requested_roles", ()) or ())
+        }
         scalar = _get(candidate, "requested_role")
         if scalar is not None:
             requested.add(_enum(scalar))
@@ -198,12 +267,13 @@ def _frame_from_act(candidate: Any, kind: str, index: int) -> M1FrameView:
                 roles.append(M1RoleView(role=role, value="?", requested=True))
             elif role:
                 roles = [
-                    M1RoleView(r.role, r.value, r.operator, True, r.modifiers) if r.role == role else r
+                    M1RoleView(r.role, r.value, r.operator, True, r.modifiers)
+                    if r.role == role
+                    else r
                     for r in roles
                 ]
-    status = _enum(_get(candidate, "status"), "ASSERTED")
     return M1FrameView(
-        local_id=str(_get(candidate, "local_id", "") or f"{kind.lower()}_{index}"),
+        local_id=local_id,
         kind=kind,
         predicate=_predicate_text(candidate),
         roles=tuple(roles),
@@ -212,7 +282,10 @@ def _frame_from_act(candidate: Any, kind: str, index: int) -> M1FrameView:
     )
 
 
-def _source_assignments(perception: Any, source: str) -> list[tuple[int, int, str, str, int]]:
+def _source_assignments(
+    perception: Any,
+    source: str,
+) -> list[tuple[int, int, str, str, int]]:
     assignments: list[tuple[int, int, str, str, int]] = []
 
     def add_surface(text: str, label: str, detail: str, priority: int) -> None:
@@ -236,11 +309,61 @@ def _source_assignments(perception: Any, source: str) -> list[tuple[int, int, st
         + [(item, "ЗАПРОС") for item in _items(perception, "queries")]
         + [(item, "КОМАНДА") for item in _items(perception, "commands")]
     )
-    for act, _kind in acts:
+    for act, kind in acts:
         predicate = _get(act, "predicate")
-        pred_detail = str(_get(predicate, "normalized_hint", "") or _get(predicate, "surface", "") or "").strip()
-        add_evidence(predicate, "Предикат", pred_detail, 70)
-        add_surface(str(_get(predicate, "surface", "") or ""), "Предикат", pred_detail, 72)
+        pred_detail = str(
+            _get(predicate, "normalized_hint", "")
+            or _get(predicate, "surface", "")
+            or ""
+        ).strip()
+
+        if _is_naming(act):
+            owner = _get(act, "owner")
+            add_evidence(owner, "ENTITY", "именуемая сущность", 100)
+            add_evidence(predicate, "Именование", "NAME_OF", 95)
+            add_surface(
+                str(_get(predicate, "surface", "") or ""),
+                "Именование",
+                "NAME_OF",
+                96,
+            )
+            name_value = str(_get(act, "name_value", "") or "").strip()
+            selected = [
+                item
+                for item in _items(act, "actants")
+                if _norm(_actant_value(item)) == _norm(name_value)
+            ]
+            if len(selected) == 1:
+                add_evidence(selected[0], "NAME", "имя", 110)
+            else:
+                # name_value itself comes from an already selected source
+                # candidate. Locating that exact surface is presentation only; no
+                # semantic decision is made here.
+                add_surface(name_value, "NAME", "имя", 105)
+            continue
+
+        if kind == "ЗАПРОС" and _is_event_set_query(act):
+            add_evidence(
+                predicate,
+                "Открытый предикат",
+                "запрашивается событие",
+                90,
+            )
+            add_surface(
+                str(_get(predicate, "surface", "") or ""),
+                "Открытый предикат",
+                "запрашивается событие",
+                92,
+            )
+        else:
+            add_evidence(predicate, "Предикат", pred_detail, 70)
+            add_surface(
+                str(_get(predicate, "surface", "") or ""),
+                "Предикат",
+                pred_detail,
+                72,
+            )
+
         for actant in _items(act, "actants"):
             role = _enum(_get(actant, "role"), "Роль")
             role_detail = _ROLE_RU.get(role, "семантическая роль")
@@ -249,12 +372,26 @@ def _source_assignments(perception: Any, source: str) -> list[tuple[int, int, st
             if quantifier is not None:
                 qkind = _enum(_get(quantifier, "kind"))
                 add_evidence(quantifier, "Квантор", qkind, 90)
-                add_surface(str(_get(quantifier, "surface", "") or ""), "Квантор", qkind, 95)
+                add_surface(
+                    str(_get(quantifier, "surface", "") or ""),
+                    "Квантор",
+                    qkind,
+                    95,
+                )
             for relation in _items(actant, "nominal_relations"):
-                dependent = str(_get(relation, "dependent_mention", "") or "").strip()
-                relation_kind = _enum(_get(relation, "kind"), "NOMINAL_MODIFIER")
+                dependent = str(
+                    _get(relation, "dependent_mention", "") or ""
+                ).strip()
+                relation_kind = _enum(
+                    _get(relation, "kind"), "NOMINAL_MODIFIER"
+                )
                 if dependent:
-                    add_surface(dependent, "Модификатор", relation_kind, 80)
+                    add_surface(
+                        dependent,
+                        "Модификатор",
+                        relation_kind,
+                        80,
+                    )
     return assignments
 
 
@@ -264,13 +401,15 @@ def _word_views(perception: Any, source: str) -> tuple[M1WordView, ...]:
     for match in _TOKEN_RE.finditer(source):
         start, end = match.span()
         candidates = [
-            item for item in assignments
+            item
+            for item in assignments
             if item[0] < end and start < item[1]
         ]
         if candidates:
-            # More explicit semantic sources win; for equal priority, the narrowest
-            # source span is the most local explanation of this word.
-            chosen = max(candidates, key=lambda item: (item[4], -(item[1] - item[0])))
+            chosen = max(
+                candidates,
+                key=lambda item: (item[4], -(item[1] - item[0])),
+            )
             label, detail = chosen[2], chosen[3]
         else:
             label, detail = "—", "не выделено M1"
@@ -301,9 +440,15 @@ def _prompt_type(perception: Any) -> tuple[str, str]:
     commands = _items(perception, "commands")
     conditionals = _items(perception, "conditionals")
     roots = _items(perception, "proposition_roots")
-    asserted = [item for item in assertions if _enum(_get(item, "status"), "ASSERTED") == "ASSERTED"]
+    asserted = [
+        item
+        for item in assertions
+        if _enum(_get(item, "status"), "ASSERTED") == "ASSERTED"
+    ]
 
     if queries and not asserted and not commands:
+        if all(_is_event_set_query(query) for query in queries):
+            return "ЗАПРОС", "Найти события по заданным ограничениям"
         requested: list[str] = []
         modes: list[str] = []
         for query in queries:
@@ -323,25 +468,54 @@ def _prompt_type(perception: Any) -> tuple[str, str]:
         return "УСЛОВИЕ", "ЕСЛИ → ТО"
     if roots and not queries and not commands:
         op = _enum(_get(_get(roots[0], "expression"), "operator"))
-        return "ФАКТ · ЛОГИЧЕСКОЕ ВЫРАЖЕНИЕ", _OPERATOR_RU.get(op, op)
+        return (
+            "ФАКТ · ЛОГИЧЕСКОЕ ВЫРАЖЕНИЕ",
+            _OPERATOR_RU.get(op, op),
+        )
     if asserted and not queries and not commands:
+        if all(_is_naming(item) for item in asserted):
+            return "ФАКТ · ИМЕНОВАНИЕ", "Задаёт имя существующей сущности"
         return "ФАКТ", "Утверждение о мире"
     if assertions or queries or commands:
         return "СОСТАВНОЙ ПРОМПТ", "Несколько речевых актов"
     return "НЕ ФОРМАЛИЗОВАНО", "M1 не выделил семантический акт"
 
 
-def _human_interpretation(prompt_type: str, frames: Sequence[M1FrameView], logic: str | None) -> str:
+def _human_interpretation(
+    prompt_type: str,
+    frames: Sequence[M1FrameView],
+    logic: str | None,
+) -> str:
     if not frames:
         return "M1 не построил предикатно-ролевую формализацию."
     parts: list[str] = []
     for frame in frames:
         known = [role for role in frame.roles if not role.requested]
         requested = [role.role for role in frame.roles if role.requested]
-        role_text = "; ".join(f"{role.role} = {role.value}" for role in known) or "без заполненных ролей"
-        if frame.kind == "ЗАПРОС":
+        role_text = (
+            "; ".join(f"{role.role} = {role.value}" for role in known)
+            or "без заполненных ролей"
+        )
+        if frame.kind == "ИМЕНОВАНИЕ":
+            entity = next(
+                (role.value for role in frame.roles if role.role == "ENTITY"),
+                "?",
+            )
+            name = next(
+                (role.value for role in frame.roles if role.role == "NAME"),
+                "?",
+            )
+            parts.append(f"«{name}» — имя сущности «{entity}».")
+        elif frame.kind == "ЗАПРОС СОБЫТИЙ":
+            parts.append(
+                f"Нужно найти события; ограничения: {role_text}."
+            )
+        elif frame.kind == "ЗАПРОС":
             target = ", ".join(requested) or "истинность события"
-            parts.append(f"Нужно найти {target} для «{frame.predicate}»; известно: {role_text}.")
+            parts.append(
+                f"Нужно найти {target} для «{frame.predicate}»; "
+                f"известно: {role_text}."
+            )
         elif frame.kind == "КОМАНДА":
             parts.append(f"Команда «{frame.predicate}»: {role_text}.")
         else:
@@ -349,15 +523,30 @@ def _human_interpretation(prompt_type: str, frames: Sequence[M1FrameView], logic
             parts.append(f"{prefix} «{frame.predicate}»: {role_text}.")
         for role in frame.roles:
             if role.operator:
-                parts.append(f"Квантор {role.operator} относится к {role.role} «{role.value}».")
+                parts.append(
+                    f"Квантор {role.operator} относится к "
+                    f"{role.role} «{role.value}»."
+                )
     if logic:
-        parts.append(f"Логическая связь между частями: {_OPERATOR_RU.get(logic, logic)} ({logic}).")
+        parts.append(
+            "Логическая связь между частями: "
+            f"{_OPERATOR_RU.get(logic, logic)} ({logic})."
+        )
     return " ".join(parts)
 
 
-def build_m1_formalization_view(perception: Any, *, source_text: str | None = None) -> M1FormalizationView:
+def build_m1_formalization_view(
+    perception: Any,
+    *,
+    source_text: str | None = None,
+) -> M1FormalizationView:
     """Build a deterministic human-readable view from PerceptionResult or its JSON form."""
-    source = str(source_text if source_text is not None else _get(perception, "source_text", "") or "")
+    source = str(
+        source_text
+        if source_text is not None
+        else _get(perception, "source_text", "")
+        or ""
+    )
     prompt_type, prompt_detail = _prompt_type(perception)
 
     frames: list[M1FrameView] = []
@@ -401,17 +590,24 @@ def render_m1_formalization_html(view: M1FormalizationView) -> str:
     """Render the compact M1 meaning view with fixed tables and no crossing edges."""
     chunks = [
         f"<h2>{escape(view.prompt_type)}</h2>",
-        f"<p><b>{escape(view.prompt_detail)}</b></p>" if view.prompt_detail else "",
+        (
+            f"<p><b>{escape(view.prompt_detail)}</b></p>"
+            if view.prompt_detail
+            else ""
+        ),
         f"<p style='font-size:16px'><b>{escape(view.source_text)}</b></p>",
         "<h3>Что означает каждый фрагмент</h3>",
     ]
 
     if view.words:
         columns = 4
-        chunks.append("<table border='0' cellspacing='6' cellpadding='6' width='100%'>")
+        chunks.append(
+            "<table border='0' cellspacing='6' cellpadding='6' width='100%'>"
+        )
         for start in range(0, len(view.words), columns):
             chunks.append("<tr>")
-            for word in view.words[start : start + columns]:
+            batch = view.words[start : start + columns]
+            for word in batch:
                 label = escape(word.label)
                 detail = escape(word.detail)
                 chunks.append(
@@ -419,7 +615,7 @@ def render_m1_formalization_html(view: M1FormalizationView) -> str:
                     f"<div style='font-size:15px'><b>{escape(word.text)}</b></div>"
                     f"<div>{label}</div><small>{detail}</small></td>"
                 )
-            for _ in range(columns - len(view.words[start : start + columns])):
+            for _ in range(columns - len(batch)):
                 chunks.append("<td></td>")
             chunks.append("</tr>")
         chunks.append("</table>")
@@ -440,7 +636,9 @@ def render_m1_formalization_html(view: M1FormalizationView) -> str:
         if frame.status and frame.status != "ASSERTED":
             state.append(frame.status)
         state_text = " · ".join(state)
-        chunks.append("<table border='1' cellspacing='0' cellpadding='8' width='100%'>")
+        chunks.append(
+            "<table border='1' cellspacing='0' cellpadding='8' width='100%'>"
+        )
         chunks.append(
             "<tr><td colspan='4' align='center'>"
             f"<small>{escape(frame.kind)}</small><br>"
@@ -455,11 +653,16 @@ def render_m1_formalization_html(view: M1FormalizationView) -> str:
                 batch = roles[start : start + 4]
                 for role in batch:
                     operator = (
-                        f"<b>{escape(_OPERATOR_RU.get(role.operator, role.operator))} ({escape(role.operator)})</b><br>"
-                        if role.operator else ""
+                        f"<b>{escape(_OPERATOR_RU.get(role.operator, role.operator))} "
+                        f"({escape(role.operator)})</b><br>"
+                        if role.operator
+                        else ""
                     )
                     value = "?" if role.requested else role.value
-                    mods = "".join(f"<br><small>↳ {escape(item)}</small>" for item in role.modifiers)
+                    mods = "".join(
+                        f"<br><small>↳ {escape(item)}</small>"
+                        for item in role.modifiers
+                    )
                     chunks.append(
                         "<td align='center' valign='top'>"
                         f"{operator}<small>{escape(_role_title(role.role))}</small><br>"
@@ -476,7 +679,8 @@ def render_m1_formalization_html(view: M1FormalizationView) -> str:
         chunks.append("<h4>Структура формулы</h4>")
         chunks.append(f"<p><code>{escape(view.formula)}</code></p>")
     chunks.append(
-        "<p><small>Слова с пометкой «не выделено M1» намеренно не классифицируются интерфейсом: "
-        "экран показывает результат формализации, а не достраивает его собственными эвристиками.</small></p>"
+        "<p><small>Слова с пометкой «не выделено M1» намеренно не "
+        "классифицируются интерфейсом: экран показывает результат "
+        "формализации, а не достраивает его собственными эвристиками.</small></p>"
     )
     return "".join(chunks)
