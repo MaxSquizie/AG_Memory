@@ -5,11 +5,12 @@ from dataclasses import dataclass
 from ah.agent import InteractionContext
 from ah.integration.entity_resolver import (
     AmbiguousEntityPlan,
-    EntityResolver,
     EquivalentLiteralPlan,
     ExistingEntity,
     NewEntityPlan,
 )
+from ah.integration.identity_entity_resolver import IdentityAwareEntityResolver
+from ah.integration.identity_graph import identity_name_refs_for_owner, identity_name_text
 from ah.model import Ref, RefKind, SemanticEntity
 from ah.perception.query_semantics import EntityIdentityQueryCandidate
 
@@ -22,7 +23,8 @@ from .contracts import (
     LogicalStatus,
     StopReason,
 )
-from .event_query import EventQueryGoalBuilder, EventSetInferenceEngine
+from .event_query import EventSetInferenceEngine
+from .identity_event_query import IdentityAwareEventQueryGoalBuilder
 from .query_builder import QueryBuildResult
 from .runtime import GoalRuntime
 from .context import ProofContext
@@ -30,7 +32,7 @@ from .context import ProofContext
 
 @dataclass(frozen=True, slots=True)
 class EntityIdentityGoal:
-    """Read the canonical identifying labels already attached to one entity M."""
+    """Read explicit canonical identity-name semantics for one entity M."""
 
     target: Ref
 
@@ -39,8 +41,8 @@ class EntityIdentityGoal:
             raise ValueError("EntityIdentityGoal.target must be canonical M")
 
 
-class EntityIdentityQueryGoalBuilder(EventQueryGoalBuilder):
-    """Resolve one typed identity-query target without interpreting its copular shell."""
+class EntityIdentityQueryGoalBuilder(IdentityAwareEventQueryGoalBuilder):
+    """Resolve one typed identity-query target through canonical name graph edges."""
 
     def build(
         self,
@@ -54,7 +56,7 @@ class EntityIdentityQueryGoalBuilder(EventQueryGoalBuilder):
         target = query.target
         if target is None:
             return QueryBuildResult(None, ("entity_identity_target_missing",))
-        resolver = EntityResolver(self.core)
+        resolver = IdentityAwareEntityResolver(self.core)
         resolution = resolver.resolve(
             target,
             context,
@@ -85,22 +87,25 @@ class EntityIdentityQueryGoalBuilder(EventQueryGoalBuilder):
             attention.append(ref)
         return QueryBuildResult(
             InferenceQuery(GoalSpec(EntityIdentityGoal(resolution.ref))),
-            ("semantic:entity_identity",),
+            ("semantic:entity_identity", "semantic:identity_name_graph"),
             tuple(attention),
         )
 
 
 class EntityIdentityInferenceEngine(EventSetInferenceEngine):
-    """Inference extension for canonical entity-name/alias retrieval."""
+    """Inference extension for explicit canonical entity-name relations."""
 
     @staticmethod
-    def _identity_labels(entity: SemanticEntity) -> tuple[str, ...]:
+    def _append_unique(values: list[str], value: object) -> None:
+        text = str(value).strip()
+        if text and text.casefold() not in {old.casefold() for old in values}:
+            values.append(text)
+
+    def _identity_labels(self, ref: Ref, entity: SemanticEntity) -> tuple[tuple[str, ...], tuple[Ref, ...]]:
         values: list[str] = []
         name = entity.properties.get("name")
         if name is not None:
-            raw = str(name.value).strip()
-            if raw:
-                values.append(raw)
+            self._append_unique(values, name.value)
         aliases = entity.properties.get("aliases")
         if aliases is not None:
             raw_aliases = aliases.value
@@ -110,10 +115,20 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
                 else (raw_aliases,)
             )
             for item in items:
-                value = str(item).strip()
-                if value and value.casefold() not in {old.casefold() for old in values}:
-                    values.append(value)
-        return tuple(values)
+                self._append_unique(values, item)
+
+        explicit_refs = identity_name_refs_for_owner(self.core, ref)
+        for name_ref in explicit_refs:
+            try:
+                name_entity = self.core.store.get_element_any_domain(name_ref.uid)
+            except KeyError:
+                continue
+            if not isinstance(name_entity, SemanticEntity):
+                continue
+            value = identity_name_text(name_entity)
+            if value is not None:
+                self._append_unique(values, value)
+        return tuple(values), explicit_refs
 
     def _solve_goal(
         self,
@@ -173,14 +188,14 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
                 proof_context=proof_context,
             )
 
-        labels = self._identity_labels(entity)
+        labels, explicit_name_refs = self._identity_labels(goal.target, entity)
         runtime.memory_query(
             "ENTITY_IDENTITY",
             goal.target.uid,
             logical_depth=0,
             focus_ref=goal.target,
             candidate_count=len(labels),
-            detail="read canonical name/aliases properties; no graph scan",
+            detail="read indexed IDENTITY_NAME edges plus canonical name/alias properties",
         )
         if not labels:
             return InferenceOutcome(
@@ -198,19 +213,21 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
         runtime.rule(
             "ENTITY_IDENTITY",
             logical_depth=0,
-            detail=f"{len(labels)} canonical identifying label(s)",
+            detail=(
+                f"{len(labels)} identifying label(s); "
+                f"{len(explicit_name_refs)} explicit IDENTITY_NAME node(s)"
+            ),
         )
+        proof_refs = (goal.target, *explicit_name_refs)
         return InferenceOutcome(
             LogicalStatus.PROVED,
             StopReason.GOAL_SATISFIED,
             ExistingRefConclusion(goal.target),
-            (goal.target,),
-            (goal.target,),
+            proof_refs,
+            proof_refs,
             self.core.store.domain_of(goal.target.uid),
             1,
-            ("Resolved entity identity from canonical name/aliases",),
-            # Retrieval of properties from the target M does not derive a new
-            # canonical object, so materialization has no dependency support to add.
+            ("Resolved entity identity from explicit canonical identity-name graph",),
             proof_support=(),
             proof_context=proof_context,
         )
