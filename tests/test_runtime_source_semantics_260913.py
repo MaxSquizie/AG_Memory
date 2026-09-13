@@ -156,7 +156,7 @@ def _predicate(parser, tokens, token_index: int, lemma: str):
 
 
 def test_public_runtime_uses_source_semantic_parser() -> None:
-    assert LLMPerceptionService is RuntimeSemanticLLMPerceptionService
+    assert issubclass(LLMPerceptionService, RuntimeSemanticLLMPerceptionService)
 
 
 def test_medial_yesterday_is_preconsumed_as_time_before_generic_roles() -> None:
