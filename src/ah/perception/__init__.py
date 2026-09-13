@@ -61,9 +61,10 @@ from .association_semantics import (
 )
 from .generalized_naming import GeneralizedNamingAdaptiveParser
 from .runtime_invariants import RuntimeSemanticAdaptiveParser
-from .identity_query import (
-    IdentityQueryAdaptiveParser,
-    IdentityQueryLLMPerceptionService as LLMPerceptionService,
+from .identity_query import IdentityQueryAdaptiveParser
+from .semantic_predicates import (
+    SemanticPredicateAdaptiveParser,
+    SemanticPredicateLLMPerceptionService as LLMPerceptionService,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
@@ -145,6 +146,7 @@ __all__ = [
     "GeneralizedNamingAdaptiveParser",
     "RuntimeSemanticAdaptiveParser",
     "IdentityQueryAdaptiveParser",
+    "SemanticPredicateAdaptiveParser",
     "TextSensoryResult",
     "TextSensoryService",
     "TemporalCandidate",
