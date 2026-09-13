@@ -6,7 +6,8 @@ from ah.model import ActantRole
 from ah.temporal import TemporalAnchorContext, TemporalNormalizer
 
 from .adaptive_parser import AdaptiveParseError, AdaptivePerceptionParser
-from .contracts import QueryMode
+from .contracts import ActantCandidate, AssertionStatus, EvidenceSpan, QueryMode
+from .naming_semantics import NamingAssertionCandidate
 from .query_semantics import EventSetQueryCandidate
 
 
@@ -19,21 +20,23 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
     independent clause, the clause is a QUERY even if terminal punctuation is
     omitted.
 
-    The same layer also closes two source-structural gaps without surface phrase
-    dictionaries:
+    The same layer closes source-structural gaps without phrase dictionaries:
 
     * a phrase already recognized by the canonical ``TemporalNormalizer`` is a
       TIME actant before free semantic role classification; the normalizer may
-      leave its value unresolved until Integration receives the legal turn/source
-      timestamp anchor;
+      leave its value unresolved until Integration receives the authoritative
+      turn/source timestamp anchor;
+    * a deictically possessed nominal-predication shell is offered one bounded
+      semantic distinction between ordinary predication and an entity naming
+      statement.  The model chooses only a finite label; source spans and owner
+      candidates are deterministic;
     * after ordinary WH parsing has produced a role-gap reading, one bounded
       UID-free semantic choice distinguishes a missing role of a fixed predicate
       from a request for the event/action itself. The latter becomes an explicit
       ``EventSetQueryCandidate`` and is compiled by inference without pretending
       the source verb is the answer predicate.
 
-    No canonical UID or AH state is visible here and no source-word list selects
-    either behavior.
+    No canonical UID or AH state is visible here.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -194,6 +197,108 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
                 return "QUERY"
         return base
 
+    def _deictic_nominal_owner(self, assertion) -> ActantCandidate | None:
+        """Return one source possessive/anaphoric owner marker from a nominal shell.
+
+        ``Apro`` is a closed grammatical feature supplied by morphology.  This
+        method does not decide that the shell is a name statement and does not map
+        the marker to a canonical user/agent UID; Integration's DeixisResolver owns
+        that resolution later.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return None
+        candidates = []
+        for actant in assertion.actants:
+            evidence = actant.evidence
+            if evidence is None or evidence.start is None or evidence.end is None:
+                continue
+            for token in graph.tokens:
+                if token.start < evidence.start or token.end > evidence.end:
+                    continue
+                if not any("Apro" in info.grammemes for info in token.analyses):
+                    continue
+                candidates.append(token)
+        unique = {(item.start, item.end): item for item in candidates}
+        if len(unique) != 1:
+            return None
+        token = next(iter(unique.values()))
+        return ActantCandidate(
+            ActantRole.SUBJECT,
+            mention=token.text,
+            evidence=EvidenceSpan(token.text, token.start, token.end),
+        )
+
+    def _naming_kind(self, source_text: str, assertion, owner: ActantCandidate) -> str:
+        prompt = (
+            f"TEXT:\n{source_text}\n"
+            f"OWNER EXPRESSION:\n{owner.mention or owner.normalized_hint or ''}\n"
+            f"NOMINAL SUBJECT/PROPERTY:\n"
+            + " | ".join(
+                actant.mention or actant.normalized_hint or "[structured]"
+                for actant in assertion.actants
+            )
+            + f"\nNAME VALUE CANDIDATE:\n{assertion.predicate.surface}\n"
+            "QUESTION:\nDoes the source explicitly assign NAME VALUE CANDIDATE as "
+            "the conventional name/label by which OWNER is called, or is this an "
+            "ordinary nominal predication?\n"
+            "CHOICES:\nENTITY_NAME\nOTHER_PREDICATION\nUNCLEAR"
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "naming_predication",
+            prompt,
+            ("ENTITY_NAME", "OTHER_PREDICATION", "UNCLEAR"),
+        )
+        assert decision is not None
+        return decision
+
+    def _rewrite_naming_assertions(self, source_text: str, assertions):
+        rewritten = []
+        changed = False
+        for assertion in assertions:
+            if (
+                assertion.status is not AssertionStatus.ASSERTED
+                or assertion.negated
+                or assertion.quoted
+                or (assertion.predicate.sense_hint or "").upper()
+                != "NOMINAL_PREDICATION"
+            ):
+                rewritten.append(assertion)
+                continue
+            owner = self._deictic_nominal_owner(assertion)
+            if owner is None:
+                rewritten.append(assertion)
+                continue
+            decision = self._naming_kind(source_text, assertion, owner)
+            if decision == "OTHER_PREDICATION":
+                rewritten.append(assertion)
+                continue
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "nominal predication is ambiguous between entity naming and ordinary predication",
+                    tuple(self._traces),
+                )
+            rewritten.append(
+                NamingAssertionCandidate(
+                    local_id=assertion.local_id,
+                    predicate=assertion.predicate,
+                    actants=assertion.actants,
+                    evidence=assertion.evidence,
+                    alternatives=assertion.alternatives,
+                    negated=assertion.negated,
+                    status=assertion.status,
+                    temporal_mode=assertion.temporal_mode,
+                    transition_operator=assertion.transition_operator,
+                    temporal_scope=assertion.temporal_scope,
+                    quoted=assertion.quoted,
+                    owner=owner,
+                    name_value=assertion.predicate.surface,
+                    name_normalized_hint=assertion.predicate.normalized_hint,
+                )
+            )
+            changed = True
+        return tuple(rewritten), changed
+
     def _query_target_kind(self, source_text: str, query) -> str:
         known = "\n".join(
             f"{actant.role.value}={actant.lookup_text or '[structured value]'}"
@@ -220,8 +325,13 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
 
     def parse(self, text: str, *, structural_resolution: str | None = None):
         parsed = super().parse(text, structural_resolution=structural_resolution)
-        rewritten = []
-        changed = False
+
+        assertions, assertions_changed = self._rewrite_naming_assertions(
+            text, parsed.perception.assertions
+        )
+
+        rewritten_queries = []
+        queries_changed = False
         for query in parsed.perception.queries:
             # Quantified and proposition-valued queries already own richer typed
             # semantics and must not be reinterpreted by this ordinary WH layer.
@@ -233,18 +343,18 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
                     for actant in query.actants
                 )
             ):
-                rewritten.append(query)
+                rewritten_queries.append(query)
                 continue
             target = self._query_target_kind(text, query)
             if target == "ROLE_FILL":
-                rewritten.append(query)
+                rewritten_queries.append(query)
                 continue
             if target == "UNCLEAR":
                 raise AdaptiveParseError(
                     "query target is ambiguous between role filling and event retrieval",
                     tuple(self._traces),
                 )
-            rewritten.append(
+            rewritten_queries.append(
                 EventSetQueryCandidate(
                     predicate=query.predicate,
                     actants=query.actants,
@@ -257,9 +367,13 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
                     scope_operators=(),
                 )
             )
-            changed = True
+            queries_changed = True
 
-        if not changed:
+        if not assertions_changed and not queries_changed:
             return parsed
-        perception = replace(parsed.perception, queries=tuple(rewritten))
+        perception = replace(
+            parsed.perception,
+            assertions=assertions,
+            queries=tuple(rewritten_queries),
+        )
         return replace(parsed, perception=perception)
