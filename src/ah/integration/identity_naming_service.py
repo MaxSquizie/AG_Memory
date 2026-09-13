@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import datetime
 
 from ah.agent import InteractionContext
 from ah.model import Domain, Property, RefKind, SemanticEntity
+from ah.perception import PerceptionResult
 from ah.perception.naming_semantics import NamingAssertionCandidate
 
+from .contracts import ActivationSeedRequest, IntegrationCommit, SeedReason
 from .entity_resolver import EntityResolver, ExistingEntity
 from .errors import CandidateValidationError
-from .identity_graph import IDENTITY_NAME_RELATION, ensure_identity_name_entity
+from .identity_graph import (
+    IDENTITY_NAME_RELATION,
+    ensure_identity_name_entity,
+    is_identity_name_entity,
+)
 from .naming_service import NamingAwareIntegrationService
 
 
@@ -28,6 +35,13 @@ class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
     USER --IDENTITY_NAME--> M("Илья") without manufacturing a generic copular fact,
     while ``Я инженер`` remains ordinary predication and does not enter this path.
     """
+
+    @staticmethod
+    def _canonical_name(assertion: NamingAssertionCandidate) -> str:
+        return (
+            assertion.name_normalized_hint
+            or assertion.name_value
+        ).strip()
 
     def _apply_naming_assertions(
         self,
@@ -56,10 +70,7 @@ class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
             if not isinstance(entity, SemanticEntity):
                 raise CandidateValidationError("Naming owner does not reference SemanticEntity")
 
-            alias = (
-                assertion.name_normalized_hint
-                or assertion.name_value
-            ).strip()
+            alias = self._canonical_name(assertion)
             if not alias:
                 raise CandidateValidationError("Naming value must not normalize to empty text")
             alias_key = alias.casefold()
@@ -99,9 +110,6 @@ class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
                     replace(entity, properties=properties, meta=meta),
                 )
 
-            # Graph identity is explicit even when the lexical alias was already
-            # present from an older memory. This also upgrades such memories on the
-            # next naming assertion instead of silently keeping alias-only state.
             try:
                 name_ref = ensure_identity_name_entity(core, alias)
             except ValueError as exc:
@@ -112,3 +120,44 @@ class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
                 name_ref,
                 self.config.nominal_relation_link_weight,
             )
+
+    def integrate_external(
+        self,
+        result: PerceptionResult,
+        context: InteractionContext,
+        *,
+        source_timestamp: datetime | None = None,
+    ) -> IntegrationCommit:
+        """Expose newly grounded name M nodes to the same turn's ignition wave."""
+        naming = tuple(
+            item for item in result.assertions
+            if isinstance(item, NamingAssertionCandidate)
+        )
+        commit = super().integrate_external(
+            result,
+            context,
+            source_timestamp=source_timestamp,
+        )
+        if not naming:
+            return commit
+
+        seeds = list(commit.activation_seeds)
+        seen = {(item.ref.kind.value, item.ref.uid) for item in seeds}
+        for assertion in naming:
+            alias = self._canonical_name(assertion)
+            if not alias:
+                continue
+            matches = tuple(
+                entity
+                for entity in self.core.store.find_entities_by_name(alias, Domain.C)
+                if is_identity_name_entity(entity)
+            )
+            if len(matches) != 1:
+                continue
+            ref = self.core.ref(matches[0].uid)
+            key = (ref.kind.value, ref.uid)
+            if key in seen:
+                continue
+            seen.add(key)
+            seeds.append(ActivationSeedRequest(ref, SeedReason.NEW_FACT))
+        return replace(commit, activation_seeds=tuple(seeds))
