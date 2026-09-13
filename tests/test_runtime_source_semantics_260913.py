@@ -2,11 +2,19 @@ from __future__ import annotations
 
 from ah.config import LLMRoleSettings
 from ah.model import ActantRole
-from ah.perception import LLMPerceptionService, PredicateCandidate, RuntimeSemanticAdaptiveParser
+from ah.perception import (
+    ActantCandidate,
+    AssertionCandidate,
+    LLMPerceptionService,
+    PerceptionResult,
+    PredicateCandidate,
+    RuntimeSemanticAdaptiveParser,
+)
 from ah.perception.adaptive_parser import AdaptiveSettings
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import MorphInfo
-from ah.perception.runtime_semantics import RuntimeSemanticLLMPerceptionService
+from ah.perception.runtime_invariants import RuntimeSemanticLLMPerceptionService
+from ah.temporal import TemporalModeProbeDecision
 
 
 class _NoLLMBackend:
@@ -44,19 +52,25 @@ class _Morphology:
         "сделал": (
             MorphInfo(
                 "сделать", "VERB", number="sing", gender="masc", mood="indc",
-                transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
+                transitivity="tran", grammemes=frozenset({"past", "perf"}), score=1.0,
             ),
         ),
         "делал": (
             MorphInfo(
                 "делать", "VERB", number="sing", gender="masc", mood="indc",
-                transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
+                transitivity="tran", grammemes=frozenset({"past", "impf"}), score=1.0,
+            ),
+        ),
+        "пил": (
+            MorphInfo(
+                "пить", "VERB", number="sing", gender="masc", mood="indc",
+                transitivity="tran", grammemes=frozenset({"past", "impf"}), score=1.0,
             ),
         ),
         "выпил": (
             MorphInfo(
                 "выпить", "VERB", number="sing", gender="masc", mood="indc",
-                transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
+                transitivity="tran", grammemes=frozenset({"past", "perf"}), score=1.0,
             ),
         ),
         "запрос": (
@@ -110,6 +124,9 @@ class _Parser(RuntimeSemanticAdaptiveParser):
             self._runtime_adverbial_scope[self._span_key(span)] = "DISCOURSE_OPERATOR"
             return "DISCOURSE_OPERATOR"
         return super()._adverbial_scope_decision(text, predicate, span)
+
+    def _resolve_temporal_mode_candidate(self, source_context, assertion, profile):
+        return TemporalModeProbeDecision.PROCESS
 
 
 def _parser_for(text: str):
@@ -182,6 +199,36 @@ def test_fronted_yesterday_is_preconsumed_as_time_before_generic_roles() -> None
     assert by_role[ActantRole.SUBJECT].mention == "я"
     assert by_role[ActantRole.OBJECT].mention == "чай"
     assert by_role[ActantRole.TIME].mention.casefold() == "вчера"
+
+
+def test_final_source_invariant_restores_time_for_imperfective_tea_frame() -> None:
+    """Regression for the live failure: Я вчера пил чай lost TIME before Integration."""
+    text = "Я вчера пил чай"
+    parser, tokens = _parser_for(text)
+    _predicate_span, predicate = _predicate(parser, tokens, 3, "пить")
+    result = PerceptionResult(
+        source_text=text,
+        assertions=(
+            AssertionCandidate(
+                local_id="A1",
+                predicate=predicate,
+                actants=(
+                    ActantCandidate(ActantRole.SUBJECT, mention="Я", normalized_hint="я"),
+                    ActantCandidate(ActantRole.OBJECT, mention="чай", normalized_hint="чай"),
+                ),
+            ),
+        ),
+    )
+
+    guarded = parser._enforce_final_source_time(result)
+    assertion = guarded.assertions[0]
+    times = tuple(item for item in assertion.actants if item.role is ActantRole.TIME)
+
+    assert len(times) == 1
+    assert times[0].mention.casefold() == "вчера"
+    assert assertion.temporal_mode is not None
+    assert assertion.temporal_mode.value == "PROCESS"
+    assert "source-time-invariant: explicit deterministic TIME preserved" in guarded.diagnostics
 
 
 def _assert_absolute_date_is_one_time_actant(text: str, expected: str) -> None:
