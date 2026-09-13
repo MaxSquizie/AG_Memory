@@ -35,6 +35,10 @@ from .temporal_scope_formalization import (
 )
 from .logical_formalization import LogicalFormBuilder
 from .modal_formalization import ModalScopeBuilder
+from .operator_source import (
+    OperatorSourceConsumptionError,
+    consume_operator_source_spans,
+)
 from .lexical_recovery import (
     LexicalRecovery,
     LexicalRecoveryStatus,
@@ -1321,6 +1325,20 @@ class AdaptivePerceptionParser:
                     tuple(self._traces),
                 )
             proposition_roots = modal.roots
+            try:
+                assertions = list(
+                    consume_operator_source_spans(
+                        assertions,
+                        modal.consumed_spans,
+                        proposition_roots,
+                        discard_source_refs=modal.discard_source_refs,
+                    )
+                )
+            except OperatorSourceConsumptionError as exc:
+                raise AdaptiveParseError(
+                    f"operator source consumption failed: {exc}",
+                    tuple(self._traces),
+                ) from exc
             logical_diagnostics = (
                 *logical_diagnostics,
                 *modal.diagnostics,

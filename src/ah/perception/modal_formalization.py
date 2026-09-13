@@ -32,6 +32,8 @@ class ModalFormalizationResult:
     roots: tuple[PropositionRootCandidate, ...]
     diagnostics: tuple[str, ...] = ()
     unresolved: str | None = None
+    consumed_spans: tuple[EvidenceSpan, ...] = ()
+    discard_source_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +66,7 @@ class ModalScopeBuilder:
         "POSSIBLE",
         "REQUIRED",
         "PERMITTED",
+        "FACTUAL",
         "NONE",
         "UNCLEAR",
     )
@@ -205,27 +208,48 @@ class ModalScopeBuilder:
         assertion_spans: Mapping[str, object | None],
         sentence_target_counts: Mapping[int, int],
     ) -> list[_Cue]:
-        occupied: list[tuple[int, int]] = []
+        predicate_occupied: list[tuple[int, int]] = []
+        actant_occupied: list[tuple[int, int]] = []
         for item in assertions:
-            for evidence in (
-                item.predicate.evidence,
-                *(actant.evidence for actant in item.actants),
-            ):
+            for evidence in (item.predicate.evidence,):
                 if (
                     evidence is not None
                     and evidence.start is not None
                     and evidence.end is not None
                 ):
-                    occupied.append((int(evidence.start), int(evidence.end)))
+                    predicate_occupied.append(
+                        (int(evidence.start), int(evidence.end))
+                    )
+            for evidence in (actant.evidence for actant in item.actants):
+                if (
+                    evidence is not None
+                    and evidence.start is not None
+                    and evidence.end is not None
+                ):
+                    actant_occupied.append(
+                        (int(evidence.start), int(evidence.end))
+                    )
 
-        def is_occupied(start: int, end: int) -> bool:
-            return any(start < right and end > left for left, right in occupied)
+        def is_predicate_occupied(start: int, end: int) -> bool:
+            return any(
+                start < right and end > left
+                for left, right in predicate_occupied
+            )
+
+        def is_actant_occupied(start: int, end: int) -> bool:
+            return any(
+                start < right and end > left
+                for left, right in actant_occupied
+            )
 
         eligible: list[tuple[object, int]] = []
         for token in self.graph.tokens:
             if token.index in self.ignored_token_indices:
                 continue
-            if is_occupied(token.start, token.end):
+            # A provisional adverbial/particle actant is exactly the leakage this
+            # semantic pass must be able to retract. Predicate overlap remains the
+            # responsibility of the structurally stronger shell-cue path.
+            if is_predicate_occupied(token.start, token.end):
                 continue
             surface = (token.raw_text or token.text).strip()
             if not surface or not _WORD_RE.search(surface):
@@ -258,7 +282,11 @@ class ModalScopeBuilder:
                 grown: list[object] = []
                 while len(grown) < 3:
                     other = by_index.get(cursor)
-                    if other is None or is_occupied(other.start, other.end):
+                    if (
+                        other is None
+                        or is_predicate_occupied(other.start, other.end)
+                        or is_actant_occupied(other.start, other.end)
+                    ):
                         break
                     surface = (other.raw_text or other.text).strip()
                     if not surface or not _WORD_RE.search(surface):
@@ -359,6 +387,8 @@ class ModalScopeBuilder:
         self._unresolved = None
         self._by_id = {item.local_id: item for item in assertions}
         root_list = list(roots)
+        consumed_spans: list[EvidenceSpan] = []
+        discard_source_refs: list[str] = []
         nested = self._nested_refs(assertions)
         root_leafs = {
             ref for root in root_list for ref in root.expression.leaf_refs()
@@ -481,14 +511,25 @@ class ModalScopeBuilder:
                 "POSSIBLE: proposition is presented only as possible/probable/uncertain.\n"
                 "REQUIRED: proposition is presented as required/necessary/obligatory.\n"
                 "PERMITTED: proposition is presented as permitted/allowed.\n"
+                "FACTUAL: cue only confirms actuality/certainty; proposition stays factual.\n"
                 "NONE: this cue does not create one of those proposition scopes.\n"
                 "UNCLEAR: it does affect commitment but the type cannot be decided safely.\n"
-                "CHOICES:\nPOSSIBLE\nREQUIRED\nPERMITTED\nNONE\nUNCLEAR"
+                "CHOICES:\nPOSSIBLE\nREQUIRED\nPERMITTED\nFACTUAL\nNONE\nUNCLEAR"
             )
             decision = self.probe(
                 "modal_operator", operator_prompt, self._OPERATOR_CHOICES
             )
             if decision == "NONE":
+                continue
+            if decision == "FACTUAL":
+                consumed_spans.append(
+                    EvidenceSpan(cue.text, cue.start, cue.end)
+                )
+                if cue.source_ref is not None:
+                    discard_source_refs.append(cue.source_ref)
+                self._diagnostics.append(
+                    f"MODAL:FACTUAL_SOURCE:{cue.start}:{cue.end}"
+                )
                 continue
             if decision not in _MODAL_LABEL_TO_OPERATOR:
                 self._unresolved = (
@@ -609,7 +650,14 @@ class ModalScopeBuilder:
             self._diagnostics.append(
                 f"MODAL:{decision}:{cue.start}:{cue.end}:{self._render(target)}"
             )
+            consumed_spans.append(
+                EvidenceSpan(cue.text, cue.start, cue.end)
+            )
 
         return ModalFormalizationResult(
-            tuple(root_list), tuple(self._diagnostics), self._unresolved
+            tuple(root_list),
+            tuple(self._diagnostics),
+            self._unresolved,
+            tuple(dict.fromkeys(consumed_spans)),
+            tuple(dict.fromkeys(discard_source_refs)),
         )
