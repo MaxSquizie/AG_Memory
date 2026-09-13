@@ -9,6 +9,12 @@ from .adaptive_parser import (
     AdaptiveSettings,
     AdaptiveStructuralClarificationRequired,
 )
+from .contracts import (
+    QueryMode,
+    QueryQuantifierOperator,
+    QuantifiedQueryBinding,
+    QuantifiedQuerySpec,
+)
 from .identity_query import IdentityQueryAdaptiveParser, IdentityQueryLLMPerceptionService
 from .lexical_recovery import EmbeddingSemanticReranker
 from .llm_parser import (
@@ -21,14 +27,17 @@ from .llm_parser import (
 class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
     """Production semantic normalization after source-structural parsing.
 
-    This layer contains no phrase inventory.  It does two bounded jobs:
+    This layer contains no phrase inventory.  It does three bounded jobs:
 
     * for an implicit nominal *question*, provide provisional grammatical roles so
       the base parser can finish before the existing identity-query rewrite decides
       whether the construction is identity or ordinary predication;
     * distinguish a possession relation from an unrelated binary predicate and give
-      all possession paraphrases one canonical predicate lemma.  The LLM chooses
-      only POSSESSION / OTHER_RELATION / UNCLEAR over already source-grounded roles.
+      all possession paraphrases one canonical predicate lemma;
+    * when a possession question contains a bare nominal SUBJECT, distinguish a
+      generic class-level question from a question about one specific entity.  A
+      generic reading becomes the existing typed FORALL query contract instead of
+      fabricating an entity named after the class.
 
     Canonical AH UIDs are unavailable here.
     """
@@ -142,6 +151,78 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
             return item, False
         return replace(item, predicate=rewritten_predicate), True
 
+    def _generic_subject_kind(self, source_text: str, query, subject) -> str:
+        prompt = (
+            f"TEXT:\n{source_text}\n"
+            f"PREDICATE SEMANTICS:\n{query.predicate.sense_hint or query.predicate.surface}\n"
+            f"SUBJECT CANDIDATE:\n{subject.lookup_text or subject.mention or ''}\n"
+            "Decision criterion:\nDoes SUBJECT denote a generic class member for which "
+            "the question asks a general rule/property of the class, or one specific "
+            "entity/referent?\nCandidate labels:\nGENERIC_CLASS\nSPECIFIC_ENTITY\nUNCLEAR"
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "generic_subject",
+            prompt,
+            ("GENERIC_CLASS", "SPECIFIC_ENTITY", "UNCLEAR"),
+        )
+        assert decision is not None
+        return decision
+
+    def _formalize_generic_possession_query(self, source_text: str, query):
+        if (
+            query.query_mode is not QueryMode.EXISTS
+            or query.quantified is not None
+            or (query.predicate.sense_hint or "").upper() != "POSSESSION"
+        ):
+            return query, False
+        subjects = tuple(
+            actant
+            for actant in query.actants
+            if actant.role is ActantRole.SUBJECT
+            and actant.entity_ref is None
+            and actant.candidate_ref is None
+            and actant.composition is None
+            and actant.proposition is None
+            and actant.quantifier is None
+        )
+        if len(subjects) != 1:
+            return query, False
+        subject = subjects[0]
+        decision = self._generic_subject_kind(source_text, query, subject)
+        if decision == "SPECIFIC_ENTITY":
+            return query, False
+        if decision == "UNCLEAR":
+            raise AdaptiveParseError(
+                "possession question subject is ambiguous between generic class and specific entity",
+                tuple(self._traces),
+            )
+        if query.local_id is None:
+            raise AdaptiveParseError(
+                "generic quantified query requires a parser-local query id",
+                tuple(self._traces),
+            )
+        restriction = (subject.normalized_hint or subject.mention or "").strip()
+        if not restriction:
+            raise AdaptiveParseError(
+                "generic quantified query has no nominal restriction",
+                tuple(self._traces),
+            )
+        entity_ref = f"{query.local_id}:generic_subject"
+        rebound = replace(subject, entity_ref=entity_ref)
+        actants = tuple(rebound if item is subject else item for item in query.actants)
+        spec = QuantifiedQuerySpec(
+            bindings=(
+                QuantifiedQueryBinding(
+                    entity_ref=entity_ref,
+                    variable_id=0,
+                    operator=QueryQuantifierOperator.FORALL,
+                    restriction_lemma=restriction,
+                ),
+            ),
+            body_negated=False,
+        )
+        return replace(query, actants=actants, quantified=spec), True
+
     def parse(self, text: str, *, structural_resolution: str | None = None):
         parsed = super().parse(text, structural_resolution=structural_resolution)
         assertions = []
@@ -154,8 +235,11 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
             changed = changed or local_changed
         for query in parsed.perception.queries:
             rewritten, local_changed = self._normalize_predicate_semantics(text, query)
+            rewritten, generic_changed = self._formalize_generic_possession_query(
+                text, rewritten
+            )
             queries.append(rewritten)
-            changed = changed or local_changed
+            changed = changed or local_changed or generic_changed
 
         if not changed:
             return parsed
