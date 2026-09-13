@@ -86,13 +86,24 @@ class TemporalValue:
 
     @property
     def canonical_key(self) -> str:
+        # A timezone is semantically part of identity only when the normalized
+        # value contains a clock coordinate.  Relative calendar expressions such
+        # as ``вчера`` need the utterance timezone to *resolve* which date is meant,
+        # but after resolution ``2026-09-12`` and an explicitly written
+        # ``12.09.2026`` denote the same DAY.  Keeping ``+03:00`` in the identity
+        # key for the former created two canonical time entities for one date.
+        has_clock_coordinate = any(
+            value is not None and "T" in value
+            for value in (self.start, self.end)
+        )
+        identity_timezone = self.timezone if has_clock_coordinate else None
         return "|".join(
             (
                 self.kind.value,
                 self.start or "",
                 self.end or "",
                 self.precision.value,
-                self.timezone or "",
+                identity_timezone or "",
             )
         )
 
