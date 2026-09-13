@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ah.config import AppConfig
-from ah.llm.lmstudio_backend import LMStudioBackend
+from ah.llm.reasoning_safe_lmstudio import LMStudioBackend
 from ah.llm.ollama_backend import OllamaBackend
 from ah.llm.process_backend import LocalLLMProcessBackend
 
