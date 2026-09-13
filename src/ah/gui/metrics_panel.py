@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from html import escape
+import json
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,7 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
+    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -35,6 +38,11 @@ from ah.diagnostics import (
     M3Report,
     ProofChainSnapshot,
     score_m2_explainability,
+)
+from ah.diagnostics.m1_presentation import (
+    M1FormalizationView,
+    build_m1_formalization_view,
+    render_m1_formalization_html,
 )
 
 from .inference_explorer import ProofCanvasView
@@ -83,9 +91,14 @@ class MetricsPanelWidget(QWidget):
     def __init__(self, services, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.services = services
+        # Keep the original MainWindow reference even after QDockWidget reparents
+        # this widget. It lets the presentation layer read the already-completed
+        # live PerceptionResult without changing the cognitive runtime contract.
+        self._host_window = parent
         self.m1_history: BoundedHistory[FormalizationTraceSnapshot] = BoundedHistory(20)
         self.m2_history: BoundedHistory[ProofChainSnapshot] = BoundedHistory(20)
         self._m1_by_id: dict[str, FormalizationTraceSnapshot] = {}
+        self._m1_presentation_by_id: dict[str, M1FormalizationView] = {}
         self._m2_by_id: dict[str, ProofChainSnapshot] = {}
         self._m2_cases: list[Any] = []
         self._m2_table_updating = False
@@ -96,8 +109,8 @@ class MetricsPanelWidget(QWidget):
         root.setContentsMargins(8, 8, 8, 8)
         root.setSpacing(8)
         intro = QLabel(
-            "Диагностика метрик отделена от обычного мониторинга. M1 и M2 хранят "
-            "только последние 20 замороженных снимков; эти данные не записываются в AH."
+            "M1 показывает итоговый смысл последних формализаций; технический canonical-подграф "
+            "оставлен отдельно. M2 и M3 по-прежнему используют свои диагностические снимки."
         )
         intro.setWordWrap(True)
         root.addWidget(intro)
@@ -147,33 +160,52 @@ class MetricsPanelWidget(QWidget):
         self.m1_trace_list = QListWidget()
         self.m1_trace_list.setMinimumWidth(250)
         splitter.addWidget(self.m1_trace_list)
+
         right = QWidget()
         right_layout = QVBoxLayout(right)
         right_layout.setContentsMargins(0, 0, 0, 0)
-        head = QHBoxLayout()
-        self.m1_trace_label = QLabel("Подграф не выбран")
+        self.m1_trace_label = QLabel("Формализация не выбрана")
         self.m1_trace_label.setWordWrap(True)
-        head.addWidget(self.m1_trace_label, 1)
+        right_layout.addWidget(self.m1_trace_label)
+
+        self.m1_view_tabs = QTabWidget()
+
+        self.m1_meaning = QTextBrowser()
+        self.m1_meaning.setOpenExternalLinks(False)
+        self.m1_meaning.setHtml(
+            "<h3>Смысл промпта</h3><p>Выберите один из последних M1-снимков слева.</p>"
+        )
+        self.m1_view_tabs.addTab(self.m1_meaning, "Смысл промпта")
+
+        canvas_tab = QWidget()
+        canvas_layout = QVBoxLayout(canvas_tab)
+        canvas_layout.setContentsMargins(0, 0, 0, 0)
+        canvas_head = QHBoxLayout()
+        canvas_head.addStretch(1)
         fit = QPushButton("Вписать canvas")
         fit.clicked.connect(lambda: self.m1_canvas.fit_snapshot())
-        head.addWidget(fit)
-        right_layout.addLayout(head)
-        self.m1_view_tabs = QTabWidget()
+        canvas_head.addWidget(fit)
+        canvas_layout.addLayout(canvas_head)
         self.m1_canvas = SnapshotCanvasView()
-        self.m1_view_tabs.addTab(self.m1_canvas, "Подграф")
+        canvas_layout.addWidget(self.m1_canvas, 1)
+        self.m1_view_tabs.addTab(canvas_tab, "Техника · Подграф")
+
         self.m1_prompt = QPlainTextEdit()
         self.m1_prompt.setReadOnly(True)
-        self.m1_view_tabs.addTab(self.m1_prompt, "Исходный промпт")
+        self.m1_view_tabs.addTab(self.m1_prompt, "Техника · Исходный текст")
+
         self.m1_nodes = QTableWidget(0, 4)
         self.m1_nodes.setHorizontalHeaderLabels(("UID", "Тип", "Домен", "Семантика"))
         self.m1_nodes.horizontalHeader().setStretchLastSection(True)
         self.m1_nodes.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.m1_view_tabs.addTab(self.m1_nodes, "Узлы")
+        self.m1_view_tabs.addTab(self.m1_nodes, "Техника · Узлы")
+
         self.m1_edges = QTableWidget(0, 5)
         self.m1_edges.setHorizontalHeaderLabels(("От", "К", "Связь", "Вид", "UID"))
         self.m1_edges.horizontalHeader().setStretchLastSection(True)
         self.m1_edges.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.m1_view_tabs.addTab(self.m1_edges, "Связи")
+        self.m1_view_tabs.addTab(self.m1_edges, "Техника · Связи")
+
         right_layout.addWidget(self.m1_view_tabs, 1)
         self.m1_details = QLabel("История: 0/20")
         self.m1_details.setWordWrap(True)
@@ -306,12 +338,68 @@ class MetricsPanelWidget(QWidget):
         self.m1_path.setText(str(candidate))
         self.m1_score_requested.emit(str(candidate))
 
+    def _live_presentation(self, trace: FormalizationTraceSnapshot) -> M1FormalizationView | None:
+        if trace.source != "LIVE" or self._host_window is None:
+            return None
+        turn = getattr(self._host_window, "_last_turn", None)
+        if turn is None or str(getattr(turn, "user_text", "")) != trace.source_text:
+            return None
+        perception = getattr(turn, "perception", None)
+        if perception is None:
+            return None
+        try:
+            return build_m1_formalization_view(perception, source_text=trace.source_text)
+        except Exception:
+            return None
+
+    def _hydrate_m1_presentations_from_run(self, run_dir: str | Path) -> None:
+        """Attach real serialized PerceptionResult data to in-memory acceptance traces."""
+        root = Path(run_dir)
+        if not root.is_dir() or not self._m1_by_id:
+            return
+        acceptance_by_index: dict[int, str] = {}
+        for trace_id, trace in self._m1_by_id.items():
+            if trace.source != "ACCEPTANCE":
+                continue
+            try:
+                acceptance_by_index[int(trace_id.rsplit(":", 1)[-1])] = trace_id
+            except (TypeError, ValueError):
+                continue
+        if not acceptance_by_index:
+            return
+        for index, trace_id in acceptance_by_index.items():
+            path = root / f"turn_{index:03d}.json"
+            if not path.is_file():
+                continue
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8-sig"))
+                perception = payload.get("perception_result")
+                source_text = str(payload.get("input") or self._m1_by_id[trace_id].source_text)
+                if isinstance(perception, dict):
+                    self._m1_presentation_by_id[trace_id] = build_m1_formalization_view(
+                        perception,
+                        source_text=source_text,
+                    )
+            except (OSError, ValueError, TypeError):
+                continue
+
     def add_m1_trace(self, trace: FormalizationTraceSnapshot, *, select: bool = False) -> None:
+        presentation = self._live_presentation(trace)
+        if presentation is not None:
+            self._m1_presentation_by_id[trace.trace_id] = presentation
         self.m1_history.append(trace)
         self._m1_by_id = {item.trace_id: item for item in self.m1_history.items}
+        live_ids = set(self._m1_by_id)
+        self._m1_presentation_by_id = {
+            trace_id: view
+            for trace_id, view in self._m1_presentation_by_id.items()
+            if trace_id in live_ids
+        }
         self.m1_trace_list.clear()
         for item in reversed(self.m1_history.items):
-            row = QListWidgetItem(f"{item.title} · {item.status}")
+            view = self._m1_presentation_by_id.get(item.trace_id)
+            kind = f" · {view.prompt_type}" if view is not None else ""
+            row = QListWidgetItem(f"{item.title}{kind} · {item.status}")
             row.setData(Qt.ItemDataRole.UserRole, item.trace_id)
             row.setToolTip(item.source_text)
             self.m1_trace_list.addItem(row)
@@ -332,12 +420,29 @@ class MetricsPanelWidget(QWidget):
         self.m1_nodes.setRowCount(0)
         self.m1_edges.setRowCount(0)
         if trace is None:
-            self.m1_trace_label.setText("Подграф не выбран")
+            self.m1_trace_label.setText("Формализация не выбрана")
+            self.m1_meaning.setHtml(
+                "<h3>Смысл промпта</h3><p>Выберите один из последних M1-снимков слева.</p>"
+            )
             return
-        self.m1_trace_label.setText(
-            f"{trace.title} · {trace.source} · {trace.status} · "
-            f"{len(trace.graph.nodes)} nodes"
-        )
+
+        view = self._m1_presentation_by_id.get(trace.trace_id)
+        if view is not None:
+            self.m1_trace_label.setText(
+                f"{trace.title} · {view.prompt_type} · {trace.status}"
+            )
+            self.m1_meaning.setHtml(render_m1_formalization_html(view))
+        else:
+            self.m1_trace_label.setText(f"{trace.title} · {trace.status}")
+            self.m1_meaning.setHtml(
+                "<h2>ФОРМАЛИЗАЦИЯ НЕДОСТУПНА</h2>"
+                f"<p><b>{escape(trace.source_text)}</b></p>"
+                "<p>Этот frozen snapshot не содержит PerceptionResult. Canonical-подграф "
+                "остаётся доступен в технических вкладках; интерфейс не восстанавливает "
+                "семантику слов эвристически.</p>"
+            )
+        self.m1_view_tabs.setCurrentIndex(0)
+
         self.m1_nodes.setRowCount(len(trace.graph.nodes))
         for row, node in enumerate(trace.graph.nodes):
             for column, value in enumerate((node.uid, node.kind, node.domain or "—", node.semantic)):
@@ -393,6 +498,11 @@ class MetricsPanelWidget(QWidget):
         self.m2_cognitive.setPlainText("\n".join(chain.cognitive_events))
 
     def set_m1_report(self, report: M1Report) -> None:
+        if report.source:
+            self._hydrate_m1_presentations_from_run(report.source)
+            current = self.m1_trace_list.currentItem()
+            if current is not None:
+                self._show_m1_trace(current, None)
         self.m1_card.set_value(
             f"{report.weighted_mean:.3f}",
             "PASS ≥ 0.600" if report.weighted_mean >= 0.6 else "BELOW 0.600",
@@ -406,7 +516,7 @@ class MetricsPanelWidget(QWidget):
             f"weighted_sum={report.weighted_sum_as_stated:.3f}; "
             f"mandatory={report.mandatory_roles_present}\n" + "\n".join(rows)
         )
-        self.detail.setText("M1 рассчитана diagnostics scorer; GUI формулу не дублирует.")
+        self.detail.setText("M1 рассчитана diagnostics scorer; основной экран показывает итоговую формализацию промпта.")
 
     def set_m2_acceptance_result(self, result) -> None:
         self._m2_cases = list(result.cases)
