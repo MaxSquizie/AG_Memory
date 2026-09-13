@@ -23,10 +23,10 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
     integration:
 
     * ``NamingAssertionCandidate`` assigns a conventional name/alias to an already
-      resolved entity.  It must enrich that M identity and must not manufacture a
+      resolved entity. It must enrich that M identity and must not manufacture a
       world proposition from the nominal shell used by the source language.
     * ``EventSetQueryCandidate`` asks for matching factual events with an open
-      predicate.  The interrogative shell is runtime query structure, so asking the
+      predicate. The interrogative shell is runtime query structure, so asking the
       question must not create/expand a canonical predicate template.
 
     Ordinary assertions/queries continue through the unchanged IntegrationService.
@@ -58,10 +58,7 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
         if not detached_ids:
             return
         for dependency in result.act_dependencies:
-            if (
-                dependency.parent_ref in detached_ids
-                or dependency.child_ref in detached_ids
-            ):
+            if dependency.parent_ref in detached_ids or dependency.child_ref in detached_ids:
                 raise CandidateValidationError(
                     "Detached naming/event query participates in an act dependency; "
                     "composed semantics require an explicit typed integration path"
@@ -186,32 +183,44 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
             alias = assertion.name_value.strip()
             alias_key = alias.casefold()
             primary = entity.properties.get("name")
-            if (
+            aliases = self._alias_values(entity)
+            properties = dict(entity.properties)
+            changed = False
+
+            if not (
                 primary is not None
                 and str(primary.value).strip().casefold() == alias_key
-            ):
-                continue
+            ) and alias_key not in {item.casefold() for item in aliases}:
+                aliases.append(alias)
+                existing_prop = entity.properties.get("aliases")
+                properties["aliases"] = Property(
+                    "aliases",
+                    tuple(aliases),
+                    existing_prop.type_name if existing_prop is not None else "str[]",
+                    existing_prop.unit if existing_prop is not None else None,
+                )
+                changed = True
 
-            aliases = self._alias_values(entity)
-            if alias_key in {item.casefold() for item in aliases}:
+            # USER/SELF are individual deictic identities. Once a source explicitly
+            # names such an identity, record that singular identity guard so the
+            # ordinary name resolver cannot later discard the alias merely because
+            # the proper-name mention carries grammatical_number=sing.
+            meta = dict(entity.meta)
+            if (
+                str(meta.get("identity_role") or "").upper() in {"USER", "SELF"}
+                and meta.get("grammatical_number") is None
+            ):
+                meta["grammatical_number"] = "sing"
+                changed = True
+
+            if not changed:
                 continue
-            aliases.append(alias)
-            existing_prop = entity.properties.get("aliases")
-            alias_prop = Property(
-                "aliases",
-                tuple(aliases),
-                existing_prop.type_name if existing_prop is not None else "str[]",
-                existing_prop.unit if existing_prop is not None else None,
-            )
             domain = core.store.domain_of(entity.uid)
             if domain is None:
                 raise CandidateValidationError("Naming owner has no semantic domain")
             core.edit_element(
                 domain,
-                replace(
-                    entity,
-                    properties={**dict(entity.properties), "aliases": alias_prop},
-                ),
+                replace(entity, properties=properties, meta=meta),
             )
 
     def _restore_experience_kinds(
@@ -222,9 +231,11 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
     ) -> None:
         kinds = self._speech_act_kinds(original)
         experience = core.store.get_hypernode(commit.experience_ref.uid)
+        raw_current = experience.meta.get("speech_act_kinds", ())
+        current_items = (raw_current,) if isinstance(raw_current, str) else raw_current
         current = tuple(
             str(item).strip().upper()
-            for item in experience.meta.get("speech_act_kinds", ())
+            for item in current_items
             if str(item).strip()
         )
         if current == kinds:
@@ -247,9 +258,7 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
         *,
         source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
-        normalized = self._normalize_query_temporals(
-            result, context, source_timestamp
-        )
+        normalized = self._normalize_query_temporals(result, context, source_timestamp)
         naming = tuple(
             item
             for item in normalized.assertions
@@ -283,7 +292,7 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
         )
 
         # Identity metadata and H pragmatic bookkeeping are one deterministic
-        # post-commit transaction.  If this phase fails, the source utterance still
+        # post-commit transaction. If this phase fails, the source utterance still
         # remains durably recorded in H, matching the architecture's failure policy;
         # no false nominal world proposition has been committed.
         with self.core.transaction() as tx:
