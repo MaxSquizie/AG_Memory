@@ -1,0 +1,204 @@
+from __future__ import annotations
+
+from ah.config import LLMRoleSettings
+from ah.model import ActantRole
+from ah.perception import LLMPerceptionService, PredicateCandidate, RuntimeSemanticAdaptiveParser
+from ah.perception.adaptive_parser import AdaptiveSettings
+from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
+from ah.perception.morphology import MorphInfo
+from ah.perception.runtime_semantics import RuntimeSemanticLLMPerceptionService
+
+
+class _NoLLMBackend:
+    def generate(self, *args, **kwargs):  # pragma: no cover - every decision is injected
+        raise AssertionError("unexpected LLM call")
+
+
+class _Morphology:
+    name = "test"
+    _MAP = {
+        "я": (
+            MorphInfo(
+                "я", "NPRO", case="nomn", number="sing",
+                grammemes=frozenset({"1per"}), score=1.0,
+            ),
+        ),
+        "илья": (
+            MorphInfo(
+                "илья", "NOUN", case="nomn", number="sing", gender="masc",
+                grammemes=frozenset({"Name"}), score=1.0,
+            ),
+        ),
+        "что": (
+            MorphInfo(
+                "что", "NPRO", case="accs", number="sing",
+                grammemes=frozenset({"Ques"}), score=1.0,
+            ),
+        ),
+        "ещё": (
+            MorphInfo("ещё", "ADVB", score=1.0),
+        ),
+        "вчера": (
+            MorphInfo("вчера", "ADVB", score=1.0),
+        ),
+        "сделал": (
+            MorphInfo(
+                "сделать", "VERB", number="sing", gender="masc", mood="indc",
+                transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
+            ),
+        ),
+        "выпил": (
+            MorphInfo(
+                "выпить", "VERB", number="sing", gender="masc", mood="indc",
+                transitivity="tran", grammemes=frozenset({"past"}), score=1.0,
+            ),
+        ),
+        "запрос": (
+            MorphInfo("запрос", "NOUN", case="accs", number="sing", gender="masc", score=1.0),
+        ),
+        "чай": (
+            MorphInfo("чай", "NOUN", case="accs", number="sing", gender="masc", score=1.0),
+        ),
+    }
+
+    def analyze_all(self, word: str):
+        return self._MAP.get(word.casefold(), ())
+
+    def analyze(self, word: str):
+        values = self.analyze_all(word)
+        return values[0] if values else None
+
+
+class _Parser(RuntimeSemanticAdaptiveParser):
+    def _classify_role(
+        self,
+        text,
+        predicate,
+        span,
+        used_roles,
+        forbidden_role,
+        *,
+        requested,
+        allowed_roles=None,
+        allow_none=False,
+    ):
+        value = self._semantic_span(span).text.casefold()
+        if value in {"я", "илья"}:
+            return ActantRole.SUBJECT
+        if value in {"запрос", "чай"}:
+            return ActantRole.OBJECT
+        return super()._classify_role(
+            text,
+            predicate,
+            span,
+            used_roles,
+            forbidden_role,
+            requested=requested,
+            allowed_roles=allowed_roles,
+            allow_none=allow_none,
+        )
+
+    def _adverbial_scope_decision(self, text, predicate, span):
+        value = self._semantic_span(span).text.casefold()
+        if value == "ещё":
+            self._runtime_adverbial_scope[self._span_key(span)] = "DISCOURSE_OPERATOR"
+            return "DISCOURSE_OPERATOR"
+        return super()._adverbial_scope_decision(text, predicate, span)
+
+
+def _parser_for(text: str):
+    morphology = _Morphology()
+    graph = LinguisticCandidateBuilder(morphology).build(text)
+    parser = _Parser(
+        _NoLLMBackend(),
+        AdaptiveSettings(
+            prompt_dir=None,
+            generation=LLMRoleSettings(max_new_tokens=24),
+            morphology_backend="none",
+        ),
+        morphology=morphology,
+    )
+    parser._candidate_graph = graph
+    tokens = parser._source_tokens_from_graph(graph)
+    return parser, tokens
+
+
+def _predicate(parser, tokens, token_index: int, lemma: str):
+    span = parser._resolve_span_from_source(tokens, token_index, token_index)
+    return span, PredicateCandidate(
+        span.text,
+        normalized_hint=lemma,
+        evidence=span.evidence,
+    )
+
+
+def test_public_runtime_uses_source_semantic_parser() -> None:
+    assert LLMPerceptionService is RuntimeSemanticLLMPerceptionService
+
+
+def test_medial_yesterday_is_preconsumed_as_time_before_generic_roles() -> None:
+    text = "Я вчера сделал запрос"
+    parser, tokens = _parser_for(text)
+    predicate_span, predicate = _predicate(parser, tokens, 3, "сделать")
+
+    actants, _ = parser._extract_actants(
+        text,
+        tokens,
+        predicate_span,
+        predicate,
+        act_type="ASSERTION",
+        requested_roles=(),
+        requested_spans=(),
+    )
+
+    by_role = {item.role: item for item in actants}
+    assert by_role[ActantRole.SUBJECT].mention == "Я"
+    assert by_role[ActantRole.OBJECT].mention == "запрос"
+    assert by_role[ActantRole.TIME].mention.casefold() == "вчера"
+
+
+def test_fronted_yesterday_is_preconsumed_as_time_before_generic_roles() -> None:
+    text = "Вчера я выпил чай"
+    parser, tokens = _parser_for(text)
+    predicate_span, predicate = _predicate(parser, tokens, 3, "выпить")
+
+    actants, _ = parser._extract_actants(
+        text,
+        tokens,
+        predicate_span,
+        predicate,
+        act_type="ASSERTION",
+        requested_roles=(),
+        requested_spans=(),
+    )
+
+    by_role = {item.role: item for item in actants}
+    assert by_role[ActantRole.SUBJECT].mention == "я"
+    assert by_role[ActantRole.OBJECT].mention == "чай"
+    assert by_role[ActantRole.TIME].mention.casefold() == "вчера"
+
+
+def test_query_additivity_is_consumed_as_discourse_not_transition_actant() -> None:
+    text = "Что ещё сделал Илья?"
+    parser, tokens = _parser_for(text)
+    predicate_span, predicate = _predicate(parser, tokens, 3, "сделать")
+    requested = parser._resolve_span_from_source(tokens, 1, 1)
+
+    actants, spans = parser._extract_actants(
+        text,
+        tokens,
+        predicate_span,
+        predicate,
+        act_type="QUERY",
+        requested_roles=(ActantRole.OBJECT,),
+        requested_spans=(requested,),
+    )
+
+    assert [(item.role, item.mention) for item in actants] == [
+        (ActantRole.SUBJECT, "Илья"),
+    ]
+    assert all(span.text.casefold() != "ещё" for span in spans)
+    assert parser._transition_cue_token_indices == set()
+    assert [item.text.casefold() for item in parser._runtime_discourse_operator_spans] == [
+        "ещё"
+    ]
