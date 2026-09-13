@@ -9,6 +9,7 @@ from .association_semantics import (
 from .contracts import CommandCandidate, PerceptionResult, QueryCandidate
 from .goal_semantics import GoalSemanticService as _BaseGoalSemanticService
 from .llm_parser import PerceptionParseError
+from .query_semantics import EntityIdentityQueryCandidate
 
 
 class AssociationGoalSemanticService(_BaseGoalSemanticService):
@@ -27,6 +28,8 @@ class AssociationGoalSemanticService(_BaseGoalSemanticService):
 
     @staticmethod
     def _eligible(root: QueryCandidate | CommandCandidate) -> bool:
+        if isinstance(root, EntityIdentityQueryCandidate):
+            return False
         if root.local_id is None or root.quoted:
             return False
         if isinstance(root, CommandCandidate) and root.negated:
