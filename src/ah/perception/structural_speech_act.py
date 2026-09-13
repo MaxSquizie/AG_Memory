@@ -12,11 +12,58 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
     independent clause, the clause is a QUERY even if terminal punctuation is
     omitted.
 
-    This class deliberately changes only speech-act classification.  It does not
-    repair an already parsed result, inspect AH state, or maintain a surface-word
-    list.  Requested-role extraction remains owned by the ordinary adaptive parser
-    after QUERY has been selected.
+    This class deliberately changes only speech-act classification and WH source
+    discovery. It does not repair an already parsed result, inspect AH state, or
+    maintain a surface-word list. Requested-role semantics remain owned by the
+    ordinary bounded role classifier after the grammatical placeholder is found.
     """
+
+    def _question_form(self, token) -> bool:
+        """Recognize the closed interrogative grammatical class, not word forms."""
+        # Keep every dictionary reading for this one closed-class check instead of
+        # applying the generic open-class probability floor: a frequent
+        # complementizer reading of the same surface form must not erase a valid
+        # interrogative-pronoun reading before clause structure has established
+        # where the token occurs.
+        return any("Ques" in info.grammemes for info in self._morph_all(token))
+
+    def _explicit_question_words(
+        self,
+        tokens,
+        predicate_span=None,
+    ):
+        """Return clause-local WH placeholders from morphology + clause structure."""
+        connector_indices: set[int] = set()
+        if self._candidate_graph is not None:
+            for clause in self._candidate_graph.clauses:
+                if clause.connector_span is not None:
+                    connector_indices.update(
+                        range(
+                            clause.connector_span.start_index,
+                            clause.connector_span.end_index + 1,
+                        )
+                    )
+        first_predicate = None
+        if self._candidate_graph is not None and self._candidate_graph.predicates:
+            first_predicate = min(
+                item.token_index for item in self._candidate_graph.predicates
+            )
+        clause_start, clause_end = self._clause_bounds(predicate_span, tokens)
+        result = []
+        for token in tokens:
+            if token.index < clause_start or token.index > clause_end:
+                continue
+            if not self._question_form(token):
+                continue
+            # The same grammatical form may head an embedded interrogative clause.
+            # A connector-owned token is a top-level query placeholder only when it
+            # precedes the first predicate of the current independent utterance.
+            if token.index in connector_indices and not (
+                first_predicate is not None and token.index < first_predicate
+            ):
+                continue
+            result.append(token)
+        return tuple(result)
 
     def _deterministic_act_type(
         self,
@@ -92,12 +139,6 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
                 continue
             if any(left <= token.index <= right for left, right in nested_ranges):
                 continue
-            # Ques is a closed grammatical-function tag. Keep every dictionary
-            # reading for this one check instead of applying the generic open-class
-            # probability floor: a frequent complementizer reading of the same
-            # surface form must not erase a valid interrogative-pronoun reading
-            # before clause structure has established that the token is top-level.
-            analyses = self._morph_all(token)
-            if any("Ques" in info.grammemes for info in analyses):
+            if self._question_form(token):
                 return "QUERY"
         return base
