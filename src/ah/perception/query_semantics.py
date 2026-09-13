@@ -10,14 +10,14 @@ class EventSetQueryCandidate(QueryCandidate):
     """Runtime query whose unknown is the event/proposition itself.
 
     Ordinary ``QueryCandidate`` asks either whether one predicate instance exists
-    or for a missing role of that predicate.  A question such as ``what did X do``
+    or for a missing role of that predicate. A question such as ``what did X do``
     is different: the source predicate is an interrogative shell describing the
-    requested event class, not a canonical predicate constraint.  The answer is
+    requested event class, not a canonical predicate constraint. The answer is
     therefore one or more asserted events satisfying the explicit actant
     constraints.
 
-    This remains perception/runtime data.  It has no canonical UID and does not
-    mutate AH.  ``query_mode`` is kept as EXISTS only for compatibility with code
+    This remains perception/runtime data. It has no canonical UID and does not
+    mutate AH. ``query_mode`` is kept as EXISTS only for compatibility with code
     that understands the historical two-mode contract; event-set aware goal
     compilation dispatches on this typed subclass before ordinary predicate/T
     resolution.
@@ -26,7 +26,9 @@ class EventSetQueryCandidate(QueryCandidate):
     event_set: bool = True
 
     def __post_init__(self) -> None:
-        super().__post_init__()
+        # dataclass(slots=True) may synthesize a replacement class object; call the
+        # base validator explicitly rather than relying on zero-argument super().
+        QueryCandidate.__post_init__(self)
         if self.query_mode is not QueryMode.EXISTS:
             raise ValueError("EventSetQueryCandidate must use compatibility mode EXISTS")
         if self.requested_roles:
