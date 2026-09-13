@@ -14,6 +14,7 @@ from ah.perception import (
     PerceptionParseError,
     PerceptionResult,
     PredicateCandidate,
+    EvidenceSpan,
 )
 from ah.perception.correlated_alternatives import CorrelatedAlternativeLLMPerceptionService
 
@@ -46,8 +47,13 @@ def _service(answer: str) -> CorrelatedAlternativeLLMPerceptionService:
     )
 
 
-def _act(role: ActantRole, text: str, entity_ref: str) -> ActantCandidate:
-    return ActantCandidate(role, mention=text, entity_ref=entity_ref)
+def _act(
+    role: ActantRole,
+    text: str,
+    entity_ref: str,
+    evidence: EvidenceSpan | None = None,
+) -> ActantCandidate:
+    return ActantCandidate(role, mention=text, entity_ref=entity_ref, evidence=evidence)
 
 
 def _correlated() -> AssertionCandidate:
@@ -81,12 +87,20 @@ def _correlated() -> AssertionCandidate:
 def test_correlated_choice_selects_one_complete_frame_without_role_cross_product() -> None:
     service = _service("A1")
     source = "Ольга взяла книгу. Она положила её на стол."
+    antecedent = AssertionCandidate(
+        "A1",
+        PredicateCandidate("взяла", "взять"),
+        (
+            _act(ActantRole.SUBJECT, "Ольга", "E_OLGA", EvidenceSpan("Ольга", 0, 5)),
+            _act(ActantRole.OBJECT, "книгу", "E_BOOK", EvidenceSpan("книгу", 12, 17)),
+        ),
+    )
     result = service._resolve_correlated_alternatives(
         source,
-        PerceptionResult(source, assertions=(_correlated(),)),
+        PerceptionResult(source, assertions=(antecedent, _correlated())),
     )
 
-    assertion = result.assertions[0]
+    assertion = result.assertions[1]
     assert assertion.alternatives == ()
     assert [(a.role, a.entity_ref) for a in assertion.actants] == [
         (ActantRole.SUBJECT, "E_OLGA"),
@@ -95,7 +109,11 @@ def test_correlated_choice_selects_one_complete_frame_without_role_cross_product
     ]
     backend = service.backend
     assert len(backend.calls) == 1
-    assert "A1:" in backend.calls[0][1] and "A2:" in backend.calls[0][1]
+    prompt = backend.calls[0][1]
+    assert "A1:" in prompt and "A2:" in prompt
+    assert "SUBJECT=R1[Ольга]; OBJECT=R2[книгу]" in prompt
+    assert "SUBJECT=R2[книгу]; OBJECT=R1[Ольга]" in prompt
+    assert "E_OLGA" not in prompt and "E_BOOK" not in prompt
 
 
 def test_correlated_unknown_remains_fail_closed() -> None:

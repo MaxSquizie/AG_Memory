@@ -49,12 +49,59 @@ def _varying_roles(
     return tuple(roles)
 
 
-def _variant_text(variant: AssertionCandidate) -> str:
+def _source_referent_labels(
+    result: PerceptionResult,
+) -> dict[str, tuple[str, str | None]]:
+    """Assign UID-free labels to local refs and ground them in source mentions."""
+
+    mentions: dict[str, list[tuple[int, str]]] = {}
+    order: list[str] = []
+    for assertion in result.assertions:
+        variants = (replace(assertion, alternatives=()), *assertion.alternatives)
+        for variant in variants:
+            for actant in variant.actants:
+                ref = actant.entity_ref
+                if ref is None:
+                    continue
+                if ref not in mentions:
+                    mentions[ref] = []
+                    order.append(ref)
+                value = (actant.lookup_text or "").strip()
+                evidence = actant.evidence
+                if value and evidence is not None and evidence.start is not None:
+                    mentions[ref].append((evidence.start, value))
+
+    ranked = sorted(
+        order,
+        key=lambda ref: (
+            min((start for start, _value in mentions[ref]), default=10**12),
+            order.index(ref),
+        ),
+    )
+    labels: dict[str, tuple[str, str | None]] = {}
+    for index, ref in enumerate(ranked, start=1):
+        grounded = min(mentions[ref], default=None)
+        labels[ref] = (
+            f"R{index}",
+            None if grounded is None else grounded[1],
+        )
+    return labels
+
+
+def _variant_text(
+    variant: AssertionCandidate,
+    referent_labels: dict[str, tuple[str, str | None]],
+) -> str:
     rows = []
     for actant in variant.actants:
-        value = (actant.lookup_text or "").strip()
-        if not value:
-            value = "[referent chosen by this reading]"
+        label = referent_labels.get(actant.entity_ref or "")
+        if label is not None:
+            local_label, grounded = label
+            value = local_label if grounded is None else f"{local_label}[{grounded}]"
+        else:
+            value = (actant.lookup_text or "").strip()
+            if not value:
+                value = "[referent chosen by this reading]"
         rows.append(f"{actant.role.value}={value}")
     return "; ".join(rows)
 
@@ -96,6 +143,7 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
             return result
         assertions: list[AssertionCandidate] = []
         changed = False
+        referent_labels = _source_referent_labels(result)
         for assertion in result.assertions:
             variants = assertion.alternatives
             varying = _varying_roles(variants)
@@ -104,7 +152,12 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
             if len(varying) <= 1:
                 assertions.append(assertion)
                 continue
-            chosen = self._choose_correlated_frame(source_text, assertion, varying)
+            chosen = self._choose_correlated_frame(
+                source_text,
+                assertion,
+                varying,
+                referent_labels,
+            )
             assertions.append(replace(chosen, local_id=assertion.local_id, alternatives=()))
             changed = True
         return replace(result, assertions=tuple(assertions)) if changed else result
@@ -114,6 +167,7 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
         source_text: str,
         assertion: AssertionCandidate,
         varying_roles: tuple[str, ...],
+        referent_labels: dict[str, tuple[str, str | None]],
     ) -> AssertionCandidate:
         variants = assertion.alternatives
         if len(variants) < 2:
@@ -137,7 +191,7 @@ class CorrelatedAlternativeLLMPerceptionService(AssociationLLMPerceptionService)
         labels = tuple(f"A{index}" for index in range(1, len(variants) + 1))
         choices = (*labels, "UNKNOWN")
         frames = "\n".join(
-            f"{label}: {_variant_text(variant)}"
+            f"{label}: {_variant_text(variant, referent_labels)}"
             for label, variant in zip(labels, variants)
         )
         prompt = (
