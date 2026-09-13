@@ -7,6 +7,7 @@ from ah.core import AHCore, SupportRecord
 from ah.model import Domain, Ref
 
 from .contracts import (
+    CompositeConclusion,
     DerivedLinkConclusion,
     ExistingRefConclusion,
     InferenceOutcome,
@@ -49,7 +50,7 @@ class InferenceMaterializer:
 
         if isinstance(conclusion, ExistingRefConclusion):
             # A formula proof may establish an already-addressable N/g that was
-            # previously only a zero-occurrence conclusion placeholder.  Persist
+            # previously only a zero-occurrence conclusion placeholder. Persist
             # dependency supports without manufacturing a second semantic object.
             # This makes the conclusion admissible through its proof while keeping
             # proof metadata outside canonical q-types.
@@ -72,6 +73,24 @@ class InferenceMaterializer:
             # Multi-WH retrieval also refers to one already existing fact. There is
             # no single new semantic object to materialize; return the supporting N.
             return MaterializationResult(conclusion.fact, domain, False)
+
+        if isinstance(conclusion, CompositeConclusion):
+            # Open-event/multi-result retrieval can prove several already canonical
+            # facts at once. There is deliberately no synthetic K/g result merely
+            # because a query returned a set, and MaterializationResult has one ref
+            # slot by design. Treat a composite consisting solely of existing refs
+            # as a read-only retrieval result. Other composite shapes may contain
+            # genuinely derived objects and must keep failing closed until they own
+            # an explicit multi-materialization contract.
+            if conclusion.conclusions and all(
+                isinstance(item, ExistingRefConclusion)
+                for item in conclusion.conclusions
+            ):
+                return MaterializationResult(None, domain, False)
+            raise TypeError(
+                "Composite conclusion contains materializable derived members; "
+                "explicit multi-materialization is required"
+            )
 
         if isinstance(conclusion, DerivedLinkConclusion):
             link, created = self.core.ensure_link(
