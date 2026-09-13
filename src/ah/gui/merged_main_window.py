@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Slot
@@ -286,7 +287,35 @@ class MainWindow(_BaseMainWindow):
                 continue
 
     def _turn_finished(self, result) -> None:
-        super()._turn_finished(result)
+        # ``AgentTurnResult.response_text`` is intentionally optional: the user
+        # turn may already be committed successfully when the response backend
+        # fails. The base GUI historically assumed a string and crashed inside
+        # html.escape(None), hiding the real ``response_error`` and all M1/M2
+        # diagnostics. Feed the base window a display-only copy in that one case;
+        # canonical memory and the authoritative turn result stay untouched.
+        display_result = result
+        missing_response = getattr(result, "response_text", None) is None
+        if missing_response:
+            error = str(
+                getattr(result, "response_error", None)
+                or "response generation returned no visible text"
+            )
+            display_result = replace(
+                result,
+                response_text=f"⚠ Ответ не сгенерирован: {error}",
+            )
+
+        super()._turn_finished(display_result)
+        # Restore the real turn object after the base GUI has rendered the
+        # presentation copy. This keeps later diagnostics honest: no assistant H
+        # utterance exists when response generation failed.
+        self._last_turn = result
+        if missing_response:
+            self.statusBar().showMessage(
+                "Пользовательский turn сохранён, но генерация ответа завершилась ошибкой; см. LLM diagnostics",
+                8000,
+            )
+
         try:
             self._record_m1_history(result.user_text, result.integration)
         except Exception as exc:
