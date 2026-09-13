@@ -14,6 +14,7 @@ from ah.inference import (
     QueryGoalBuilder,
 )
 from ah.integration import IntegrationConfig, IntegrationService
+from ah.integration.identity_graph import IDENTITY_NAME_RELATION, is_identity_name_entity
 from ah.model import ActantRole, Domain, Property
 from ah.perception import (
     ActantCandidate,
@@ -127,7 +128,7 @@ def _seed_yesterday_events(integration, context, turn_time):
     return first, second
 
 
-def test_naming_assertion_enriches_user_identity_without_false_world_fact() -> None:
+def test_naming_assertion_materializes_identity_name_node_and_link_without_false_world_fact() -> None:
     core, context, integration = _runtime()
     turn_time = datetime(
         2026, 9, 13, 18, 0, tzinfo=timezone(timedelta(hours=3))
@@ -158,8 +159,25 @@ def test_naming_assertion_enriches_user_identity_without_false_world_fact() -> N
     )
 
     assert commit.assertions == ()
-    matches = core.store.find_entities_by_name("Илья")
-    assert tuple(item.uid for item in matches) == (context.user_ref.uid,)
+    # Fast lexical resolution still reaches USER in P through the retrieval alias.
+    personalized = core.store.find_entities_by_name("Илья", Domain.P)
+    assert tuple(item.uid for item in personalized) == (context.user_ref.uid,)
+
+    # The graph itself now owns an explicit excitable name M plus a typed L.
+    name_nodes = tuple(
+        item
+        for item in core.store.find_entities_by_name("Илья", Domain.C)
+        if is_identity_name_entity(item)
+    )
+    assert len(name_nodes) == 1
+    link = core.store.find_link(
+        IDENTITY_NAME_RELATION,
+        context.user_ref.uid,
+        name_nodes[0].uid,
+    )
+    assert link is not None
+
+    # Naming does not manufacture a lexical predicate/coplanar world fact.
     assert core.store.find_symbols_by_form("Илья") == ()
     user = core.store.get_element_any_domain(context.user_ref.uid)
     assert user.meta.get("grammatical_number") == "sing"
@@ -217,7 +235,6 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
     )
     assert time_actant.temporal is not None and time_actant.temporal.resolved
     assert time_actant.temporal.value.start == "2026-09-12"
-    # The interrogative shell is runtime semantics, not a canonical predicate/T.
     assert core.store.find_symbols_by_form("делать") == ()
     query_experience = core.store.get_hypernode(query_commit.experience_ref.uid)
     assert tuple(query_experience.meta.get("speech_act_kinds", ())) == ("QUERY",)
@@ -238,9 +255,6 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
         second.assertions[0].ref.uid,
     }
 
-    # The live orchestrator materializes every successful inference by default.
-    # Multi-event retrieval must therefore remain a read-only result rather than
-    # failing here or inventing a synthetic canonical group.
     materialized = InferenceMaterializer(core, IntegrationSettings()).materialize(outcome)
     assert materialized.ref is None
     assert materialized.created is False
