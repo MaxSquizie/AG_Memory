@@ -45,13 +45,15 @@ from .formalization import (
 from .service import IntegrationConfig, IntegrationService as _BaseIntegrationService
 from .naming_service import NamingAwareIntegrationService
 from .identity_naming_service import CanonicalNamingIntegrationService
+from .identity_query_service import IdentityQueryIntegrationService
 from .template_completion import TemplateCompletionService
 
 # Runtime construction imports IntegrationService from the package. Keep the large
-# canonical writer unchanged and expose narrow semantic adapters around it: naming
-# and open-event shells are consumed before ordinary fact/T integration, while
-# inflected naming values are indexed by their morphology-normalized form.
-IntegrationService = CanonicalNamingIntegrationService
+# canonical writer unchanged and expose narrow semantic adapters around it: naming,
+# open-event queries and entity-identity query shells are consumed before ordinary
+# fact/T integration, while inflected naming values are indexed by their morphology-
+# normalized form.
+IntegrationService = IdentityQueryIntegrationService
 
 __all__ = [
     "namespace_perception_result",
@@ -90,6 +92,7 @@ __all__ = [
     "IntegrationService",
     "NamingAwareIntegrationService",
     "CanonicalNamingIntegrationService",
+    "IdentityQueryIntegrationService",
     "TemplateCompletionService",
     "RefutationRequest",
     "RefutationCommit",
