@@ -8,7 +8,7 @@ from .process_backend import (
 from .ollama_client import OllamaClient, OllamaClientError
 from .ollama_backend import OllamaBackend
 from .lmstudio_client import LMStudioClient, LMStudioClientError
-from .reasoning_safe_lmstudio import LMStudioBackend
+from .lmstudio_backend import LMStudioBackend
 from .factory import LLMBackend, build_llm_backend
 from .embeddings import (
     EmbeddingClient,
