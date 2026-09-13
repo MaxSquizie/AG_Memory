@@ -2,18 +2,21 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ah.model import ActantRole
+
 from .adaptive_parser import (
     AdaptiveParseError,
     AdaptiveSettings,
     AdaptiveStructuralClarificationRequired,
 )
-from .contracts import ActantCandidate, EvidenceSpan, QueryMode
+from .contracts import ActantCandidate, AssertionStatus, EvidenceSpan, QueryMode
 from .lexical_recovery import EmbeddingSemanticReranker
 from .llm_parser import (
     PerceptionAttemptDiagnostic,
     PerceptionClarificationRequired,
     PerceptionParseError,
 )
+from .naming_semantics import NamingAssertionCandidate
 from .query_semantics import EntityIdentityQueryCandidate, EventSetQueryCandidate
 from .runtime_invariants import (
     RuntimeSemanticAdaptiveParser,
@@ -22,22 +25,117 @@ from .runtime_invariants import (
 
 
 class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
-    """Recognize source-grounded questions whose unknown is entity identity.
+    """Production parser for source-grounded naming and identity questions.
 
-    The deterministic gate is deliberately narrow: an already parsed EXISTS query
-    must contain exactly one interrogative grammatical actant and exactly one plain
-    non-interrogative entity candidate.  Only then does one bounded semantic probe
-    distinguish identity/name lookup from ordinary copular/class predication.
+    Two ambiguity classes are handled here without surface phrase dictionaries:
 
-    This avoids surface phrase rules such as ``кто пользователь`` while preventing
-    action questions (normally FILL_ROLE/EVENT_SET) from entering the identity path.
+    * a synthetic/implicit copular assertion with one grammatical USER/SELF
+      referent and nominal complements may be a naming assertion (``Я Илья``) or
+      ordinary class/property predication (``Я инженер``); the existing bounded
+      naming probe decides only between already source-grounded candidates;
+    * an EXISTS question with one interrogative actant may ask for the identity of
+      one of several source-grounded candidates (``Кто такой Илья?``).  A bounded
+      finite-choice probe selects the target candidate, ordinary predication, or
+      UNCLEAR.  Non-selected candidates are consumed as query-shell material only
+      when the model explicitly chooses an identity target.
+
+    Canonical UIDs are still unavailable in Perception.  Integration/Inference own
+    entity resolution and all AH access.
     """
 
-    _IDENTITY_CHOICES = (
-        "ENTITY_IDENTITY",
+    _IDENTITY_TAIL_CHOICES = (
         "ORDINARY_PREDICATION",
         "UNCLEAR",
     )
+
+    def _implicit_deictic_predication(
+        self,
+        assertion,
+    ) -> tuple[ActantCandidate, tuple[ActantCandidate, ...]] | None:
+        """Stage an implicit copular shell for the existing naming decision.
+
+        ``AdaptivePerceptionParser`` marks a synthesized copula with ``IMPLICIT``
+        and no predicate source span.  That is deterministic structural evidence
+        that the source itself contained only nominal material.  We therefore may
+        compare its nominal complement(s) with naming semantics without treating
+        arbitrary transitive predicates containing ``я`` as naming candidates.
+        """
+        if (assertion.predicate.sense_hint or "").upper() != "IMPLICIT":
+            return None
+
+        subject_tokens = []
+        for actant in assertion.actants:
+            if actant.role is not ActantRole.SUBJECT:
+                continue
+            subject_tokens.extend(
+                self._personal_deictic_tokens(
+                    actant.evidence,
+                    nominative_only=True,
+                )
+            )
+        unique = {(token.start, token.end): token for token in subject_tokens}
+        if len(unique) != 1:
+            return None
+
+        owner = self._owner_candidate(next(iter(unique.values())))
+        values = self._verbal_name_values(assertion, owner)
+        return (owner, values) if values else None
+
+    def _rewrite_naming_assertions(self, source_text: str, assertions):
+        """Extend the mature naming layer to parser-synthesized implicit copulas."""
+        base_rewritten, base_changed = super()._rewrite_naming_assertions(
+            source_text,
+            assertions,
+        )
+
+        rewritten = []
+        changed = base_changed
+        for assertion in base_rewritten:
+            if isinstance(assertion, NamingAssertionCandidate):
+                rewritten.append(assertion)
+                continue
+            if (
+                assertion.status is not AssertionStatus.ASSERTED
+                or assertion.negated
+                or assertion.quoted
+            ):
+                rewritten.append(assertion)
+                continue
+
+            staged = self._implicit_deictic_predication(assertion)
+            if staged is None:
+                rewritten.append(assertion)
+                continue
+
+            owner, values = staged
+            decision = self._verbal_naming_choice(
+                source_text,
+                assertion,
+                owner,
+                values,
+            )
+            if decision == "OTHER_PREDICATION":
+                rewritten.append(assertion)
+                continue
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "implicit predication is ambiguous between entity naming and ordinary predication",
+                    tuple(self._traces),
+                )
+
+            try:
+                selected_index = int(decision.removeprefix("VALUE_")) - 1
+                selected = values[selected_index]
+            except (ValueError, IndexError) as exc:
+                raise AdaptiveParseError(
+                    f"invalid implicit naming value decision: {decision}",
+                    tuple(self._traces),
+                ) from exc
+
+            rewritten.append(self._naming_candidate(assertion, owner, selected))
+            changed = True
+
+        return tuple(rewritten), changed
 
     def _question_evidence(self, actant: ActantCandidate) -> tuple[EvidenceSpan, ...]:
         evidence = actant.evidence
@@ -60,36 +158,58 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                 out.append(item)
         return tuple(out)
 
+    @staticmethod
+    def _candidate_text(candidate: ActantCandidate) -> str:
+        return (candidate.lookup_text or candidate.mention or "").strip()
+
     def _identity_query_decision(
         self,
         source_text: str,
         query,
-        target: ActantCandidate,
+        candidates: tuple[ActantCandidate, ...],
         interrogative: ActantCandidate,
     ) -> str:
+        labels = tuple(f"TARGET_{index}" for index in range(1, len(candidates) + 1))
+        rows = "\n".join(
+            f"{label}: role={candidate.role.value}; text={self._candidate_text(candidate)}"
+            for label, candidate in zip(labels, candidates)
+        )
+        choices = (*labels, *self._IDENTITY_TAIL_CHOICES)
         prompt = (
             f"TEXT:\n{source_text}\n"
             f"SOURCE PREDICATE:\n{query.predicate.surface}\n"
-            f"KNOWN ENTITY CANDIDATE:\n{target.lookup_text or target.mention or ''}\n"
-            f"INTERROGATIVE CANDIDATE:\n"
-            f"{interrogative.lookup_text or interrogative.mention or ''}\n"
-            "Decision criterion:\nWhat information does this question request?\n"
-            "ENTITY_IDENTITY: it asks who/what the already known entity is called or "
-            "which concrete identity/name denotes that entity.\n"
-            "ORDINARY_PREDICATION: it asks whether/who satisfies a profession, class, "
-            "property, role, state, relation, or other ordinary predicate; the known "
-            "candidate is not merely an entity whose stored identity/name is requested.\n"
-            "UNCLEAR: the source does not safely distinguish these readings.\n"
-            "Candidate labels:\n"
-            + "\n".join(self._IDENTITY_CHOICES)
+            f"INTERROGATIVE:\n{self._candidate_text(interrogative)}\n"
+            f"NON-INTERROGATIVE CANDIDATES:\n{rows}\n"
         )
         decision, _ = self._deep_semantic_choice_probe(
             "identity_query",
             prompt,
-            self._IDENTITY_CHOICES,
+            choices,
         )
         assert decision is not None
         return decision
+
+    @staticmethod
+    def _append_evidence_unique(
+        out: list[EvidenceSpan],
+        evidence: EvidenceSpan | None,
+    ) -> None:
+        if evidence is None:
+            return
+        key = (evidence.start, evidence.end, evidence.text)
+        if all((item.start, item.end, item.text) != key for item in out):
+            out.append(evidence)
+
+    def _identity_operator_evidence(
+        self,
+        interrogative_evidence: tuple[EvidenceSpan, ...],
+        shell_candidates: tuple[ActantCandidate, ...],
+    ) -> tuple[EvidenceSpan, ...]:
+        """Preserve all source material explicitly consumed by identity semantics."""
+        out = list(interrogative_evidence)
+        for candidate in shell_candidates:
+            self._append_evidence_unique(out, candidate.evidence)
+        return tuple(out)
 
     def parse(self, text: str, *, structural_resolution: str | None = None):
         parsed = super().parse(text, structural_resolution=structural_resolution)
@@ -101,6 +221,7 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                 isinstance(query, (EventSetQueryCandidate, EntityIdentityQueryCandidate))
                 or query.query_mode is not QueryMode.EXISTS
                 or query.quantified is not None
+                or query.requested_role is not None
                 or query.requested_roles
                 or any(
                     actant.candidate_ref is not None
@@ -122,20 +243,19 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                 rewritten.append(query)
                 continue
 
-            interrogative, operator_evidence = interrogative_rows[0]
-            known = [
+            interrogative, interrogative_evidence = interrogative_rows[0]
+            candidates = tuple(
                 actant for actant in query.actants
                 if actant is not interrogative
-            ]
-            if len(known) != 1:
+            )
+            if not candidates:
                 rewritten.append(query)
                 continue
-            target = known[0]
 
             decision = self._identity_query_decision(
                 text,
                 query,
-                target,
+                candidates,
                 interrogative,
             )
             if decision == "ORDINARY_PREDICATION":
@@ -147,6 +267,24 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                     tuple(self._traces),
                 )
 
+            try:
+                selected_index = int(decision.removeprefix("TARGET_")) - 1
+                target = candidates[selected_index]
+            except (ValueError, IndexError) as exc:
+                raise AdaptiveParseError(
+                    f"invalid identity target decision: {decision}",
+                    tuple(self._traces),
+                ) from exc
+
+            shell = tuple(
+                candidate
+                for index, candidate in enumerate(candidates)
+                if index != selected_index
+            )
+            operator_evidence = self._identity_operator_evidence(
+                interrogative_evidence,
+                shell,
+            )
             rewritten.append(
                 EntityIdentityQueryCandidate(
                     predicate=query.predicate,
