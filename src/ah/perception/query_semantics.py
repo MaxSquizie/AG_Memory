@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .contracts import QueryCandidate, QueryMode
+from .contracts import EvidenceSpan, QueryCandidate, QueryMode
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,6 +16,12 @@ class EventSetQueryCandidate(QueryCandidate):
     therefore one or more asserted events satisfying the explicit actant
     constraints.
 
+    ``query_operator_evidence`` keeps the already detected interrogative source
+    spans (for example the top-level ``Что``).  It is presentation/provenance data,
+    not a second classifier: the same structural Ques+clause decision that created
+    the query owns these spans.  Keeping them here lets M1 explain every grounded
+    operator without re-inferring semantics from surface words.
+
     This remains perception/runtime data. It has no canonical UID and does not
     mutate AH. ``query_mode`` is kept as EXISTS only for compatibility with code
     that understands the historical two-mode contract; event-set aware goal
@@ -24,6 +30,7 @@ class EventSetQueryCandidate(QueryCandidate):
     """
 
     event_set: bool = True
+    query_operator_evidence: tuple[EvidenceSpan, ...] = ()
 
     def __post_init__(self) -> None:
         # dataclass(slots=True) may synthesize a replacement class object; call the
