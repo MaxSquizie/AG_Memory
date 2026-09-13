@@ -60,7 +60,7 @@ from .association_semantics import (
     AssociationSemanticClassifier,
 )
 from .generalized_naming import GeneralizedNamingAdaptiveParser
-from .runtime_semantics import (
+from .runtime_invariants import (
     RuntimeSemanticAdaptiveParser,
     RuntimeSemanticLLMPerceptionService as LLMPerceptionService,
 )
