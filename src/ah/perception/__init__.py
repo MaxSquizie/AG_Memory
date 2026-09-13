@@ -44,6 +44,8 @@ from .contracts import (
     StructuralClarificationOption,
     StructuralClarificationSpec,
 )
+from .naming_semantics import NamingAssertionCandidate
+from .query_semantics import EventSetQueryCandidate
 from .llm_parser import (
     LLMPerceptionSettings,
     PerceptionAttemptDiagnostic,
@@ -118,6 +120,8 @@ __all__ = [
     "QueryQuantifierOperator",
     "QuantifiedQueryBinding",
     "QuantifiedQuerySpec",
+    "NamingAssertionCandidate",
+    "EventSetQueryCandidate",
     "DiscourseRelationDecision",
     "SituationRelationCandidate",
     "SituationRelationHintCandidate",
