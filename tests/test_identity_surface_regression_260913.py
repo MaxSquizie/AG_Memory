@@ -5,6 +5,7 @@ from ah.diagnostics.m1_presentation import build_m1_formalization_view
 from ah.model import ActantRole
 from ah.perception import (
     ActantCandidate,
+    AssertionCandidate,
     EntityIdentityQueryCandidate,
     EvidenceSpan,
     NamingAssertionCandidate,
@@ -130,8 +131,7 @@ def _evidence(source: str, token: str) -> EvidenceSpan:
 def test_bare_i_am_name_is_naming_not_be_fact() -> None:
     source = "Я Илья"
     parser = _parser(source)
-    assertion = QueryLike = None
-    assertion = __import__("ah.perception", fromlist=["AssertionCandidate"]).AssertionCandidate(
+    assertion = AssertionCandidate(
         local_id="A1",
         predicate=PredicateCandidate(
             "быть",
