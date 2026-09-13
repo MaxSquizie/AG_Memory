@@ -25,6 +25,7 @@ from ah.perception import (
     QueryMode,
     TemplateCandidate,
 )
+from ah.temporal import temporal_value_from_entity
 
 
 def _runtime():
@@ -160,6 +161,11 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
     first_node = core.store.get_hypernode(first.assertions[0].ref.uid)
     second_node = core.store.get_hypernode(second.assertions[0].ref.uid)
     assert first_node.actants[ActantRole.TIME] == second_node.actants[ActantRole.TIME]
+    time_ref = first_node.actants[ActantRole.TIME]
+    time_entity = core.store.get_element_any_domain(time_ref.uid)
+    time_value = temporal_value_from_entity(time_entity)
+    assert time_value is not None
+    assert time_value.start == "2026-09-12"
 
     event_query = EventSetQueryCandidate(
         predicate=PredicateCandidate("делал", normalized_hint="делать"),
