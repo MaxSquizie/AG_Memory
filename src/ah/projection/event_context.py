@@ -9,8 +9,9 @@ from ah.inference.contracts import (
 )
 from ah.inference.event_query import EventMatchGoal
 from ah.inference.identity_query import EntityIdentityGoal
+from ah.inference.quantified_exists import DerivedAtomConclusion
 from ah.integration.identity_graph import identity_name_refs_for_owner, identity_name_text
-from ah.model import Hypernode, Ref, RefKind, SemanticEntity
+from ah.model import ActantRole, Domain, Hypernode, Ref, RefKind, SemanticEntity
 
 from .agent_context import ContextProjector as _BaseContextProjector
 from .contracts import ProjectionBlock, ProjectionMode
@@ -25,10 +26,10 @@ class EventAwareContextProjector(_BaseContextProjector):
     its prose is withheld from the Main LLM whenever inference or an unresolved
     GoalSpec result is present.
 
-    Identity labels are projected from the explicit ``IDENTITY_NAME`` graph first,
-    with legacy ``aliases`` retained as compatibility/retrieval evidence. This keeps
-    response grounding aligned with the canonical M/L structure instead of treating
-    one property string as the whole identity representation.
+    Identity questions may be supported by explicit IDENTITY_NAME edges and/or
+    unary conceptual descriptors such as ``студент(Алексей)``. Quantified inference
+    may also return a proved ground atom before it is materialized; both are rendered
+    directly from typed proof objects rather than guessed by the response model.
     """
 
     def project(
@@ -137,8 +138,41 @@ class EventAwareContextProjector(_BaseContextProjector):
             chunks.append(f"{role.value}={rendered}")
         return f"{predicate}({', '.join(chunks)})"
 
-    def _identity_block(self, ref: Ref) -> ProjectionBlock:
+    def _identity_descriptors(
+        self,
+        target: Ref,
+        premise_refs: tuple[Ref, ...],
+    ) -> tuple[str, ...]:
+        out: list[str] = []
+        seen: set[str] = set()
+        for ref in premise_refs:
+            if ref.kind is not RefKind.N or not self.core.store.has_uid(ref.uid):
+                continue
+            if self.core.store.domain_of(ref.uid) is not Domain.C:
+                continue
+            try:
+                node = self.core.store.get_hypernode(ref.uid)
+                template = self.core.store.get_template(node.template.uid)
+            except (KeyError, TypeError):
+                continue
+            if tuple(template.roles) != (ActantRole.SUBJECT,):
+                continue
+            if node.actants.get(ActantRole.SUBJECT) != target:
+                continue
+            predicate = self.model_semantic.inference_text_for_ref(template.predicate).strip()
+            folded = predicate.casefold()
+            if predicate and folded not in seen:
+                seen.add(folded)
+                out.append(predicate)
+        return tuple(out)
+
+    def _identity_block(
+        self,
+        ref: Ref,
+        premise_refs: tuple[Ref, ...] = (),
+    ) -> ProjectionBlock:
         parts = self._entity_identity_parts(ref)
+        descriptors = self._identity_descriptors(ref, premise_refs)
         if parts is None:
             return ProjectionBlock(
                 ref,
@@ -146,14 +180,43 @@ class EventAwareContextProjector(_BaseContextProjector):
                 "Идентичность сущности подтверждена, но её человекочитаемая метка недоступна.",
             )
         primary, aliases = parts
-        if aliases:
-            text = (
-                f"Идентичность сущности: «{primary}» и "
-                f"«{', '.join(aliases)}» связаны как обозначения одного объекта."
+        chunks: list[str] = []
+        if descriptors:
+            chunks.append(
+                f"Описание сущности: «{primary}» — {', '.join(descriptors)}."
             )
-        else:
-            text = f"Идентичность сущности: известное имя/обозначение — «{primary}»."
-        return ProjectionBlock(ref, ProjectionMode.INFERENCE, text)
+        if aliases:
+            chunks.append(
+                f"«{primary}» и «{', '.join(aliases)}» связаны как обозначения одного объекта."
+            )
+        if not chunks:
+            chunks.append(f"Идентичность сущности: известное обозначение — «{primary}».")
+        return ProjectionBlock(ref, ProjectionMode.INFERENCE, " ".join(chunks))
+
+    def _derived_atom_block(self, conclusion: DerivedAtomConclusion) -> ProjectionBlock:
+        try:
+            template = self.core.store.get_template(conclusion.template_ref.uid)
+        except KeyError:
+            return ProjectionBlock(
+                None,
+                ProjectionMode.INFERENCE,
+                "Логический вывод доказал целевое атомарное утверждение.",
+            )
+        predicate = self.model_semantic.inference_text_for_ref(template.predicate)
+        roles = conclusion.role_map()
+        chunks: list[str] = []
+        for role in template.roles:
+            value = roles.get(role)
+            if value is None:
+                continue
+            rendered = (
+                self._entity_identity_text(value)
+                if value.kind is RefKind.M
+                else self.model_semantic.inference_text_for_ref(value)
+            )
+            chunks.append(f"{role.value}={rendered}")
+        text = f"Доказано логическим выводом: {predicate}({', '.join(chunks)})."
+        return ProjectionBlock(None, ProjectionMode.INFERENCE, text)
 
     def _inference_block(self, outcome):
         conclusion = outcome.conclusion
@@ -161,11 +224,17 @@ class EventAwareContextProjector(_BaseContextProjector):
 
         if (
             outcome.status is LogicalStatus.PROVED
+            and isinstance(conclusion, DerivedAtomConclusion)
+        ):
+            return self._derived_atom_block(conclusion)
+
+        if (
+            outcome.status is LogicalStatus.PROVED
             and isinstance(target, EntityIdentityGoal)
             and isinstance(conclusion, ExistingRefConclusion)
             and conclusion.ref.kind is RefKind.M
         ):
-            return self._identity_block(conclusion.ref)
+            return self._identity_block(conclusion.ref, outcome.premise_refs)
 
         if (
             outcome.status is LogicalStatus.PROVED
