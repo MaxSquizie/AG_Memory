@@ -5,7 +5,14 @@ from datetime import datetime, timedelta, timezone
 from ah.agent import InteractionContext
 from ah.config import InferenceSettings, IntegrationSettings
 from ah.core import AHCore
-from ah.inference import CompositeConclusion, ExistingRefConclusion, InferenceEngine, LogicalStatus, QueryGoalBuilder
+from ah.inference import (
+    CompositeConclusion,
+    ExistingRefConclusion,
+    InferenceEngine,
+    InferenceMaterializer,
+    LogicalStatus,
+    QueryGoalBuilder,
+)
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.model import ActantRole, Domain, Property
 from ah.perception import (
@@ -104,6 +111,8 @@ def test_naming_assertion_enriches_user_identity_without_false_world_fact() -> N
     matches = core.store.find_entities_by_name("Илья")
     assert tuple(item.uid for item in matches) == (context.user_ref.uid,)
     assert core.store.find_symbols_by_form("Илья") == ()
+    user = core.store.get_element_any_domain(context.user_ref.uid)
+    assert user.meta.get("grammatical_number") == "sing"
     experience = core.store.get_hypernode(commit.experience_ref.uid)
     assert "ASSERTION" in tuple(experience.meta.get("speech_act_kinds", ()))
 
@@ -159,6 +168,7 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
                 ActantRole.SUBJECT,
                 mention="Илья",
                 normalized_hint="Илья",
+                grammatical_number="sing",
             ),
             ActantCandidate(
                 ActantRole.TIME,
@@ -185,6 +195,8 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
     assert time_actant.temporal.value.start == "2026-09-12"
     # The interrogative shell is runtime semantics, not a canonical predicate/T.
     assert core.store.find_symbols_by_form("делать") == ()
+    query_experience = core.store.get_hypernode(query_commit.experience_ref.uid)
+    assert tuple(query_experience.meta.get("speech_act_kinds", ())) == ("QUERY",)
 
     built = QueryGoalBuilder(core).build(normalized_query, context)
     assert built.goal is not None, built.diagnostics
@@ -201,3 +213,10 @@ def test_open_event_query_reuses_identity_and_exact_relative_time() -> None:
         first.assertions[0].ref.uid,
         second.assertions[0].ref.uid,
     }
+
+    # The live orchestrator materializes every successful inference by default.
+    # Multi-event retrieval must therefore remain a read-only result rather than
+    # failing here or inventing a synthetic canonical group.
+    materialized = InferenceMaterializer(core, IntegrationSettings()).materialize(outcome)
+    assert materialized.ref is None
+    assert materialized.created is False
