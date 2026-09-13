@@ -1,22 +1,44 @@
 from __future__ import annotations
 
-from .adaptive_parser import AdaptivePerceptionParser
+from dataclasses import replace
+
+from ah.model import ActantRole
+from ah.temporal import TemporalAnchorContext, TemporalNormalizer
+
+from .adaptive_parser import AdaptiveParseError, AdaptivePerceptionParser
+from .contracts import QueryMode
+from .query_semantics import EventSetQueryCandidate
 
 
 class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
-    """Adaptive parser with punctuation-independent clause force recognition.
+    """Adaptive parser extensions for grammatical force and typed query targets.
 
     ``?`` is useful orthographic evidence, but it is not the definition of a
     question. Russian morphology explicitly marks interrogative pronouns/adverbs/
-    determiners with the ``Ques`` grammeme.  When such a form belongs to the
+    determiners with the ``Ques`` grammeme. When such a form belongs to the
     independent clause, the clause is a QUERY even if terminal punctuation is
     omitted.
 
-    This class deliberately changes only speech-act classification and WH source
-    discovery. It does not repair an already parsed result, inspect AH state, or
-    maintain a surface-word list. Requested-role semantics remain owned by the
-    ordinary bounded role classifier after the grammatical placeholder is found.
+    The same layer also closes two source-structural gaps without surface phrase
+    dictionaries:
+
+    * a phrase already recognized by the canonical ``TemporalNormalizer`` is a
+      TIME actant before free semantic role classification; the normalizer may
+      leave its value unresolved until Integration receives the legal turn/source
+      timestamp anchor;
+    * after ordinary WH parsing has produced a role-gap reading, one bounded
+      UID-free semantic choice distinguishes a missing role of a fixed predicate
+      from a request for the event/action itself. The latter becomes an explicit
+      ``EventSetQueryCandidate`` and is compiled by inference without pretending
+      the source verb is the answer predicate.
+
+    No canonical UID or AH state is visible here and no source-word list selects
+    either behavior.
     """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._source_temporal_normalizer = TemporalNormalizer()
 
     def _question_form(self, token) -> bool:
         """Recognize the closed interrogative grammatical class, not word forms."""
@@ -26,6 +48,35 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
         # interrogative-pronoun reading before clause structure has established
         # where the token occurs.
         return any("Ques" in info.grammemes for info in self._morph_all(token))
+
+    def _deterministic_role_candidates(
+        self,
+        tokens,
+        predicate_span,
+        predicate,
+        span,
+    ):
+        """Promote formally recognized temporal source spans to canonical TIME.
+
+        Relative expressions deliberately do not need an anchor here. A returned
+        unresolved ``TemporalCandidate`` is already sufficient evidence that the
+        source phrase is temporal; Integration later resolves its value against the
+        authoritative source/experience timestamp. Unknown adverbs still fall
+        through to the ordinary bounded role classifier.
+        """
+        semantic_span = self._semantic_span(span)
+        temporal = self._source_temporal_normalizer.normalize(
+            semantic_span.text,
+            TemporalAnchorContext(),
+        )
+        if temporal is not None:
+            return (ActantRole.TIME,)
+        return super()._deterministic_role_candidates(
+            tokens,
+            predicate_span,
+            predicate,
+            span,
+        )
 
     def _explicit_question_words(
         self,
@@ -142,3 +193,73 @@ class StructuralSpeechActAdaptiveParser(AdaptivePerceptionParser):
             if self._question_form(token):
                 return "QUERY"
         return base
+
+    def _query_target_kind(self, source_text: str, query) -> str:
+        known = "\n".join(
+            f"{actant.role.value}={actant.lookup_text or '[structured value]'}"
+            for actant in query.actants
+        ) or "NONE"
+        requested = ", ".join(role.value for role in query.requested_roles) or "NONE"
+        prompt = (
+            f"TEXT:\n{source_text}\n"
+            f"SOURCE PREDICATE:\n{query.predicate.surface}\n"
+            f"KNOWN EVENT ROLES:\n{known}\n"
+            f"CURRENT WH ROLE READING:\n{requested}\n"
+            "QUESTION:\nDoes the interrogative ask for a missing value inside the "
+            "stated predicate, or does it ask which event/action/state itself "
+            "occurred under the known constraints?\n"
+            "CHOICES:\nROLE_FILL\nEVENT_SET\nUNCLEAR"
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "query_target",
+            prompt,
+            ("ROLE_FILL", "EVENT_SET", "UNCLEAR"),
+        )
+        assert decision is not None
+        return decision
+
+    def parse(self, text: str, *, structural_resolution: str | None = None):
+        parsed = super().parse(text, structural_resolution=structural_resolution)
+        rewritten = []
+        changed = False
+        for query in parsed.perception.queries:
+            # Quantified and proposition-valued queries already own richer typed
+            # semantics and must not be reinterpreted by this ordinary WH layer.
+            if (
+                query.query_mode is not QueryMode.FILL_ROLE
+                or query.quantified is not None
+                or any(
+                    actant.proposition is not None or actant.candidate_ref is not None
+                    for actant in query.actants
+                )
+            ):
+                rewritten.append(query)
+                continue
+            target = self._query_target_kind(text, query)
+            if target == "ROLE_FILL":
+                rewritten.append(query)
+                continue
+            if target == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "query target is ambiguous between role filling and event retrieval",
+                    tuple(self._traces),
+                )
+            rewritten.append(
+                EventSetQueryCandidate(
+                    predicate=query.predicate,
+                    actants=query.actants,
+                    requested_role=None,
+                    requested_roles=(),
+                    query_mode=QueryMode.EXISTS,
+                    local_id=query.local_id,
+                    quoted=query.quoted,
+                    quantified=None,
+                    scope_operators=(),
+                )
+            )
+            changed = True
+
+        if not changed:
+            return parsed
+        perception = replace(parsed.perception, queries=tuple(rewritten))
+        return replace(parsed, perception=perception)
