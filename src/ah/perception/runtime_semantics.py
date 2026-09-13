@@ -48,6 +48,13 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
         "DISCOURSE_OPERATOR",
         "UNCLEAR",
     )
+    # Absolute temporal literals may be split into several source tokens by the
+    # generic tokenizer (``12 . 09 . 2026``, ``2026 - 09 - 12``, datetimes and
+    # bounded intervals).  Scan a finite source window before ordinary roles so
+    # punctuation never turns pieces of one date into independent actants.  This
+    # is a computational bound, not a vocabulary/template list; every candidate is
+    # still accepted only by the canonical deterministic TemporalNormalizer.
+    _MAX_TEMPORAL_SOURCE_TOKENS = 16
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -124,18 +131,21 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
         predicate_span,
         requested_spans,
     ):
-        """Return deterministic temporal source spans without relying on LLM selection.
+        """Return deterministic temporal spans independently of role chunking.
 
-        Candidate-phrase chunking remains useful for multi-token dates/intervals,
-        but a single lexical temporal adverb such as ``вчера`` must survive even if
-        another parser stage would not have selected that phrase.  Therefore every
-        source token in the current predicate argument window is also tested as a
-        singleton against the same canonical TemporalNormalizer.
+        Generic tokenization intentionally preserves punctuation.  Consequently an
+        absolute date can arrive as five tokens and a dot inside the date may even
+        look like a sentence boundary to the linguistic graph.  Temporal identity
+        must be established *before* those generic boundaries are allowed to drive
+        actant parsing.  We therefore combine two source-grounded candidate sets:
+
+        1. ordinary linguistic phrase spans;
+        2. bounded contiguous source-token windows, validated only by the canonical
+           ``TemporalNormalizer`` over the exact original source substring.
+
+        No date spelling/form list is maintained here.  A window that the temporal
+        normalizer does not recognize simply is not a temporal candidate.
         """
-        clause_start, clause_end = self._predicate_argument_bounds(
-            predicate_span,
-            tokens,
-        )
         candidates = list(
             self._candidate_phrase_spans(
                 text,
@@ -145,15 +155,39 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
                 requested_spans=requested_spans,
             )
         )
-        for index in range(clause_start, clause_end + 1):
-            if predicate_span is not None and predicate_span.start_index <= index <= predicate_span.end_index:
-                continue
-            singleton = self._resolve_span_from_source(tokens, index, index)
-            if self._overlaps_any(singleton, requested_spans):
-                continue
-            if not re.search(r"\w", tokens[index - 1].text, flags=re.UNICODE):
-                continue
-            candidates.append(singleton)
+
+        token_count = len(tokens)
+        for start in range(1, token_count + 1):
+            max_end = min(
+                token_count,
+                start + self._MAX_TEMPORAL_SOURCE_TOKENS - 1,
+            )
+            for end in range(start, max_end + 1):
+                # A TIME value cannot consume the lexical predicate itself.  Once
+                # a growing window reaches the predicate from its left, all wider
+                # windows also overlap it and can be abandoned immediately.
+                if predicate_span is not None and not (
+                    end < predicate_span.start_index
+                    or start > predicate_span.end_index
+                ):
+                    if start < predicate_span.start_index <= end:
+                        break
+                    continue
+
+                span = self._resolve_span_from_source(tokens, start, end)
+                if self._overlaps_any(span, requested_spans):
+                    continue
+                if not any(
+                    re.search(r"\w", tokens[index - 1].text, flags=re.UNICODE)
+                    for index in range(start, end + 1)
+                ):
+                    continue
+                semantic = self._semantic_span(span)
+                if self._runtime_temporal_normalizer.normalize(
+                    semantic.text,
+                    TemporalAnchorContext(),
+                ) is not None:
+                    candidates.append(span)
 
         recognized = {}
         for span in candidates:
@@ -168,8 +202,8 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
             recognized[self._span_key(span)] = span
 
         # Prefer a wider already-recognized phrase over its recognized singleton
-        # fragments.  The source semantics are identical but the wider evidence is
-        # more faithful and avoids manufacturing multiple TIME values.
+        # fragments.  ``2026`` is itself a YEAR, but inside ``2026-09-12`` the full
+        # DAY span is the stronger exact source representation.
         ordered = sorted(
             recognized.values(),
             key=lambda item: (
