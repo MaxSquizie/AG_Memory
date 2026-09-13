@@ -460,6 +460,32 @@ class LinguisticCandidateBuilder:
     def _predicate_heads(self, tokens: tuple[SourceToken, ...]) -> tuple[PredicateHeadCandidate, ...]:
         result: list[PredicateHeadCandidate] = []
 
+        def determiner_hyphen_suffix(index: int) -> bool:
+            """Reject a spurious predicate reading inside one hyphenated pronoun.
+
+            Tokenization intentionally preserves punctuation as separate source
+            tokens.  Dictionary morphology can nevertheless read the right-hand
+            part of ``pronoun/determiner-suffix`` as an imperative verb.  The
+            left-hand pronominal/determiner morphology plus two source-adjacent
+            hyphens is stronger lexical-unit evidence; no suffix vocabulary is
+            needed.
+            """
+
+            if index < 3:
+                return False
+            hyphen = tokens[index - 2]
+            left = tokens[index - 3]
+            current = tokens[index - 1]
+            if hyphen.text not in {"-", "‐", "‑"}:
+                return False
+            if left.end != hyphen.start or hyphen.end != current.start:
+                return False
+            return any(
+                item.pos == "NPRO"
+                or bool({"Apro", "Anum", "Ques", "Dmns"} & set(item.grammemes))
+                for item in self._material_analyses(left)
+            )
+
         def governed_oblique_nominal(index: int) -> bool:
             """Return True when a weak predicate reading sits inside a PP.
 
@@ -498,6 +524,8 @@ class LinguisticCandidateBuilder:
             return False
 
         for token in tokens:
+            if determiner_hyphen_suffix(token.index):
+                continue
             strong = self._lemma_candidates(token, _STRONG_PREDICATE_POS)
             secondary = self._lemma_candidates(token, _SECONDARY_PREDICATE_POS)
             if strong:

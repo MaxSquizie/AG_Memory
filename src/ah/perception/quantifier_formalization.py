@@ -182,6 +182,175 @@ class QuantifierFormalizer:
                 return next(iter(lemmas)), token
         return None, None
 
+    def _phrase_profile(self, phrase: str) -> tuple[bool, bool]:
+        """Return (binder-like morphology, nominal-head morphology)."""
+
+        binder = False
+        nominal = False
+        for token in self._tokens(phrase):
+            analyses = self._analyses(token)
+            for item in material_analyses(analyses):
+                nominal = nominal or item.pos == "NOUN"
+                binder = binder or item.pos in {"NPRO", "NUMR"} or bool(
+                    {"Apro", "Anum", "Ques", "Dmns"}
+                    & set(item.grammemes)
+                )
+        return binder, nominal
+
+    def _analyses(self, token: str):
+        try:
+            return tuple(self.morphology.analyze_all(token))
+        except AttributeError:
+            item = self.morphology.analyze(token)
+            return () if item is None else (item,)
+
+    def _expand_hyphenated_actants(
+        self,
+        source_text: str,
+        actants: tuple[ActantCandidate, ...],
+    ) -> tuple[ActantCandidate, ...]:
+        """Restore a source-adjacent hyphen suffix to its provisional actant."""
+
+        expanded: list[ActantCandidate] = []
+        for actant in actants:
+            evidence = actant.evidence
+            if (
+                evidence is None
+                or evidence.start is None
+                or evidence.end is None
+            ):
+                expanded.append(actant)
+                continue
+            suffix = re.match(
+                r"[-‐‑][A-Za-zА-Яа-яЁё]+",
+                source_text[int(evidence.end) :],
+            )
+            if suffix is None:
+                expanded.append(actant)
+                continue
+            end = int(evidence.end) + suffix.end()
+            phrase = source_text[int(evidence.start) : end]
+            binder, _nominal = self._phrase_profile(phrase)
+            if not binder:
+                expanded.append(actant)
+                continue
+            expanded.append(
+                replace(
+                    actant,
+                    mention=phrase,
+                    normalized_hint=None,
+                    evidence=type(evidence)(phrase, evidence.start, end),
+                )
+            )
+        return tuple(expanded)
+
+    def _fuse_split_nominal_binders(
+        self,
+        source_text: str,
+        assertion: AssertionCandidate,
+    ) -> AssertionCandidate:
+        """Rejoin a determiner fragment with its adjacent nominal restriction."""
+
+        actants = list(
+            self._expand_hyphenated_actants(source_text, assertion.actants)
+        )
+        consumed: set[int] = set()
+        replacements: dict[int, ActantCandidate] = {}
+        ordered = sorted(
+            range(len(actants)),
+            key=lambda index: (
+                actants[index].evidence.start
+                if actants[index].evidence is not None
+                and actants[index].evidence.start is not None
+                else 10**12,
+                index,
+            ),
+        )
+        weak_fragment_roles = {
+            ActantRole.AMOUNT,
+            ActantRole.AUXILLIARY,
+            ActantRole.HOW_TO,
+        }
+        for left_index, right_index in zip(ordered, ordered[1:]):
+            if left_index in consumed or right_index in consumed:
+                continue
+            left = actants[left_index]
+            right = actants[right_index]
+            if any(
+                item.candidate_ref is not None
+                or item.composition is not None
+                or item.proposition is not None
+                or item.quantifier is not None
+                for item in (left, right)
+            ):
+                continue
+            left_evidence = left.evidence
+            right_evidence = right.evidence
+            if (
+                left_evidence is None
+                or right_evidence is None
+                or left_evidence.start is None
+                or left_evidence.end is None
+                or right_evidence.start is None
+                or right_evidence.end is None
+                or left_evidence.end > right_evidence.start
+            ):
+                continue
+            between = source_text[left_evidence.end : right_evidence.start]
+            if between.strip():
+                continue
+            left_phrase = source_text[left_evidence.start : left_evidence.end]
+            right_phrase = source_text[right_evidence.start : right_evidence.end]
+            left_binder, left_nominal = self._phrase_profile(left_phrase)
+            _right_binder, right_nominal = self._phrase_profile(right_phrase)
+            if not left_binder or left_nominal or not right_nominal:
+                continue
+
+            start = int(left_evidence.start)
+            end = int(right_evidence.end)
+            phrase = source_text[start:end]
+            role = (
+                right.role
+                if left.role in weak_fragment_roles
+                and right.role not in weak_fragment_roles
+                else left.role
+            )
+            replacements[left_index] = replace(
+                left,
+                role=role,
+                mention=phrase,
+                normalized_hint=None,
+                evidence=type(left_evidence)(phrase, start, end),
+                nominal_relations=right.nominal_relations,
+                grammatical_number=right.grammatical_number,
+            )
+            consumed.add(right_index)
+
+        if not consumed and not replacements:
+            return assertion
+        fused = tuple(
+            replacements.get(index, actant)
+            for index, actant in enumerate(actants)
+            if index not in consumed
+        )
+        predicate = assertion.predicate
+        proposed = predicate.template_candidate
+        if proposed is not None:
+            fused_roles = {item.role for item in fused}
+            ordered_roles = tuple(
+                dict.fromkeys(
+                    (
+                        *(role for role in proposed.roles if role in fused_roles),
+                        *(item.role for item in fused),
+                    )
+                )
+            )
+            predicate = replace(
+                predicate,
+                template_candidate=type(proposed)(ordered_roles),
+            )
+        return replace(assertion, predicate=predicate, actants=fused)
+
     @staticmethod
     def _assertion_source(
         result: PerceptionResult, assertion: AssertionCandidate
@@ -302,6 +471,30 @@ class QuantifierFormalizer:
                 f"negation sites for {phrase!r}; relative scope is unresolved"
             )
 
+        phrase_tokens = tuple(self._fold(token) for token in self._tokens(phrase))
+        if (
+            kind is QuantifierKind.NOT_FORALL
+            and not any(token in self._NEGATION_PARTICLES for token in phrase_tokens)
+            and self._predicate_has_local_negation(
+                result.source_text, assertion.predicate
+            )
+        ):
+            # The only visible negation site is immediately before the event
+            # predicate, hence it belongs to the body: FORALL(x, NOT(P(x))).
+            kind = QuantifierKind.FORALL
+        if (
+            kind is QuantifierKind.NOT_FORALL
+            and "ни" in phrase_tokens
+            and any(
+                item.pos == "NUMR" or "Anum" in item.grammemes
+                for token in self._tokens(phrase)
+                for item in material_analyses(self._analyses(token))
+            )
+        ):
+            # A negative cardinal binder denies existence of a witness; it does
+            # not deny an every-member proposition.
+            kind = QuantifierKind.NOT_EXISTS
+
         restriction, head_surface = self._nominal_restriction(actant, phrase)
         if kind in {QuantifierKind.FORALL, QuantifierKind.NOT_FORALL} and not restriction:
             raise QuantifierFormalizationError(
@@ -326,6 +519,9 @@ class QuantifierFormalizer:
     ) -> AssertionCandidate:
         if assertion.quoted:
             return assertion
+        assertion = self._fuse_split_nominal_binders(
+            result.source_text, assertion
+        )
         actants: list[ActantCandidate] = []
         recognized: list[_Recognition] = []
         for index, actant in enumerate(assertion.actants):
