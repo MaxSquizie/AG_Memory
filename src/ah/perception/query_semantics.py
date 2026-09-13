@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .contracts import EvidenceSpan, QueryCandidate, QueryMode
+from .contracts import ActantCandidate, EvidenceSpan, QueryCandidate, QueryMode
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,3 +40,34 @@ class EventSetQueryCandidate(QueryCandidate):
             raise ValueError("EventSetQueryCandidate must use compatibility mode EXISTS")
         if self.requested_roles:
             raise ValueError("EventSetQueryCandidate requests events, not actant roles")
+
+
+@dataclass(frozen=True, slots=True)
+class EntityIdentityQueryCandidate(QueryCandidate):
+    """Runtime query asking for the asserted identity/name of one known entity.
+
+    Natural-language copular shells such as ``пользователь кто?`` are not factual
+    ``быть(STATE=пользователь, SUBJECT=кто)`` propositions.  Their unknown is an
+    identifying label of one already grounded entity.  The source copula remains
+    provenance only; it must not create or select a canonical predicate template.
+
+    ``target`` is the source-grounded entity expression. ``query_operator_evidence``
+    records the interrogative source span that requested identity.  Canonical entity
+    resolution and reading the stored identity properties remain deterministic and
+    happen after Perception.
+    """
+
+    target: ActantCandidate | None = None
+    identity_query: bool = True
+    query_operator_evidence: tuple[EvidenceSpan, ...] = ()
+
+    def __post_init__(self) -> None:
+        QueryCandidate.__post_init__(self)
+        if self.query_mode is not QueryMode.EXISTS:
+            raise ValueError("EntityIdentityQueryCandidate must use compatibility mode EXISTS")
+        if self.requested_roles:
+            raise ValueError("EntityIdentityQueryCandidate does not request predicate roles")
+        if self.target is None:
+            raise ValueError("EntityIdentityQueryCandidate requires a target entity")
+        if len(self.actants) != 1 or self.actants[0] != self.target:
+            raise ValueError("EntityIdentityQueryCandidate.actants must contain only target")
