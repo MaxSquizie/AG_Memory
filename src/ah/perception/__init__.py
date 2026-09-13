@@ -59,8 +59,9 @@ from .association_semantics import (
     AssociationQueryDecision,
     AssociationSemanticClassifier,
 )
-from .correlated_alternatives import (
-    CorrelatedAlternativeLLMPerceptionService as LLMPerceptionService,
+from .generalized_naming import (
+    GeneralizedNamingAdaptiveParser,
+    GeneralizedNamingLLMPerceptionService as LLMPerceptionService,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
@@ -138,6 +139,7 @@ __all__ = [
     "AssociationEndpointSelector",
     "AssociationQueryDecision",
     "AssociationSemanticClassifier",
+    "GeneralizedNamingAdaptiveParser",
     "TextSensoryResult",
     "TextSensoryService",
     "TemporalCandidate",
