@@ -20,10 +20,12 @@ from PySide6.QtWidgets import (
 
 from ah.model import (
     AbstractSymbol,
+    BoundVar,
     FunctionSymbol,
     Group,
     Hypernode,
     Link,
+    Ref,
     SemanticEntity,
     Template,
 )
@@ -361,11 +363,22 @@ class NodeInspectorWidget(QWidget):
         return str(value)
 
     @staticmethod
-    def _format_refs(refs) -> str:
-        return ", ".join(f"{ref.uid} ({ref.kind.value})" for ref in refs) or "—"
+    def _format_operand(operand) -> str:
+        if isinstance(operand, Ref):
+            return f"{operand.uid} ({operand.kind.value})"
+        if isinstance(operand, BoundVar):
+            return f"${operand.local_id}:{operand.sort.value}"
+        return str(operand)
 
-    @staticmethod
-    def _format_ref_map(refs) -> str:
+    @classmethod
+    def _format_refs(cls, refs) -> str:
+        return ", ".join(cls._format_operand(ref) for ref in refs) or "—"
+
+    @classmethod
+    def _format_ref_map(cls, refs) -> str:
         if not refs:
             return "—"
-        return "; ".join(f"{role.value}: {ref.uid}" for role, ref in refs.items())
+        return "; ".join(
+            f"{role.value}: {cls._format_operand(ref)}"
+            for role, ref in refs.items()
+        )
