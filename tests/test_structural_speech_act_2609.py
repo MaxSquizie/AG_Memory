@@ -16,10 +16,15 @@ class _Morphology:
     name = "test"
 
     _MAP = {
+        # Model a common homography problem deliberately: the complementizer
+        # reading is much more probable than the interrogative-pronoun reading.
+        # Speech force must use the closed Ques grammeme after clause scoping,
+        # rather than letting the generic morphology score erase it.
         "что": (
+            MorphInfo("что", "CONJ", score=0.9),
             MorphInfo(
                 "что", "NPRO", case="accs", number="sing",
-                grammemes=frozenset({"Ques"}), score=1.0,
+                grammemes=frozenset({"Ques"}), score=0.1,
             ),
         ),
         "я": (
@@ -92,14 +97,19 @@ def test_top_level_wh_is_query_without_question_mark() -> None:
     predicate_index = _predicate_index(graph, "делал")
     clause = graph.clause_for_token(predicate_index)
     assert clause is not None
+    predicate_span = parser._resolve_span_from_source(
+        tokens, predicate_index, predicate_index
+    )
 
     force = parser._deterministic_act_type(
         tokens,
         (predicate_index,),
         clause.clause_id,
     )
+    placeholders = parser._explicit_question_words(tokens, predicate_span)
 
     assert force == "QUERY"
+    assert tuple(item.text for item in placeholders) == ("Что",)
 
 
 def test_embedded_wh_does_not_turn_matrix_into_query() -> None:
@@ -107,11 +117,16 @@ def test_embedded_wh_does_not_turn_matrix_into_query() -> None:
     predicate_index = _predicate_index(graph, "знаю")
     clause = graph.clause_for_token(predicate_index)
     assert clause is not None
+    predicate_span = parser._resolve_span_from_source(
+        tokens, predicate_index, predicate_index
+    )
 
     force = parser._deterministic_act_type(
         tokens,
         (predicate_index,),
         clause.clause_id,
     )
+    placeholders = parser._explicit_question_words(tokens, predicate_span)
 
     assert force == "ASSERTION"
+    assert placeholders == ()
