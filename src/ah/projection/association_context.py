@@ -6,7 +6,7 @@ from ah.core import AHCore
 from ah.inference import InferenceOutcome
 from ah.model import Ref
 
-from .agent_context import ContextProjector
+from .event_context import EventAwareContextProjector
 from .contracts import (
     AgentContext,
     ProjectionBlock,
@@ -16,12 +16,18 @@ from .contracts import (
 )
 
 
-class AssociationContextProjector(ContextProjector):
+class AssociationContextProjector(EventAwareContextProjector):
     """Project associative convergence separately from logical inference.
 
     AssociationOutcome is runtime search provenance, not a proof and not a new fact.
     The response model therefore receives it in its own ASSOCIATION RESULTS section
     and AgentContext keeps it outside ``inference_blocks`` as well.
+
+    This projector deliberately inherits the event-aware inference projector rather
+    than the bare base projector. The top-level orchestrator always rebuilds final
+    context through this association layer, even when the current turn has no
+    AssociationGoal; therefore open-event ``CompositeConclusion`` handling must
+    survive this final projection step.
     """
 
     def __init__(self, core: AHCore, settings: ContextSettings) -> None:
