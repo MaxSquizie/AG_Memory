@@ -11,12 +11,15 @@ from ah.integration import IntegrationConfig, IntegrationService
 from ah.model import ActantRole, Domain, Property
 from ah.perception import (
     ActantCandidate,
+    AssertionCandidate,
     EntityIdentityQueryCandidate,
+    EventSetQueryCandidate,
     EvidenceSpan,
     NamingAssertionCandidate,
     PerceptionResult,
     PredicateCandidate,
     QueryMode,
+    TemplateCandidate,
 )
 from ah.projection import ContextProjector
 
@@ -129,6 +132,74 @@ def test_identity_query_is_detached_resolved_and_projected_with_alias() -> None:
     assert "пользователь" in projected.rendered.casefold()
     assert "илья" in projected.rendered.casefold()
     assert "одного и того же объекта" in projected.rendered.casefold()
+
+
+def test_event_proof_keeps_alias_of_canonical_subject_visible() -> None:
+    core, context, integration = _runtime()
+    turn_time = datetime(
+        2026, 9, 13, 23, 0, tzinfo=timezone(timedelta(hours=3))
+    )
+    _name_user_ilya(integration, context, turn_time)
+
+    assertion = AssertionCandidate(
+        local_id="A1",
+        predicate=PredicateCandidate(
+            "сделал",
+            normalized_hint="сделать",
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.OBJECT)
+            ),
+        ),
+        actants=(
+            ActantCandidate(ActantRole.SUBJECT, mention="я", normalized_hint="я"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                mention="запрос",
+                normalized_hint="запрос",
+            ),
+        ),
+    )
+    fact = integration.integrate_external(
+        PerceptionResult("Я сделал запрос", assertions=(assertion,)),
+        context,
+        source_timestamp=turn_time,
+    )
+    assert len(fact.assertions) == 1
+
+    query = EventSetQueryCandidate(
+        predicate=PredicateCandidate("делал", normalized_hint="делать"),
+        actants=(
+            ActantCandidate(
+                ActantRole.SUBJECT,
+                mention="Илья",
+                normalized_hint="Илья",
+                grammatical_number="sing",
+            ),
+        ),
+        query_mode=QueryMode.EXISTS,
+        local_id="QE1",
+    )
+    query_commit = integration.integrate_external(
+        PerceptionResult("Что делал Илья?", queries=(query,)),
+        context,
+        source_timestamp=turn_time,
+    )
+    normalized = query_commit.unresolved_queries[0]
+    built = QueryGoalBuilder(core).build(normalized, context)
+    assert built.goal is not None, built.diagnostics
+    outcome = InferenceEngine(core, InferenceSettings()).solve(built.goal)
+    assert outcome.status is LogicalStatus.PROVED
+    assert isinstance(outcome.conclusion, ExistingRefConclusion)
+
+    projected = ContextProjector(core, ContextSettings()).project(
+        "Что делал Илья?",
+        (),
+        (outcome,),
+    )
+    rendered = projected.rendered.casefold()
+    assert "пользователь" in rendered
+    assert "илья" in rendered
+    assert "тот же объект" in rendered
 
 
 def test_identity_query_m1_shows_identity_not_copular_truth_check() -> None:
