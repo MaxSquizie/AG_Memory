@@ -9,6 +9,7 @@ from ah.inference.contracts import (
 )
 from ah.inference.event_query import EventMatchGoal
 from ah.inference.identity_query import EntityIdentityGoal
+from ah.integration.identity_graph import identity_name_refs_for_owner, identity_name_text
 from ah.model import Hypernode, Ref, RefKind, SemanticEntity
 
 from .agent_context import ContextProjector as _BaseContextProjector
@@ -24,11 +25,10 @@ class EventAwareContextProjector(_BaseContextProjector):
     its prose is withheld from the Main LLM whenever inference or an unresolved
     GoalSpec result is present.
 
-    Entity aliases are part of canonical M identity. Proof-facing rendering therefore
-    includes them for event witnesses and identity queries. This prevents a named
-    USER from being serialized merely as ``пользователь`` after the query itself was
-    resolved through alias ``Илья`` and stops the response model from inventing a
-    distinction between two labels of the same M.
+    Identity labels are projected from the explicit ``IDENTITY_NAME`` graph first,
+    with legacy ``aliases`` retained as compatibility/retrieval evidence. This keeps
+    response grounding aligned with the canonical M/L structure instead of treating
+    one property string as the whole identity representation.
     """
 
     def project(
@@ -52,8 +52,6 @@ class EventAwareContextProjector(_BaseContextProjector):
             budget_tokens=budget_tokens,
         )
         if proof_obligation and tuple(workspace_refs) != context.source_workspace_refs:
-            # Diagnostics must describe the real cognitive Workspace even though
-            # model-facing ACTIVE MEMORY is intentionally proof-gated for this turn.
             context = replace(context, source_workspace_refs=tuple(workspace_refs))
         return context
 
@@ -84,7 +82,17 @@ class EventAwareContextProjector(_BaseContextProjector):
         if not isinstance(entity, SemanticEntity):
             return None
         names = self._property_values(entity, "name")
-        aliases = self._property_values(entity, "aliases")
+        aliases = list(self._property_values(entity, "aliases"))
+        for name_ref in identity_name_refs_for_owner(self.core, ref):
+            try:
+                name_entity = self.core.store.get_element_any_domain(name_ref.uid)
+            except KeyError:
+                continue
+            if not isinstance(name_entity, SemanticEntity):
+                continue
+            value = identity_name_text(name_entity)
+            if value and value.casefold() not in {item.casefold() for item in aliases}:
+                aliases.append(value)
         primary = names[0] if names else ref.uid
         unique_aliases = tuple(
             value
@@ -100,7 +108,7 @@ class EventAwareContextProjector(_BaseContextProjector):
         primary, aliases = parts
         if not aliases:
             return primary
-        return f"{primary} (тот же объект; имена/алиасы: {', '.join(aliases)})"
+        return f"{primary} (тот же объект; имена/идентификаторы: {', '.join(aliases)})"
 
     def _proof_ref_text(self, ref: Ref) -> str:
         if ref.kind is RefKind.M:
@@ -141,7 +149,7 @@ class EventAwareContextProjector(_BaseContextProjector):
         if aliases:
             text = (
                 f"Идентичность сущности: «{primary}» и "
-                f"«{', '.join(aliases)}» — имена/алиасы одного и того же объекта."
+                f"«{', '.join(aliases)}» связаны как обозначения одного объекта."
             )
         else:
             text = f"Идентичность сущности: известное имя/обозначение — «{primary}»."
