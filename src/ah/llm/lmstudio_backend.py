@@ -341,7 +341,11 @@ class LMStudioBackend:
             if str(system or "").strip():
                 messages.append({"role": "system", "content": str(system).strip()})
             messages.append({"role": "user", "content": str(prompt)})
-            is_protocol_probe = role.startswith("perception_") or role.startswith("semantic_")
+            is_protocol_probe = (
+                role.startswith("perception_")
+                or role.startswith("semantic_")
+                or role == "lexical_recovery_choice"
+            )
             if is_protocol_probe and not bool(defaults.get("enable_thinking", False)):
                 # The OpenAI-compatible chat endpoint accepts only the documented
                 # OpenAI-style sampling keys and may ignore custom Jinja variables.

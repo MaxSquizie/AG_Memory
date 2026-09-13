@@ -154,7 +154,8 @@ class DocumentProcessor(_PipelineDocumentProcessor):
         bridges, not new events, and allowing them into the probe could create a
         spurious self/FOLLOW edge after canonical deduplication.
         """
-        classifier = getattr(self.services.perception, "classify_discourse_relation", None)
+        perception = getattr(self.services, "perception", None)
+        classifier = getattr(perception, "classify_discourse_relation", None)
         if not callable(classifier):
             return ()
 

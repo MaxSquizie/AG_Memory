@@ -2,11 +2,22 @@ from __future__ import annotations
 
 from ah.agent import InteractionContext
 from ah.integration.contracts import IntegrationCommit
+from ah.integration.entity_resolver import EntityResolver, ExistingEntity
 from ah.model import FunctionSymbol, Ref, RefKind
-from ah.perception import PropositionExprCandidate, PropositionOperator, QueryCandidate
+from ah.perception import (
+    PropositionExprCandidate,
+    PropositionOperator,
+    QueryCandidate,
+    QueryMode,
+)
 
-from .contracts import GoalSpec, InferenceQuery
-from .modal_goal import FormulaPattern, ModalSemanticGoalCompiler
+from .contracts import FormulaGoal, GoalSpec, InferenceQuery
+from .modal_goal import (
+    FormulaPattern,
+    FormulaPatternGoal,
+    MatrixFormulaPatternGoal,
+    ModalSemanticGoalCompiler,
+)
 from .query_builder import QueryBuildResult
 
 
@@ -95,46 +106,167 @@ class ModalTurnGoalCompiler(ModalSemanticGoalCompiler):
         integrated_by_id: dict[str, object],
         attention_refs: tuple[Ref, ...],
     ) -> QueryBuildResult:
-        modal_expressions = self._modal_expressions(query)
-        if not modal_expressions or not self._proposition_only_shell(query):
-            # Subject-bearing attitudes remain matrix propositions. A modal phrase
-            # embedded *inside* BELIEVES(A, M(P)) is not authorization to ask M(P).
+        pattern_expressions = tuple(
+            actant.proposition
+            for actant in query.actants
+            if actant.proposition is not None
+            and self._requires_pattern_goal(actant.proposition)
+        )
+        if not pattern_expressions:
             return super()._build_matrix_proposition_query(
                 query,
                 context,
                 integrated_by_id,
                 attention_refs,
             )
-        if len(modal_expressions) != 1:
+        if self._proposition_only_shell(query) and not query.requested_roles:
+            if len(pattern_expressions) != 1:
+                return QueryBuildResult(
+                    None,
+                    (
+                        "semantic:formula_matrix_shell_scope_not_unique:"
+                        f"{len(pattern_expressions)}",
+                    ),
+                )
+            expression = pattern_expressions[0]
+            goal = self._goal_from_modal_expr(expression, integrated_by_id, {})
+            if goal is None:
+                return QueryBuildResult(
+                    None,
+                    ("semantic:formula_pattern_target_unresolved",),
+                )
+            pattern = self._pattern_from_expr(expression, integrated_by_id, {})
+            attention: list[Ref] = list(attention_refs)
+            seen = {(item.kind.value, item.uid) for item in attention}
+            if pattern is not None:
+                for ref in pattern.refs():
+                    key = (ref.kind.value, ref.uid)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    attention.append(ref)
+            diagnostic = (
+                "semantic:modal_formula_goal:proposition_shell"
+                if self._contains_modal(expression)
+                else "semantic:proposition_formula_goal:proposition_shell"
+            )
             return QueryBuildResult(
-                None,
-                (
-                    "semantic:modal_matrix_shell_scope_not_unique:"
-                    f"{len(modal_expressions)}",
-                ),
+                InferenceQuery(GoalSpec(goal)),
+                (diagnostic,),
+                tuple(attention),
             )
 
-        expression = modal_expressions[0]
-        goal = self._goal_from_modal_expr(expression, integrated_by_id, {})
-        if goal is None:
+        selection = query.predicate.template_selection
+        if selection is None or selection.existing_template_uid is None:
             return QueryBuildResult(
                 None,
-                ("semantic:modal_formula_target_unresolved",),
+                ("semantic:matrix_query_template_unresolved",),
+            )
+        try:
+            template = self.core.store.get_template(selection.existing_template_uid)
+        except KeyError:
+            return QueryBuildResult(
+                None,
+                ("semantic:matrix_query_template_missing",),
             )
 
-        pattern = self._pattern_from_expr(expression, integrated_by_id, {})
+        resolver = EntityResolver(self.core)
+        known = {}
+        proposition_roles = {}
         attention: list[Ref] = list(attention_refs)
         seen = {(item.kind.value, item.uid) for item in attention}
-        if pattern is not None:
-            for ref in pattern.refs():
-                key = (ref.kind.value, ref.uid)
-                if key in seen:
-                    continue
+
+        def add_attention(ref: Ref) -> None:
+            key = (ref.kind.value, ref.uid)
+            if key not in seen:
                 seen.add(key)
                 attention.append(ref)
+
+        for actant in query.actants:
+            if actant.proposition is not None:
+                if actant.proposition.operator is PropositionOperator.REF:
+                    assert actant.proposition.ref is not None
+                    integrated = integrated_by_id.get(actant.proposition.ref)
+                    ref = getattr(integrated, "ref", None)
+                    if not isinstance(ref, Ref):
+                        return QueryBuildResult(
+                            None,
+                            (
+                                "semantic:matrix_query_content_missing:"
+                                f"{actant.proposition.ref}",
+                            ),
+                        )
+                    known[actant.role] = ref
+                    add_attention(ref)
+                    continue
+                pattern = self._pattern_from_expr(
+                    actant.proposition, integrated_by_id, {}
+                )
+                if pattern is None:
+                    return QueryBuildResult(
+                        None,
+                        ("semantic:matrix_query_formula_pattern_unresolved",),
+                    )
+                proposition_roles[actant.role] = pattern
+                for ref in pattern.refs():
+                    add_attention(ref)
+                continue
+            if actant.candidate_ref is not None:
+                integrated = integrated_by_id.get(actant.candidate_ref)
+                ref = getattr(integrated, "ref", None)
+                if not isinstance(ref, Ref):
+                    return QueryBuildResult(
+                        None,
+                        (
+                            "semantic:matrix_query_content_missing:"
+                            f"{actant.candidate_ref}",
+                        ),
+                    )
+                known[actant.role] = ref
+                add_attention(ref)
+                continue
+            resolved = resolver.resolve(
+                actant,
+                context,
+                first_person_ref=context.user_ref,
+                second_person_ref=context.self_ref,
+                attention_refs=attention_refs,
+            )
+            if not isinstance(resolved, ExistingEntity):
+                return QueryBuildResult(
+                    None,
+                    (
+                        "semantic:matrix_query_actant_unresolved:"
+                        f"{actant.role.value}",
+                    ),
+                )
+            known[actant.role] = resolved.ref
+            add_attention(resolved.ref)
+            for ref in resolved.support_refs:
+                add_attention(ref)
+
+        required_roles = (
+            set(known) | set(proposition_roles) | set(query.requested_roles)
+        )
+        if not required_roles.issubset(set(template.roles)):
+            return QueryBuildResult(
+                None,
+                ("semantic:matrix_query_template_role_mismatch",),
+            )
+        if query.query_mode is QueryMode.FILL_ROLE and not query.requested_roles:
+            return QueryBuildResult(
+                None,
+                ("semantic:matrix_query_requested_role_missing",),
+            )
+        target = MatrixFormulaPatternGoal(
+            self.core.ref(template.uid),
+            known,
+            proposition_roles,
+            query.requested_roles,
+        )
         return QueryBuildResult(
-            InferenceQuery(GoalSpec(goal)),
-            ("semantic:modal_formula_goal:proposition_shell",),
+            InferenceQuery(GoalSpec(target)),
+            ("semantic:matrix_proposition_pattern_query",),
             tuple(attention),
         )
 
@@ -143,13 +275,57 @@ class ModalTurnGoalCompiler(ModalSemanticGoalCompiler):
         query: QueryCandidate,
         integration: IntegrationCommit,
     ) -> QueryBuildResult:
-        # The current quantified-query materializer creates only the quantified
-        # formula. If the same query also carries an explicit modal AST, compiling
-        # it as quantified-only would silently erase modal scope. Until a combined
-        # quantified-modal FormulaGoal contract exists, fail closed.
-        if query.quantified is not None and self._modal_expressions(query):
+        base = super()._build_quantified_formula_goal(query, integration)
+        modal_expressions = self._modal_expressions(query)
+        operators = query.scope_operators
+        if not modal_expressions and not operators:
+            return base
+        if base.goal is None:
+            return base
+        target = base.goal.goal.target
+        if not isinstance(target, FormulaGoal):
             return QueryBuildResult(
                 None,
-                ("semantic:quantified_modal_target_not_supported",),
+                ("semantic:quantified_modal_base_not_formula",),
             )
-        return super()._build_quantified_formula_goal(query, integration)
+        pattern = self._pattern_for_canonical_ref(target.expression)
+        if operators:
+            for operator in reversed(operators):
+                pattern = FormulaPattern(
+                    operator=operator.value,
+                    members=(pattern,),
+                )
+        else:
+            if len(modal_expressions) != 1:
+                return QueryBuildResult(
+                    None,
+                    (
+                        "semantic:quantified_modal_scope_not_unique:"
+                        f"{len(modal_expressions)}",
+                    ),
+                )
+            expression = modal_expressions[0]
+            if len(expression.leaf_refs()) != 1:
+                return QueryBuildResult(
+                    None,
+                    ("semantic:quantified_modal_leaf_not_unique",),
+                )
+
+            def substitute(item: PropositionExprCandidate) -> FormulaPattern:
+                if item.operator is PropositionOperator.REF:
+                    return pattern
+                return FormulaPattern(
+                    operator=(
+                        "NOT"
+                        if item.operator is PropositionOperator.FALSE
+                        else item.operator.value
+                    ),
+                    members=tuple(substitute(child) for child in item.members),
+                )
+
+            pattern = substitute(expression)
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(FormulaPatternGoal(pattern))),
+            ("semantic:quantified_modal_formula_goal", *base.diagnostics),
+            base.attention_refs,
+        )

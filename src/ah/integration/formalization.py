@@ -22,6 +22,8 @@ from ah.perception import (
     PropositionExprCandidate,
     QuantifierCandidate,
     QuantifierKind,
+    TemporalScopeCandidate,
+    TemporalScopeKind,
     PropositionRootCandidate,
     QuantifiedQuerySpec,
     QueryCandidate,
@@ -31,6 +33,10 @@ from ah.perception import (
 from ah.perception.quantifier_formalization import (
     QuantifierFormalizationError,
     QuantifierFormalizer,
+)
+from ah.perception.temporal_scope_formalization import (
+    TemporalScopeFormalizationError,
+    TemporalScopeFormalizer,
 )
 from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception.scoping import apply_speech_act_scoping
@@ -177,6 +183,28 @@ class UniversalBinding:
 
 
 @dataclass(frozen=True, slots=True)
+class TemporalScopeBinding:
+    """Runtime binding for one proposition-level temporal quantifier."""
+
+    assertion_id: str
+    variable_ref: str
+    variable_id: int
+    kind: TemporalScopeKind
+    anchor: str
+    anchor_timestamp: datetime
+
+    def __post_init__(self) -> None:
+        if not self.assertion_id.strip() or not self.variable_ref.strip():
+            raise ValueError("TemporalScopeBinding identifiers must be non-empty")
+        if self.variable_id < 0:
+            raise ValueError("TemporalScopeBinding.variable_id must be >= 0")
+        if self.anchor != "RELEVANT_PAST":
+            raise ValueError("TemporalScopeBinding requires RELEVANT_PAST")
+        if self.anchor_timestamp.tzinfo is None:
+            raise ValueError("TemporalScopeBinding anchor timestamp must be timezone-aware")
+
+
+@dataclass(frozen=True, slots=True)
 class UnresolvedTemporalRef:
     """Runtime-only relative TIME actant that lacks a legal anchor."""
 
@@ -207,6 +235,7 @@ class CandidateIR:
     discourse_refs: tuple[DiscourseRef, ...] = ()
     existential_bindings: tuple[ExistentialBinding, ...] = ()
     universal_bindings: tuple[UniversalBinding, ...] = ()
+    temporal_scope_bindings: tuple[TemporalScopeBinding, ...] = ()
     temporal_refs: tuple[UnresolvedTemporalRef, ...] = ()
     batch_kind: BatchKind = BatchKind.MESSAGE
     source_ref: str | None = None
@@ -395,6 +424,15 @@ def _namespace_assertion(item: AssertionCandidate, prefix: str, source_offset: i
             predicate=_offset_predicate(alt.predicate, source_offset),
             actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in alt.actants),
             evidence=_offset_evidence(alt.evidence, source_offset),
+            temporal_scope=(
+                None
+                if alt.temporal_scope is None
+                else replace(
+                    alt.temporal_scope,
+                    variable_ref=f"{prefix}{alt.temporal_scope.variable_ref}",
+                    evidence=_offset_evidence(alt.temporal_scope.evidence, source_offset),
+                )
+            ),
             alternatives=(),
         )
         for alt in item.alternatives
@@ -405,6 +443,15 @@ def _namespace_assertion(item: AssertionCandidate, prefix: str, source_offset: i
         predicate=_offset_predicate(item.predicate, source_offset),
         actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in item.actants),
         evidence=_offset_evidence(item.evidence, source_offset),
+        temporal_scope=(
+            None
+            if item.temporal_scope is None
+            else replace(
+                item.temporal_scope,
+                variable_ref=f"{prefix}{item.temporal_scope.variable_ref}",
+                evidence=_offset_evidence(item.temporal_scope.evidence, source_offset),
+            )
+        ),
         alternatives=alternatives,
     )
 
@@ -542,6 +589,41 @@ class SemanticConsolidator:
         self.morphology = morphology or build_morphology("auto")
         self.temporal = TemporalNormalizer()
         self.quantifier_formalizer = QuantifierFormalizer(self.morphology)
+        self.temporal_scope_formalizer = TemporalScopeFormalizer(self.morphology)
+
+    @staticmethod
+    def _flatten_runtime_alternatives(
+        result: PerceptionResult,
+    ) -> PerceptionResult:
+        """Normalize a nested alternative tree to complete correlated leaves.
+
+        Every leaf is already a complete ``AssertionCandidate`` reading.  Flattening
+        therefore preserves each source-supported role tuple while preventing later
+        passes from independently combining per-role options.  The root candidate
+        remains the source-facing placeholder and is never treated as an extra
+        reading merely because it owns the tree.
+        """
+
+        def flatten(candidate: AssertionCandidate) -> AssertionCandidate:
+            if not candidate.alternatives:
+                return candidate
+            leaves: list[AssertionCandidate] = []
+
+            def walk(item: AssertionCandidate) -> None:
+                if not item.alternatives:
+                    leaves.append(replace(item, alternatives=()))
+                    return
+                for child in item.alternatives:
+                    walk(child)
+
+            for alternative in candidate.alternatives:
+                walk(alternative)
+            return replace(candidate, alternatives=tuple(leaves))
+
+        assertions = tuple(flatten(item) for item in result.assertions)
+        if assertions == result.assertions:
+            return result
+        return replace(result, assertions=assertions)
 
     @staticmethod
     def _actant_variants(assertion: AssertionCandidate, role: ActantRole) -> tuple[ActantCandidate, ...]:
@@ -713,6 +795,63 @@ class SemanticConsolidator:
                         )
                     marks.setdefault(actant.entity_ref, quantifier)
         return rewritten, marks
+
+    def _rewrite_temporal_scopes(
+        self, result: PerceptionResult
+    ) -> tuple[PerceptionResult, dict[str, TemporalScopeCandidate]]:
+        """Normalize explicit typed scopes without interpreting source words."""
+
+        try:
+            rewritten = self.temporal_scope_formalizer.formalize(result)
+        except TemporalScopeFormalizationError as exc:
+            raise CandidateValidationError(str(exc)) from exc
+        scopes: dict[str, TemporalScopeCandidate] = {}
+        for assertion in rewritten.assertions:
+            values = tuple(
+                item.temporal_scope for item in (assertion, *assertion.alternatives)
+            )
+            present = tuple(item for item in values if item is not None)
+            if not present:
+                continue
+            semantic_keys = {
+                (item.kind, item.variable_ref, item.anchor) for item in present
+            }
+            if len(present) != len(values) or len(semantic_keys) != 1:
+                raise CandidateValidationError(
+                    f"Temporal-scope alternatives disagree for {assertion.local_id!r}"
+                )
+            scopes[assertion.local_id] = present[0]
+        return rewritten, scopes
+
+    @staticmethod
+    def _temporal_scope_bindings(
+        scopes: Mapping[str, TemporalScopeCandidate],
+        *,
+        start_at: int,
+        source_timestamp: datetime | None,
+        experience_timestamp: datetime | None,
+    ) -> tuple[TemporalScopeBinding, ...]:
+        anchor_timestamp = source_timestamp or experience_timestamp
+        if scopes and anchor_timestamp is None:
+            raise CandidateValidationError(
+                "Temporal NEVER requires an explicit relevant-past anchor"
+            )
+        if anchor_timestamp is not None and anchor_timestamp.tzinfo is None:
+            raise CandidateValidationError(
+                "Temporal NEVER relevant-past anchor must be timezone-aware"
+            )
+        assert not scopes or anchor_timestamp is not None
+        return tuple(
+            TemporalScopeBinding(
+                assertion_id=assertion_id,
+                variable_ref=scope.variable_ref,
+                variable_id=start_at + index,
+                kind=scope.kind,
+                anchor=scope.anchor,
+                anchor_timestamp=anchor_timestamp,
+            )
+            for index, (assertion_id, scope) in enumerate(scopes.items())
+        )
 
     def _negative_existential_bindings(
         self,
@@ -1097,10 +1236,12 @@ class SemanticConsolidator:
         source_timestamp: datetime | None = None,
         experience_timestamp: datetime | None = None,
     ) -> MutationPlan:
-        scoped = apply_speech_act_scoping(result)
+        flattened = self._flatten_runtime_alternatives(result)
+        scoped = apply_speech_act_scoping(flattened)
         scoped, cross_turn_existentials = self._bind_cross_turn_existential_pronouns(
             scoped, context
         )
+        scoped, temporal_scopes = self._rewrite_temporal_scopes(scoped)
         scoped, temporal_refs = self._temporalize(
             scoped, context=context, source_timestamp=source_timestamp,
             experience_timestamp=experience_timestamp,
@@ -1122,6 +1263,13 @@ class SemanticConsolidator:
         universal_bindings = self._universal_bindings(
             quantifier_marks, start_at=next_variable_id
         )
+        next_variable_id += len(universal_bindings)
+        temporal_scope_bindings = self._temporal_scope_bindings(
+            temporal_scopes,
+            start_at=next_variable_id,
+            source_timestamp=source_timestamp,
+            experience_timestamp=experience_timestamp,
+        )
         existential_bindings = cross_turn_existentials + fresh_existentials + negative_existentials
         ir = CandidateIR(
             source_text=scoped.source_text,
@@ -1130,6 +1278,7 @@ class SemanticConsolidator:
             discourse_refs=self._discourse_refs(scoped, context),
             existential_bindings=existential_bindings,
             universal_bindings=universal_bindings,
+            temporal_scope_bindings=temporal_scope_bindings,
             temporal_refs=temporal_refs,
             batch_kind=batch_kind,
             source_ref=source_ref,

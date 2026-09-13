@@ -1,6 +1,7 @@
 from .attention import AttentionFocusEvent, IgnitionInferenceAttention, InferenceAttention
 from .contracts import (
     AllOfGoal,
+    AnyOfGoal,
     AssociationGoal,
     CauseEntailmentGoal,
     CounterfactualGoal,
@@ -10,6 +11,7 @@ from .contracts import (
     DerivedLinkConclusion,
     ExistingRefConclusion,
     ExistsGoal,
+    ExactlyOneOfGoal,
     FormulaGoal,
     GoalMode,
     GoalSpec,
@@ -35,6 +37,7 @@ from .counterfactual_goal import CounterfactualSemanticGoalCompiler
 from .modal_goal import (
     FormulaPattern,
     FormulaPatternGoal,
+    MatrixFormulaPatternGoal,
     ModalInferenceEngine,
     ModalSemanticGoalCompiler,
 )
@@ -51,6 +54,7 @@ TurnGoalBuilder = AssociationTurnGoalCompiler
 __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
+    "AnyOfGoal",
     "AssociationGoal",
     "AssociationQueryBuildResult",
     "AssociationTurnGoalCompiler",
@@ -63,9 +67,11 @@ __all__ = [
     "DerivedLinkConclusion",
     "ExistingRefConclusion",
     "ExistsGoal",
+    "ExactlyOneOfGoal",
     "FormulaGoal",
     "FormulaPattern",
     "FormulaPatternGoal",
+    "MatrixFormulaPatternGoal",
     "GoalMode",
     "GoalSpec",
     "GoalRuntime",

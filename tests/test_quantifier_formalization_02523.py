@@ -15,6 +15,7 @@ from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Property, Ref
 from ah.perception import (
     ActantCandidate,
     AssertionCandidate,
+    EvidenceSpan,
     PerceptionResult,
     PredicateCandidate,
     QuantifierCandidate,
@@ -25,6 +26,7 @@ from ah.perception import (
     TemplateCandidate,
 )
 from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
+from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import MorphInfo
 
 
@@ -45,6 +47,11 @@ class Grammar:
         "инженер": ("инженер", "nomn", "masc"),
         "получателю": ("получатель", "datv", "masc"),
         "иван": ("иван", "nomn", "masc"),
+        "сотрудников": ("сотрудник", "gent", "masc"),
+        "инженеров": ("инженер", "gent", "masc"),
+        "датчик": ("датчик", "nomn", "masc"),
+        "ключом": ("ключ", "ablt", "masc"),
+        "сплава": ("сплав", "gent", "masc"),
     }
     _DETERMINERS = {
         "каждый",
@@ -52,6 +59,8 @@ class Grammar:
         "любой",
         "всякому",
         "единому",
+        "каким-нибудь",
+        "какого-нибудь",
     }
     _NUMERALS = {"один", "одной", "одним"}
     _PRONOUNS = {"кто-нибудь", "никто"}
@@ -212,6 +221,257 @@ def test_explicit_negative_binder_cannot_silently_consume_body_negation() -> Non
         QuantifierFormalizer(Grammar()).formalize(
             assertion(candidate.surface, negated=True, quantifier=candidate)
         )
+
+
+def _split_binder_result(
+    text: str,
+    left_text: str,
+    left_role: ActantRole,
+    right_text: str,
+    right_role: ActantRole,
+    decision: QuantifierProbeDecision,
+    *,
+    negated: bool = False,
+    predicate_text: str | None = None,
+) -> PerceptionResult:
+    left_start = text.index(left_text)
+    right_start = text.index(right_text, left_start + len(left_text))
+    predicate_text = predicate_text or text.rstrip(".").split()[-1]
+    predicate_start = text.rindex(predicate_text)
+    candidate = PerceptionResult(
+        text,
+        assertions=(
+            AssertionCandidate(
+                "A1",
+                PredicateCandidate(
+                    predicate_text,
+                    predicate_text,
+                    evidence=EvidenceSpan(
+                        predicate_text,
+                        predicate_start,
+                        predicate_start + len(predicate_text),
+                    ),
+                    template_candidate=TemplateCandidate(
+                        (left_role, right_role)
+                    ),
+                ),
+                (
+                    ActantCandidate(
+                        left_role,
+                        mention=left_text,
+                        evidence=EvidenceSpan(
+                            left_text, left_start, left_start + len(left_text)
+                        ),
+                    ),
+                    ActantCandidate(
+                        right_role,
+                        mention=right_text,
+                        evidence=EvidenceSpan(
+                            right_text, right_start, right_start + len(right_text)
+                        ),
+                    ),
+                ),
+                negated=negated,
+            ),
+        ),
+    )
+    return QuantifierFormalizer(Grammar()).formalize(
+        candidate, resolver=lambda *_args: decision
+    )
+
+
+@pytest.mark.parametrize(
+    ("text", "left", "kind", "restriction"),
+    (
+        (
+            "Один из сотрудников вошёл.",
+            "Один из",
+            QuantifierProbeDecision.EXISTS,
+            "сотрудник",
+        ),
+        (
+            "Каждый из инженеров вошёл.",
+            "Каждый из",
+            QuantifierProbeDecision.FORALL,
+            "инженер",
+        ),
+    ),
+)
+def test_split_partitive_binder_is_fused_with_nominal_restriction(
+    text: str,
+    left: str,
+    kind: QuantifierProbeDecision,
+    restriction: str,
+) -> None:
+    result = _split_binder_result(
+        text,
+        left,
+        ActantRole.SUBJECT,
+        text.split()[-2],
+        ActantRole.AUXILLIARY,
+        kind,
+    )
+    actants = result.assertions[0].actants
+    assert len(actants) == 1
+    assert actants[0].role is ActantRole.SUBJECT
+    assert actants[0].quantifier is not None
+    assert actants[0].quantifier.kind.value == kind.value
+    assert actants[0].quantifier.restriction_lemma == restriction
+
+
+def test_bare_pronoun_is_not_fused_with_adjacent_dative_actant() -> None:
+    class PronounGrammar(Grammar):
+        def analyze_all(self, word: str):
+            values = {
+                "его": (MorphInfo("он", "NPRO", case="accs", score=1.0),),
+                "Марии": (MorphInfo("Мария", "NOUN", case="datv", score=1.0),),
+            }
+            return values.get(word, super().analyze_all(word))
+
+    text = "Иван отправил его Марии."
+    left_start = text.index("его")
+    right_start = text.index("Марии")
+    assertion_candidate = AssertionCandidate(
+        "A1",
+        PredicateCandidate("отправил", "отправить"),
+        (
+            ActantCandidate(
+                ActantRole.OBJECT,
+                mention="его",
+                evidence=EvidenceSpan("его", left_start, left_start + 3),
+            ),
+            ActantCandidate(
+                ActantRole.RECIPIENT,
+                mention="Марии",
+                evidence=EvidenceSpan("Марии", right_start, right_start + 5),
+            ),
+        ),
+    )
+    result = QuantifierFormalizer(PronounGrammar()).formalize(
+        PerceptionResult(text, assertions=(assertion_candidate,)),
+        resolver=lambda *_args: QuantifierProbeDecision.NONE,
+    )
+
+    assert [(item.role, item.mention) for item in result.assertions[0].actants] == [
+        (ActantRole.OBJECT, "его"),
+        (ActantRole.RECIPIENT, "Марии"),
+    ]
+
+
+def test_hyphenated_role_binder_is_fused_with_its_head_noun() -> None:
+    text = "Он открыл дверь каким-нибудь ключом."
+    result = _split_binder_result(
+        text,
+        "каким",
+        ActantRole.HOW_TO,
+        "ключом",
+        ActantRole.TOOL,
+        QuantifierProbeDecision.EXISTS,
+        predicate_text="открыл",
+    )
+    actant = result.assertions[0].actants[0]
+    assert actant.role is ActantRole.TOOL
+    assert actant.quantifier is not None
+    assert actant.quantifier.restriction_lemma == "ключ"
+    assert actant.quantifier.surface == "каким-нибудь ключом"
+
+
+def test_hyphenated_material_binder_keeps_semantic_role_and_gains_restriction() -> None:
+    text = "Деталь изготовили из какого-нибудь сплава."
+    result = _split_binder_result(
+        text,
+        "из какого",
+        ActantRole.MATERIAL,
+        "сплава",
+        ActantRole.SOURCE,
+        QuantifierProbeDecision.EXISTS,
+        predicate_text="изготовили",
+    )
+    actant = result.assertions[0].actants[0]
+    assert actant.role is ActantRole.MATERIAL
+    assert actant.quantifier is not None
+    assert actant.quantifier.restriction_lemma == "сплав"
+    assert actant.quantifier.surface == "из какого-нибудь сплава"
+
+
+def test_negative_cardinal_is_not_misclassified_as_not_forall() -> None:
+    result = _split_binder_result(
+        "Ни один датчик не сработал.",
+        "Ни один",
+        ActantRole.SUBJECT,
+        "датчик",
+        ActantRole.AUXILLIARY,
+        QuantifierProbeDecision.NOT_FORALL,
+        negated=True,
+    )
+    assertion = result.assertions[0]
+    assert assertion.negated is False
+    assert assertion.actants[0].quantifier.kind is QuantifierKind.NOT_EXISTS
+    assert assertion.actants[0].quantifier.restriction_lemma == "датчик"
+
+
+def test_predicate_local_negation_stays_inside_universal_body() -> None:
+    text = "Каждый студент не сдал."
+    subject_start = text.index("Каждый")
+    predicate_start = text.index("сдал")
+    source = PerceptionResult(
+        text,
+        assertions=(
+            AssertionCandidate(
+                "A1",
+                PredicateCandidate(
+                    "сдал",
+                    "сдать",
+                    evidence=EvidenceSpan("сдал", predicate_start, predicate_start + 4),
+                    template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+                ),
+                (
+                    ActantCandidate(
+                        ActantRole.SUBJECT,
+                        mention="Каждый студент",
+                        evidence=EvidenceSpan(
+                            "Каждый студент",
+                            subject_start,
+                            subject_start + len("Каждый студент"),
+                        ),
+                    ),
+                ),
+                negated=True,
+            ),
+        ),
+    )
+    result = QuantifierFormalizer(Grammar()).formalize(
+        source,
+        # Simulate the exact erroneous bounded answer observed in acceptance.
+        resolver=lambda *_args: QuantifierProbeDecision.NOT_FORALL,
+    )
+    assertion = result.assertions[0]
+    assert assertion.negated is True
+    assert assertion.actants[0].quantifier.kind is QuantifierKind.FORALL
+
+
+def test_hyphenated_pronominal_suffix_cannot_become_predicate_head() -> None:
+    class HyphenGrammar:
+        name = "test"
+
+        def analyze_all(self, word: str):
+            values = {
+                "Кто": (MorphInfo("кто", "NPRO", case="nomn"),),
+                "нибудь": (MorphInfo("нибыть", "VERB"),),
+                "позвонил": (MorphInfo("позвонить", "VERB"),),
+            }
+            return values.get(word, ())
+
+        def analyze(self, word: str):
+            values = self.analyze_all(word)
+            return values[0] if values else None
+
+    graph = LinguisticCandidateBuilder(HyphenGrammar()).build(
+        "Кто-нибудь позвонил."
+    )
+    assert [
+        graph.token(item.token_index).text for item in graph.predicates
+    ] == ["позвонил"]
 
 
 def test_quantifier_probe_uses_one_non_thinking_fixed_label_call() -> None:

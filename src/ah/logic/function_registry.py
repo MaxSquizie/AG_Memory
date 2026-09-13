@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from ah.model import BoundVar, Operand, Ref, RefKind
+from ah.model import BoundVar, Operand, Ref, RefKind, VariableSort
 
 
 OperandValidator = Callable[[tuple[Operand, ...]], None]
@@ -17,10 +17,21 @@ def _refs_only(operands: tuple[Operand, ...]) -> None:
 
 def _proposition_refs(operands: tuple[Operand, ...]) -> None:
     _refs_only(operands)
-    invalid = [item for item in operands if isinstance(item, Ref) and item.kind not in {RefKind.N, RefKind.G}]
+    # A K operand is reserved for a canonical AMBIGUOUS_PROPOSITION group.  The
+    # registry cannot inspect graph metadata, so Integration owns that stronger
+    # validation and clarification rewires the K to its selected N/G before the
+    # formula is evaluated.
+    invalid = [
+        item
+        for item in operands
+        if isinstance(item, Ref)
+        and item.kind not in {RefKind.N, RefKind.G, RefKind.K}
+    ]
     if invalid:
         kinds = ", ".join(item.kind.value for item in invalid)
-        raise ValueError(f"Function expects proposition refs (N/G), got: {kinds}")
+        raise ValueError(
+            f"Function expects proposition refs (N/G or pending proposition K), got: {kinds}"
+        )
 
 
 def _quantifier(operands: tuple[Operand, ...]) -> None:
@@ -35,8 +46,23 @@ def _quantifier(operands: tuple[Operand, ...]) -> None:
     if len(operands) == 1:
         return
     body = operands[1]
-    if not isinstance(body, Ref) or body.kind not in {RefKind.N, RefKind.G}:
-        raise ValueError("Quantifier body must reference a proposition/formula (N/G)")
+    if not isinstance(body, Ref) or body.kind not in {
+        RefKind.N,
+        RefKind.G,
+        RefKind.K,
+    }:
+        raise ValueError(
+            "Quantifier body must reference a proposition/formula "
+            "(N/G or pending proposition K)"
+        )
+
+
+def _relevant_past(operands: tuple[Operand, ...]) -> None:
+    variable, anchor = operands
+    if not isinstance(variable, BoundVar) or variable.sort is not VariableSort.TIME:
+        raise ValueError("RELEVANT_PAST first operand must be a TIME BoundVar")
+    if not isinstance(anchor, Ref) or anchor.kind is not RefKind.M:
+        raise ValueError("RELEVANT_PAST anchor must reference semantic time M")
 
 
 def _render_quantifier(name: str, operands: tuple[str, ...]) -> str:
@@ -194,6 +220,14 @@ class FunctionRegistry:
                 lambda xs: _render_quantifier("EXISTS", xs),
                 reasoner_handler="EXISTS",
                 operand_validator=_quantifier,
+            )
+        )
+        self.register(
+            FunctionSpec(
+                "RELEVANT_PAST", 2, 2,
+                lambda xs: f"RELEVANT_PAST ({xs[0]}, {xs[1]})",
+                reasoner_handler="RELEVANT_PAST",
+                operand_validator=_relevant_past,
             )
         )
         for temporal_id in ("START", "STOP", "CONTINUE", "AGAIN", "NO_LONGER"):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ah.agent import InteractionContext
 from ah.config import InferenceSettings
@@ -27,6 +27,7 @@ from ah.perception.linguistic_candidates import (
 )
 from ah.perception.modal_formalization import ModalScopeBuilder
 from ah.perception.morphology import MorphInfo
+from ah.perception.operator_source import consume_operator_source_spans
 
 
 @dataclass(frozen=True)
@@ -282,6 +283,115 @@ def test_nonmodal_adverb_does_not_create_modal_formula() -> None:
     assert result.roots == ()
     assert result.unresolved is None
     assert calls == ["modal_operator"]
+
+
+def test_registered_modal_span_is_removed_from_provisional_ordinary_actants() -> None:
+    text = "Сервер, возможно, работает."
+    graph = _graph(
+        text,
+        (
+            ("Сервер", "NOUN"),
+            (",", None),
+            ("возможно", "ADVB"),
+            (",", None),
+            ("работает", "VERB"),
+            (".", None),
+        ),
+    )
+    assertion = _assertion(
+        "A1", "работает", "Сервер", "Сервер, возможно, работает", text
+    )
+    cue_start = text.index("возможно")
+    assertion = replace(
+        assertion,
+        predicate=replace(
+            assertion.predicate,
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.HOW_TO)
+            ),
+        ),
+        actants=(
+            *assertion.actants,
+            ActantCandidate(
+                ActantRole.HOW_TO,
+                mention="возможно",
+                evidence=EvidenceSpan(
+                    "возможно", cue_start, cue_start + len("возможно")
+                ),
+            ),
+        ),
+    )
+
+    result = ModalScopeBuilder(
+        graph,
+        lambda stage, *_args: (
+            "POSSIBLE" if stage == "modal_operator" else "UNCLEAR"
+        ),
+    ).build(text, (assertion,), {"A1": _Span(5, 5)})
+
+    assert _render(result.roots[0].expression) == "POSSIBLE(A1)"
+    assert [item.text for item in result.consumed_spans] == ["возможно"]
+    cleaned = consume_operator_source_spans(
+        (assertion,), result.consumed_spans, result.roots
+    )
+    assert tuple(item.role for item in cleaned[0].actants) == (
+        ActantRole.SUBJECT,
+    )
+    assert cleaned[0].predicate.template_candidate.roles == (
+        ActantRole.SUBJECT,
+    )
+
+
+def test_factual_discourse_span_is_consumed_without_modal_wrapper() -> None:
+    text = "Фактически, сервер работает."
+    graph = _graph(
+        text,
+        (
+            ("Фактически", "ADVB"),
+            (",", None),
+            ("сервер", "NOUN"),
+            ("работает", "VERB"),
+            (".", None),
+        ),
+    )
+    assertion = _assertion(
+        "A1", "работает", "сервер", "сервер работает", text
+    )
+    cue_start = text.index("Фактически")
+    assertion = replace(
+        assertion,
+        predicate=replace(
+            assertion.predicate,
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.HOW_TO)
+            ),
+        ),
+        actants=(
+            *assertion.actants,
+            ActantCandidate(
+                ActantRole.HOW_TO,
+                mention="Фактически",
+                evidence=EvidenceSpan(
+                    "Фактически", cue_start, cue_start + len("Фактически")
+                ),
+            ),
+        ),
+    )
+
+    result = ModalScopeBuilder(
+        graph,
+        lambda stage, *_args: (
+            "FACTUAL" if stage == "modal_operator" else "UNCLEAR"
+        ),
+    ).build(text, (assertion,), {"A1": _Span(4, 4)})
+
+    assert result.roots == ()
+    cleaned = consume_operator_source_spans(
+        (assertion,), result.consumed_spans, result.roots
+    )
+    assert tuple(item.role for item in cleaned[0].actants) == (
+        ActantRole.SUBJECT,
+    )
 
 
 def test_modal_operator_unclear_fails_closed() -> None:

@@ -74,6 +74,29 @@ def test_acceptance_sentences_are_not_a_production_temporal_dictionary() -> None
         assert case.text.casefold() not in algorithm
 
 
+def test_phase_infinitive_oracles_use_transition_operand_architecture() -> None:
+    expected = {
+        ROOT / "data" / "acceptance_oracle.json": {
+            "case_115": ("читать", 1),
+        },
+        ROOT / "data" / "acceptance_ellipsis" / "oracle.json": {
+            "ellipsis_v2_094": ("читать", 2),
+            "ellipsis_v3_127": ("писать", 2),
+            "ellipsis_v3_129": ("работать", 2),
+        },
+    }
+    for path, scenarios in expected.items():
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        by_scenario = {item["scenario"]: item for item in payload["cases"]}
+        for scenario, (predicate, count) in scenarios.items():
+            assertions = by_scenario[scenario]["expect"]["perception"]["assertions"]
+            assert len(assertions) == count
+            assert all(item["predicate"] == predicate for item in assertions)
+            assert all(item["status"] == "ASSERTED" for item in assertions)
+            assert all(item["temporal_mode"] == "TRANSITION" for item in assertions)
+            assert all(item["transition_operator"] == "START" for item in assertions)
+
+
 def test_temporal_mode_acceptance_is_bound_to_cli_gui_and_metrics_history() -> None:
     args = build_parser().parse_args(["temporal-mode-acceptance"])
     assert args.command == "temporal-mode-acceptance"

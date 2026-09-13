@@ -1,0 +1,28 @@
+{
+  "roadmap_step": "A2_PROPOSITION_QUERY_GOALS",
+  "case_count": 16,
+  "invariants": [
+    "query compilation and execution do not materialize a requested formula or branches",
+    "OR is true with one admissibly proved branch and false only when every branch is explicitly false",
+    "XOR means exactly one true branch; UNKNOWN is not FALSE",
+    "compound proposition content remains one correlated matrix actant"
+  ],
+  "cases": [
+    {"id":"or_001","text":"Правда ли, что Лев спит или Мария читает?","goal":"OR","expected":"PROVED_IF_ANY"},
+    {"id":"or_002","text":"Лев спит либо Мария читает — верно?","goal":"OR","expected":"PROVED_IF_ANY"},
+    {"id":"or_003","text":"Хотя бы одно верно: насос работает или клапан открыт?","goal":"OR","expected":"PROVED_IF_ANY"},
+    {"id":"or_004","text":"Насос работает или всё-таки клапан открыт?","goal":"OR","expected":"UNKNOWN_IF_UNRESOLVED"},
+    {"id":"xor_001","text":"Верно ли ровно одно: Лев спит либо Мария читает?","goal":"XOR","expected":"EXACTLY_ONE"},
+    {"id":"xor_002","text":"Только одно из двух верно: насос работает или клапан открыт?","goal":"XOR","expected":"EXACTLY_ONE"},
+    {"id":"xor_003","text":"Либо маяк виден, либо сирена слышна, но не оба сразу?","goal":"XOR","expected":"DISPROVED_IF_MULTIPLE"},
+    {"id":"xor_004","text":"Ровно один сигнал активен — красный или зелёный?","goal":"XOR","expected":"UNKNOWN_IS_NOT_FALSE"},
+    {"id":"matrix_001","text":"Анна считает, что Лев спит или Мария читает?","goal":"MATRIX_OR","expected":"FACT_MATCH"},
+    {"id":"matrix_002","text":"Считает ли Анна, что либо насос работает, либо клапан открыт?","goal":"MATRIX_OR","expected":"FACT_MATCH"},
+    {"id":"matrix_003","text":"Что считает Анна: что насос работает или что клапан открыт?","goal":"MATRIX_OR_FILL","expected":"BINDING"},
+    {"id":"matrix_004","text":"Кто считает, что ровно одно верно: маяк виден либо сирена слышна?","goal":"MATRIX_XOR_FILL","expected":"BINDING"},
+    {"id":"negative_001","text":"Не верно ли, что Лев спит или Мария читает?","goal":"NOT_OR","expected":"OPEN_WORLD"},
+    {"id":"ellipsis_001","text":"Верно ли: мотор исправен или — после паузы — насос запущен?","goal":"OR","expected":"PRESERVE_BRANCHES"},
+    {"id":"inversion_001","text":"Или Мария читает, или Лев спит — это верно?","goal":"OR","expected":"COMMUTATIVE"},
+    {"id":"scope_001","text":"Анна не утверждала, что насос работает или клапан открыт?","goal":"MATRIX_NOT_OR","expected":"NO_SCOPE_POLLUTION"}
+  ]
+}

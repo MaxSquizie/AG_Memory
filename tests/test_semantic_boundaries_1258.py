@@ -192,8 +192,61 @@ class StructuralNarrowing1258Tests(unittest.TestCase):
         self.assertEqual(role, ActantRole.LOCATION)
         self.assertIn("в которую", backend.calls[0][1])
 
+    def test_incompatible_modifier_agreement_separates_state_from_temporal_np(self):
+        parser = make_parser()
+        text = "Лампа оставалась включённой всю ночь."
+        tokens = parser._source_tokens(text)
+        parser._candidate_graph = LinguisticCandidateBuilder(parser.morphology).build(text)
+        predicate = parser._resolve_span(text, tokens, 2, 2)
+        candidates = parser._candidate_phrase_spans(
+            text, tokens, predicate, [], requested_spans=()
+        )
+        self.assertEqual(
+            [item.text for item in candidates],
+            ["Лампа", "включённой", "всю ночь"],
+        )
+
 
 class CompositionAndNormalization1258Tests(unittest.TestCase):
+    def test_split_clock_fragments_rejoin_only_after_time_classification(self):
+        text = "Встреча началась в 12:00."
+        hour_start = text.index("12")
+        minute_start = text.index("00")
+        hour = ActantCandidate(
+            ActantRole.TIME,
+            mention="12",
+            evidence=EvidenceSpan("12", hour_start, hour_start + 2),
+        )
+        minute = ActantCandidate(
+            ActantRole.DURATION,
+            mention="00",
+            evidence=EvidenceSpan("00", minute_start, minute_start + 2),
+        )
+        fused = AdaptivePerceptionParser._fuse_clock_time_actants(
+            text, [hour, minute]
+        )
+        self.assertEqual(
+            [(item.role, item.mention) for item in fused],
+            [(ActantRole.TIME, "12:00")],
+        )
+
+        unrelated = AdaptivePerceptionParser._fuse_clock_time_actants(
+            "Соотношение 12 к 00",
+            [
+                ActantCandidate(
+                    ActantRole.AMOUNT,
+                    mention="12",
+                    evidence=EvidenceSpan("12", 12, 14),
+                ),
+                ActantCandidate(
+                    ActantRole.AMOUNT,
+                    mention="00",
+                    evidence=EvidenceSpan("00", 17, 19),
+                ),
+            ],
+        )
+        self.assertEqual(len(unrelated), 2)
+
     def test_numeric_amount_fuses_only_into_semantically_resolved_duration(self):
         text = "Мария ждала два часа."
         amount = ActantCandidate(ActantRole.AMOUNT, mention="два", evidence=EvidenceSpan("два", 12, 15))

@@ -15,6 +15,31 @@ from .errors import CandidateValidationError
 
 class CandidateValidator:
     @staticmethod
+    def _alternative_nodes(
+        candidate: AssertionCandidate,
+    ) -> tuple[AssertionCandidate, ...]:
+        nodes: list[AssertionCandidate] = []
+
+        def walk(item: AssertionCandidate) -> None:
+            for alternative in item.alternatives:
+                nodes.append(alternative)
+                walk(alternative)
+
+        walk(candidate)
+        return tuple(nodes)
+
+    @classmethod
+    def _alternative_leaves(
+        cls,
+        candidate: AssertionCandidate,
+    ) -> tuple[AssertionCandidate, ...]:
+        return tuple(
+            item
+            for item in cls._alternative_nodes(candidate)
+            if not item.alternatives
+        )
+
+    @staticmethod
     def _validate_template_roles(predicate, roles, *, label: str) -> None:
         proposed = predicate.template_candidate
         if proposed is None:
@@ -42,14 +67,30 @@ class CandidateValidator:
             self._validate_template_roles(
                 candidate.predicate, roles, label=candidate.local_id
             )
+            if candidate.temporal_scope is not None:
+                if candidate.negated:
+                    raise CandidateValidationError(
+                        f"Temporal scope in {candidate.local_id} must consume predicate negation"
+                    )
+                scope_actants = tuple(
+                    actant
+                    for actant in candidate.actants
+                    if actant.entity_ref == candidate.temporal_scope.variable_ref
+                )
+                if len(scope_actants) != 1 or scope_actants[0].role is not ActantRole.TIME:
+                    raise CandidateValidationError(
+                        f"Temporal scope in {candidate.local_id} requires one bound TIME role"
+                    )
+                if scope_actants[0].quantifier is not None or scope_actants[0].temporal is not None:
+                    raise CandidateValidationError(
+                        f"Temporal scope TIME in {candidate.local_id} cannot be an entity quantifier/calendar value"
+                    )
 
             if candidate.alternatives:
                 alternative_role_sets: list[set] = []
-                for alt_index, alternative in enumerate(candidate.alternatives, start=1):
-                    if alternative.alternatives:
-                        raise CandidateValidationError(
-                            f"Nested runtime alternatives are not supported in {candidate.local_id}"
-                        )
+                alternatives = self._alternative_nodes(candidate)
+                leaves = self._alternative_leaves(candidate)
+                for alt_index, alternative in enumerate(alternatives, start=1):
                     if alternative.local_id != candidate.local_id:
                         raise CandidateValidationError(
                             f"Alternative local_id mismatch in {candidate.local_id}"
@@ -62,6 +103,24 @@ class CandidateValidator:
                         alternative.negated != candidate.negated
                         or alternative.status is not candidate.status
                         or alternative.quoted != candidate.quoted
+                        or (
+                            None
+                            if alternative.temporal_scope is None
+                            else (
+                                alternative.temporal_scope.kind,
+                                alternative.temporal_scope.variable_ref,
+                                alternative.temporal_scope.anchor,
+                            )
+                        )
+                        != (
+                            None
+                            if candidate.temporal_scope is None
+                            else (
+                                candidate.temporal_scope.kind,
+                                candidate.temporal_scope.variable_ref,
+                                candidate.temporal_scope.anchor,
+                            )
+                        )
                     ):
                         raise CandidateValidationError(
                             f"Alternative assertion status/scope mismatch in {candidate.local_id}"
@@ -75,7 +134,12 @@ class CandidateValidator:
                         alternative.predicate, alt_roles,
                         label=f"{candidate.local_id}.alternative#{alt_index}",
                     )
-                    alternative_role_sets.append(set(alt_roles))
+                    if not alternative.alternatives:
+                        alternative_role_sets.append(set(alt_roles))
+                if len(leaves) < 2:
+                    raise CandidateValidationError(
+                        f"Runtime alternatives in {candidate.local_id} require at least two leaf readings"
+                    )
                 if any(role_set != alternative_role_sets[0] for role_set in alternative_role_sets[1:]):
                     raise CandidateValidationError(
                         f"Runtime alternatives in {candidate.local_id} must share one role schema"
@@ -147,7 +211,7 @@ class CandidateValidator:
                 )
 
         for candidate in result.assertions:
-            variants = (candidate, *candidate.alternatives)
+            variants = (candidate, *self._alternative_nodes(candidate))
             for variant in variants:
                 for actant in variant.actants:
                     if actant.candidate_ref is not None and actant.candidate_ref not in by_id:

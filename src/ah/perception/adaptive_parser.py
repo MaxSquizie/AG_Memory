@@ -29,8 +29,16 @@ from .temporal_mode_formalization import (
     TemporalModeFormalizationError,
     TemporalModeFormalizer,
 )
+from .temporal_scope_formalization import (
+    TemporalScopeFormalizationError,
+    TemporalScopeFormalizer,
+)
 from .logical_formalization import LogicalFormBuilder
 from .modal_formalization import ModalScopeBuilder
+from .operator_source import (
+    OperatorSourceConsumptionError,
+    consume_operator_source_spans,
+)
 from .lexical_recovery import (
     LexicalRecovery,
     LexicalRecoveryStatus,
@@ -66,6 +74,7 @@ from .contracts import (
     PropositionExprCandidate,
     PropositionOperator,
     QuantifierProbeDecision,
+    TemporalScopeProbeDecision,
     TemplateCandidate,
     QueryCandidate,
     QueryMode,
@@ -332,11 +341,11 @@ _ROLE_GROUPS: dict[str, tuple[tuple[ActantRole, str], ...]] = {
         ),
         (
             ActantRole.TIME,
-            "TARGET locates the event on a timeline and answers when it happens; it does not describe how the event is performed",
+            "TARGET locates the event on a timeline and answers when it happens, including a start/end boundary or deadline; it is not an elapsed amount of time and does not describe how the event is performed",
         ),
         (
             ActantRole.DURATION,
-            "TARGET specifies the elapsed temporal length of the event/state and answers how long it lasts",
+            "TARGET specifies an elapsed amount of time and answers how long the event/state lasts; a temporal endpoint, boundary, or deadline is TIME rather than DURATION",
         ),
         (
             ActantRole.AMOUNT,
@@ -1316,6 +1325,20 @@ class AdaptivePerceptionParser:
                     tuple(self._traces),
                 )
             proposition_roots = modal.roots
+            try:
+                assertions = list(
+                    consume_operator_source_spans(
+                        assertions,
+                        modal.consumed_spans,
+                        proposition_roots,
+                        discard_source_refs=modal.discard_source_refs,
+                    )
+                )
+            except OperatorSourceConsumptionError as exc:
+                raise AdaptiveParseError(
+                    f"operator source consumption failed: {exc}",
+                    tuple(self._traces),
+                ) from exc
             logical_diagnostics = (
                 *logical_diagnostics,
                 *modal.diagnostics,
@@ -1389,6 +1412,13 @@ class AdaptivePerceptionParser:
             lexical_recovery=lexical_decisions,
         )
         try:
+            result = TemporalScopeFormalizer(self.morphology).formalize(
+                result,
+                resolver=self._resolve_temporal_scope_candidate,
+            )
+        except TemporalScopeFormalizationError as exc:
+            raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
+        try:
             result = TemporalModeFormalizer(self.morphology).formalize(
                 result,
                 resolver=self._resolve_temporal_mode_candidate,
@@ -1403,6 +1433,36 @@ class AdaptivePerceptionParser:
         except QuantifierFormalizationError as exc:
             raise AdaptiveParseError(str(exc), tuple(self._traces)) from exc
         return AdaptiveParseResult(result, tuple(self._traces))
+
+    def _resolve_temporal_scope_candidate(
+        self,
+        source_context: str,
+        assertion: AssertionCandidate,
+        candidates: tuple[EvidenceSpan, ...],
+    ) -> TemporalScopeProbeDecision:
+        """Classify one structurally narrowed negative occurrence, UID-free."""
+
+        options = "\n".join(
+            f"C{index}={item.text}" for index, item in enumerate(candidates, start=1)
+        )
+        prompt = (
+            f"TEXT:\n{source_context}\n"
+            f"PREDICATE:\n{assertion.predicate.surface}\n"
+            f"TEMPORAL CANDIDATES:\n{options or 'NONE'}\n"
+            "QUESTION:\nDoes this source assert that the positive proposition had no "
+            "occurrence anywhere in the contextually relevant past, or does it only "
+            "negate a proposition at a particular/unspecified time? Frequency meanings "
+            "such as almost never are ambiguous for this binary scope.\n"
+            "CHOICES:\nNEVER\nPLAIN_NEGATION\nAMBIGUOUS"
+        )
+        label, _margin = self._deep_semantic_choice_probe(
+            "temporal_scope",
+            prompt,
+            ("NEVER", "PLAIN_NEGATION", "AMBIGUOUS"),
+            instruction_stage="negation",
+        )
+        assert label is not None
+        return TemporalScopeProbeDecision(label)
 
     def _resolve_temporal_mode_candidate(
         self,
@@ -1436,7 +1496,10 @@ class AdaptivePerceptionParser:
             "in the stated temporal frame.\n"
             "STATE: a condition or property holds across the interval.\n"
             "EVENT: a bounded occurrence or change is viewed as a whole.\n"
-            "PROCESS: activity is viewed internally as unfolding over the interval.\n"
+            "PROCESS: an activity or change is viewed internally as unfolding over "
+            "the interval. Stable knowledge, preference, possession, status, or "
+            "condition is STATE even when expressed by an imperfective verb; use "
+            "PROCESS only when the source presents internal activity/development.\n"
             "AMBIGUOUS: the source does not determine one of those readings.\n"
             "CHOICES:\nSTATE\nEVENT\nPROCESS\nAMBIGUOUS"
         )
@@ -1698,18 +1761,31 @@ class AdaptivePerceptionParser:
         )
 
     def _unique_realization_roles(self, source_actants, target_evidence, tokens):
+        aligned_indices = self._unique_realization_slots(
+            source_actants, target_evidence, tokens
+        )
+        return {
+            target_index: source_actants[source_index].role
+            for target_index, source_index in aligned_indices.items()
+        }
+
+    def _unique_realization_slots(self, source_actants, target_evidence, tokens):
+        """Return isolated target-index -> source-index grammatical matches."""
+
         # Compatibility is grammatical possibility, not analyser-score ranking.
         # Transfer only isolated edges of the bipartite correspondence: neither
         # the source slot nor the target phrase may have a competing counterpart.
-        source = [(item.role, self._realization_signature(item.evidence, tokens))
-                  for item in source_actants]
+        source = [
+            self._realization_signature(item.evidence, tokens)
+            for item in source_actants
+        ]
         target = [self._realization_signature(evidence, tokens) for evidence in target_evidence]
         aligned = {}
         used_source = set()
         # Preserve exact parallel feature bundles first. Context can then narrow
         # case-syncretic remaining phrases, but cannot displace an exact pair.
         for exact in (True, False):
-            edges = [(i, j) for i, (_, signature) in enumerate(source)
+            edges = [(i, j) for i, signature in enumerate(source)
                      for j, other in enumerate(target)
                      if i not in used_source and j not in aligned
                      and signature is not None and other is not None
@@ -1718,7 +1794,7 @@ class AdaptivePerceptionParser:
                         if sum(a == i for a, _ in edges) == 1
                         and sum(b == j for _, b in edges) == 1]
             for i, j in isolated:
-                aligned[j] = source[i][0]
+                aligned[j] = i
                 used_source.add(i)
         return aligned
 
@@ -2104,6 +2180,31 @@ class AdaptivePerceptionParser:
                     spans_out.pop(local_id, None)
                 source_by_clause.pop(clause.clause_id, None)
 
+            # A rooted control frame may contain the same canonical role at
+            # different levels (matrix RECIPIENT and embedded RECIPIENT), while
+            # one controller identity also occupies two roles (matrix RECIPIENT
+            # and child SUBJECT). A flat role map cannot represent that topology.
+            # Keep one source slot per explicit identity and let grammatical
+            # realization align the target phrases to those identities.
+            identity_slots: list[ActantCandidate] = []
+            identity_slot_keys: list[tuple[object, ...]] = []
+            for source_item in component:
+                for source_actant in source_item.actants:
+                    if (
+                        source_actant.candidate_ref is not None
+                        or source_actant.proposition is not None
+                    ):
+                        continue
+                    identity = actant_identity(source_actant)
+                    if identity is None or identity in identity_slot_keys:
+                        continue
+                    identity_slot_keys.append(identity)
+                    identity_slots.append(source_actant)
+            hierarchical_identity_frame = len(identity_slots) > len(source_slots)
+            hierarchical_replacements: dict[
+                tuple[object, ...], ActantCandidate
+            ] | None = None
+
             old_hints = getattr(self, "_ellipsis_role_hints", {})
             old_active_clause = self._active_implicit_clause_id
             old_blocked = set(getattr(self, "_runtime_blocked_token_indices", set()))
@@ -2115,30 +2216,52 @@ class AdaptivePerceptionParser:
             self._runtime_reclaimed_predicate_indices = old_reclaimed | reclaimed_predicates
             try:
                 target_spans = self._candidate_phrase_spans(text, tokens, None, [], requested_spans=())
-                target_source = realization_representatives(
-                    source_slots,
-                    candidates,
-                    tuple(span.evidence for span in target_spans),
-                )
-                aligned = self._unique_realization_roles(
-                    target_source,
-                    [span.evidence for span in target_spans],
-                    tokens,
-                )
-                self._ellipsis_role_hints = {
-                    (target_spans[index].start_index, target_spans[index].end_index): role
-                    for index, role in aligned.items()
-                }
-                target_actants, _ = self._extract_actants(
-                    text,
-                    tokens,
-                    None,
-                    source.predicate,
-                    act_type="ASSERTION",
-                    requested_roles=(),
-                    requested_spans=(),
-                    role_whitelist=source_roles,
-                )
+                if hierarchical_identity_frame:
+                    slot_alignment = self._unique_realization_slots(
+                        identity_slots,
+                        [span.evidence for span in target_spans],
+                        tokens,
+                    )
+                    if (
+                        len(target_spans) != len(identity_slots)
+                        or len(slot_alignment) != len(target_spans)
+                    ):
+                        unresolved(clause, "hierarchical_slot_alignment_not_unique")
+                    hierarchical_replacements = {}
+                    built: list[ActantCandidate] = []
+                    for target_index, target_span in enumerate(target_spans):
+                        source_index = slot_alignment[target_index]
+                        source_slot = identity_slots[source_index]
+                        identity = identity_slot_keys[source_index]
+                        replacement = self._make_actant(source_slot.role, target_span)
+                        hierarchical_replacements[identity] = replacement
+                        built.append(replacement)
+                    target_actants = tuple(built)
+                else:
+                    target_source = realization_representatives(
+                        source_slots,
+                        candidates,
+                        tuple(span.evidence for span in target_spans),
+                    )
+                    aligned = self._unique_realization_roles(
+                        target_source,
+                        [span.evidence for span in target_spans],
+                        tokens,
+                    )
+                    self._ellipsis_role_hints = {
+                        (target_spans[index].start_index, target_spans[index].end_index): role
+                        for index, role in aligned.items()
+                    }
+                    target_actants, _ = self._extract_actants(
+                        text,
+                        tokens,
+                        None,
+                        source.predicate,
+                        act_type="ASSERTION",
+                        requested_roles=(),
+                        requested_spans=(),
+                        role_whitelist=source_roles,
+                    )
             finally:
                 self._ellipsis_role_hints = old_hints
                 self._active_implicit_clause_id = old_active_clause
@@ -2166,63 +2289,72 @@ class AdaptivePerceptionParser:
             # Exact source-grounded bundles are aligned before compatible
             # syncretic bundles, even if a bounded semantic probe initially swaps
             # two roles in the target frame.
-            target_source = realization_representatives(
-                source_slots,
-                candidates,
-                tuple(item.evidence for item in target_actants),
-            )
-            alignment = self._unique_realization_roles(
-                target_source,
-                [item.evidence for item in target_actants],
-                tokens,
-            )
-            aligned: list[ActantCandidate] = []
-            alignment_changed = False
-            for index, target_actant in enumerate(target_actants):
-                aligned_role = alignment.get(index)
-                if aligned_role is not None and aligned_role is not target_actant.role:
-                    target_actant = replace(target_actant, role=aligned_role)
-                    alignment_changed = True
-                aligned.append(target_actant)
-            if alignment_changed:
-                target_actants = tuple(aligned)
-                self._deterministic_trace(
-                    "ellipsis_slot_alignment",
-                    f"SOURCE:{source.local_id}\nTARGET_CLAUSE:{clause.span.text}",
-                    ",".join(f"{item.role.value}:{item.mention or item.normalized_hint or '?'}" for item in target_actants),
+            if hierarchical_replacements is None:
+                target_source = realization_representatives(
+                    source_slots,
+                    candidates,
+                    tuple(item.evidence for item in target_actants),
                 )
+                alignment = self._unique_realization_roles(
+                    target_source,
+                    [item.evidence for item in target_actants],
+                    tokens,
+                )
+                aligned: list[ActantCandidate] = []
+                alignment_changed = False
+                for index, target_actant in enumerate(target_actants):
+                    aligned_role = alignment.get(index)
+                    if aligned_role is not None and aligned_role is not target_actant.role:
+                        target_actant = replace(target_actant, role=aligned_role)
+                        alignment_changed = True
+                    aligned.append(target_actant)
+                if alignment_changed:
+                    target_actants = tuple(aligned)
+                    self._deterministic_trace(
+                        "ellipsis_slot_alignment",
+                        f"SOURCE:{source.local_id}\nTARGET_CLAUSE:{clause.span.text}",
+                        ",".join(f"{item.role.value}:{item.mention or item.normalized_hint or '?'}" for item in target_actants),
+                    )
 
             # One canonical slot cannot silently keep only the final filler.
             # Coordinated fillers must arrive as one explicit composition.
             if not target_actants:
                 unresolved(clause, "no_explicit_target_roles")
-            explicit_by_role = {actant.role: actant for actant in target_actants}
-            if len(explicit_by_role) != len(target_actants):
-                unresolved(clause, "duplicate_target_roles")
-            if not set(explicit_by_role) <= source_roles:
-                unresolved(clause, "target_role_outside_source_frame")
-            unresolved_inherited = set(ambiguous_source_roles or ()) - set(explicit_by_role)
-            if unresolved_inherited:
-                unresolved(
-                    clause,
-                    "source_identity_ambiguity_would_be_inherited:"
-                    + ",".join(sorted(role.value for role in unresolved_inherited)),
-                )
-            replacement_by_identity: dict[tuple[object, ...], ActantCandidate] = {}
-            for role, replacement in explicit_by_role.items():
-                source_slot = source_slots.get(role)
-                identity = None if source_slot is None else actant_identity(source_slot)
-                if identity is None:
-                    unresolved(clause, "explicit_role_has_no_source_identity")
-                previous = replacement_by_identity.get(identity)
-                if previous is not None and previous != replacement:
-                    unresolved(clause, "conflicting_correlated_role_replacements")
-                replacement_by_identity[identity] = replacement
+            if hierarchical_replacements is None:
+                explicit_by_role = {actant.role: actant for actant in target_actants}
+                if len(explicit_by_role) != len(target_actants):
+                    unresolved(clause, "duplicate_target_roles")
+                if not set(explicit_by_role) <= source_roles:
+                    unresolved(clause, "target_role_outside_source_frame")
+                unresolved_inherited = set(ambiguous_source_roles or ()) - set(explicit_by_role)
+                if unresolved_inherited:
+                    unresolved(
+                        clause,
+                        "source_identity_ambiguity_would_be_inherited:"
+                        + ",".join(sorted(role.value for role in unresolved_inherited)),
+                    )
+                replacement_by_identity: dict[tuple[object, ...], ActantCandidate] = {}
+                for role, replacement in explicit_by_role.items():
+                    source_slot = source_slots.get(role)
+                    identity = None if source_slot is None else actant_identity(source_slot)
+                    if identity is None:
+                        unresolved(clause, "explicit_role_has_no_source_identity")
+                    previous = replacement_by_identity.get(identity)
+                    if previous is not None and previous != replacement:
+                        unresolved(clause, "conflicting_correlated_role_replacements")
+                    replacement_by_identity[identity] = replacement
 
-            inherited_roles = sorted(
-                role.value for role in source_roles if role not in explicit_by_role
-            )
-            replaced_roles = sorted(role.value for role in explicit_by_role)
+                inherited_roles = sorted(
+                    role.value for role in source_roles if role not in explicit_by_role
+                )
+                replaced_roles = sorted(role.value for role in explicit_by_role)
+            else:
+                replacement_by_identity = hierarchical_replacements
+                inherited_roles = []
+                replaced_roles = sorted(
+                    f"{item.role.value}@{index}"
+                    for index, item in enumerate(identity_slots, start=1)
+                )
 
             kind = clause.ellipsis_kind
             if kind is EllipsisKind.PROPOSITION_NEGATION and source.negated:
@@ -5034,6 +5166,14 @@ class AdaptivePerceptionParser:
                     "QUESTION:\nWhich transition over the OPERAND is explicitly "
                     "asserted in this occurrence?\n"
                 )
+                + "START: an explicit onset/beginning of OPERAND.\n"
+                + "STOP: an explicit cessation/change event that ends OPERAND.\n"
+                + "CONTINUE: OPERAND explicitly persists without ending.\n"
+                + "AGAIN: OPERAND explicitly starts or occurs again.\n"
+                + "NO_LONGER: the source presents the resulting current condition "
+                + "that OPERAND does not hold anymore, rather than the cessation "
+                + "event itself.\n"
+                + "NONE: no transition meaning is contributed.\n"
                 + "CHOICES:\nSTART\nSTOP\nCONTINUE\nAGAIN\nNO_LONGER\nNONE\nUNCLEAR"
             )
             label, _margin = self._deep_semantic_choice_probe(
@@ -8008,6 +8148,7 @@ class AdaptivePerceptionParser:
                 )
 
         actants = self._split_quantified_nominal_actants(text, actants)
+        actants = self._fuse_clock_time_actants(text, actants)
         actants = self._fuse_quantified_duration_actants(text, actants)
 
         return tuple(actants), tuple(spans)
@@ -8163,6 +8304,73 @@ class AdaptivePerceptionParser:
             )
             result[result.index(duration)] = fused
             result.remove(quantity)
+        return result
+
+    @staticmethod
+    def _fuse_clock_time_actants(
+        text: str,
+        actants: list[ActantCandidate],
+    ) -> list[ActantCandidate]:
+        """Rejoin tokenizer-split ``HH:MM``/``HH:MM:SS`` TIME evidence.
+
+        This is source-shape normalization, not temporal classification: at least
+        one fragment must already have been resolved semantically as TIME. The
+        numeric ranges and literal colon adjacency distinguish a clock reading
+        from unrelated neighbouring quantities without phrase vocabulary.
+        """
+        result = list(actants)
+        eligible_roles = {ActantRole.TIME, ActantRole.DURATION, ActantRole.AMOUNT}
+        evidence_items = [
+            item
+            for item in result
+            if item.role in eligible_roles
+            and item.evidence is not None
+            and item.evidence.start is not None
+            and item.evidence.end is not None
+        ]
+        ordered = sorted(
+            evidence_items,
+            key=lambda item: item.evidence.start,  # type: ignore[union-attr]
+        )
+        for size in (3, 2):
+            for offset in range(len(ordered) - size + 1):
+                group = ordered[offset:offset + size]
+                if not any(item.role is ActantRole.TIME for item in group):
+                    continue
+                spans = [item.evidence for item in group]
+                assert all(span is not None for span in spans)
+                start = spans[0].start
+                end = spans[-1].end
+                assert start is not None and end is not None
+                if any(
+                    text[left.end:right.start] != ":"
+                    for left, right in zip(spans, spans[1:])
+                    if left is not None and right is not None
+                ):
+                    continue
+                value = text[start:end]
+                match = re.fullmatch(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", value)
+                if match is None:
+                    continue
+                hour, minute, second = (
+                    int(part) if part is not None else None
+                    for part in match.groups()
+                )
+                if hour > 23 or minute > 59 or (second is not None and second > 59):
+                    continue
+                first = group[0]
+                fused_evidence = EvidenceSpan(value, start, end)
+                fused = replace(
+                    first,
+                    role=ActantRole.TIME,
+                    mention=value,
+                    normalized_hint=None,
+                    evidence=fused_evidence,
+                )
+                result[result.index(first)] = fused
+                for item in group[1:]:
+                    result.remove(item)
+                return result
         return result
 
     @staticmethod
@@ -9022,6 +9230,7 @@ class AdaptivePerceptionParser:
         if start > limit or start in blocked:
             return None
         cursor = start
+        compatible_modifier_cases: set[str] | None = None
         while cursor <= limit and cursor not in blocked and self._has_morph(
             tokens[cursor - 1], poses={"ADJF", "PRTF", "NUMR"}
         ):
@@ -9031,6 +9240,28 @@ class AdaptivePerceptionParser:
             # following noun: ``отправил его Марии`` contains two participants.
             if self._has_structural_morph(tokens[cursor - 1], poses={"NPRO"}):
                 break
+            current_cases = {
+                info.case
+                for info in self._material_morph_analyses(tokens[cursor - 1])
+                if info.pos in {"ADJF", "PRTF", "NUMR"}
+                and info.case is not None
+            }
+            if (
+                compatible_modifier_cases is not None
+                and current_cases
+                and not (compatible_modifier_cases & current_cases)
+            ):
+                # Adjacent adjective-like material with incompatible agreement
+                # cannot jointly modify one following nominal head. Preserve the
+                # boundary so a predicative complement and a temporal/participant
+                # NP are offered as separate semantic candidates.
+                break
+            if current_cases:
+                compatible_modifier_cases = (
+                    current_cases
+                    if compatible_modifier_cases is None
+                    else compatible_modifier_cases & current_cases
+                )
             cursor += 1
         if cursor > limit or cursor in blocked or not self._has_morph(
             tokens[cursor - 1], poses={"NOUN", "NPRO"}
@@ -10657,6 +10888,7 @@ class AdaptivePerceptionParser:
         choices: tuple[str, ...],
         *,
         optional: bool = False,
+        instruction_stage: str | None = None,
     ) -> tuple[str | None, float]:
         """Resolve one rare local semantic cue without enabling model thinking.
 
@@ -10676,7 +10908,7 @@ class AdaptivePerceptionParser:
         """
         if not choices or len(set(choices)) != len(choices):
             raise AdaptiveParseError(f"{stage} requires unique fixed choices")
-        instruction = self._instruction(stage)
+        instruction = self._instruction(instruction_stage or stage)
         user_prompt = self._compose_probe_prompt(prompt, instruction)
         override = self._generation_override(8)
         # Never opt a machine-protocol semantic probe into a reasoning channel.

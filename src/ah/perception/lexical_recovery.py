@@ -86,6 +86,10 @@ class EmbeddingSemanticReranker(_core.EmbeddingSemanticReranker):
                 "top_k": 0,
                 "repetition_penalty": 1.0,
                 "no_repeat_ngram_size": 0,
+                # This is an exact-label machine protocol.  Thinking-capable
+                # templates must not spend the tiny answer budget on a hidden
+                # reasoning channel before emitting C1/C2/UNKNOWN.
+                "enable_thinking": False,
             },
             role="lexical_recovery_choice",
         )

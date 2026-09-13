@@ -1,0 +1,33 @@
+{
+  "roadmap_step": "A3_RECURSIVE_ORTHOGONAL_SCOPES",
+  "case_count": 20,
+  "invariants": [
+    "each quantified, modal, counterfactual, relation and association layer remains typed in the runtime goal",
+    "modal or counterfactual content is never lowered to ordinary factual ExistsGoal",
+    "UNKNOWN remains open-world uncertainty and is not treated as false",
+    "goal compilation and inference perform no canonical writes",
+    "quantified association selects at least one explicitly bound endpoint"
+  ],
+  "cases": [
+    {"id":"quant_modal_001","text":"Возможно ли, что каждый сотрудник прибыл?","composition":"POSSIBLE(FORALL)","expected":"TYPED_GOAL"},
+    {"id":"quant_modal_002","text":"Обязан ли хотя бы один инженер проверить шлюз?","composition":"REQUIRED(EXISTS)","expected":"TYPED_GOAL"},
+    {"id":"quant_modal_003","text":"Каждый ли маяк, вероятно, виден?","composition":"POSSIBLE(FORALL)","expected":"TYPED_GOAL"},
+    {"id":"quant_modal_004","text":"Хоть один насос разрешено запустить?","composition":"PERMITTED(EXISTS)","expected":"TYPED_GOAL"},
+    {"id":"cf_modal_001","text":"Если бы сервер работал, возможно ли, что маяк виден?","composition":"COUNTERFACTUAL(POSSIBLE)","expected":"TYPED_GOAL"},
+    {"id":"cf_modal_002","text":"Возможно ли было бы увидеть маяк, работай сервер?","composition":"COUNTERFACTUAL(POSSIBLE)","expected":"INVERSION"},
+    {"id":"cf_modal_003","text":"Если бы насос включили, обязан ли клапан открыться?","composition":"COUNTERFACTUAL(REQUIRED)","expected":"TYPED_GOAL"},
+    {"id":"cf_modal_004","text":"А если сервер работал бы — маяк, возможно, был бы виден?","composition":"COUNTERFACTUAL(POSSIBLE)","expected":"ELLIPSIS"},
+    {"id":"cf_quant_001","text":"Если бы Иван прибыл, прибыл бы кто-нибудь?","composition":"COUNTERFACTUAL(EXISTS)","expected":"EXISTS_WITNESS"},
+    {"id":"cf_quant_002","text":"При наличии хотя бы одного дежурного, если бы смена началась, ответил бы кто-нибудь?","composition":"COUNTERFACTUAL(EXISTS)","expected":"NESTED_SCOPE"},
+    {"id":"cf_quant_003","text":"Если бы сервер работал, каждый ли запрос завершился бы?","composition":"COUNTERFACTUAL(FORALL)","expected":"OPEN_WORLD"},
+    {"id":"cf_relation_001","text":"Если бы Крипл был ИИ, является ли Крипл системой?","composition":"COUNTERFACTUAL(IS-A)","expected":"DIRECT_RELATION"},
+    {"id":"cf_relation_002","text":"Являлся бы маяк сооружением, будь питание включено?","composition":"COUNTERFACTUAL(IS-A)","expected":"INVERSION"},
+    {"id":"cf_relation_003","text":"Если бы шлюз открылся, следует ли событие A за событием B?","composition":"COUNTERFACTUAL(FOLLOW)","expected":"TYPED_RELATION"},
+    {"id":"quant_assoc_001","text":"С чем связан хотя бы один город — с этой рекой?","composition":"ASSOCIATION(EXISTS,ENTITY)","expected":"TYPED_ENDPOINT"},
+    {"id":"quant_assoc_002","text":"Хотя бы один инженер и журнал: что их связывает?","composition":"ASSOCIATION(EXISTS,ENTITY)","expected":"ELLIPSIS"},
+    {"id":"quant_assoc_003","text":"С рекой связан какой-нибудь город?","composition":"ASSOCIATION(ENTITY,EXISTS)","expected":"INVERSION"},
+    {"id":"recursive_001","text":"Возможно ли, что все сотрудники прибыли, если бы Иван прибыл?","composition":"COUNTERFACTUAL(POSSIBLE(FORALL))","expected":"PRESERVE_ALL_SCOPES"},
+    {"id":"ambiguous_001","text":"Если бы сервер работал, возможно ли, что маяк виден, или он обязан быть виден?","composition":"COUNTERFACTUAL(MODAL)","expected":"AMBIGUOUS"},
+    {"id":"guard_001","text":"С чем связан журнал, если ни один выбранный конец не относится к квантору?","composition":"ASSOCIATION(QUANTIFIED)","expected":"REJECT_UNBOUND_ENDPOINTS"}
+  ]
+}

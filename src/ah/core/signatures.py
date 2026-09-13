@@ -10,6 +10,7 @@ def hypernode_signature(node: Hypernode, template: Template) -> tuple:
     Roles are normalized according to the canonical Template order.
     """
     scope = node.meta.get("semantic_scope")
+    source_scope = node.meta.get("source_scope")
     temporal_mode = node.meta.get("temporal_mode")
     def actant_signature(value):
         if isinstance(value, Ref):
@@ -30,6 +31,7 @@ def hypernode_signature(node: Hypernode, template: Template) -> tuple:
         # world level.  Scope therefore participates in N semantic identity while
         # ordinary metadata (weights, lifecycle, occurrence counters) does not.
         ("semantic_scope", str(scope)) if scope else None,
+        ("source_scope", str(source_scope)) if source_scope else None,
         # Temporal interpretation belongs to this occurrence/proposition, not T.
         # Otherwise one predicate with identical fillers but distinct STATE/EVENT
         # readings would collapse to one canonical proposition.

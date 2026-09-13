@@ -136,14 +136,14 @@ class AssociationGoal:
 
 @dataclass(frozen=True, slots=True)
 class CounterfactualGoal:
-    """Evaluate one formula under explicit temporary assumptions.
+    """Evaluate one typed goal under explicit temporary assumptions.
 
     Assumptions are canonical N/g proposition references used only by a runtime
     CounterfactualContext. They never mutate, duplicate or replace canonical AH.
     """
 
     assumptions: tuple[Ref, ...]
-    target: FormulaGoal
+    target: "InferenceGoal"
 
     def __post_init__(self) -> None:
         if not self.assumptions:
@@ -170,7 +170,29 @@ class AllOfGoal:
             raise ValueError("AllOfGoal requires at least two child goals")
 
 
-InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal
+@dataclass(frozen=True, slots=True)
+class AnyOfGoal:
+    """Disjunctive typed target; one proved child is sufficient."""
+
+    goals: tuple["InferenceGoal", ...]
+
+    def __post_init__(self) -> None:
+        if len(self.goals) < 2:
+            raise ValueError("AnyOfGoal requires at least two child goals")
+
+
+@dataclass(frozen=True, slots=True)
+class ExactlyOneOfGoal:
+    """Exclusive typed target; exactly one child must be proved."""
+
+    goals: tuple["InferenceGoal", ...]
+
+    def __post_init__(self) -> None:
+        if len(self.goals) < 2:
+            raise ValueError("ExactlyOneOfGoal requires at least two child goals")
+
+
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal | AnyOfGoal | ExactlyOneOfGoal
 GoalTarget = InferenceGoal | AssociationGoal
 
 

@@ -40,11 +40,61 @@ class CounterfactualSemanticGoalCompiler(_BaseSemanticGoalCompiler):
             and not item.quoted
         )
 
+    def _counterfactual_scoped_target(
+        self,
+        root: QueryCandidate,
+        target_ids: tuple[str, ...],
+        integrated_by_id: dict[str, object],
+        perception: PerceptionResult,
+    ) -> QueryBuildResult:
+        if not target_ids:
+            return QueryBuildResult(
+                None,
+                ("semantic:counterfactual_target_missing",),
+            )
+        if len(target_ids) != 1:
+            return QueryBuildResult(
+                None,
+                (
+                    "semantic:counterfactual_target_not_unique:"
+                    f"{len(target_ids)}",
+                ),
+            )
+        target_id = target_ids[0]
+        integrated = integrated_by_id.get(target_id)
+        if integrated is None:
+            return QueryBuildResult(
+                None,
+                ("semantic:counterfactual_target_not_materialized",),
+            )
+        relation = next(
+            (
+                item
+                for item in perception.act_relations
+                if item.act_ref == target_id
+            ),
+            None,
+        )
+        if relation is not None:
+            return self._embedded_act_relation(integrated, relation)
+        target_ref = getattr(integrated, "ref", None)
+        if not isinstance(target_ref, Ref) or target_ref.kind.value not in {"N", "G"}:
+            return QueryBuildResult(
+                None,
+                ("semantic:counterfactual_target_not_materialized",),
+            )
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(FormulaGoal(target_ref))),
+            ("semantic:counterfactual_formula_target",),
+            (target_ref,),
+        )
+
     def _counterfactual_result(
         self,
         root: QueryCandidate,
         integration: IntegrationCommit,
         perception: PerceptionResult,
+        context: InteractionContext,
     ) -> QueryBuildResult | None:
         if root.local_id is None:
             return None
@@ -82,70 +132,14 @@ class CounterfactualSemanticGoalCompiler(_BaseSemanticGoalCompiler):
                 None,
                 ("semantic:counterfactual_formula_target_required",),
             )
-        if getattr(root, "quantified", None) is not None:
-            # Counterfactual and quantified target construction are orthogonal
-            # features. Do not silently drop either scope merely because both are
-            # present in one query; composition can be added with an explicit AST
-            # contract later.
-            return QueryBuildResult(
-                None,
-                ("semantic:counterfactual_quantified_target_not_supported",),
-            )
-        if any(item.act_ref == root.local_id for item in perception.act_relations):
-            # A direct structural relation query has RelationGoal semantics. The
-            # current CounterfactualGoal explicitly wraps FormulaGoal, so silently
-            # treating that relation query as existence of a linguistic N would be
-            # unsound.
-            return QueryBuildResult(
-                None,
-                ("semantic:counterfactual_relation_target_not_supported",),
-            )
-
         assumption_scope: set[str] = set()
         for local_id in outer_assumptions:
             assumption_scope.add(local_id)
             assumption_scope.update(self._descendants(perception, local_id))
 
-        target_candidates = self._ordered_assertion_ids(
-            perception,
-            descendants - assumption_scope,
-            status=AssertionStatus.EMBEDDED,
-        )
-        if not target_candidates:
-            return QueryBuildResult(
-                None,
-                ("semantic:counterfactual_target_missing",),
-            )
-        if len(target_candidates) != 1:
-            return QueryBuildResult(
-                None,
-                (
-                    "semantic:counterfactual_target_not_unique:"
-                    f"{len(target_candidates)}",
-                ),
-            )
-
-        target_id = target_candidates[0]
-        if any(item.act_ref == target_id for item in perception.act_relations):
-            # CounterfactualGoal currently evaluates a FormulaGoal. A typed
-            # structural RelationGoal (e.g. IS-A) has different proof semantics and
-            # must not be downgraded to existence of its linguistic N wrapper.
-            return QueryBuildResult(
-                None,
-                ("semantic:counterfactual_relation_target_not_supported",),
-            )
-
         integrated_by_id = {
             item.local_id: item for item in integration.assertions
         }
-        target_item = integrated_by_id.get(target_id)
-        target_ref = getattr(target_item, "ref", None)
-        if not isinstance(target_ref, Ref) or target_ref.kind.value not in {"N", "G"}:
-            return QueryBuildResult(
-                None,
-                ("semantic:counterfactual_target_not_materialized",),
-            )
-
         assumptions: list[Ref] = []
         for local_id in outer_assumptions:
             item = integrated_by_id.get(local_id)
@@ -160,25 +154,75 @@ class CounterfactualSemanticGoalCompiler(_BaseSemanticGoalCompiler):
                 )
             assumptions.append(ref)
 
+        root_relation = next(
+            (
+                item
+                for item in perception.act_relations
+                if item.act_ref == root.local_id
+            ),
+            None,
+        )
+        if root.quantified is not None:
+            target_result = self._build_quantified_formula_goal(root, integration)
+        elif root_relation is not None:
+            target_result = self._resolve_query_relation(
+                root,
+                root_relation,
+                context,
+            )
+        else:
+            target_candidates = self._ordered_assertion_ids(
+                perception,
+                descendants - assumption_scope,
+                status=AssertionStatus.EMBEDDED,
+            )
+            target_result = self._counterfactual_scoped_target(
+                root,
+                target_candidates,
+                integrated_by_id,
+                perception,
+            )
+        if target_result.goal is None:
+            return target_result
+        target = target_result.goal.goal.target
+
         attention: list[Ref] = []
         seen: set[tuple[str, str]] = set()
-        for ref in (target_ref, *assumptions):
+        for ref in (*target_result.attention_refs, *assumptions):
             key = (ref.kind.value, ref.uid)
             if key in seen:
                 continue
             seen.add(key)
             attention.append(ref)
 
+        ordinary_formula = (
+            isinstance(target, FormulaGoal)
+            and root.quantified is None
+            and root_relation is None
+            and not root.scope_operators
+        )
+        diagnostic = (
+            "semantic:counterfactual_formula_goal"
+            if ordinary_formula
+            else "semantic:counterfactual_composed_goal:"
+            + type(target).__name__
+        )
+        diagnostics = (
+            (diagnostic,)
+            if ordinary_formula
+            else (diagnostic, *target_result.diagnostics)
+        )
         return QueryBuildResult(
             InferenceQuery(
                 GoalSpec(
                     CounterfactualGoal(
                         tuple(assumptions),
-                        FormulaGoal(target_ref),
+                        target,
                     )
-                )
+                ),
+                premise_refs=target_result.goal.premise_refs,
             ),
-            ("semantic:counterfactual_formula_goal",),
+            diagnostics,
             tuple(attention),
         )
 
@@ -215,7 +259,7 @@ class CounterfactualSemanticGoalCompiler(_BaseSemanticGoalCompiler):
         for root in roots:
             if isinstance(root, QueryCandidate):
                 counterfactual = self._counterfactual_result(
-                    root, integration, perception
+                    root, integration, perception, context
                 )
                 if counterfactual is not None:
                     results.append(counterfactual)

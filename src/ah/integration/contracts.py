@@ -109,7 +109,7 @@ class ClarificationOption:
 
 @dataclass(frozen=True, slots=True)
 class ClarificationUse:
-    """A fact/role position currently pointing at k_AMBIGUOUS."""
+    """A canonical fact/role position containing the ambiguity target."""
 
     fact_ref: Ref
     roles: tuple[ActantRole, ...]
@@ -215,6 +215,31 @@ class IntegratedQuantifiedQuery:
 
 
 @dataclass(frozen=True, slots=True)
+class IntegratedTemporalScope:
+    """Canonical NEVER root and its explicit temporal scope components."""
+
+    local_id: str
+    ref: Ref
+    existential_ref: Ref
+    member_refs: tuple[Ref, ...]
+    anchor_ref: Ref
+    variable_id: int
+    created: bool
+
+    def __post_init__(self) -> None:
+        if not self.local_id.strip():
+            raise ValueError("IntegratedTemporalScope.local_id must be non-empty")
+        if self.ref.kind.value != "G" or self.existential_ref.kind.value != "G":
+            raise ValueError("IntegratedTemporalScope formula refs must be G")
+        if self.anchor_ref.kind.value != "M":
+            raise ValueError("IntegratedTemporalScope.anchor_ref must be M")
+        if not self.member_refs:
+            raise ValueError("IntegratedTemporalScope requires a proposition member")
+        if self.variable_id < 0:
+            raise ValueError("IntegratedTemporalScope.variable_id must be >= 0")
+
+
+@dataclass(frozen=True, slots=True)
 class IntegratedFormula:
     """One source-asserted logical formula built from scoped proposition leaves."""
 
@@ -281,3 +306,4 @@ class IntegrationCommit:
     # Appended for positional-call compatibility with older IntegrationCommit code.
     formulas: tuple[IntegratedFormula, ...] = ()
     quantified_queries: tuple[IntegratedQuantifiedQuery, ...] = ()
+    temporal_scopes: tuple[IntegratedTemporalScope, ...] = ()

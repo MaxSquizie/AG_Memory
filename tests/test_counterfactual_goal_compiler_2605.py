@@ -9,6 +9,7 @@ from ah.inference import (
     FormulaGoal,
     InferenceEngine,
     LogicalStatus,
+    RelationGoal,
     SemanticGoalCompiler,
     StopReason,
 )
@@ -340,10 +341,11 @@ def test_fill_role_counterfactual_fails_closed_without_synthetic_target() -> Non
     assert built.diagnostics == ("semantic:counterfactual_formula_target_required",)
 
 
-def test_structural_relation_counterfactual_fails_closed() -> None:
-    core, context, service, _engine = _runtime()
-    _entity(core, "Крипл")
-    _entity(core, "ИИ")
+def test_structural_relation_counterfactual_preserves_typed_goal() -> None:
+    core, context, service, engine = _runtime()
+    crip = _entity(core, "Крипл")
+    ai = _entity(core, "ИИ")
+    relation = core.add_link("IS-A", crip, ai, 0.4)
     assumption = _assertion(
         "A1", "работать", "сервер", status=AssertionStatus.HYPOTHETICAL
     )
@@ -372,8 +374,20 @@ def test_structural_relation_counterfactual_fails_closed() -> None:
     )
     perception = apply_speech_act_scoping(raw)
     _commit, built = _compile(core, context, service, perception)
-    assert built.goal is None
-    assert built.diagnostics == ("semantic:counterfactual_relation_target_not_supported",)
+    assert built.goal is not None
+    goal = built.goal.goal.target
+    assert isinstance(goal, CounterfactualGoal)
+    assert goal.target == RelationGoal("IS-A", crip, ai)
+    assert built.diagnostics == (
+        "semantic:counterfactual_composed_goal:RelationGoal",
+        "semantic:direct_relation:IS-A",
+    )
+
+    outcome = engine.solve(built.goal)
+    assert outcome.status is LogicalStatus.PROVED
+    assert isinstance(outcome.proof_context, CounterfactualContext)
+    assert outcome.proof_support[0].rule_id == "DIRECT_RELATION"
+    assert relation.uid in {ref.uid for ref in outcome.proof_support[0].premise_refs}
 
 
 def test_quoted_hypothesis_edge_does_not_open_counterfactual_scope() -> None:

@@ -13,6 +13,7 @@ from ah.perception.adaptive_parser import (
     AdaptiveSettings,
 )
 from ah.perception.lexical_recovery import (
+    EmbeddingSemanticReranker,
     LexicalRecovery,
     LexicalRecoveryStatus,
     weighted_damerau_levenshtein,
@@ -120,6 +121,30 @@ class _UnavailableReranker:
     def rank(self, context: str, candidates: tuple[str, ...]) -> dict[str, float]:
         del context, candidates
         raise RuntimeError("embedding endpoint is offline")
+
+
+class _ChoiceProvider:
+    def __init__(self) -> None:
+        self.override = None
+        self.role = None
+
+    def embed(self, texts):
+        return [[1.0] for _item in texts]
+
+    def generate(self, prompt, *, system="", override=None, role="generic"):
+        del prompt, system
+        self.override = override
+        self.role = role
+        return LLMResponse("C2", {})
+
+
+def test_lexical_choice_explicitly_disables_thinking() -> None:
+    provider = _ChoiceProvider()
+    reranker = EmbeddingSemanticReranker(provider)
+
+    assert reranker.choose("Мария прочитала журнла.", ("журнал", "журнала")) == "журнала"
+    assert provider.role == "lexical_recovery_choice"
+    assert provider.override["enable_thinking"] is False
 
 
 def test_semantic_reranker_runs_only_for_the_narrow_close_shortlist(morphology) -> None:

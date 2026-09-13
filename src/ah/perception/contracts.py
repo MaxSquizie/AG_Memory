@@ -41,6 +41,42 @@ class QuantifierProbeDecision(str, Enum):
     AMBIGUOUS = "AMBIGUOUS"
 
 
+class TemporalScopeKind(str, Enum):
+    """Source-semantic temporal quantifier attached to one proposition."""
+
+    NEVER = "NEVER"
+
+
+class TemporalScopeProbeDecision(str, Enum):
+    """Closed protocol for distinguishing NEVER from ordinary negation."""
+
+    NEVER = "NEVER"
+    PLAIN_NEGATION = "PLAIN_NEGATION"
+    AMBIGUOUS = "AMBIGUOUS"
+
+
+@dataclass(frozen=True, slots=True)
+class TemporalScopeCandidate:
+    """UID-free temporal scope retained until canonical Integration.
+
+    ``variable_ref`` is a parser-local handle for the TIME binder.  ``anchor`` is
+    deliberately a semantic scope identifier rather than a timestamp: the actual
+    source/context timestamp is supplied only at Integration and becomes an
+    explicit canonical time ref.
+    """
+
+    kind: TemporalScopeKind
+    variable_ref: str
+    anchor: str = "RELEVANT_PAST"
+    evidence: EvidenceSpan | None = None
+
+    def __post_init__(self) -> None:
+        if not self.variable_ref.strip():
+            raise ValueError("TemporalScopeCandidate.variable_ref must be non-empty")
+        if self.anchor != "RELEVANT_PAST":
+            raise ValueError("TemporalScopeCandidate currently supports RELEVANT_PAST only")
+
+
 @dataclass(frozen=True, slots=True)
 class QuantifierCandidate:
     """UID-free quantifier metadata consumed by deterministic Integration.
@@ -344,6 +380,9 @@ class AssertionCandidate:
     # in another.
     temporal_mode: TemporalMode | None = None
     transition_operator: TransitionOperator | None = None
+    # Proposition-level temporal quantification.  In particular NEVER is not the
+    # same as ``negated=True``: Integration materializes NOT(EXISTS time ...).
+    temporal_scope: TemporalScopeCandidate | None = None
     # Quotation is orthogonal to conditional/embedded proposition status.  A
     # quoted assertion is represented canonically as proposition content but is
     # never eligible for ordinary asserted-fact retrieval merely because it was
@@ -355,6 +394,8 @@ class AssertionCandidate:
             raise ValueError("transition_operator requires temporal_mode=TRANSITION")
         if self.temporal_mode is TemporalMode.TRANSITION and self.transition_operator is None:
             raise ValueError("temporal_mode=TRANSITION requires transition_operator")
+        if self.temporal_scope is not None and self.transition_operator is not None:
+            raise ValueError("temporal scope cannot also be a transition occurrence")
 
 
 class CompositionOperator(str, Enum):
@@ -460,6 +501,11 @@ class QueryCandidate:
     local_id: str | None = None
     quoted: bool = False
     quantified: QuantifiedQuerySpec | None = None
+    # Outermost-first semantic wrappers over the already typed query goal. This
+    # is runtime AST metadata, not a lexical marker channel. It is primarily used
+    # when a quantifier owns the predicate body while modal scope remains
+    # orthogonal to that body (for example POSSIBLE(FORALL(...))).
+    scope_operators: tuple[PropositionOperator, ...] = ()
 
     def __post_init__(self) -> None:
         roles = self.requested_roles
@@ -473,6 +519,22 @@ class QueryCandidate:
             raise ValueError("EXISTS query cannot request role fillers")
         if self.query_mode is QueryMode.FILL_ROLE and not roles:
             raise ValueError("FILL_ROLE query requires at least one requested role")
+        if any(
+            operator
+            not in {
+                PropositionOperator.POSSIBLE,
+                PropositionOperator.REQUIRED,
+                PropositionOperator.PERMITTED,
+            }
+            for operator in self.scope_operators
+        ):
+            raise ValueError(
+                "QueryCandidate.scope_operators accepts modal operators only"
+            )
+        if self.scope_operators and self.quantified is None:
+            raise ValueError(
+                "QueryCandidate.scope_operators requires a quantified query body"
+            )
         object.__setattr__(self, "requested_roles", tuple(roles))
         # Preserve the old scalar view only when the query genuinely has one gap.
         object.__setattr__(self, "requested_role", roles[0] if len(roles) == 1 else None)

@@ -11,12 +11,14 @@ from ah.model import FunctionSymbol, Hypernode, Ref, RefKind
 from .attention import InferenceAttention
 from .contracts import (
     AllOfGoal,
+    AnyOfGoal,
     CauseEntailmentGoal,
     CounterfactualGoal,
     CompositeConclusion,
     DerivedLinkConclusion,
     ExistingRefConclusion,
     ExistsGoal,
+    ExactlyOneOfGoal,
     FormulaGoal,
     GoalSpec,
     InferenceGoal,
@@ -129,6 +131,26 @@ class InferenceEngine:
             return self._all_of(
                 goal, query, workspace_refs, attention, proof_context=proof_context, runtime=runtime
             )
+        if isinstance(goal, AnyOfGoal):
+            return self._alternative_goal(
+                goal.goals,
+                exclusive=False,
+                query=query,
+                workspace_refs=workspace_refs,
+                attention=attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
+        if isinstance(goal, ExactlyOneOfGoal):
+            return self._alternative_goal(
+                goal.goals,
+                exclusive=True,
+                query=query,
+                workspace_refs=workspace_refs,
+                attention=attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
         raise TypeError(f"Unsupported inference goal: {type(goal).__name__}")
 
     def _counterfactual(
@@ -228,7 +250,11 @@ class InferenceEngine:
         )
         runtime.subgoal(
             logical_depth=0,
-            ref=goal.target.expression,
+            ref=(
+                goal.target.expression
+                if isinstance(goal.target, FormulaGoal)
+                else None
+            ),
             detail=f"counterfactual overlay with {len(assumptions)} explicit assumption(s)",
         )
         outcome = self._solve_goal(
@@ -238,6 +264,174 @@ class InferenceEngine:
             outcome,
             diagnostics=("counterfactual overlay; canonical AH unchanged", *outcome.diagnostics),
             proof_context=context,
+        )
+
+    def _alternative_goal(
+        self,
+        goals: tuple[InferenceGoal, ...],
+        *,
+        exclusive: bool,
+        query: InferenceQuery,
+        workspace_refs: tuple[Ref, ...],
+        attention: InferenceAttention | None,
+        proof_context: ProofContext,
+        runtime: GoalRuntime,
+    ) -> InferenceOutcome:
+        """Evaluate typed OR/XOR without materializing a canonical formula."""
+
+        max_depth, budget = self._limits(query)
+        outcomes: list[InferenceOutcome] = []
+        total_expanded = 0
+        operator = "XOR" if exclusive else "OR"
+        for index, child in enumerate(goals, 1):
+            remaining_budget = budget - total_expanded
+            if remaining_budget < 1:
+                outcomes.append(
+                    InferenceOutcome(
+                        LogicalStatus.UNKNOWN,
+                        StopReason.BUDGET_EXHAUSTED,
+                        None,
+                        (),
+                        (),
+                        None,
+                        0,
+                        (f"{operator} child {index} not attempted: budget exhausted",),
+                        proof_context=proof_context,
+                    )
+                )
+                break
+            runtime.subgoal(
+                logical_depth=0,
+                detail=f"{operator} child {index}/{len(goals)}: {type(child).__name__}",
+            )
+            child_query = InferenceQuery(
+                GoalSpec(child),
+                premise_refs=query.premise_refs,
+                max_depth=max_depth,
+                max_expanded_states=remaining_budget,
+                proof_context=proof_context,
+            )
+            outcome = self._solve_goal(
+                child,
+                child_query,
+                workspace_refs,
+                attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
+            outcomes.append(outcome)
+            total_expanded += outcome.expanded_states
+            if not exclusive and outcome.status is LogicalStatus.PROVED:
+                break
+
+        evaluated = tuple(outcomes)
+        proved = tuple(
+            item for item in evaluated if item.status is LogicalStatus.PROVED
+        )
+        disproved = tuple(
+            item for item in evaluated if item.status is LogicalStatus.DISPROVED
+        )
+        selected: tuple[InferenceOutcome, ...] = ()
+        status = LogicalStatus.UNKNOWN
+        stop_reason = next(
+            (
+                item.stop_reason
+                for item in evaluated
+                if item.status is LogicalStatus.UNKNOWN
+            ),
+            StopReason.SEARCH_EXHAUSTED,
+        )
+        rule_id: str | None = None
+        conclusion = None
+        if not exclusive and proved:
+            status = LogicalStatus.PROVED
+            stop_reason = StopReason.GOAL_SATISFIED
+            selected = (proved[0],)
+            conclusion = proved[0].conclusion
+            rule_id = "OR_INTRO"
+        elif not exclusive and len(disproved) == len(goals):
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            selected = evaluated
+            rule_id = "OR_REFUTED"
+        elif exclusive and len(proved) >= 2:
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            selected = proved[:2]
+            rule_id = "XOR_MULTI_TRUE"
+        elif (
+            exclusive
+            and len(proved) == 1
+            and len(disproved) == len(goals) - 1
+        ):
+            status = LogicalStatus.PROVED
+            stop_reason = StopReason.GOAL_SATISFIED
+            selected = evaluated
+            conclusion = proved[0].conclusion
+            rule_id = "XOR_INTRO"
+        elif exclusive and len(disproved) == len(goals):
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            selected = evaluated
+            rule_id = "XOR_ALL_FALSE"
+
+        if rule_id is None:
+            return InferenceOutcome(
+                LogicalStatus.UNKNOWN,
+                stop_reason,
+                None,
+                (),
+                (),
+                None,
+                total_expanded,
+                (
+                    f"{operator} remains open: UNKNOWN is not explicit FALSE",
+                ),
+                logical_depth=max(
+                    (item.logical_depth for item in evaluated), default=0
+                ),
+                proof_context=proof_context,
+            )
+
+        premises: list[Ref] = []
+        premise_seen: set[tuple[str, str]] = set()
+        trace: list[Ref] = []
+        trace_seen: set[tuple[str, str]] = set()
+        supports: list[ProofSupport] = []
+        for outcome in selected:
+            supports.extend(outcome.proof_support)
+            for source, target, seen in (
+                (outcome.premise_refs, premises, premise_seen),
+                (outcome.uid_trace, trace, trace_seen),
+            ):
+                for ref in source:
+                    key = (ref.kind.value, ref.uid)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    target.append(ref)
+        premise_tuple = tuple(premises)
+        logical_depth = max(
+            (item.logical_depth for item in selected), default=0
+        )
+        runtime.rule(
+            rule_id,
+            logical_depth=logical_depth,
+            detail=f"runtime-only typed {operator} goal",
+        )
+        supports.append(ProofSupport(premise_tuple, rule_id=rule_id))
+        return InferenceOutcome(
+            status,
+            stop_reason,
+            conclusion,
+            premise_tuple,
+            tuple(trace),
+            domain_from_premises(self.core, premise_tuple) if premise_tuple else None,
+            total_expanded,
+            (f"Resolved runtime-only typed {operator} goal",),
+            logical_depth=logical_depth,
+            proof_support=tuple(supports),
+            proof_context=proof_context,
         )
 
     def _all_of(

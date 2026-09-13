@@ -17,7 +17,14 @@ from ah.model import (
 )
 from ah.perception.scoping import apply_speech_act_scoping
 from ah.inference.schema import InferenceSchemaRegistry
-from ah.temporal import StateTracker, ensure_time_entity, exact_datetime_from_ref
+from ah.temporal import (
+    StateTracker,
+    TemporalKind,
+    TemporalPrecision,
+    TemporalValue,
+    ensure_time_entity,
+    exact_datetime_from_ref,
+)
 from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception import (
     ActantCandidate,
@@ -47,6 +54,7 @@ from .contracts import (
     IntegratedExistential,
     IntegratedFormula,
     IntegratedQuantifiedQuery,
+    IntegratedTemporalScope,
     IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
@@ -451,6 +459,9 @@ class IntegrationService:
             discourse_refs=[item.local_id for item in ir.discourse_refs],
             existential_variable_ids=[item.variable_id for item in ir.existential_bindings],
             universal_variable_ids=[item.variable_id for item in ir.universal_bindings],
+            temporal_scope_variable_ids=[
+                item.variable_id for item in ir.temporal_scope_bindings
+            ],
             unresolved_temporal_refs=[item.local_id for item in ir.temporal_refs],
             query_count=len(ir.perception.queries),
             quantified_query_count=sum(
@@ -781,6 +792,7 @@ class IntegrationService:
         existentials: list[IntegratedExistential] = []
         universals: list[IntegratedExistential] = []
         quantified_queries: list[IntegratedQuantifiedQuery] = []
+        temporal_scopes: list[IntegratedTemporalScope] = []
         conflicts: list[IntegratedConflict] = []
         local_refs: dict[str, Ref] = {}
         entity_local_refs: dict[str, Ref] = {}
@@ -791,6 +803,10 @@ class IntegrationService:
         universal_bindings = {
             item.entity_ref: item for item in plan.candidate_ir.universal_bindings
         }
+        temporal_scope_bindings = {
+            item.assertion_id: item
+            for item in plan.candidate_ir.temporal_scope_bindings
+        }
         existential_vars = {
             item.entity_ref: BoundVar(item.variable_id, item.sort)
             for item in plan.candidate_ir.existential_bindings
@@ -799,7 +815,11 @@ class IntegrationService:
             item.entity_ref: BoundVar(item.variable_id, item.sort)
             for item in plan.candidate_ir.universal_bindings
         }
-        bound_vars = {**existential_vars, **universal_vars}
+        temporal_vars = {
+            item.variable_ref: BoundVar(item.variable_id, VariableSort.TIME)
+            for item in plan.candidate_ir.temporal_scope_bindings
+        }
+        bound_vars = {**existential_vars, **universal_vars, **temporal_vars}
 
         assertion_by_id = {item.local_id: item for item in ordered}
         ordinary_formula_roots = tuple(
@@ -948,6 +968,126 @@ class IntegrationService:
                     candidate.local_id in existential_assertion_vars
                     or candidate.local_id in universal_assertion_vars
                 )
+                temporal_scope_binding = temporal_scope_bindings.get(
+                    candidate.local_id
+                )
+                if temporal_scope_binding is not None:
+                    if quantified:
+                        raise CandidateValidationError(
+                            "Temporal NEVER combined with entity quantifiers belongs to "
+                            "the recursive scope-composition slice"
+                        )
+                    if candidate.temporal_scope is None or candidate.negated:
+                        raise CandidateValidationError(
+                            "Temporal NEVER reached Integration without normalized typed scope"
+                        )
+                    if candidate.transition_operator is not None:
+                        raise CandidateValidationError(
+                            "Temporal NEVER cannot wrap a transition occurrence"
+                        )
+
+                    if candidate.quoted:
+                        source_scope = "QUOTED"
+                    elif formula_leaf:
+                        source_scope = "LOGICAL"
+                    elif candidate.status is not AssertionStatus.ASSERTED:
+                        source_scope = candidate.status.value
+                    else:
+                        source_scope = None
+
+                    integrated = self._integrate_assertion(
+                        tx,
+                        candidate,
+                        context,
+                        local_refs,
+                        entity_local_refs,
+                        local_domain_overrides.get(candidate.local_id, forced_domain),
+                        entity_anchors=entity_anchors,
+                        speaker_ref=speaker_ref,
+                        addressee_ref=addressee_ref,
+                        count_occurrence=False,
+                        semantic_scope="TEMPORAL_NEVER",
+                        source_scope=source_scope,
+                        existential_vars=temporal_vars,
+                    )
+                    variable = temporal_vars[temporal_scope_binding.variable_ref]
+                    anchor_timestamp = temporal_scope_binding.anchor_timestamp
+                    anchor_value = TemporalValue(
+                        TemporalKind.POINT,
+                        anchor_timestamp.isoformat(),
+                        None,
+                        TemporalPrecision.SECOND,
+                        timezone=str(anchor_timestamp.tzinfo),
+                        source_text="relevant-past anchor",
+                    )
+                    anchor_ref, anchor_created = ensure_time_entity(
+                        tx, anchor_value, domain=Domain.C
+                    )
+                    relevant_past_g, relevant_past_created = tx.ensure_function(
+                        integrated.domain,
+                        "RELEVANT_PAST",
+                        (variable, anchor_ref),
+                    )
+                    relevant_past_ref = tx.ref(relevant_past_g.uid)
+                    body_g, body_created = tx.ensure_function(
+                        integrated.domain,
+                        "AND",
+                        # Prove/bind the event occurrence first, then validate the
+                        # resulting TIME binding against the explicit anchor.
+                        (integrated.ref, relevant_past_ref),
+                    )
+                    body_ref = tx.ref(body_g.uid)
+                    exists_g, exists_created = tx.ensure_function(
+                        integrated.domain,
+                        "EXISTS",
+                        (variable, body_ref),
+                    )
+                    exists_ref = tx.ref(exists_g.uid)
+                    not_g, not_created = tx.ensure_function(
+                        integrated.domain,
+                        "NOT",
+                        (exists_ref,),
+                    )
+                    never_ref = tx.ref(not_g.uid)
+                    created = any(
+                        (
+                            integrated.created,
+                            anchor_created,
+                            relevant_past_created,
+                            body_created,
+                            exists_created,
+                            not_created,
+                        )
+                    )
+                    final = IntegratedAssertion(
+                        local_id=integrated.local_id,
+                        ref=never_ref,
+                        domain=integrated.domain,
+                        created=created,
+                        ambiguous=integrated.ambiguous,
+                        semantic_scope=source_scope,
+                    )
+                    assertions.append(final)
+                    local_refs[candidate.local_id] = never_ref
+                    temporal_scopes.append(
+                        IntegratedTemporalScope(
+                            local_id=candidate.local_id,
+                            ref=never_ref,
+                            existential_ref=exists_ref,
+                            member_refs=(integrated.ref,),
+                            anchor_ref=anchor_ref,
+                            variable_id=variable.local_id,
+                            created=created,
+                        )
+                    )
+                    if source_scope is None and not formula_leaf:
+                        seeds.append(
+                            ActivationSeedRequest(
+                                never_ref,
+                                SeedReason.NEW_FACT if created else SeedReason.REACTIVATED_FACT,
+                            )
+                        )
+                    continue
                 if quantified:
                     # A quantified participant is not a semantic entity. Source
                     # assertions become QUANTIFIED pattern N and are asserted only
@@ -1092,28 +1232,41 @@ class IntegrationService:
                         semantic_scope="TRANSITION_OPERAND",
                     )
                     node = tx.store.get_hypernode(integrated.ref.uid)
+                    # A source-explicit transition is a proposition in its own
+                    # right. Materialize it before attempting the optional state
+                    # interval projection so an unavailable/non-orderable clock
+                    # point or an unmet state precondition cannot erase g_OP(P).
+                    transition_g, transition_created = tx.ensure_function(
+                        integrated.domain,
+                        candidate.transition_operator.value,
+                        (integrated.ref,),
+                    )
+                    transition_ref = tx.ref(transition_g.uid)
                     time_ref = node.actants.get(ActantRole.TIME)
                     if isinstance(time_ref, Ref) and time_ref.kind is RefKind.M:
-                        transition_ref = StateTracker(
-                            tx, default_weight=self.config.initial_hypernode_weight
-                        ).apply(
-                            integrated.ref,
-                            candidate.transition_operator,
-                            time_ref,
-                        ).transition_ref
-                        transition_created = True
-                    else:
-                        # The transition proposition itself is source-explicit even
-                        # when no calendar anchor is stated.  Materialize g_OP(P)
-                        # without inventing a TIME point or mutating state intervals;
-                        # StateTracker remains the sole authority for interval
-                        # effects once an explicit/resolved TIME exists.
-                        transition_g, transition_created = tx.ensure_function(
-                            integrated.domain,
-                            candidate.transition_operator.value,
-                            (integrated.ref,),
-                        )
-                        transition_ref = tx.ref(transition_g.uid)
+                        try:
+                            # State intervals are a derived secondary effect. A
+                            # nested transaction gives that effect its own failure
+                            # boundary while preserving the outer proposition.
+                            with tx.transaction() as state_tx:
+                                StateTracker(
+                                    state_tx,
+                                    default_weight=self.config.initial_hypernode_weight,
+                                ).apply(
+                                    integrated.ref,
+                                    candidate.transition_operator,
+                                    time_ref,
+                                )
+                        except ValueError as exc:
+                            from ah.diagnostics.session_log import emit
+
+                            emit(
+                                "state_transition_projection_skipped",
+                                local_id=candidate.local_id,
+                                operator=candidate.transition_operator.value,
+                                time_uid=time_ref.uid,
+                                reason=str(exc),
+                            )
                     final = IntegratedAssertion(
                         local_id=integrated.local_id,
                         ref=transition_ref,
@@ -1905,6 +2058,7 @@ class IntegrationService:
             universals=tuple(universals),
             conflicts=tuple(conflicts),
             quantified_queries=tuple(quantified_queries),
+            temporal_scopes=tuple(temporal_scopes),
         )
         from ah.diagnostics.session_log import emit
 
@@ -1941,6 +2095,16 @@ class IntegrationService:
                     "variable_ids": list(item.variable_ids),
                 }
                 for item in commit.quantified_queries
+            ],
+            temporal_scopes=[
+                {
+                    "local_id": item.local_id,
+                    "uid": item.ref.uid,
+                    "exists_uid": item.existential_ref.uid,
+                    "anchor_uid": item.anchor_ref.uid,
+                    "variable_id": item.variable_id,
+                }
+                for item in commit.temporal_scopes
             ],
             formulas=[
                 {
@@ -2355,7 +2519,10 @@ class IntegrationService:
         element = self.core.store.get_element_any_domain(ambiguous_ref.uid)
         if not isinstance(element, Group):
             raise CandidateValidationError("Clarification target is not a K group")
-        if element.meta.get("TYPE") == "AMBIGUOUS_REFERENCE":
+        if element.meta.get("TYPE") in {
+            "AMBIGUOUS_REFERENCE",
+            "AMBIGUOUS_PROPOSITION",
+        }:
             return self._build_clarification_request(ambiguous_ref, element)
         if element.meta.get("TYPE") == "STRUCTURAL_CLARIFICATION":
             return self._build_structural_clarification_request(ambiguous_ref, element)
@@ -2603,12 +2770,50 @@ class IntegrationService:
             if not tx.store.has_uid(ambiguous_ref.uid):
                 raise CandidateValidationError("Clarification K no longer exists")
             group = tx.store.get_element_any_domain(ambiguous_ref.uid)
-            if not isinstance(group, Group) or group.meta.get("TYPE") != "AMBIGUOUS_REFERENCE":
+            if not isinstance(group, Group) or group.meta.get("TYPE") not in {
+                "AMBIGUOUS_REFERENCE",
+                "AMBIGUOUS_PROPOSITION",
+            }:
                 raise CandidateValidationError("Clarification target is not k_AMBIGUOUS")
             if selected_ref not in group.members:
                 raise CandidateValidationError("Clarification selection is not a member of k_AMBIGUOUS")
             if not tx.store.has_uid(selected_ref.uid) or tx.store.kind_of(selected_ref.uid) is not selected_ref.kind:
                 raise CandidateValidationError("Clarification selection is not canonical")
+
+            resolution_target = selected_ref
+            if group.meta.get("TYPE") == "AMBIGUOUS_PROPOSITION":
+                self._validate_semantic_alternative_group(tx, group)
+                raw_scope = str(group.meta.get("assertion_scope") or "ASSERTED")
+                source_scope = group.meta.get("source_scope")
+                resolution_target = self._rescope_semantic_alternative(
+                    tx,
+                    selected_ref,
+                    semantic_scope=None if raw_scope == "ASSERTED" else raw_scope,
+                    source_scope=(
+                        str(source_scope) if source_scope is not None else None
+                    ),
+                    count_occurrence=(
+                        raw_scope == "ASSERTED"
+                        and not bool(group.meta.get("negated"))
+                    ),
+                )
+                current_group = tx.store.get_element_any_domain(ambiguous_ref.uid)
+                if not isinstance(current_group, Group):
+                    raise CandidateValidationError(
+                        "Semantic clarification group disappeared during resolution"
+                    )
+                group_domain = tx.store.domain_of(current_group.uid)
+                assert group_domain is not None
+                tx.edit_element(
+                    group_domain,
+                    replace(
+                        current_group,
+                        meta={
+                            **dict(current_group.meta),
+                            "resolved_to": resolution_target.uid,
+                        },
+                    ),
+                )
 
             initial_affected = tuple(
                 use.fact_ref for use in self._clarification_uses_for_ref(ambiguous_ref, core=tx)
@@ -2616,7 +2821,7 @@ class IntegrationService:
             self._replace_reference_usages(
                 tx,
                 ambiguous_ref,
-                selected_ref,
+                resolution_target,
                 delete_source=False,
                 final_by_uid=final_by_uid,
             )
@@ -2641,6 +2846,42 @@ class IntegrationService:
                 ActivationSeedRequest(ref, SeedReason.CORRECTION) for ref in affected
             ),
         )
+
+    @staticmethod
+    def _validate_semantic_alternative_group(core: AHCore, group: Group) -> None:
+        """Revalidate persisted complete readings before an atomic selection."""
+
+        labels = group.meta.get("option_labels")
+        if (
+            not isinstance(labels, (tuple, list))
+            or len(labels) != len(group.members)
+            or any(not str(label).strip() for label in labels)
+        ):
+            raise CandidateValidationError(
+                "Semantic clarification contains invalid option labels"
+            )
+        schemas: set[tuple[str, tuple[str, ...]]] = set()
+        for member in group.members:
+            if not core.store.has_uid(member.uid):
+                raise CandidateValidationError(
+                    "Clarification selection is not canonical"
+                )
+            if member.kind is RefKind.N:
+                node = core.store.get_hypernode(member.uid)
+                schemas.add(
+                    (
+                        node.template.uid,
+                        tuple(sorted(role.value for role in node.actants)),
+                    )
+                )
+            elif member.kind is not RefKind.G:
+                raise CandidateValidationError(
+                    "Semantic clarification option must be a proposition"
+                )
+        if len(schemas) > 1:
+            raise CandidateValidationError(
+                "Semantic clarification options no longer share one proposition schema"
+            )
 
     def _clarification_requests(
         self, assertions: tuple[IntegratedAssertion, ...]
@@ -2669,7 +2910,10 @@ class IntegrationService:
                 element = self.core.store.get_element_any_domain(ref.uid)
                 if not isinstance(element, Group):
                     return
-                if element.meta.get("TYPE") == "AMBIGUOUS_REFERENCE":
+                if element.meta.get("TYPE") in {
+                    "AMBIGUOUS_REFERENCE",
+                    "AMBIGUOUS_PROPOSITION",
+                }:
                     by_uid.setdefault(ref.uid, self._build_clarification_request(ref, element))
                     return
                 for child in element.members:
@@ -2680,7 +2924,15 @@ class IntegrationService:
         return tuple(by_uid.values())
 
     def _build_clarification_request(self, ref: Ref, group: Group) -> ClarificationRequest:
-        raw_labels = [self._clarification_member_label(member) for member in group.members]
+        persisted_labels = group.meta.get("option_labels")
+        if (
+            isinstance(persisted_labels, (tuple, list))
+            and len(persisted_labels) == len(group.members)
+            and all(str(label).strip() for label in persisted_labels)
+        ):
+            raw_labels = [str(label).strip() for label in persisted_labels]
+        else:
+            raw_labels = [self._clarification_member_label(member) for member in group.members]
         counts: dict[str, int] = {}
         for label in raw_labels:
             counts[label.casefold()] = counts.get(label.casefold(), 0) + 1
@@ -2704,6 +2956,11 @@ class IntegrationService:
                 for index, member in enumerate(group.members, start=1)
             ),
             uses=tuple(uses),
+            kind=(
+                "SEMANTIC_ALTERNATIVE"
+                if group.meta.get("TYPE") == "AMBIGUOUS_PROPOSITION"
+                else "ENTITY_REFERENCE"
+            ),
         )
 
     def _clarification_uses_for_ref(
@@ -2849,7 +3106,10 @@ class IntegrationService:
                             if value not in members:
                                 members.append(value)
                         if (
-                            element.meta.get("TYPE") == "AMBIGUOUS_REFERENCE"
+                            element.meta.get("TYPE") in {
+                                "AMBIGUOUS_REFERENCE",
+                                "AMBIGUOUS_PROPOSITION",
+                            }
                             and len(members) == 1
                         ):
                             # The ambiguity disappeared because two supposedly
@@ -3010,6 +3270,195 @@ class IntegrationService:
             domain=domain,
             created=created or any(item.created for item in members),
             ambiguous=any(item.ambiguous for item in members),
+        )
+
+    @staticmethod
+    def _semantic_alternative_label(candidate: AssertionCandidate) -> str:
+        """Render one UID-free complete reading for a clarification option."""
+
+        def expression_label(expr: PropositionExprCandidate) -> str:
+            if expr.operator is PropositionOperator.REF:
+                return expr.ref or "?"
+            return (
+                f"{expr.operator.value}("
+                + ",".join(expression_label(item) for item in expr.members)
+                + ")"
+            )
+
+        parts: list[str] = []
+        for actant in candidate.actants:
+            if actant.proposition is not None:
+                value = expression_label(actant.proposition)
+            elif actant.candidate_ref is not None:
+                value = actant.candidate_ref
+            elif actant.composition is not None:
+                value = actant.composition.operator.value + "(" + ", ".join(
+                    item.mention or item.normalized_hint
+                    for item in actant.composition.members
+                ) + ")"
+            else:
+                value = actant.lookup_text or actant.entity_ref or "?"
+            parts.append(f"{actant.role.value}={value}")
+        predicate = candidate.predicate.surface.strip() or candidate.predicate.lookup_form
+        return predicate + (": " + "; ".join(parts) if parts else "")
+
+    def _rescope_semantic_alternative(
+        self,
+        core: AHCore,
+        ref: Ref,
+        *,
+        semantic_scope: str | None,
+        source_scope: str | None,
+        count_occurrence: bool,
+    ) -> Ref:
+        """Promote one selected/collapsed N branch to its enclosing source scope."""
+
+        if ref.kind is not RefKind.N:
+            return ref
+        node = core.store.get_hypernode(ref.uid)
+        meta = dict(node.meta)
+        if meta.get("semantic_scope") == "AMBIGUOUS_ALTERNATIVE":
+            if semantic_scope is None:
+                meta.pop("semantic_scope", None)
+            else:
+                meta["semantic_scope"] = semantic_scope
+        if source_scope is None:
+            meta.pop("source_scope", None)
+        else:
+            meta["source_scope"] = source_scope
+        if count_occurrence:
+            meta["occurrence_count"] = max(
+                1, int(meta.get("occurrence_count", 0))
+            )
+        updated = replace(node, meta=meta)
+        template = core.store.get_template(updated.template.uid)
+        signature = hypernode_signature(updated, template)
+        existing = core.store.find_hypernode_by_signature(
+            core.store.domain_of(node.uid), signature
+        )
+        if existing is not None and existing.uid != node.uid:
+            if count_occurrence:
+                existing_domain = core.store.domain_of(existing.uid)
+                existing_meta = dict(existing.meta)
+                existing_meta["occurrence_count"] = (
+                    int(existing_meta.get("occurrence_count", 1)) + 1
+                )
+                assert existing_domain is not None
+                core.edit_element(
+                    existing_domain, replace(existing, meta=existing_meta)
+                )
+            target = core.ref(existing.uid)
+            self._replace_reference_usages(
+                core,
+                ref,
+                target,
+                delete_source=True,
+                final_by_uid={},
+            )
+            return target
+        domain = core.store.domain_of(node.uid)
+        assert domain is not None
+        core.edit_element(domain, updated)
+        return ref
+
+    def _integrate_semantic_alternatives(
+        self,
+        core: AHCore,
+        candidate: AssertionCandidate,
+        context: InteractionContext,
+        local_refs: dict[str, Ref],
+        entity_local_refs: dict[str, Ref],
+        forced_domain: Domain | None,
+        *,
+        entity_anchors: dict[str, ActantCandidate],
+        speaker_ref: Ref,
+        addressee_ref: Ref | None,
+        count_occurrence: bool,
+        semantic_scope: str | None,
+        source_scope: str | None,
+        existential_vars: dict[str, BoundVar],
+    ) -> IntegratedAssertion:
+        """Canonicalize complete correlated readings without role cross-products."""
+
+        branch_scope = semantic_scope or "AMBIGUOUS_ALTERNATIVE"
+        by_ref: dict[tuple[str, str], tuple[IntegratedAssertion, str]] = {}
+        for alternative in candidate.alternatives:
+            branch = replace(alternative, alternatives=())
+            integrated = self._integrate_assertion(
+                core,
+                branch,
+                context,
+                local_refs,
+                entity_local_refs,
+                forced_domain,
+                entity_anchors=entity_anchors,
+                speaker_ref=speaker_ref,
+                addressee_ref=addressee_ref,
+                count_occurrence=False,
+                semantic_scope=branch_scope,
+                source_scope=source_scope,
+                _allow_or_lift=True,
+                existential_vars=existential_vars,
+            )
+            by_ref.setdefault(
+                (integrated.ref.kind.value, integrated.ref.uid),
+                (integrated, self._semantic_alternative_label(branch)),
+            )
+
+        branches = tuple(item[0] for item in by_ref.values())
+        labels = tuple(item[1] for item in by_ref.values())
+        if not branches:
+            raise CandidateValidationError(
+                f"Runtime alternatives produced no canonical readings in {candidate.local_id}"
+            )
+        if len(branches) == 1:
+            collapsed = branches[0]
+            ref = self._rescope_semantic_alternative(
+                core,
+                collapsed.ref,
+                semantic_scope=semantic_scope,
+                source_scope=source_scope,
+                count_occurrence=count_occurrence,
+            )
+            return IntegratedAssertion(
+                local_id=candidate.local_id,
+                ref=ref,
+                domain=core.store.domain_of(ref.uid) or collapsed.domain,
+                created=collapsed.created,
+                ambiguous=False,
+                semantic_scope=semantic_scope,
+            )
+
+        domains = {item.domain for item in branches}
+        if len(domains) != 1:
+            raise CandidateValidationError(
+                f"Correlated alternatives in {candidate.local_id} resolved to different domains"
+            )
+        domain = branches[0].domain
+        group = core.add_group(
+            domain,
+            tuple(item.ref for item in branches),
+            meta={
+                "TYPE": "AMBIGUOUS_PROPOSITION",
+                "mention": (
+                    candidate.evidence.text
+                    if candidate.evidence is not None and candidate.evidence.text.strip()
+                    else candidate.predicate.surface
+                ),
+                "option_labels": labels,
+                "assertion_scope": semantic_scope or "ASSERTED",
+                "source_scope": source_scope,
+                "negated": candidate.negated,
+                "gc_auto_created": True,
+            },
+        )
+        return IntegratedAssertion(
+            local_id=candidate.local_id,
+            ref=core.ref(group.uid),
+            domain=domain,
+            created=True,
+            ambiguous=True,
+            semantic_scope=semantic_scope,
         )
 
     @staticmethod
@@ -3268,20 +3717,11 @@ class IntegrationService:
         addressee_ref: Ref | None,
         count_occurrence: bool = True,
         semantic_scope: str | None = None,
+        source_scope: str | None = None,
         _allow_or_lift: bool = True,
         existential_vars: dict[str, BoundVar] | None = None,
     ) -> IntegratedAssertion:
         existential_vars = existential_vars or {}
-        if _allow_or_lift and semantic_scope is None:
-            lifted = self._integrate_disjunctive_assertion(
-                core, candidate, context, local_refs, entity_local_refs, forced_domain,
-                entity_anchors=entity_anchors,
-                speaker_ref=speaker_ref, addressee_ref=addressee_ref,
-                count_occurrence=count_occurrence,
-            )
-            if lifted is not None:
-                return lifted
-
         effective_actants = candidate.actants
         alternative_role_options: dict[ActantRole, tuple[ActantCandidate, ...]] = {}
         if candidate.alternatives:
@@ -3307,11 +3747,49 @@ class IntegrationService:
                 keys = {option_key(item) for item in options}
                 if len(keys) > 1:
                     alternative_role_options[role] = options
-            if len(alternative_role_options) > 1:
-                raise CandidateValidationError(
-                    f"Correlated runtime alternatives across several roles are not yet canonicalizable: "
-                    f"{candidate.local_id}"
+
+            varies_non_entity_content = any(
+                option.candidate_ref is not None
+                or option.composition is not None
+                or option.proposition is not None
+                for options in alternative_role_options.values()
+                for option in options
+            )
+            if (
+                len(alternative_role_options) > 1
+                or semantic_scope is not None
+                or varies_non_entity_content
+            ):
+                return self._integrate_semantic_alternatives(
+                    core,
+                    candidate,
+                    context,
+                    local_refs,
+                    entity_local_refs,
+                    forced_domain,
+                    entity_anchors=entity_anchors,
+                    speaker_ref=speaker_ref,
+                    addressee_ref=addressee_ref,
+                    count_occurrence=count_occurrence,
+                    semantic_scope=semantic_scope,
+                    source_scope=source_scope,
+                    existential_vars=existential_vars,
                 )
+
+        if _allow_or_lift and semantic_scope is None:
+            lift_candidate = (
+                candidate
+                if not candidate.alternatives
+                else replace(candidate, actants=effective_actants, alternatives=())
+            )
+            lifted = self._integrate_disjunctive_assertion(
+                core, lift_candidate, context, local_refs, entity_local_refs, forced_domain,
+                entity_anchors=entity_anchors,
+                speaker_ref=speaker_ref, addressee_ref=addressee_ref,
+                count_occurrence=count_occurrence,
+            )
+            if lifted is not None:
+                return lifted
 
         roles = tuple(actant.role for actant in effective_actants)
         template_domain = forced_domain if forced_domain is not None else Domain.C
@@ -3632,6 +4110,8 @@ class IntegrationService:
         scoped_meta: dict[str, object] = {}
         if semantic_scope:
             scoped_meta["semantic_scope"] = semantic_scope
+        if source_scope:
+            scoped_meta["source_scope"] = source_scope
         if candidate.temporal_mode is not None:
             scoped_meta["temporal_mode"] = candidate.temporal_mode.value
         node, created = core.add_or_enrich_hypernode(
