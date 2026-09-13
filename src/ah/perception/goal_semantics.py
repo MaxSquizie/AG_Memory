@@ -11,6 +11,7 @@ from .contracts import (
     PredicateCandidate,
     QueryMode,
 )
+from .query_semantics import EntityIdentityQueryCandidate
 
 
 class ActRelationClassifier(Protocol):
@@ -72,7 +73,8 @@ class GoalSemanticService:
 
         for query in result.queries:
             if (
-                query.local_id is None
+                isinstance(query, EntityIdentityQueryCandidate)
+                or query.local_id is None
                 or query.local_id in covered
                 or query.quoted
                 or query.query_mode is not QueryMode.EXISTS
