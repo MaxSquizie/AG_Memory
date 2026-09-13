@@ -11,8 +11,9 @@ from ah.integration.entity_resolver import (
     ExistingEntity,
     NewEntityPlan,
 )
-from ah.model import ActantRole, Ref
+from ah.model import ActantRole, Ref, RefKind, SemanticEntity
 from ah.perception.query_semantics import EventSetQueryCandidate
+from ah.temporal import temporal_value_from_entity
 
 from .attention import InferenceAttention
 from .contracts import (
@@ -54,6 +55,38 @@ class EventMatchGoal:
 class EventQueryGoalBuilder(_BaseQueryGoalBuilder):
     """Compile an EventSetQueryCandidate without binding it to one predicate T."""
 
+    def _temporal_constraint(self, actant) -> tuple[Ref | None, str | None]:
+        temporal = actant.temporal
+        if temporal is None:
+            return None, None
+        if not temporal.resolved or temporal.value is None:
+            return None, "event_query_temporal_unresolved"
+
+        key = temporal.value.canonical_key
+        matches: list[Ref] = []
+        for ref in self.core.store.find_elements_with_property("temporal_key", key):
+            if ref.kind is not RefKind.M:
+                continue
+            try:
+                entity = self.core.store.get_element_any_domain(ref.uid)
+            except KeyError:
+                continue
+            if not isinstance(entity, SemanticEntity):
+                continue
+            value = temporal_value_from_entity(entity)
+            if value is None or value.canonical_key != key:
+                continue
+            if all(existing.uid != ref.uid for existing in matches):
+                matches.append(ref)
+        if len(matches) == 1:
+            return matches[0], None
+        if not matches:
+            # Query compilation is read-only.  Asking about a time for which no
+            # canonical time entity exists must not manufacture one; no stored fact
+            # can satisfy this exact temporal constraint anyway.
+            return None, "event_query_temporal_not_found"
+        return None, f"event_query_temporal_ambiguous:{len(matches)}"
+
     def build(
         self,
         query,
@@ -75,7 +108,20 @@ class EventQueryGoalBuilder(_BaseQueryGoalBuilder):
                 attention.append(ref)
 
         for actant in query.actants:
-            if actant.candidate_ref is not None or actant.proposition is not None:
+            if actant.role is ActantRole.TIME and actant.temporal is not None:
+                time_ref, diagnostic = self._temporal_constraint(actant)
+                if diagnostic is not None or time_ref is None:
+                    return QueryBuildResult(None, (diagnostic or "event_query_temporal_unresolved",))
+                known[ActantRole.TIME] = time_ref
+                add_attention(time_ref)
+                continue
+
+            if (
+                actant.candidate_ref is not None
+                or actant.proposition is not None
+                or actant.composition is not None
+                or actant.entity_ref is not None
+            ):
                 return QueryBuildResult(
                     None,
                     ("event_query_structured_actant_not_supported",),
