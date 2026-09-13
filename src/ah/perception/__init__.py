@@ -45,7 +45,7 @@ from .contracts import (
     StructuralClarificationSpec,
 )
 from .naming_semantics import NamingAssertionCandidate
-from .query_semantics import EventSetQueryCandidate
+from .query_semantics import EntityIdentityQueryCandidate, EventSetQueryCandidate
 from .llm_parser import (
     LLMPerceptionSettings,
     PerceptionAttemptDiagnostic,
@@ -60,9 +60,10 @@ from .association_semantics import (
     AssociationSemanticClassifier,
 )
 from .generalized_naming import GeneralizedNamingAdaptiveParser
-from .runtime_invariants import (
-    RuntimeSemanticAdaptiveParser,
-    RuntimeSemanticLLMPerceptionService as LLMPerceptionService,
+from .runtime_invariants import RuntimeSemanticAdaptiveParser
+from .identity_query import (
+    IdentityQueryAdaptiveParser,
+    IdentityQueryLLMPerceptionService as LLMPerceptionService,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
@@ -124,6 +125,7 @@ __all__ = [
     "QuantifiedQuerySpec",
     "NamingAssertionCandidate",
     "EventSetQueryCandidate",
+    "EntityIdentityQueryCandidate",
     "DiscourseRelationDecision",
     "SituationRelationCandidate",
     "SituationRelationHintCandidate",
@@ -142,6 +144,7 @@ __all__ = [
     "AssociationSemanticClassifier",
     "GeneralizedNamingAdaptiveParser",
     "RuntimeSemanticAdaptiveParser",
+    "IdentityQueryAdaptiveParser",
     "TextSensoryResult",
     "TextSensoryService",
     "TemporalCandidate",
