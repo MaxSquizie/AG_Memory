@@ -151,6 +151,8 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     config = load_config(Path(args.config))
     services = RuntimeServices.build(config)
+    if services.llm is not None and not services.llm.is_running:
+        services.llm.start()
 
     if args.command == "acceptance":
         result = run_document_acceptance(
