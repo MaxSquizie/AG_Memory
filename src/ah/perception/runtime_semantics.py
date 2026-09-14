@@ -98,6 +98,167 @@ class RuntimeSemanticAdaptiveParser(GeneralizedNamingAdaptiveParser):
     def _overlaps_any(span, others) -> bool:
         return any(span.overlaps(other) for other in others)
 
+    def _runtime_explicit_nominal(self, token) -> bool:
+        """Whether material morphology contains an actual NOUN/NPRO reading.
+
+        Production pymorphy output is intentionally ambiguous.  A substantive such
+        as ``животное`` may also expose an adjectival reading (``животный``).  The
+        copular-state detector must give the substantive reading structural priority
+        inside an NP instead of turning that NP into STATE merely because *one*
+        analysis is adjectival.
+        """
+        return any(
+            item.pos in {"NOUN", "NPRO"}
+            for item in self._material_morph_analyses(token)
+        )
+
+    def _runtime_substantivized_adjective(self, token) -> bool:
+        return any(
+            item.pos == "ADJF" and "Subx" in item.grammemes
+            for item in self._material_morph_analyses(token)
+        )
+
+    def _runtime_begins_nominal_phrase(self, token_index, tokens, clause_end) -> bool:
+        """Detect an adjective/determiner that belongs to a local NP.
+
+        This is morphology-only and vocabulary-free.  A material nominal reading on
+        the token itself is already a head.  Otherwise an adjective/participle/number
+        sequence is followed until the first material nominal (including a
+        substantivized adjective) or until the modifier chain is broken.
+        """
+        token = tokens[token_index - 1]
+        if self._runtime_explicit_nominal(token):
+            return True
+
+        cursor = token_index + 1
+        while cursor <= clause_end:
+            current = tokens[cursor - 1]
+            if self._runtime_explicit_nominal(current) or self._runtime_substantivized_adjective(current):
+                return True
+            if not self._has_structural_morph(
+                current, poses={"ADJF", "PRTF", "NUMR"}
+            ):
+                return False
+            if self._has_structural_morph(current, poses={"NPRO"}):
+                return False
+            cursor += 1
+        return False
+
+    def _deterministic_copular_state_span(
+        self,
+        text,
+        tokens,
+        predicate_span,
+        predicate,
+        selected,
+        requested_spans,
+    ):
+        """Production-safe copular STATE recovery under morphology ambiguity.
+
+        The base parser deliberately admits all lexical analyses.  That is correct
+        for semantic probing, but it is too permissive for the *structural* decision
+        that separates ``[каждое животное] [живое]``.  Here material morphology is
+        used with nominal-head precedence: an attributive determiner/NP cannot become
+        STATE solely because one token also has an adjectival reading.
+        """
+        if not self._is_copular_lookup(predicate.lookup_form):
+            return None
+        clause_start, clause_end = self._clause_bounds(predicate_span, tokens)
+        lower_bound = (
+            predicate_span.end_index + 1
+            if predicate_span is not None
+            else clause_start
+        )
+        state_poses = {"ADJF", "ADJS", "PRTS", "PRTF", "PRED"}
+        starts: list[int] = []
+        for token in tokens:
+            if token.index < lower_bound or token.index > clause_end:
+                continue
+            if any(self._span_contains(span, token.index) for span in requested_spans):
+                continue
+            if any(
+                span.start_index <= token.index <= span.end_index
+                for span in selected
+            ):
+                continue
+            if not self._has_structural_morph(token, poses=state_poses):
+                continue
+            if self._runtime_begins_nominal_phrase(
+                token.index, tokens, clause_end
+            ):
+                continue
+            # Do not start on the second member of an adjective coordination.
+            if (
+                token.index >= 3
+                and tokens[token.index - 2].text.casefold()
+                in {"и", "или", "либо"}
+                and self._has_structural_morph(
+                    tokens[token.index - 3], poses=state_poses
+                )
+            ):
+                continue
+            starts.append(token.index)
+
+        if len(starts) != 1:
+            return None
+        start = starts[0]
+        if self._candidate_graph is not None:
+            coord_matches = [
+                item
+                for item in self._candidate_graph.coordinations
+                if item.span.start_index == start
+                and item.span.end_index <= clause_end
+            ]
+            if len(coord_matches) == 1:
+                item = coord_matches[0]
+                return self._resolve_span(
+                    text, tokens, item.span.start_index, item.span.end_index
+                )
+
+        end = start
+        base_poses = {
+            item.pos
+            for item in self._material_morph_analyses(tokens[start - 1])
+            if item.pos in state_poses
+        }
+        cursor = start + 1
+        while cursor + 1 <= clause_end:
+            coordinator = tokens[cursor - 1].text.casefold()
+            if coordinator not in {"и", "или", "либо"}:
+                break
+            next_poses = {
+                item.pos
+                for item in self._material_morph_analyses(tokens[cursor])
+                if item.pos in state_poses
+            }
+            if not (base_poses & next_poses):
+                break
+            end = cursor + 1
+            cursor += 2
+        return self._resolve_span(text, tokens, start, end)
+
+    def _deterministic_role_candidates(
+        self, tokens, predicate_span, predicate, span
+    ):
+        candidates = super()._deterministic_role_candidates(
+            tokens, predicate_span, predicate, span
+        )
+        # The base structural narrowing historically used "contains any ADJF" for
+        # copular STATE.  With real morphology this turns an ordinary NP such as
+        # ``каждое животное`` into STATE because its determiner is ADJF (and the
+        # noun itself can have an adjectival homograph).  STATE is admissible only
+        # when the candidate is not a phrase with an explicit substantive head.
+        if (
+            candidates == (ActantRole.STATE,)
+            and self._is_copular_lookup(predicate.lookup_form)
+            and any(
+                self._runtime_explicit_nominal(tokens[index - 1])
+                for index in range(span.start_index, span.end_index + 1)
+            )
+        ):
+            return ()
+        return candidates
+
     def _pure_adverbial_span(self, span, tokens) -> bool:
         lexical = [
             tokens[index - 1]
