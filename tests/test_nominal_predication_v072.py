@@ -38,6 +38,19 @@ class NominalMorphology:
         "россии": (MorphInfo("россия", "NOUN", case="gent", number="sing", score=1.0),),
         "миша": (MorphInfo("миша", "NOUN", case="nomn", number="sing", score=1.0),),
         "человек": (MorphInfo("человек", "NOUN", case="nomn", number="sing", score=1.0),),
+        "каждое": (MorphInfo("каждый", "ADJF", case="nomn", number="sing", gender="neut", grammemes=frozenset({"Apro"}), score=1.0),),
+        "каждый": (MorphInfo("каждый", "ADJF", case="nomn", number="sing", gender="masc", grammemes=frozenset({"Apro"}), score=1.0),),
+        "животное": (MorphInfo("животное", "NOUN", case="nomn", number="sing", gender="neut", score=1.0),),
+        "кот": (MorphInfo("кот", "NOUN", case="nomn", number="sing", gender="masc", score=1.0),),
+        "живое": (MorphInfo("живой", "ADJF", case="nomn", number="sing", gender="neut", score=1.0),),
+        "живой": (MorphInfo("живой", "ADJF", case="nomn", number="sing", gender="masc", score=1.0),),
+        "снег": (MorphInfo("снег", "NOUN", case="nomn", number="sing", gender="masc", score=1.0),),
+        "идёт": (MorphInfo("идти", "VERB", number="sing", transitivity="intr", score=1.0),),
+        "из": (MorphInfo("из", "PREP", score=1.0),),
+        "за": (MorphInfo("за", "PREP", score=1.0),),
+        "холода": (MorphInfo("холод", "NOUN", case="gent", number="sing", gender="masc", score=1.0),),
+        "потому": (MorphInfo("потому", "ADVB", score=1.0),),
+        "холодно": (MorphInfo("холодно", "PRED", score=1.0),),
     }
 
     def analyze_all(self, word: str):
@@ -71,6 +84,8 @@ class Backend:
                 return LLMResponse("ACTOR_OR_EXPERIENCER", {})
             if "TARGET:\nРоссии" in prompt:
                 return LLMResponse("AFFECTED_OR_CONTENT", {})
+            if "TARGET:\nиз-за холода" in prompt:
+                return LLMResponse("CAUSE", {})
         if role == "perception_frame_relation":
             return LLMResponse("CONTENT_LINK", {})
         if role == "perception_coordination_shared_actant":
@@ -148,6 +163,36 @@ def test_exact_kripl_compound_nominal_predication_splits_into_two_frames():
     assert ActantRole.MATERIAL not in r1 and ActantRole.MATERIAL not in r2
     assert ActantRole.RECIPIENT not in r1 and ActantRole.RECIPIENT not in r2
     assert "perception_referential_predicative" not in backend.roles
+
+
+def test_quantified_adjective_is_not_competing_copular_state():
+    for source, subject, state in (
+        ("Каждое животное живое", "животное", "живое"),
+        ("Каждый кот живой", "кот", "живой"),
+    ):
+        result = parser().parse(source)
+        assertion = result.perception.assertions[0]
+        assert assertion.predicate.lookup_form == "быть"
+        assert roles(assertion)[ActantRole.SUBJECT].normalized_hint == subject
+        assert roles(assertion)[ActantRole.SUBJECT].evidence.text.startswith("Кажд")
+        assert roles(assertion)[ActantRole.STATE].mention == state
+        assert not any(trace.stage == "role_cue" for trace in result.traces)
+
+
+def test_hyphenated_cause_preposition_keeps_one_governed_phrase():
+    result = parser().parse("Снег идёт из-за холода")
+    assertion = result.perception.assertions[0]
+    cause = roles(assertion)[ActantRole.CAUSE]
+    assert cause.evidence.text == "из-за холода"
+    assert cause.mention == "холода"
+    assert cause.normalized_hint == "холод"
+
+
+def test_explicit_causal_subordinator_emits_oriented_cause_relation():
+    result = parser().parse("Снег идёт потому что холодно").perception
+    assert [(item.relation_id, item.source_ref, item.target_ref) for item in result.relations] == [
+        ("CAUSE", "A2", "A1")
+    ]
 
 
 

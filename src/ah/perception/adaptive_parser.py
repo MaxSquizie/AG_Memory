@@ -8071,6 +8071,15 @@ class AdaptivePerceptionParser:
                     {item for item in allowed_roles if item not in roles}
                     if allowed_roles else None
                 )
+                # A structural hint is a narrowing aid, not a second template.
+                # Once its only role is occupied it contributes no information
+                # about this different span.  Passing the resulting empty set to
+                # `_classify_role` used to manufacture the misleading
+                # ``no canonical roles remain available`` failure even though the
+                # frame still had many legal roles.  Drop only the exhausted hint
+                # and classify over the remaining canonical schema.
+                if filtered_allowed == set() and role_whitelist is None:
+                    filtered_allowed = None
                 if role_whitelist is not None:
                     remaining_whitelist = {
                         item for item in role_whitelist
@@ -8142,6 +8151,8 @@ class AdaptivePerceptionParser:
                 if role_whitelist is not None:
                     allowed = tuple(role for role in allowed if role in role_whitelist)
                 filtered = {item for item in allowed if item not in roles} if allowed else None
+                if filtered == set() and role_whitelist is None:
+                    filtered = None
                 if role_whitelist is not None:
                     remaining_whitelist = {
                         item for item in role_whitelist
@@ -8648,14 +8659,7 @@ class AdaptivePerceptionParser:
         ]
         if not tokens:
             return None
-        if (
-            len(tokens) >= 3
-            and tokens[0].text.casefold() in _SPATIAL_RELATION_ADVERBS
-            and tokens[1].text.casefold() == "с"
-        ):
-            tokens = tokens[2:]
-        elif tokens and tokens[0].has_pos("PREP"):
-            tokens = tokens[1:]
+        tokens = list(self._strip_external_governor_tokens(tokens))
         if not tokens:
             return None
 
@@ -8742,6 +8746,37 @@ class AdaptivePerceptionParser:
         "твоему", "твоим", "твоими", "твоих", "твою",
     })
 
+    def _strip_external_governor_tokens(
+        self, tokens: list[_SourceToken] | tuple[_SourceToken, ...]
+    ) -> tuple[_SourceToken, ...]:
+        """Remove an event-level adposition while preserving the governed NP.
+
+        Word-only callers do not retain the punctuation token between ``из`` and
+        ``за``.  Use exact source offsets to recognize a tight lexical hyphen and
+        remove both PREP parts.  This shares one boundary rule across identity,
+        nominal-relation and grammatical-number extraction, preventing different
+        layers from naming the same phrase as both ``за холода`` and ``холод``.
+        """
+
+        values = tuple(tokens)
+        if not values:
+            return ()
+        if (
+            len(values) >= 3
+            and values[0].text.casefold() in _SPATIAL_RELATION_ADVERBS
+            and values[1].text.casefold() == "с"
+        ):
+            return values[2:]
+        if not values[0].has_pos("PREP"):
+            return values
+        cut = 1
+        graph = self._candidate_graph
+        if graph is not None and len(values) >= 2 and values[1].has_pos("PREP"):
+            between = graph.text[values[0].end:values[1].start]
+            if between in {"-", "‐", "‑"}:
+                cut = 2
+        return values[cut:]
+
     def _nominal_relations_for_span(
         self, span: _Span, *, role: ActantRole | None = None
     ) -> tuple[NominalRelationCandidate, ...]:
@@ -8773,14 +8808,7 @@ class AdaptivePerceptionParser:
 
         # Strip only external event governors.  They describe the event-to-NP
         # relation and therefore are not part of the NP's internal structure.
-        if (
-            len(tokens) >= 3
-            and tokens[0].text.casefold() in _SPATIAL_RELATION_ADVERBS
-            and tokens[1].text.casefold() == "с"
-        ):
-            tokens = tokens[2:]
-        elif tokens and tokens[0].has_pos("PREP"):
-            tokens = tokens[1:]
+        tokens = list(self._strip_external_governor_tokens(tokens))
         if not tokens:
             return ()
 
@@ -9020,9 +9048,7 @@ class AdaptivePerceptionParser:
             and tokens[1].text.casefold() == "с"
         ):
             governed_by_preposition = True
-            tokens = tokens[2:]
-        elif tokens[0].has_pos("PREP"):
-            tokens = tokens[1:]
+        tokens = list(self._strip_external_governor_tokens(tokens))
         if not tokens:
             return span.text, None
         mention = self._semantic_token_range_text(
@@ -9386,6 +9412,25 @@ class AdaptivePerceptionParser:
             if cursor > limit or not self._has_morph(tokens[cursor - 1], poses={"PREP"}):
                 return None
             cursor += 1
+            # The source tokenizer deliberately keeps punctuation as separate
+            # evidence tokens.  Consequently a lexical preposition such as
+            # ``из-за`` / ``из-под`` arrives as PREP, '-', PREP.  Treat it as one
+            # prepositional introducer only when the hyphen is orthographically
+            # tight and both word parts independently have PREP morphology.  A
+            # spaced dash (``из — за ...``) therefore cannot be swallowed, while
+            # the complete source span remains available to the semantic-role
+            # probe instead of degrading to the incorrect fragment ``за ...``.
+            if cursor + 1 <= limit:
+                hyphen = tokens[cursor - 1]
+                second = tokens[cursor]
+                first = tokens[start - 1]
+                if (
+                    hyphen.text in {"-", "‐", "‑"}
+                    and first.end == hyphen.start
+                    and hyphen.end == second.start
+                    and self._has_morph(second, poses={"PREP"})
+                ):
+                    cursor += 2
         end = self._nominal_phrase_end(tokens, cursor, limit, blocked)
         if end is not None:
             return end
@@ -10457,6 +10502,30 @@ class AdaptivePerceptionParser:
             if any(span.start_index <= token.index <= span.end_index for span in selected):
                 continue
             if self._has_morph(token, poses={"ADJF", "ADJS", "PRTS", "PRTF", "PRED"}):
+                # An adjective-like token that begins a complete local NP is an
+                # attributive modifier/determiner, not the copular STATE.  This is
+                # especially important for universal NPs such as ``каждое
+                # животное``: treating ``каждое`` and the actual predicate
+                # ``живое`` as two competing states makes the role lattice depend
+                # on an edge model's arbitrary first choice.  The distinction is
+                # grammatical and vocabulary-free: the token is excluded only
+                # when the ordinary NP chunker finds a following nominal head.
+                cursor = token.index
+                while cursor <= clause_end:
+                    modifier = tokens[cursor - 1]
+                    if not self._has_morph(
+                        modifier, poses={"ADJF", "PRTF", "NUMR"}
+                    ):
+                        break
+                    if self._has_structural_morph(modifier, poses={"NPRO"}):
+                        break
+                    cursor += 1
+                if (
+                    cursor > token.index
+                    and cursor <= clause_end
+                    and self._has_morph(tokens[cursor - 1], poses={"NOUN", "NPRO"})
+                ):
+                    continue
                 # Do not start on the second member of an adjective coordination.
                 if token.index >= 3 and tokens[token.index - 2].text.casefold() in _COORDINATORS:
                     if self._has_morph(tokens[token.index - 3], poses={"ADJF", "ADJS", "PRTS", "PRTF", "PRED"}):
