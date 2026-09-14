@@ -33,8 +33,9 @@ from .summary import RuntimeDiagnostics, RuntimeSummary
 from .trace_view import TraceView
 from .inference_proof import (
     ProofCheck, ProofChainSnapshot, ProofEdgeSnapshot, ProofNodeSnapshot,
-    ProofSnapshotBuilder, ProofStepSnapshot,
+    ProofStepSnapshot,
 )
+from .association_proof import ProofSnapshotBuilder
 from .m2_acceptance import (
     M2AcceptanceCaseResult,
     M2AcceptanceRunResult,
