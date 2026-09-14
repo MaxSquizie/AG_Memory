@@ -6,11 +6,13 @@ The deterministic implementation remains in :mod:`lexical_recovery_core`.  This
 facade adds exactly one extra stage after that implementation has narrowed an OOV
 token to a small, morphosyntactically plausible shortlist:
 
-    deterministic ranking -> embeddings -> bounded LLM choice -> AMBIGUOUS
+    deterministic ranking -> embeddings -> bounded SOURCE/correction choice
 
-The model never proposes a spelling.  It can only return one label for an existing
-candidate, or UNKNOWN.  If embeddings fail rather than merely remain uncertain, the
-LLM stage is not used and recovery still fails closed.
+The model never proposes a spelling.  It can only preserve the exact source token,
+return one label for an existing correction candidate, or return UNKNOWN.  Preserving
+the source yields ``UNKNOWN_TOKEN`` rather than a fabricated dictionary correction;
+UNKNOWN remains a genuine unresolved ambiguity.  If embeddings fail rather than
+merely remain uncertain, the LLM stage is not used and recovery still fails closed.
 """
 
 from pathlib import Path
@@ -54,11 +56,22 @@ class EmbeddingSemanticReranker(_core.EmbeddingSemanticReranker):
         # Compatibility for callers that only implement/use the historical scorer.
         return self.rank_embedding(context, candidates)
 
-    def choose(self, context: str, candidates: tuple[str, ...]) -> str | None:
-        """Choose only among supplied candidates; malformed/uncertain output is None."""
+    def _bounded_choice(
+        self,
+        context: str,
+        candidates: tuple[str, ...],
+        *,
+        source: str | None = None,
+    ) -> str | None:
+        """Resolve SOURCE vs supplied corrections without inventing lexical forms."""
 
         generate = getattr(self.provider, "generate", None)
-        if not callable(generate) or not context.strip() or len(candidates) < 2:
+        minimum_candidates = 1 if source is not None else 2
+        if (
+            not callable(generate)
+            or not context.strip()
+            or len(candidates) < minimum_candidates
+        ):
             return None
         if not self.choice_prompt_path.is_file():
             # A missing explicit service prompt is a configuration problem.  The
@@ -84,10 +97,18 @@ class EmbeddingSemanticReranker(_core.EmbeddingSemanticReranker):
             f"{label} = {candidate}"
             for label, candidate in zip(labels, candidates)
         )
+        context_lines = [f"CONTEXT:\n{context}"]
+        choices: tuple[str, ...]
+        if source is not None:
+            context_lines.append(f"SOURCE TOKEN:\n{source}")
+            choices = ("SOURCE", *labels, "UNKNOWN")
+        else:
+            choices = (*labels, "UNKNOWN")
+        context_lines.append(f"CANDIDATE CORRECTIONS:\n{options}")
         prompt = compose_choice_prompt(
-            f"CONTEXT:\n{context}\n\nCANDIDATES:\n{options}",
+            "\n\n".join(context_lines),
             instruction,
-            (*labels, "UNKNOWN"),
+            choices,
         )
         response = generate(
             prompt,
@@ -101,22 +122,39 @@ class EmbeddingSemanticReranker(_core.EmbeddingSemanticReranker):
                 "no_repeat_ngram_size": 0,
                 # This is an exact-label machine protocol.  Thinking-capable
                 # templates must not spend the tiny answer budget on a hidden
-                # reasoning channel before emitting C1/C2/UNKNOWN.
+                # reasoning channel before emitting SOURCE/C1/C2/UNKNOWN.
                 "enable_thinking": False,
             },
             role="lexical_recovery_choice",
         )
         try:
-            label = decode_choice(str(getattr(response, "text", "")), (*labels, "UNKNOWN"))
+            label = decode_choice(str(getattr(response, "text", "")), choices)
         except ProbeProtocolError:
             return None
         if label == "UNKNOWN":
             return None
+        if label == "SOURCE":
+            return source
         return candidates[labels.index(label)]
+
+    def choose(self, context: str, candidates: tuple[str, ...]) -> str | None:
+        """Backward-compatible correction-only fixed choice."""
+        return self._bounded_choice(context, candidates)
+
+    def choose_source(
+        self,
+        context: str,
+        source: str,
+        candidates: tuple[str, ...],
+    ) -> str | None:
+        """Choose exact SOURCE, one supplied correction, or unresolved UNKNOWN."""
+        if not source.strip():
+            return None
+        return self._bounded_choice(context, candidates, source=source)
 
 
 class LexicalRecovery(_core.LexicalRecovery):
-    """Core recovery with a fixed-choice LLM only after weak embedding evidence."""
+    """Core recovery with a fixed-choice LLM only after embedding evidence."""
 
     def recover(self, text: str, tokens: tuple[Any, ...], graph: Any) -> tuple[TokenCandidate, ...]:
         del text  # offsets/raw evidence remain owned by the caller's graph
@@ -241,10 +279,12 @@ class LexicalRecovery(_core.LexicalRecovery):
             selected = best
             confidence = 0.0
             reason = ""
+            preserve_source = False
             has_context = self._has_lexical_context(token, tokens, graph)
 
             # These deterministic gates are intentionally identical to the core
-            # implementation.  The LLM never sees cases already decidable here.
+            # implementation.  The semantic model never sees cases already
+            # decidable by a strong local typo signal.
             if len(ranked) == 1:
                 confidence = 0.97
                 reason = "unique orthographic+morphosyntactic candidate"
@@ -328,14 +368,55 @@ class LexicalRecovery(_core.LexicalRecovery):
                     )
                     observed_combined_margin = semantic_margin
                     observed_semantic_margin = raw_semantic_margin
-                    if semantic_margin >= 0.10 and raw_semantic_margin >= 0.05:
+
+                    # Production lexical recovery must consider that an OOV may be
+                    # intentional language (slang, jargon, a neologism, borrowing,
+                    # etc.), not merely a misspelling of one dictionary entry.  The
+                    # source-aware bounded probe sees the exact source token and the
+                    # already narrowed correction shortlist.  It may preserve only
+                    # that exact source form; it still cannot invent a replacement.
+                    source_chooser = getattr(
+                        self.semantic_reranker, "choose_source", None
+                    )
+                    if callable(source_chooser):
+                        llm_attempted = True
+                        try:
+                            chosen = source_chooser(
+                                context,
+                                raw,
+                                tuple(item.text for item in close),
+                            )
+                        except Exception as exc:
+                            chosen = None
+                            detail = " ".join(str(exc).split())
+                            llm_error = f"{type(exc).__name__}: {detail}"[:240]
+                        if chosen == raw:
+                            preserve_source = True
+                            reason = (
+                                "bounded lexical LLM preserved exact source OOV "
+                                "after deterministic+embedding ambiguity"
+                            )
+                        elif chosen is not None:
+                            by_text = {item.text: item for item in close}
+                            selected_candidate = by_text.get(str(chosen))
+                            if selected_candidate is not None:
+                                selected = selected_candidate
+                                confidence = 0.90
+                                reason = (
+                                    "bounded lexical LLM correction after "
+                                    "deterministic+embedding ambiguity"
+                                )
+                            else:
+                                llm_unresolved = True
+                        elif llm_error is None:
+                            llm_unresolved = True
+                    elif semantic_margin >= 0.10 and raw_semantic_margin >= 0.05:
                         selected = semantic_best
                         confidence = min(0.94, 0.82 + semantic_margin / 2.0)
                         reason = "local embedding rerank after deterministic narrowing"
                     else:
-                        # Embeddings answered successfully but remained too close.
-                        # Only now is the stronger model allowed one fixed-choice
-                        # semantic decision. It cannot create a candidate.
+                        # Compatibility path for older/custom rerankers that expose
+                        # only correction selection and cannot preserve SOURCE.
                         chooser = getattr(self.semantic_reranker, "choose", None)
                         if callable(chooser):
                             llm_attempted = True
@@ -363,7 +444,19 @@ class LexicalRecovery(_core.LexicalRecovery):
                             elif llm_error is None:
                                 llm_unresolved = True
 
-            if confidence > 0.0:
+            if preserve_source:
+                decisions.append(
+                    TokenCandidate(
+                        token.index,
+                        raw,
+                        raw,
+                        LexicalRecoveryStatus.UNKNOWN_TOKEN,
+                        alternatives=display,
+                        confidence=0.90,
+                        reason=reason,
+                    )
+                )
+            elif confidence > 0.0:
                 normalized = self._restore_case(raw, selected.text)
                 decisions.append(
                     TokenCandidate(
