@@ -35,6 +35,92 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
 
     _POSSESSION_CANONICAL_PREDICATE = "иметь"
 
+    @staticmethod
+    def _clause_source_text(source_text: str, clause) -> str:
+        evidence = clause.span.evidence
+        start = getattr(evidence, "start", None)
+        end = getattr(evidence, "end", None)
+        if isinstance(start, int) and isinstance(end, int) and 0 <= start <= end <= len(source_text):
+            value = source_text[start:end].strip()
+            if value:
+                return value
+        return str(clause.span.text or "").strip()
+
+    def _resolve_relative_adverb_clause_modes(self, builder, graph):
+        """Resolve relative-adverb ambiguity from the local clause pair only.
+
+        Whole-document ingestion can pass thousands of characters through one
+        perception call. Feeding that complete chunk to a tiny RELATIVE/SUBORDINATE
+        probe makes repeated connectors such as ``где``/``когда`` indistinguishable
+        to the model. The structural graph has already isolated the child clause and
+        its parent, so expose exactly that bounded evidence instead of unrelated
+        neighbouring diary entries. The decision remains fail-closed and uses the
+        same labels and graph rewrite as the base parser.
+        """
+        ambiguous = [
+            clause
+            for clause in graph.clauses
+            if clause.relative
+            and (clause.marker or "").casefold() in {"где", "куда", "откуда", "когда"}
+        ]
+        if not ambiguous:
+            return graph
+
+        clauses = list(graph.clauses)
+        changed = False
+        for clause in ambiguous:
+            parent = next(
+                (
+                    item
+                    for item in graph.clauses
+                    if item.clause_id == clause.parent_clause_id
+                ),
+                None,
+            )
+            child_text = self._clause_source_text(graph.text, clause)
+            parent_text = (
+                self._clause_source_text(graph.text, parent)
+                if parent is not None
+                else "[no explicit parent clause]"
+            )
+            prompt = (
+                f"PARENT CLAUSE:\n{parent_text}\n"
+                f"TARGET CLAUSE:\n{child_text}\n"
+                f"CONNECTOR:\n{clause.marker}\n"
+                "Decision criterion:\nDoes this connector introduce a relative clause that modifies a nominal "
+                "anchor in PARENT CLAUSE, or an independent subordinate situation relation?\n"
+                "Candidate labels:\nRELATIVE\nSUBORDINATE"
+            )
+            decision, _ = self._exact_choice_probe(
+                "relative_clause_mode",
+                prompt,
+                ("RELATIVE", "SUBORDINATE", "UNCLEAR"),
+            )
+            if decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "relative/subordinate clause mode remains unresolved"
+                )
+            if decision == "RELATIVE":
+                continue
+            index = next(
+                i
+                for i, item in enumerate(clauses)
+                if item.clause_id == clause.clause_id
+            )
+            clauses[index] = replace(clause, relative=False)
+            changed = True
+
+        if not changed:
+            return graph
+        clause_tuple = tuple(clauses)
+        frame_graph = builder._frame_graph(
+            graph.tokens,
+            clause_tuple,
+            graph.predicates,
+            graph.frame_graph.coordinations,
+        )
+        return replace(graph, clauses=clause_tuple, frame_graph=frame_graph)
+
     def _explicit_question_words(self, tokens, predicate_span=None):
         """Keep WH material as an actant inside a zero-copula nominal question.
 
