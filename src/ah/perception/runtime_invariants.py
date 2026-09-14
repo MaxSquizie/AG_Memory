@@ -41,17 +41,144 @@ from .temporal_mode_formalization import (
 
 
 class RuntimeSemanticAdaptiveParser(_RuntimeSemanticAdaptiveParser):
-    """Production parser with a final deterministic source-time invariant.
-
-    Initial source preconsumption remains the primary path.  This final boundary is
-    intentionally independent from intermediate frame rewrites: if an explicit,
-    deterministically recognized temporal source span belongs to one unambiguous
-    final act, that act cannot leave Perception without a TIME role.
-    """
+    """Production parser with final source-semantic invariants."""
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._final_temporal_normalizer = TemporalNormalizer()
+
+    def _resolve_nominal_predication_modes(self, builder, graph):
+        """Resolve the semantic head of an explicit nominal copular shell.
+
+        The base parser correctly promotes the first RHS noun for ordinary shells
+        such as ``Москва — столица России``.  A productive taxonomic shell may,
+        however, place a relational classifier before the actual class target, as
+        in ``Лапки — это тип ножек``.  Treating that classifier as the predicate
+        leaves the class target as an extra actant and eventually raises
+        ``target semantic role remains unresolved``.
+
+        This override does not maintain a vocabulary of classifier words.  Only
+        when the already licensed nominal predicate has several RHS nominal heads
+        do we ask one bounded source-only semantic question: which listed nominal,
+        if any, is the class/type directly asserted of the left referent?  Choosing
+        the original first noun preserves the ordinary nominal analysis.  Choosing
+        a later noun promotes that noun and consumes the intervening relational
+        shell as copular structure, so downstream IS-A classification receives the
+        intended two endpoints.
+        """
+        resolved = super()._resolve_nominal_predication_modes(builder, graph)
+        subject_map = dict(getattr(self, "_nominal_subject_spans", {}))
+        if not subject_map:
+            return resolved
+
+        tokens = resolved.tokens
+        predicates = {item.token_index: item for item in resolved.predicates}
+        changed = False
+
+        for original_index, subject_span in tuple(subject_map.items()):
+            original = predicates.get(original_index)
+            if original is None or not original.nominal_predicative:
+                continue
+
+            candidates: list[tuple[int, tuple[str, ...]]] = []
+            for index in range(original_index, len(tokens) + 1):
+                token = tokens[index - 1]
+                if index > original_index and token.text in {",", ";", ".", "!", "?"}:
+                    break
+                if (
+                    index > original_index
+                    and token.text.casefold() in {"и", "или", "либо", "а", "но", "однако"}
+                ):
+                    break
+                lemmas = tuple(
+                    dict.fromkeys(
+                        item.normal_form.strip()
+                        for item in self._material_morph_analyses(token)
+                        if item.pos == "NOUN" and item.normal_form.strip()
+                    )
+                )
+                if lemmas:
+                    candidates.append((index, lemmas))
+
+            if len(candidates) < 2:
+                continue
+            # The local probe must stay bounded even for malformed/run-on input.
+            candidates = candidates[:8]
+            labels = tuple(f"N{position}" for position in range(1, len(candidates) + 1))
+            option_lines = [
+                f"{label}: {tokens[index - 1].text}"
+                for label, (index, _lemmas) in zip(labels, candidates)
+            ]
+            rhs_end = candidates[-1][0]
+            rhs_text = self._semantic_token_range_text(
+                self._source_tokens_from_graph(resolved),
+                original_index,
+                rhs_end,
+            )
+            prompt = (
+                f"TEXT:\n{resolved.text}\n"
+                f"LEFT REFERENT:\n{subject_span.text}\n"
+                f"RIGHT NOMINAL PHRASE:\n{rhs_text}\n"
+                "Decision criterion:\n"
+                "The source already licenses a nominal copular predication. Select the listed "
+                "noun concept that is directly asserted as the class/type/instance-category of "
+                "LEFT REFERENT. A relational classifier or shell before the actual class target "
+                "must not replace that target. Conversely, a dependent possessor/location after "
+                "an ordinary predicate noun must not replace the predicate noun. Use only the "
+                "exact source sentence; do not add world knowledge. If the source does not make "
+                "one listed taxonomic target clear, choose UNCLEAR.\n"
+                "Candidate labels:\n"
+                + "\n".join(option_lines)
+                + "\nUNCLEAR"
+            )
+            choice, _margin = self._deep_semantic_choice_probe(
+                "nominal_taxonomic_head",
+                prompt,
+                labels + ("UNCLEAR",),
+            )
+            if choice is None or choice == "UNCLEAR":
+                continue
+            selected_position = labels.index(choice)
+            selected_index, selected_lemmas = candidates[selected_position]
+            if selected_index == original_index:
+                continue
+
+            # Only a later target is a shell rewrite.  Consuming the intervening
+            # tokens prevents the classifier from reappearing as an independent
+            # semantic actant while preserving its source evidence in the parse.
+            predicates.pop(original_index, None)
+            predicates[selected_index] = replace(
+                original,
+                token_index=selected_index,
+                lemma_candidates=selected_lemmas,
+            )
+            self._nominal_subject_spans.pop(original_index, None)
+            self._nominal_subject_spans[selected_index] = subject_span
+            self._nominal_linker_tokens.update(range(original_index, selected_index))
+            changed = True
+            self._deterministic_trace(
+                "nominal_taxonomic_head",
+                rhs_text,
+                f"predicate_token={selected_index}",
+            )
+
+        if not changed:
+            return resolved
+
+        predicate_tuple = tuple(predicates[index] for index in sorted(predicates))
+        clauses = builder._clauses(resolved.text, tokens, predicate_tuple)
+        coordinations = builder._coordinations(resolved.text, tokens, predicate_tuple)
+        predicate_coordinations = builder._predicate_coordinations(tokens, clauses)
+        frame_graph = builder._frame_graph(
+            tokens, clauses, predicate_tuple, predicate_coordinations
+        )
+        return replace(
+            resolved,
+            predicates=predicate_tuple,
+            clauses=clauses,
+            coordinations=coordinations,
+            frame_graph=frame_graph,
+        )
 
     def _predicate_source_span(self, predicate):
         graph = self._candidate_graph
