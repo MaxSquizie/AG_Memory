@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Mapping
 
 from ah.core import SupportRecord
-from ah.model import ActantRole, Domain, Hypernode, Ref, RefKind
+from ah.model import ActantRole, BoundVar, Domain, Hypernode, Ref, RefKind
 
 from .bindings import BindingEnvironment
 from .contracts import (
@@ -25,6 +25,7 @@ from .materialization import (
 from .attention import InferenceAttention
 from .context import ProofContext
 from .runtime import GoalRuntime
+from .subsumption import taxonomy_path
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +72,47 @@ class RuntimeGroundFormulaReasoner(GroundFormulaReasoner):
     reverse T/function indexes and antecedent proof machinery.  Nothing is inserted
     into AH during search.
     """
+
+    def _match_consequent_node(
+        self,
+        pattern: Hypernode,
+        ground: Hypernode,
+        env: BindingEnvironment,
+    ) -> tuple[BindingEnvironment, tuple[Ref, ...]] | None:
+        if pattern.template != ground.template:
+            return None
+        candidate = env.copy()
+        support: list[Ref] = []
+        seen: set[str] = set()
+        for role, produced in pattern.actants.items():
+            required = ground.actants.get(role)
+            if not isinstance(required, Ref):
+                return None
+            if isinstance(produced, Ref):
+                path = taxonomy_path(
+                    self.core,
+                    produced,
+                    required,
+                    max_depth=self.max_depth,
+                )
+                if path is None:
+                    return None
+                for ref in path:
+                    if ref.uid not in seen:
+                        seen.add(ref.uid)
+                        support.append(ref)
+                continue
+            if isinstance(produced, BoundVar):
+                resolved = candidate.resolve(produced)
+                if resolved is not None:
+                    if resolved != required:
+                        return None
+                    continue
+                if not self._bind_declared(candidate, produced, required):
+                    return None
+                continue
+            return None
+        return candidate, tuple(support)
 
     def solve_ground_atom(
         self,
@@ -139,9 +181,12 @@ class RuntimeGroundFormulaReasoner(GroundFormulaReasoner):
                     env = BindingEnvironment()
                     for _qref, _qobj, variable in chain:
                         env = env.child(variable)
-                    matched = self._match_pattern_node(pattern, ground, env)
-                    if matched is None:
+                    matched_result = self._match_consequent_node(
+                        pattern, ground, env
+                    )
+                    if matched_result is None:
                         continue
+                    matched, subsumption_support = matched_result
 
                     self._focus(outer_ref, depth)
                     antecedent_proofs = self._prove_bound(
@@ -160,12 +205,14 @@ class RuntimeGroundFormulaReasoner(GroundFormulaReasoner):
                         proof.premise_refs,
                         quantifier_refs,
                         (implication_ref,),
+                        subsumption_support,
                     )
                     trace = (
                         *proof.uid_trace,
                         *quantifier_refs,
                         implication_ref,
                         pattern_ref,
+                        *subsumption_support,
                         template_ref,
                     )
                     logical_depth = max(proof.logical_depth + 1, depth + 1)

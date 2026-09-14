@@ -38,6 +38,7 @@ from .context import CounterfactualContext, ProofContext
 from .schema import InferenceSchemaRegistry
 from .formula import GroundFormulaReasoner
 from .runtime import GoalRuntime
+from .subsumption import taxonomy_path
 
 
 class InferenceEngine:
@@ -736,10 +737,30 @@ class InferenceEngine:
             # an asserted world fact, so ordinary EXISTS/ROLE_FILL must ignore them.
             if element.meta.get("semantic_scope"):
                 continue
-            if all(element.actants.get(role) == ref for role, ref in known_roles.items()):
+            if self._actant_subsumption_support(element.actants, known_roles) is not None:
                 out.append(element)
         out.sort(key=lambda n: n.uid)
         return out
+
+    def _actant_subsumption_support(
+        self, actual_roles, required_roles
+    ) -> tuple[Ref, ...] | None:
+        support: list[Ref] = []
+        seen: set[str] = set()
+        for role, required in required_roles.items():
+            actual = actual_roles.get(role)
+            if not isinstance(actual, Ref) or not isinstance(required, Ref):
+                return None
+            path = taxonomy_path(
+                self.core, actual, required, max_depth=self.settings.max_depth
+            )
+            if path is None:
+                return None
+            for ref in path:
+                if ref.uid not in seen:
+                    seen.add(ref.uid)
+                    support.append(ref)
+        return tuple(support)
 
     def _role_fill(self, goal: RoleFillGoal, runtime: GoalRuntime) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
@@ -757,13 +778,16 @@ class InferenceEngine:
                 continue
             runtime.focus(fact_ref, logical_depth=0, reason="matched factual premise")
             runtime.rule("FACT_MATCH", logical_depth=0, detail=f"requested role={goal.requested_role.value}")
-            premises = (fact_ref,)
+            subsumption = self._actant_subsumption_support(
+                node.actants, goal.known_roles
+            ) or ()
+            premises = (fact_ref, *subsumption)
             return InferenceOutcome(
                 LogicalStatus.PROVED,
                 StopReason.GOAL_SATISFIED,
                 RoleBindingConclusion(goal.requested_role, value, fact_ref),
                 premises,
-                (fact_ref, value),
+                (fact_ref, *subsumption, value),
                 domain_from_premises(self.core, premises),
                 1,
                 proof_support=self._proof_support(premises, rule_id="FACT_MATCH"),
@@ -805,8 +829,15 @@ class InferenceEngine:
                 continue
             runtime.focus(fact_ref, logical_depth=0, reason="matched factual premise")
             runtime.rule("FACT_MATCH", logical_depth=0, detail="multi-role binding")
-            premises = (fact_ref,)
-            trace = (fact_ref, *(value for _role, value in bindings))
+            subsumption = self._actant_subsumption_support(
+                node.actants, goal.known_roles
+            ) or ()
+            premises = (fact_ref, *subsumption)
+            trace = (
+                fact_ref,
+                *subsumption,
+                *(value for _role, value in bindings),
+            )
             return InferenceOutcome(
                 LogicalStatus.PROVED,
                 StopReason.GOAL_SATISFIED,
@@ -851,13 +882,16 @@ class InferenceEngine:
             if false_ref is None:
                 runtime.focus(ref, logical_depth=0, reason="EXISTS witness")
                 runtime.rule("EXISTS_WITNESS", logical_depth=0, detail="explicit canonical witness")
-                premises = (ref,)
+                subsumption = self._actant_subsumption_support(
+                    node.actants, goal.known_roles
+                ) or ()
+                premises = (ref, *subsumption)
                 return InferenceOutcome(
                     LogicalStatus.PROVED,
                     StopReason.GOAL_SATISFIED,
                     ExistingRefConclusion(ref),
                     premises,
-                    (ref,),
+                    (ref, *subsumption),
                     domain_from_premises(self.core, premises),
                     1,
                     proof_support=self._proof_support(premises, rule_id="EXISTS_WITNESS"),
@@ -898,10 +932,9 @@ class InferenceEngine:
                     goal.template_ref.uid
                 )
                 if node.meta.get("semantic_scope")
-                and all(
-                    node.actants.get(role) == ref
-                    for role, ref in goal.known_roles.items()
-                )
+                and self._actant_subsumption_support(
+                    node.actants, goal.known_roles
+                ) is not None
             ),
             key=lambda node: node.uid,
         )
@@ -922,11 +955,28 @@ class InferenceEngine:
             )
             derived = reasoner.solve(FormulaGoal(candidate_ref))
             if derived.status is LogicalStatus.PROVED:
+                subsumption = self._actant_subsumption_support(
+                    node.actants, goal.known_roles
+                ) or ()
+                premises = tuple(dict.fromkeys((*derived.premise_refs, *subsumption)))
+                trace = tuple(dict.fromkeys((*derived.uid_trace, *subsumption)))
                 return replace(
                     derived,
+                    premise_refs=premises,
+                    uid_trace=trace,
                     diagnostics=(
                         "EXISTS witness derived from asserted formula",
                         *derived.diagnostics,
+                    ),
+                    proof_support=(
+                        *derived.proof_support,
+                        *(
+                            self._proof_support(
+                                subsumption,
+                                rule_id="ROLE_IS_A_SUBSUMPTION",
+                            )
+                            if subsumption else ()
+                        ),
                     ),
                 )
         return InferenceOutcome(

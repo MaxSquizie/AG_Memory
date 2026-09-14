@@ -67,7 +67,9 @@ def test_precise_exists_is_derived_from_asserted_forall_implication_without_quer
     t_student = _template(core, "STUDENT", "студент", (ActantRole.SUBJECT,))
     t_have = _template(core, "HAVE", "иметь", (ActantRole.SUBJECT, ActantRole.OBJECT))
     alexey = _entity(core, "M_ALEXEY", "Алексей")
-    book = _entity(core, "M_BOOK", "учебник")
+    textbook = _entity(core, "M_TEXTBOOK", "учебник")
+    book = _entity(core, "M_BOOK", "книга")
+    is_a = core.add_link("IS-A", textbook, book, 0.2)
     student_fact, _ = core.add_hypernode(
         Domain.C, t_student, {ActantRole.SUBJECT: alexey}, 0.4, uid="N_STUDENT_ALEXEY"
     )
@@ -85,7 +87,7 @@ def test_precise_exists_is_derived_from_asserted_forall_implication_without_quer
     have_pattern, _ = core.add_hypernode(
         Domain.C,
         t_have,
-        {ActantRole.SUBJECT: x, ActantRole.OBJECT: book},
+        {ActantRole.SUBJECT: x, ActantRole.OBJECT: textbook},
         0.4,
         uid="N_HAVE_X_BOOK",
         meta={"semantic_scope": "QUANTIFIED"},
@@ -107,7 +109,7 @@ def test_precise_exists_is_derived_from_asserted_forall_implication_without_quer
             GoalSpec(
                 ExistsGoal(
                     t_have,
-                    {ActantRole.SUBJECT: alexey, ActantRole.OBJECT: book},
+                    {ActantRole.SUBJECT: alexey, ActantRole.OBJECT: textbook},
                 )
             )
         )
@@ -116,7 +118,7 @@ def test_precise_exists_is_derived_from_asserted_forall_implication_without_quer
     assert isinstance(outcome.conclusion, DerivedAtomConclusion)
     assert outcome.conclusion.role_map() == {
         ActantRole.SUBJECT: alexey,
-        ActantRole.OBJECT: book,
+        ActantRole.OBJECT: textbook,
     }
     assert outcome.proof_support[-1].rule_id == "FORALL_IMPLIES_MP"
     assert {ref.uid for ref in outcome.premise_refs} >= {
@@ -124,10 +126,28 @@ def test_precise_exists_is_derived_from_asserted_forall_implication_without_quer
         "G_FORALL",
         "G_RULE",
     }
+
+    generalized = engine.solve(
+        InferenceQuery(
+            GoalSpec(
+                ExistsGoal(
+                    t_have,
+                    {ActantRole.SUBJECT: alexey, ActantRole.OBJECT: book},
+                )
+            )
+        )
+    )
+    assert generalized.status is LogicalStatus.PROVED
+    assert isinstance(generalized.conclusion, DerivedAtomConclusion)
+    assert generalized.conclusion.role_map()[ActantRole.OBJECT] == book
+    assert core.ref(is_a.uid) in generalized.premise_refs
     # The question itself did not create a canonical ground N during search.
     assert not any(
         node.meta.get("semantic_scope") is None
-        and node.actants == {ActantRole.SUBJECT: alexey, ActantRole.OBJECT: book}
+        and node.actants == {
+            ActantRole.SUBJECT: alexey,
+            ActantRole.OBJECT: textbook,
+        }
         for node in core.store.find_hypernodes_by_template(t_have.uid)
     )
 
