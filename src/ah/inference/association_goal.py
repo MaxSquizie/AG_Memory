@@ -399,11 +399,15 @@ class AssociationTurnGoalCompiler(ModalTurnGoalCompiler):
             for item in perception.act_relations
             if item.canonical_relation_id == "ASSOCIATION"
         }
+        # Plain association queries are runtime search goals. Quantified +
+        # association remains deliberately unsupported by the current contract and
+        # must stay on the ordinary/quantified path instead of being smuggled into
+        # AssociationCoordinator.
         association_query_ids = {
             item.local_id
             for item in perception.queries
             if item.local_id in association_relations
-            and item.quantified is not None
+            and item.quantified is None
             and not item.quoted
         }
         association_command_ids = {
