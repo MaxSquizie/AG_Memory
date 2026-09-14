@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Protocol
 
+from ah.model import ActantRole
+
 from .contracts import (
     ActRelationCandidate,
     ActantCandidate,
@@ -10,6 +12,7 @@ from .contracts import (
     PerceptionResult,
     PredicateCandidate,
     QueryMode,
+    TemplateCandidate,
 )
 from .query_semantics import EntityIdentityQueryCandidate
 
@@ -22,6 +25,13 @@ class ActRelationClassifier(Protocol):
         predicate: PredicateCandidate,
         actants: tuple[ActantCandidate, ...],
     ) -> ActRelationCandidate | None: ...
+
+    def classify_nominal_taxonomy(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        subject: ActantCandidate,
+    ) -> str | None: ...
 
 
 class GoalSemanticService:
@@ -39,8 +49,71 @@ class GoalSemanticService:
 
     def complete(self, result: PerceptionResult) -> PerceptionResult:
         classify = getattr(self.classifier, "classify_act_relation", None)
-        if not callable(classify):
+        classify_nominal = getattr(
+            self.classifier, "classify_nominal_taxonomy", None
+        )
+        if not callable(classify) and not callable(classify_nominal):
             return result
+
+        def complete_nominal(root):
+            if (
+                not callable(classify_nominal)
+                or isinstance(root, EntityIdentityQueryCandidate)
+                or root.quoted
+                or root.predicate.sense_hint != "NOMINAL_PREDICATION"
+                or len(root.actants) != 1
+                or root.actants[0].role is not ActantRole.SUBJECT
+                or (
+                    hasattr(root, "query_mode")
+                    and root.query_mode is not QueryMode.EXISTS
+                )
+            ):
+                return root
+            subject = root.actants[0]
+            if (
+                subject.candidate_ref is not None
+                or subject.entity_ref is not None
+                or subject.composition is not None
+                or subject.proposition is not None
+                or subject.quantifier is not None
+                or subject.lookup_text is None
+            ):
+                return root
+            decision = classify_nominal(
+                result.source_text, root.predicate, subject
+            )
+            if decision == "SUBJECT_IS_PREDICATE":
+                return replace(
+                    root,
+                    predicate=replace(
+                        root.predicate, sense_hint="TAXONOMIC_PREDICATION"
+                    ),
+                )
+            if decision != "PREDICATE_IS_SUBJECT":
+                return root
+
+            # Normalize reversed nominal order (for example ``Инженер — это я``)
+            # into the same unary class predicate as ``Я — инженер``. Both sides
+            # were already isolated by Perception; the bounded classifier only
+            # selects their semantic orientation.
+            predicate = PredicateCandidate(
+                surface=subject.mention or subject.lookup_text,
+                normalized_hint=subject.normalized_hint,
+                sense_hint="TAXONOMIC_PREDICATION",
+                evidence=subject.evidence,
+                template_candidate=TemplateCandidate((ActantRole.SUBJECT,)),
+            )
+            normalized_subject = ActantCandidate(
+                ActantRole.SUBJECT,
+                mention=root.predicate.surface,
+                normalized_hint=root.predicate.normalized_hint,
+                evidence=root.predicate.evidence,
+            )
+            return replace(root, predicate=predicate, actants=(normalized_subject,))
+
+        assertions = tuple(complete_nominal(item) for item in result.assertions)
+        queries = tuple(complete_nominal(item) for item in result.queries)
+        result = replace(result, assertions=assertions, queries=queries)
 
         relations = list(result.act_relations)
         covered = {item.act_ref for item in relations}
@@ -59,7 +132,11 @@ class GoalSemanticService:
             # nominal predicate as the target of IS-A (e.g. NAME(X, owner's Y)) is
             # a category error.  Unary class predicates still work directly as N;
             # explicit non-nominal classification frames remain eligible below.
-            if assertion.predicate.sense_hint == "NOMINAL_PREDICATION":
+            if assertion.predicate.sense_hint in {
+                "NOMINAL_PREDICATION", "TAXONOMIC_PREDICATION"
+            }:
+                continue
+            if not callable(classify):
                 continue
             relation = classify(
                 result.source_text,
@@ -78,8 +155,12 @@ class GoalSemanticService:
                 or query.local_id in covered
                 or query.quoted
                 or query.query_mode is not QueryMode.EXISTS
-                or query.predicate.sense_hint == "NOMINAL_PREDICATION"
+                or query.predicate.sense_hint in {
+                    "NOMINAL_PREDICATION", "TAXONOMIC_PREDICATION"
+                }
             ):
+                continue
+            if not callable(classify):
                 continue
             relation = classify(
                 result.source_text,

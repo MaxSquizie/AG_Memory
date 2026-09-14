@@ -493,6 +493,40 @@ class AdaptivePerceptionParser:
         self._transition_classified_refs: set[str] = set()
         self._transition_cue_token_indices: set[int] = set()
 
+    def classify_nominal_taxonomy(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        subject: ActantCandidate,
+    ) -> str | None:
+        """Classify the two sides of one unary nominal predication.
+
+        Structural parsing has already isolated the subject and noun-headed
+        predicate.  The model decides only whether either orientation expresses
+        stable class membership/subtyping.  Naming, properties, possession and
+        transient states remain ordinary nominal predications.
+        """
+        if subject.lookup_text is None:
+            return None
+        choices = (
+            "SUBJECT_IS_PREDICATE",
+            "PREDICATE_IS_SUBJECT",
+            "OTHER_PREDICATION",
+            "UNCLEAR",
+        )
+        prompt = (
+            f"TEXT:\n{source_text}\n"
+            f"SUBJECT SIDE:\n{subject.lookup_text}\n"
+            f"PREDICATE SIDE:\n{predicate.lookup_form}\n"
+            "Candidate labels:\n" + "\n".join(choices)
+        )
+        choice, _ = self._deep_semantic_choice_probe(
+            "nominal_taxonomy", prompt, choices, optional=True
+        )
+        if choice in {None, "OTHER_PREDICATION", "UNCLEAR"}:
+            return None
+        return choice
+
     def classify_act_relation(
         self,
         source_text: str,
@@ -561,8 +595,8 @@ class AdaptivePerceptionParser:
                 for item in direct
             )
             + "\nDecision criterion:\nDoes this semantic act itself state or ask that one listed "
-              "referent is an instance/member/subtype of another listed class/type? "
-              "Do not choose IS-A for a temporary state, job/role, attribute, location, "
+              "referent is an instance/member/subtype or stable class-role of another "
+              "listed class/type? Do not choose IS-A for a temporary state, attribute, location, "
               "possession, event participation, comparison, naming, or ordinary predicate.\n"
             + "Candidate labels:\n" + "\n".join(option_lines)
         )
@@ -630,7 +664,8 @@ class AdaptivePerceptionParser:
             f"ALREADY EXCLUDED PAIRS:\n{excluded_lines}\n"
             "Decision criterion:\nWhich CURRENT event, if any, is presented as having one direct "
             "cross-turn dependency on a PRIOR ACTIVE event? Select a current event only "
-            "for a direct causal reaction/result or a direct continuation/next phase of "
+            "when PRIOR directly causes, triggers, enables, or explains CURRENT, or for "
+            "a direct continuation/next phase of "
             "an earlier activity. Same actor, same topic, or mere later occurrence is not enough.\n"
             "Candidate labels:\n" + "\n".join(current_choices)
         )
@@ -680,7 +715,8 @@ class AdaptivePerceptionParser:
             f"CURRENT EVENT:\n{current_events[current_index]}\n"
             "Decision criterion:\nWhat direct relation, if any, does the narrative establish from "
             "PRIOR EVENT to CURRENT EVENT?\n"
-            "CAUSE: CURRENT is a reaction, response, consequence, or result triggered by PRIOR.\n"
+            "CAUSE: PRIOR directly causes, triggers, enables, or explains why CURRENT occurs, "
+            "including a reaction, consequence, or result.\n"
             "FOLLOW: CURRENT is a direct continuation/next phase of PRIOR, without asserting causation.\n"
             "NO_RELATION: the events are only in the same narrative/episode or merely ordered in time.\n"
             "UNCLEAR: the text does not determine the relation safely.\n"
@@ -2822,8 +2858,8 @@ class AdaptivePerceptionParser:
                 f"TEXT:\n{self._candidate_graph.text if self._candidate_graph is not None else ''}\n"
                 f"EVENT A:\n{event_text(source)}\n"
                 f"EVENT B:\n{event_text(target)}\n"
-                "Decision criterion:\nDoes this narrative present EVENT B as a direct reaction, "
-                "response, consequence, or result triggered by EVENT A in this scene? "
+                "Decision criterion:\nDoes EVENT A directly cause, trigger, enable, or explain why "
+                "EVENT B occurs in this scene, including a reaction, consequence, or result? "
                 "A contrastive construction can still describe a reaction. Mere temporal "
                 "order, topic continuity, shared participants, or plausibility are not enough.\n"
                 "Candidate labels:\nCAUSAL_RESPONSE\nNO_CAUSAL_RESPONSE\nUNCLEAR"

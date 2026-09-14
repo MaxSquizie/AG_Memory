@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from ah.agent import InteractionContext
 from ah.config import IntegrationSettings
 from ah.core import AHCore
+from ah.inference import QueryGoalBuilder, RelationGoal
 from ah.integration import IntegrationConfig, IntegrationService
 from ah.model import ActantRole, Domain, Property
 from ah.perception import (
@@ -12,8 +13,11 @@ from ah.perception import (
     AssertionCandidate,
     PerceptionResult,
     PredicateCandidate,
+    QueryCandidate,
+    QueryMode,
     TemplateCandidate,
 )
+from ah.perception.goal_semantics import GoalSemanticService
 
 
 def test_user_classification_is_fact_not_identity_alias() -> None:
@@ -55,8 +59,15 @@ def test_user_classification_is_fact_not_identity_alias() -> None:
         ),
     )
 
+    class TaxonomyClassifier:
+        def classify_nominal_taxonomy(self, source_text, predicate, subject):
+            return "SUBJECT_IS_PREDICATE"
+
+    perception = GoalSemanticService(TaxonomyClassifier()).complete(
+        PerceptionResult(source_text="Я инженер", assertions=(assertion,))
+    )
     commit = integration.integrate_external(
-        PerceptionResult(source_text="Я инженер", assertions=(assertion,)),
+        perception,
         context,
         source_timestamp=datetime(2026, 9, 13, 18, 0, tzinfo=timezone.utc),
     )
@@ -65,3 +76,25 @@ def test_user_classification_is_fact_not_identity_alias() -> None:
     node = core.store.get_hypernode(commit.assertions[0].ref.uid)
     assert node.actants[ActantRole.SUBJECT] == core.ref(user.uid)
     assert core.store.find_entities_by_name("инженер", Domain.P) == ()
+    class_entity = next(
+        item
+        for item in core.store.find_entities_by_name("инженер", Domain.C)
+        if item.meta.get("taxonomy_class") is True
+    )
+    assert core.store.find_link("IS-A", user.uid, class_entity.uid) is not None
+
+    query = QueryCandidate(
+        PredicateCandidate(
+            "инженер",
+            normalized_hint="инженер",
+            sense_hint="TAXONOMIC_PREDICATION",
+        ),
+        (ActantCandidate(ActantRole.SUBJECT, mention="я", normalized_hint="я"),),
+        query_mode=QueryMode.EXISTS,
+        local_id="Q1",
+    )
+    built = QueryGoalBuilder(core).build(query, context)
+    assert built.goal is not None
+    assert built.goal.goal.target == RelationGoal(
+        "IS-A", core.ref(user.uid), core.ref(class_entity.uid)
+    )

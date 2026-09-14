@@ -213,6 +213,43 @@ class LLMPerceptionService:
             self._record_diagnostic(source_text, attempts, None, str(exc))
             raise PerceptionParseError(str(exc)) from exc
 
+    def classify_nominal_taxonomy(
+        self,
+        source_text: str,
+        predicate: PredicateCandidate,
+        subject: ActantCandidate,
+    ) -> str | None:
+        """Return a UID-free taxonomic orientation for one nominal frame."""
+        if self.settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
+            return None
+        parser = AdaptivePerceptionParser(
+            self.backend,
+            AdaptiveSettings(
+                prompt_dir=self.settings.probe_prompt_dir,
+                generation=self.settings.generation,
+                retry_attempts=self.settings.probe_retry_attempts,
+                max_actants_per_act=self.settings.max_actants_per_act,
+                predicate_symbol_language=self.settings.predicate_symbol_language,
+                morphology_backend=self.settings.morphology_backend,
+                verify_predicate_symbol=(self.settings.protocol == "adaptive_v3"),
+            ),
+        )
+        try:
+            return parser.classify_nominal_taxonomy(
+                source_text, predicate, subject
+            )
+        except AdaptiveParseError as exc:
+            attempts = [
+                PerceptionAttemptDiagnostic(
+                    role=trace.stage, raw_text=trace.raw_text, error=trace.error,
+                    prompt=trace.prompt, normalized_answer=trace.normalized_answer,
+                    retry_index=trace.retry_index,
+                )
+                for trace in exc.traces
+            ]
+            self._record_diagnostic(source_text, attempts, None, str(exc))
+            raise PerceptionParseError(str(exc)) from exc
+
     def classify_discourse_relation(
         self,
         narrative_context: str,

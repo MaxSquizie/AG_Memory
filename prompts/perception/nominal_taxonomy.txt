@@ -1,0 +1,1 @@
+Choose SUBJECT_IS_PREDICATE when the subject is an instance, member, subtype, or stable class-role of the predicate class. Choose PREDICATE_IS_SUBJECT for the reverse. Choose OTHER_PREDICATION for a name, title, temporary state, attribute, location, possession, comparison, or other non-taxonomic meaning. Choose UNCLEAR when unresolved.

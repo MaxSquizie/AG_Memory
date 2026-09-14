@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from ah.agent import InteractionContext
 from ah.core import AHCore
-from ah.model import Ref
+from ah.model import ActantRole, Ref
 from ah.perception import (
     ActRelationCandidate,
     AssertionStatus,
@@ -23,6 +23,7 @@ from ah.integration.entity_resolver import (
     ExistingEntity,
     NewEntityPlan,
 )
+from ah.integration.taxonomy import taxonomy_class_candidates
 
 from .contracts import (
     AllOfGoal,
@@ -68,12 +69,66 @@ class QueryGoalBuilder:
             return ()
         return self.core.store.find_symbols_by_form(surface)
 
+    def _build_taxonomic_relation(
+        self,
+        query: QueryCandidate,
+        context: InteractionContext,
+        identity_attention_refs: tuple[Ref, ...],
+    ) -> QueryBuildResult:
+        if (
+            query.query_mode is not QueryMode.EXISTS
+            or query.requested_roles
+            or len(query.actants) != 1
+            or query.actants[0].role is not ActantRole.SUBJECT
+        ):
+            return QueryBuildResult(None, ("taxonomy_query_shape_invalid",))
+        classes = taxonomy_class_candidates(self.core, query.predicate)
+        if len(classes) != 1:
+            diagnostic = (
+                "taxonomy_class_not_found"
+                if not classes
+                else f"taxonomy_class_ambiguous:{len(classes)}"
+            )
+            return QueryBuildResult(None, (diagnostic,))
+
+        subject = query.actants[0]
+        resolution = EntityResolver(self.core).resolve(
+            subject,
+            context,
+            first_person_ref=context.user_ref,
+            second_person_ref=context.self_ref,
+            attention_refs=identity_attention_refs,
+        )
+        if not isinstance(resolution, ExistingEntity):
+            if isinstance(resolution, AmbiguousEntityPlan):
+                diagnostic = f"ambiguous_taxonomy_subject:{len(resolution.candidates)}"
+            elif isinstance(resolution, NewEntityPlan):
+                diagnostic = "taxonomy_subject_not_found"
+            else:
+                diagnostic = "taxonomy_subject_unresolved"
+            return QueryBuildResult(None, (diagnostic,))
+
+        target = classes[0]
+        attention: list[Ref] = []
+        for ref in (resolution.ref, *resolution.support_refs, target):
+            if all(existing.uid != ref.uid for existing in attention):
+                attention.append(ref)
+        return QueryBuildResult(
+            InferenceQuery(GoalSpec(RelationGoal("IS-A", resolution.ref, target))),
+            ("semantic:taxonomic_relation:IS-A",),
+            tuple(attention),
+        )
+
     def build(
         self,
         query: QueryCandidate,
         context: InteractionContext,
         identity_attention_refs: tuple[Ref, ...] = (),
     ) -> QueryBuildResult:
+        if query.predicate.sense_hint == "TAXONOMIC_PREDICATION":
+            return self._build_taxonomic_relation(
+                query, context, identity_attention_refs
+            )
         required_roles = {a.role for a in query.actants}
         required_roles.update(query.requested_roles)
         selection = query.predicate.template_selection

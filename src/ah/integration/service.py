@@ -79,6 +79,7 @@ from .errors import (
 from .experience_mapper import ExperienceMapper
 from .formalization import BatchKind, FormalizationBatch, MutationPlan, SemanticConsolidator
 from .template_resolver import TemplateResolver
+from .taxonomy import ensure_taxonomy_class
 
 
 _ENTITY_PRONOUNS = {
@@ -1877,6 +1878,48 @@ class IntegrationService:
                         created=created,
                     )
                 )
+
+            # Unary nominal classifications retain their ordinary predicate N so
+            # quantified rules can still match e.g. student(Alexey), and also emit
+            # the canonical M --IS-A--> class M edge used by M2 relation inference.
+            # This is deliberately not applied to negation, scoped formula leaves,
+            # quantified variables, or non-taxonomic nominal predications.
+            for candidate in ordered:
+                if (
+                    candidate.predicate.sense_hint != "TAXONOMIC_PREDICATION"
+                    or candidate.quoted
+                    or candidate.negated
+                    or candidate.status is not AssertionStatus.ASSERTED
+                    or candidate.local_id in formula_leaf_ids
+                    or candidate.local_id not in local_refs
+                ):
+                    continue
+                proposition_ref = local_refs[candidate.local_id]
+                if proposition_ref.kind is not RefKind.N:
+                    continue
+                node = tx.store.get_hypernode(proposition_ref.uid)
+                source = node.actants.get(ActantRole.SUBJECT)
+                if not isinstance(source, Ref):
+                    continue
+                target, target_created = ensure_taxonomy_class(
+                    tx, candidate.predicate
+                )
+                link, created = tx.ensure_link(
+                    "IS-A", source, target, self.config.is_a_link_weight
+                )
+                relations.append(
+                    IntegratedRelation(
+                        relation_id="IS-A",
+                        source=source,
+                        target=target,
+                        ref=tx.ref(link.uid),
+                        created=created,
+                    )
+                )
+                if target_created:
+                    seeds.append(
+                        ActivationSeedRequest(target, SeedReason.NEW_FACT)
+                    )
 
             # Directional inter-situation relations are likewise world truth only
             # when both endpoint situations are ordinary asserted facts.

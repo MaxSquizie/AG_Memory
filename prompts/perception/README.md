@@ -42,3 +42,6 @@ Rules:
   selected kind is preserved through GoalSpec, so a name request requires an
   explicit identity-name edge while a description may use identity or asserted
   descriptive facts.
+- `nominal_taxonomy.txt` — separates stable class membership/subtyping from
+  naming, attributes, possession and transient nominal states, and selects the
+  source-grounded orientation without exposing canonical identifiers.
