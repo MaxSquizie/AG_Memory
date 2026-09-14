@@ -4,8 +4,17 @@ from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from datetime import datetime
 
-from ah.association import AssociationCoordinator, AssociationOutcome
+from ah.association import AssociationCoordinator, AssociationOutcome, AssociationStatus
 from ah.inference import AssociationQueryBuildResult, InferenceOutcome, TurnGoalBuilder
+from ah.inference.contracts import (
+    ExistingRefConclusion,
+    GoalMode,
+    GoalSpec,
+    LogicalStatus,
+    ProofSupport,
+    StopReason,
+)
+from ah.model import Ref, RefKind
 from ah.projection.association_context import AssociationContextProjector
 
 from .orchestrator_base import (
@@ -19,7 +28,14 @@ from .orchestrator_base import (
 
 @dataclass(frozen=True, slots=True)
 class QueryExecution(_BaseQueryExecution):
-    """One runtime goal execution; association is explicitly non-inferential."""
+    """One runtime goal execution.
+
+    ``association_outcome`` remains the authoritative associative result.  ``outcome``
+    may additionally contain a diagnostic M2-visible proof *of convergence* so the
+    operator can audit whether an association was actually found.  That diagnostic
+    proof is never fed back into ordinary logical inference/projection and therefore
+    does not promote associative convergence to semantic entailment.
+    """
 
     association_outcome: AssociationOutcome | None = None
 
@@ -30,8 +46,11 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
     The mature base pipeline still owns parsing, Integration, settling, discourse,
     logical inference, response recording and persistence. This extension reuses one
     no-response base pass, executes only the association requests that the typed
-    GoalCompiler marked, then rebuilds AgentContext with an explicit non-proof
-    ASSOCIATION RESULTS section before optional response generation.
+    GoalCompiler marked, then rebuilds AgentContext with an explicit ASSOCIATION
+    RESULTS section.  For diagnostics it also freezes a proof-shaped convergence
+    trace in ``QueryExecution.outcome``; that trace proves only that both bounded
+    activation fronts met at one canonical representation, not that a new factual
+    proposition follows from the meeting point.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -39,6 +58,104 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
         self.association = AssociationCoordinator(self.integration.core, self.ignition)
         self.association_projector = AssociationContextProjector(
             self.integration.core, self.projector.settings
+        )
+
+    def _association_uid_trace(self, outcome: AssociationOutcome) -> tuple[Ref, ...]:
+        """Freeze canonical provenance used by an association convergence.
+
+        Search-only MEMORY_QUERY hops may name a canonical incidence object in
+        ``via_uid``.  Include it when it still exists so the GUI can overlay the
+        exact route on the live canvas.  Runtime-only query edges themselves are not
+        invented as L nodes.
+        """
+
+        refs: list[Ref] = []
+        seen: set[str] = set()
+
+        def add(ref: Ref) -> None:
+            if ref.uid in seen or not self.integration.core.store.has_uid(ref.uid):
+                return
+            seen.add(ref.uid)
+            refs.append(ref)
+
+        for path in (outcome.left_path, outcome.right_path):
+            if path is None:
+                continue
+            for index, ref in enumerate(path.refs):
+                add(ref)
+                if index >= len(path.hops):
+                    continue
+                via_uid = path.hops[index].via_uid
+                if not via_uid or via_uid in seen:
+                    continue
+                if self.integration.core.store.has_uid(via_uid):
+                    add(self.integration.core.ref(via_uid))
+        if outcome.common_ref is not None:
+            add(outcome.common_ref)
+        return tuple(refs)
+
+    @staticmethod
+    def _association_stop_reason(outcome: AssociationOutcome) -> StopReason:
+        if outcome.status is AssociationStatus.FOUND:
+            return StopReason.GOAL_SATISFIED
+        if outcome.status is AssociationStatus.DEPTH_EXHAUSTED:
+            return StopReason.DEPTH_EXHAUSTED
+        if outcome.status is AssociationStatus.BUDGET_EXHAUSTED:
+            return StopReason.BUDGET_EXHAUSTED
+        if outcome.status is AssociationStatus.RESOURCE_LIMIT:
+            return StopReason.RESOURCE_LIMIT
+        return StopReason.SEARCH_EXHAUSTED
+
+    def _association_diagnostic_outcome(
+        self, outcome: AssociationOutcome
+    ) -> InferenceOutcome:
+        """Represent association search as an auditable M2 diagnostic obligation.
+
+        ``PROVED`` here means exactly "the runtime ASSOCIATION goal reached its stop
+        condition by convergence".  It is deliberately tagged with
+        ``GoalMode.ASSOCIATION`` and ``ASSOCIATION_CONVERGENCE`` support, excluded
+        from ordinary inference projection below, and never materialized into AH.
+        """
+
+        found = outcome.found
+        conclusion = (
+            ExistingRefConclusion(outcome.common_ref)
+            if found and outcome.common_ref is not None
+            else None
+        )
+        depth = max(
+            outcome.left_path.depth if outcome.left_path is not None else 0,
+            outcome.right_path.depth if outcome.right_path is not None else 0,
+        )
+        diagnostics = (
+            f"semantic:association_status:{outcome.status.value}",
+            "runtime:association_convergence_proof:not_semantic_entailment",
+            f"runtime:association_common_candidates:{len(outcome.common_candidates)}",
+            f"runtime:association_minimal_fact_count:{outcome.minimal_fact_count}",
+        )
+        support = (
+            ProofSupport(
+                premise_refs=(outcome.goal.left, outcome.goal.right),
+                rule_id="ASSOCIATION_CONVERGENCE",
+                relation_id="ASSOCIATION",
+            ),
+        ) if found else ()
+        return InferenceOutcome(
+            status=LogicalStatus.PROVED if found else LogicalStatus.UNKNOWN,
+            stop_reason=self._association_stop_reason(outcome),
+            conclusion=conclusion,
+            premise_refs=(outcome.goal.left, outcome.goal.right),
+            uid_trace=self._association_uid_trace(outcome),
+            conclusion_domain=(
+                self.integration.core.store.domain_of(outcome.common_ref.uid)
+                if outcome.common_ref is not None
+                else None
+            ),
+            expanded_states=outcome.expanded_states,
+            diagnostics=diagnostics,
+            goal_spec=GoalSpec(outcome.goal, mode=GoalMode.ASSOCIATION),
+            logical_depth=depth,
+            proof_support=support,
         )
 
     def _execute_associations(
@@ -83,9 +200,10 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
 
                 outcome = self.association.solve(built.association_goal)
                 association_outcomes.append(outcome)
+                diagnostic_outcome = self._association_diagnostic_outcome(outcome)
                 executions.append(
                     QueryExecution(
-                        None,
+                        diagnostic_outcome,
                         None,
                         built.diagnostics
                         + (f"semantic:association_status:{outcome.status.value}",),
@@ -109,7 +227,8 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
     ) -> AgentTurnResult:
         # Suppress only presentation in the base pass. Canonical user semantics and
         # ordinary inference are committed/executed exactly once. Association is
-        # then routed through its dedicated activation coordinator rather than M2.
+        # then routed through its dedicated activation coordinator rather than being
+        # allowed to masquerade as an ordinary semantic RelationGoal.
         base = super().handle_user_text(
             text,
             generate_response=False,
@@ -124,6 +243,7 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                 execution.outcome
                 for execution in executions
                 if isinstance(execution.outcome, InferenceOutcome)
+                and getattr(execution, "association_outcome", None) is None
             )
             agent_context = self.association_projector.project_with_associations(
                 text,
