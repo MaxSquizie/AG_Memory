@@ -13,14 +13,12 @@ from .inference_proof import (
 
 
 class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
-    """M2 proof renderer with an explicit ASSOCIATION convergence obligation.
+    """M2 renderer for explicit ASSOCIATION convergence obligations.
 
-    Association search is not semantic entailment.  The live orchestrator nevertheless
-    exposes a diagnostic ``InferenceOutcome`` whose GoalSpec has mode ASSOCIATION so
-    the operator can audit whether both activation fronts really converged instead of
-    seeing an ordinary ``UNRESOLVED`` query.  This renderer keeps that distinction
-    visible and deliberately does not reinterpret incidence/activation hops as logical
-    L-rule applications.
+    Association search is not semantic entailment. The live orchestrator exposes a
+    diagnostic ``InferenceOutcome`` with GoalSpec.mode=ASSOCIATION so the operator
+    can audit whether both activation fronts really converged. The ancestry is shown
+    as association-search steps, never re-labelled as logical L-rule applications.
     """
 
     @staticmethod
@@ -30,6 +28,61 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
             and outcome.goal_spec.mode is GoalMode.ASSOCIATION
             and isinstance(outcome.goal_spec.target, AssociationGoal)
         )
+
+    def _association_steps(
+        self,
+        outcome: InferenceOutcome,
+        goal: AssociationGoal,
+    ) -> tuple[ProofStepSnapshot, ...]:
+        steps: list[ProofStepSnapshot] = []
+        for event in outcome.cognitive_trace:
+            rule_id = event.rule_id or ""
+            if not rule_id.startswith("ASSOCIATION:"):
+                continue
+            relation = rule_id.split(":", 1)[1]
+            source_uid = event.query_key
+            target = event.ref
+            if source_uid is None or target is None:
+                continue
+            try:
+                source_text = self._text(self.core.ref(source_uid))
+            except Exception:
+                source_text = source_uid
+            target_text = self._text(target)
+            front = event.detail.split(":", 1)[0] if event.detail else "PATH"
+            steps.append(
+                ProofStepSnapshot(
+                    len(steps) + 1,
+                    f"ASSOCIATION / {relation}",
+                    source_uid,
+                    None,
+                    target.uid,
+                    f"{front}: «{source_text}» → «{target_text}»; "
+                    "это шаг bounded activation/incidence search, не правило логического вывода.",
+                )
+            )
+
+        if outcome.conclusion is not None and outcome.status.value == "PROVED":
+            common_ref = getattr(outcome.conclusion, "ref", None)
+            common_uid = None if common_ref is None else common_ref.uid
+            common_text = (
+                "неизвестная репрезентация"
+                if common_ref is None
+                else self._text(common_ref)
+            )
+            steps.append(
+                ProofStepSnapshot(
+                    len(steps) + 1,
+                    "ASSOCIATION / CONVERGENCE",
+                    goal.left.uid,
+                    None,
+                    common_uid,
+                    f"Фронты от «{self._text(goal.left)}» и «{self._text(goal.right)}» "
+                    f"сошлись на «{common_text}». Ассоциация действительно найдена; "
+                    "новый семантический факт этим не утверждается.",
+                )
+            )
+        return tuple(steps)
 
     def build(
         self,
@@ -54,35 +107,6 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
         assert isinstance(goal, AssociationGoal)
         trace = tuple(outcome.uid_trace)
         nodes = self._nodes(trace)
-        found = outcome.conclusion is not None and outcome.status.value == "PROVED"
-
-        if found:
-            common_ref = getattr(outcome.conclusion, "ref", None)
-            common_uid = None if common_ref is None else common_ref.uid
-            common_text = (
-                "неизвестная репрезентация"
-                if common_ref is None
-                else self._text(common_ref)
-            )
-            explanation = (
-                f"Два ограниченных фронта активации от «{self._text(goal.left)}» и "
-                f"«{self._text(goal.right)}» сошлись на канонической репрезентации "
-                f"«{common_text}». Это подтверждает факт найденной ассоциации в "
-                "runtime-поиске; это не доказательство нового семантического факта."
-            )
-            steps = (
-                ProofStepSnapshot(
-                    1,
-                    "ASSOCIATION / CONVERGENCE",
-                    goal.left.uid,
-                    None,
-                    common_uid,
-                    explanation,
-                ),
-            )
-        else:
-            steps = ()
-
         return ProofChainSnapshot(
             chain_id=chain_id,
             source=source,
@@ -98,10 +122,10 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
             conclusion_text=self._conclusion_text(outcome),
             trace_uids=tuple(ref.uid for ref in trace),
             nodes=nodes,
-            # Incidence/propagation provenance is not a logical L proof.  The UID
-            # trace and node overlay remain available without drawing fake rule edges.
+            # Association path hops include reverse/incidence runtime transitions.
+            # They are intentionally rendered as steps rather than fake canonical L.
             edges=(),
-            steps=steps,
+            steps=self._association_steps(outcome, goal),
             checks=tuple(checks),
             diagnostics=tuple(outcome.diagnostics),
             cognitive_events=self._cognitive_events(outcome),
