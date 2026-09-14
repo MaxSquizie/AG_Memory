@@ -12,7 +12,10 @@ from ah.integration.entity_resolver import (
 from ah.integration.identity_entity_resolver import IdentityAwareEntityResolver
 from ah.integration.identity_graph import identity_name_refs_for_owner, identity_name_text
 from ah.model import ActantRole, Domain, Ref, RefKind, SemanticEntity
-from ah.perception.query_semantics import EntityIdentityQueryCandidate
+from ah.perception.query_semantics import (
+    EntityIdentityQueryCandidate,
+    IdentityQueryKind,
+)
 
 from .attention import InferenceAttention
 from .contracts import (
@@ -32,13 +35,16 @@ from .context import ProofContext
 
 @dataclass(frozen=True, slots=True)
 class EntityIdentityGoal:
-    """Describe one canonical entity from explicit identity/classification evidence."""
+    """Project one requested identity facet from explicit canonical evidence."""
 
     target: Ref
+    query_kind: IdentityQueryKind = IdentityQueryKind.ENTITY_DESCRIPTION
 
     def __post_init__(self) -> None:
         if self.target.kind is not RefKind.M:
             raise ValueError("EntityIdentityGoal.target must be canonical M")
+        if not isinstance(self.query_kind, IdentityQueryKind):
+            raise ValueError("EntityIdentityGoal.query_kind must be IdentityQueryKind")
 
 
 class EntityIdentityQueryGoalBuilder(IdentityAwareEventQueryGoalBuilder):
@@ -86,8 +92,13 @@ class EntityIdentityQueryGoalBuilder(IdentityAwareEventQueryGoalBuilder):
             seen.add(key)
             attention.append(ref)
         return QueryBuildResult(
-            InferenceQuery(GoalSpec(EntityIdentityGoal(resolution.ref))),
-            ("semantic:entity_identity", "semantic:identity_or_description"),
+            InferenceQuery(
+                GoalSpec(EntityIdentityGoal(resolution.ref, query.query_kind))
+            ),
+            (
+                "semantic:entity_identity",
+                f"semantic:identity_kind:{query.query_kind.value}",
+            ),
             tuple(attention),
         )
 
@@ -240,10 +251,18 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
             detail="explicit IDENTITY_NAME support plus asserted unary conceptual descriptions",
         )
 
-        # A primary ``name`` property alone merely lets lexical resolution find the
-        # entity.  It is not by itself an answer to "who/what is X?"; otherwise any
-        # freshly mentioned unknown entity would tautologically identify itself.
-        if not explicit_name_refs and not descriptor_refs:
+        # The requested facet controls which evidence can satisfy the goal. A
+        # lexical ``name`` property alone only makes an M addressable and is never
+        # proof: names require an explicit IDENTITY_NAME edge, while class/role
+        # questions require asserted unary conceptual descriptions.
+        if goal.query_kind is IdentityQueryKind.NAME_LOOKUP:
+            support_refs = explicit_name_refs
+            support_detail = "explicit identity-name evidence"
+        else:
+            support_refs = (*explicit_name_refs, *descriptor_refs)
+            support_detail = "explicit identity and/or description evidence"
+
+        if not support_refs:
             return InferenceOutcome(
                 LogicalStatus.UNKNOWN,
                 StopReason.SEARCH_EXHAUSTED,
@@ -252,21 +271,25 @@ class EntityIdentityInferenceEngine(EventSetInferenceEngine):
                 (goal.target,),
                 self.core.store.domain_of(goal.target.uid),
                 1,
-                ("Entity is addressable but has no asserted identity/classification evidence",),
+                (
+                    "Entity is addressable but has no "
+                    f"{support_detail} for {goal.query_kind.value}",
+                ),
                 proof_context=proof_context,
             )
 
-        for ref in (*explicit_name_refs, *descriptor_refs):
-            runtime.focus(ref, logical_depth=0, reason="entity identity/description support")
+        for ref in support_refs:
+            runtime.focus(ref, logical_depth=0, reason="requested identity facet support")
         runtime.rule(
             "ENTITY_IDENTITY",
             logical_depth=0,
             detail=(
-                f"labels={len(labels)}; explicit_names={len(explicit_name_refs)}; "
-                f"descriptors={len(descriptor_refs)}"
+                f"kind={goal.query_kind.value}; labels={len(labels)}; "
+                f"explicit_names={len(explicit_name_refs)}; "
+                f"descriptors={len(descriptor_refs)}; selected={len(support_refs)}"
             ),
         )
-        proof_refs = (goal.target, *explicit_name_refs, *descriptor_refs)
+        proof_refs = (goal.target, *support_refs)
         return InferenceOutcome(
             LogicalStatus.PROVED,
             StopReason.GOAL_SATISFIED,

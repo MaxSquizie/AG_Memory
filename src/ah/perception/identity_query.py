@@ -17,7 +17,11 @@ from .llm_parser import (
     PerceptionParseError,
 )
 from .naming_semantics import NamingAssertionCandidate
-from .query_semantics import EntityIdentityQueryCandidate, EventSetQueryCandidate
+from .query_semantics import (
+    EntityIdentityQueryCandidate,
+    EventSetQueryCandidate,
+    IdentityQueryKind,
+)
 from .runtime_invariants import (
     RuntimeSemanticAdaptiveParser,
     RuntimeSemanticLLMPerceptionService,
@@ -33,18 +37,19 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
       referent and nominal complements may be a naming assertion (``Я Илья``) or
       ordinary class/property predication (``Я инженер``); the existing bounded
       naming probe decides only between already source-grounded candidates;
-    * an EXISTS question with one interrogative actant may ask for the identity of
-      one of several source-grounded candidates (``Кто такой Илья?``).  A bounded
-      finite-choice probe selects the target candidate, ordinary predication, or
-      UNCLEAR.  Non-selected candidates are consumed as query-shell material only
-      when the model explicitly chooses an identity target.
+    * a question may ask for a conventional name or for a supported description
+      of an entity. One bounded probe distinguishes those two proof obligations
+      from an ordinary query; a separate bounded probe selects only among
+      source-grounded target candidates. Verbal shells (``Как меня зовут?``,
+      ``Кем является Илья?``) and implicit copular shells (``Кто Илья?``) share
+      the contract without a dictionary of surface question forms.
 
     Canonical UIDs are still unavailable in Perception.  Integration/Inference own
     entity resolution and all AH access.
     """
 
-    _IDENTITY_TAIL_CHOICES = (
-        "ORDINARY_PREDICATION",
+    _IDENTITY_KIND_CHOICES = tuple(item.value for item in IdentityQueryKind) + (
+        "ORDINARY_QUERY",
         "UNCLEAR",
     )
 
@@ -158,33 +163,100 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                 out.append(item)
         return tuple(out)
 
+    def _query_question_evidence(self, query) -> tuple[EvidenceSpan, ...]:
+        """Return only question operators from this query's source clause(s)."""
+        graph = self._candidate_graph
+        if graph is None:
+            return ()
+        anchors = tuple(
+            evidence
+            for evidence in (
+                query.predicate.evidence,
+                *(actant.evidence for actant in query.actants),
+            )
+            if evidence is not None
+            and evidence.start is not None
+            and evidence.end is not None
+        )
+        clause_bounds: set[tuple[int, int]] = set()
+        for token in graph.tokens:
+            if not any(
+                token.start < evidence.end and evidence.start < token.end
+                for evidence in anchors
+            ):
+                continue
+            clause = graph.clause_for_token(token.index)
+            if clause is not None:
+                clause_bounds.add(
+                    (clause.span.start_index, clause.span.end_index)
+                )
+        if not clause_bounds:
+            clauses = tuple(graph.clauses)
+            if len(clauses) != 1:
+                return ()
+            clause_bounds.add(
+                (clauses[0].span.start_index, clauses[0].span.end_index)
+            )
+        return tuple(
+            EvidenceSpan(token.text, token.start, token.end)
+            for token in graph.tokens
+            if self._question_form(token)
+            and any(start <= token.index <= end for start, end in clause_bounds)
+        )
+
     @staticmethod
     def _candidate_text(candidate: ActantCandidate) -> str:
         return (candidate.lookup_text or candidate.mention or "").strip()
 
-    def _identity_query_decision(
+    def _identity_query_kind_decision(
         self,
         source_text: str,
         query,
         candidates: tuple[ActantCandidate, ...],
-        interrogative: ActantCandidate,
+        interrogative: ActantCandidate | None,
     ) -> str:
-        labels = tuple(f"TARGET_{index}" for index in range(1, len(candidates) + 1))
         rows = "\n".join(
-            f"{label}: role={candidate.role.value}; text={self._candidate_text(candidate)}"
-            for label, candidate in zip(labels, candidates)
+            f"role={candidate.role.value}; text={self._candidate_text(candidate)}"
+            for candidate in candidates
         )
-        choices = (*labels, *self._IDENTITY_TAIL_CHOICES)
         prompt = (
             f"TEXT:\n{source_text}\n"
             f"SOURCE PREDICATE:\n{query.predicate.surface}\n"
-            f"INTERROGATIVE:\n{self._candidate_text(interrogative)}\n"
-            f"NON-INTERROGATIVE CANDIDATES:\n{rows}\n"
+            f"INTERROGATIVE ACTANT:\n"
+            f"{self._candidate_text(interrogative) if interrogative is not None else '[separate question operator]'}\n"
+            f"ENTITY CANDIDATES:\n{rows}\n"
         )
         decision, _ = self._deep_semantic_choice_probe(
             "identity_query",
             prompt,
-            choices,
+            self._IDENTITY_KIND_CHOICES,
+        )
+        assert decision is not None
+        return decision
+
+    def _identity_target_decision(
+        self,
+        source_text: str,
+        query,
+        candidates: tuple[ActantCandidate, ...],
+        query_kind: IdentityQueryKind,
+    ) -> str:
+        labels = tuple(f"TARGET_{index}" for index in range(1, len(candidates) + 1))
+        if len(labels) == 1:
+            return labels[0]
+        rows = "\n".join(
+            f"{label}: role={candidate.role.value}; text={self._candidate_text(candidate)}"
+            for label, candidate in zip(labels, candidates)
+        )
+        prompt = (
+            f"TEXT:\n{source_text}\n"
+            f"IDENTITY QUERY KIND:\n{query_kind.value}\n"
+            f"TARGET CANDIDATES:\n{rows}\n"
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "identity_target",
+            prompt,
+            (*labels, "UNCLEAR"),
         )
         assert decision is not None
         return decision
@@ -219,10 +291,7 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
         for query in parsed.perception.queries:
             if (
                 isinstance(query, (EventSetQueryCandidate, EntityIdentityQueryCandidate))
-                or query.query_mode is not QueryMode.EXISTS
                 or query.quantified is not None
-                or query.requested_role is not None
-                or query.requested_roles
                 or any(
                     actant.candidate_ref is not None
                     or actant.proposition is not None
@@ -239,31 +308,58 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                 for actant in query.actants
             ]
             interrogative_rows = [row for row in interrogative_rows if row[1]]
-            if len(interrogative_rows) != 1:
+            if len(interrogative_rows) > 1:
                 rewritten.append(query)
                 continue
 
-            interrogative, interrogative_evidence = interrogative_rows[0]
-            candidates = tuple(
-                actant for actant in query.actants
-                if actant is not interrogative
-            )
+            if interrogative_rows:
+                interrogative, interrogative_evidence = interrogative_rows[0]
+                candidates = tuple(
+                    actant for actant in query.actants
+                    if actant is not interrogative
+                )
+            else:
+                interrogative = None
+                interrogative_evidence = self._query_question_evidence(query)
+                candidates = tuple(query.actants)
+                if not interrogative_evidence:
+                    rewritten.append(query)
+                    continue
             if not candidates:
                 rewritten.append(query)
                 continue
 
-            decision = self._identity_query_decision(
+            kind_decision = self._identity_query_kind_decision(
                 text,
                 query,
                 candidates,
                 interrogative,
             )
-            if decision == "ORDINARY_PREDICATION":
+            if kind_decision == "ORDINARY_QUERY":
                 rewritten.append(query)
                 continue
+            if kind_decision == "UNCLEAR":
+                raise AdaptiveParseError(
+                    "query is ambiguous between entity identity semantics and an ordinary query",
+                    tuple(self._traces),
+                )
+            try:
+                query_kind = IdentityQueryKind(kind_decision)
+            except ValueError as exc:
+                raise AdaptiveParseError(
+                    f"invalid identity query kind decision: {kind_decision}",
+                    tuple(self._traces),
+                ) from exc
+
+            decision = self._identity_target_decision(
+                text,
+                query,
+                candidates,
+                query_kind,
+            )
             if decision == "UNCLEAR":
                 raise AdaptiveParseError(
-                    "query is ambiguous between entity identity and ordinary predication",
+                    "identity query target is ambiguous",
                     tuple(self._traces),
                 )
 
@@ -297,6 +393,7 @@ class IdentityQueryAdaptiveParser(RuntimeSemanticAdaptiveParser):
                     quantified=None,
                     scope_operators=query.scope_operators,
                     target=target,
+                    query_kind=query_kind,
                     query_operator_evidence=operator_evidence,
                 )
             )

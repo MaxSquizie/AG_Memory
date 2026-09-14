@@ -1,0 +1,1 @@
+Choose the TARGET_n that denotes the entity being named or described. Do not choose interrogative or copular shell material, or a participant whose relation is merely queried. Use UNCLEAR when multiple candidates remain.

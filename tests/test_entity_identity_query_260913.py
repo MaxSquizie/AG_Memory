@@ -15,6 +15,7 @@ from ah.perception import (
     EntityIdentityQueryCandidate,
     EventSetQueryCandidate,
     EvidenceSpan,
+    IdentityQueryKind,
     NamingAssertionCandidate,
     PerceptionResult,
     PredicateCandidate,
@@ -73,7 +74,9 @@ def _name_user_ilya(integration, context, turn_time) -> None:
     )
 
 
-def _identity_query() -> EntityIdentityQueryCandidate:
+def _identity_query(
+    query_kind: IdentityQueryKind = IdentityQueryKind.ENTITY_DESCRIPTION,
+) -> EntityIdentityQueryCandidate:
     source = "А пользователь кто?"
     target_start = source.index("пользователь")
     target_end = target_start + len("пользователь")
@@ -92,6 +95,7 @@ def _identity_query() -> EntityIdentityQueryCandidate:
         query_mode=QueryMode.EXISTS,
         local_id="QID1",
         target=target,
+        query_kind=query_kind,
         query_operator_evidence=(EvidenceSpan("кто", who_start, who_end),),
     )
 
@@ -202,6 +206,26 @@ def test_event_proof_keeps_alias_of_canonical_subject_visible() -> None:
     assert "тот же объект" in rendered
 
 
+def test_name_lookup_keeps_a_distinct_proof_and_projection_contract() -> None:
+    core, context, integration = _runtime()
+    turn_time = datetime(
+        2026, 9, 13, 23, 0, tzinfo=timezone(timedelta(hours=3))
+    )
+    _name_user_ilya(integration, context, turn_time)
+    query = _identity_query(IdentityQueryKind.NAME_LOOKUP)
+
+    built = QueryGoalBuilder(core).build(query, context)
+    assert built.goal is not None, built.diagnostics
+    outcome = InferenceEngine(core, InferenceSettings()).solve(built.goal)
+    assert outcome.status is LogicalStatus.PROVED
+
+    projected = ContextProjector(core, ContextSettings()).project(
+        "Как зовут пользователя?", (), (outcome,)
+    )
+    assert "Подтверждённое имя сущности" in projected.rendered
+    assert "Илья" in projected.rendered
+
+
 def test_identity_query_m1_shows_identity_not_copular_truth_check() -> None:
     query = _identity_query()
     view = build_m1_formalization_view(
@@ -209,16 +233,16 @@ def test_identity_query_m1_shows_identity_not_copular_truth_check() -> None:
     )
 
     assert view.prompt_type == "ЗАПРОС"
-    assert view.prompt_detail == "Найти имя / идентичность сущности"
+    assert view.prompt_detail == "Найти подтверждённое описание сущности"
     assert len(view.frames) == 1
     frame = view.frames[0]
-    assert frame.kind == "ЗАПРОС ИДЕНТИЧНОСТИ"
-    assert frame.predicate == "IDENTITY_OF"
+    assert frame.kind == "ЗАПРОС ОПИСАНИЯ"
+    assert frame.predicate == "DESCRIPTION_OF"
     assert [(role.role, role.value, role.requested) for role in frame.roles] == [
         ("ENTITY", "пользователь", False),
-        ("NAME", "?", True),
+        ("DESCRIPTION", "?", True),
     ]
     words = {word.text: (word.label, word.detail) for word in view.words}
     assert words["пользователь"] == ("ENTITY", "идентифицируемая сущность")
-    assert words["кто"] == ("Оператор запроса", "IDENTITY")
+    assert words["кто"] == ("Оператор запроса", "DESCRIPTION")
     assert "истинность события" not in view.interpretation

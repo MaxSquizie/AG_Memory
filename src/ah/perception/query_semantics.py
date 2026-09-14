@@ -1,8 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 
 from .contracts import ActantCandidate, EvidenceSpan, QueryCandidate, QueryMode
+
+
+class IdentityQueryKind(str, Enum):
+    """Typed information need carried by an entity-identity question.
+
+    The values describe the requested semantic projection, not Russian surface
+    forms.  Perception selects one bounded value from the complete source and the
+    already extracted structure; downstream layers never classify question words.
+    """
+
+    NAME_LOOKUP = "NAME_LOOKUP"
+    ENTITY_DESCRIPTION = "ENTITY_DESCRIPTION"
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,20 +57,20 @@ class EventSetQueryCandidate(QueryCandidate):
 
 @dataclass(frozen=True, slots=True)
 class EntityIdentityQueryCandidate(QueryCandidate):
-    """Runtime query asking for the asserted identity/name of one known entity.
+    """Runtime query asking for a supported name/description of one known entity.
 
     Natural-language copular shells such as ``пользователь кто?`` are not factual
     ``быть(STATE=пользователь, SUBJECT=кто)`` propositions.  Their unknown is an
-    identifying label of one already grounded entity.  The source copula remains
+    name or description of one already grounded entity. The source copula remains
     provenance only; it must not create or select a canonical predicate template.
 
     ``target`` is the source-grounded entity expression. ``query_operator_evidence``
-    records the interrogative source span that requested identity.  Canonical entity
-    resolution and reading the stored identity properties remain deterministic and
-    happen after Perception.
+    records source spans consumed by this query shell. Canonical entity resolution
+    and reading matching identity evidence remain deterministic after Perception.
     """
 
     target: ActantCandidate | None = None
+    query_kind: IdentityQueryKind = IdentityQueryKind.ENTITY_DESCRIPTION
     identity_query: bool = True
     query_operator_evidence: tuple[EvidenceSpan, ...] = ()
 
@@ -71,3 +84,5 @@ class EntityIdentityQueryCandidate(QueryCandidate):
             raise ValueError("EntityIdentityQueryCandidate requires a target entity")
         if len(self.actants) != 1 or self.actants[0] != self.target:
             raise ValueError("EntityIdentityQueryCandidate.actants must contain only target")
+        if not isinstance(self.query_kind, IdentityQueryKind):
+            raise ValueError("EntityIdentityQueryCandidate.query_kind must be IdentityQueryKind")

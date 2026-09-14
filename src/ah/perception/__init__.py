@@ -45,7 +45,11 @@ from .contracts import (
     StructuralClarificationSpec,
 )
 from .naming_semantics import NamingAssertionCandidate
-from .query_semantics import EntityIdentityQueryCandidate, EventSetQueryCandidate
+from .query_semantics import (
+    EntityIdentityQueryCandidate,
+    EventSetQueryCandidate,
+    IdentityQueryKind,
+)
 from .llm_parser import (
     LLMPerceptionSettings,
     PerceptionAttemptDiagnostic,
@@ -127,6 +131,7 @@ __all__ = [
     "NamingAssertionCandidate",
     "EventSetQueryCandidate",
     "EntityIdentityQueryCandidate",
+    "IdentityQueryKind",
     "DiscourseRelationDecision",
     "SituationRelationCandidate",
     "SituationRelationHintCandidate",

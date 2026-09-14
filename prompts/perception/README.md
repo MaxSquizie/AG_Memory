@@ -9,6 +9,8 @@ Rules:
 - deterministic structure narrows the problem before any semantic probe;
 - role classification uses one deterministically narrowed natural-semantic choice; grammar may remove impossible roles, but case/preposition/lexeme associations are not themselves canonical role assignments;
 - one small semantic decision per probe;
+- stage files define semantic distinctions only, remain short, and never restate
+  the response format or option menu owned by the shared wire protocol;
 - every bounded semantic choice uses the shared numeric-first wire protocol and ordinary temperature-zero non-thinking generation; an exact current label or complete matching menu row remains a format-compatible response, but prose, headings, stale options and mismatched rows are rejected;
 - retries repeat the same semantic evidence and options with a format-only correction; invalid model output is never fed back into the prompt;
 - choice sets are finite, unique and capped before generation; no likelihood scorer, margin threshold, calibration veto, hidden tournament or semantic fallback is a second voter;
@@ -34,3 +36,9 @@ Rules:
 - `association_query.txt` — bounded non-thinking association-intent probe. Deterministic parsing first enumerates source-grounded endpoint candidates as local `E1..En` labels, including members of one actant composition. The shared wire menu contains `ORDINARY`, `UNKNOWN`, and the enumerated endpoint pairs and is rejected before generation if pair expansion exceeds its cap. The probe never sees canonical AH UIDs and never constructs `AssociationGoal`; canonical endpoint resolution remains deterministic and read-only in GoalCompiler.
 - `quantifier.txt` — bounded source-semantic classification after grammatical candidate extraction. It chooses only a typed quantifier label (or abstains); Python owns restriction/scope construction and canonical Integration.
 - `temporal_mode.txt` — bounded occurrence-level `STATE/EVENT/PROCESS/AMBIGUOUS` decision used only when temporal fillers make the distinction observable and morphology/frame metadata did not settle it. It never classifies canonical `T`.
+- `identity_query.txt` — distinguishes only the proof-relevant name-versus-
+  description target independently of Russian surface form;
+  `identity_target.txt` then selects among source-grounded entity candidates. The
+  selected kind is preserved through GoalSpec, so a name request requires an
+  explicit identity-name edge while a description may use identity or asserted
+  descriptive facts.

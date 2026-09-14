@@ -35,6 +35,30 @@ def _identity_query(value: Any) -> bool:
     return bool(_get(value, "identity_query", False))
 
 
+_KIND_VIEW = {
+    "NAME_LOOKUP": (
+        "ЗАПРОС ИМЕНИ",
+        "NAME_OF",
+        "NAME",
+        "Найти подтверждённое имя сущности",
+        "имя",
+    ),
+    "ENTITY_DESCRIPTION": (
+        "ЗАПРОС ОПИСАНИЯ",
+        "DESCRIPTION_OF",
+        "DESCRIPTION",
+        "Найти подтверждённое описание сущности",
+        "описание",
+    ),
+}
+
+
+def _kind_view(query: Any) -> tuple[str, str, str, str, str]:
+    raw = _get(query, "query_kind", "ENTITY_DESCRIPTION")
+    value = str(_get(raw, "value", raw) or "ENTITY_DESCRIPTION")
+    return _KIND_VIEW.get(value, _KIND_VIEW["ENTITY_DESCRIPTION"])
+
+
 def _actant_text(value: Any) -> str:
     return str(
         _get(value, "mention", "")
@@ -74,8 +98,9 @@ def _rewrite_words(view, queries):
     for query in queries:
         target = _get(query, "target")
         mark(_span(target), "ENTITY", "идентифицируемая сущность")
+        operator_detail = _kind_view(query)[2]
         for evidence in _items(query, "query_operator_evidence"):
-            mark(_span(evidence), "Оператор запроса", "IDENTITY")
+            mark(_span(evidence), "Оператор запроса", operator_detail)
     return tuple(words)
 
 
@@ -91,13 +116,20 @@ def build_m1_formalization_view(perception: Any, *, source_text: str | None = No
     for index, query in enumerate(queries, start=1):
         target = _get(query, "target")
         local_id = str(_get(query, "local_id", "") or f"identity_{index}")
+        (
+            frame_kind,
+            predicate,
+            requested_role,
+            _detail,
+            _requested_text,
+        ) = _kind_view(query)
         replacement_frames[local_id] = _base.M1FrameView(
             local_id=local_id,
-            kind="ЗАПРОС ИДЕНТИЧНОСТИ",
-            predicate="IDENTITY_OF",
+            kind=frame_kind,
+            predicate=predicate,
             roles=(
                 _base.M1RoleView("ENTITY", _actant_text(target)),
-                _base.M1RoleView("NAME", "?", requested=True),
+                _base.M1RoleView(requested_role, "?", requested=True),
             ),
             negated=False,
             status="ASSERTED",
@@ -128,18 +160,24 @@ def build_m1_formalization_view(perception: Any, *, source_text: str | None = No
     )
     if identity_only:
         prompt_type = "ЗАПРОС"
-        prompt_detail = "Найти имя / идентичность сущности"
+        details = tuple(dict.fromkeys(_kind_view(query)[3] for query in queries))
+        prompt_detail = "; ".join(details)
         descriptions = []
         for query in queries:
+            requested = _kind_view(query)[4]
             descriptions.append(
-                f"Нужно определить имя/идентичность сущности «{_actant_text(_get(query, 'target'))}»."
+                f"Нужно получить {requested} сущности "
+                f"«{_actant_text(_get(query, 'target'))}» "
+                "из подтверждённых связей памяти."
             )
         interpretation = " ".join(descriptions)
     else:
         prompt_type = view.prompt_type
         prompt_detail = view.prompt_detail
         identity_text = " ".join(
-            f"Нужно определить имя/идентичность сущности «{_actant_text(_get(query, 'target'))}»."
+            f"Нужно получить {_kind_view(query)[4]} сущности "
+            f"«{_actant_text(_get(query, 'target'))}» "
+            "из подтверждённых связей памяти."
             for query in queries
         )
         interpretation = (view.interpretation + " " + identity_text).strip()

@@ -12,6 +12,7 @@ from ah.inference.identity_query import EntityIdentityGoal
 from ah.inference.quantified_exists import DerivedAtomConclusion
 from ah.integration.identity_graph import identity_name_refs_for_owner, identity_name_text
 from ah.model import ActantRole, Domain, Hypernode, Ref, RefKind, SemanticEntity
+from ah.perception.query_semantics import IdentityQueryKind
 
 from .agent_context import ContextProjector as _BaseContextProjector
 from .contracts import ProjectionBlock, ProjectionMode
@@ -166,10 +167,28 @@ class EventAwareContextProjector(_BaseContextProjector):
                 out.append(predicate)
         return tuple(out)
 
+    def _explicit_identity_names(self, ref: Ref) -> tuple[str, ...]:
+        out: list[str] = []
+        seen: set[str] = set()
+        for name_ref in identity_name_refs_for_owner(self.core, ref):
+            try:
+                entity = self.core.store.get_element_any_domain(name_ref.uid)
+            except KeyError:
+                continue
+            if not isinstance(entity, SemanticEntity):
+                continue
+            value = identity_name_text(entity)
+            folded = "" if value is None else value.casefold()
+            if value and folded not in seen:
+                seen.add(folded)
+                out.append(value)
+        return tuple(out)
+
     def _identity_block(
         self,
         ref: Ref,
         premise_refs: tuple[Ref, ...] = (),
+        query_kind: IdentityQueryKind = IdentityQueryKind.ENTITY_DESCRIPTION,
     ) -> ProjectionBlock:
         parts = self._entity_identity_parts(ref)
         descriptors = self._identity_descriptors(ref, premise_refs)
@@ -180,6 +199,15 @@ class EventAwareContextProjector(_BaseContextProjector):
                 "Идентичность сущности подтверждена, но её человекочитаемая метка недоступна.",
             )
         primary, aliases = parts
+        if query_kind is IdentityQueryKind.NAME_LOOKUP:
+            names = self._explicit_identity_names(ref)
+            text = (
+                f"Подтверждённое имя сущности — «{', '.join(names)}»."
+                if names
+                else "Имя сущности не найдено в доказательном контексте."
+            )
+            return ProjectionBlock(ref, ProjectionMode.INFERENCE, text)
+
         chunks: list[str] = []
         if descriptors:
             chunks.append(
@@ -187,7 +215,8 @@ class EventAwareContextProjector(_BaseContextProjector):
             )
         if aliases:
             chunks.append(
-                f"«{primary}» и «{', '.join(aliases)}» связаны как обозначения одного объекта."
+                f"«{primary}» и «{', '.join(aliases)}» связаны как обозначения "
+                "одного и того же объекта."
             )
         if not chunks:
             chunks.append(f"Идентичность сущности: известное обозначение — «{primary}».")
@@ -234,7 +263,11 @@ class EventAwareContextProjector(_BaseContextProjector):
             and isinstance(conclusion, ExistingRefConclusion)
             and conclusion.ref.kind is RefKind.M
         ):
-            return self._identity_block(conclusion.ref, outcome.premise_refs)
+            return self._identity_block(
+                conclusion.ref,
+                outcome.premise_refs,
+                target.query_kind,
+            )
 
         if (
             outcome.status is LogicalStatus.PROVED

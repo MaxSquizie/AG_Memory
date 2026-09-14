@@ -207,8 +207,7 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
             "already identified SUBJECT is the possessor/holder and OBJECT is the "
             "thing possessed/available to that subject? This includes existential "
             "possessive wording, but not an action merely performed on an object, "
-            "location near an object, or another binary relation.\n"
-            "Candidate labels:\nPOSSESSION\nOTHER_RELATION\nUNCLEAR"
+            "location near an object, or another binary relation."
         )
         decision, _ = self._deep_semantic_choice_probe(
             "predicate_semantics",
@@ -250,7 +249,7 @@ class SemanticPredicateAdaptiveParser(IdentityQueryAdaptiveParser):
             f"SUBJECT CANDIDATE:\n{subject.lookup_text or subject.mention or ''}\n"
             "Decision criterion:\nDoes SUBJECT denote a generic class member for which "
             "the question asks a general rule/property of the class, or one specific "
-            "entity/referent?\nCandidate labels:\nGENERIC_CLASS\nSPECIFIC_ENTITY\nUNCLEAR"
+            "entity/referent?"
         )
         decision, _ = self._deep_semantic_choice_probe(
             "generic_subject",

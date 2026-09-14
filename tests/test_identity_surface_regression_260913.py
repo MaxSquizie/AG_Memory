@@ -8,6 +8,7 @@ from ah.perception import (
     AssertionCandidate,
     EntityIdentityQueryCandidate,
     EvidenceSpan,
+    IdentityQueryKind,
     NamingAssertionCandidate,
     PerceptionResult,
     PredicateCandidate,
@@ -101,7 +102,10 @@ class _InjectedDecisionParser(IdentityQueryAdaptiveParser):
         assert [(item.mention or item.lookup_text) for item in values] == ["Илья"]
         return "VALUE_1"
 
-    def _identity_query_decision(self, source_text, query, candidates, interrogative):
+    def _identity_query_kind_decision(self, source_text, query, candidates, interrogative):
+        return IdentityQueryKind.ENTITY_DESCRIPTION.value
+
+    def _identity_target_decision(self, source_text, query, candidates, query_kind):
         assert self.identity_target_text is not None
         texts = [self._candidate_text(item) for item in candidates]
         index = texts.index(self.identity_target_text)
@@ -225,14 +229,15 @@ def test_who_is_shell_selects_entity_and_consumes_shell(monkeypatch) -> None:
         identity = parsed.perception.queries[0]
         assert isinstance(identity, EntityIdentityQueryCandidate)
         assert identity.target.mention == target_text
+        assert identity.query_kind is IdentityQueryKind.ENTITY_DESCRIPTION
         assert tuple(item.mention for item in identity.actants) == (target_text,)
         assert {item.text for item in identity.query_operator_evidence} == {"Кто", "такой"}
 
         view = build_m1_formalization_view(parsed.perception)
-        assert view.prompt_detail == "Найти имя / идентичность сущности"
-        assert view.frames[0].kind == "ЗАПРОС ИДЕНТИЧНОСТИ"
-        assert view.frames[0].predicate == "IDENTITY_OF"
+        assert view.prompt_detail == "Найти подтверждённое описание сущности"
+        assert view.frames[0].kind == "ЗАПРОС ОПИСАНИЯ"
+        assert view.frames[0].predicate == "DESCRIPTION_OF"
         words = {word.text: (word.label, word.detail) for word in view.words}
-        assert words["Кто"] == ("Оператор запроса", "IDENTITY")
-        assert words["такой"] == ("Оператор запроса", "IDENTITY")
+        assert words["Кто"] == ("Оператор запроса", "DESCRIPTION")
+        assert words["такой"] == ("Оператор запроса", "DESCRIPTION")
         assert words[target_text] == ("ENTITY", "идентифицируемая сущность")
