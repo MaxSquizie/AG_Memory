@@ -7,6 +7,8 @@ from datetime import datetime
 from ah.association import AssociationCoordinator, AssociationOutcome, AssociationStatus
 from ah.inference import AssociationQueryBuildResult, InferenceOutcome, TurnGoalBuilder
 from ah.inference.contracts import (
+    CognitiveEventKind,
+    CognitiveTraceEvent,
     ExistingRefConclusion,
     GoalMode,
     GoalSpec,
@@ -14,7 +16,7 @@ from ah.inference.contracts import (
     ProofSupport,
     StopReason,
 )
-from ah.model import Ref, RefKind
+from ah.model import Ref
 from ah.projection.association_context import AssociationContextProjector
 
 from .orchestrator_base import (
@@ -30,9 +32,9 @@ from .orchestrator_base import (
 class QueryExecution(_BaseQueryExecution):
     """One runtime goal execution.
 
-    ``association_outcome`` remains the authoritative associative result.  ``outcome``
+    ``association_outcome`` remains the authoritative associative result. ``outcome``
     may additionally contain a diagnostic M2-visible proof *of convergence* so the
-    operator can audit whether an association was actually found.  That diagnostic
+    operator can audit whether an association was actually found. That diagnostic
     proof is never fed back into ordinary logical inference/projection and therefore
     does not promote associative convergence to semantic entailment.
     """
@@ -41,16 +43,12 @@ class QueryExecution(_BaseQueryExecution):
 
 
 class AgentOrchestrator(_BaseAgentOrchestrator):
-    """AgentOrchestrator extension routing AssociationGoal to AssociationCoordinator.
+    """Route AssociationGoal to AssociationCoordinator and expose its provenance.
 
-    The mature base pipeline still owns parsing, Integration, settling, discourse,
-    logical inference, response recording and persistence. This extension reuses one
-    no-response base pass, executes only the association requests that the typed
-    GoalCompiler marked, then rebuilds AgentContext with an explicit ASSOCIATION
-    RESULTS section.  For diagnostics it also freezes a proof-shaped convergence
-    trace in ``QueryExecution.outcome``; that trace proves only that both bounded
-    activation fronts met at one canonical representation, not that a new factual
-    proposition follows from the meeting point.
+    The base pipeline still owns parsing, Integration, settling, discourse, logical
+    inference, response recording and persistence. Association execution remains a
+    separate activation search. For diagnostics only, its exact left/right ancestry
+    is mirrored into an M2-visible outcome whose GoalSpec.mode is ASSOCIATION.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -61,14 +59,7 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
         )
 
     def _association_uid_trace(self, outcome: AssociationOutcome) -> tuple[Ref, ...]:
-        """Freeze canonical provenance used by an association convergence.
-
-        Search-only MEMORY_QUERY hops may name a canonical incidence object in
-        ``via_uid``.  Include it when it still exists so the GUI can overlay the
-        exact route on the live canvas.  Runtime-only query edges themselves are not
-        invented as L nodes.
-        """
-
+        """Freeze canonical refs touched by the selected convergence paths."""
         refs: list[Ref] = []
         seen: set[str] = set()
 
@@ -94,6 +85,61 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
             add(outcome.common_ref)
         return tuple(refs)
 
+    def _association_cognitive_trace(
+        self, outcome: AssociationOutcome
+    ) -> tuple[CognitiveTraceEvent, ...]:
+        """Mirror selected association ancestry without inventing logical L rules."""
+        events: list[CognitiveTraceEvent] = [
+            CognitiveTraceEvent(
+                CognitiveEventKind.GOAL_START,
+                logical_depth=0,
+                detail=(
+                    "ASSOCIATION search: two bounded activation fronts; "
+                    "convergence evidence is not semantic entailment"
+                ),
+            )
+        ]
+        for front, path in (("LEFT", outcome.left_path), ("RIGHT", outcome.right_path)):
+            if path is None:
+                continue
+            events.append(
+                CognitiveTraceEvent(
+                    CognitiveEventKind.FOCUS,
+                    logical_depth=0,
+                    ref=path.origin,
+                    detail=f"ASSOCIATION:{front}:origin",
+                )
+            )
+            for depth, hop in enumerate(path.hops, 1):
+                kind = (
+                    CognitiveEventKind.MEMORY_QUERY
+                    if hop.kind.value == "MEMORY_QUERY"
+                    else CognitiveEventKind.FOCUS
+                )
+                events.append(
+                    CognitiveTraceEvent(
+                        kind,
+                        logical_depth=depth,
+                        ref=hop.target,
+                        query_kind=hop.kind.value,
+                        query_key=hop.source.uid,
+                        rule_id=f"ASSOCIATION:{hop.relation}",
+                        detail=f"{front}:{hop.source.uid}->{hop.target.uid}",
+                    )
+                )
+        events.append(
+            CognitiveTraceEvent(
+                CognitiveEventKind.GOAL_STOP,
+                logical_depth=max(
+                    outcome.left_path.depth if outcome.left_path is not None else 0,
+                    outcome.right_path.depth if outcome.right_path is not None else 0,
+                ),
+                ref=outcome.common_ref,
+                detail=f"ASSOCIATION:{outcome.status.value}",
+            )
+        )
+        return tuple(events)
+
     @staticmethod
     def _association_stop_reason(outcome: AssociationOutcome) -> StopReason:
         if outcome.status is AssociationStatus.FOUND:
@@ -111,12 +157,11 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
     ) -> InferenceOutcome:
         """Represent association search as an auditable M2 diagnostic obligation.
 
-        ``PROVED`` here means exactly "the runtime ASSOCIATION goal reached its stop
-        condition by convergence".  It is deliberately tagged with
-        ``GoalMode.ASSOCIATION`` and ``ASSOCIATION_CONVERGENCE`` support, excluded
-        from ordinary inference projection below, and never materialized into AH.
+        ``PROVED`` means exactly: the runtime ASSOCIATION goal reached its explicit
+        convergence stop condition. It does not mean that a new proposition was
+        entailed. The outcome is excluded from ordinary inference projection below
+        and is never materialized into canonical AH.
         """
-
         found = outcome.found
         conclusion = (
             ExistingRefConclusion(outcome.common_ref)
@@ -156,6 +201,7 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
             goal_spec=GoalSpec(outcome.goal, mode=GoalMode.ASSOCIATION),
             logical_depth=depth,
             proof_support=support,
+            cognitive_trace=self._association_cognitive_trace(outcome),
         )
 
     def _execute_associations(
@@ -225,10 +271,6 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
         generate_response: bool = True,
         source_timestamp: datetime | None = None,
     ) -> AgentTurnResult:
-        # Suppress only presentation in the base pass. Canonical user semantics and
-        # ordinary inference are committed/executed exactly once. Association is
-        # then routed through its dedicated activation coordinator rather than being
-        # allowed to masquerade as an ordinary semantic RelationGoal.
         base = super().handle_user_text(
             text,
             generate_response=False,
@@ -239,6 +281,9 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
         with lock:
             executions, association_outcomes, unresolved = self._execute_associations(base)
             workspace = self.ignition.workspace_refs()
+            # Diagnostic ASSOCIATION outcomes are intentionally excluded here: the
+            # response model receives them only through the dedicated association
+            # projector, never as ordinary logical entailment.
             inference_outcomes = tuple(
                 execution.outcome
                 for execution in executions
@@ -284,11 +329,6 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                     with lock:
                         self._enqueue_clarifications(base.integration.clarifications)
 
-        # The base no-response pass already attempted persistence for the user
-        # turn. Repeat it only if this extension changed runtime/canonical state:
-        # association advances Ignition and a recorded response adds an H event.
-        # A failed response with no association must not duplicate an identical
-        # persistence write.
         post_route_changed = bool(association_outcomes) or response_integration is not None
         post_autosaved = self._autosave(lock) if post_route_changed else False
         autosaved = base.autosaved or post_autosaved
