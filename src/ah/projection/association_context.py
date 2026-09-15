@@ -46,21 +46,50 @@ class AssociationContextProjector(EventAwareContextProjector):
             parts.append(f"--{hop.relation}--> {self._ref_text(target)}")
         return " ".join(parts)
 
+    def _frame_pattern_text(self, outcome: AssociationOutcome) -> str | None:
+        pattern = outcome.frame_pattern
+        if pattern is None:
+            return None
+        rows: list[tuple[str, str]] = []
+        for role in pattern.variable_roles:
+            rows.append((role.value, "_"))
+        for binding in pattern.bindings:
+            value = self._ref_text(binding.value)
+            if binding.generalized:
+                value = f"{value} [IS-A generalization]"
+            rows.append((binding.role.value, value))
+        rows.sort(key=lambda item: item[0])
+        predicate = self._ref_text(pattern.predicate)
+        return f"{predicate}({', '.join(f'{role}={value}' for role, value in rows)})"
+
     def _association_block(self, outcome: AssociationOutcome) -> ProjectionBlock:
         if outcome.status is AssociationStatus.FOUND and outcome.common_ref is not None:
             common = self._ref_text(outcome.common_ref)
             left = self._path_text(outcome.left_path)
             right = self._path_text(outcome.right_path)
+            pattern = self._frame_pattern_text(outcome)
             semantics = (
                 ""
                 if outcome.semantics is None
                 else f" Тип сходимости: {outcome.semantics.value}."
             )
+            if pattern is not None:
+                result = (
+                    "Ассоциативный поиск: FOUND. Общая семантическая схема: "
+                    f"{pattern}. Структурная точка сходимости активации: {common}. "
+                    f"Левая ветвь: {left}. Правая ветвь: {right}."
+                )
+            else:
+                result = (
+                    "Ассоциативный поиск: FOUND. Общая активированная репрезентация: "
+                    f"{common}. Левая ветвь: {left}. Правая ветвь: {right}."
+                )
             text = (
-                "Ассоциативный поиск: FOUND. Общая активированная репрезентация: "
-                f"{common}. Левая ветвь: {left}. Правая ветвь: {right}."
-                f"{semantics} Это ассоциативная сходимость памяти, НЕ логическое "
-                "доказательство и НЕ новый утверждённый факт."
+                result
+                + semantics
+                + " Это ассоциативная сходимость памяти, НЕ логическое доказательство "
+                "и НЕ новый утверждённый факт. Не расширяй найденную общность мировыми "
+                "знаниями за пределы указанной схемы и её поддерживающих ветвей."
             )
             return ProjectionBlock(
                 outcome.common_ref,
