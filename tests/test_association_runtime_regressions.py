@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from ah.model import ActantRole
+from types import SimpleNamespace
+
+from ah.association import AssociationCoordinator
+from ah.core import AHCore, SequentialUidGenerator
+from ah.model import ActantRole, Domain
 from ah.perception.association_continuation import (
     AssociationContinuationLLMPerceptionService,
     normalize_correlative_actant_compositions,
@@ -143,3 +147,13 @@ def test_production_perception_service_exposes_association_probe() -> None:
     assert callable(
         getattr(AssociationContinuationLLMPerceptionService, "classify_association_query", None)
     )
+
+
+def test_structural_coordination_group_is_not_a_terminal_commonality() -> None:
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    crow = core.add_entity(Domain.C)
+    table = core.add_entity(Domain.C)
+    pair = core.add_group(Domain.H, (core.ref(crow.uid), core.ref(table.uid)))
+    coordinator = AssociationCoordinator(core, SimpleNamespace(core=core))
+
+    assert coordinator._raw_common_allowed(None, pair.uid) is False
