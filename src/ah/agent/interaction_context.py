@@ -38,6 +38,29 @@ class ExistentialDiscourseAnchor:
 
 
 @dataclass(slots=True)
+class AssociationDiscourseSession:
+    """Runtime-only context for follow-up requests such as ``А ещё?``.
+
+    The canonical endpoints stay the same while ``emitted_signatures`` records which
+    association answers have already been returned for this pair.  A continuation
+    therefore reruns the ordinary bounded association search with those signatures
+    excluded instead of accepting the same nearest convergence again.
+    """
+
+    left: Ref
+    right: Ref
+    emitted_signatures: list[str] = field(default_factory=list)
+
+    def same_pair(self, left: Ref, right: Ref) -> bool:
+        return {self.left.uid, self.right.uid} == {left.uid, right.uid}
+
+    def remember(self, signature: str | None) -> None:
+        value = (signature or "").strip()
+        if value and value not in self.emitted_signatures:
+            self.emitted_signatures.append(value)
+
+
+@dataclass(slots=True)
 class InteractionContext:
     """Runtime interaction context; not part of canonical AH state."""
 
@@ -49,6 +72,7 @@ class InteractionContext:
     existential_pronoun_anchors: dict[str, ExistentialDiscourseAnchor] = field(default_factory=dict)
     last_experience_ref: Ref | None = None
     pending_clarification_refs: list[Ref] = field(default_factory=list)
+    association_session: AssociationDiscourseSession | None = None
 
     def resolve_pronoun(self, text: str) -> Ref | None:
         return self.pronoun_refs.get(text.casefold())
