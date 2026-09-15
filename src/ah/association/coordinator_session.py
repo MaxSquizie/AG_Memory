@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ah.model import RefKind
+from ah.model import Ref, RefKind
 
 from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
 from .coordinator_specific import AssociationCoordinator as _StructuredAssociationCoordinator
@@ -38,8 +38,26 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
             return
         remember_signature(self.core, left, right, f"REF:{pattern.template.uid}")
         remember_signature(self.core, left, right, f"REF:{pattern.predicate.uid}")
+
+        left_fact = self.core.store.get_hypernode(pattern.left_fact.uid)
+        right_fact = self.core.store.get_hypernode(pattern.right_fact.uid)
         for binding in pattern.bindings:
             remember_signature(self.core, left, right, f"REF:{binding.value.uid}")
+            if not binding.generalized:
+                continue
+            # A generalized fixed binding owns the concrete fillers that supported
+            # that generalization as well.  Example:
+            #
+            #   HAVE(crow, paws) + HAVE(table, legs) + paws IS-A legs
+            #
+            # is one answer: HAVE(_, legs).  Without recording ``paws`` as already
+            # consumed, a later search can converge on the subtype ref and the
+            # response layer verbalizes the same "both have legs" commonality again.
+            # This is result-history only; no canonical semantic relation is added.
+            for fact in (left_fact, right_fact):
+                operand = fact.actants.get(binding.role)
+                if isinstance(operand, Ref):
+                    remember_signature(self.core, left, right, f"REF:{operand.uid}")
 
     def solve(
         self,
