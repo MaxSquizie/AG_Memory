@@ -90,6 +90,11 @@ class AssociationContinuationLLMPerceptionService(SemanticPredicateLLMPerception
                 result = self._continuation_result(text)
                 self._record_diagnostic(text, [], result)
                 return result
+            if decision == "ORDINARY":
+                # The association session is dialogue state, not permanent memory.
+                # A real topic change closes it; a new explicit association query
+                # will deterministically open a fresh session during GoalCompiler.
+                interaction_context.association_session = None
             # UNCLEAR is fail-closed with respect to the optional continuation
-            # overlay: preserve ordinary perception instead of hijacking the turn.
+            # overlay: preserve ordinary perception without destroying the session.
         return super().parse(text, interaction_context)
