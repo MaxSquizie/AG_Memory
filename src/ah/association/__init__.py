@@ -1,6 +1,8 @@
 from .contracts import (
     AssociationBudget,
     AssociationDomainPolicy,
+    AssociationFrameBinding,
+    AssociationFramePattern,
     AssociationGoal,
     AssociationHop,
     AssociationHopKind,
@@ -11,12 +13,15 @@ from .contracts import (
     AssociationTraceEvent,
     AssociationTraceKind,
 )
-from .coordinator import AssociationCoordinator, AssociationSearchState
+from .coordinator import AssociationSearchState
+from .coordinator_specific import AssociationCoordinator
 
 __all__ = [
     "AssociationBudget",
     "AssociationCoordinator",
     "AssociationDomainPolicy",
+    "AssociationFrameBinding",
+    "AssociationFramePattern",
     "AssociationGoal",
     "AssociationHop",
     "AssociationHopKind",
