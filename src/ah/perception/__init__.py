@@ -66,9 +66,10 @@ from .association_semantics import (
 from .generalized_naming import GeneralizedNamingAdaptiveParser
 from .runtime_invariants import RuntimeSemanticAdaptiveParser
 from .identity_query import IdentityQueryAdaptiveParser
-from .semantic_predicates import (
-    SemanticPredicateAdaptiveParser,
-    SemanticPredicateLLMPerceptionService as LLMPerceptionService,
+from .semantic_predicates import SemanticPredicateAdaptiveParser
+from .association_continuation import (
+    AssociationContinuationLLMPerceptionService as LLMPerceptionService,
+    AssociationContinuationQueryCandidate,
 )
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
@@ -148,6 +149,7 @@ __all__ = [
     "AssociationEndpointSelector",
     "AssociationQueryDecision",
     "AssociationSemanticClassifier",
+    "AssociationContinuationQueryCandidate",
     "GeneralizedNamingAdaptiveParser",
     "RuntimeSemanticAdaptiveParser",
     "IdentityQueryAdaptiveParser",
