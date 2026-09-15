@@ -53,7 +53,11 @@ from .quantified_exists import (
     QuantifiedInferenceMaterializer,
 )
 from .modal_dispatch import ModalTurnGoalCompiler
-from .association_goal import AssociationQueryBuildResult, AssociationTurnGoalCompiler
+from .association_goal import AssociationQueryBuildResult
+from .association_session_goal import (
+    AssociationContinuationGoal,
+    AssociationSessionTurnGoalCompiler,
+)
 
 # Public runtime composes independent GoalCompiler/Inference extensions. Open-event
 # retrieval, identity/description lookup and quantified ground-atom derivation are
@@ -62,15 +66,18 @@ from .association_goal import AssociationQueryBuildResult, AssociationTurnGoalCo
 InferenceEngine = QuantifiedExistsInferenceEngine
 InferenceMaterializer = QuantifiedInferenceMaterializer
 QueryGoalBuilder = EntityIdentityQueryGoalBuilder
-SemanticGoalCompiler = AssociationTurnGoalCompiler
-TurnGoalBuilder = AssociationTurnGoalCompiler
+AssociationTurnGoalCompiler = AssociationSessionTurnGoalCompiler
+SemanticGoalCompiler = AssociationSessionTurnGoalCompiler
+TurnGoalBuilder = AssociationSessionTurnGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
     "AnyOfGoal",
     "AssociationGoal",
+    "AssociationContinuationGoal",
     "AssociationQueryBuildResult",
+    "AssociationSessionTurnGoalCompiler",
     "AssociationTurnGoalCompiler",
     "CauseEntailmentGoal",
     "CounterfactualGoal",
