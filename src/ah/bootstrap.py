@@ -1,107 +1,118 @@
 from __future__ import annotations
 
-import os
-from dataclasses import fields, replace
+from dataclasses import dataclass, fields, replace
+from datetime import datetime
 from pathlib import Path
 from threading import RLock
 
-from ah.agent import InteractionContext
+from ah.agent.interaction_context import InteractionContext
+from ah.agent.llm_agent import LLMAgent, LLMAgentSettings
 from ah.agent.orchestrator import AgentOrchestrator
 from ah.config import AppConfig, PersistenceSettings
 from ah.core import AHCore, JsonPersistence
 from ah.diagnostics import GraphInspector, RuntimeDiagnostics
-from ah.dsl import DSLFacade
-from ah.ignition import IgnitionClock, IgnitionEngine, IgnitionSnapshot
-from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder
-from ah.integration import CorrectionManager, IntegrationConfig, IntegrationService
-from ah.llm import build_llm_backend
+from ah.diagnostics.session_log import audit_tick_result
+from ah.dsl import DSLInterpreter
+from ah.ignition import IgnitionClock, IgnitionEngine
+from ah.ignition.engine import IgnitionSnapshot
+from ah.integration import IntegrationConfig, IntegrationService
+from ah.integration.correction import RefutationCommit, SemanticCorrectionService
+from ah.integration.contracts import IntegrationCommit
+from ah.inference import InferenceEngine, InferenceMaterializer, QueryGoalBuilder, InferenceSchemaRegistry
+from ah.llm import LLMBackend, build_llm_backend
 from ah.model import Domain, Property, SemanticEntity
-from ah.perception import LLMPerceptionService, LLMPerceptionSettings, PerceptionResult, TextSensoryService
+from ah.perception import (
+    LLMPerceptionService,
+    LLMPerceptionSettings,
+    PerceptionResult,
+    TextSensoryService,
+    build_morphology,
+)
 from ah.projection import ContextProjector
-from ah.schema import SchemaRegistry
 
 
+@dataclass(slots=True)
 class RuntimeServices:
-    def __init__(
-        self,
-        *,
-        config: AppConfig,
-        operation_lock: RLock,
-        core: AHCore,
-        context: InteractionContext,
-        integration: IntegrationService,
-        schema_registry: SchemaRegistry,
-        ignition: IgnitionEngine,
-        clock: IgnitionClock,
-        inference: InferenceEngine,
-        materializer: InferenceMaterializer,
-        query_builder: QueryGoalBuilder,
-        projector: ContextProjector,
-        sensory: TextSensoryService,
-        persistence: JsonPersistence,
-        dsl: DSLFacade,
-        correction: CorrectionManager,
-        graph_inspector: GraphInspector,
-        diagnostics: RuntimeDiagnostics,
-        llm,
-        perception,
-        agent,
-    ) -> None:
-        self.config = config
-        self.operation_lock = operation_lock
-        self.core = core
-        self.context = context
-        self.integration = integration
-        self.schema_registry = schema_registry
-        self.ignition = ignition
-        self.clock = clock
-        self.inference = inference
-        self.materializer = materializer
-        self.query_builder = query_builder
-        self.projector = projector
-        self.sensory = sensory
-        self.persistence = persistence
-        self.dsl = dsl
-        self.correction = correction
-        self.graph_inspector = graph_inspector
-        self.diagnostics = diagnostics
-        self.llm = llm
-        self.perception = perception
-        self.agent = agent
+    config: AppConfig
+    operation_lock: RLock
+    core: AHCore
+    context: InteractionContext
+    integration: IntegrationService
+    schema_registry: InferenceSchemaRegistry
+    ignition: IgnitionEngine
+    clock: IgnitionClock
+    inference: InferenceEngine
+    materializer: InferenceMaterializer
+    query_builder: QueryGoalBuilder
+    projector: ContextProjector
+    sensory: TextSensoryService
+    persistence: JsonPersistence
+    dsl: DSLInterpreter
+    correction: SemanticCorrectionService
+    graph_inspector: GraphInspector
+    diagnostics: RuntimeDiagnostics
+    llm: LLMBackend | None
+    perception: LLMPerceptionService | None
+    agent: LLMAgent | None
+
+    def document_processor(self, *, max_chunk_chars: int = 6000):
+        """Create the lightweight document facade over these live services."""
+        from ah.documents import DocumentProcessor
+
+        return DocumentProcessor(self, max_chunk_chars=max_chunk_chars)
 
     @classmethod
-    def build(cls, config: AppConfig) -> "RuntimeServices":
-        operation_lock = RLock()
-        core = AHCore()
-        context = InteractionContext()
-        persistence = JsonPersistence(config.paths.memory_file, config.persistence)
-        if config.persistence.enabled and config.persistence.load_on_start and config.paths.memory_file.exists():
-            persistence.load(core, context=context)
+    def build(cls, config: AppConfig, *, core: AHCore | None = None) -> "RuntimeServices":
+        persistence = JsonPersistence(config.paths.persistence_file, config.persistence)
+        loaded_snapshot = None
+        loaded_context = None
 
+        if (
+            core is None
+            and config.persistence.enabled
+            and config.persistence.load_on_start
+            and persistence.exists()
+        ):
+            bundle = persistence.load()
+            core = bundle.core
+            loaded_snapshot = bundle.ignition_snapshot
+            loaded_context = bundle.interaction_context
+
+        core = core or AHCore()
+        context = loaded_context or InteractionContext()
         cls._ensure_identity_context(core, context, config)
-        schema_registry = SchemaRegistry()
+
+        operation_lock = RLock()
+        schema_registry = InferenceSchemaRegistry.default()
         integration = IntegrationService(
             core,
-            schema_registry,
-            config=IntegrationConfig.from_settings(config.integration),
+            IntegrationConfig.from_settings(config.integration),
+            schema_registry=schema_registry,
         )
         ignition = IgnitionEngine(core, config.ignition, config.workspace, config.lifecycle)
-        clock = IgnitionClock(ignition, config.ignition.tick_interval_seconds)
-        inference = InferenceEngine(core, config.inference, ignition=ignition)
-        materializer = InferenceMaterializer(
-            core,
-            integration,
-            schema_registry,
-            config.integration,
+        if loaded_snapshot is not None:
+            ignition.restore_snapshot(loaded_snapshot)
+        def _on_tick(result):
+            audit_tick_result(result)
+            persistence.maybe_autosave(core, ignition=ignition, context=context)
+
+        clock = IgnitionClock(
+            ignition,
+            config.ignition.tick_interval_seconds,
+            on_tick=_on_tick,
+            execution_lock=operation_lock,
         )
-        query_builder = QueryGoalBuilder(core, schema_registry)
+        inference = InferenceEngine(core, config.inference, schema_registry=schema_registry)
+        materializer = InferenceMaterializer(core, config.integration)
+        query_builder = QueryGoalBuilder(core)
         projector = ContextProjector(core, config.context)
-        sensory = TextSensoryService()
-        dsl = DSLFacade(core)
-        correction = CorrectionManager(core)
-        graph_inspector = GraphInspector(core)
-        diagnostics = RuntimeDiagnostics(core, ignition)
-        llm = build_llm_backend(config) if config.llm.enabled else None
+        sensory = TextSensoryService(core, build_morphology(config.llm.perception_morphology_backend))
+        dsl = DSLInterpreter(core)
+        correction = SemanticCorrectionService(core)
+        graph_inspector = GraphInspector(core, ignition, runtime_lock=operation_lock)
+        diagnostics = RuntimeDiagnostics(core, ignition, runtime_lock=operation_lock)
+
+        llm = build_llm_backend(config)
         perception = (
             LLMPerceptionService(
                 llm,
@@ -369,11 +380,6 @@ class RuntimeServices:
             if was_running:
                 self.clock.stop()
             self.core.store.replace_from(AHCore().store)
-            # Association answer history is runtime dialogue state attached to the
-            # live core, not canonical memory. A full memory reset must clear it as
-            # well, otherwise reused UIDs could inherit exclusions from a prior AH.
-            if hasattr(self.core, "_runtime_association_result_history"):
-                delattr(self.core, "_runtime_association_result_history")
             fresh_context = InteractionContext()
             self._ensure_identity_context(self.core, fresh_context, self.config)
             for item in fields(InteractionContext):
