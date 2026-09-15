@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from collections import deque
 from typing import Iterable
 
 from ah.inference.contracts import AssociationGoal, GoalMode, InferenceOutcome
+from ah.model import FunctionSymbol, Group, Hypernode, Ref, RefKind, Template
 
 from .inference_proof import (
     ProofCheck,
@@ -19,6 +21,12 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
     diagnostic ``InferenceOutcome`` with GoalSpec.mode=ASSOCIATION so the operator
     can audit whether both activation fronts really converged. The ancestry is shown
     as association-search steps, never re-labelled as logical L-rule applications.
+
+    The raw runtime fronts can meet at structural hubs such as predicate S/template T.
+    For operator diagnostics we additionally reconstruct the shared partial predicate
+    frame from the supporting N facts already present in the frozen UID trace. This
+    makes the visible result ``HAVE(SUBJECT=_, OBJECT=legs)`` rather than bare
+    ``HAVE`` without inventing a canonical partial N.
     """
 
     @staticmethod
@@ -28,6 +36,157 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
             and outcome.goal_spec.mode is GoalMode.ASSOCIATION
             and isinstance(outcome.goal_spec.target, AssociationGoal)
         )
+
+    def _element(self, ref: Ref):
+        if ref.kind in {RefKind.S, RefKind.L}:
+            return None
+        try:
+            return self.core.store.get_element_any_domain(ref.uid)
+        except Exception:
+            return None
+
+    def _contains(self, operand, target: Ref, seen: set[str] | None = None) -> bool:
+        if not isinstance(operand, Ref):
+            return False
+        if operand == target:
+            return True
+        seen = set() if seen is None else seen
+        if operand.uid in seen:
+            return False
+        seen.add(operand.uid)
+        obj = self._element(operand)
+        if isinstance(obj, Group):
+            return any(self._contains(item, target, seen) for item in obj.members)
+        if isinstance(obj, FunctionSymbol):
+            return any(
+                self._contains(item, target, seen)
+                for item in obj.operands
+                if isinstance(item, Ref)
+            )
+        return False
+
+    @staticmethod
+    def _relation_key(value: str) -> str:
+        return value.upper().replace("_", "-")
+
+    def _ancestors(self, origin: Ref) -> dict[str, tuple[Ref, int]]:
+        found: dict[str, tuple[Ref, int]] = {origin.uid: (origin, 0)}
+        queue = deque([(origin, 0)])
+        while queue:
+            current, depth = queue.popleft()
+            if depth >= 6:
+                continue
+            try:
+                links = tuple(self.core.store.outgoing_links(current.uid))
+            except Exception:
+                links = ()
+            for link in links:
+                if link.weight <= 0 or self._relation_key(link.relation_id) != "IS-A":
+                    continue
+                next_depth = depth + 1
+                old = found.get(link.target.uid)
+                if old is not None and old[1] <= next_depth:
+                    continue
+                found[link.target.uid] = (link.target, next_depth)
+                queue.append((link.target, next_depth))
+        return found
+
+    def _common_value(self, left, right) -> tuple[Ref, bool] | None:
+        if not isinstance(left, Ref) or not isinstance(right, Ref):
+            return None
+        if left == right:
+            return left, False
+        la = self._ancestors(left)
+        ra = self._ancestors(right)
+        common = set(la) & set(ra)
+        if not common:
+            return None
+        uid = min(
+            common,
+            key=lambda item: (
+                la[item][1] + ra[item][1],
+                max(la[item][1], ra[item][1]),
+                item,
+            ),
+        )
+        return la[uid][0], True
+
+    def _association_frame_text(
+        self,
+        outcome: InferenceOutcome,
+        goal: AssociationGoal,
+    ) -> str | None:
+        trace = tuple(outcome.uid_trace)
+        indexed = {ref.uid: index for index, ref in enumerate(trace)}
+        facts: list[tuple[Ref, Hypernode]] = []
+        for ref in trace:
+            if ref.kind is not RefKind.N:
+                continue
+            obj = self._element(ref)
+            if isinstance(obj, Hypernode) and obj.weight > 0:
+                facts.append((ref, obj))
+        left = [
+            item
+            for item in facts
+            if any(self._contains(value, goal.left) for value in item[1].actants.values())
+        ]
+        right = [
+            item
+            for item in facts
+            if any(self._contains(value, goal.right) for value in item[1].actants.values())
+        ]
+        candidates: list[tuple[tuple, str]] = []
+        for left_ref, left_node in left:
+            for right_ref, right_node in right:
+                if left_node.template != right_node.template:
+                    continue
+                template = self._element(left_node.template)
+                if not isinstance(template, Template):
+                    continue
+                variable_roles = []
+                for role in template.roles:
+                    lv = left_node.actants.get(role)
+                    rv = right_node.actants.get(role)
+                    if lv is None or rv is None:
+                        continue
+                    if self._contains(lv, goal.left) and self._contains(rv, goal.right):
+                        variable_roles.append(role)
+                if not variable_roles:
+                    continue
+                rows: list[tuple[str, str, bool]] = []
+                for role in template.roles:
+                    if role in variable_roles:
+                        rows.append((role.value, "_", False))
+                        continue
+                    lv = left_node.actants.get(role)
+                    rv = right_node.actants.get(role)
+                    if lv is None or rv is None:
+                        continue
+                    common = self._common_value(lv, rv)
+                    if common is None:
+                        continue
+                    value, generalized = common
+                    rendered = self._text(value)
+                    rows.append((role.value, rendered, generalized))
+                rows.sort(key=lambda row: row[0])
+                predicate = self._text(template.predicate)
+                rendered_rows = []
+                fixed_count = 0
+                exact_count = 0
+                for role, value, generalized in rows:
+                    if value != "_":
+                        fixed_count += 1
+                        if not generalized:
+                            exact_count += 1
+                    suffix = " [IS-A]" if generalized and value != "_" else ""
+                    rendered_rows.append(f"{role}={value}{suffix}")
+                text = f"{predicate}({', '.join(rendered_rows)})"
+                distance = indexed.get(left_ref.uid, 10**6) + indexed.get(right_ref.uid, 10**6)
+                key = (distance, -fixed_count, -exact_count, text)
+                candidates.append((key, text))
+        if not candidates:
+            return None
+        return min(candidates, key=lambda item: item[0])[1]
 
     def _association_steps(
         self,
@@ -70,6 +229,13 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
                 if common_ref is None
                 else self._text(common_ref)
             )
+            frame_text = self._association_frame_text(outcome, goal)
+            detail = (
+                f" Структурная сходимость произошла на «{common_text}», но общая "
+                f"семантическая схема поддерживающих фактов: «{frame_text}»."
+                if frame_text is not None
+                else f" Фронты сошлись на «{common_text}»."
+            )
             steps.append(
                 ProofStepSnapshot(
                     len(steps) + 1,
@@ -77,9 +243,9 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
                     goal.left.uid,
                     None,
                     common_uid,
-                    f"Фронты от «{self._text(goal.left)}» и «{self._text(goal.right)}» "
-                    f"сошлись на «{common_text}». Ассоциация действительно найдена; "
-                    "новый семантический факт этим не утверждается.",
+                    f"Фронты от «{self._text(goal.left)}» и «{self._text(goal.right)}» сошлись."
+                    + detail
+                    + " Ассоциация действительно найдена; новый семантический факт этим не утверждается.",
                 )
             )
         return tuple(steps)
@@ -107,6 +273,12 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
         assert isinstance(goal, AssociationGoal)
         trace = tuple(outcome.uid_trace)
         nodes = self._nodes(trace)
+        frame_text = self._association_frame_text(outcome, goal)
+        conclusion = (
+            f"общая семантическая схема: {frame_text}"
+            if frame_text is not None and outcome.status.value == "PROVED"
+            else self._conclusion_text(outcome)
+        )
         return ProofChainSnapshot(
             chain_id=chain_id,
             source=source,
@@ -119,11 +291,9 @@ class ProofSnapshotBuilder(_BaseProofSnapshotBuilder):
                 "найти ассоциативную сходимость между "
                 f"«{self._text(goal.left)}» и «{self._text(goal.right)}»"
             ),
-            conclusion_text=self._conclusion_text(outcome),
+            conclusion_text=conclusion,
             trace_uids=tuple(ref.uid for ref in trace),
             nodes=nodes,
-            # Association path hops include reverse/incidence runtime transitions.
-            # They are intentionally rendered as steps rather than fake canonical L.
             edges=(),
             steps=self._association_steps(outcome, goal),
             checks=tuple(checks),
