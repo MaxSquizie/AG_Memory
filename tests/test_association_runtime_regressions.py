@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from ah.association import AssociationCoordinator
 from ah.core import AHCore, SequentialUidGenerator
 from ah.model import ActantRole, Domain
+from ah.perception import LLMPerceptionService
 from ah.perception.association_continuation import (
-    AssociationContinuationLLMPerceptionService,
     normalize_correlative_actant_compositions,
 )
 from ah.perception.association_goal_semantics import AssociationGoalSemanticService
@@ -23,6 +23,8 @@ from ah.perception.contracts import (
     QueryCandidate,
     QueryMode,
 )
+from ah.perception.coordination_normalization import normalize_plain_actant_compositions
+from ah.perception.morphology import MorphInfo
 
 
 def _evidence(text: str, fragment: str, *, after: int = 0) -> EvidenceSpan:
@@ -91,6 +93,69 @@ def test_correlative_object_pair_becomes_one_object_composition() -> None:
     )
 
 
+def test_plain_object_and_spurious_amount_coordination_becomes_one_object() -> None:
+    text = "В мастерской делают деревянных ворон и столы"
+
+    class Morphology:
+        def analyze_all(self, word: str):
+            mapping = {
+                "ворон": MorphInfo(
+                    "ворона", "NOUN", case="gent", number="plur", animacy="anim", score=1.0
+                ),
+                "столы": MorphInfo(
+                    "стол", "NOUN", case="accs", number="plur", animacy="inan", score=1.0
+                ),
+            }
+            value = mapping.get(word.casefold())
+            return () if value is None else (value,)
+
+        def analyze(self, word: str):
+            values = self.analyze_all(word)
+            return values[0] if values else None
+
+    assertion = AssertionCandidate(
+        local_id="A1",
+        predicate=PredicateCandidate("делают", normalized_hint="делать"),
+        actants=(
+            ActantCandidate(
+                ActantRole.LOCATION,
+                mention="мастерской",
+                normalized_hint="мастерская",
+                evidence=_evidence(text, "мастерской"),
+            ),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                mention="деревянных ворон",
+                normalized_hint="ворона",
+                evidence=_evidence(text, "ворон"),
+            ),
+            ActantCandidate(
+                ActantRole.AMOUNT,
+                mention="столы",
+                normalized_hint="стол",
+                evidence=_evidence(text, "столы"),
+            ),
+        ),
+    )
+
+    normalized = normalize_plain_actant_compositions(
+        PerceptionResult(source_text=text, assertions=(assertion,)),
+        Morphology(),
+    )
+    rewritten = normalized.assertions[0]
+    assert tuple(item.role for item in rewritten.actants) == (
+        ActantRole.LOCATION,
+        ActantRole.OBJECT,
+    )
+    grouped = rewritten.actants[-1]
+    assert grouped.composition is not None
+    assert grouped.role is ActantRole.OBJECT
+    assert tuple(member.normalized_hint for member in grouped.composition.members) == (
+        "ворона",
+        "стол",
+    )
+
+
 def test_association_goal_probe_sees_two_participants_not_commonality_state() -> None:
     text = "Что общего между вороной и столом?"
     query = QueryCandidate(
@@ -144,9 +209,7 @@ def test_association_goal_probe_sees_two_participants_not_commonality_state() ->
 
 
 def test_production_perception_service_exposes_association_probe() -> None:
-    assert callable(
-        getattr(AssociationContinuationLLMPerceptionService, "classify_association_query", None)
-    )
+    assert callable(getattr(LLMPerceptionService, "classify_association_query", None))
 
 
 def test_structural_coordination_group_is_not_a_terminal_commonality() -> None:
