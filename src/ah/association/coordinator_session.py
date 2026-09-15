@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ah.model import RefKind
+
 from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
 from .coordinator_specific import AssociationCoordinator as _StructuredAssociationCoordinator
 from .history import remember_signature
@@ -14,6 +16,18 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
     predicate ``SEE`` or raw concept ``yard`` and incorrectly present it as a new
     association.
     """
+
+    def _raw_common_allowed(self, state, uid: str) -> bool:
+        ref = self.core.ref(uid)
+        # K produced by actant coordination is a structural carrier, not a useful
+        # answer to "what do these two things have in common?".  In a one-event case
+        # both fronts reach the same coordinated OBJECT group before they reach the
+        # containing H fact.  Stopping at K would therefore hide the informative
+        # frame (for example SEE(OBJECT=_, LOCATION=yard)).  Keep searching until a
+        # semantic frame or another non-structural commonality is available.
+        if ref.kind is RefKind.K:
+            return False
+        return super()._raw_common_allowed(state, uid)
 
     def _remember_outcome(self, outcome: AssociationOutcome) -> None:
         left = outcome.goal.left
