@@ -46,14 +46,15 @@ from .service import IntegrationConfig, IntegrationService as _BaseIntegrationSe
 from .naming_service import NamingAwareIntegrationService
 from .identity_naming_service import CanonicalNamingIntegrationService
 from .identity_query_service import IdentityQueryIntegrationService
+from .predicate_family_service import PredicateFamilyIntegrationService
 from .template_completion import TemplateCompletionService
 
 # Runtime construction imports IntegrationService from the package. Keep the large
 # canonical writer unchanged and expose narrow semantic adapters around it: naming,
 # open-event queries and entity-identity query shells are consumed before ordinary
-# fact/T integration, while inflected naming values are indexed by their morphology-
-# normalized form.
-IntegrationService = IdentityQueryIntegrationService
+# fact/T integration. PredicateFamilyIntegrationService only broadens occurrence-
+# local template *candidates*; lexical S identity itself remains unchanged.
+IntegrationService = PredicateFamilyIntegrationService
 
 __all__ = [
     "namespace_perception_result",
@@ -93,6 +94,7 @@ __all__ = [
     "NamingAwareIntegrationService",
     "CanonicalNamingIntegrationService",
     "IdentityQueryIntegrationService",
+    "PredicateFamilyIntegrationService",
     "TemplateCompletionService",
     "RefutationRequest",
     "RefutationCommit",
