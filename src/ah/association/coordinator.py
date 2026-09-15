@@ -251,6 +251,43 @@ class AssociationCoordinator:
                             )
                         )
 
+            # A goal-generated memory query is itself a focused recall operation.
+            # Its seed may be fully consumed by an already warm/saturated target,
+            # producing no fresh Ignition activation_event because input_gain == 0.
+            # Such a target must still enter this goal's ancestry after the query
+            # packet has actually been consumed; otherwise repeated ``А ещё?``
+            # searches become blind to recently active facts/templates.  Restrict
+            # this admission to pending MEMORY_QUERY hops owned by this search, so
+            # unrelated warm Workspace nodes never become readable implicitly.
+            consumed = {
+                uid
+                for uid, amount in result.incoming_consumed.items()
+                if amount > 0.0
+            }
+            for front in _FRONTS:
+                for uid in tuple(state.pending[front]):
+                    if uid not in consumed:
+                        continue
+                    pending = state.pending[front].get(uid)
+                    hop = pending.parent.hop if pending is not None else None
+                    if hop is None or hop.kind is not AssociationHopKind.MEMORY_QUERY:
+                        continue
+                    ref = self.core.ref(uid)
+                    if state.activate(front, ref, tick=tick):
+                        newly_activated[front].append(ref)
+                        state.trace.append(
+                            AssociationTraceEvent(
+                                AssociationTraceKind.ACTIVATION,
+                                tick=tick,
+                                front=front,
+                                ref=ref,
+                                detail=(
+                                    "query-recalled warm focus; "
+                                    f"depth={state.depth(front, ref.uid)}"
+                                ),
+                            )
+                        )
+
             common = self._select_common(state)
             if common is not None:
                 state.trace.append(
