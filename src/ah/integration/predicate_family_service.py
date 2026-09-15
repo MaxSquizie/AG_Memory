@@ -61,6 +61,18 @@ class PredicateFamilyIntegrationService(IdentityQueryIntegrationService):
     free to remain different while true aspectual variants may converge to one T.
     """
 
+    def _template_sense_description(self, template) -> str:
+        base = super()._template_sense_description(template)
+        try:
+            symbol = self.core.store.get_symbol(template.predicate.uid)
+            form = sorted(
+                (str(item).strip() for item in symbol.forms if str(item).strip()),
+                key=lambda item: (len(item), item.casefold()),
+            )[0]
+        except (AttributeError, KeyError, IndexError, ValueError):
+            return base
+        return f"predicate: {form}; {base}"
+
     def _predicate_symbol_candidates(self, predicate) -> tuple:
         exact = super()._predicate_symbol_candidates(predicate)
         if exact:
