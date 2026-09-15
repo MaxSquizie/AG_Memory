@@ -118,12 +118,31 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
             if isinstance(item, AssociationContinuationQueryCandidate)
         )
         if not continuations:
-            return super().build(
-                integration,
-                context,
-                perception,
-                attention_refs=attention_refs,
+            results = tuple(
+                super().build(
+                    integration,
+                    context,
+                    perception,
+                    attention_refs=attention_refs,
+                )
             )
+            if (
+                context.association_session is not None
+                and (perception.queries or perception.commands)
+                and not any(isinstance(item, AssociationQueryBuildResult) for item in results)
+            ):
+                # ``А ещё?`` is intentionally context-sensitive.  Once the user has
+                # issued another ordinary query/command, the immediately preceding
+                # question is no longer the association comparison.  Keeping the old
+                # session made a later ``А ещё?`` jump back across an intervening
+                # question (e.g. after ``Что я видел во дворе?``) and continue the
+                # stale crow/table comparison instead of the current query stream.
+                #
+                # Explicit ASSOCIATION rephrasings are preserved above because their
+                # compiler result is AssociationQueryBuildResult and still needs the
+                # old pair/history for same-pair exclusion.
+                context.association_session = None
+            return results
 
         ordinary = replace(
             perception,
