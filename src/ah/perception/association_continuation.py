@@ -69,7 +69,7 @@ def _merge_role(actants: tuple[ActantCandidate, ...]) -> ActantRole | None:
     """Choose the semantic role shared by a correlative coordination.
 
     The recurrent parser failure this repairs is one correctly typed member plus
-    later members demoted to AUXILLIARY.  If two genuinely different non-auxiliary
+    later members demoted to AUXILLIARY. If two genuinely different non-auxiliary
     roles are present, the source is not safe to rewrite and remains untouched.
     """
     non_aux = {item.role for item in actants if item.role is not ActantRole.AUXILLIARY}
@@ -93,10 +93,10 @@ def _composition_member(actant: ActantCandidate) -> CompositionMemberCandidate:
 def _repair_root_correlative_coordination(source_text: str, root):
     """Recover source-explicit ``и A, и B`` / ``либо A, либо B`` compositions.
 
-    LinguisticCandidateBuilder already handles ordinary ``A и B``.  The repeated
+    LinguisticCandidateBuilder already handles ordinary ``A и B``. The repeated
     coordinator form was falling through because the second coordinator is preceded
     by a comma, so the second nominal was independently role-classified and often
-    became AUXILLIARY.  This repair uses only evidence offsets and the repeated
+    became AUXILLIARY. This repair uses only evidence offsets and the repeated
     source coordinator; it makes no lexical/ontological decision about the nouns.
     """
     candidates = [item for item in root.actants if _simple_composition_member(item)]
@@ -314,10 +314,18 @@ class AssociationContinuationLLMPerceptionService(SemanticPredicateLLMPerception
                 self._record_diagnostic(text, [], result)
                 return result
             if decision == "ORDINARY":
-                # The association session is dialogue state, not permanent memory.
-                # A real topic change closes it; a new explicit association query
-                # will deterministically open a fresh session during GoalCompiler.
-                interaction_context.association_session = None
+                # Do not destroy the active comparison before ordinary parsing.
+                # A rephrasing such as ``Что ещё общего?`` may be classified here as
+                # ORDINARY yet still compile to the same explicit ASSOCIATION pair;
+                # AssociationSessionTurnGoalCompiler must see the old session so it
+                # can preserve emitted-result exclusions. A genuine non-query topic
+                # change can be closed immediately after its ordinary parse.
+                result = normalize_correlative_actant_compositions(
+                    super().parse(text, interaction_context)
+                )
+                if not result.queries:
+                    interaction_context.association_session = None
+                return result
             # UNCLEAR is fail-closed with respect to the optional continuation
             # overlay: preserve ordinary perception without destroying the session.
         return normalize_correlative_actant_compositions(
