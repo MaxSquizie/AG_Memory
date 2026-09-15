@@ -37,9 +37,31 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
         )
         goal = result.association_goal
         if goal is not None:
-            # An explicit binary association request begins a fresh result stream.
-            clear_signatures(self.core, goal.left, goal.right)
-            context.association_session = AssociationDiscourseSession(goal.left, goal.right)
+            session = context.association_session
+            same_pair = session is not None and session.same_pair(goal.left, goal.right)
+            if same_pair:
+                # A semantically explicit rephrasing such as ``Что ещё общего?`` may
+                # be reconstructed by Perception as the same binary ASSOCIATION goal
+                # instead of the typed elliptical continuation.  It must not erase
+                # the result stream merely because the surface form was not reduced
+                # to AssociationContinuationQueryCandidate.  The canonical pair is
+                # the discourse identity of the active comparison.
+                excluded = emitted_signatures(self.core, goal.left, goal.right)
+                result = replace(
+                    result,
+                    association_goal=AssociationContinuationGoal(
+                        goal.left,
+                        goal.right,
+                        excluded_signatures=excluded,
+                    ),
+                    diagnostics=tuple(
+                        (*result.diagnostics, "semantic:association_same_pair_continuation")
+                    ),
+                )
+            else:
+                # A genuinely new endpoint pair starts a fresh result stream.
+                clear_signatures(self.core, goal.left, goal.right)
+                context.association_session = AssociationDiscourseSession(goal.left, goal.right)
         return result
 
     def _continuation_result(
