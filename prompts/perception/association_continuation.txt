@@ -1,0 +1,1 @@
+Choose CONTINUE only when CURRENT UTTERANCE asks for another distinct result of the already active comparison/commonality search, while keeping the same compared endpoints. Choose ORDINARY for a new independent question, assertion, command, topic change, or a new comparison with different endpoints. Choose UNCLEAR when the discourse function cannot be determined safely.
