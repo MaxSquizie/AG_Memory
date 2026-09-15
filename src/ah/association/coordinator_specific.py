@@ -227,6 +227,19 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
             semantics=semantics,
         )
 
+    def _pattern_excluded(self, pattern: AssociationFramePattern) -> bool:
+        if pattern.signature in self._excluded_signatures:
+            return True
+        # A raw convergence on the sole retained binding and the corresponding
+        # one-binding frame express the same answer at two representation levels.
+        # Example: REF:legs and HAVE(SUBJECT=_, OBJECT=legs).  History used to see
+        # different strings and emit the same natural-language commonality twice.
+        # Do not generalize this rule to richer frames: SEE(_, yard, user) remains
+        # a distinct association even if one of its individual bindings was seen.
+        if len(pattern.bindings) == 1:
+            return f"REF:{pattern.bindings[0].value.uid}" in self._excluded_signatures
+        return False
+
     def _frame_patterns(self, state: AssociationSearchState) -> tuple[AssociationFramePattern, ...]:
         patterns: dict[str, AssociationFramePattern] = {}
         left_facts = self._active_facts(state, _LEFT)
@@ -234,7 +247,7 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
         for left_ref, left in left_facts:
             for right_ref, right in right_facts:
                 pattern = self._pattern_for_pair(state, left_ref, left, right_ref, right)
-                if pattern is None or pattern.signature in self._excluded_signatures:
+                if pattern is None or self._pattern_excluded(pattern):
                     continue
                 current = patterns.get(pattern.signature)
                 if current is None:
