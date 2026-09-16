@@ -2,14 +2,22 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from ah.agent.interaction_context import AssociationDiscourseSession
+from ah.agent.interaction_context import AssociationDiscourseSession, InteractionContext
 from ah.association import AssociationCoordinator
 from ah.association.history import emitted_signatures, remember_signature
 from ah.config import IgnitionSettings, LifecycleSettings, PacemakerSettings, WorkspaceSettings
 from ah.core import AHCore, SequentialUidGenerator
 from ah.ignition import IgnitionEngine
-from ah.inference.association_session_goal import AssociationConstraint, AssociationScopedGoal
+from ah.inference.association_goal import _EndpointResolution
+from ah.inference.association_session_goal import (
+    AssociationConstraint,
+    AssociationScopedGoal,
+    AssociationSessionTurnGoalCompiler,
+)
+from ah.integration.contracts import IntegrationCommit
 from ah.model import ActantRole, Domain
+from ah.perception.association_semantics import AssociationActRelationCandidate
+from ah.perception.contracts import ActantCandidate, PredicateCandidate, QueryCandidate, QueryMode
 from ah.projection.association_context import AssociationContextProjector
 
 
@@ -29,6 +37,55 @@ def _runtime(core: AHCore) -> AssociationCoordinator:
         LifecycleSettings(gc_enabled=False, orphan_cleanup=False),
     )
     return AssociationCoordinator(core, ignition)
+
+
+def test_prompt_location_is_compiled_into_association_goal_scope() -> None:
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    crow = _entity(core)
+    table = _entity(core)
+    yard = _entity(core)
+    refs = {
+        "ворона": _ref(core, crow),
+        "стол": _ref(core, table),
+        "двор": _ref(core, yard),
+    }
+
+    class Compiler(AssociationSessionTurnGoalCompiler):
+        def _resolve_endpoint(self, candidate, *args, **kwargs):
+            ref = refs.get(candidate.normalized_hint or candidate.mention)
+            return _EndpointResolution(ref, ()) if ref is not None else _EndpointResolution(None)
+
+    compiler = Compiler(core)
+    # _resolve_association_root runs inside build with this integration context in
+    # production. Set the same runtime slot explicitly so this unit isolates the
+    # association compiler from unrelated Integration mechanics.
+    compiler._association_integration = IntegrationCommit((), _ref(core, crow), ())
+    query = QueryCandidate(
+        predicate=PredicateCandidate("быть", normalized_hint="быть"),
+        actants=(
+            ActantCandidate(ActantRole.STATE, mention="общего", normalized_hint="общий"),
+            ActantCandidate(ActantRole.SUBJECT, mention="вороны", normalized_hint="ворона"),
+            ActantCandidate(ActantRole.OBJECT, mention="стола", normalized_hint="стол"),
+            ActantCandidate(ActantRole.LOCATION, mention="во дворе", normalized_hint="двор"),
+        ),
+        query_mode=QueryMode.EXISTS,
+        local_id="Q1",
+    )
+    relation = AssociationActRelationCandidate(
+        "ASSOCIATION",
+        "Q1",
+        ActantRole.SUBJECT,
+        ActantRole.OBJECT,
+    )
+
+    built = compiler._resolve_association_root(query, relation, InteractionContext())
+
+    assert isinstance(built.association_goal, AssociationScopedGoal)
+    assert built.association_goal.left == _ref(core, crow)
+    assert built.association_goal.right == _ref(core, table)
+    assert built.association_goal.constraints == (
+        AssociationConstraint(ActantRole.LOCATION, _ref(core, yard)),
+    )
 
 
 def test_scoped_association_finds_common_frame_from_two_distinct_h_facts() -> None:
