@@ -52,6 +52,11 @@ from .quantified_exists import (
     QuantifiedExistsInferenceEngine,
     QuantifiedInferenceMaterializer,
 )
+from .set_valued_query import (
+    SetValuedInferenceMaterializer,
+    SetValuedQueryGoalBuilder,
+    SetValuedQueryInferenceEngine,
+)
 from .modal_dispatch import ModalTurnGoalCompiler
 from .association_goal import AssociationQueryBuildResult
 from .association_session_goal import (
@@ -60,12 +65,13 @@ from .association_session_goal import (
 )
 
 # Public runtime composes independent GoalCompiler/Inference extensions. Open-event
-# retrieval, identity/description lookup and quantified ground-atom derivation are
-# InferenceEngine extensions. Association execution remains outside InferenceEngine
-# and is routed to AssociationCoordinator by the agent orchestrator.
-InferenceEngine = QuantifiedExistsInferenceEngine
-InferenceMaterializer = QuantifiedInferenceMaterializer
-QueryGoalBuilder = EntityIdentityQueryGoalBuilder
+# retrieval, identity/description lookup, quantified ground-atom derivation and
+# complete WH binding retrieval are InferenceEngine extensions. Association
+# execution remains outside InferenceEngine and is routed to AssociationCoordinator
+# by the agent orchestrator.
+InferenceEngine = SetValuedQueryInferenceEngine
+InferenceMaterializer = SetValuedInferenceMaterializer
+QueryGoalBuilder = SetValuedQueryGoalBuilder
 AssociationTurnGoalCompiler = AssociationSessionTurnGoalCompiler
 SemanticGoalCompiler = AssociationSessionTurnGoalCompiler
 TurnGoalBuilder = AssociationSessionTurnGoalCompiler
@@ -121,6 +127,9 @@ __all__ = [
     "QueryGoalBuilder",
     "QuantifiedExistsInferenceEngine",
     "QuantifiedInferenceMaterializer",
+    "SetValuedInferenceMaterializer",
+    "SetValuedQueryGoalBuilder",
+    "SetValuedQueryInferenceEngine",
     "SemanticGoalCompiler",
     "TurnGoalBuilder",
     "RelationGoal",
