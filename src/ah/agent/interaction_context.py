@@ -50,8 +50,10 @@ class AssociationDiscourseSession:
 
     left: Ref
     right: Ref
-    constraints: tuple[tuple[ActantRole, Ref], ...] = ()
+    # Keep this field in its historical positional slot for compatibility with
+    # callers/tests that constructed AssociationDiscourseSession(left, right, rows).
     emitted_signatures: list[str] = field(default_factory=list)
+    constraints: tuple[tuple[ActantRole, Ref], ...] = ()
 
     @staticmethod
     def _constraint_key(constraints) -> tuple[tuple[str, str, str], ...]:
