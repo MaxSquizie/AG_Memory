@@ -20,10 +20,10 @@ class AssociationContextProjector(SetValuedContextProjector):
     """Project associative convergence separately from logical inference.
 
     AssociationOutcome is runtime search provenance, not a proof and not a new fact.
-    When an association goal has an outcome, the response prompt is intentionally
-    *scoped*: unrelated active Workspace facts are not rendered beside the result.
-    Otherwise the response LLM can ignore the search stop condition and independently
-    reconstruct old commonalities from whatever happens to be warm in memory.
+    Model-facing context contains only the scoped semantic result/status. Search paths
+    and the warm Workspace remain available to diagnostics/UI but are deliberately
+    excluded from response generation so the language model cannot perform a second,
+    unscoped association pass over provenance details.
     """
 
     def __init__(self, core: AHCore, settings: ContextSettings) -> None:
@@ -33,14 +33,6 @@ class AssociationContextProjector(SetValuedContextProjector):
         if not self.core.store.has_uid(ref.uid):
             return f"unavailable {ref.kind.value}"
         return self.model_semantic.inference_text_for_ref(ref)
-
-    def _path_text(self, path) -> str:
-        if path is None or not path.refs:
-            return "no path"
-        parts: list[str] = [self._ref_text(path.refs[0])]
-        for hop, target in zip(path.hops, path.refs[1:]):
-            parts.append(f"--{hop.relation}--> {self._ref_text(target)}")
-        return " ".join(parts)
 
     def _frame_pattern_text(self, outcome: AssociationOutcome) -> str | None:
         pattern = outcome.frame_pattern
@@ -71,9 +63,6 @@ class AssociationContextProjector(SetValuedContextProjector):
     def _association_block(self, outcome: AssociationOutcome) -> ProjectionBlock:
         scope = self._scope_text(outcome)
         if outcome.status is AssociationStatus.FOUND and outcome.common_ref is not None:
-            common = self._ref_text(outcome.common_ref)
-            left = self._path_text(outcome.left_path)
-            right = self._path_text(outcome.right_path)
             pattern = self._frame_pattern_text(outcome)
             semantics = (
                 ""
@@ -84,23 +73,20 @@ class AssociationContextProjector(SetValuedContextProjector):
                 result = (
                     f"{scope} Ассоциативный поиск: FOUND. Авторитетный ответ для общей "
                     "черты — ТОЛЬКО эта общая семантическая схема: "
-                    f"{pattern}. Структурная точка сходимости активации: {common}. "
-                    f"Левая ветвь provenance: {left}. Правая ветвь provenance: {right}."
+                    f"{pattern}."
                 )
                 grounding = (
-                    " Поддерживающие ветви являются только provenance поиска: НЕ выводи "
-                    "из их полного текста дополнительные общие свойства. Ответ должен "
-                    "описывать ровно predicate, variable roles и fixed bindings указанной "
-                    "схемы и соблюдать ограничения цели."
+                    " Ответ должен описывать ровно predicate, variable roles и fixed "
+                    "bindings указанной схемы и соблюдать ограничения цели."
                 )
             else:
+                common = self._ref_text(outcome.common_ref)
                 result = (
-                    f"{scope} Ассоциативный поиск: FOUND. Общая активированная "
-                    f"репрезентация: {common}. Левая ветвь: {left}. Правая ветвь: {right}."
+                    f"{scope} Ассоциативный поиск: FOUND. Авторитетный результат — "
+                    f"ТОЛЬКО эта общая репрезентация: {common}."
                 )
                 grounding = (
-                    " Не превращай детали одной поддерживающей ветви в свойства второго "
-                    "объекта; сообщай только непосредственно найденную общую репрезентацию "
+                    " Сообщай только непосредственно найденную общую репрезентацию "
                     "в пределах ограничений цели."
                 )
             text = (
@@ -108,7 +94,7 @@ class AssociationContextProjector(SetValuedContextProjector):
                 + semantics
                 + " Это ассоциативная сходимость памяти, НЕ логическое доказательство "
                 "и НЕ новый утверждённый факт. Не расширяй найденную общность мировыми "
-                "знаниями за пределы указанной схемы."
+                "знаниями или другими активными воспоминаниями."
                 + grounding
             )
             return ProjectionBlock(
@@ -134,10 +120,8 @@ class AssociationContextProjector(SetValuedContextProjector):
         sections = ["# CURRENT INPUT", current_input]
         # Association results are already a bounded, goal-scoped read from memory.
         # Rendering the entire warm Workspace next to them gives the response model a
-        # second, unscoped search surface and was the direct cause of replies that
-        # re-listed previously emitted legs/workshop facts. Keep Workspace metadata in
-        # AgentContext for diagnostics/UI, but do not expose it to response generation
-        # on a turn with an association outcome.
+        # second, unscoped search surface. Workspace stays in AgentContext metadata
+        # for diagnostics/UI, but is hidden from response generation on this turn.
         if workspace_blocks and not association_blocks:
             sections.extend(["", "# ACTIVE MEMORY"])
             sections.extend(f"- {block.semantic}" for block in workspace_blocks)
