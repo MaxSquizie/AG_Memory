@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from ah.model import Ref, RefKind
+from ah.model import ActantRole, Ref, RefKind
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,18 +41,35 @@ class ExistentialDiscourseAnchor:
 class AssociationDiscourseSession:
     """Runtime-only context for follow-up requests such as ``А ещё?``.
 
-    The canonical endpoints stay the same while ``emitted_signatures`` records which
-    association answers have already been returned for this pair.  A continuation
-    therefore reruns the ordinary bounded association search with those signatures
-    excluded instead of accepting the same nearest convergence again.
+    A comparison stream is identified by both canonical endpoints and its explicit
+    typed search restrictions.  ``A vs B`` and ``A vs B at LOCATION=yard`` are
+    therefore different discourse goals and must not share result exclusions.
+    Constraints are stored as low-level ``(ActantRole, Ref)`` pairs to keep the
+    interaction layer independent from inference dataclasses.
     """
 
     left: Ref
     right: Ref
+    constraints: tuple[tuple[ActantRole, Ref], ...] = ()
     emitted_signatures: list[str] = field(default_factory=list)
+
+    @staticmethod
+    def _constraint_key(constraints) -> tuple[tuple[str, str, str], ...]:
+        rows: list[tuple[str, str, str]] = []
+        for item in constraints or ():
+            role = getattr(item, "role", None)
+            value = getattr(item, "value", None)
+            if role is None or value is None:
+                role, value = item
+            rows.append((str(getattr(role, "value", role)), value.kind.value, value.uid))
+        rows.sort()
+        return tuple(rows)
 
     def same_pair(self, left: Ref, right: Ref) -> bool:
         return {self.left.uid, self.right.uid} == {left.uid, right.uid}
+
+    def same_goal(self, left: Ref, right: Ref, constraints=()) -> bool:
+        return self.same_pair(left, right) and self._constraint_key(self.constraints) == self._constraint_key(constraints)
 
     def remember(self, signature: str | None) -> None:
         value = (signature or "").strip()
