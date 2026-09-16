@@ -171,6 +171,11 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
             constraint_attention_seed,
         )
         if constraints is None:
+            # This turn expressed a new association goal but its explicit scope could
+            # not be represented canonically. Never keep the previous comparison
+            # alive: a following elliptical ``А ещё?`` must not jump back to an older
+            # pair/scope after this failed request.
+            context.association_session = None
             return replace(
                 result,
                 association_goal=None,
