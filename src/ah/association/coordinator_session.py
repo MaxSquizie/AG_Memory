@@ -11,10 +11,10 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
     """Structured association search with runtime result-history support.
 
     A returned partial frame owns not only its exact frame signature but also the
-    structural/template and fixed-value hubs that constitute that answer.  Otherwise
-    ``А ещё?`` could merely decompose ``SEE(OBJECT=_, LOCATION=yard)`` into the raw
-    predicate ``SEE`` or raw concept ``yard`` and incorrectly present it as a new
-    association.
+    structural/template, supporting facts and fixed-value hubs that constitute that
+    answer. Otherwise ``А ещё?`` can merely rediscover the exact same commonality at
+    another representation level instead of allowing the two fronts to continue to
+    the next independent shared frame.
     """
 
     def _raw_common_allowed(self, state, uid: str) -> bool:
@@ -38,6 +38,17 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
             return
         remember_signature(self.core, left, right, f"REF:{pattern.template.uid}")
         remember_signature(self.core, left, right, f"REF:{pattern.predicate.uid}")
+
+        # A frame and the canonical facts that support it are one association answer,
+        # not several answers at different representation levels.  This matters most
+        # for a single coordinated fact such as MAKE(OBJECT={crow, table}, ...): after
+        # returning its structured frame, a continuation used to converge on the same
+        # N and verbalize "wooden crow/table" again.  Mark both supporting facts as
+        # consumed so the next continuation can keep expanding toward a genuinely
+        # different frame, including one assembled from two distinct facts such as
+        # SEE(crow, yard, yesterday) + SEE(table, yard, today).
+        for fact_ref in (pattern.left_fact, pattern.right_fact):
+            remember_signature(self.core, left, right, f"REF:{fact_ref.uid}")
 
         left_fact = self.core.store.get_hypernode(pattern.left_fact.uid)
         right_fact = self.core.store.get_hypernode(pattern.right_fact.uid)
