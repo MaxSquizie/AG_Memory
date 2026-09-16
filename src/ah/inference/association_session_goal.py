@@ -49,7 +49,11 @@ class AssociationScopedGoal(AssociationGoal):
     constraints: tuple[AssociationConstraint, ...] = ()
 
     def __post_init__(self) -> None:
-        super().__post_init__()
+        # ``dataclass(slots=True)`` may replace the class object created by the
+        # class statement.  Zero-argument super() can then retain a __class__
+        # cell for the pre-decoration class and fail at runtime with
+        # ``super(type, obj)``.  Call the single base contract explicitly.
+        AssociationGoal.__post_init__(self)
         object.__setattr__(self, "constraints", _normalize_constraints(self.constraints))
 
 
@@ -66,7 +70,9 @@ class AssociationContinuationGoal(AssociationGoal):
     constraints: tuple[AssociationConstraint, ...] = ()
 
     def __post_init__(self) -> None:
-        super().__post_init__()
+        # See AssociationScopedGoal.__post_init__: avoid zero-argument super()
+        # in a slots dataclass subclass for the same class-replacement reason.
+        AssociationGoal.__post_init__(self)
         object.__setattr__(self, "constraints", _normalize_constraints(self.constraints))
 
 
