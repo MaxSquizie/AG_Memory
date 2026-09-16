@@ -30,66 +30,78 @@ class AssociationConstraint:
             raise ValueError("AssociationConstraint.value cannot be L")
 
 
+def _normalize_constraints(
+    constraints: tuple[AssociationConstraint, ...],
+) -> tuple[AssociationConstraint, ...]:
+    roles = tuple(item.role for item in constraints)
+    if len(set(roles)) != len(roles):
+        raise ValueError("Association constraint roles must be unique")
+    return tuple(
+        sorted(
+            constraints,
+            key=lambda item: (item.role.value, item.value.kind.value, item.value.uid),
+        )
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class AssociationScopedGoal(AssociationGoal):
     constraints: tuple[AssociationConstraint, ...] = ()
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        roles = tuple(item.role for item in self.constraints)
-        if len(set(roles)) != len(roles):
-            raise ValueError("AssociationScopedGoal constraint roles must be unique")
-        ordered = tuple(
-            sorted(
-                self.constraints,
-                key=lambda item: (item.role.value, item.value.kind.value, item.value.uid),
-            )
-        )
-        object.__setattr__(self, "constraints", ordered)
+        object.__setattr__(self, "constraints", _normalize_constraints(self.constraints))
 
 
 @dataclass(frozen=True, slots=True)
-class AssociationContinuationGoal(AssociationScopedGoal):
-    """Scoped AssociationGoal that excludes already returned result signatures."""
+class AssociationContinuationGoal(AssociationGoal):
+    """Association goal that keeps scope and excludes already returned results.
+
+    ``excluded_signatures`` deliberately remains the third positional field for
+    compatibility with the pre-scope constructor AssociationContinuationGoal(A,B,x).
+    New scope is appended as the fourth field and production code uses keywords.
+    """
 
     excluded_signatures: tuple[str, ...] = ()
+    constraints: tuple[AssociationConstraint, ...] = ()
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        object.__setattr__(self, "constraints", _normalize_constraints(self.constraints))
 
 
 class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
     """Add typed search scope and cross-turn association continuation."""
 
-    # These roles express restrictions on *where/when/how/under what conditions*
-    # the commonality must be supported. STATE is intentionally absent: commonality
-    # questions are commonly parsed as BE(STATE=common, ...), and that shell is the
-    # query operator rather than a memory restriction.
-    _CONSTRAINT_ROLES = frozenset(
-        {
-            ActantRole.LOCATION,
-            ActantRole.TIME,
-            ActantRole.DURATION,
-            ActantRole.CAUSE,
-            ActantRole.PURPOSE,
-            ActantRole.TOOL,
-            ActantRole.MATERIAL,
-            ActantRole.AMOUNT,
-            ActantRole.HOW_TO,
-        }
-    )
-
     @staticmethod
-    def _session_constraints(goal: AssociationScopedGoal) -> tuple[tuple[ActantRole, Ref], ...]:
+    def _session_constraints(goal) -> tuple[tuple[ActantRole, Ref], ...]:
         return tuple((item.role, item.value) for item in goal.constraints)
 
     def _resolve_constraints(
         self,
         root,
+        relation,
         context: InteractionContext,
         attention_refs,
     ) -> tuple[tuple[AssociationConstraint, ...] | None, tuple[Ref, ...], tuple[str, ...]]:
+        """Resolve all explicit non-endpoint actants into query restrictions.
+
+        This is intentionally role-structural rather than a list of phrases such as
+        "во дворе". Once Perception has typed an actant, every filled role other than
+        the selected association endpoints constrains admissible supporting facts.
+        STATE is the one exception because commonality questions are routinely parsed
+        as a copular query shell BE(STATE=common, A, B); that STATE is the requested
+        relation description, not a world-condition.
+        """
+
         integration = getattr(self, "_association_integration", None)
         if not isinstance(integration, IntegrationCommit):
             return None, (), ("semantic:association_constraint_integration_missing",)
 
+        endpoint_roles = {
+            relation.source_selector.role,
+            relation.target_selector.role,
+        }
         attention: list[Ref] = list(attention_refs)
         seen = {(ref.kind.value, ref.uid) for ref in attention}
 
@@ -102,7 +114,7 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
         constraints: list[AssociationConstraint] = []
         role_seen: set[ActantRole] = set()
         for candidate in root.actants:
-            if candidate.role not in self._CONSTRAINT_ROLES:
+            if candidate.role in endpoint_roles or candidate.role is ActantRole.STATE:
                 continue
             if candidate.role in role_seen:
                 return None, tuple(attention), (
@@ -111,7 +123,7 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
             role_seen.add(candidate.role)
             if candidate.composition is not None:
                 # OR/AND semantics for a multi-value restriction must be explicit;
-                # silently choosing one member would widen/narrow the query by guess.
+                # silently choosing one member would change the query by guess.
                 return None, tuple(attention), (
                     f"semantic:association_constraint_composition_unsupported:{candidate.role.value}",
                 )
@@ -132,8 +144,7 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
             for support in resolved.support_refs:
                 add_attention(support)
 
-        constraints.sort(key=lambda item: (item.role.value, item.value.kind.value, item.value.uid))
-        return tuple(constraints), tuple(attention), ()
+        return _normalize_constraints(tuple(constraints)), tuple(attention), ()
 
     def _resolve_association_root(
         self,
@@ -155,6 +166,7 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
         constraint_attention_seed = tuple((*attention_refs, *result.attention_refs))
         constraints, constraint_attention, constraint_diagnostics = self._resolve_constraints(
             root,
+            relation,
             context,
             constraint_attention_seed,
         )
@@ -188,7 +200,7 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
         )
         if same_goal:
             # Explicit same-scope rephrasing continues exactly the same result
-            # stream. A changed LOCATION/TIME/etc is a new goal, even for the same
+            # stream. A changed role restriction is a new goal, even for the same
             # endpoint pair.
             excluded = emitted_signatures(
                 self.core,
@@ -201,8 +213,8 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
                 association_goal=AssociationContinuationGoal(
                     goal.left,
                     goal.right,
-                    constraints=goal.constraints,
                     excluded_signatures=excluded,
+                    constraints=goal.constraints,
                 ),
                 diagnostics=tuple(
                     (*result.diagnostics, "semantic:association_same_scope_continuation")
@@ -233,9 +245,11 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
                 None,
                 ("semantic:association_continuation_without_session",),
             )
-        constraints = tuple(
-            AssociationConstraint(role, value)
-            for role, value in session.constraints
+        constraints = _normalize_constraints(
+            tuple(
+                AssociationConstraint(role, value)
+                for role, value in session.constraints
+            )
         )
         excluded = emitted_signatures(
             self.core,
@@ -246,8 +260,8 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
         goal = AssociationContinuationGoal(
             session.left,
             session.right,
-            constraints=constraints,
             excluded_signatures=excluded,
+            constraints=constraints,
         )
         attention = list(attention_refs)
         seen = {(item.kind.value, item.uid) for item in attention}
