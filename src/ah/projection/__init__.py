@@ -1,5 +1,6 @@
 from .agent_context import ContextProjector as _BaseContextProjector
 from .event_context import EventAwareContextProjector
+from .set_valued_context import SetValuedContextProjector
 from .association_context import AssociationContextProjector
 from .contracts import (
     AgentContext,
@@ -22,8 +23,9 @@ from .source_scope import (
 )
 
 # Runtime construction imports ContextProjector from this package. Keep the base
-# implementation available internally while exposing the event-set aware extension.
-ContextProjector = EventAwareContextProjector
+# implementations available internally while exposing complete set-valued WH
+# retrieval on top of the event/identity aware projector.
+ContextProjector = SetValuedContextProjector
 
 __all__ = [
     "AgentContext",
@@ -31,6 +33,7 @@ __all__ = [
     "AssociationContextProjector",
     "ContextProjector",
     "EventAwareContextProjector",
+    "SetValuedContextProjector",
     "FunctionRegistry",
     "FunctionSpec",
     "ProjectionBlock",
