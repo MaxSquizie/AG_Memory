@@ -149,6 +149,15 @@ class AssociationContextProjector(SetValuedContextProjector):
             sections.extend(f"- {block.semantic}" for block in association_blocks)
         return "\n".join(sections).strip()
 
+    @staticmethod
+    def _has_unresolved_association(
+        unresolved_goal_diagnostics: tuple[tuple[str, ...], ...],
+    ) -> bool:
+        return any(
+            any(str(item).startswith("semantic:association") for item in diagnostics)
+            for diagnostics in unresolved_goal_diagnostics
+        )
+
     def project_with_associations(
         self,
         current_input: str,
@@ -168,15 +177,22 @@ class AssociationContextProjector(SetValuedContextProjector):
             source_scope=source_scope,
             budget_tokens=budget_tokens,
         )
-        if not association_results:
+        association_unresolved = self._has_unresolved_association(
+            unresolved_goal_diagnostics
+        )
+        if not association_results and not association_unresolved:
             return base
 
         association_blocks = tuple(
             self._association_block(outcome) for outcome in association_results
         )
+        # Even when compilation failed before a coordinator outcome could exist,
+        # association semantics remain fail-closed: expose the explicit UNRESOLVED
+        # diagnostic but not the warm Workspace as an alternate unscoped answer
+        # source for the response model.
         rendered = self._render_with_association_sections(
             current_input,
-            base.workspace_blocks,
+            (),
             base.inference_blocks,
             association_blocks,
         )
