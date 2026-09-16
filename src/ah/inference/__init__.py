@@ -60,7 +60,9 @@ from .set_valued_query import (
 from .modal_dispatch import ModalTurnGoalCompiler
 from .association_goal import AssociationQueryBuildResult
 from .association_session_goal import (
+    AssociationConstraint,
     AssociationContinuationGoal,
+    AssociationScopedGoal,
     AssociationSessionTurnGoalCompiler,
 )
 
@@ -80,8 +82,10 @@ __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
     "AnyOfGoal",
+    "AssociationConstraint",
     "AssociationGoal",
     "AssociationContinuationGoal",
+    "AssociationScopedGoal",
     "AssociationQueryBuildResult",
     "AssociationSessionTurnGoalCompiler",
     "AssociationTurnGoalCompiler",
