@@ -3,6 +3,7 @@ from __future__ import annotations
 from ah.model import Hypernode, Ref, RefKind
 
 from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
+from .coordinator import _LEFT, _RIGHT
 from .coordinator_specific import AssociationCoordinator as _StructuredAssociationCoordinator
 from .history import remember_signature
 
@@ -44,11 +45,57 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
             return None
         return super()._pattern_for_pair(state, left_ref, left, right_ref, right)
 
+    def _path_uses_fact(self, state, front: str, ref: Ref) -> bool:
+        """Whether reaching ``ref`` on this front depended on a concrete N fact.
+
+        A raw semantic M reached *through* an assertion/episode is useful propagation
+        evidence but is a lossy terminal answer: stopping at the shared participant
+        throws away the predicate frame that explains why the endpoints are related.
+        Direct/taxonomic M convergence remains eligible because it does not cross an
+        N fact and therefore does not hide a richer proposition structure.
+        """
+        if state is None:
+            return False
+        try:
+            path = state.path(front, ref, self.core)
+        except Exception:
+            return False
+        if path is None:
+            return False
+
+        # Most N-mediated paths expose the supporting fact directly in refs.
+        if any(item.kind is RefKind.N for item in path.refs[1:-1]):
+            return True
+
+        # Memory-query/propagation hops can also keep the structural carrier in
+        # provenance rather than as an explicit path vertex.
+        for hop in path.hops:
+            via_uid = hop.via_uid
+            if not via_uid:
+                continue
+            try:
+                if self.core.ref(via_uid).kind is RefKind.N:
+                    return True
+            except Exception:
+                continue
+        return False
+
     def _raw_common_allowed(self, state, uid: str) -> bool:
         ref = self.core.ref(uid)
         # K produced by actant coordination is a structural carrier, not a useful
         # answer to "what do these two things have in common?".
         if ref.kind is RefKind.K:
+            return False
+
+        # Do not terminate on a shared entity that both fronts reached through
+        # concrete facts.  Example: two SEE facts share SUBJECT=user.  Returning
+        # raw M(user) would discard SEE(OBJECT=_, SUBJECT=user, LOCATION=...) and can
+        # stop the search one tick before the structured frame becomes available.
+        # This is representation-level filtering, not a blacklist of concepts.
+        if ref.kind is RefKind.M and (
+            self._path_uses_fact(state, _LEFT, ref)
+            or self._path_uses_fact(state, _RIGHT, ref)
+        ):
             return False
 
         constraints = self._goal_constraints(state) if state is not None else ()
