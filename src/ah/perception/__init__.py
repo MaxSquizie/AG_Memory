@@ -68,9 +68,7 @@ from .runtime_invariants import RuntimeSemanticAdaptiveParser
 from .identity_query import IdentityQueryAdaptiveParser
 from .semantic_predicates import SemanticPredicateAdaptiveParser
 from .association_continuation import AssociationContinuationQueryCandidate
-from .coordination_normalization import (
-    CoordinationAwareLLMPerceptionService as LLMPerceptionService,
-)
+from .higher_order_queries import HigherOrderQueryLLMPerceptionService as LLMPerceptionService
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
     EmbeddingSemanticReranker,
