@@ -4,7 +4,7 @@ from ah.association.contracts import AssociationOutcome, AssociationStatus
 from ah.config import ContextSettings
 from ah.core import AHCore
 from ah.inference import InferenceOutcome
-from ah.model import Ref
+from ah.model import Hypernode, Ref
 
 from .set_valued_context import SetValuedContextProjector
 from .contracts import (
@@ -20,8 +20,9 @@ class AssociationContextProjector(SetValuedContextProjector):
     """Project associative convergence separately from logical inference.
 
     AssociationOutcome is runtime search provenance, not a proof and not a new fact.
-    Model-facing context contains only the scoped semantic result/status. Search paths
-    and the warm Workspace remain available to diagnostics/UI but are deliberately
+    Model-facing context contains only the scoped semantic result/status and the
+    minimal canonical facts that ground a selected structured frame. Search paths and
+    the warm Workspace remain available to diagnostics/UI but are deliberately
     excluded from response generation so the language model cannot perform a second,
     unscoped association pass over provenance details.
     """
@@ -50,6 +51,81 @@ class AssociationContextProjector(SetValuedContextProjector):
         predicate = self._ref_text(pattern.predicate)
         return f"{predicate}({', '.join(f'{role}={value}' for role, value in rows)})"
 
+    def _fact(self, ref: Ref) -> Hypernode | None:
+        try:
+            value = self.core.store.get_hypernode(ref.uid)
+        except Exception:
+            return None
+        return value if isinstance(value, Hypernode) else None
+
+    def _operand_text(self, value) -> str:
+        if isinstance(value, Ref):
+            return self._ref_text(value)
+        if value is None:
+            return "<нет значения>"
+        return str(value)
+
+    def _frame_grounding_text(self, outcome: AssociationOutcome) -> str:
+        """Render the minimal facts that give a runtime frame its actual meaning.
+
+        A frame such as ``есть(SUBJECT=_, OBJECT=ножки)`` is intentionally compact,
+        but the lexical predicate alone can be ambiguous for a response LLM.  The
+        two supporting N facts disambiguate the predicate and show exactly how the
+        compared endpoints instantiate every variable role.  They are evidence for
+        the already-selected association, not an extra search surface.
+        """
+        pattern = outcome.frame_pattern
+        if pattern is None:
+            return ""
+        left_fact = self._fact(pattern.left_fact)
+        right_fact = self._fact(pattern.right_fact)
+        if left_fact is None or right_fact is None:
+            return ""
+
+        left_endpoint = self._ref_text(outcome.goal.left)
+        right_endpoint = self._ref_text(outcome.goal.right)
+        lines: list[str] = []
+
+        if pattern.left_fact == pattern.right_fact:
+            lines.append(
+                f"Общий опорный канонический факт: {self._ref_text(pattern.left_fact)}."
+            )
+        else:
+            lines.append(
+                f"Левый опорный канонический факт: {self._ref_text(pattern.left_fact)}."
+            )
+            lines.append(
+                f"Правый опорный канонический факт: {self._ref_text(pattern.right_fact)}."
+            )
+
+        for role in pattern.variable_roles:
+            left_value = self._operand_text(left_fact.actants.get(role))
+            right_value = self._operand_text(right_fact.actants.get(role))
+            lines.append(
+                f"Переменная роль {role.value}: левый сравниваемый объект="
+                f"{left_endpoint}; правый сравниваемый объект={right_endpoint}; "
+                f"значение роли в левом факте={left_value}; "
+                f"значение роли в правом факте={right_value}."
+            )
+
+        for binding in pattern.bindings:
+            left_value = self._operand_text(left_fact.actants.get(binding.role))
+            right_value = self._operand_text(right_fact.actants.get(binding.role))
+            common_value = self._ref_text(binding.value)
+            if binding.generalized:
+                lines.append(
+                    f"Общая фиксированная роль {binding.role.value}: слева={left_value}; "
+                    f"справа={right_value}; каноническое обобщение={common_value} "
+                    "через IS-A."
+                )
+            else:
+                lines.append(
+                    f"Общая фиксированная роль {binding.role.value}: слева={left_value}; "
+                    f"справа={right_value}; фиксированное значение={common_value}."
+                )
+
+        return " ".join(lines)
+
     def _scope_text(self, outcome: AssociationOutcome) -> str:
         constraints = tuple(getattr(outcome.goal, "constraints", ()) or ())
         if not constraints:
@@ -70,14 +146,22 @@ class AssociationContextProjector(SetValuedContextProjector):
                 else f" Тип сходимости: {outcome.semantics.value}."
             )
             if pattern is not None:
+                grounding_facts = self._frame_grounding_text(outcome)
                 result = (
-                    f"{scope} Ассоциативный поиск: FOUND. Авторитетный ответ для общей "
-                    "черты — ТОЛЬКО эта общая семантическая схема: "
-                    f"{pattern}."
+                    f"{scope} Ассоциативный поиск: FOUND. Авторитетное основание "
+                    "общей черты — эта общая семантическая схема вместе с её "
+                    f"опорными фактами: {pattern}."
                 )
+                if grounding_facts:
+                    result += " " + grounding_facts
                 grounding = (
-                    " Ответ должен описывать ровно predicate, variable roles и fixed "
-                    "bindings указанной схемы и соблюдать ограничения цели."
+                    " Символ '_' в схеме означает семантический слот, который "
+                    "занимают два сравниваемых объекта; это не отдельное свойство и "
+                    "не неизвестный факт. Интерпретируй predicate только вместе с "
+                    "ролями и опорными фактами, а не по одному слову-предикату. "
+                    "Сформулируй человеческим языком именно отношение, общее для "
+                    "обоих объектов. Роли, которые различаются в опорных фактах и "
+                    "не входят в fixed bindings, не объявляй общими."
                 )
             else:
                 common = self._ref_text(outcome.common_ref)
