@@ -52,17 +52,6 @@ from .hackathon_metrics import (
     score_m2_explainability, score_m4_comparison, score_m5_robustness, run_tick_benchmark, write_metric_report,
     M3_RUNS_DIRNAME,
 )
-from .m4_acceptance import (
-    DEFAULT_M4_QUESTIONS,
-    InjectedAhAnswer,
-    M4AcceptanceError,
-    M4AcceptanceReport,
-    M4CaseRecord,
-    M4Question,
-    M4_RUNS_DIRNAME,
-    load_m4_questions,
-    run_m4_acceptance,
-)
 from .propagation_audit import (
     FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
 )
@@ -155,3 +144,24 @@ __all__ = [
     "analyze_propagation",
     "propagation_edges",
 ]
+
+_M4_EXPORTS = {
+    "DEFAULT_M4_QUESTIONS",
+    "InjectedAhAnswer",
+    "M4AcceptanceError",
+    "M4AcceptanceReport",
+    "M4CaseRecord",
+    "M4Question",
+    "M4_RUNS_DIRNAME",
+    "load_m4_questions",
+    "run_m4_acceptance",
+}
+
+
+def __getattr__(name: str):
+    if name in _M4_EXPORTS:
+        from . import m4_acceptance as _m4
+        value = getattr(_m4, name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

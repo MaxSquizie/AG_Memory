@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from ah.config import AppConfig
+from ah.llm.android_npu_backend import AndroidNpuBackend
 from ah.llm.reasoning_safe_lmstudio import LMStudioBackend
 from ah.llm.ollama_backend import OllamaBackend
 from ah.llm.process_backend import LocalLLMProcessBackend
 
-LLMBackend = LocalLLMProcessBackend | OllamaBackend | LMStudioBackend
+LLMBackend = LocalLLMProcessBackend | OllamaBackend | LMStudioBackend | AndroidNpuBackend
 
 
 def build_llm_backend(config: AppConfig) -> LLMBackend | None:
@@ -16,6 +17,8 @@ def build_llm_backend(config: AppConfig) -> LLMBackend | None:
         return OllamaBackend(config)
     if backend == "lmstudio":
         return LMStudioBackend(config)
+    if backend == "android_npu":
+        return AndroidNpuBackend(config)
     if backend == "builtin_process":
         return LocalLLMProcessBackend(config)
     raise ValueError(f"Unsupported llm.backend: {config.llm.backend}")

@@ -36,9 +36,9 @@ class LMStudioEmbeddingClient:
 
 def build_embedding_client(config: AppConfig) -> EmbeddingClient:
     backend = str(config.llm.backend or "").strip().lower()
-    if backend == "builtin_process":
+    if backend in {"builtin_process", "android_npu"}:
         raise EmbeddingClientError(
-            "M4 embeddings require ollama or lmstudio; builtin_process is fail-closed"
+            "M4 embeddings require ollama or lmstudio; builtin_process/android_npu is fail-closed"
         )
     model = config.llm.embedding_model_name()
     if not model:
