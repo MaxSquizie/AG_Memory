@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ah.model import Hypernode, Ref, RefKind
+from ah.model import FunctionSymbol, Hypernode, Ref, RefKind
 
 from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
 from .coordinator import _LEFT, _RIGHT
@@ -86,6 +86,20 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
         # answer to "what do these two things have in common?".
         if ref.kind is RefKind.K:
             return False
+
+        # A functional container whose operands recursively contain both queried
+        # endpoints is likewise only packaging of the pair, not a property shared by
+        # the pair. This is deliberately structural rather than an AND/OR blacklist:
+        # any g that merely encloses both origins remains usable for propagation but
+        # cannot terminate the association as ``(left) FUNCTION (right)``.
+        if ref.kind is RefKind.G and state is not None:
+            obj = self._element(ref)
+            if (
+                isinstance(obj, FunctionSymbol)
+                and self._operand_contains(ref, state.goal.left)
+                and self._operand_contains(ref, state.goal.right)
+            ):
+                return False
 
         # Do not terminate on a raw child that a front reached through a concrete
         # fact. Example: two SEE facts share SUBJECT=user. Returning raw M(user)
