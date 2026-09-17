@@ -14,7 +14,7 @@ from .contracts import (
     AssociationTraceKind,
 )
 from .coordinator import AssociationSearchState
-from .coordinator_session import AssociationCoordinator
+from .coordinator_identity import AssociationCoordinator
 
 __all__ = [
     "AssociationBudget",
