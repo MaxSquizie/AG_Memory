@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ah.model import FunctionSymbol, Hypernode, Ref, RefKind
+from ah.model import FunctionSymbol, Hypernode, Ref, RefKind, SemanticEntity
 
 from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
 from .coordinator import _LEFT, _RIGHT
@@ -22,17 +22,83 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
         goal = getattr(state, "goal", None)
         return tuple(getattr(goal, "constraints", ()) or ())
 
+    @staticmethod
+    def _fold_label(value: object) -> str:
+        return str(value).strip().casefold().replace("ё", "е")
+
+    def _lexical_labels(self, ref: Ref) -> frozenset[str]:
+        """Return deterministic lexical labels for a lexical S or semantic M.
+
+        Association constraints are compiled read-only. If entity resolution cannot
+        select one canonical M without guessing, the compiler may legally fall back
+        to an already known lexical S. A supporting fact, however, normally carries
+        the semantic M in its role slot. Treat S<->M as two representation levels of
+        the same lexical value only when their explicit stored labels intersect.
+
+        M<->M equality is intentionally *not* inferred from names: two distinct
+        entities may share a name. This bridge therefore cannot collapse identities.
+        """
+        if ref.kind is RefKind.S:
+            try:
+                symbol = self.core.store.get_symbol(ref.uid)
+            except Exception:
+                return frozenset()
+            return frozenset(
+                self._fold_label(form) for form in symbol.forms if str(form).strip()
+            )
+
+        if ref.kind is not RefKind.M:
+            return frozenset()
+        try:
+            entity = self.core.store.get_element_any_domain(ref.uid)
+        except Exception:
+            return frozenset()
+        if not isinstance(entity, SemanticEntity):
+            return frozenset()
+
+        labels: set[str] = set()
+        name = entity.properties.get("name")
+        if name is not None and str(name.value).strip():
+            labels.add(self._fold_label(name.value))
+        aliases = entity.properties.get("aliases")
+        if aliases is not None:
+            raw = aliases.value
+            if isinstance(raw, str):
+                if raw.strip():
+                    labels.add(self._fold_label(raw))
+            elif isinstance(raw, (tuple, list, set, frozenset)):
+                labels.update(
+                    self._fold_label(item)
+                    for item in raw
+                    if str(item).strip()
+                )
+        return frozenset(labels)
+
+    def _constraint_value_matches(self, actual: Ref, requested: Ref) -> bool:
+        if actual == requested:
+            return True
+
+        # Conditions use the same canonical taxonomy direction as ordinary role
+        # matching: an observed subtype may satisfy a requested ancestor.
+        ancestors = self._is_a_ancestors(actual)
+        if requested.uid in ancestors:
+            return True
+
+        # Read-only query compilation can resolve a phrase such as ``во дворе`` to
+        # lexical S while the stored role contains semantic M(двор). Bridge only
+        # this representation mismatch; never merge two M identities by spelling.
+        if {actual.kind, requested.kind} == {RefKind.S, RefKind.M}:
+            actual_labels = self._lexical_labels(actual)
+            requested_labels = self._lexical_labels(requested)
+            return bool(actual_labels and requested_labels and actual_labels & requested_labels)
+        return False
+
     def _fact_satisfies_constraints(self, fact: Hypernode, constraints) -> bool:
         for constraint in constraints:
             actual = fact.actants.get(constraint.role)
             if not isinstance(actual, Ref):
                 return False
-            if actual == constraint.value:
-                continue
-            # Conditions use the same canonical taxonomy direction as ordinary
-            # role matching: an observed subtype may satisfy a requested ancestor.
-            ancestors = self._is_a_ancestors(actual)
-            if constraint.value.uid not in ancestors:
+            if not self._constraint_value_matches(actual, constraint.value):
                 return False
         return True
 
