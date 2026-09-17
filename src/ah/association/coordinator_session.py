@@ -48,11 +48,11 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
     def _path_uses_fact(self, state, front: str, ref: Ref) -> bool:
         """Whether reaching ``ref`` on this front depended on a concrete N fact.
 
-        A raw semantic M reached *through* an assertion/episode is useful propagation
-        evidence but is a lossy terminal answer: stopping at the shared participant
-        throws away the predicate frame that explains why the endpoints are related.
-        Direct/taxonomic M convergence remains eligible because it does not cross an
-        N fact and therefore does not hide a richer proposition structure.
+        A raw representation reached *through* an assertion/episode is useful
+        propagation evidence but is a lossy terminal answer: stopping at one actant,
+        formula or other child throws away the predicate frame that explains why the
+        endpoints are related. Direct/taxonomic convergence remains eligible because
+        it does not cross an N fact and therefore does not hide that richer frame.
         """
         if state is None:
             return False
@@ -87,12 +87,13 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
         if ref.kind is RefKind.K:
             return False
 
-        # Do not terminate on a shared entity that both fronts reached through
-        # concrete facts.  Example: two SEE facts share SUBJECT=user.  Returning
-        # raw M(user) would discard SEE(OBJECT=_, SUBJECT=user, LOCATION=...) and can
-        # stop the search one tick before the structured frame becomes available.
-        # This is representation-level filtering, not a blacklist of concepts.
-        if ref.kind is RefKind.M and (
+        # Do not terminate on a raw child that a front reached through a concrete
+        # fact. Example: two SEE facts share SUBJECT=user. Returning raw M(user)
+        # discards SEE(OBJECT=_, SUBJECT=user, LOCATION=...) and can stop the search
+        # one tick before the structured frame becomes available. The same invariant
+        # applies to any non-N child representation; a concrete N that itself
+        # contains both endpoints remains eligible in the structured base layer.
+        if ref.kind is not RefKind.N and (
             self._path_uses_fact(state, _LEFT, ref)
             or self._path_uses_fact(state, _RIGHT, ref)
         ):
