@@ -7,6 +7,7 @@ import pytest
 from ah.model import ActantRole
 from ah.perception import LLMPerceptionService
 from ah.perception.adaptive_parser import AdaptiveParseError
+from ah.perception.contracts import ActantCandidate, AssertionCandidate, PredicateCandidate
 from ah.perception.higher_order_queries import (
     HigherOrderQueryAdaptiveParser,
     HigherOrderQueryLLMPerceptionService,
@@ -44,8 +45,65 @@ def _parser(monkeypatch, decision: str):
     return parser
 
 
+def _binary_assertion() -> AssertionCandidate:
+    return AssertionCandidate(
+        local_id="A1",
+        predicate=PredicateCandidate("есть", normalized_hint="быть"),
+        actants=(
+            # Deliberately plausible local roles that are wrong for possession.
+            ActantCandidate(ActantRole.SOURCE, mention="ворона"),
+            ActantCandidate(ActantRole.STATE, mention="лапки"),
+        ),
+    )
+
+
 def test_production_perception_uses_higher_order_query_layer() -> None:
     assert LLMPerceptionService is HigherOrderQueryLLMPerceptionService
+
+
+def test_binary_frame_can_correct_provisional_roles_top_down(monkeypatch) -> None:
+    parser = object.__new__(HigherOrderQueryAdaptiveParser)
+    parser._traces = []
+    monkeypatch.setattr(
+        HigherOrderQueryAdaptiveParser,
+        "_deep_semantic_choice_probe",
+        lambda self, stage, prompt, choices: ("E1_HAS_E2", ()),
+    )
+
+    rewritten, changed = parser._normalize_predicate_semantics(
+        "У вороны есть лапки",
+        _binary_assertion(),
+    )
+
+    assert changed
+    assert rewritten.predicate.normalized_hint == "иметь"
+    assert rewritten.predicate.sense_hint == "POSSESSION"
+    assert tuple(item.role for item in rewritten.actants) == (
+        ActantRole.SUBJECT,
+        ActantRole.OBJECT,
+    )
+    assert tuple(item.mention for item in rewritten.actants) == ("ворона", "лапки")
+
+
+def test_binary_frame_orientation_is_semantic_not_source_order(monkeypatch) -> None:
+    parser = object.__new__(HigherOrderQueryAdaptiveParser)
+    parser._traces = []
+    monkeypatch.setattr(
+        HigherOrderQueryAdaptiveParser,
+        "_deep_semantic_choice_probe",
+        lambda self, stage, prompt, choices: ("E2_HAS_E1", ()),
+    )
+
+    rewritten, changed = parser._normalize_predicate_semantics(
+        "Лапки есть у вороны",
+        _binary_assertion(),
+    )
+
+    assert changed
+    assert tuple(item.role for item in rewritten.actants) == (
+        ActantRole.OBJECT,
+        ActantRole.SUBJECT,
+    )
 
 
 def test_unresolved_wh_can_commit_late_to_relation_description(monkeypatch) -> None:
@@ -68,11 +126,11 @@ def test_late_commitment_does_not_rewrite_ordinary_argument_gap(monkeypatch) -> 
 
     with pytest.raises(AdaptiveParseError, match="requested role unresolved"):
         parser._requested_query_roles(
-            "Что увидел наблюдатель?",
+            "Что связывает первый объект со вторым?",
             (),
-            SimpleNamespace(surface="увидел"),
+            SimpleNamespace(surface="связывает"),
             None,
-            used_roles={ActantRole.SUBJECT, ActantRole.LOCATION},
+            used_roles={ActantRole.SUBJECT, ActantRole.OBJECT},
         )
 
 
