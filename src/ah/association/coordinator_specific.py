@@ -155,6 +155,45 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
                 out.append((ref, obj))
         return out
 
+    def _compatible_frame_schema(
+        self,
+        left: Hypernode,
+        right: Hypernode,
+    ) -> tuple[Ref, Ref, tuple[ActantRole, ...]] | None:
+        """Return a common predicate schema for two supporting facts.
+
+        Template UID equality is stronger than semantic predicate equality. In
+        production the same predicate may legitimately have several T shapes because
+        one occurrence exposes an optional role (TIME, LOCATION, CAUSE, ...), while
+        another does not. Requiring the exact same T made two otherwise compatible
+        facts invisible to association. Keep lexical predicate identity strict, but
+        intersect their role schemas instead of requiring identical template UIDs.
+        """
+        left_template = self._element(left.template)
+        right_template = self._element(right.template)
+        if not isinstance(left_template, Template) or not isinstance(right_template, Template):
+            return None
+        if left_template.predicate != right_template.predicate:
+            return None
+
+        common_roles = tuple(
+            sorted(
+                set(left_template.roles) & set(right_template.roles),
+                key=lambda role: role.value,
+            )
+        )
+        if not common_roles:
+            return None
+
+        # AssociationFramePattern keeps one structural anchor for provenance. When
+        # both facts use distinct compatible templates, choose a stable canonical
+        # anchor; semantic rendering uses the shared predicate and common roles.
+        template_anchor = min(
+            (left.template, right.template),
+            key=lambda ref: (ref.kind.value, ref.uid),
+        )
+        return template_anchor, left_template.predicate, common_roles
+
     def _pattern_for_pair(
         self,
         state: AssociationSearchState,
@@ -163,14 +202,13 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
         right_ref: Ref,
         right: Hypernode,
     ) -> AssociationFramePattern | None:
-        if left.template != right.template:
+        schema = self._compatible_frame_schema(left, right)
+        if schema is None:
             return None
-        template_obj = self._element(left.template)
-        if not isinstance(template_obj, Template):
-            return None
+        template_anchor, predicate_ref, common_roles = schema
 
         variable_roles: list[ActantRole] = []
-        for role in template_obj.roles:
+        for role in common_roles:
             left_operand = left.actants.get(role)
             right_operand = right.actants.get(role)
             if left_operand is None or right_operand is None:
@@ -188,7 +226,7 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
             return None
 
         bindings: list[AssociationFrameBinding] = []
-        for role in template_obj.roles:
+        for role in common_roles:
             if role in variable_roles:
                 continue
             left_operand = left.actants.get(role)
@@ -203,8 +241,13 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
 
         variable_tuple = tuple(sorted(variable_roles, key=lambda role: role.value))
         binding_tuple = tuple(sorted(bindings, key=lambda item: item.role.value))
+        if left.template == right.template:
+            frame_identity = left.template.uid
+        else:
+            template_pair = ",".join(sorted((left.template.uid, right.template.uid)))
+            frame_identity = f"PRED:{predicate_ref.uid}|TEMPLATES:{template_pair}"
         signature = "FRAME:{}|VAR:{}|BIND:{}".format(
-            left.template.uid,
+            frame_identity,
             ",".join(role.value for role in variable_tuple),
             ",".join(f"{item.role.value}={item.value.uid}" for item in binding_tuple),
         )
@@ -217,8 +260,8 @@ class AssociationCoordinator(_BaseAssociationCoordinator):
             else AssociationSemantics.SEMANTIC
         )
         return AssociationFramePattern(
-            template=left.template,
-            predicate=template_obj.predicate,
+            template=template_anchor,
+            predicate=predicate_ref,
             variable_roles=variable_tuple,
             bindings=binding_tuple,
             left_fact=left_ref,
