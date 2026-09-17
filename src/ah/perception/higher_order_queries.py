@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import re
 
 from ah.model import ActantRole
 
@@ -23,28 +24,20 @@ class HigherOrderQueryAdaptiveParser(SemanticPredicateAdaptiveParser):
     """Coarse-to-fine semantic commitment on top of source-grounded structure.
 
     The lower parser still owns tokenization, clause structure, source spans and a
-    provisional role assignment.  This layer deliberately does not build a second
-    complete parse.  It revisits only decisions whose meaning depends on a larger
+    provisional role assignment. This layer deliberately does not build a second
+    complete parse. It revisits only decisions whose meaning depends on a larger
     semantic unit than the local role classifier can see:
 
-    * a binary relation can constrain/correct the provisional endpoint roles;
+    * a binary relation can constrain/correct provisional endpoint roles;
+    * a structurally coordinated group can remain an endpoint set while a
+      higher-order relation query is being recognized, instead of being forced into
+      an ordinary local role first;
     * an unresolved WH span can denote a higher-order relation description rather
       than an ordinary missing predicate argument.
 
-    Both operations use bounded choices over already source-grounded candidates.
+    Every semantic decision is bounded over already source-grounded alternatives.
     There is no inventory of surface phrases, prepositions or predicate exceptions.
     """
-
-    _PARTICIPANT_ROLES = frozenset(
-        {
-            ActantRole.SUBJECT,
-            ActantRole.OBJECT,
-            ActantRole.RECIPIENT,
-            ActantRole.SOURCE,
-            ActantRole.ABSENTEE,
-            ActantRole.AUXILLIARY,
-        }
-    )
 
     @staticmethod
     def _plain_binary_actants(item):
@@ -71,13 +64,13 @@ class HigherOrderQueryAdaptiveParser(SemanticPredicateAdaptiveParser):
         """Let a whole binary semantic frame constrain provisional local roles.
 
         The previous production path asked whether SUBJECT already meant holder and
-        OBJECT already meant possessed.  That made the higher semantic decision
-        depend on lower roles being correct first.  Russian existential possession
-        is a representative failure mode: a locally plausible prepositional role can
+        OBJECT already meant possessed. That made the higher semantic decision
+        depend on lower roles being correct first. Russian existential possession is
+        a representative failure mode: a locally plausible prepositional role can
         prevent possession semantics from ever being considered.
 
         Here the model receives exactly two source-grounded candidates and chooses
-        among four meanings.  It never emits canonical roles, UIDs or a parse tree.
+        among four meanings. It never emits canonical roles, UIDs or a parse tree.
         Python deterministically maps a possession orientation to SUBJECT/OBJECT and
         to the existing canonical possession predicate.
         """
@@ -152,11 +145,189 @@ class HigherOrderQueryAdaptiveParser(SemanticPredicateAdaptiveParser):
         )
         return rewritten, rewritten != item
 
+    @staticmethod
+    def _forbidden_roles(value) -> set[ActantRole]:
+        if value is None:
+            return set()
+        if isinstance(value, ActantRole):
+            return {value}
+        return set(value)
+
+    def _relation_endpoint_coordination(self, text: str, span):
+        """Return one source-grounded binary coordination carried by ``span``.
+
+        The coordination graph is lower-level structure, not a semantic guess. A
+        wider span is accepted only when every source word outside the coordinated
+        members is functional morphology (preposition/conjunction/particle). Thus a
+        governor can wrap ``A and B`` without forcing that whole phrase into a
+        canonical actant role before the utterance-level operation is known.
+        """
+        graph = self._candidate_graph
+        if graph is None:
+            return None
+        matches = [
+            item
+            for item in graph.coordinations
+            if span.start_index <= item.span.start_index
+            and item.span.end_index <= span.end_index
+            and len(item.member_spans) == 2
+        ]
+        if len(matches) != 1:
+            return None
+        group = matches[0]
+
+        source_tokens = self._source_tokens(text)
+        outside = [
+            token
+            for token in source_tokens
+            if span.start_index <= token.index <= span.end_index
+            and not (group.span.start_index <= token.index <= group.span.end_index)
+            and re.search(r"\w", token.text)
+        ]
+        if any(
+            not self._has_morph(token, poses={"PREP", "CONJ", "PRCL"})
+            for token in outside
+        ):
+            return None
+
+        clause = graph.clause_for_token(span.start_index)
+        if clause is None:
+            return None
+        question_tokens = self._explicit_question_words(source_tokens, None)
+        if not any(
+            clause.span.start_index <= token.index <= clause.span.end_index
+            for token in question_tokens
+        ):
+            return None
+        return group
+
+    def _recover_relation_endpoint_role(
+        self,
+        *,
+        text: str,
+        predicate,
+        span,
+        used_roles: set[ActantRole],
+        forbidden_role,
+        allowed_roles: set[ActantRole] | None,
+    ) -> ActantRole | None:
+        """Preserve a binary endpoint set until the higher semantic operation settles.
+
+        AUXILLIARY is used only as the existing runtime carrier role. The two member
+        identities stay explicit in ``ActantCompositionCandidate`` and association
+        endpoint selection addresses them by member index. No AUXILLIARY fact is
+        asserted: queries are compiled into runtime goals before ordinary query
+        inference.
+        """
+        carrier = ActantRole.AUXILLIARY
+        if (
+            carrier in used_roles
+            or carrier in self._forbidden_roles(forbidden_role)
+            or (allowed_roles is not None and carrier not in allowed_roles)
+        ):
+            return None
+        group = self._relation_endpoint_coordination(text, span)
+        if group is None:
+            return None
+
+        source_tokens = self._source_tokens(text)
+        members = tuple(
+            self._resolve_span(
+                text,
+                source_tokens,
+                member.start_index,
+                member.end_index,
+            )
+            for member in group.member_spans
+        )
+        member_rows = "\n".join(
+            f"E{index}={member.text}" for index, member in enumerate(members, start=1)
+        )
+        prompt = (
+            f"TEXT:\n{text}\n"
+            f"PARSED PREDICATE:\n{predicate.surface}\n"
+            f"LOCALLY UNRESOLVED GROUP:\n{span.text}\n"
+            f"STRUCTURAL MEMBERS:\n{member_rows}\n"
+            "Decision criterion:\n"
+            "At the level of the complete question, is this binary coordinated "
+            "group the set of two endpoints whose relation/property/schema is being "
+            "requested, or is the group an ordinary participant/circumstance of the "
+            "parsed predicate? The source coordination is already established; "
+            "decide only its semantic level."
+        )
+        decision, _ = self._deep_semantic_choice_probe(
+            "query_endpoint_level",
+            prompt,
+            ("RELATION_ENDPOINT_SET", "ORDINARY_ARGUMENT", "UNCLEAR"),
+        )
+        if decision != "RELATION_ENDPOINT_SET":
+            return None
+
+        # Make the wider governed span a runtime composition so the ordinary
+        # ActantCandidate constructor preserves both members. This is parser-local
+        # state only and disappears after Perception.
+        self._runtime_compositions[(span.start_index, span.end_index)] = (
+            group.operator,
+            members,
+        )
+        self._deterministic_trace(
+            "query_endpoint_level_commitment",
+            prompt,
+            "RELATION_ENDPOINT_SET->AUXILLIARY_COMPOSITION",
+        )
+        return carrier
+
+    def _classify_role(
+        self,
+        text,
+        predicate,
+        span,
+        used_roles,
+        forbidden_role,
+        *,
+        requested,
+        allowed_roles=None,
+        allow_none=False,
+    ):
+        """Allow higher query structure to postpone one failed local role choice."""
+        try:
+            return super()._classify_role(
+                text,
+                predicate,
+                span,
+                used_roles,
+                forbidden_role,
+                requested=requested,
+                allowed_roles=allowed_roles,
+                allow_none=allow_none,
+            )
+        except AdaptiveParseError as original:
+            # Requested WH material has a separate late-commit path below. This
+            # branch is only for an explicit source phrase whose local role probe
+            # returned UNCLEAR before the query operation itself could be built.
+            if requested or str(original) != "target semantic role remains unresolved":
+                raise
+            recovered = self._recover_relation_endpoint_role(
+                text=text,
+                predicate=predicate,
+                span=span,
+                used_roles=set(used_roles),
+                forbidden_role=forbidden_role,
+                allowed_roles=(None if allowed_roles is None else set(allowed_roles)),
+            )
+            if recovered is None:
+                raise original
+            return recovered
+
     def _requested_query_roles(self, *args, **kwargs):
         try:
             return super()._requested_query_roles(*args, **kwargs)
         except AdaptiveParseError as original:
-            if "requested role unresolved" not in str(original):
+            message = str(original)
+            if (
+                "requested role unresolved" not in message
+                and message != "target semantic role remains unresolved"
+            ):
                 raise
 
             if len(args) < 3:
@@ -166,20 +337,16 @@ class HigherOrderQueryAdaptiveParser(SemanticPredicateAdaptiveParser):
             predicate = args[2]
             predicate_span = args[3] if len(args) > 3 else kwargs.get("predicate_span")
             used_roles = set(kwargs.get("used_roles") or ())
-
-            # A higher-order relation request must already have two independently
-            # filled participant slots.  This structural guard keeps ordinary
-            # single-gap WH questions on the mature role-resolution path and avoids
-            # an extra semantic probe for them.
-            participant_count = len(used_roles & self._PARTICIPANT_ROLES)
-            if participant_count < 2:
-                raise
-
-            spans = self._requested_query_spans(text, tokens, predicate_span)
+            requested_spans = kwargs.get("requested_spans")
+            spans = (
+                tuple(requested_spans)
+                if requested_spans is not None
+                else self._requested_query_spans(text, tokens, predicate_span)
+            )
             if len(spans) != 1:
                 # Multiple unresolved holes need an explicit compositional contract;
                 # do not collapse them into one relation request by guess.
-                raise
+                raise original
 
             span = spans[0]
             role_rows = ", ".join(sorted(role.value for role in used_roles)) or "[none]"
@@ -203,8 +370,9 @@ class HigherOrderQueryAdaptiveParser(SemanticPredicateAdaptiveParser):
                 raise original
 
             # STATE is a staging representation of the requested relation
-            # description, not a claim that STATE is a filled world fact.  The
-            # association semantic overlay removes it from endpoint selection.
+            # description, not a claim that STATE is a filled world fact. The
+            # association semantic overlay removes relation-description material
+            # from endpoint selection and compiles the query into a runtime goal.
             self._deterministic_trace(
                 "query_gap_level_commitment",
                 prompt,
