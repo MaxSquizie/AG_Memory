@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ah.model import FunctionSymbol, Hypernode, Ref, RefKind, SemanticEntity
+from ah.model import FunctionSymbol, Group, Hypernode, Ref, RefKind, SemanticEntity
 
 from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
 from .coordinator import _LEFT, _RIGHT
@@ -146,6 +146,53 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
                 continue
         return False
 
+    def _is_pair_container_ref(self, state, ref: Ref) -> bool:
+        """Whether ``ref`` merely packages both queried origins.
+
+        Coordination K and logical/compositional g nodes can be traversed in both
+        directions by the association recall machinery.  If such a container holds
+        both endpoints, walking through it and then unpacking the opposite member is
+        not a discovered commonality; it is only a round trip through the query pair
+        itself.  This predicate is structural and operator-agnostic.
+        """
+        if state is None or ref.kind not in {RefKind.K, RefKind.G}:
+            return False
+        obj = self._element(ref)
+        if not isinstance(obj, (Group, FunctionSymbol)):
+            return False
+        return (
+            self._operand_contains(ref, state.goal.left)
+            and self._operand_contains(ref, state.goal.right)
+        )
+
+    def _path_uses_pair_container(self, state, front: str, ref: Ref) -> bool:
+        """Whether one front reached ``ref`` by unpacking a container of the pair."""
+        if state is None:
+            return False
+        try:
+            path = state.path(front, ref, self.core)
+        except Exception:
+            return False
+        if path is None:
+            return False
+
+        for item in path.refs[1:-1]:
+            if self._is_pair_container_ref(state, item):
+                return True
+
+        # As with N provenance, a query hop may expose the carrier only as via_uid.
+        for hop in path.hops:
+            via_uid = hop.via_uid
+            if not via_uid:
+                continue
+            try:
+                via_ref = self.core.ref(via_uid)
+            except Exception:
+                continue
+            if self._is_pair_container_ref(state, via_ref):
+                return True
+        return False
+
     def _raw_common_allowed(self, state, uid: str) -> bool:
         ref = self.core.ref(uid)
         # K produced by actant coordination is a structural carrier, not a useful
@@ -158,14 +205,20 @@ class AssociationCoordinator(_StructuredAssociationCoordinator):
         # the pair. This is deliberately structural rather than an AND/OR blacklist:
         # any g that merely encloses both origins remains usable for propagation but
         # cannot terminate the association as ``(left) FUNCTION (right)``.
-        if ref.kind is RefKind.G and state is not None:
-            obj = self._element(ref)
-            if (
-                isinstance(obj, FunctionSymbol)
-                and self._operand_contains(ref, state.goal.left)
-                and self._operand_contains(ref, state.goal.right)
-            ):
-                return False
+        if ref.kind is RefKind.G and self._is_pair_container_ref(state, ref):
+            return False
+
+        # Do not let a pair-container leak one of its members (or another raw child)
+        # back as a later "common" result.  This is the continuation bug that could
+        # emit ``ворона`` and then ``стол`` after a valid MAKE frame had already been
+        # returned: one front traversed endpoint -> K/g(pair) -> other endpoint.
+        # Direct taxonomic convergence is unaffected because that path contains no
+        # pair container.
+        if ref.kind is not RefKind.N and (
+            self._path_uses_pair_container(state, _LEFT, ref)
+            or self._path_uses_pair_container(state, _RIGHT, ref)
+        ):
+            return False
 
         # Do not terminate on a raw child that a front reached through a concrete
         # fact. Example: two SEE facts share SUBJECT=user. Returning raw M(user)
