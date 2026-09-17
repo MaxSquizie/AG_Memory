@@ -15,7 +15,7 @@ from ah.inference.association_session_goal import (
     AssociationSessionTurnGoalCompiler,
 )
 from ah.integration.contracts import IntegrationCommit
-from ah.model import ActantRole, Domain
+from ah.model import ActantRole, Domain, Property
 from ah.perception.association_semantics import AssociationActRelationCandidate
 from ah.perception.contracts import ActantCandidate, PredicateCandidate, QueryCandidate, QueryMode
 from ah.projection.association_context import AssociationContextProjector
@@ -27,6 +27,13 @@ def _ref(core: AHCore, element):
 
 def _entity(core: AHCore, domain: Domain = Domain.C):
     return core.add_entity(domain)
+
+
+def _named_entity(core: AHCore, name: str, domain: Domain = Domain.C):
+    return core.add_entity(
+        domain,
+        properties={"name": Property("name", name, "str")},
+    )
 
 
 def _runtime(core: AHCore) -> AssociationCoordinator:
@@ -144,6 +151,124 @@ def test_scoped_association_finds_common_frame_from_two_distinct_h_facts() -> No
     assert bindings[ActantRole.SUBJECT] == _ref(core, observer)
     assert bindings[ActantRole.LOCATION] == _ref(core, yard)
     assert ActantRole.TIME not in bindings
+
+
+def test_scoped_association_accepts_same_predicate_across_distinct_templates() -> None:
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    see_s = core.add_abstract_symbol({"видеть"})
+    detailed_t = core.add_template(
+        Domain.C,
+        _ref(core, see_s),
+        (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.LOCATION, ActantRole.TIME),
+    )
+    compact_t = core.add_template(
+        Domain.C,
+        _ref(core, see_s),
+        (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.LOCATION),
+    )
+    observer = _entity(core, Domain.P)
+    crow = _entity(core)
+    table = _entity(core)
+    yard = _entity(core)
+    yesterday = _entity(core)
+
+    left, _ = core.add_hypernode(
+        Domain.H,
+        _ref(core, detailed_t),
+        {
+            ActantRole.SUBJECT: _ref(core, observer),
+            ActantRole.OBJECT: _ref(core, crow),
+            ActantRole.LOCATION: _ref(core, yard),
+            ActantRole.TIME: _ref(core, yesterday),
+        },
+        1.0,
+        deduplicate=False,
+    )
+    right, _ = core.add_hypernode(
+        Domain.H,
+        _ref(core, compact_t),
+        {
+            ActantRole.SUBJECT: _ref(core, observer),
+            ActantRole.OBJECT: _ref(core, table),
+            ActantRole.LOCATION: _ref(core, yard),
+        },
+        1.0,
+        deduplicate=False,
+    )
+
+    goal = AssociationScopedGoal(
+        _ref(core, crow),
+        _ref(core, table),
+        constraints=(AssociationConstraint(ActantRole.LOCATION, _ref(core, yard)),),
+    )
+    outcome = _runtime(core).solve(goal)
+
+    assert outcome.found
+    assert outcome.frame_pattern is not None
+    pattern = outcome.frame_pattern
+    assert pattern.predicate == _ref(core, see_s)
+    assert {pattern.left_fact.uid, pattern.right_fact.uid} == {left.uid, right.uid}
+    assert pattern.variable_roles == (ActantRole.OBJECT,)
+    bindings = {item.role: item.value for item in pattern.bindings}
+    assert bindings[ActantRole.SUBJECT] == _ref(core, observer)
+    assert bindings[ActantRole.LOCATION] == _ref(core, yard)
+
+
+def test_scoped_constraint_bridges_lexical_symbol_to_semantic_role_value() -> None:
+    core = AHCore(uid_generator=SequentialUidGenerator())
+    see_s = core.add_abstract_symbol({"видеть"})
+    yard_s = core.add_abstract_symbol({"двор"})
+    see_t = core.add_template(
+        Domain.C,
+        _ref(core, see_s),
+        (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.LOCATION, ActantRole.TIME),
+    )
+    observer = _entity(core, Domain.P)
+    crow = _entity(core)
+    table = _entity(core)
+    yard = _named_entity(core, "двор")
+    yesterday = _entity(core)
+    today = _entity(core)
+
+    core.add_hypernode(
+        Domain.H,
+        _ref(core, see_t),
+        {
+            ActantRole.SUBJECT: _ref(core, observer),
+            ActantRole.OBJECT: _ref(core, crow),
+            ActantRole.LOCATION: _ref(core, yard),
+            ActantRole.TIME: _ref(core, yesterday),
+        },
+        1.0,
+        deduplicate=False,
+    )
+    core.add_hypernode(
+        Domain.H,
+        _ref(core, see_t),
+        {
+            ActantRole.SUBJECT: _ref(core, observer),
+            ActantRole.OBJECT: _ref(core, table),
+            ActantRole.LOCATION: _ref(core, yard),
+            ActantRole.TIME: _ref(core, today),
+        },
+        1.0,
+        deduplicate=False,
+    )
+
+    # Query compilation may keep a lexical S as the read-only restriction while
+    # canonical facts store semantic M(двор). That representation mismatch must not
+    # make a valid scoped association disappear.
+    goal = AssociationScopedGoal(
+        _ref(core, crow),
+        _ref(core, table),
+        constraints=(AssociationConstraint(ActantRole.LOCATION, _ref(core, yard_s)),),
+    )
+    outcome = _runtime(core).solve(goal)
+
+    assert outcome.found
+    assert outcome.frame_pattern is not None
+    bindings = {item.role: item.value for item in outcome.frame_pattern.bindings}
+    assert bindings[ActantRole.LOCATION] == _ref(core, yard)
 
 
 def test_scoped_association_rejects_unrelated_have_and_workshop_commonalities() -> None:
