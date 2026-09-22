@@ -26,3 +26,6 @@ android/app/src/main/python/ah/
 /data/m2_runs/
 /data/m3_runs/
 /data/m4_runs/
+
+/docs/final/*
+/docs/final_talk/*
