@@ -1,0 +1,39 @@
+{
+  "version": "v1",
+  "scope": "demo-boundary",
+  "boundary_note": "Restriction to these four relations is a declared boundary of this demo, not a claim about language coverage. A reading outside the set is reported as NO_CANDIDATE (miss), never silently mapped to the nearest relation.",
+  "relations": [
+    {
+      "id": "V1",
+      "name": "HAVE",
+      "arity": 2,
+      "args": ["x", "y"],
+      "meaning_en": "possession"
+    },
+    {
+      "id": "V2",
+      "name": "HAS_PART",
+      "arity": 2,
+      "args": ["whole", "part"],
+      "meaning_en": "part-whole relation"
+    },
+    {
+      "id": "V3",
+      "name": "LOCATIVE",
+      "arity": 2,
+      "args": ["x", "place"],
+      "meaning_en": "spatial location"
+    },
+    {
+      "id": "V4",
+      "name": "LIKE",
+      "arity": 2,
+      "args": ["x", "y"],
+      "meaning_en": "positive attitude"
+    }
+  ],
+  "candidate_generation": {
+    "rule": "For each frame slot propose ALL declared relations minus provable type/arity incompatibility. No semantic form->value filters: a construction does not determine the value, and pre-filtering would hint the answer to the selector. In particular 'u + GEN' admits a spatial reading; LOCATIVE is never excluded by form alone.",
+    "no_semantic_prefilter": true
+  }
+}
