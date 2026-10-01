@@ -90,6 +90,30 @@ class TestOpenTemplateIsolation(unittest.TestCase):
         self.assertNotEqual(k1, k3)
 
 
+class TestTwoChannelJournal(unittest.TestCase):
+    """WP0.3 — the two journal channels (observation / resolution_log) coexist in one store with a
+    single global admission order, yet each channel's content is independently appendable/readable."""
+
+    def test_channels_are_independent_but_share_one_admission_order(self):
+        s = MemoryStore()
+        seq_obs = s.append_journal("observation", JournalRecord("observation", "run-A", {"kind": "obs_record"}))
+        seq_res = s.append_journal("resolution_log", JournalRecord("resolution_log", "run-A", {"kind": "decision"}))
+        self.assertLess(seq_obs, seq_res)  # one global monotonic seq across BOTH channels
+
+        all_recs = s.scan_unprocessed(0)
+        by_channel = {}
+        for r in all_recs:
+            by_channel.setdefault(r.channel, []).append(r.payload.get("kind"))
+        self.assertEqual(by_channel["observation"], ["obs_record"])   # observation channel isolated
+        self.assertEqual(by_channel["resolution_log"], ["decision"])  # resolution channel isolated
+        self.assertEqual(len(all_recs), 2)
+
+    def test_observation_channel_does_not_materialize_elements(self):
+        s = MemoryStore()
+        s.append_journal("observation", JournalRecord("observation", "run-A", {"kind": "obs_record", "uid": "n1"}))
+        self.assertFalse(s.has_uid("n1"))  # journaling an observation is not a commit; no element materialized
+
+
 class TestCrashRecovery(unittest.TestCase):
     def _adapter(self, tmpdir):
         from ah.core.journal import JournalChannel

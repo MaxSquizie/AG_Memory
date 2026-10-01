@@ -141,7 +141,7 @@ src/ah/formalizer/
 
 **Статус реализации (по состоянию на текущий коммит, измерено):**
 - ✅ WP0.1 `run_binding.py` (InterpretationRunBinding CAS); ✅ WP0.2 `provider_call_log.py` + `provider_adapter.py` (BudgetSnapshot, ProviderAdapter{select,propose_local}, replay/INTEGRITY_ERROR); ✅ WP0.4 `resources/registry.py` (RoleRegistry обязательные роли, ProposalPolicy/OpenTemplatePolicy, EnsureOpenTemplate isolation key, REGISTRY_REJECT/OPEN_TEMPLATE_INVALID на write boundary); ✅ WP0.7 `store_interface.py` + `memory_store.py`; ✅ WP0.8 `ah_adapter.py`.
-- ◐ WP0.3 — канал журнала (resolution_log) присутствует во всех модулях; явная независимость двух каналов (наблюдения / resolution_log) ещё не выделена отдельным тестом.
+- ✅ WP0.3 — два канала (observation / resolution_log): явная независимость + единый глобальный admission order покрыты `TestTwoChannelJournal`.
 - ◐ WP0.5 — контракт маркера материализации + COMMIT_DECISION D атомен в `store_interface.commit_transaction`/`recover_from_head`; реальная AH-side интеграция (materialization_marker/commit_decision_record) отнесена к G1/P2.
 - ◐ WP0.6 — `tests/test_formalizer_g1_adapters.py`: готовы 5 из 9 (concurrent_run_binding, idempotent_recommit, unresolved_replay, open_template_isolation, crash_recovery на реальном файле); 4 (legacy_roundtrip, v2_integration, known_mapping_failure, proposal_validation) требуют C/T6 и отнесены к P2.
 
@@ -253,9 +253,9 @@ P4 ──► G5 (generalization)        [real provider + ≥500 unseen corpus]
 
 R1 решено (см. §6 п.5): AH-контракт фиксируется сразу, память — двойник для чистых решений.
 
-**Выполнено в текущем коммите:** WP0.1/0.2/0.4/0.7/0.8 (spine детерминизма + store-контракт), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1). 261 тест зелёные.
+**Выполнено в текущем коммите:** WP0.1/0.2/0.3/0.4/0.7/0.8 (spine детерминизма + store-контракт + два канала), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1). 269 тест зелёных.
 
 **Осталось до G1:**
 1. **WP0.6 (остаток)** — 4 оставшихся G1-адаптерных теста (§12/§20): legacy_roundtrip, v2_integration, known_mapping_failure, proposal_validation — все требуют C/T6 и пишутся в P2. Готовы уже: concurrent_run_binding, idempotent_recommit, unresolved_replay, open_template_isolation, crash_recovery.
-2. **WP0.3** — вынести явную независимость двух каналов журнала (наблюдения / resolution_log) отдельным тестом.
-3. **P2** — C/T5/T6/T6b + goal + temporal: вертикальные трассы DR1–DR31; реальная AH-side интеграция маркера/COMMIT_DECISION (WP0.5).
+2. **WP0.5 (AH-side)** — реальная интеграция маркера/COMMIT_DECISION в AHStore + crash-stop прогоны (WP2.9); контракт уже атомен в `store_interface`.
+3. **P2** — C/T5/T6/T6b + goal + temporal: вертикальные трассы DR1–DR31.
