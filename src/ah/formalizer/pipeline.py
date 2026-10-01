@@ -8,18 +8,30 @@ one budget charge per attempt; recorded I/O on the decision) ->
 T4 joint validation (the ONLY place a semantic outcome is granted).
 
 V5 rev16 stages added (frozen for Phase 1 validation):
-- SRL between T0 and T1: deterministic declared patterns only — L1 double-letter
-  orthographic hypothesis, B1 new-predicative-center boundary candidates, E1 predicate-gap.
-  SRL proposes structural HYPOTHESES with pattern provenance; it creates no
-  ReferenceCandidate, no identity links, no memory facts, no final structure (I24/I26).
+- SRL between T0 and T1: deterministic declared patterns ONLY, run through a declarative
+  RuleRegistry (rules.py): the core is a generic evaluator with NO language knowledge;
+  L1 double-letter orthographic hypothesis, B1 new-predicative-center boundary candidates,
+  E1 predicate-gap are RULE DECLARATIONS — adding a pattern = register(), never a change
+  to the evaluation loop. SRL proposes structural HYPOTHESES with pattern provenance; it
+  creates no ReferenceCandidate, no identity links, no memory facts, no final structure (I24/I26).
 - T1 CONSUMES the SRL output [H1]: hypotheses extend LexDecision candidates;
   surviving ClauseCandidates become linked alternatives + a BOUNDARY decision (I29).
-- TD (ReferenceResolver §15.4) [H2] — not SRL — creates ReferenceCandidates from
-  observation mentions + the declared memory window; 'mention = antecedent' exists only
-  inside a reference DECISION, never before resolution.
-- T2 valency check: a verbal frame with zero arguments yields a MissingArgumentCandidate
-  [H3]; every structural object carries ResourceProvenance (pattern_ids + resource_versions).
-- I30: after TD+T2 the structural set is CLOSED; T3/T4 only decide over existing objects.
+- TD (ReferenceResolver §15.4) [H2] — not SRL — creates ReferenceCandidates through four
+  DECLARED evidence channels {morphology, syntax, discourse, memory}: the morphology channel
+  is a hard agreement filter on R1 features (rejected candidates are RECORDED with a D-trace,
+  never deleted silently); syntax/discourse rank observed mentions by the declared
+  CoreferencePolicy; memory adds journal-window mentions as W-channel evidence.
+  'mention = antecedent' exists only inside a reference DECISION, never before resolution.
+- T2 valency check: an unfilled role yields a MissingArgumentCandidate in state
+  POSSIBLE_GAP (three-state machine POSSIBLE_GAP/CONFIRMED_GAP/NO_GAP — not binary) [H3];
+  every structural object carries ResourceProvenance (pattern_ids + resource_versions).
+- I30: after TD+T2 the structural set is CLOSED; EVERY structural producer (SRL/T1/TD/T2)
+  raises if called after closure, and T3/T4 only decide over existing objects.
+- Traceability (§18.2/I23): trace_decision() reconstructs RawInput -> SRL candidates ->
+  FrameCandidate -> Decision for any decision; rejected_alternatives() returns the I29
+  audit trail (a candidate leaves the active set ONLY via a recorded RejectionRecord).
+  SemanticGraphCandidate/Canonical Memory are Phase 2 objects — in Phase 1 the chain
+  legitimately ends at the Decision (I25: nothing writes before the commit stage).
 
 rev8 contracts implemented here:
 - T3 candidates come from ``candidates_for_slot`` (schema rule), never hardcoded;
@@ -52,6 +64,8 @@ from ah.formalizer.selection_protocol import (
     candidates_for_slot,
     validate_selection_response,
 )
+from ah.formalizer.rules import RuleRegistry, default_registry
+from ah.formalizer.seal import structural_seal
 from ah.formalizer.state import (
     BoundaryCandidate,
     Budget,
@@ -92,11 +106,11 @@ def t0(text: str) -> FormalizationState:
 
 
 # --------------------------------------------------------------------------- SRL (V5 §17)
-# Structural Reconstruction Layer: deterministic, declared patterns only. R1 is used as a
-# declared resource for STRUCTURAL SIGNALS (is there a new predicative center?); it never
-# yields lexical verdicts here — those are T1's LexDecisions.
+# Structural Reconstruction Layer. The core below is a GENERIC EVALUATOR with no
+# language knowledge: it runs the registered StructuralRules in declared order and
+# collects their candidates. All pattern knowledge lives in rules.py declarations;
+# adding a pattern = registry.register(rule) — this loop never changes (CP1/I13).
 
-_R1_VERSION = "pymorphy3-opencorpora"
 _GRAMMAR_VERSION = "op1-op5-v1"
 
 
@@ -104,63 +118,38 @@ def _parses(provider: MorphProvider, span: str) -> tuple:
     return provider.analyze(span)
 
 
-def _has_finite_verb(parses) -> bool:
-    return any(v.pos == "VERB" and v.tense in ("past", "present", "future") for v in parses)
-
-
-def _top_is_nominal(parses) -> bool:
-    if not parses:
-        return False
-    top = max(parses, key=lambda v: v.score)
-    return top.pos in ("NOUN", "ADJF", "NPRO")
-
-
-def srl(state: FormalizationState, morph: MorphProvider | None = None) -> FormalizationState:
+def srl(
+    state: FormalizationState,
+    morph: MorphProvider | None = None,
+    registry: RuleRegistry | None = None,
+) -> FormalizationState:
     """SRL stage (lifecycle T0 -> SRL -> T1). Creates structural hypotheses ONLY.
 
-    Declared patterns (corpus-testable, no per-word knowledge):
-      L1 — a token ending in a doubled letter gets variants {keep_as_is, dedup};
-           keep-as-is is first-class; distance never proves a correction (§17.5).
-      B1 — a finite verb that is NOT the unit's first predicative center opens boundary
-           candidates before itself and before its nearest preceding nominal subject.
-      E1 — a unit with no finite verb/infinitive but with nominals gets a PREDICATE_GAP
-           (structural gap only; valency is T2/T3's job [H3]).
+    Generic evaluation over the declared ruleset (default_registry(): L1/B1/E1).
     Nothing here creates ReferenceCandidates, identity links, memory facts or final
-    ClauseUnit/Frame decisions (I24/I26)."""
+    ClauseUnit/Frame decisions (I24/I26); every produced object carries its rule's
+    pattern provenance (I27)."""
     state.require_structures_open("SRL")
+    reg = registry or default_registry()
     provider = morph or MorphProvider()
     evs = state.evidence
     n = len(evs)
     parses = [_parses(provider, ev.span) for ev in evs]
 
-    # L1: orthographic double-letter hypothesis (keep_as_is stays first-class).
-    for i, ev in enumerate(evs):
-        s = ev.span.lower()
-        if len(s) >= 3 and s[-1] == s[-2]:
-            state.token_hypotheses.append(TokenHypothesis(
-                hypothesis_id=f"L{i}", span_ref=ev.span,
-                variants=("keep_as_is", ev.span[:-1]),
-                provenance=ResourceProvenance(pattern_ids=("L1_double_letter",)),
-            ))
+    # Generic loop: declared rules only; the core knows no pattern and no word.
+    for rule in reg.rules:
+        if not rule.activate(evs, parses):
+            continue
+        for obj in rule.produce(state, evs, parses):
+            if isinstance(obj, TokenHypothesis):
+                state.token_hypotheses.append(obj)
+            elif isinstance(obj, BoundaryCandidate):
+                state.boundary_candidates.append(obj)
+            elif isinstance(obj, EllipsisCandidate):
+                state.ellipsis_candidates.append(obj)
 
-    # B1: new predicative centers after the first one.
-    centers = [i for i, p in enumerate(parses) if _has_finite_verb(p)]
-    for c in centers[1:]:
-        positions = {c}
-        for j in range(c - 1, -1, -1):
-            if _top_is_nominal(parses[j]):
-                positions.add(j)
-                break
-        prov = ResourceProvenance(
-            pattern_ids=("B1_new_predicative_center",), resource_versions={"r1": _R1_VERSION})
-        for p in sorted(positions):
-            state.boundary_candidates.append(BoundaryCandidate(
-                candidate_id=f"B{p}", position=p, kind="CLAUSE_BOUNDARY",
-                evidence=[f"new predicative center '{evs[c].span}' after first center '{evs[centers[0]].span}'"],
-                provenance=prov,
-            ))
-
-    # ClauseCandidates: the no-boundary default plus one segmentation per boundary.
+    # Bookkeeping over fired boundaries (not language knowledge): the no-boundary
+    # default plus one segmentation per declared boundary candidate.
     state.clause_candidates.append(ClauseCandidate(
         candidate_id="S0", segmentation=((0, n - 1),),
         provenance=ResourceProvenance(pattern_ids=("B0_no_boundary",)),
@@ -170,17 +159,6 @@ def srl(state: FormalizationState, morph: MorphProvider | None = None) -> Formal
         state.clause_candidates.append(ClauseCandidate(
             candidate_id=f"S{bc.candidate_id}", segmentation=seg, provenance=bc.provenance,
         ))
-
-    # E1: predicate gap (structural only).
-    if not any(_has_finite_verb(p) or any(v.pos == "INFN" for v in p) for p in parses):
-        nominals = [ev.span for ev, p in zip(evs, parses) if _top_is_nominal(p)]
-        if nominals:
-            state.ellipsis_candidates.append(EllipsisCandidate(
-                candidate_id="G0", gap_ref=nominals[0], kind="PREDICATE_GAP",
-                antecedent_ref=None,
-                evidence=["no finite verb or infinitive in the unit (structural gap)"],
-                provenance=ResourceProvenance(pattern_ids=("E1_predicate_gap",), resource_versions={"r1": _R1_VERSION}),
-            ))
     return state
 
 
@@ -245,6 +223,7 @@ def _expand_shared_form(v: MorphVariant, token: str) -> MorphVariant:
 
 
 def t1(state: FormalizationState, morph: MorphProvider | None = None) -> FormalizationState:
+    state.require_structures_open("T1")  # I30: T1 consumes SRL output; it is a structural producer
     provider = morph or MorphProvider()
     for ev in state.evidence:
         variants = tuple(_expand_shared_form(v, ev.span) for v in provider.analyze(ev.span))
@@ -281,8 +260,8 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None) -> Formali
         dec = state.decisions.get(key)
         if dec is None:
             # L1 flagged an orthographic anomaly on a token that HAS dictionary parses
-            # (e.g. 'быстраяя' parses as GRND): it becomes a LexDecision anyway —
-            # keep-as-is first-class, PROVISIONAL pick; distance may rank but never prove.
+            # (the form still resolves in the dictionary): it becomes a LexDecision
+            # anyway — keep-as-is first-class, PROVISIONAL pick; distance may rank but never prove.
             dec = Decision(slot_id="lex", frame_id=hyp.span_ref, candidates=("keep_as_is", *extra))
             dec.selected = ("keep_as_is",)
             dec.lifecycle = "PROVISIONAL"
@@ -345,6 +324,7 @@ def t2(state: FormalizationState) -> FormalizationState:
 
     OP4/OP5 (NESTED/COORD) are declared stubs for Phase 2; T3 records
     STRUCTURE_NOT_COVERED for any frame of those kinds instead of skipping silently."""
+    state.require_structures_open("T2")  # I30: after closure no stage may add structure
     evs = state.evidence
     frames: list[FrameCandidate] = []
     n = len(evs)
@@ -375,12 +355,19 @@ def t2(state: FormalizationState) -> FormalizationState:
         # Valency check [Rev16/H3]: a verbal frame with zero arguments yields a
         # MissingArgumentCandidate (structural gap confirmed by the schema's cardinality).
         if not args:
+            # Three-state machine (V5 §17.3 [H3]): the valency check only POSSIBLY
+            # opens a gap; a declared structural link confirms it; nothing is binary.
+            confirmed = any(
+                ec.antecedent_ref == ev.span or ec.gap_ref in frame.participants
+                for ec in state.ellipsis_candidates
+            )
+            status = "CONFIRMED_GAP" if confirmed else "POSSIBLE_GAP"
             state.missing_argument_candidates.append(MissingArgumentCandidate(
                 candidate_id=f"MA-{frame.frame_id}", frame_ref=frame.frame_id, role="ARGUMENT",
-                status="UNRESOLVED",
+                status=status,
                 provenance=ResourceProvenance(pattern_ids=("valency_check_v1",), resource_versions={"predicate_schema": "v1"}),
             ))
-            state.miss_reports.append(f"{frame.frame_id}: possible argument gap (valency check, UNRESOLVED)")
+            state.miss_reports.append(f"{frame.frame_id}: argument gap (valency check, {status})")
 
     # OP2: copula constructions (explicit copula or ellipsis under 'у'+GEN).
     for i, ev in enumerate(evs):
@@ -391,6 +378,7 @@ def t2(state: FormalizationState) -> FormalizationState:
                 frame_id=f"C{i}", kind="FLAT", anchor_span=ev.span,
                 participants=tuple([*poss, *obj]), arguments=tuple(obj),
                 construction="u+GEN+NOM" if poss else "V+ARG", rank=len(frames),
+                provenance=ResourceProvenance(pattern_ids=("OP2_copula",), resource_versions={"grammar": _GRAMMAR_VERSION}),
             ))
         elif ev.pos in ("NOUN", "ADJF", "NPRO"):
             prev = evs[i - 1] if i else None
@@ -402,7 +390,42 @@ def t2(state: FormalizationState) -> FormalizationState:
                     frame_id=f"E{i}", kind="FLAT", anchor_span=ev.span,
                     participants=tuple([ev.span, *obj]), arguments=tuple(obj),
                     construction="u+GEN+NOM", copula_ellipsis=True, rank=len(frames),
+                    provenance=ResourceProvenance(pattern_ids=("OP2_copula_ellipsis",), resource_versions={"grammar": _GRAMMAR_VERSION}),
                 ))
+
+    # OP4_NESTED (Rev18, declared rule [connectives_v1]): a subordinator connective links
+    # the following clause to a preceding verbal center. Primary attachment = NEAREST
+    # preceding finite verb; alternative attachments are derived by composition.build_graphs
+    # (bounded enumeration). No matrix center or no subclause center -> honest
+    # STRUCTURE_NOT_COVERED, never a silent skip.
+    from ah.formalizer.composition import CONNECTIVES_V1, _CONNECTIVES_VERSION
+    for i, ev in enumerate(evs):
+        if ev.pos != "CONJ" or (ev.lemma or "").lower() not in CONNECTIVES_V1:
+            continue
+        next_conn = [j for j in range(i + 1, n)
+                     if evs[j].pos == "CONJ" and (evs[j].lemma or "").lower() in CONNECTIVES_V1]
+        end = (next_conn[0] - 1) if next_conn else (n - 1)
+
+        def _finite(j: int) -> bool:
+            return evs[j].pos == "VERB" and any(
+                v.tense in ("past", "present", "future") for v in evs[j].variants)
+
+        sub_nominals = [e.span for j, e in enumerate(evs[i + 1:end + 1]) if nominal(j)]
+        centers_before = [j for j in range(i) if _finite(j) and not _is_copula(evs[j])]
+        sub_center = next((j for j in range(i + 1, end + 1) if _finite(j)), None)
+        if not centers_before or sub_center is None:
+            state.diag("STRUCTURE_NOT_COVERED",
+                       f"connective '{ev.span}': OP4_NESTED needs a matrix center and a subclause center")
+            continue
+        frames.append(FrameCandidate(
+            frame_id=f"N{i}", kind="NESTED", anchor_span=ev.span,
+            participants=tuple(sub_nominals), arguments=tuple(sub_nominals),
+            construction=f"SUBORDINATE:{CONNECTIVES_V1[(ev.lemma or '').lower()]}",
+            attachment=evs[max(centers_before)].span, rank=len(frames),
+            provenance=ResourceProvenance(
+                pattern_ids=("OP4_nested",),
+                resource_versions={"grammar": _GRAMMAR_VERSION, "connectives": _CONNECTIVES_VERSION}),
+        ))
 
     # OP5 (declared stub): coordination marker between two nominal mentions.
     for i, ev in enumerate(evs):
@@ -414,6 +437,7 @@ def t2(state: FormalizationState) -> FormalizationState:
                     frame_id=f"K{i}", kind="COORD", anchor_span=ev.span,
                     participants=tuple([*left, *right]), arguments=(),
                     construction="COORD", rank=len(frames),
+                    provenance=ResourceProvenance(pattern_ids=("OP5_coordination",), resource_versions={"grammar": _GRAMMAR_VERSION}),
                 ))
 
     state.frames = sorted(frames, key=lambda f: (f.rank != 0, f.rank))
@@ -528,11 +552,11 @@ def t3(
     """Bounded selection. Every pick is PROVISIONAL; a semantic outcome is granted by T4 only."""
     det = detector or OscillationDetector()
     for frame in state.frames:
-        if frame.kind != "FLAT":
-            # OP4/OP5 declared stubs: honest incompleteness, never a silent skip.
+        if frame.kind not in ("FLAT", "NESTED"):
+            # OP5 COORD remains a declared stub: honest incompleteness, never silent.
             state.diag(
                 "STRUCTURE_NOT_COVERED",
-                f"{frame.kind} frame {frame.frame_id}: declared in the grammar (OP4/OP5), exercised in Phase 2",
+                f"{frame.kind} frame {frame.frame_id}: declared in the grammar (OP5), exercised in Phase 2",
             )
             continue
         candidates = candidates_for_slot(schema, SLOT_ARITY["predicate_value"])
@@ -625,46 +649,175 @@ def _cluster_valid(state: FormalizationState, key: str, dec: Decision, schema) -
 
 # --------------------------------------------------------------------------- TD (V5 §15.4)
 
+# Declared versioned policy [C] (V5 §15.4): lexicographic ranking criteria, no criterion
+# is hardcoded in the core — a new criterion = a NEW POLICY VERSION.
+COREF_POLICY = {
+    "policy_id": "coref_policy_v1",
+    "version": "v1",
+    "ranking_criteria": ("subject", "recency"),
+}
+
+
+def _anaphora_features(ev: TokenEvidence) -> tuple:
+    """(gender, number) of the anaphora's top variant — R1 features only."""
+    if not ev.variants:
+        return (None, None)
+    top = max(ev.variants, key=lambda v: v.score)
+    return (top.gender, top.number)
+
+
+def _agrees(anaphora: tuple, mention_ev: TokenEvidence | None) -> bool:
+    """Declared HARD FILTER (structural rule under the two-tier invariant): gender/number
+    agreement from R1 features. A candidate agrees when ANY of its variants matches the
+    anaphora's top variant on every feature KNOWN on both sides; unknown features impose
+    no constraint and never reject. Memory-channel mentions have no R1 features here —
+    they are not filterable by morphology (their channel is memory, §17.4)."""
+    if mention_ev is None:
+        return True
+    ag, an = anaphora
+    for v in mention_ev.variants:
+        g_ok = ag is None or v.gender is None or v.gender == ag
+        n_ok = an is None or v.number is None or v.number == an
+        if g_ok and n_ok:
+            return True
+    return False
+
+
+def _subject_positions(evs) -> set:
+    """Declared syntax signal for the 'subject' policy criterion: a nominal position is a
+    subject when it is the NEAREST nominal preceding some finite-verb center."""
+    centers = [j for j, e in enumerate(evs)
+               if e.pos == "VERB" and any(v.tense in ("past", "present", "future") for v in e.variants)]
+    subjects: set[int] = set()
+    for c in centers:
+        for j in range(c - 1, -1, -1):
+            if evs[j].pos in ("NOUN", "ADJF") and not evs[j].is_oov():
+                subjects.add(j)
+                break
+    return subjects
+
 
 def td(state: FormalizationState) -> FormalizationState:
     """ReferenceResolver [Rev16/H2]: TD — NOT SRL — creates ReferenceCandidates.
 
     Declared policy coref_policy_v1: anaphoric mentions are 3rd-person NPRO; the
     antecedent set = nominal mentions of the observation + the declared memory window
-    (journal, §17.4/H5). Evidence categories {discourse, memory} become value-specific
-    grounds (R for observed, W for memory-channel). The pair 'mention = antecedent'
-    exists ONLY inside a reference decision; no identity link is created here or before
-    consolidation (I24)."""
+    (journal, §17.4/H5). Candidates are built through FOUR DECLARED evidence channels:
+      morphology — hard agreement filter on R1 features; a failing observed candidate is
+                   RECORDED as rejected with a D-trace (I29), never deleted silently;
+      syntax     — subject/recency ranking by the declared policy criteria (ranks, not cuts);
+      discourse  — the mention lies inside the observation window (declared NQ7 default);
+      memory     — journal-window mentions enter as W-channel evidence only.
+    The pair 'mention = antecedent' exists ONLY inside a reference decision; no identity
+    link is created here or before consolidation (I24)."""
     state.require_structures_open("TD")
     evs = state.evidence
+    prov = ResourceProvenance(
+        pattern_ids=(COREF_POLICY["policy_id"],),
+        resource_versions={"coreference_policy": COREF_POLICY["version"]},
+    )
+    subjects = _subject_positions(evs)
     for i, ev in enumerate(evs):
         if ev.pos != "NPRO" or not any(v.person == "3rd" for v in ev.variants):
             continue
-        observed = [e.span for j, e in enumerate(evs)
-                    if j != i and e.pos in ("NOUN", "ADJF") and not e.is_oov()]
-        cands: list[str] = list(observed)
-        evid: list[tuple[str, str]] = [("discourse", f"nominal mention '{m}' in the observation") for m in observed]
+        anaphora = _anaphora_features(ev)
+        observed = [(j, e) for j, e in enumerate(evs)
+                   if j != i and e.pos in ("NOUN", "ADJF") and not e.is_oov()]
+        survivors: list[tuple[str, TokenEvidence | None, int, bool, list]] = []
+        for j, m in observed:
+            if not _agrees(anaphora, m):
+                feats = sorted(
+                    f"{v.gender or '?'}-{v.number or '?'}" for v in m.variants
+                )
+                state.reject(
+                    candidate_id=f"antecedent:{m.span}", stage="TD",
+                    reason=(f"failed the declared agreement filter ({COREF_POLICY['policy_id']}): "
+                           f"anaphora '{ev.span}' is {anaphora[0]}/{anaphora[1]}, candidate features {feats}"),
+                    provenance=prov,
+                )
+                continue
+            evd = [
+                ("morphology", f"agrees with anaphora '{ev.span}' on {anaphora} (declared hard filter)"),
+                ("syntax", f"{'subject' if j in subjects else 'non-subject'} position; "
+                          f"ranked by policy criteria {COREF_POLICY['ranking_criteria']}"),
+                ("discourse", "nominal mention inside the observation window (declared NQ7 default)"),
+            ]
+            survivors.append((m.span, m, j, j in subjects, evd))
+        # Declared ranking [Rev13]: lexicographic by policy criteria — subject first,
+        # then recency (later position first); memory mentions follow in declared order.
+        survivors.sort(key=lambda s: (0 if s[3] else 1, -s[2]))
         for m in state.memory_mentions:
-            if m not in cands:
-                cands.append(m)
-                evid.append(("memory", f"mention '{m}' from the declared journal window (H5)"))
-        prov = ResourceProvenance(pattern_ids=("coref_policy_v1",), resource_versions={"coreference_policy": "v1"})
+            if not any(span == m for span, _, _, _, _ in survivors):
+                survivors.append((m, None, len(evs), False, [
+                    ("memory", f"mention '{m}' from the declared journal window (V5 §17.4/H5)"),
+                ]))
+        cands = [span for span, _, _, _, _ in survivors]
+        evid = [(cat, det) for _, _, _, _, evd in survivors for cat, det in evd]
         state.reference_candidates.append(ReferenceCandidate(
             mention_id=ev.span, candidates=tuple(cands), evidence=evid, provenance=prov,
         ))
         dec = Decision(slot_id="reference", frame_id=ev.span, candidates=tuple(cands), provenance=prov)
-        for m in cands:  # value-specific positive grounds per candidate
-            gtype = "R" if m in observed else "W"
-            src = "observation" if m in observed else "memory window (declared input)"
-            dec.grounds.append(Ground(gtype, f"antecedent '{m}' from {src}", value=m))
-        if len(cands) == 1:
-            dec.selected = (cands[0],)
-            dec.lifecycle = "PROVISIONAL"
-        elif cands:  # several survivors: all stay admissible; T4 grants the outcome
+        for span, mev, _, _, _ in survivors:  # value-specific positive grounds per candidate
+            if mev is not None:
+                dec.grounds.append(Ground("R", f"antecedent '{span}' from observation (channels: morphology/syntax/discourse)", value=span))
+            else:
+                dec.grounds.append(Ground("W", f"antecedent '{span}' from the memory channel (declared journal window, §17.4/H5)", value=span))
+        if cands:  # single survivor or several: T4 grants the outcome; all stay admissible
             dec.selected = tuple(cands)
             dec.lifecycle = "PROVISIONAL"
         state.decisions[f"reference|{ev.span}"] = dec
     return state
+
+
+# --------------------------------------------------------------------------- traceability (§18.2/I23)
+
+
+def rejected_alternatives(state: FormalizationState):
+    """I29/§2.3 audit trail: every candidate that left the active set, with the stage,
+    the declared rule that rejected it (D-trace) and provenance. Silent deletion = none."""
+    return list(state.rejections)
+
+
+def trace_decision(state: FormalizationState, key: str):
+    """Reconstruct the provenance chain for one decision (V5 §18.2/I23, Phase 1 scope).
+
+    Ordered raw -> structural -> decision:
+      RawInput tokens -> TokenHypothesis/BoundaryCandidate/ClauseCandidate/EllipsisCandidate
+      touching them -> FrameCandidate -> Decision.
+    SemanticGraphCandidate and Canonical Memory are Phase 2 objects: I25 forbids any write
+    before the commit stage, so in Phase 1 the chain legitimately ENDS at the Decision —
+    nothing beyond it exists yet (honest incompleteness, not a missing link)."""
+    dec = state.decisions[key]
+    spans: set[str] = set()
+    frame = next((f for f in state.frames if f.frame_id == dec.frame_id), None)
+    if frame is not None:
+        spans.update(frame.participants)
+    elif dec.slot_id == "reference":
+        spans.add(dec.frame_id)  # the anaphoric span itself
+    chain: list[tuple[str, str, ResourceProvenance]] = []
+    for ev in state.evidence:  # raw input first
+        if ev.span in spans:
+            chain.append(("TokenEvidence", ev.span, ResourceProvenance()))
+    for h in state.token_hypotheses:  # then the structural layer over those tokens
+        if h.span_ref in spans:
+            chain.append(("TokenHypothesis", h.hypothesis_id, h.provenance))
+    for bc in state.boundary_candidates:
+        if 0 <= bc.position < len(state.evidence) and state.evidence[bc.position].span in spans:
+            chain.append(("BoundaryCandidate", bc.candidate_id, bc.provenance))
+    for cc in state.clause_candidates:
+        touched = any(
+            idx < len(state.evidence) and state.evidence[idx].span in spans
+            for rng in cc.segmentation for idx in range(rng[0], rng[1] + 1)
+        )
+        if touched:
+            chain.append(("ClauseCandidate", cc.candidate_id, cc.provenance))
+    for ec in state.ellipsis_candidates:
+        if ec.gap_ref in spans or (ec.antecedent_ref and ec.antecedent_ref in spans):
+            chain.append(("EllipsisCandidate", ec.candidate_id, ec.provenance))
+    if frame is not None:  # ...through the frame...
+        chain.append(("FrameCandidate", frame.frame_id, frame.provenance))
+    chain.append(("Decision", key, dec.provenance))  # ...to the decision
+    return chain
 
 
 def t4(state: FormalizationState, schema) -> FormalizationState:
@@ -768,7 +921,30 @@ def run(
     t1(state, morph=morph)
     t2(state)
     td(state)
-    state.close_structures()  # I30 [Rev16]: T3/T4 may only decide from here on
+    structural_seal(state)  # WP1.1/§4.3: closure validation + structural hash + freeze (I30)
     t3(state, schema, selector)
     t4(state, schema)
     return state
+
+
+def revise(
+    base_state: FormalizationState,
+    schema,
+    selector,
+    morph: MorphProvider | None = None,
+    memory_mentions: tuple[str, ...] = (),  # updated journal window (GENERATION channel)
+    context_facts: tuple[str, ...] | None = None,  # None -> keep the base version's facts
+) -> FormalizationState:
+    """Rev18/check4 — context revision of the SAME ObservationRecord.
+
+    The source text does not change; the journal window (GENERATION channel) may. Result:
+    same observation_id (source_uid), interpretation_version = base + 1, a fresh
+    CandidateIR. No canonical fact is auto-created (I25): Phase 1 has no commit stage —
+    every decision stays <= PROVISIONAL."""
+    st = run(
+        base_state.text, schema, selector, morph=morph,
+        context_facts=context_facts if context_facts is not None else base_state.context_facts,
+        memory_mentions=memory_mentions,
+    )
+    st.interpretation_version = base_state.interpretation_version + 1
+    return st

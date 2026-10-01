@@ -124,6 +124,7 @@ class FrameCandidate:
     arguments: tuple[str, ...] = ()  # argument mentions (verbal frame: minus the predicate itself)
     construction: str = ""  # e.g. "u+GEN+NOM", "NOM+V+ACC"
     copula_ellipsis: bool = False
+    attachment: str | None = None  # Rev18/OP4_NESTED: the matrix predicate center this subclause attaches to
     rank: int = 0
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)  # Rev16/H6
 
@@ -189,6 +190,13 @@ class EllipsisCandidate:
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)
 
 
+# MissingArgument states (V5 §17.3 [Rev16/H3]) — NOT binary:
+# POSSIBLE_GAP  — the valency check found an unfilled role; nothing confirms it yet
+# CONFIRMED_GAP — a declared structural link (e.g. an EllipsisCandidate) confirms the gap
+# NO_GAP        — the role is filled by an observed argument (recorded for audit)
+MA_STATES = ("POSSIBLE_GAP", "CONFIRMED_GAP", "NO_GAP")
+
+
 @dataclass
 class MissingArgumentCandidate:
     """Created by T2/T3 AFTER the valency check (V5 §17.3 [Rev16/H3]) — never by SRL."""
@@ -196,8 +204,12 @@ class MissingArgumentCandidate:
     candidate_id: str
     frame_ref: str
     role: str = "ARGUMENT"
-    status: str = "UNRESOLVED"  # UNRESOLVED | RESOLVED_BY_ELLIPSIS | UNFILLED
+    status: str = "POSSIBLE_GAP"  # MA_STATES; a gap is a state machine, not a boolean
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)
+
+    def __post_init__(self):
+        if self.status not in MA_STATES:
+            raise ValueError(f"unknown MissingArgument state: {self.status!r}")
 
 
 @dataclass
@@ -222,6 +234,18 @@ class LinkedAlternative:
     kind: str  # CLAUSE_SEGMENTATION | ELLIPSIS | REFERENCE ...
     description: str
     source_candidate_id: str
+    provenance: ResourceProvenance = field(default_factory=ResourceProvenance)
+
+
+@dataclass(frozen=True)
+class RejectionRecord:
+    """I29/§2.3 [Rev15]: a candidate is never deleted silently — ACTIVE -> REJECTED
+    only with a recorded reason (D-trace), the stage that rejected it, and provenance.
+    Silent deletion of an alternative is an audit violation."""
+
+    candidate_id: str
+    stage: str  # the stage whose declared rule rejected the candidate (e.g. TD)
+    reason: str  # D-trace: which declared filter/rule fired and why
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)
 
 
@@ -268,6 +292,7 @@ class Budget:
 @dataclass
 class FormalizationState:
     source_uid: str
+    interpretation_version: int  # Rev18/check4: same ObservationRecord, new version on context revision
     context_version: int
     text: str
     evidence: list[TokenEvidence] = field(default_factory=list)
@@ -281,6 +306,8 @@ class FormalizationState:
     linked_alternatives: list[LinkedAlternative] = field(default_factory=list)  # I29
     memory_mentions: tuple[str, ...] = ()  # journal window input (V5 §17.4/H5): declared, versioned
     structural_closed: bool = False  # I30 [Rev16]: set after TD+T2; T3/T4 must not add structure
+    seal_snapshot_id: str | None = None  # WP1.1/§4.3: identity of the frozen structural snapshot
+    structural_hash: str | None = None  # WP1.1/§4.3: deterministic hash of the frozen set (replay)
     frames: list[FrameCandidate] = field(default_factory=list)
     decisions: dict[str, Decision] = field(default_factory=dict)  # key f"{frame_id}|{slot}"
     diagnostics: list[Diagnostic] = field(default_factory=list)
@@ -288,11 +315,21 @@ class FormalizationState:
     context_facts: tuple[str, ...] = ()  # declared contextual statements (C grounds); baseline passes none
     constraints: list[ConstraintEdge] = field(default_factory=list)  # declared cluster edges (§T4 rev8)
     miss_reports: list[str] = field(default_factory=list)
+    rejections: list[RejectionRecord] = field(default_factory=list)  # I29/§2.3 audit trail
+
+    def reject(self, candidate_id: str, stage: str, reason: str,
+               provenance: ResourceProvenance | None = None) -> RejectionRecord:
+        """Record an explicit rejection (the ONLY way a candidate leaves the active set)."""
+        rec = RejectionRecord(candidate_id=candidate_id, stage=stage, reason=reason,
+                             provenance=provenance or ResourceProvenance())
+        self.rejections.append(rec)
+        return rec
 
     @classmethod
     def new(cls, text: str, context_facts: tuple[str, ...] = ()) -> "FormalizationState":
         uid = hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
-        return cls(source_uid=uid, context_version=1, text=text, context_facts=context_facts)
+        return cls(source_uid=uid, interpretation_version=1, context_version=1,
+                  text=text, context_facts=context_facts)
 
     def diag(self, code: str, detail: str) -> None:
         self.diagnostics.append(Diagnostic(code=code, detail=detail))
