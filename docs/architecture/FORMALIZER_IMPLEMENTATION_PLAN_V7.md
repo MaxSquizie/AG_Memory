@@ -139,8 +139,14 @@ src/ah/formalizer/
 | WP0.7 | StoreInterface (общий контракт): append_journal / read_global_head / commit_txn(ops+marker+D атомарно) / append_terminal / retract / recover_from_head; + memory_store double для чистых решений | store_interface.py, memory_store.py | §7.3/§8.3 |
 | WP0.8 | Минимальный AH-адаптер того же StoreInterface: append журнала, чтение global head, атомарная запись plan\E+marker+D, статусный отзыв (полный формализатор не требуется) | ah_adapter.py + AH journal/marker/ledger | §7.3/§8.3/§14 |
 
+**Статус реализации (по состоянию на текущий коммит, измерено):**
+- ✅ WP0.1 `run_binding.py` (InterpretationRunBinding CAS); ✅ WP0.2 `provider_call_log.py` + `provider_adapter.py` (BudgetSnapshot, ProviderAdapter{select,propose_local}, replay/INTEGRITY_ERROR); ✅ WP0.4 `resources/registry.py` (RoleRegistry обязательные роли, ProposalPolicy/OpenTemplatePolicy, EnsureOpenTemplate isolation key, REGISTRY_REJECT/OPEN_TEMPLATE_INVALID на write boundary); ✅ WP0.7 `store_interface.py` + `memory_store.py`; ✅ WP0.8 `ah_adapter.py`.
+- ◐ WP0.3 — канал журнала (resolution_log) присутствует во всех модулях; явная независимость двух каналов (наблюдения / resolution_log) ещё не выделена отдельным тестом.
+- ◐ WP0.5 — контракт маркера материализации + COMMIT_DECISION D атомен в `store_interface.commit_transaction`/`recover_from_head`; реальная AH-side интеграция (materialization_marker/commit_decision_record) отнесена к G1/P2.
+- ✗ WP0.6 — 9 именованных G1-адаптерных тестов ещё не написаны; это фактический врат G1.
+
 ### P1 — Structural pipeline T0–TP–T4 (расширение существующего ядра)
-Статус: ~80% готово. Закрыть gap и сделать A-случаи исполняемыми через oracle harness.
+Статус: ✅ завершено (WP1.1–WP1.6). `seal.py`, `t3_candidates.py`, `tp_proposer.py`, `t4_resolution.py`, `candidate_ir.py`, `oracle.py` + тесты; A-случаи исполняемы через oracle harness.
 
 | WP | Содержание | Модули | V7 |
 |---|---|---|---|
@@ -247,8 +253,9 @@ P4 ──► G5 (generalization)        [real provider + ≥500 unseen corpus]
 
 R1 решено (см. §6 п.5): AH-контракт фиксируется сразу, память — двойник для чистых решений.
 
-1. **WP0.7 + WP0.8**: StoreInterface + минимальный AH-адаптер (append журнала / global head / атомарная запись plan\E+marker+D / статусный отзыв) — фундамент P2; полный формализатор не требуется.
-2. **memory_store double** того же интерфейса: юнит-тесты чистых решений (head-only admission, вычисление E и plan\E, выбор терминального исхода). Не доказывает атомарность/recovery-from-D.
-3. **WP0.1 + WP0.2**: InterpretationRunBinding + ProviderCallLog — spine детерминизма, от которого зависят все фазы.
-4. **WP1.1 + WP1.2**: формализовать `seal`-стадию и контракт 5 источников T3 (`CandidateSourceTrace`) — закрывает P1-gap в существующем ядре.
-5. **WC1 skeleton**: Oracle harness (§11.2), чтобы A/DR-случаи стали исполняемыми проверками уже с P1 (не только FakeSelector на S1–S6).
+**Выполнено в текущем коммите:** WP0.1/0.2/0.4/0.7/0.8 (spine детерминизма + store-контракт), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1). 261 тест зелёные.
+
+**Осталось до G1:**
+1. **WP0.6** — 9 именованных G1-адаптерных тестов (§12/§20): legacy_roundtrip, v2_integration, idempotent_recommit, open_template_isolation, known_mapping_failure, proposal_validation, concurrent_run_binding, unresolved_replay, crash_recovery. Фактический врат G1.
+2. **WP0.3** — вынести явную независимость двух каналов журнала (наблюдения / resolution_log) отдельным тестом.
+3. **P2** — C/T5/T6/T6b + goal + temporal: вертикальные трассы DR1–DR31; реальная AH-side интеграция маркера/COMMIT_DECISION (WP0.5).
