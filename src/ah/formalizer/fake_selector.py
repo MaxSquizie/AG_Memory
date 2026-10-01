@@ -125,6 +125,44 @@ class FakeSelector:
         return FakeSelector(augmented, fallback=baseline)
 
 
+class FakeProposer:
+    """Deterministic stand-in for the TP local-structure proposer (V7 §4.5 / WP1.3).
+
+    ``propose(request) -> raw JSON string`` (a StructureProposalReply) or ``None`` (abstain = an
+    explicit miss, never AMBIGUOUS). Scripts are keyed by request_id; a script may be a raw JSON
+    string, the sentinel "ABSTAIN", or "PROVIDER_UNAVAILABLE". Unscripted requests abstain."""
+
+    def __init__(self, scripts: dict | None = None):
+        self.scripts: dict = scripts or {}
+
+    def propose(self, request) -> str | None:
+        script = self.scripts.get(request.request_id)
+        if script is None:
+            return None  # abstain -> explicit miss (f), never AMBIGUOUS
+        if script == "PROVIDER_UNAVAILABLE":
+            raise ProviderUnavailableError("fake TP provider down (fixture)")
+        if script == "ABSTAIN":
+            return json.dumps({"abstain": True})
+        return script
+
+    @staticmethod
+    def demo() -> "FakeProposer":
+        # A valid local hypothesis: a CLAUSE node plus an ARG node anchored to a proper sub-region,
+        # bound by a SURFACE_ARG edge (syntactic-only — never a proven semantic role).
+        reply = json.dumps({
+            "hypotheses": [{
+                "local_id": "H1",
+                "nodes": [
+                    {"kind": "CLAUSE", "anchor_spans": ["s0:s3"]},
+                    {"kind": "ARG", "anchor_spans": ["s2:s3"]},
+                ],
+                "edges": [{"kind": "GOVERNS", "from": 0, "to": 1, "role_id": "SURFACE_ARG"}],
+                "alternatives": 1,
+            }],
+        }, ensure_ascii=False)
+        return FakeProposer({"tp_demo_1": reply})
+
+
 if __name__ == "__main__":  # manual smoke check
     sel = FakeSelector.demo("augmented")
     from ah.formalizer.selection_protocol import build_selection_prompt, load_decision_schema
