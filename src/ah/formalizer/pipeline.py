@@ -66,6 +66,7 @@ from ah.formalizer.selection_protocol import (
 )
 from ah.formalizer.rules import RuleRegistry, default_registry
 from ah.formalizer.seal import structural_seal
+from ah.formalizer.t3_sources import build_source_traces
 from ah.formalizer.state import (
     BoundaryCandidate,
     Budget,
@@ -566,6 +567,12 @@ def t3(
             # slot-level: which value a statement supports is the model's judgment (M),
             # recorded with its I/O — never a self-legalizing assumption.
             dec.grounds.append(Ground("C", f"contextual statement: {fact}"))
+        # WP1.2/§5.1: record the exhaustive five-source check for this slot. Phase 1 wires only
+        # source 1 (schema value_ids); declared reads are already C-grounds above; R-S/R-X3/open
+        # are honest NOT_APPLICABLE/CHECKED_EMPTY, never a silent candidate.
+        dec.source_traces = build_source_traces(
+            frame.frame_id, "predicate_value", schema_candidates=candidates,
+        )
         key = _slot_key(frame.frame_id, "predicate_value")
         state.decisions[key] = dec
 

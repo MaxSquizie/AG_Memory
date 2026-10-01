@@ -259,6 +259,7 @@ class Decision:
     lifecycle: str = "OPEN"  # OPEN -> PROVISIONAL -> COMMITTED (T5 grants COMMITTED)
     outcome: str | None = None  # semantic outcome; granted by T4 only
     grounds: list[Ground] = field(default_factory=list)
+    source_traces: list = field(default_factory=list)  # WP1.2/§5.1: the five ordered CandidateSourceTrace
     history: list[str] = field(default_factory=list)
     last_prompt: str | None = None  # rev8: recorded I/O of the bounded selection (replayable)
     raw_response: str | None = None  # rev8: the verified raw response, verbatim
