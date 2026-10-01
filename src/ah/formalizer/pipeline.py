@@ -66,7 +66,7 @@ from ah.formalizer.selection_protocol import (
 )
 from ah.formalizer.rules import RuleRegistry, default_registry
 from ah.formalizer.seal import structural_seal
-from ah.formalizer.t3_sources import build_source_traces
+from ah.formalizer.t3_sources import build_source_traces, search_blocked
 from ah.formalizer.state import (
     BoundaryCandidate,
     Budget,
@@ -871,10 +871,21 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
         if dec.slot_id != "predicate_value":
             continue
         search_complete = bool(dec.selector_outcome)  # validated response over the closed set
+        blocked = search_blocked(dec.source_traces) if dec.source_traces else False  # §5.1 incomplete search
+
+        def fail(reason: str, code: str) -> None:
+            dec.outcome = "UNRESOLVED"
+            state.diag(code, f"{key}: {reason}")
+
         if not dec.selected:
             if dec.selector_outcome == "NONE_FIT":
-                dec.outcome = "NO_CANDIDATE"
-                state.miss_reports.append(f"{key}: no declared relation fits (demo boundary)")
+                # §5.1: NO_CANDIDATE only when the search is complete; a blocked source means the
+                # absence is not exhaustive -> UNRESOLVED (COMPUTATION_LIMIT), never NO_CANDIDATE.
+                if blocked:
+                    fail("search incomplete (blocked source); NONE_FIT is not exhaustive", "COMPUTATION_LIMIT")
+                else:
+                    dec.outcome = "NO_CANDIDATE"
+                    state.miss_reports.append(f"{key}: no declared relation fits (demo boundary)")
             elif dec.selector_outcome == "INSUFFICIENT_CONTEXT":
                 dec.outcome = "INSUFFICIENT_CONTEXT"
             continue
@@ -882,11 +893,11 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
         per_value = {g.value for g in dec.grounds if g.type in _POSITIVE and g.value is not None}
         cluster_ok = _cluster_valid(state, key, dec, schema)
 
-        def fail(reason: str, code: str) -> None:
-            dec.outcome = "UNRESOLVED"
-            state.diag(code, f"{key}: {reason}")
-
-        if len(dec.selected) == 1:
+        if blocked:
+            # §5.1: an incomplete search forbids RESOLVED even with a found+grounded candidate —
+            # the selection is not unique while an applicable source was BLOCKED.
+            fail("search incomplete (blocked source); selection not unique", "COMPUTATION_LIMIT")
+        elif len(dec.selected) == 1:
             v = dec.selected[0]
             if not cluster_ok:
                 fail("selected value fails the joint cluster check", "CLUSTER_CONFLICT")
