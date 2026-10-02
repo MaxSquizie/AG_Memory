@@ -160,12 +160,12 @@ src/ah/formalizer/
 Приёмка: частичный G3 (P1-применимые A/DR) + доказанный replay через ProviderCallLog.
 
 ### P2 — Commit & revision C/T5/T6/T6b + goal + temporal (основная постройка)
-Статус: ◐ (WP2.1 готов). Самая большая фаза; даёт вертикальные трассы DR1–DR31.
+Статус: ◐ (WP2.1+WP2.2 готовы). Самая большая фаза; даёт вертикальные трассы DR1–DR31.
 
 | WP | Содержание | Модули | V7 |
 |---|---|---|---|
 | WP2.1 ✅ | C-консолидация: identity-планы/дедуп/каноническая привязка; RelationKey=(S,роли,value); STATE-временная дедуп (EVENT/UNKNOWN не сливаются); OPEN_LEXICAL isolation key (переживает re-analysis, не коллайдит кросс-наблюдения); CANONICAL_MAPPING_MISSING блокирует фрагмент (не обходится open path) | c_consolidate.py + test_formalizer_c_consolidate.py (11 тестов) | §7.1 |
-| WP2.2 | T5 batch + журнал: 5 условий (i–v) incl. truth-ground O/C/W; resolution_log на несостоявшемся условии; durable miss при NO_CANDIDATE; commit eligibility через InterpretationRunBinding; idempotent по batch_hash | t5_batch.py | §7.2 |
+| WP2.2 ✅ | T5 batch + журнал: 5 условий (i–v) incl. truth-ground O/C/W; resolution_log на несостоявшемся условии (по номеру); durable miss при NO_CANDIDATE; commit eligibility через InterpretationRunBinding (INTEGRITY_ERROR / investigation-only); marker early-refusal; idempotent по batch_hash | t5_batch.py + test_formalizer_t5_batch.py (10 тестов) | §7.2 |
 | WP2.3 | T6 single writer + admission: атомарные шаги 1–8; head-only admission (PENDING_ADMISSION_ORDER); формальное plan\E (closure допущенных, общие операции сохраняются); COMMIT_DECISION D + APPLIED; REJECTED_CONFLICT_ADMISSION; STALE_SUPERSEDED; crash-окно recovery | t6_commit.py | §7.3/§6.3 |
 | WP2.4 | Типы опор: root (O/C/W) / structural (без truth-support) / derived (AND_ELIMINATION commit-time); NOT-root — собственная O-ground, не опора операнда; запрет наследования | support.py | §7.4 |
 | WP2.5 | SOM + UsageLink layer: неутверждённые структурные операнды как типизированные N/G/M без truth-support; ATTITUDE vs OPERATOR links; S-access/F-visible; MaterializeUsageLink/RetractUsageLink | som.py, ir.py | §7.5/§3 |
@@ -253,9 +253,9 @@ P4 ──► G5 (generalization)        [real provider + ≥500 unseen corpus]
 
 R1 решено (см. §6 п.5): AH-контракт фиксируется сразу, память — двойник для чистых решений.
 
-**Выполнено в текущем коммите:** WP0.1/0.2/0.3/0.4/0.7/0.8 (spine детерминизма + store-контракт + два канала), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1), **WP2.1** (C-консолидация). 280 тест зелёных.
+**Выполнено в текущем коммите:** WP0.1/0.2/0.3/0.4/0.7/0.8 (spine детерминизма + store-контракт + два канала), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1), **WP2.1** (C-консолидация) и **WP2.2** (T5 batch + журнал). 290 тест зелёных.
 
 **Осталось до G1:**
 1. **WP0.6 (остаток)** — 4 оставшихся G1-адаптерных теста (§12/§20): legacy_roundtrip, v2_integration, known_mapping_failure, proposal_validation — все требуют C/T6 и пишутся в P2. Готовы уже: concurrent_run_binding, idempotent_recommit, unresolved_replay, open_template_isolation, crash_recovery.
 2. **WP0.5 (AH-side)** — реальная интеграция маркера/COMMIT_DECISION в AHStore + crash-stop прогоны (WP2.9); контракт уже атомен в `store_interface`.
-3. **P2 (остаток)** — WP2.2–WP2.9: T5 batch/журнал, T6 single-writer+admission, support/SOM/temporal/T6b/goal + crash-stop runs; вертикальные трассы DR1–DR31. (WP2.1 C-консолидация готов.)
+3. **P2 (остаток)** — WP2.3–WP2.9: T6 single-writer+admission, support/SOM/temporal/T6b/goal + crash-stop runs; вертикальные трассы DR1–DR31. (WP2.1 C-консолидация и WP2.2 T5 batch готовы.)
