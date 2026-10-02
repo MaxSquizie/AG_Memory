@@ -110,6 +110,19 @@ def legacy_semantic_answer(role: str, prompt: str) -> str | None:
         # probe with its neutral label.
         return "NONE"
 
+    if role == "semantic_binary_relation_frame":
+        # Legacy fixtures predate the whole-binary possession-orientation probe
+        # (E1_HAS_E2 / E2_HAS_E1). These sentences are not graded for possession;
+        # answer the neutral label so the parser leaves the parse unchanged. Dedicated
+        # possession tests script an explicit orientation instead.
+        return "OTHER_RELATION"
+
+    if role == "semantic_predicate_semantics":
+        # Same: legacy fixtures do not grade possession kind (POSSESSION vs other).
+        # The neutral label keeps the predicate unrewritten; dedicated possession
+        # tests provide an explicit POSSESSION decision.
+        return "OTHER_RELATION"
+
     if role == "semantic_logical_whole_negation":
         # Old compound fixtures already encode every local NOT on its atom.
         return "NO"
