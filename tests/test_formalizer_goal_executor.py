@@ -1,59 +1,98 @@
 # -*- coding: utf-8 -*-
-"""Goal-executor tests (V7 §5.9) — compilation into the REAL AssociationGoal/Ref types."""
+"""WP2.8 — GoalExecutor goal transaction tests (V7 §6.4/§7.5).
+
+Proves idempotency by goal_run_id, the preflight temporal license gate, premise-liveness re-checked inside the atomic
+transaction (the DB-N race), dedup APPLIED_NOOP vs ABORTED-on-stale, FORALL_INST licensing, and decision immutability under
+a later retraction.
+"""
 
 import unittest
 
-from ah.inference.contracts import AssociationGoal
-from ah.model.types import Ref, RefKind
-
-from ah.formalizer.goal_executor import compile_association_goals, goals_from_ir
+from ah.formalizer.goal_executor import GoalExecutor, GoalRequest, GoalStore, PathRecord, _path_key
+from ah.formalizer.temporal_license import point, cont
 
 
-def _resolver(mapping: dict[str, Ref | None]):
-    return lambda span: mapping.get(span)
+def _executor(*live):
+    store = GoalStore()
+    store.live_premises.update(live)
+    return GoalExecutor(store), store
 
 
-class TestCompile(unittest.TestCase):
-    def test_two_mentions_yield_one_goal(self):
-        refs = {"Ворона": Ref("u1", RefKind.N), "перья": Ref("u2", RefKind.G)}
-        goals = compile_association_goals(["Ворона", "перья"], _resolver(refs), text="Ворона имеет перья")
-        self.assertEqual(len(goals), 1)
-        g = goals[0].goal
-        self.assertIsInstance(g, AssociationGoal)
-        self.assertEqual((g.left.uid, g.right.uid), ("u1", "u2"))
+class TestGoalTransaction(unittest.TestCase):
+    def test_fresh_licensed_live_applies_and_is_idempotent(self):
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("run1", "OR_ELIMINATION", ("s_or", "s_not"), "P1", (point(5), cont(3, 7)))
 
-    def test_l_ref_is_dropped_not_fabricated(self):
-        refs = {"Ворона": Ref("u1", RefKind.N), "x": Ref("u9", RefKind.L)}
-        goals = compile_association_goals(["Ворона", "x"], _resolver(refs))
-        self.assertEqual(goals, [])  # the L endpoint is excluded; no goal fabricated
+        first = ex.execute(req)
+        self.assertEqual(first["outcome"], "APPLIED")
+        self.assertIn("conclusion_ref", first)
+        self.assertEqual(len(store.paths), 1)
+        self.assertEqual(len(store.terminals), 1)
 
-    def test_unresolvable_span_skipped(self):
-        refs = {"Ворона": Ref("u1", RefKind.N)}
-        goals = compile_association_goals(["Ворона", "неизвестно"], _resolver(refs))
-        self.assertEqual(goals, [])  # only one resolvable mention -> no pair
+        second = ex.execute(req)                       # same goal_run_id -> idempotent no-op
+        self.assertEqual(second, first)
+        self.assertEqual(len(store.paths), 1)          # no duplicate path
+        self.assertEqual(len(store.terminals), 1)      # exactly one terminal per run
 
-    def test_deterministic_order_and_dedup(self):
-        refs = {s: Ref(f"u{i}", RefKind.N) for i, s in enumerate(["a", "b", "c"])}
-        goals = compile_association_goals(["a", "b", "c"], _resolver(refs))
-        self.assertEqual([(g.left_span, g.right_span) for g in goals],
-                         [("a", "b"), ("a", "c"), ("b", "c")])
+    def test_license_failure_aborts_without_node(self):
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("run2", "OR_ELIMINATION", ("s_or", "s_not"), "P1", (point(9), cont(3, 7)))  # NOT region misses
 
-        dup = compile_association_goals(["a", "a", "b"], _resolver(refs))
-        self.assertEqual([(g.left_span, g.right_span) for g in dup], [("a", "b")])
+        res = ex.execute(req)
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_LICENSE_FAILED")
+        self.assertEqual(len(store.paths), 0)          # no node/path created on license failure
 
+    def test_premise_dead_inside_transaction_aborts(self):
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("run3", "OR_ELIMINATION", ("s_or", "s_not"), "P1", (point(5), cont(3, 7)))
 
-class TestRealContract(unittest.TestCase):
-    def test_real_type_rejects_l(self):
-        with self.assertRaises(ValueError):
-            AssociationGoal(left=Ref("x", RefKind.L), right=Ref("y", RefKind.N))
+        res = ex.execute(req, interleave=lambda: store.retract_premise("s_not"))   # retraction commits before apply
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_PREMISES_STALE")
+        self.assertEqual(len(store.paths), 0)          # no partial records
 
-    def test_goals_from_ir_uses_lexical_units(self):
-        class _IR:
-            lexical_units = ("Ворона", "перья")
-            predicate_frames = ()
-        refs = {"Ворона": Ref("u1", RefKind.N), "перья": Ref("u2", RefKind.G)}
-        goals = goals_from_ir(_IR(), _resolver(refs))
-        self.assertEqual(len(goals), 1)
+    def test_dedup_hit_live_is_noop(self):
+        ex, store = _executor("s1")
+        node_id = store.ensure_node("P1")
+        key = ("OR_ELIMINATION", ("s1",), "P1")
+        store.paths[key] = PathRecord(record_id="DS0", rule_id="OR_ELIMINATION", premise_support_ids=("s1",), node_id=node_id)
+
+        req = GoalRequest("run4", "OR_ELIMINATION", ("s1",), "P1", (point(5), cont(3, 7)))
+        res = ex.execute(req)
+        self.assertEqual(res["outcome"], "APPLIED_NOOP")
+        self.assertEqual(len(store.paths), 1)          # no second path
+
+    def test_dedup_hit_stale_aborts_without_resurrecting(self):
+        ex, store = _executor("s1")
+        node_id = store.ensure_node("P1")
+        key = ("OR_ELIMINATION", ("s1",), "P1")
+        store.paths[key] = PathRecord(record_id="DS0", rule_id="OR_ELIMINATION", premise_support_ids=("s1",), node_id=node_id)
+
+        req = GoalRequest("run5", "OR_ELIMINATION", ("s1",), "P1", (point(5), cont(3, 7)))
+        res = ex.execute(req, interleave=lambda: store.retract_premise("s1"))   # existing path's premise dies
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_PREMISES_STALE")
+        self.assertEqual(len(store.paths), 1)          # not resurrected, no duplicate
+
+    def test_forall_inst_licensed_and_disjoint(self):
+        ex, store = _executor("s_all", "s_p")
+        ok = GoalRequest("run6", "FORALL_INST", ("s_all", "s_p"), "P(a)", (cont(0, 10), point(5)))
+        self.assertEqual(ex.execute(ok)["outcome"], "APPLIED")
+
+        bad = GoalRequest("run7", "FORALL_INST", ("s_all", "s_p"), "P(b)", (cont(0, 2), point(5)))  # disjoint
+        res = ex.execute(bad)
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_LICENSE_FAILED")
+
+    def test_decision_is_immutable_under_later_retraction(self):
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("run8", "OR_ELIMINATION", ("s_or", "s_not"), "P1", (point(5), cont(3, 7)))
+        first = ex.execute(req)
+        self.assertEqual(first["outcome"], "APPLIED")
+
+        store.retract_premise("s_not")                 # a later retraction supersedes the node by cascade...
+        self.assertEqual(store.decisions["run8"]["outcome"], "APPLIED")   # ...but never rewrites the decision
 
 
 if __name__ == "__main__":
