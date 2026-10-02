@@ -72,8 +72,10 @@ class LLMConfig:
     backend: str = "builtin_process"
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = ""
+    ollama_embed_model: str = ""
     lmstudio_base_url: str = "http://127.0.0.1:1234"
     lmstudio_model: str = ""
+    lmstudio_embed_model: str = ""
     lmstudio_api_key: str = ""
     loader_type: str = "auto"
     device_map: str = "auto"
@@ -138,12 +140,20 @@ class LLMConfig:
             raise ValueError("llm.perception.morphology_backend must be auto, pymorphy3, or none")
         if self.agent_repair_attempts < 0 or self.agent_repair_attempts > 2:
             raise ValueError("llm.agent.repair_attempts must be in [0, 2]")
-        if self.backend not in {"builtin_process", "ollama", "lmstudio"}:
-            raise ValueError("llm.backend must be builtin_process, ollama, or lmstudio")
+        if self.backend not in {"builtin_process", "ollama", "lmstudio", "android_npu"}:
+            raise ValueError("llm.backend must be builtin_process, ollama, lmstudio, or android_npu")
         if not str(self.ollama_base_url).strip():
             raise ValueError("llm.ollama_base_url must not be empty")
         if not str(self.lmstudio_base_url).strip():
             raise ValueError("llm.lmstudio_base_url must not be empty")
+
+    def embedding_model_name(self) -> str:
+        backend = self.backend.strip().lower()
+        if backend == "ollama":
+            return (self.ollama_embed_model or self.ollama_model).strip()
+        if backend == "lmstudio":
+            return (self.lmstudio_embed_model or self.lmstudio_model).strip()
+        return ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -229,8 +239,16 @@ class PlasticitySettings:
             raise ValueError("ignition.plasticity.link_kind must be additive_hebb")
         if self.hypernode_kind not in {"additive_confirmation_refutation"}:
             raise ValueError("ignition.plasticity.hypernode_kind must be additive_confirmation_refutation")
-        if not 0 <= self.link_weight_floor <= 1:
-            raise ValueError("ignition.plasticity.link_weight_floor must be in [0, 1]")
+        for field_name in (
+            "link_hebb_increment",
+            "link_async_decrement",
+            "hypernode_confirmation_increment",
+            "hypernode_refutation_decrement",
+        ):
+            if getattr(self, field_name) < 0:
+                raise ValueError(f"ignition.plasticity.{field_name} must be >= 0")
+        if not 0 < self.link_weight_floor <= 1:
+            raise ValueError("ignition.plasticity.link_weight_floor must be in (0, 1]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -245,7 +263,7 @@ class SeedSettings:
     resolved_symbol: float = 0.95
     # Runtime relational/query recall anchor. It is attention, not proof and not
     # an h_N confirmation event.
-    query_recall: float = 0.80
+    query_recall: float = 0.95
     correction: float = 0.65
     pacemaker: float = 0.08
 
@@ -488,8 +506,10 @@ def load_config(path: str | Path) -> AppConfig:
         backend=str(llm_raw.get("backend", "builtin_process")),
         ollama_base_url=str(llm_raw.get("ollama_base_url", "http://127.0.0.1:11434")),
         ollama_model=str(llm_raw.get("ollama_model", "")),
+        ollama_embed_model=str(llm_raw.get("ollama_embed_model", "")),
         lmstudio_base_url=str(llm_raw.get("lmstudio_base_url", "http://127.0.0.1:1234")),
         lmstudio_model=str(llm_raw.get("lmstudio_model", "")),
+        lmstudio_embed_model=str(llm_raw.get("lmstudio_embed_model", "")),
         lmstudio_api_key=str(llm_raw.get("lmstudio_api_key", "")),
         loader_type=str(llm_raw.get("loader_type", "auto")),
         device_map=str(llm_raw.get("device_map", "auto")),
@@ -594,7 +614,7 @@ def load_config(path: str | Path) -> AppConfig:
             experience=float(seeds.get("experience", 0.5)),
             sensory_symbol=float(seeds.get("sensory_symbol", 0.85)),
             resolved_symbol=float(seeds.get("resolved_symbol", 0.95)),
-            query_recall=float(seeds.get("query_recall", 0.80)),
+            query_recall=float(seeds.get("query_recall", 0.95)),
             correction=float(seeds.get("correction", 0.65)),
             pacemaker=float(seeds.get("pacemaker", 0.08)),
         ),
@@ -683,3 +703,20 @@ def load_config(path: str | Path) -> AppConfig:
             parse_agent_response_to_h=bool(orchestrator_raw.get("parse_agent_response_to_h", False)),
         ),
     )
+
+
+def validate_app_config(config: AppConfig) -> AppConfig:
+    """Validate backend/path combinations that one TOML section cannot check alone."""
+
+    if not config.llm.enabled:
+        return config
+    backend = config.llm.backend.strip().lower()
+    if backend == "builtin_process" and config.paths.llm_model_dir is None:
+        raise ValueError(
+            "paths.llm_model_dir is required when llm.backend is builtin_process"
+        )
+    if backend == "ollama" and not config.llm.ollama_model.strip():
+        raise ValueError("llm.ollama_model is required when llm.backend is ollama")
+    # LM Studio may intentionally omit lmstudio_model when exactly one model is
+    # loaded; LMStudioBackend performs that deterministic discovery at startup.
+    return config

@@ -1,0 +1,1 @@
+Classify the proof target, not the WH token. NAME_LOOKUP asks for an entity's name or label. ENTITY_DESCRIPTION asks who or what an entity is, including its identity, class, kind, function, or role. ORDINARY_QUERY asks for a missing participant, event, state, relation, property value, or other fact. Use UNCLEAR only when the source does not decide.

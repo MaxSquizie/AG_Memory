@@ -8,6 +8,9 @@ from .contracts import (
     IntegratedAssertion,
     IntegratedConditional,
     IntegratedExistential,
+    IntegratedFormula,
+    IntegratedQuantifiedQuery,
+    IntegratedTemporalScope,
     IntegratedConflict,
     IntegratedRelation,
     IntegrationCommit,
@@ -31,14 +34,27 @@ from .formalization import (
     CandidateIR,
     DiscourseRef,
     ExistentialBinding,
+    UniversalBinding,
+    TemporalScopeBinding,
     UnresolvedTemporalRef,
     MutationPlan,
     SemanticConsolidator,
     merge_formalization_units,
     namespace_perception_result,
 )
-from .service import IntegrationConfig, IntegrationService
+from .service import IntegrationConfig, IntegrationService as _BaseIntegrationService
+from .naming_service import NamingAwareIntegrationService
+from .identity_naming_service import CanonicalNamingIntegrationService
+from .identity_query_service import IdentityQueryIntegrationService
+from .predicate_family_service import PredicateFamilyIntegrationService
 from .template_completion import TemplateCompletionService
+
+# Runtime construction imports IntegrationService from the package. Keep the large
+# canonical writer unchanged and expose narrow semantic adapters around it: naming,
+# open-event queries and entity-identity query shells are consumed before ordinary
+# fact/T integration. PredicateFamilyIntegrationService only broadens occurrence-
+# local template *candidates*; lexical S identity itself remains unchanged.
+IntegrationService = PredicateFamilyIntegrationService
 
 __all__ = [
     "namespace_perception_result",
@@ -48,6 +64,8 @@ __all__ = [
     "MutationPlan",
     "DiscourseRef",
     "ExistentialBinding",
+    "UniversalBinding",
+    "TemporalScopeBinding",
     "UnresolvedTemporalRef",
     "CandidateIR",
     "BatchKind",
@@ -62,6 +80,9 @@ __all__ = [
     "IntegratedAssertion",
     "IntegratedConditional",
     "IntegratedExistential",
+    "IntegratedFormula",
+    "IntegratedQuantifiedQuery",
+    "IntegratedTemporalScope",
     "IntegratedConflict",
     "IntegratedRelation",
     "IntegrationCommit",
@@ -70,6 +91,10 @@ __all__ = [
     "UnresolvedDiscourseReferenceError",
     "UnresolvedTemporalReferenceError",
     "IntegrationService",
+    "NamingAwareIntegrationService",
+    "CanonicalNamingIntegrationService",
+    "IdentityQueryIntegrationService",
+    "PredicateFamilyIntegrationService",
     "TemplateCompletionService",
     "RefutationRequest",
     "RefutationCommit",

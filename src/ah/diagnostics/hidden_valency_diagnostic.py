@@ -10,6 +10,12 @@ from typing import Any, TYPE_CHECKING
 
 from ah.model import ActantRole
 from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
+from ah.perception.probe_protocol import (
+    CHOICE_MAX_NEW_TOKENS,
+    ProbeProtocolError,
+    compose_choice_prompt,
+    decode_choice,
+)
 
 from .acceptance_runner import canonical_ah_snapshot, diff_canonical_ah
 
@@ -115,7 +121,6 @@ def _format_known_roles(known_roles: tuple[tuple[ActantRole, str], ...]) -> str:
 
 def _hidden_valency_context(
     case: HiddenValencyDiagnosticCase,
-    choices: tuple[str, str],
 ) -> str:
     if case.tested_role is ActantRole.RECIPIENT:
         question = (
@@ -133,8 +138,7 @@ def _hidden_valency_context(
         f"Sentence:\n{case.sentence}\n\n"
         f"Verb:\n{case.verb}\n\n"
         f"Known roles:\n{_format_known_roles(case.known_roles)}\n\n"
-        f"QUESTION:\n{question}\n\n"
-        f"CHOICES:\n{choices[0]}\n{choices[1]}"
+        f"Decision criterion:\n{question}"
     )
 
 
@@ -147,11 +151,16 @@ def _semantic_label(raw_text: str, choices: tuple[str, str]) -> tuple[str | None
     protocol text still remains malformed.
     """
     text = raw_text.strip()
-    if text in choices:
-        return text, "EXACT"
+    try:
+        return decode_choice(text, choices), "EXACT"
+    except ProbeProtocolError:
+        pass
     recovered = re.sub(r"(?:\s*</think>\s*)+$", "", text, flags=re.I).strip()
-    if recovered in choices and recovered != text:
-        return recovered, "RECOVERED_ORPHAN_THINK_CLOSE"
+    if recovered != text:
+        try:
+            return decode_choice(recovered, choices), "RECOVERED_ORPHAN_THINK_CLOSE"
+        except ProbeProtocolError:
+            pass
     return None, "MALFORMED"
 
 
@@ -228,15 +237,18 @@ def _run_hidden_valency_diagnostic_impl(services: "RuntimeServices") -> HiddenVa
         semantic_labels: list[str | None] = []
 
         for order_name, choice_order in variants:
-            context = _hidden_valency_context(case, choice_order)
-            prompt = parser._compose_probe_prompt(
+            context = _hidden_valency_context(case)
+            prompt = compose_choice_prompt(
                 context,
                 parser._instruction("template_hidden_valency"),
+                choice_order,
             )
+            override = parser._generation_override(CHOICE_MAX_NEW_TOKENS)
+            override["enable_thinking"] = False
             response = services.llm.generate(
                 prompt,
                 system=parser._probe_system(),
-                override=parser._generation_override(8),
+                override=override,
                 role=_DIAGNOSTIC_ROLE,
             )
             raw = response.text.strip()

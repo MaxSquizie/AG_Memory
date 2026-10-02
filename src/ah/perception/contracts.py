@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ah.model import ActantRole
+from ah.model import ActantRole, VariableSort
 from ah.temporal.contracts import TemporalCandidate, TemporalMode, TransitionOperator
 from .lexical_recovery import TokenCandidate
 
@@ -19,6 +19,90 @@ class EvidenceSpan:
             raise ValueError("EvidenceSpan.start/end must be both set or both None")
         if self.start is not None and (self.start < 0 or self.end < self.start):
             raise ValueError("Invalid evidence span")
+
+
+class QuantifierKind(str, Enum):
+    """Runtime operator selected for one source-grounded quantified actant."""
+
+    EXISTS = "EXISTS"
+    NOT_EXISTS = "NOT_EXISTS"
+    FORALL = "FORALL"
+    NOT_FORALL = "NOT_FORALL"
+
+
+class QuantifierProbeDecision(str, Enum):
+    """Closed output protocol for the bounded quantifier semantic probe."""
+
+    NONE = "NONE"
+    EXISTS = "EXISTS"
+    NOT_EXISTS = "NOT_EXISTS"
+    FORALL = "FORALL"
+    NOT_FORALL = "NOT_FORALL"
+    AMBIGUOUS = "AMBIGUOUS"
+
+
+class TemporalScopeKind(str, Enum):
+    """Source-semantic temporal quantifier attached to one proposition."""
+
+    NEVER = "NEVER"
+
+
+class TemporalScopeProbeDecision(str, Enum):
+    """Closed protocol for distinguishing NEVER from ordinary negation."""
+
+    NEVER = "NEVER"
+    PLAIN_NEGATION = "PLAIN_NEGATION"
+    AMBIGUOUS = "AMBIGUOUS"
+
+
+@dataclass(frozen=True, slots=True)
+class TemporalScopeCandidate:
+    """UID-free temporal scope retained until canonical Integration.
+
+    ``variable_ref`` is a parser-local handle for the TIME binder.  ``anchor`` is
+    deliberately a semantic scope identifier rather than a timestamp: the actual
+    source/context timestamp is supplied only at Integration and becomes an
+    explicit canonical time ref.
+    """
+
+    kind: TemporalScopeKind
+    variable_ref: str
+    anchor: str = "RELEVANT_PAST"
+    evidence: EvidenceSpan | None = None
+
+    def __post_init__(self) -> None:
+        if not self.variable_ref.strip():
+            raise ValueError("TemporalScopeCandidate.variable_ref must be non-empty")
+        if self.anchor != "RELEVANT_PAST":
+            raise ValueError("TemporalScopeCandidate currently supports RELEVANT_PAST only")
+
+
+@dataclass(frozen=True, slots=True)
+class QuantifierCandidate:
+    """UID-free quantifier metadata consumed by deterministic Integration.
+
+    The source expression remains provenance. ``restriction_lemma`` is the
+    morphology-normalized class constrained by the binder; it is never persisted
+    as an entity standing for the quantified phrase.
+    """
+
+    kind: QuantifierKind
+    surface: str
+    restriction_lemma: str | None = None
+    evidence: EvidenceSpan | None = None
+
+    def __post_init__(self) -> None:
+        if not self.surface.strip():
+            raise ValueError("QuantifierCandidate.surface must be non-empty")
+        restriction = (
+            None
+            if self.restriction_lemma is None
+            else self.restriction_lemma.strip().casefold().replace("ё", "е")
+        )
+        if self.kind in {QuantifierKind.FORALL, QuantifierKind.NOT_FORALL} and not restriction:
+            raise ValueError("Universal quantifier requires a restriction class")
+        if self.restriction_lemma is not None:
+            object.__setattr__(self, "restriction_lemma", restriction)
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,7 +166,12 @@ class PropositionOperator(str, Enum):
     REF = "REF"
     AND = "AND"
     OR = "OR"
+    XOR = "XOR"
     NOT = "NOT"
+    IMPLIES = "IMPLIES"
+    POSSIBLE = "POSSIBLE"
+    REQUIRED = "REQUIRED"
+    PERMITTED = "PERMITTED"
     FALSE = "FALSE"  # legacy runtime alias; canonical object negation is NOT
 
 
@@ -91,7 +180,7 @@ class PropositionExprCandidate:
     """Runtime-only proposition expression over local assertion refs.
 
     This is deliberately not a canonical AH type. Integration maps REF to the
-    corresponding scoped N and AND/OR/NOT to the already-canonical g operators.
+    corresponding scoped N and registered proposition operators to canonical g operators.
     """
 
     operator: PropositionOperator
@@ -105,9 +194,21 @@ class PropositionExprCandidate:
             return
         if self.ref is not None:
             raise ValueError("non-REF proposition cannot carry ref")
-        if self.operator in {PropositionOperator.NOT, PropositionOperator.FALSE}:
+        if self.operator in {
+            PropositionOperator.NOT,
+            PropositionOperator.FALSE,
+            PropositionOperator.POSSIBLE,
+            PropositionOperator.REQUIRED,
+            PropositionOperator.PERMITTED,
+        }:
             if len(self.members) != 1:
-                raise ValueError(f"{self.operator.value} proposition requires exactly one member")
+                raise ValueError(
+                    f"{self.operator.value} proposition requires exactly one member"
+                )
+            return
+        if self.operator is PropositionOperator.IMPLIES:
+            if len(self.members) != 2:
+                raise ValueError("IMPLIES proposition requires exactly two members")
             return
         if len(self.members) < 2:
             raise ValueError(f"{self.operator.value} proposition requires at least two members")
@@ -124,6 +225,33 @@ class PropositionExprCandidate:
         for member in self.members:
             out.extend(member.leaf_refs())
         return tuple(dict.fromkeys(out))
+
+
+@dataclass(frozen=True, slots=True)
+class PropositionRootCandidate:
+    """One source-asserted top-level logical formula before canonical Integration.
+
+    expression references parser-local AssertionCandidate ids only. Leaf
+    propositions can therefore be canonicalized with zero ordinary occurrence
+    count, while the formula root itself receives the H assertion occurrence.
+    operator_source_refs records matrix frames consumed purely as linguistic
+    logical operators so they are not asserted as independent world facts.
+    """
+
+    local_id: str
+    expression: PropositionExprCandidate
+    evidence: EvidenceSpan | None = None
+    operator_source_refs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.local_id.strip():
+            raise ValueError("PropositionRootCandidate.local_id must be non-empty")
+        if self.expression.operator is PropositionOperator.REF:
+            raise ValueError("Top-level logical root cannot be a bare REF")
+        if any(not item.strip() for item in self.operator_source_refs):
+            raise ValueError("operator_source_refs must contain non-empty local ids")
+        if set(self.operator_source_refs) & set(self.expression.leaf_refs()):
+            raise ValueError("logical operator source cannot also be a formula leaf")
 
 
 class NominalRelationKind(str, Enum):
@@ -181,6 +309,9 @@ class ActantCandidate:
     grammatical_number: str | None = None
     # Runtime-only normalized TIME descriptor. Canonical time remains ordinary m.
     temporal: TemporalCandidate | None = None
+    # Runtime-only binder metadata. Integration maps ``entity_ref`` to BoundVar;
+    # the quantified phrase itself must never become a canonical M/S fact.
+    quantifier: QuantifierCandidate | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -201,6 +332,14 @@ class ActantCandidate:
             raise ValueError("ActantCandidate proposition cannot also use candidate_ref/entity_ref/composition")
         if self.entity_ref is not None and not self.entity_ref.strip():
             raise ValueError("entity_ref must be non-empty when provided")
+        if self.quantifier is not None and (
+            self.candidate_ref is not None
+            or self.composition is not None
+            or self.proposition is not None
+        ):
+            raise ValueError(
+                "Quantified actant cannot also use candidate_ref/composition/proposition"
+            )
         if self.parser_confidence is not None and not 0.0 <= self.parser_confidence <= 1.0:
             raise ValueError("parser_confidence must be in [0, 1]")
         if self.grammatical_number is not None:
@@ -241,6 +380,9 @@ class AssertionCandidate:
     # in another.
     temporal_mode: TemporalMode | None = None
     transition_operator: TransitionOperator | None = None
+    # Proposition-level temporal quantification.  In particular NEVER is not the
+    # same as ``negated=True``: Integration materializes NOT(EXISTS time ...).
+    temporal_scope: TemporalScopeCandidate | None = None
     # Quotation is orthogonal to conditional/embedded proposition status.  A
     # quoted assertion is represented canonically as proposition content but is
     # never eligible for ordinary asserted-fact retrieval merely because it was
@@ -250,6 +392,10 @@ class AssertionCandidate:
     def __post_init__(self) -> None:
         if self.transition_operator is not None and self.temporal_mode is not TemporalMode.TRANSITION:
             raise ValueError("transition_operator requires temporal_mode=TRANSITION")
+        if self.temporal_mode is TemporalMode.TRANSITION and self.transition_operator is None:
+            raise ValueError("temporal_mode=TRANSITION requires transition_operator")
+        if self.temporal_scope is not None and self.transition_operator is not None:
+            raise ValueError("temporal scope cannot also be a transition occurrence")
 
 
 class CompositionOperator(str, Enum):
@@ -287,6 +433,61 @@ class QueryMode(str, Enum):
     EXISTS = "EXISTS"
 
 
+class QueryQuantifierOperator(str, Enum):
+    EXISTS = "EXISTS"
+    FORALL = "FORALL"
+
+
+@dataclass(frozen=True, slots=True)
+class QuantifiedQueryBinding:
+    """One already-formalized quantified role inside a query.
+
+    This is a runtime contract between quantifier formalization and GoalCompiler.
+    entity_ref is the parser-local handle carried by one or more actants; it is
+    never a canonical M UID. negated negates this quantifier complete scope.
+    restriction_lemma is optional for unrestricted and class-restricted forms.
+    """
+
+    entity_ref: str
+    variable_id: int
+    operator: QueryQuantifierOperator
+    restriction_lemma: str | None = None
+    negated: bool = False
+    sort: VariableSort = VariableSort.ENTITY
+
+    def __post_init__(self) -> None:
+        if not self.entity_ref.strip():
+            raise ValueError("QuantifiedQueryBinding.entity_ref must be non-empty")
+        if self.variable_id < 0:
+            raise ValueError("QuantifiedQueryBinding.variable_id must be >= 0")
+        if self.restriction_lemma is not None and not self.restriction_lemma.strip():
+            raise ValueError(
+                "QuantifiedQueryBinding.restriction_lemma must be non-empty or None"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class QuantifiedQuerySpec:
+    """Complete quantified goal shape, outermost binding first.
+
+    body_negated is predicate/body negation inside every quantifier and is
+    intentionally distinct from negating the quantifier itself.
+    """
+
+    bindings: tuple[QuantifiedQueryBinding, ...]
+    body_negated: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.bindings:
+            raise ValueError("QuantifiedQuerySpec requires at least one binding")
+        refs = tuple(item.entity_ref for item in self.bindings)
+        ids = tuple(item.variable_id for item in self.bindings)
+        if len(set(refs)) != len(refs):
+            raise ValueError("QuantifiedQuerySpec.entity_ref bindings must be unique")
+        if len(set(ids)) != len(ids):
+            raise ValueError("QuantifiedQuerySpec.variable_id values must be unique")
+
+
 @dataclass(frozen=True, slots=True)
 class QueryCandidate:
     predicate: PredicateCandidate
@@ -299,6 +500,12 @@ class QueryCandidate:
     query_mode: QueryMode = QueryMode.EXISTS
     local_id: str | None = None
     quoted: bool = False
+    quantified: QuantifiedQuerySpec | None = None
+    # Outermost-first semantic wrappers over the already typed query goal. This
+    # is runtime AST metadata, not a lexical marker channel. It is primarily used
+    # when a quantifier owns the predicate body while modal scope remains
+    # orthogonal to that body (for example POSSIBLE(FORALL(...))).
+    scope_operators: tuple[PropositionOperator, ...] = ()
 
     def __post_init__(self) -> None:
         roles = self.requested_roles
@@ -312,6 +519,22 @@ class QueryCandidate:
             raise ValueError("EXISTS query cannot request role fillers")
         if self.query_mode is QueryMode.FILL_ROLE and not roles:
             raise ValueError("FILL_ROLE query requires at least one requested role")
+        if any(
+            operator
+            not in {
+                PropositionOperator.POSSIBLE,
+                PropositionOperator.REQUIRED,
+                PropositionOperator.PERMITTED,
+            }
+            for operator in self.scope_operators
+        ):
+            raise ValueError(
+                "QueryCandidate.scope_operators accepts modal operators only"
+            )
+        if self.scope_operators and self.quantified is None:
+            raise ValueError(
+                "QueryCandidate.scope_operators requires a quantified query body"
+            )
         object.__setattr__(self, "requested_roles", tuple(roles))
         # Preserve the old scalar view only when the query genuinely has one gap.
         object.__setattr__(self, "requested_role", roles[0] if len(roles) == 1 else None)
@@ -536,6 +759,9 @@ class PerceptionResult:
     # Runtime preprocessing diagnostics.  These are source-provenance decisions,
     # never canonical AH elements or authorization to write a fact.
     lexical_recovery: tuple[TokenCandidate, ...] = ()
+    # Keep this field last so legacy positional PerceptionResult construction
+    # preserves its historical argument layout.
+    proposition_roots: tuple[PropositionRootCandidate, ...] = ()
 
     @property
     def acts_count(self) -> int:

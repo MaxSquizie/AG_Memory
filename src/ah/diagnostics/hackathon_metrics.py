@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
+from datetime import datetime
 from pathlib import Path
 from time import perf_counter
 import gc
@@ -11,6 +12,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from ah.config import AppConfig, PacemakerSettings
 from ah.core import AHCore, SequentialUidGenerator
+from ah.dsl import DSLInterpreter
 from ah.ignition import IgnitionEngine
 from ah.integration.contracts import SeedReason
 from ah.model import ActantRole, Domain, Property
@@ -75,6 +77,13 @@ class M3Report:
     live_preservation: float
     passed: bool
     elapsed_ms: float
+    output_dir: str | None = None
+    pacemaker_enabled: bool = False
+    live_missing: tuple[str, ...] = ()
+    remaining_orphans: tuple[str, ...] = ()
+
+
+M3_RUNS_DIRNAME = "m3_runs"
 
 
 
@@ -352,77 +361,191 @@ def score_m5_robustness(
     return M5Report(ah_slm_f1, rag_slm_f1, ah_llm_f1, rag_llm_f1, gain)
 
 
+def _m3_uid_debug(core: AHCore, engine: IgnitionEngine, uid: str) -> dict[str, Any]:
+    if not core.store.has_uid(uid):
+        return {"uid": uid, "exists": False}
+    kind = core.store.kind_of(uid)
+    excitation = 0.0
+    try:
+        excitation = float(core.store.runtime_state(uid).excitation)
+    except KeyError:
+        pass
+    threshold = float(engine.workspace_settings.threshold)
+    return {
+        "uid": uid,
+        "exists": True,
+        "kind": getattr(kind, "value", str(kind)),
+        "excitation": excitation,
+        "pacemaker_only": uid in engine._pacemaker_only_excitation,
+        "in_workspace": excitation > threshold,
+        "lifetime_managed": core.store.is_lifetime_managed(uid),
+        "birth_tick": core.store.lifetime_birth_tick(uid),
+    }
+
+
+def _write_m3_bundle(
+    data_dir: Path,
+    *,
+    report: M3Report,
+    config: AppConfig,
+    orphan_records: list[dict[str, Any]],
+    live_records: dict[str, Any],
+    tick_records: list[dict[str, Any]],
+    remaining: list[dict[str, Any]],
+) -> Path:
+    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S_%z")
+    root = Path(data_dir) / M3_RUNS_DIRNAME
+    output_dir = root / timestamp
+    suffix = 1
+    while output_dir.exists():
+        output_dir = root / f"{timestamp}_{suffix:02d}"
+        suffix += 1
+    output_dir.mkdir(parents=True, exist_ok=False)
+    (output_dir / "summary.json").write_text(
+        json.dumps(asdict(report) | {"output_dir": str(output_dir)}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    lines = [
+        f"M3 {'PASS' if report.passed else 'FAIL'}",
+        f"orphans {report.orphan_nodes_before} -> {report.orphan_nodes_after}",
+        f"live {report.live_nodes_before} -> {report.live_nodes_after}",
+        f"GC_efficiency={report.gc_efficiency}",
+        f"live_preservation={report.live_preservation}",
+        f"ticks_until_orphans_gone={report.ticks_until_orphans_gone}",
+        f"ticks_budget={report.ticks_budget}",
+        f"pacemaker_enabled={report.pacemaker_enabled}",
+        f"elapsed_ms={report.elapsed_ms:.2f}",
+    ]
+    if report.live_missing:
+        lines.append(f"live_missing={','.join(report.live_missing)}")
+    if report.remaining_orphans:
+        lines.append(f"remaining_orphans={','.join(report.remaining_orphans)}")
+    (output_dir / "report.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (output_dir / "config_snapshot.json").write_text(
+        json.dumps(
+            {
+                "initial_lifetime_ticks": config.lifecycle.initial_lifetime_ticks,
+                "gc_enabled": config.lifecycle.gc_enabled,
+                "orphan_cleanup": config.lifecycle.orphan_cleanup,
+                "workspace_threshold": config.workspace.threshold,
+                "nu": config.ignition.nu,
+                "tick_interval_seconds": config.ignition.tick_interval_seconds,
+                "pacemaker": {
+                    "enabled": config.ignition.pacemaker.enabled,
+                    "target_policy": config.ignition.pacemaker.target_policy,
+                    "include_symbols": config.ignition.pacemaker.include_symbols,
+                    "domains": list(config.ignition.pacemaker.domains),
+                },
+                "decay_alpha": config.ignition.decay.alpha,
+                "pacemaker_pulse": config.ignition.seeds.pacemaker,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (output_dir / "orphans.json").write_text(
+        json.dumps(orphan_records, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    (output_dir / "live.json").write_text(
+        json.dumps(live_records, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    with (output_dir / "ticks.jsonl").open("w", encoding="utf-8") as fh:
+        for row in tick_records:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    (output_dir / "remaining_after.json").write_text(
+        json.dumps(remaining, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return output_dir
+
+
 def run_m3_gc_acceptance(
     config: AppConfig,
     *,
     orphan_count: int = 200,
     live_fact_count: int = 100,
     ticks_budget: int = 50,
+    data_dir: Path | str | None = None,
 ) -> M3Report:
     """Committee-shape local M3 harness.
 
-    The harness starts Ignition first, then creates both a connected live component
-    and the isolated injected nodes through the same public AH Core mutation API.
-    Thus both populations are lifetime-managed and no special test-only GC path is
-    used.
+    Ignition starts first with the configured pacemaker. Live structure and the
+    200 isolated nodes are then created through the public DSL, the same surface
+    the committee can use. Ordinary ticks include ν.
     """
     if orphan_count <= 0 or live_fact_count <= 0 or ticks_budget <= 0:
         raise ValueError("M3 counts and ticks_budget must be > 0")
 
     core = AHCore(uid_generator=SequentialUidGenerator())
-    quiet_ignition = type(config.ignition)(
-        tick_interval_seconds=config.ignition.tick_interval_seconds,
-        nu=config.ignition.nu,
-        x_max=config.ignition.x_max,
-        activation=config.ignition.activation,
-        decay=config.ignition.decay,
-        plasticity=config.ignition.plasticity,
-        seeds=config.ignition.seeds,
-        pacemaker=PacemakerSettings(enabled=False),
-    )
-    engine = IgnitionEngine(core, quiet_ignition, config.workspace, config.lifecycle)
+    engine = IgnitionEngine(core, config.ignition, config.workspace, config.lifecycle)
+    dsl = DSLInterpreter(core)
 
-    predicate = core.add_abstract_symbol({"live"}, uid="S_M3_LIVE")
-    template = core.add_template(Domain.C, core.ref(predicate.uid), (ActantRole.SUBJECT,), uid="T_M3_LIVE")
+    predicate = dsl.execute('addAbstractSymbol forms="live"').value
+    template = dsl.execute(
+        f'addElement domain=C kind=T predicate=@{predicate.uid} roles=SUBJECT'
+    ).value
     live_uids: set[str] = {predicate.uid, template.uid}
     for index in range(live_fact_count):
-        entity = core.add_entity(
-            Domain.C,
-            {"name": Property("name", f"live-{index}", "str")},
-        )
-        node, _ = core.add_hypernode(
-            Domain.C,
-            core.ref(template.uid),
-            {ActantRole.SUBJECT: core.ref(entity.uid)},
-            0.4,
-            deduplicate=False,
-            count_occurrence=False,
-        )
+        entity = dsl.execute(f'addElement domain=C kind=M name="live-{index}"').value
+        node = dsl.execute(
+            f'addElement domain=C kind=N template=@{template.uid} SUBJECT=@{entity.uid} weight=0.4'
+        ).value
         live_uids.update((entity.uid, node.uid))
 
-    orphan_uids = {
-        core.add_entity(
-            Domain.C,
-            {"name": Property("name", f"committee-orphan-{index}", "str")},
-        ).uid
-        for index in range(orphan_count)
-    }
+    orphan_uids: list[str] = []
+    for index in range(orphan_count):
+        entity = dsl.execute(
+            f'addElement domain=C kind=M name="committee-orphan-{index}"'
+        ).value
+        orphan_uids.append(entity.uid)
+    orphan_set = set(orphan_uids)
 
     live_before = sum(core.store.has_uid(uid) for uid in live_uids)
     orphan_before = sum(core.store.has_uid(uid) for uid in orphan_uids)
     gone_at: int | None = None
+    tick_records: list[dict[str, Any]] = []
+    orphan_gone: dict[str, int] = {}
     started = perf_counter()
+    previous_live = set(uid for uid in live_uids if core.store.has_uid(uid))
     for tick in range(1, ticks_budget + 1):
-        engine.tick(include_pacemaker=False)
-        if gone_at is None and not any(core.store.has_uid(uid) for uid in orphan_uids):
+        result = engine.tick()
+        live_now = {uid for uid in live_uids if core.store.has_uid(uid)}
+        live_missing_now = sorted(previous_live - live_now)
+        previous_live = live_now
+        remaining_now = [uid for uid in orphan_uids if core.store.has_uid(uid)]
+        for uid in orphan_uids:
+            if uid not in orphan_gone and not core.store.has_uid(uid):
+                orphan_gone[uid] = tick
+        gc = result.gc
+        tick_records.append(
+            {
+                "tick": result.tick,
+                "loop": tick,
+                "deleted": list(gc.deleted) if gc is not None else [],
+                "orphan_deleted": list(gc.orphan_deleted) if gc is not None else [],
+                "protected": list(gc.protected) if gc is not None else [],
+                "reasons": dict(gc.reasons) if gc is not None else {},
+                "orphans_remaining": len(remaining_now),
+                "pacemaker_targets": [
+                    uid for uid in result.pacemaker_targets if uid in orphan_set
+                ],
+                "live_missing": live_missing_now,
+            }
+        )
+        if gone_at is None and not remaining_now:
             gone_at = tick
     elapsed_ms = (perf_counter() - started) * 1000.0
 
     orphan_after = sum(core.store.has_uid(uid) for uid in orphan_uids)
     live_after = sum(core.store.has_uid(uid) for uid in live_uids)
+    live_missing = tuple(sorted(uid for uid in live_uids if not core.store.has_uid(uid)))
+    remaining_orphans = tuple(uid for uid in orphan_uids if core.store.has_uid(uid))
     efficiency = 1.0 - (orphan_after / orphan_before) if orphan_before else 1.0
     live_preservation = live_after / live_before if live_before else 1.0
-    return M3Report(
+    report = M3Report(
         orphan_nodes_before=orphan_before,
         orphan_nodes_after=orphan_after,
         live_nodes_before=live_before,
@@ -439,7 +562,39 @@ def run_m3_gc_acceptance(
             and gone_at <= ticks_budget
         ),
         elapsed_ms=elapsed_ms,
+        pacemaker_enabled=bool(config.ignition.pacemaker.enabled),
+        live_missing=live_missing,
+        remaining_orphans=remaining_orphans,
     )
+    output_dir: Path | None = None
+    if data_dir is not None:
+        remaining_debug = [_m3_uid_debug(core, engine, uid) for uid in remaining_orphans]
+        orphan_records = [
+            {
+                "uid": uid,
+                "birth_tick": core.store.lifetime_birth_tick(uid) if core.store.has_uid(uid) else None,
+                "gone_at": orphan_gone.get(uid),
+                "still_present": core.store.has_uid(uid),
+            }
+            for uid in orphan_uids
+        ]
+        live_records = {
+            "before": live_before,
+            "after": live_after,
+            "missing": list(live_missing),
+            "uids": sorted(live_uids),
+        }
+        output_dir = _write_m3_bundle(
+            Path(data_dir),
+            report=report,
+            config=config,
+            orphan_records=orphan_records,
+            live_records=live_records,
+            tick_records=tick_records,
+            remaining=remaining_debug,
+        )
+        report = replace(report, output_dir=str(output_dir))
+    return report
 
 
 def write_metric_report(path: str | Path, report: Any) -> Path:

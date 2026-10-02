@@ -16,6 +16,7 @@ from .contracts import (
     AssociationHopKind,
     AssociationOutcome,
     AssociationPath,
+    AssociationSemantics,
     AssociationStatus,
     AssociationTraceEvent,
     AssociationTraceKind,
@@ -79,8 +80,6 @@ class AssociationSearchState:
             return False
         previous = self.pending[front].get(target.uid)
         if previous is not None:
-            # Keep the shallowest path; tie-break deterministically by the
-            # diagnostic relation/via UID so results do not depend on traversal order.
             old_key = (
                 previous.depth,
                 previous.parent.hop.relation if previous.parent.hop else "",
@@ -212,10 +211,17 @@ class AssociationCoordinator:
             newly_activated: dict[str, list[Ref]] = {_LEFT: [], _RIGHT: []}
             activation_by_uid = {ref.uid: ref for ref in result.activation_events}
 
-            # Roots are already ancestry-known, but their first real query seed still
-            # receives an ACTIVATION event and should initiate reverse/incidence queries.
+            # Association roots are explicit current-goal focus, so their narrow
+            # incidence query must run once per solve even when their retained x is
+            # already saturated from the preceding turn. Requiring a fresh
+            # activation_event made repeated ``А ещё?`` searches progressively blind:
+            # QUERY_RECALL could add no input_gain at x_max, therefore no event was
+            # emitted and the new goal never expanded from its own endpoints.
+            # This does not grant global memory access: only the two explicitly
+            # seeded roots receive this first-tick focus treatment.
+            first_goal_tick = ticks_executed == 1
             for front, root in ((_LEFT, goal.left), (_RIGHT, goal.right)):
-                if root.uid in activation_by_uid:
+                if first_goal_tick or root.uid in activation_by_uid:
                     newly_activated[front].append(root)
                     state.trace.append(
                         AssociationTraceEvent(
@@ -223,7 +229,11 @@ class AssociationCoordinator:
                             tick=tick,
                             front=front,
                             ref=root,
-                            detail="association origin activation",
+                            detail=(
+                                "association origin query focus"
+                                if first_goal_tick and root.uid not in activation_by_uid
+                                else "association origin activation"
+                            ),
                         )
                     )
 
@@ -238,6 +248,43 @@ class AssociationCoordinator:
                                 front=front,
                                 ref=ref,
                                 detail=f"depth={state.depth(front, ref.uid)}",
+                            )
+                        )
+
+            # A goal-generated memory query is itself a focused recall operation.
+            # Its seed may be fully consumed by an already warm/saturated target,
+            # producing no fresh Ignition activation_event because input_gain == 0.
+            # Such a target must still enter this goal's ancestry after the query
+            # packet has actually been consumed; otherwise repeated ``А ещё?``
+            # searches become blind to recently active facts/templates.  Restrict
+            # this admission to pending MEMORY_QUERY hops owned by this search, so
+            # unrelated warm Workspace nodes never become readable implicitly.
+            consumed = {
+                uid
+                for uid, amount in result.incoming_consumed.items()
+                if amount > 0.0
+            }
+            for front in _FRONTS:
+                for uid in tuple(state.pending[front]):
+                    if uid not in consumed:
+                        continue
+                    pending = state.pending[front].get(uid)
+                    hop = pending.parent.hop if pending is not None else None
+                    if hop is None or hop.kind is not AssociationHopKind.MEMORY_QUERY:
+                        continue
+                    ref = self.core.ref(uid)
+                    if state.activate(front, ref, tick=tick):
+                        newly_activated[front].append(ref)
+                        state.trace.append(
+                            AssociationTraceEvent(
+                                AssociationTraceKind.ACTIVATION,
+                                tick=tick,
+                                front=front,
+                                ref=ref,
+                                detail=(
+                                    "query-recalled warm focus; "
+                                    f"depth={state.depth(front, ref.uid)}"
+                                ),
                             )
                         )
 
@@ -267,8 +314,6 @@ class AssociationCoordinator:
                     ticks_executed=ticks_executed,
                 )
 
-            # Record ordinary Ignition propagation as ancestry that may activate on
-            # the next synchronous tick. One packet still crosses <=1 edge per tick.
             for event in result.propagations:
                 for front in _FRONTS:
                     if not state.has(front, event.source.uid):
@@ -298,9 +343,6 @@ class AssociationCoordinator:
                         parent=_Parent(event.source.uid, hop),
                     )
 
-            # GoalSpec may issue narrow queries from the *newly activated* focus.
-            # Those candidates receive ordinary QUERY_RECALL seeds and must actually
-            # activate on a subsequent Ignition tick before joining the front.
             for front in _FRONTS:
                 for ref in sorted(newly_activated[front], key=lambda item: item.uid):
                     source_depth = state.depth(front, ref.uid)
@@ -344,9 +386,6 @@ class AssociationCoordinator:
                             self._seed(target, front, state, tick=tick, query_generated=True)
 
             if budget_hit:
-                # Stop immediately instead of walking extra graph after the resource
-                # contract has been reached. Already scheduled Ignition packets stay
-                # ordinary runtime state; no canonical search state exists to clean up.
                 state.trace.append(
                     AssociationTraceEvent(
                         AssociationTraceKind.GOAL_STOP,
@@ -359,8 +398,6 @@ class AssociationCoordinator:
                     domain_policy, ticks_executed=ticks_executed,
                 )
 
-            # If neither front has any not-yet-activated ancestry and Ignition
-            # scheduled no new packet, the search is exhausted before max_ticks.
             if not state.pending[_LEFT] and not state.pending[_RIGHT] and not result.propagations:
                 status = AssociationStatus.DEPTH_EXHAUSTED if depth_hit else AssociationStatus.NOT_FOUND
                 state.trace.append(
@@ -457,20 +494,16 @@ class AssociationCoordinator:
                 return
             candidates.setdefault(target.uid, (target, relation, via_uid))
 
-        # Reverse hyperedge incidence: any current canonical ref may be an N actant.
         for node in self.core.store.hypernodes_for_actant(ref.uid):
             if node.weight <= 0:
                 continue
             add(self.core.ref(node.uid), "ACTANT_OF", node.uid)
 
-        # Reverse functional/group incidence.
         for parent in self.core.store.function_parents(ref.uid):
             add(self.core.ref(parent.uid), "OPERAND_OF", parent.uid)
         for group in self.core.store.groups_containing(ref.uid):
             add(self.core.ref(group.uid), "MEMBER_OF", group.uid)
 
-        # Activation may travel opposite to a directed semantic L without asserting
-        # the reverse logical relation.
         for link in self.core.store.incoming_links(ref.uid):
             if link.weight <= 0:
                 continue
@@ -495,8 +528,7 @@ class AssociationCoordinator:
         common = state.intersection()
         if not common:
             return None
-        # No semantic hub filter. Deterministic selection only chooses which valid
-        # convergence to report first; every discovered common node remains exposed.
+
         def key(uid: str) -> tuple[int, int, int, str]:
             left_tick = state.discovered_tick[_LEFT].get(uid, -1)
             right_tick = state.discovered_tick[_RIGHT].get(uid, -1)
@@ -506,6 +538,37 @@ class AssociationCoordinator:
             return (convergence_tick, left_depth + right_depth, max(left_depth, right_depth), uid)
 
         return self.core.ref(min(common, key=key))
+
+    @staticmethod
+    def _path_fact_uids(path: AssociationPath | None) -> frozenset[str]:
+        if path is None:
+            return frozenset()
+        return frozenset(ref.uid for ref in path.refs if ref.kind is RefKind.N)
+
+    def _association_semantics(
+        self,
+        left_path: AssociationPath | None,
+        right_path: AssociationPath | None,
+    ) -> AssociationSemantics | None:
+        if left_path is None or right_path is None:
+            return None
+        refs = (*left_path.refs, *right_path.refs)
+        if any(self.core.store.domain_of(ref.uid) is Domain.H for ref in refs):
+            return AssociationSemantics.EPISODIC
+        return AssociationSemantics.SEMANTIC
+
+    def _minimal_common_fact_count(
+        self, state: AssociationSearchState, common_uids: tuple[str, ...]
+    ) -> int | None:
+        if not common_uids:
+            return None
+        counts: list[int] = []
+        for uid in common_uids:
+            common = self.core.ref(uid)
+            left = state.path(_LEFT, common, self.core)
+            right = state.path(_RIGHT, common, self.core)
+            counts.append(len(self._path_fact_uids(left) | self._path_fact_uids(right)))
+        return min(counts) if counts else None
 
     def _outcome(
         self,
@@ -533,6 +596,9 @@ class AssociationCoordinator:
         )
         left_path = state.path(_LEFT, common, self.core) if common is not None else None
         right_path = state.path(_RIGHT, common, self.core) if common is not None else None
+        common_uids = tuple(ref.uid for ref in common_refs)
+        semantics = self._association_semantics(left_path, right_path)
+        minimal_fact_count = self._minimal_common_fact_count(state, common_uids)
         left_activated = tuple(
             self.core.ref(uid)
             for uid in sorted(state.parents[_LEFT], key=lambda uid: (state.depths[_LEFT][uid], uid))
@@ -554,4 +620,6 @@ class AssociationCoordinator:
             ticks_executed=ticks_executed,
             trace=tuple(state.trace),
             domain_policy=policy,
+            semantics=semantics,
+            minimal_fact_count=minimal_fact_count,
         )

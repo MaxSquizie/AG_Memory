@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from threading import Lock
-from typing import Any
+from typing import Any, Sequence
 import uuid
 
 from ah.config import AppConfig
@@ -124,6 +124,15 @@ class OllamaBackend:
     def restart(self) -> None:
         self.stop()
         self.start()
+
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        model = (self.config.llm.ollama_embed_model or self.config.llm.ollama_model).strip()
+        if not model:
+            raise RuntimeError("Ollama embedding model is not configured")
+        try:
+            return self._client.embed(model=model, texts=texts)
+        except OllamaClientError as exc:
+            raise RuntimeError(str(exc)) from exc
 
     def _generation_options(self, override: dict[str, Any]) -> dict[str, Any]:
         return {

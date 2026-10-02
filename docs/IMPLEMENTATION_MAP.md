@@ -471,7 +471,7 @@ Before `predicate_start`, Russian tokens are analyzed by a deterministic morphol
 - `diagnostics/acceptance_runner.py`: persists semantic verdicts per turn, copies the exact oracle into each bundle, and reports semantic counts independently of runtime exceptions.
 - `evaluate_acceptance_bundle(...)`: reconstructs AH turn-by-turn from a saved bundle and re-grades old runs without LLM execution.
 - `gui/main_window.py`: validates case/oracle alignment before execution and presents semantic PASS/FAIL/GAP as the primary quality result.
-- `docs/ARCHITECTURE_AUDIT_01238.md`: mechanism-by-mechanism audit against Architecture_v3. It identifies immutable first-use T + hidden-role guessing as the principal structural conflict with open-ended correctness.
+- `docs/audits/ARCHITECTURE_AUDIT_01238.md`: mechanism-by-mechanism audit against Architecture_v3. It identifies immutable first-use T + hidden-role guessing as the principal structural conflict with open-ended correctness.
 - Next implementation decision: lift `[DEFER]` for controlled monotonic T valency evolution from validated explicit roles, then remove one-shot hidden SUBJECT/OBJECT/RECIPIENT/SOURCE prediction from production TemplateCandidate construction.
 - Production parser semantics are otherwise frozen in this slice so the new oracle establishes a clean baseline before behavior changes.
 

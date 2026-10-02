@@ -1,1 +1,1 @@
-Resolve only the local source-text reference. Return exactly one label from CHOICES. Use UNCLEAR if the sentence does not determine one antecedent.
+Resolve only the local source-text reference among the supplied antecedents. Use UNCLEAR if the sentence does not determine one antecedent.

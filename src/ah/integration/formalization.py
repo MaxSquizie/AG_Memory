@@ -3,9 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime
 from enum import Enum
+from typing import Mapping
+import re
 
 from ah.agent import InteractionContext
 from ah.model import ActantRole, Domain, Ref, VariableSort
+from ah.integration.errors import CandidateValidationError
 from ah.temporal import TemporalAnchorContext, TemporalNormalizer, temporal_value_from_ref
 from ah.perception import (
     ActDependencyCandidate,
@@ -17,9 +20,23 @@ from ah.perception import (
     NominalRelationCandidate,
     PerceptionResult,
     PropositionExprCandidate,
+    QuantifierCandidate,
+    QuantifierKind,
+    TemporalScopeCandidate,
+    TemporalScopeKind,
+    PropositionRootCandidate,
+    QuantifiedQuerySpec,
     QueryCandidate,
     SituationRelationCandidate,
     SituationRelationHintCandidate,
+)
+from ah.perception.quantifier_formalization import (
+    QuantifierFormalizationError,
+    QuantifierFormalizer,
+)
+from ah.perception.temporal_scope_formalization import (
+    TemporalScopeFormalizationError,
+    TemporalScopeFormalizer,
 )
 from ah.perception.morphology import Morphology, build_morphology, material_analyses
 from ah.perception.scoping import apply_speech_act_scoping
@@ -121,6 +138,8 @@ class ExistentialBinding:
     # continuation evidence only; they do not create a new canonical node kind.
     anchor_ref: Ref | None = None
     anchor_member_refs: tuple[Ref, ...] = ()
+    negative: bool = False
+    restriction_lemma: str | None = None
 
     def __post_init__(self) -> None:
         if not self.entity_ref.strip():
@@ -131,6 +150,58 @@ class ExistentialBinding:
             raise ValueError("ExistentialBinding.anchor_ref must be G")
         if self.anchor_ref is None and self.anchor_member_refs:
             raise ValueError("anchor_member_refs require anchor_ref")
+        if self.negative and self.anchor_ref is not None:
+            raise ValueError("negative existentials cannot continue a prior existential anchor")
+        if self.restriction_lemma is not None:
+            value = self.restriction_lemma.strip().casefold().replace("ё", "е")
+            object.__setattr__(self, "restriction_lemma", value or None)
+
+
+@dataclass(frozen=True, slots=True)
+class UniversalBinding:
+    """Runtime-only binding for a universal determiner plus restriction class.
+
+    ``entity_ref`` is a parser-local handle, not a canonical UID. Integration
+    uses a scoped ``BoundVar`` and an asserted ``FORALL``/``IMPLIES`` rule instead
+    of fabricating ``m_все_люди``. ``negate_quantifier`` is the §24.2 ``не все``
+    reading; body negation is kept on the assertion itself.
+    """
+
+    entity_ref: str
+    variable_id: int
+    restriction_lemma: str
+    sort: VariableSort = VariableSort.ENTITY
+    negate_quantifier: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.entity_ref.strip():
+            raise ValueError("UniversalBinding.entity_ref must be non-empty")
+        if self.variable_id < 0:
+            raise ValueError("UniversalBinding.variable_id must be >= 0")
+        if not self.restriction_lemma.strip():
+            raise ValueError("UniversalBinding.restriction_lemma must be non-empty")
+
+
+@dataclass(frozen=True, slots=True)
+class TemporalScopeBinding:
+    """Runtime binding for one proposition-level temporal quantifier."""
+
+    assertion_id: str
+    variable_ref: str
+    variable_id: int
+    kind: TemporalScopeKind
+    anchor: str
+    anchor_timestamp: datetime
+
+    def __post_init__(self) -> None:
+        if not self.assertion_id.strip() or not self.variable_ref.strip():
+            raise ValueError("TemporalScopeBinding identifiers must be non-empty")
+        if self.variable_id < 0:
+            raise ValueError("TemporalScopeBinding.variable_id must be >= 0")
+        if self.anchor != "RELEVANT_PAST":
+            raise ValueError("TemporalScopeBinding requires RELEVANT_PAST")
+        if self.anchor_timestamp.tzinfo is None:
+            raise ValueError("TemporalScopeBinding anchor timestamp must be timezone-aware")
 
 
 @dataclass(frozen=True, slots=True)
@@ -163,6 +234,8 @@ class CandidateIR:
     ordered_assertion_ids: tuple[str, ...]
     discourse_refs: tuple[DiscourseRef, ...] = ()
     existential_bindings: tuple[ExistentialBinding, ...] = ()
+    universal_bindings: tuple[UniversalBinding, ...] = ()
+    temporal_scope_bindings: tuple[TemporalScopeBinding, ...] = ()
     temporal_refs: tuple[UnresolvedTemporalRef, ...] = ()
     batch_kind: BatchKind = BatchKind.MESSAGE
     source_ref: str | None = None
@@ -227,6 +300,14 @@ def _offset_actant(actant: ActantCandidate, offset: int) -> ActantCandidate:
     return replace(
         actant,
         evidence=_offset_evidence(actant.evidence, offset),
+        quantifier=(
+            None
+            if actant.quantifier is None
+            else replace(
+                actant.quantifier,
+                evidence=_offset_evidence(actant.quantifier.evidence, offset),
+            )
+        ),
         composition=_offset_composition(actant.composition, offset),
         nominal_relations=tuple(
             replace(relation, evidence=_offset_evidence(relation.evidence, offset))
@@ -277,6 +358,20 @@ def _namespace_expr(expr: PropositionExprCandidate | None, prefix: str) -> Propo
     return replace(expr, members=tuple(_namespace_expr(item, prefix) for item in expr.members))
 
 
+def _namespace_proposition_root(
+    item: PropositionRootCandidate,
+    prefix: str,
+    source_offset: int = 0,
+) -> PropositionRootCandidate:
+    return replace(
+        item,
+        local_id=f"{prefix}{item.local_id}",
+        expression=_namespace_expr(item.expression, prefix),
+        evidence=_offset_evidence(item.evidence, source_offset),
+        operator_source_refs=tuple(f"{prefix}{ref}" for ref in item.operator_source_refs),
+    )
+
+
 def _namespace_actant(actant: ActantCandidate, prefix: str, source_offset: int = 0) -> ActantCandidate:
     nominal_relations = tuple(
         replace(
@@ -293,7 +388,30 @@ def _namespace_actant(actant: ActantCandidate, prefix: str, source_offset: int =
         proposition=_namespace_expr(actant.proposition, prefix),
         nominal_relations=nominal_relations,
         evidence=_offset_evidence(actant.evidence, source_offset),
+        quantifier=(
+            None
+            if actant.quantifier is None
+            else replace(
+                actant.quantifier,
+                evidence=_offset_evidence(actant.quantifier.evidence, source_offset),
+            )
+        ),
         composition=_offset_composition(actant.composition, source_offset),
+    )
+
+
+def _namespace_quantified_query(
+    spec: QuantifiedQuerySpec | None,
+    prefix: str,
+) -> QuantifiedQuerySpec | None:
+    if spec is None:
+        return None
+    return replace(
+        spec,
+        bindings=tuple(
+            replace(binding, entity_ref=f"{prefix}{binding.entity_ref}")
+            for binding in spec.bindings
+        ),
     )
 
 
@@ -306,6 +424,15 @@ def _namespace_assertion(item: AssertionCandidate, prefix: str, source_offset: i
             predicate=_offset_predicate(alt.predicate, source_offset),
             actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in alt.actants),
             evidence=_offset_evidence(alt.evidence, source_offset),
+            temporal_scope=(
+                None
+                if alt.temporal_scope is None
+                else replace(
+                    alt.temporal_scope,
+                    variable_ref=f"{prefix}{alt.temporal_scope.variable_ref}",
+                    evidence=_offset_evidence(alt.temporal_scope.evidence, source_offset),
+                )
+            ),
             alternatives=(),
         )
         for alt in item.alternatives
@@ -316,6 +443,15 @@ def _namespace_assertion(item: AssertionCandidate, prefix: str, source_offset: i
         predicate=_offset_predicate(item.predicate, source_offset),
         actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in item.actants),
         evidence=_offset_evidence(item.evidence, source_offset),
+        temporal_scope=(
+            None
+            if item.temporal_scope is None
+            else replace(
+                item.temporal_scope,
+                variable_ref=f"{prefix}{item.temporal_scope.variable_ref}",
+                evidence=_offset_evidence(item.temporal_scope.evidence, source_offset),
+            )
+        ),
         alternatives=alternatives,
     )
 
@@ -341,6 +477,7 @@ def namespace_perception_result(
             local_id=_prefix_local(item.local_id, prefix),
             predicate=_offset_predicate(item.predicate, source_offset),
             actants=tuple(_namespace_actant(actant, prefix, source_offset) for actant in item.actants),
+            quantified=_namespace_quantified_query(item.quantified, prefix),
         )
         for item in result.queries
     )
@@ -397,6 +534,10 @@ def namespace_perception_result(
         relations=relations,
         act_relations=act_relations,
         conditionals=conditionals,
+        proposition_roots=tuple(
+            _namespace_proposition_root(item, prefix, source_offset)
+            for item in result.proposition_roots
+        ),
         act_dependencies=dependencies,
         relation_hints=hints,
     )
@@ -423,6 +564,7 @@ def merge_formalization_units(batch: FormalizationBatch) -> PerceptionResult:
         relations=tuple(item for unit in units for item in unit.relations),
         act_relations=tuple(item for unit in units for item in unit.act_relations),
         conditionals=tuple(item for unit in units for item in unit.conditionals),
+        proposition_roots=tuple(item for unit in units for item in unit.proposition_roots),
         act_dependencies=tuple(item for unit in units for item in unit.act_dependencies),
         relation_hints=tuple(item for unit in units for item in unit.relation_hints),
     )
@@ -446,6 +588,42 @@ class SemanticConsolidator:
         self.validator = validator or CandidateValidator()
         self.morphology = morphology or build_morphology("auto")
         self.temporal = TemporalNormalizer()
+        self.quantifier_formalizer = QuantifierFormalizer(self.morphology)
+        self.temporal_scope_formalizer = TemporalScopeFormalizer(self.morphology)
+
+    @staticmethod
+    def _flatten_runtime_alternatives(
+        result: PerceptionResult,
+    ) -> PerceptionResult:
+        """Normalize a nested alternative tree to complete correlated leaves.
+
+        Every leaf is already a complete ``AssertionCandidate`` reading.  Flattening
+        therefore preserves each source-supported role tuple while preventing later
+        passes from independently combining per-role options.  The root candidate
+        remains the source-facing placeholder and is never treated as an extra
+        reading merely because it owns the tree.
+        """
+
+        def flatten(candidate: AssertionCandidate) -> AssertionCandidate:
+            if not candidate.alternatives:
+                return candidate
+            leaves: list[AssertionCandidate] = []
+
+            def walk(item: AssertionCandidate) -> None:
+                if not item.alternatives:
+                    leaves.append(replace(item, alternatives=()))
+                    return
+                for child in item.alternatives:
+                    walk(child)
+
+            for alternative in candidate.alternatives:
+                walk(alternative)
+            return replace(candidate, alternatives=tuple(leaves))
+
+        assertions = tuple(flatten(item) for item in result.assertions)
+        if assertions == result.assertions:
+            return result
+        return replace(result, assertions=assertions)
 
     @staticmethod
     def _actant_variants(assertion: AssertionCandidate, role: ActantRole) -> tuple[ActantCandidate, ...]:
@@ -580,50 +758,163 @@ class SemanticConsolidator:
                     grouped.setdefault(actant.entity_ref, []).append(actant)
         return {key: tuple(values) for key, values in grouped.items()}
 
-    _EXISTENTIAL_PRONOUNS = frozenset({
-        "кто-то", "кто-нибудь", "кто-либо", "некто",
-        "что-то", "что-нибудь", "что-либо", "нечто",
-        "someone", "somebody", "something",
-    })
+    def _rewrite_quantified_actants(
+        self, result: PerceptionResult
+    ) -> tuple[PerceptionResult, dict[str, QuantifierCandidate]]:
+        """Normalize explicit Perception binders and index their local handles.
 
-    @classmethod
-    def _is_existential_anchor(cls, actant: ActantCandidate) -> bool:
-        """Recognize a narrow lexical class of explicit indefinite pronouns.
-
-        This is intentionally not a generic marker-word -> logic table.  These
-        pronouns themselves denote an existentially introduced, non-identified
-        referent.  Broader generalized-quantifier phrases remain outside this
-        deterministic shortcut and must be handled by later semantic analysis.
+        Quantifier recognition belongs to :class:`QuantifierFormalizer` before
+        Integration.  This boundary deliberately has no words, regular expressions
+        or semantic fallbacks: it consumes only typed ``QuantifierCandidate``
+        metadata and fails closed when alternatives disagree.
         """
 
-        if (
-            actant.entity_ref is None
-            or actant.candidate_ref is not None
-            or actant.composition is not None
-            or actant.proposition is not None
-        ):
-            return False
-        text = (actant.normalized_hint or actant.mention or "").strip().casefold().replace("ё", "е")
-        return text in cls._EXISTENTIAL_PRONOUNS
+        try:
+            rewritten = self.quantifier_formalizer.formalize(result)
+        except QuantifierFormalizationError as exc:
+            raise CandidateValidationError(str(exc)) from exc
+
+        marks: dict[str, QuantifierCandidate] = {}
+        for assertion in rewritten.assertions:
+            for variant in (assertion, *assertion.alternatives):
+                for actant in variant.actants:
+                    quantifier = actant.quantifier
+                    if quantifier is None:
+                        continue
+                    if actant.entity_ref is None:
+                        raise CandidateValidationError(
+                            f"Quantified actant in {assertion.local_id} has no local handle"
+                        )
+                    previous = marks.get(actant.entity_ref)
+                    if previous is not None and (
+                        previous.kind is not quantifier.kind
+                        or previous.restriction_lemma != quantifier.restriction_lemma
+                    ):
+                        raise CandidateValidationError(
+                            f"Quantifier handle {actant.entity_ref!r} has inconsistent metadata"
+                        )
+                    marks.setdefault(actant.entity_ref, quantifier)
+        return rewritten, marks
+
+    def _rewrite_temporal_scopes(
+        self, result: PerceptionResult
+    ) -> tuple[PerceptionResult, dict[str, TemporalScopeCandidate]]:
+        """Normalize explicit typed scopes without interpreting source words."""
+
+        try:
+            rewritten = self.temporal_scope_formalizer.formalize(result)
+        except TemporalScopeFormalizationError as exc:
+            raise CandidateValidationError(str(exc)) from exc
+        scopes: dict[str, TemporalScopeCandidate] = {}
+        for assertion in rewritten.assertions:
+            values = tuple(
+                item.temporal_scope for item in (assertion, *assertion.alternatives)
+            )
+            present = tuple(item for item in values if item is not None)
+            if not present:
+                continue
+            semantic_keys = {
+                (item.kind, item.variable_ref, item.anchor) for item in present
+            }
+            if len(present) != len(values) or len(semantic_keys) != 1:
+                raise CandidateValidationError(
+                    f"Temporal-scope alternatives disagree for {assertion.local_id!r}"
+                )
+            scopes[assertion.local_id] = present[0]
+        return rewritten, scopes
+
+    @staticmethod
+    def _temporal_scope_bindings(
+        scopes: Mapping[str, TemporalScopeCandidate],
+        *,
+        start_at: int,
+        source_timestamp: datetime | None,
+        experience_timestamp: datetime | None,
+    ) -> tuple[TemporalScopeBinding, ...]:
+        anchor_timestamp = source_timestamp or experience_timestamp
+        if scopes and anchor_timestamp is None:
+            raise CandidateValidationError(
+                "Temporal NEVER requires an explicit relevant-past anchor"
+            )
+        if anchor_timestamp is not None and anchor_timestamp.tzinfo is None:
+            raise CandidateValidationError(
+                "Temporal NEVER relevant-past anchor must be timezone-aware"
+            )
+        assert not scopes or anchor_timestamp is not None
+        return tuple(
+            TemporalScopeBinding(
+                assertion_id=assertion_id,
+                variable_ref=scope.variable_ref,
+                variable_id=start_at + index,
+                kind=scope.kind,
+                anchor=scope.anchor,
+                anchor_timestamp=anchor_timestamp,
+            )
+            for index, (assertion_id, scope) in enumerate(scopes.items())
+        )
+
+    def _negative_existential_bindings(
+        self,
+        marks: Mapping[str, QuantifierCandidate],
+        *,
+        start_at: int,
+    ) -> tuple[ExistentialBinding, ...]:
+        found = [
+            (handle, mark)
+            for handle, mark in marks.items()
+            if mark.kind is QuantifierKind.NOT_EXISTS
+        ]
+        return tuple(
+            ExistentialBinding(
+                entity_ref=handle,
+                variable_id=start_at + index,
+                negative=True,
+                restriction_lemma=mark.restriction_lemma,
+            )
+            for index, (handle, mark) in enumerate(found)
+        )
+
+    def _universal_bindings(
+        self,
+        marks: Mapping[str, QuantifierCandidate],
+        *,
+        start_at: int,
+    ) -> tuple[UniversalBinding, ...]:
+        found = [
+            (handle, mark)
+            for handle, mark in marks.items()
+            if mark.kind in {QuantifierKind.FORALL, QuantifierKind.NOT_FORALL}
+        ]
+        return tuple(
+            UniversalBinding(
+                entity_ref=handle,
+                variable_id=start_at + index,
+                restriction_lemma=mark.restriction_lemma or "",
+                negate_quantifier=mark.kind is QuantifierKind.NOT_FORALL,
+            )
+            for index, (handle, mark) in enumerate(found)
+        )
 
     def _existential_bindings(
-        self, result: PerceptionResult, *, start_at: int = 0
+        self,
+        marks: Mapping[str, QuantifierCandidate],
+        *,
+        start_at: int = 0,
     ) -> tuple[ExistentialBinding, ...]:
-        """Return stable batch-local existential variables in first-mention order."""
+        """Return typed positive existential variables in source traversal order."""
 
-        found: list[str] = []
-        for assertion in result.assertions:
-            variants = assertion.alternatives or (assertion,)
-            for variant in variants:
-                for actant in variant.actants:
-                    if not self._is_existential_anchor(actant):
-                        continue
-                    assert actant.entity_ref is not None
-                    if actant.entity_ref not in found:
-                        found.append(actant.entity_ref)
+        found = [
+            (handle, mark)
+            for handle, mark in marks.items()
+            if mark.kind is QuantifierKind.EXISTS
+        ]
         return tuple(
-            ExistentialBinding(entity_ref=entity_ref, variable_id=start_at + index)
-            for index, entity_ref in enumerate(found)
+            ExistentialBinding(
+                entity_ref=handle,
+                variable_id=start_at + index,
+                restriction_lemma=mark.restriction_lemma,
+            )
+            for index, (handle, mark) in enumerate(found)
         )
 
 
@@ -675,6 +966,7 @@ class SemanticConsolidator:
                     variable_id=anchor.variable_id,
                     anchor_ref=anchor.existential_ref,
                     anchor_member_refs=anchor.member_refs,
+                    restriction_lemma=anchor.restriction_lemma,
                 ),
             )
             return replace(actant, entity_ref=handle)
@@ -944,29 +1236,49 @@ class SemanticConsolidator:
         source_timestamp: datetime | None = None,
         experience_timestamp: datetime | None = None,
     ) -> MutationPlan:
-        scoped = apply_speech_act_scoping(result)
+        flattened = self._flatten_runtime_alternatives(result)
+        scoped = apply_speech_act_scoping(flattened)
         scoped, cross_turn_existentials = self._bind_cross_turn_existential_pronouns(
             scoped, context
         )
+        scoped, temporal_scopes = self._rewrite_temporal_scopes(scoped)
         scoped, temporal_refs = self._temporalize(
             scoped, context=context, source_timestamp=source_timestamp,
             experience_timestamp=experience_timestamp,
         )
+        scoped, quantifier_marks = self._rewrite_quantified_actants(scoped)
         self.validator.validate(scoped)
         ordered = self.validator.dependency_order(scoped)
         next_variable_id = max(
             (item.variable_id for item in cross_turn_existentials), default=-1
         ) + 1
         fresh_existentials = self._existential_bindings(
-            scoped, start_at=next_variable_id
+            quantifier_marks, start_at=next_variable_id
         )
-        existential_bindings = cross_turn_existentials + fresh_existentials
+        next_variable_id += len(fresh_existentials)
+        negative_existentials = self._negative_existential_bindings(
+            quantifier_marks, start_at=next_variable_id
+        )
+        next_variable_id += len(negative_existentials)
+        universal_bindings = self._universal_bindings(
+            quantifier_marks, start_at=next_variable_id
+        )
+        next_variable_id += len(universal_bindings)
+        temporal_scope_bindings = self._temporal_scope_bindings(
+            temporal_scopes,
+            start_at=next_variable_id,
+            source_timestamp=source_timestamp,
+            experience_timestamp=experience_timestamp,
+        )
+        existential_bindings = cross_turn_existentials + fresh_existentials + negative_existentials
         ir = CandidateIR(
             source_text=scoped.source_text,
             perception=scoped,
             ordered_assertion_ids=tuple(item.local_id for item in ordered),
             discourse_refs=self._discourse_refs(scoped, context),
             existential_bindings=existential_bindings,
+            universal_bindings=universal_bindings,
+            temporal_scope_bindings=temporal_scope_bindings,
             temporal_refs=temporal_refs,
             batch_kind=batch_kind,
             source_ref=source_ref,

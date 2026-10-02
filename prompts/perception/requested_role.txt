@@ -1,1 +1,1 @@
-Choose exactly one English label from OPTIONS. Return only the label. Choose UNKNOWN if the requested information type is not clear.
+Classify the semantic role requested by the fixed query gap. Use UNKNOWN if the requested information type is not clear.

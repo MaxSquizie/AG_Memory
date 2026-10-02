@@ -5239,25 +5239,13 @@
           "assertions": [
             {
               "key": "a1",
-              "predicate": "начать",
+              "predicate": "читать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Ольга",
-                "OBJECT": {
-                  "assertion": "a2"
-                }
-              }
-            },
-            {
-              "key": "a2",
-              "predicate": "читать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a1.SUBJECT"
-                },
                 "OBJECT": "книга"
               }
             }
@@ -5269,8 +5257,7 @@
         "integration": {
           "must_succeed": true,
           "domains": {
-            "a1": "C",
-            "a2": "C"
+            "a1": "C"
           }
         }
       },

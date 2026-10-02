@@ -1,6 +1,7 @@
 from .attention import AttentionFocusEvent, IgnitionInferenceAttention, InferenceAttention
 from .contracts import (
     AllOfGoal,
+    AnyOfGoal,
     AssociationGoal,
     CauseEntailmentGoal,
     CounterfactualGoal,
@@ -10,6 +11,7 @@ from .contracts import (
     DerivedLinkConclusion,
     ExistingRefConclusion,
     ExistsGoal,
+    ExactlyOneOfGoal,
     FormulaGoal,
     GoalMode,
     GoalSpec,
@@ -29,23 +31,85 @@ from .bindings import BindingEnvironment
 from .runtime import GoalRuntime
 from .context import BranchContext, CounterfactualContext, ProofContext
 from .schema import InferenceSchema, InferenceSchemaRegistry
-from .engine import InferenceEngine
-from .materialization import InferenceMaterializer, MaterializationResult
-from .query_builder import QueryBuildResult, QueryGoalBuilder, SemanticGoalCompiler, TurnGoalBuilder
+from .materialization import MaterializationResult
+from .query_builder import QueryBuildResult, QueryGoalBuilder as _BaseQueryGoalBuilder
+from .counterfactual_goal import CounterfactualSemanticGoalCompiler
+from .modal_goal import (
+    FormulaPattern,
+    FormulaPatternGoal,
+    MatrixFormulaPatternGoal,
+    ModalInferenceEngine,
+    ModalSemanticGoalCompiler,
+)
+from .event_query import EventMatchGoal, EventQueryGoalBuilder, EventSetInferenceEngine
+from .identity_query import (
+    EntityIdentityGoal,
+    EntityIdentityInferenceEngine,
+    EntityIdentityQueryGoalBuilder,
+)
+from .quantified_exists import (
+    DerivedAtomConclusion,
+    QuantifiedExistsInferenceEngine,
+    QuantifiedInferenceMaterializer,
+)
+from .set_valued_query import (
+    SetValuedInferenceMaterializer,
+    SetValuedQueryGoalBuilder,
+    SetValuedQueryInferenceEngine,
+)
+from .modal_dispatch import ModalTurnGoalCompiler
+from .association_goal import AssociationQueryBuildResult
+from .association_session_goal import (
+    AssociationConstraint,
+    AssociationContinuationGoal,
+    AssociationScopedGoal,
+    AssociationSessionTurnGoalCompiler,
+)
+
+# Public runtime composes independent GoalCompiler/Inference extensions. Open-event
+# retrieval, identity/description lookup, quantified ground-atom derivation and
+# complete WH binding retrieval are InferenceEngine extensions. Association
+# execution remains outside InferenceEngine and is routed to AssociationCoordinator
+# by the agent orchestrator.
+InferenceEngine = SetValuedQueryInferenceEngine
+InferenceMaterializer = SetValuedInferenceMaterializer
+QueryGoalBuilder = SetValuedQueryGoalBuilder
+AssociationTurnGoalCompiler = AssociationSessionTurnGoalCompiler
+SemanticGoalCompiler = AssociationSessionTurnGoalCompiler
+TurnGoalBuilder = AssociationSessionTurnGoalCompiler
 
 __all__ = [
     "AttentionFocusEvent",
     "AllOfGoal",
+    "AnyOfGoal",
+    "AssociationConstraint",
     "AssociationGoal",
+    "AssociationContinuationGoal",
+    "AssociationScopedGoal",
+    "AssociationQueryBuildResult",
+    "AssociationSessionTurnGoalCompiler",
+    "AssociationTurnGoalCompiler",
     "CauseEntailmentGoal",
     "CounterfactualGoal",
+    "CounterfactualSemanticGoalCompiler",
     "CognitiveEventKind",
     "CognitiveTraceEvent",
     "CompositeConclusion",
+    "DerivedAtomConclusion",
     "DerivedLinkConclusion",
+    "EventMatchGoal",
+    "EventQueryGoalBuilder",
+    "EventSetInferenceEngine",
+    "EntityIdentityGoal",
+    "EntityIdentityInferenceEngine",
+    "EntityIdentityQueryGoalBuilder",
     "ExistingRefConclusion",
     "ExistsGoal",
+    "ExactlyOneOfGoal",
     "FormulaGoal",
+    "FormulaPattern",
+    "FormulaPatternGoal",
+    "MatrixFormulaPatternGoal",
     "GoalMode",
     "GoalSpec",
     "GoalRuntime",
@@ -58,10 +122,18 @@ __all__ = [
     "InferenceQuery",
     "LogicalStatus",
     "MaterializationResult",
+    "ModalInferenceEngine",
+    "ModalSemanticGoalCompiler",
+    "ModalTurnGoalCompiler",
     "MultiRoleBindingConclusion",
     "MultiRoleFillGoal",
     "QueryBuildResult",
     "QueryGoalBuilder",
+    "QuantifiedExistsInferenceEngine",
+    "QuantifiedInferenceMaterializer",
+    "SetValuedInferenceMaterializer",
+    "SetValuedQueryGoalBuilder",
+    "SetValuedQueryInferenceEngine",
     "SemanticGoalCompiler",
     "TurnGoalBuilder",
     "RelationGoal",

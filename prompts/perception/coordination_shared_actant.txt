@@ -1,1 +1,1 @@
-Choose whether the ACTANT fills the stated semantic role for every coordinated predicate. Answer exactly SHARED or LOCAL. Do not infer a new role and do not explain.
+Decide whether ACTANT fills the already stated semantic role for every coordinated predicate. SHARED applies to all listed predicates; LOCAL applies only to its attached predicate. Use UNCLEAR when the scope is not determined. Do not infer a new role.

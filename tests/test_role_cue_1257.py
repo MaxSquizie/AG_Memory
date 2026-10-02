@@ -93,7 +93,7 @@ class RuntimeRoleCue1257Tests(unittest.TestCase):
         backend = ScriptedBackend({"perception_role_cue": ["SOMETHING_ELSE"]})
         parser = make_parser(backend)
         span = _Span(1, 1, "TARGET_X", EvidenceSpan("TARGET_X", 0, 8))
-        with self.assertRaisesRegex(Exception, "role_cue expected exactly one of"):
+        with self.assertRaisesRegex(Exception, "role_cue failed after 1 attempt.*expected exactly one current option"):
             parser._classify_role(
                 "PRED TARGET_X", PredicateCandidate("PRED"), span, set(), None,
                 requested=False,

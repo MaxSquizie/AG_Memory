@@ -1,0 +1,4083 @@
+{
+  "version": 1,
+  "corpus_id": "quantifier-semantic-v1-78",
+  "case_count": 78,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Semantic quantifier recognition and canonical binder-scope acceptance.",
+    "rule": "The oracle is authored from intended semantics. Surface expressions are test data only; production recognition must use the bounded semantic probe and typed QuantifierCandidate contract."
+  },
+  "coverage": {
+    "existential_paraphrase": 8,
+    "existential_pronoun": 3,
+    "existential_partitive": 1,
+    "role_scope": 17,
+    "existential_indefinite": 1,
+    "universal_paraphrase": 9,
+    "universal_partitive": 1,
+    "negative_existential": 6,
+    "negative_role_scope": 17,
+    "negated_universal": 7,
+    "inversion_scope": 6,
+    "body_negation": 1,
+    "ambiguous_scope": 1
+  },
+  "cases": [
+    {
+      "text": "Хотя бы один студент пришёл.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_001"
+    },
+    {
+      "text": "По меньшей мере один курьер доставил посылку.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "доставить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "посылка",
+                "SUBJECT": {
+                  "text": "курьер",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "курьер"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "курьер",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_002"
+    },
+    {
+      "text": "Как минимум одна лампа горит.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "гореть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "лампа",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "лампа"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "лампа",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_003"
+    },
+    {
+      "text": "Мария пригласила не менее одного специалиста.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "пригласить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария",
+                "OBJECT": {
+                  "text": "специалист",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "специалист"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "специалист",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_004"
+    },
+    {
+      "text": "Кто-нибудь позвонил.",
+      "grade": "EXACT",
+      "family": "existential_pronoun",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "кто-нибудь",
+                  "quantifier": {
+                    "kind": "EXISTS"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": null,
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_005"
+    },
+    {
+      "text": "Кто-либо ответил.",
+      "grade": "EXACT",
+      "family": "existential_pronoun",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "ответить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "кто-либо",
+                  "quantifier": {
+                    "kind": "EXISTS"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": null,
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_006"
+    },
+    {
+      "text": "Некто постучал.",
+      "grade": "EXACT",
+      "family": "existential_pronoun",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "постучать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "некто",
+                  "quantifier": {
+                    "kind": "EXISTS"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": null,
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_007"
+    },
+    {
+      "text": "Один из сотрудников вошёл.",
+      "grade": "EXACT",
+      "family": "existential_partitive",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "войти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "сотрудник",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "сотрудник"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "сотрудник",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_008"
+    },
+    {
+      "text": "Найдётся хотя бы один свидетель.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "найтись",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "свидетель",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "свидетель"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "свидетель",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_009"
+    },
+    {
+      "text": "Иван передал письмо хотя бы одному адресату.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "письмо",
+                "RECIPIENT": {
+                  "text": "адресат",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "адресат"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "адресат",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_010"
+    },
+    {
+      "text": "Иван положил книгу хотя бы в один шкаф.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "положить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга",
+                "LOCATION": {
+                  "text": "шкаф",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "шкаф"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "шкаф",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_011"
+    },
+    {
+      "text": "В какой-нибудь день Анна вернётся.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "вернуться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "TIME": {
+                  "text": "день",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "день"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "день",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_012"
+    },
+    {
+      "text": "Иван открыл дверь каким-нибудь ключом.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": {
+                  "text": "ключ",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "ключ"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "ключ",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_013"
+    },
+    {
+      "text": "Иван получил письмо хотя бы от одного отдела.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "письмо",
+                "SOURCE": {
+                  "text": "отдел",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "отдел"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "отдел",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_014"
+    },
+    {
+      "text": "Мастер изготовил деталь из какого-нибудь сплава.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "изготовить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "деталь",
+                "MATERIAL": {
+                  "text": "сплав",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "сплав"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "сплав",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_015"
+    },
+    {
+      "text": "Иван пришёл хотя бы с одним коллегой.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "AUXILLIARY": {
+                  "text": "коллега",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "коллега"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "коллега",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_016"
+    },
+    {
+      "text": "В отчёте обнаружилась по крайней мере одна ошибка.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "обнаружиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "LOCATION": "отчёт",
+                "SUBJECT": {
+                  "text": "ошибка",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "ошибка"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "ошибка",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_017"
+    },
+    {
+      "text": "Минимум один датчик сработал.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "датчик",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "датчик"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "датчик",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_018"
+    },
+    {
+      "text": "Один или более узлов отказали.",
+      "grade": "EXACT",
+      "family": "existential_paraphrase",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отказать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "узел",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "узел"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "узел",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_019"
+    },
+    {
+      "text": "Какой-то исследователь предложил метод.",
+      "grade": "EXACT",
+      "family": "existential_indefinite",
+      "tags": [
+        "quantifier",
+        "exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "предложить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "метод",
+                "SUBJECT": {
+                  "text": "исследователь",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "исследователь"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "исследователь",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_020"
+    },
+    {
+      "text": "Каждый студент сдал экзамен.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сдать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "экзамен",
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_021"
+    },
+    {
+      "text": "Всякий участник получил жетон.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "жетон",
+                "SUBJECT": {
+                  "text": "участник",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "участник"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "участник",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_022"
+    },
+    {
+      "text": "Любой пользователь открывает файл.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "файл",
+                "SUBJECT": {
+                  "text": "пользователь",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "пользователь"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "пользователь",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_023"
+    },
+    {
+      "text": "Все без исключения датчики сработали.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "датчик",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "датчик"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "датчик",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_024"
+    },
+    {
+      "text": "Кто угодно из участников ответит.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "ответить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "участник",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "участник"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "участник",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_025"
+    },
+    {
+      "text": "Каждый из инженеров подписал акт.",
+      "grade": "EXACT",
+      "family": "universal_partitive",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "подписать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "акт",
+                "SUBJECT": {
+                  "text": "инженер",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "инженер"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "инженер",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_026"
+    },
+    {
+      "text": "Поголовно все сотрудники явились.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "явиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "сотрудник",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "сотрудник"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "сотрудник",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_027"
+    },
+    {
+      "text": "В каждом помещении горит лампа.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "гореть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "лампа",
+                "LOCATION": {
+                  "text": "помещение",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "помещение"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "помещение",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_028"
+    },
+    {
+      "text": "Анна показала документ каждому адресату.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "показать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "документ",
+                "RECIPIENT": {
+                  "text": "адресат",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "адресат"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "адресат",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_029"
+    },
+    {
+      "text": "Иван проверил каждую запись.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "text": "запись",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "запись"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "запись",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_030"
+    },
+    {
+      "text": "Сообщение пришло из каждого отдела.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сообщение",
+                "SOURCE": {
+                  "text": "отдел",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "отдел"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "отдел",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_031"
+    },
+    {
+      "text": "Иван открыл дверь любым ключом.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": {
+                  "text": "ключ",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "ключ"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "ключ",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_032"
+    },
+    {
+      "text": "В любой день система запускается.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "запускаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "система",
+                "TIME": {
+                  "text": "день",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "день"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "день",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_033"
+    },
+    {
+      "text": "Исследователь измерил образец каждым прибором.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "измерить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "исследователь",
+                "OBJECT": "образец",
+                "TOOL": {
+                  "text": "прибор",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "прибор"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "прибор",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_034"
+    },
+    {
+      "text": "Мастер изготовил образец из всякого металла.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "изготовить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "образец",
+                "MATERIAL": {
+                  "text": "металл",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "металл"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "металл",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_035"
+    },
+    {
+      "text": "Автобус прошёл по каждому маршруту.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "пройти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "автобус",
+                "LOCATION": {
+                  "text": "маршрут",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "маршрут"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "маршрут",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_036"
+    },
+    {
+      "text": "Каждый раз звучал сигнал.",
+      "grade": "EXACT",
+      "family": "role_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "звучать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сигнал",
+                "TIME": {
+                  "text": "раз",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "раз"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "раз",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_037"
+    },
+    {
+      "text": "Оператор обработал все без исключения заявки.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "обработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "оператор",
+                "OBJECT": {
+                  "text": "заявка",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "заявка"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "заявка",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_038"
+    },
+    {
+      "text": "Всякий инженер знает правило.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "знать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "правило",
+                "SUBJECT": {
+                  "text": "инженер",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "инженер"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "инженер",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_039"
+    },
+    {
+      "text": "Любая книга лежит на полке.",
+      "grade": "EXACT",
+      "family": "universal_paraphrase",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "лежать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "LOCATION": "полка",
+                "SUBJECT": {
+                  "text": "книга",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "книга"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "книга",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_040"
+    },
+    {
+      "text": "Никто не пришёл.",
+      "grade": "EXACT",
+      "family": "negative_existential",
+      "tags": [
+        "quantifier",
+        "not_exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "никто",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": null,
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_041"
+    },
+    {
+      "text": "Ничто не изменилось.",
+      "grade": "EXACT",
+      "family": "negative_existential",
+      "tags": [
+        "quantifier",
+        "not_exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "измениться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "ничто",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": null,
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_042"
+    },
+    {
+      "text": "Ни один студент не опоздал.",
+      "grade": "EXACT",
+      "family": "negative_existential",
+      "tags": [
+        "quantifier",
+        "not_exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "опоздать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_043"
+    },
+    {
+      "text": "Ни одна посылка не потерялась.",
+      "grade": "EXACT",
+      "family": "negative_existential",
+      "tags": [
+        "quantifier",
+        "not_exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "потеряться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "посылка",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "посылка"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "посылка",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_044"
+    },
+    {
+      "text": "Охранник не впустил ни единого посетителя.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "впустить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "охранник",
+                "OBJECT": {
+                  "text": "посетитель",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "посетитель"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "посетитель",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_045"
+    },
+    {
+      "text": "Иван не увидел ни одной ошибки.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "увидеть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "text": "ошибка",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "ошибка"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "ошибка",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_046"
+    },
+    {
+      "text": "Иван не отправил письмо ни одному адресату.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "отправить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "письмо",
+                "RECIPIENT": {
+                  "text": "адресат",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "адресат"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "адресат",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_047"
+    },
+    {
+      "text": "Иван не нашёл книгу ни в одном шкафу.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "найти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга",
+                "LOCATION": {
+                  "text": "шкаф",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "шкаф"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "шкаф",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_048"
+    },
+    {
+      "text": "Ни в какой день система не останавливалась.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "останавливаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "система",
+                "TIME": {
+                  "text": "день",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "день"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "день",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_049"
+    },
+    {
+      "text": "Иван не открыл дверь никаким ключом.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "дверь",
+                "TOOL": {
+                  "text": "ключ",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "ключ"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "ключ",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_050"
+    },
+    {
+      "text": "Иван не получил ответа ни от одного отдела.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "получить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "ответ",
+                "SOURCE": {
+                  "text": "отдел",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "отдел"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "отдел",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_051"
+    },
+    {
+      "text": "Мастер не изготовил деталь ни из одного сплава.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "изготовить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "деталь",
+                "MATERIAL": {
+                  "text": "сплав",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "сплав"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "сплав",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_052"
+    },
+    {
+      "text": "Иван не спорил ни с одним коллегой.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "спорить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "AUXILLIARY": {
+                  "text": "коллега",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "коллега"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "коллега",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_053"
+    },
+    {
+      "text": "Ни один из датчиков не сработал.",
+      "grade": "EXACT",
+      "family": "negative_existential",
+      "tags": [
+        "quantifier",
+        "not_exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "датчик",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "датчик"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "датчик",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_054"
+    },
+    {
+      "text": "Ни малейшего сигнала не поступило.",
+      "grade": "EXACT",
+      "family": "negative_existential",
+      "tags": [
+        "quantifier",
+        "not_exists"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "поступить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "сигнал",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "сигнал"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "сигнал",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_055"
+    },
+    {
+      "text": "Не каждый студент сдал экзамен.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сдать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "экзамен",
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_056"
+    },
+    {
+      "text": "Далеко не всякий участник ответил.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "ответить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "участник",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "участник"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "участник",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_057"
+    },
+    {
+      "text": "Не любой ключ открыл дверь.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открыть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "дверь",
+                "TOOL": {
+                  "text": "ключ",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "ключ"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "ключ",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_058"
+    },
+    {
+      "text": "Не все без исключения датчики сработали.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сработать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "датчик",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "датчик"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "датчик",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_059"
+    },
+    {
+      "text": "Не каждый из инженеров подписал акт.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "подписать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "акт",
+                "SUBJECT": {
+                  "text": "инженер",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "инженер"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "инженер",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_060"
+    },
+    {
+      "text": "Иван проверил не каждую запись.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "text": "запись",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "запись"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "запись",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_061"
+    },
+    {
+      "text": "Анна показала документ не каждому адресату.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "показать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "документ",
+                "RECIPIENT": {
+                  "text": "адресат",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "адресат"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "адресат",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_062"
+    },
+    {
+      "text": "Лампа горит не в каждом помещении.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "гореть",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "лампа",
+                "LOCATION": {
+                  "text": "помещение",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "помещение"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "помещение",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_063"
+    },
+    {
+      "text": "Система запускается не в любой день.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "запускаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "система",
+                "TIME": {
+                  "text": "день",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "день"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "день",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_064"
+    },
+    {
+      "text": "Дверь открывается не каждым ключом.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "открываться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "дверь",
+                "TOOL": {
+                  "text": "ключ",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "ключ"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "ключ",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_065"
+    },
+    {
+      "text": "Сообщение пришло не из каждого отдела.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сообщение",
+                "SOURCE": {
+                  "text": "отдел",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "отдел"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "отдел",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_066"
+    },
+    {
+      "text": "Мастер изготовил образец не из всякого металла.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "изготовить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "мастер",
+                "OBJECT": "образец",
+                "MATERIAL": {
+                  "text": "металл",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "металл"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "металл",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_067"
+    },
+    {
+      "text": "Не каждый раз звучал сигнал.",
+      "grade": "EXACT",
+      "family": "negative_role_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "role_scope"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "звучать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "сигнал",
+                "TIME": {
+                  "text": "раз",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "раз"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "раз",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_068"
+    },
+    {
+      "text": "Далеко не все сотрудники явились.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "явиться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": {
+                  "text": "сотрудник",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "сотрудник"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "сотрудник",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_069"
+    },
+    {
+      "text": "Отнюдь не любой инженер знает правило.",
+      "grade": "EXACT",
+      "family": "negated_universal",
+      "tags": [
+        "quantifier",
+        "not_forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "знать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "правило",
+                "SUBJECT": {
+                  "text": "инженер",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "инженер"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "инженер",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_070"
+    },
+    {
+      "text": "Экзамен сдал каждый студент.",
+      "grade": "EXACT",
+      "family": "inversion_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "inversion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сдать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "экзамен",
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_071"
+    },
+    {
+      "text": "Каждую запись Иван проверил.",
+      "grade": "EXACT",
+      "family": "inversion_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "inversion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "проверить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": {
+                  "text": "запись",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "запись"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "запись",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_072"
+    },
+    {
+      "text": "Каждому адресату Анна показала документ.",
+      "grade": "EXACT",
+      "family": "inversion_scope",
+      "tags": [
+        "quantifier",
+        "forall",
+        "inversion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "показать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Анна",
+                "OBJECT": "документ",
+                "RECIPIENT": {
+                  "text": "адресат",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "адресат"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "адресат",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_073"
+    },
+    {
+      "text": "Хотя бы одному адресату Иван передал письмо.",
+      "grade": "EXACT",
+      "family": "inversion_scope",
+      "tags": [
+        "quantifier",
+        "exists",
+        "inversion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "передать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "письмо",
+                "RECIPIENT": {
+                  "text": "адресат",
+                  "quantifier": {
+                    "kind": "EXISTS",
+                    "restriction": "адресат"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "EXISTS",
+              "variables": 1,
+              "restriction": "адресат",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_074"
+    },
+    {
+      "text": "Ни в одном шкафу Иван не нашёл книгу.",
+      "grade": "EXACT",
+      "family": "inversion_scope",
+      "tags": [
+        "quantifier",
+        "not_exists",
+        "inversion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "найти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван",
+                "OBJECT": "книга",
+                "LOCATION": {
+                  "text": "шкаф",
+                  "quantifier": {
+                    "kind": "NOT_EXISTS",
+                    "restriction": "шкаф"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_EXISTS",
+              "variables": 1,
+              "restriction": "шкаф",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_075"
+    },
+    {
+      "text": "Каждый студент не сдал экзамен.",
+      "grade": "EXACT",
+      "family": "body_negation",
+      "tags": [
+        "quantifier",
+        "forall"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сдать",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "OBJECT": "экзамен",
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "FORALL",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "FORALL",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_076"
+    },
+    {
+      "text": "Экзамен сдал далеко не каждый студент.",
+      "grade": "EXACT",
+      "family": "inversion_scope",
+      "tags": [
+        "quantifier",
+        "not_forall",
+        "inversion"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "сдать",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "OBJECT": "экзамен",
+                "SUBJECT": {
+                  "text": "студент",
+                  "quantifier": {
+                    "kind": "NOT_FORALL",
+                    "restriction": "студент"
+                  }
+                }
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": []
+        },
+        "integration": {
+          "must_succeed": true,
+          "domains": {
+            "a1": "C"
+          },
+          "quantifiers": [
+            {
+              "kind": "NOT_FORALL",
+              "variables": 1,
+              "restriction": "студент",
+              "members": [
+                "a1"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "quantifier_077"
+    },
+    {
+      "text": "Не каждый студент не сдал экзамен.",
+      "grade": "EXACT",
+      "family": "ambiguous_scope",
+      "tags": [
+        "quantifier",
+        "scope",
+        "fail_closed"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": false
+        },
+        "integration": {
+          "must_succeed": false
+        }
+      },
+      "scenario": "quantifier_078"
+    }
+  ]
+}

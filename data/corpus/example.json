@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "domain": "C",
+  "symbols": [
+    {
+      "id": "gift",
+      "forms": ["дарить", "подарить"]
+    }
+  ],
+  "entities": [
+    {"id": "ivan", "name": "Иван"},
+    {"id": "book", "name": "книга"},
+    {"id": "maria", "name": "Мария"},
+    {"id": "person", "name": "человек"}
+  ],
+  "templates": [
+    {
+      "id": "gift_event",
+      "predicate": "gift",
+      "roles": ["SUBJECT", "OBJECT", "RECIPIENT"]
+    }
+  ],
+  "facts": [
+    {
+      "id": "gift_1",
+      "template": "gift_event",
+      "SUBJECT": "ivan",
+      "OBJECT": "book",
+      "RECIPIENT": "maria"
+    }
+  ],
+  "links": [
+    {
+      "id": "ivan_is_person",
+      "relation": "IS-A",
+      "from": "ivan",
+      "to": "person"
+    }
+  ]
+}

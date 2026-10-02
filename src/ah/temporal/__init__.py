@@ -3,12 +3,13 @@ from .contracts import (
     TemporalCandidate,
     TemporalKind,
     TemporalMode,
+    TemporalModeProbeDecision,
     TemporalPrecision,
     TemporalRelation,
     TemporalValue,
     TransitionOperator,
 )
-from .normalizer import TemporalNormalizer
+from .source_normalizer import TemporalNormalizer
 from .reasoner import TemporalReasoner, TemporalRelationResult, TemporalTruth
 from .state import StateTracker, StateTransitionResult, StateTruth
 from .storage import (
@@ -21,6 +22,7 @@ __all__ = [
     "TemporalCandidate",
     "TemporalKind",
     "TemporalMode",
+    "TemporalModeProbeDecision",
     "TemporalPrecision",
     "TemporalRelation",
     "TemporalValue",

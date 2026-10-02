@@ -1,4 +1,9 @@
-from ah.temporal import TemporalCandidate, TemporalMode, TransitionOperator
+from ah.temporal import (
+    TemporalCandidate,
+    TemporalMode,
+    TemporalModeProbeDecision,
+    TransitionOperator,
+)
 from .contracts import (
     ActDependencyCandidate,
     ActDependencyKind,
@@ -17,11 +22,21 @@ from .contracts import (
     PerceptionResult,
     PropositionExprCandidate,
     PropositionOperator,
+    QuantifierCandidate,
+    QuantifierKind,
+    QuantifierProbeDecision,
+    TemporalScopeCandidate,
+    TemporalScopeKind,
+    TemporalScopeProbeDecision,
+    PropositionRootCandidate,
     PredicateCandidate,
     TemplateCandidate,
     TemplateSelection,
     QueryCandidate,
     QueryMode,
+    QueryQuantifierOperator,
+    QuantifiedQueryBinding,
+    QuantifiedQuerySpec,
     DiscourseRelationDecision,
     SituationRelationCandidate,
     SituationRelationHintCandidate,
@@ -29,14 +44,31 @@ from .contracts import (
     StructuralClarificationOption,
     StructuralClarificationSpec,
 )
+from .naming_semantics import NamingAssertionCandidate
+from .query_semantics import (
+    EntityIdentityQueryCandidate,
+    EventSetQueryCandidate,
+    IdentityQueryKind,
+)
 from .llm_parser import (
-    LLMPerceptionService,
     LLMPerceptionSettings,
     PerceptionAttemptDiagnostic,
     PerceptionDiagnostic,
     PerceptionParseError,
     PerceptionClarificationRequired,
 )
+from .association_semantics import (
+    AssociationActRelationCandidate,
+    AssociationEndpointSelector,
+    AssociationQueryDecision,
+    AssociationSemanticClassifier,
+)
+from .generalized_naming import GeneralizedNamingAdaptiveParser
+from .runtime_invariants import RuntimeSemanticAdaptiveParser
+from .identity_query import IdentityQueryAdaptiveParser
+from .semantic_predicates import SemanticPredicateAdaptiveParser
+from .association_continuation import AssociationContinuationQueryCandidate
+from .higher_order_queries import HigherOrderQueryLLMPerceptionService as LLMPerceptionService
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
     EmbeddingSemanticReranker,
@@ -44,6 +76,22 @@ from .lexical_recovery import (
     LexicalRecoveryStatus,
     TokenCandidate,
     weighted_damerau_levenshtein,
+)
+from .quantifier_formalization import (
+    QuantifierFormalizationError,
+    QuantifierFormalizer,
+    QuantifierSemanticResolver,
+)
+from .temporal_mode_formalization import (
+    PredicateTemporalProfile,
+    TemporalModeFormalizationError,
+    TemporalModeFormalizer,
+    TemporalModeSemanticResolver,
+)
+from .temporal_scope_formalization import (
+    TemporalScopeFormalizationError,
+    TemporalScopeFormalizer,
+    TemporalScopeSemanticResolver,
 )
 
 __all__ = [
@@ -64,11 +112,25 @@ __all__ = [
     "PerceptionResult",
     "PropositionExprCandidate",
     "PropositionOperator",
+    "QuantifierCandidate",
+    "QuantifierKind",
+    "QuantifierProbeDecision",
+    "TemporalScopeCandidate",
+    "TemporalScopeKind",
+    "TemporalScopeProbeDecision",
+    "PropositionRootCandidate",
     "PredicateCandidate",
     "TemplateCandidate",
     "TemplateSelection",
     "QueryCandidate",
     "QueryMode",
+    "QueryQuantifierOperator",
+    "QuantifiedQueryBinding",
+    "QuantifiedQuerySpec",
+    "NamingAssertionCandidate",
+    "EventSetQueryCandidate",
+    "EntityIdentityQueryCandidate",
+    "IdentityQueryKind",
     "DiscourseRelationDecision",
     "SituationRelationCandidate",
     "SituationRelationHintCandidate",
@@ -81,16 +143,36 @@ __all__ = [
     "PerceptionDiagnostic",
     "PerceptionParseError",
     "PerceptionClarificationRequired",
+    "AssociationActRelationCandidate",
+    "AssociationEndpointSelector",
+    "AssociationQueryDecision",
+    "AssociationSemanticClassifier",
+    "AssociationContinuationQueryCandidate",
+    "GeneralizedNamingAdaptiveParser",
+    "RuntimeSemanticAdaptiveParser",
+    "IdentityQueryAdaptiveParser",
+    "SemanticPredicateAdaptiveParser",
     "TextSensoryResult",
     "TextSensoryService",
     "TemporalCandidate",
     "TemporalMode",
+    "TemporalModeProbeDecision",
     "TransitionOperator",
     "EmbeddingSemanticReranker",
     "LexicalRecovery",
     "LexicalRecoveryStatus",
     "TokenCandidate",
     "weighted_damerau_levenshtein",
+    "QuantifierFormalizationError",
+    "QuantifierFormalizer",
+    "QuantifierSemanticResolver",
+    "PredicateTemporalProfile",
+    "TemporalModeFormalizationError",
+    "TemporalModeFormalizer",
+    "TemporalModeSemanticResolver",
+    "TemporalScopeFormalizationError",
+    "TemporalScopeFormalizer",
+    "TemporalScopeSemanticResolver",
     "apply_speech_act_scoping",
     "GoalSemanticService",
 ]
@@ -99,4 +181,4 @@ from .morphology import MorphInfo, Morphology, NullMorphology, Pymorphy3Morpholo
 
 from .scoping import apply_speech_act_scoping
 
-from .goal_semantics import GoalSemanticService
+from .association_goal_semantics import AssociationGoalSemanticService as GoalSemanticService

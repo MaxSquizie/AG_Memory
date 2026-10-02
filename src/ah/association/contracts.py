@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from ah.inference.contracts import AssociationGoal
-from ah.model import Ref
+from ah.model import ActantRole, Ref
 
 
 class AssociationStatus(str, Enum):
@@ -21,11 +21,19 @@ class AssociationStatus(str, Enum):
     RESOURCE_LIMIT = "RESOURCE_LIMIT"
 
 
+class AssociationSemantics(str, Enum):
+    """Whether the selected convergence depends on episodic H content."""
+
+    SEMANTIC = "SEMANTIC"
+    EPISODIC = "EPISODIC"
+
+
 class AssociationDomainPolicy(str, Enum):
-    """Runtime policy for the still-open H-domain architecture decision.
+    """Runtime policy for H-domain participation in associative search.
 
     ``ALL`` allows H to participate like C/P. ``EXCLUDE_H`` keeps episodic H out
-    of the search. The choice is runtime-only and never changes canonical AH.
+    of the search. The choice is runtime-only and never changes canonical AH;
+    outcomes independently report whether a found route is semantic or episodic.
     """
 
     ALL = "ALL"
@@ -81,6 +89,41 @@ class AssociationPath:
         return len(self.hops)
 
 
+@dataclass(frozen=True, slots=True)
+class AssociationFrameBinding:
+    """One retained role constraint of a runtime common predicate frame.
+
+    ``generalized`` means the two observed fillers were not identical but had a
+    nearest canonical IS-A common ancestor.  This is association-time structure,
+    never a new asserted fact.
+    """
+
+    role: ActantRole
+    value: Ref
+    generalized: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class AssociationFramePattern:
+    """A partial predicate frame shared by both association endpoints.
+
+    The queried endpoints occupy ``variable_roles`` and are intentionally replaced
+    by holes. ``bindings`` retain only role constraints common to both supporting
+    facts (exactly or through canonical IS-A generalization).  This lets association
+    report ``HAVE(SUBJECT=_, OBJECT=legs)`` rather than stopping at the generic
+    predicate symbol ``HAVE``.
+    """
+
+    template: Ref
+    predicate: Ref
+    variable_roles: tuple[ActantRole, ...]
+    bindings: tuple[AssociationFrameBinding, ...]
+    left_fact: Ref
+    right_fact: Ref
+    signature: str
+    semantics: AssociationSemantics
+
+
 class AssociationTraceKind(str, Enum):
     GOAL_START = "GOAL_START"
     SEED = "SEED"
@@ -116,6 +159,10 @@ class AssociationOutcome:
     ticks_executed: int
     trace: tuple[AssociationTraceEvent, ...]
     domain_policy: AssociationDomainPolicy
+    semantics: AssociationSemantics | None = None
+    minimal_fact_count: int | None = None
+    frame_pattern: AssociationFramePattern | None = None
+    result_signature: str | None = None
 
     @property
     def found(self) -> bool:

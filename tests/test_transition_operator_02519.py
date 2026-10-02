@@ -57,6 +57,8 @@ class _TransitionFixture:
             if cue == "не":
                 return LLMResponse("NONE", {})
             return LLMResponse(self.operator, {})
+        if role == "semantic_modal_operator":
+            return LLMResponse("NONE", {})
         if role == "perception_act_relation":
             return LLMResponse("NONE", {})
         raise AssertionError(f"unexpected bounded call: {role}\n{prompt[:800]}")

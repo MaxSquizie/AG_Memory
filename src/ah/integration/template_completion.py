@@ -51,6 +51,30 @@ class TemplateCompletionService:
             commands=tuple(replace(item, predicate=resolve_predicate(item.predicate)) for item in result.commands),
         )
 
+    def _option_is_exact_lexeme(self, predicate: PredicateCandidate, option) -> bool:
+        """Whether one candidate T belongs to the current predicate's exact S.
+
+        A one-option sense set used to be accepted without an LLM call. That is safe
+        only when the option came from exact lexical identity. Predicate-family
+        retrieval deliberately exposes cross-lexeme neighbours (e.g. видеть <-
+        увидеть) as *candidates*, so those single options still require the bounded
+        semantic resolver and retain NEW as a valid outcome.
+        """
+        try:
+            template = self.integration.core.store.get_template(option.template_uid)
+            symbol = self.integration.core.store.get_symbol(template.predicate.uid)
+        except (AttributeError, KeyError, ValueError):
+            return False
+        lookup = predicate.lookup_form.strip().casefold().replace("ё", "е")
+        if not lookup:
+            return False
+        forms = {
+            str(form).strip().casefold().replace("ё", "е")
+            for form in symbol.forms
+            if str(form).strip()
+        }
+        return lookup in forms
+
     def _reconcile_selected_query_roles(self, result: PerceptionResult) -> PerceptionResult:
         """Constrain known query fillers by the already-selected canonical T.
 
@@ -133,11 +157,14 @@ class TemplateCompletionService:
         for request in requests:
             predicate = request.predicate
             if request.sense_options:
-                # Once deterministic role narrowing leaves one existing T, no
-                # semantic model call is needed. Preserve the same local-label ->
-                # canonical-UID mapping contract while making the common polar-query
-                # path deterministic.
-                if len(request.sense_options) == 1:
+                # Exact lexical identity + one compatible T is deterministic. A
+                # single cross-lexeme family candidate is not: it must still be
+                # compared semantically with NEW so prefixes never collapse meaning
+                # merely because role layouts happen to match.
+                if (
+                    len(request.sense_options) == 1
+                    and self._option_is_exact_lexeme(predicate, request.sense_options[0])
+                ):
                     decision = request.sense_options[0].label
                 else:
                     if sense_resolver is None:

@@ -1,0 +1,1 @@
+Classify PREAMBLE relative to the already built formula. OPERATOR_SOURCE means it only supplies a truth-functional instruction or constraint for that formula. INDEPENDENT means it also asserts a separate world proposition. Use UNCLEAR when the source does not determine this safely.

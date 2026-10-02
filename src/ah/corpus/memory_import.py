@@ -196,4 +196,7 @@ def import_memory_snapshot(services, path: str | Path, *, cold_restore: bool = T
     services.ignition.restore_snapshot(IgnitionSnapshot(0, {}, {}) if cold_restore or bundle.ignition_snapshot is None else bundle.ignition_snapshot)
     type(services)._ensure_identity_context(services.core, services.context, services.config)
     services.projector = ContextProjector(services.core, services.config.context)
+    # Loaded records stay unmanaged unless the dump already listed them.
+    # Subsequent ordinary API insertions must again receive initial lifetime.
+    services.core.store.enable_lifetime_tracking(services.ignition.tick_index)
     return MemoryImportResult(turns_processed=1, max_excitation=max_excitation(services.core))

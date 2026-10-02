@@ -1,3 +1,11 @@
-from .interaction_context import ExistentialDiscourseAnchor, InteractionContext
+from .interaction_context import (
+    AssociationDiscourseSession,
+    ExistentialDiscourseAnchor,
+    InteractionContext,
+)
 
-__all__ = ["ExistentialDiscourseAnchor", "InteractionContext"]
+__all__ = [
+    "AssociationDiscourseSession",
+    "ExistentialDiscourseAnchor",
+    "InteractionContext",
+]

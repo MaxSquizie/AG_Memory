@@ -1,0 +1,1 @@
+POSSESSION means SUBJECT has OBJECT as a belonging, resource, or available item; existential possessive wording counts. OTHER_RELATION covers actions, locations, comparisons, transfers, perceptions, class/property statements, and other relations. Use UNCLEAR when the whole source does not decide. Judge the proposition, not the surface verb.

@@ -1,1 +1,1 @@
-Choose exactly one label from CHOICES. Decide only whether KNOWN CONTENT is directed to PARTICIPANT as the person being asked, told, advised, instructed, or otherwise addressed. Return only CONTENT_ADDRESSEE or NOT_CONTENT_ADDRESSEE. Do not explain.
+Decide only whether KNOWN CONTENT is directed to PARTICIPANT as the person being asked, told, advised, instructed, or otherwise addressed. Use NOT_CONTENT_ADDRESSEE only when that relation is absent, and UNCLEAR when the text does not determine it.

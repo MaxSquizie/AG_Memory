@@ -38,9 +38,10 @@ def validate_hypernode(store: "AHStoreLike", node: Hypernode) -> Template:
 
     if has_bound_vars:
         scope = str(node.meta.get("semantic_scope") or "").upper()
-        if scope != "QUANTIFIED":
+        if scope not in {"QUANTIFIED", "TEMPORAL_NEVER"}:
             raise ValidationError(
-                "BoundVar actants are allowed only in QUANTIFIED formula-pattern N, not factual N"
+                "BoundVar actants are allowed only in QUANTIFIED formula-pattern "
+                "N (including TEMPORAL_NEVER), not factual N"
             )
 
     return template

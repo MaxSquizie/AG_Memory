@@ -1,0 +1,1 @@
+Decide only what the question asks to bind. ROLE_FILL means the event is fixed and one participant, property, place, time, cause, manner, amount, or other role is missing. EVENT_SET means the event, action, or state itself is requested under known constraints; its wording must not restrict retrieval to one lexical predicate. Use UNCLEAR when unresolved.

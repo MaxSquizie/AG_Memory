@@ -4,6 +4,7 @@ Only bounded model answers are fixtures. No parser/recovery/extraction method is
 patched. Expected predicate/role frames are specified independently below.
 """
 from pathlib import Path
+import re
 
 import pytest
 
@@ -11,6 +12,7 @@ from ah.config import LLMRoleSettings
 from ah.llm.process_backend import LLMResponse
 from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.morphology import Pymorphy3Morphology
+from legacy_semantic_fixture import legacy_semantic_answer
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,7 +37,8 @@ class SemanticFixture:
                       else 'AFFECTED_OR_CONTENT' if target in self.objects
                       else 'PLACE' if target in self.places else None)
             if answer is not None:
-                assert answer in prompt.split('CHOICES:\n')[1].split('\n\nTASK:')[0].splitlines()
+                offered = re.findall(r"^-?\d+\s*=\s*([^\n]+)$", prompt, re.MULTILINE)
+                assert answer in offered
                 return LLMResponse(answer, {})
         if role == 'perception_lexeme_comparison' and 'TARGET:\nполку\n' in prompt:
             for label in ('A', 'B'):
@@ -45,6 +48,9 @@ class SemanticFixture:
             modifier = prompt.split('MODIFIER:\n', 1)[1].split('\n', 1)[0]
             if modifier in self.places:
                 return LLMResponse('EVENT', {})
+        fallback = legacy_semantic_answer(role, prompt)
+        if fallback is not None:
+            return LLMResponse(str(fallback), {})
         raise AssertionError(f'Unspecified bounded fixture: {role}\n{prompt[:600]}')
 
 

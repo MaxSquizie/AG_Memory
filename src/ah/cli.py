@@ -89,6 +89,19 @@ def build_parser() -> argparse.ArgumentParser:
         default="data/acceptance_oracle_m1_adversarial.json",
         help="semantic oracle JSON aligned with --cases",
     )
+    semantic.add_argument(
+        "--runs-dirname",
+        default="acceptance_runs_m1_adversarial",
+        help="output directory name under the configured data directory",
+    )
+    sub.add_parser(
+        "quantifier-acceptance",
+        help="run the 78-case semantic quantifier corpus through the normal local-LLM pipeline",
+    )
+    sub.add_parser(
+        "temporal-mode-acceptance",
+        help="run the 46-case occurrence TemporalMode corpus through the normal local-LLM pipeline",
+    )
     sub.add_parser(
         "m2-acceptance",
         help=(
@@ -104,6 +117,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser(
         "m3-acceptance",
         help="run committee-shape GC check: 200 injected orphans, <=50 ticks, 100%% live preservation",
+    )
+    sub.add_parser(
+        "m4-acceptance",
+        help="run AH vs Vanilla RAG benchmark (M4) on the document corpus",
     )
     sub.add_parser(
         "tick-benchmark",
@@ -140,8 +157,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "m3-acceptance":
         from ah.diagnostics import run_m3_gc_acceptance
 
-        report = run_m3_gc_acceptance(cfg)
+        report = run_m3_gc_acceptance(cfg, data_dir=cfg.paths.data_dir)
         print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        if report.output_dir:
+            print(f"bundle: {report.output_dir}")
+        return 0 if report.passed else 1
+    if args.command == "m4-acceptance":
+        from ah.diagnostics import run_m4_acceptance
+
+        report = run_m4_acceptance(cfg)
+        print(json.dumps(_jsonable(report), ensure_ascii=False, indent=2))
+        if report.output_dir:
+            print(f"bundle: {report.output_dir}")
         return 0 if report.passed else 1
     if args.command == "tick-benchmark":
         from ah.diagnostics import run_tick_benchmark
@@ -152,14 +179,30 @@ def main(argv: list[str] | None = None) -> int:
 
     services = RuntimeServices.build(cfg)
 
-    if args.command == "semantic-acceptance":
+    if args.command in {
+        "semantic-acceptance",
+        "quantifier-acceptance",
+        "temporal-mode-acceptance",
+    }:
         from ah.diagnostics import run_acceptance_suite
 
+        if args.command == "quantifier-acceptance":
+            cases_file = cfg.paths.data_dir / "acceptance_quantifiers" / "cases.txt"
+            oracle_file = cfg.paths.data_dir / "acceptance_quantifiers" / "oracle.json"
+            runs_dirname = "acceptance_runs_m1_quantifiers"
+        elif args.command == "temporal-mode-acceptance":
+            cases_file = cfg.paths.data_dir / "acceptance_temporal_modes" / "cases.txt"
+            oracle_file = cfg.paths.data_dir / "acceptance_temporal_modes" / "oracle.json"
+            runs_dirname = "acceptance_runs_m1_temporal_modes"
+        else:
+            cases_file = Path(args.cases)
+            oracle_file = Path(args.oracle)
+            runs_dirname = str(args.runs_dirname)
         result = run_acceptance_suite(
             services,
-            cases_file=Path(args.cases),
-            oracle_file=Path(args.oracle),
-            runs_dirname="acceptance_runs_m1_adversarial",
+            cases_file=cases_file,
+            oracle_file=oracle_file,
+            runs_dirname=runs_dirname,
         )
         print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
         return 0 if result.semantic_failed == 0 and result.failed == 0 else 1

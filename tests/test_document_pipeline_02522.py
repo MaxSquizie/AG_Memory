@@ -38,7 +38,7 @@ class FakeIntegration:
     def template_requests(self, _result):
         return ()
 
-    def integrate_external_batch(self, batch, _context):
+    def integrate_external_batch(self, batch, _context, *, plan_transform=None):
         self.batches.append(batch)
         return SimpleNamespace(activation_seeds=("seed",), refutations=("refute",))
 

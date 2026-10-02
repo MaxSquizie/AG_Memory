@@ -14,6 +14,8 @@ from ah.perception import (
     AssertionCandidate,
     PerceptionResult,
     PredicateCandidate,
+    QuantifierCandidate,
+    QuantifierKind,
     TemplateCandidate,
 )
 from ah.perception.morphology import MorphInfo
@@ -113,6 +115,7 @@ def _unary(
     mention: str,
     *,
     entity_ref: str | None = None,
+    quantified: bool = False,
 ):
     return AssertionCandidate(
         local_id,
@@ -127,6 +130,11 @@ def _unary(
                 mention=mention,
                 normalized_hint=mention.casefold(),
                 entity_ref=entity_ref,
+                quantifier=(
+                    QuantifierCandidate(QuantifierKind.EXISTS, mention)
+                    if quantified
+                    else None
+                ),
             ),
         ),
     )
@@ -160,7 +168,12 @@ def test_cross_turn_pronoun_extends_same_existential_scope_without_fake_entity()
     first = service.integrate_external(
         PerceptionResult(
             "Кто-то вошёл.",
-            assertions=(_unary("A1", "вошёл", "войти", "Кто-то", entity_ref="E1"),),
+            assertions=(
+                _unary(
+                    "A1", "вошёл", "войти", "Кто-то",
+                    entity_ref="E1", quantified=True,
+                ),
+            ),
         ),
         context,
     )
@@ -206,7 +219,12 @@ def test_three_turn_existential_chain_accumulates_one_participant_scope() -> Non
     first = service.integrate_external(
         PerceptionResult(
             "Кто-то вошёл.",
-            assertions=(_unary("A1", "вошёл", "войти", "Кто-то", entity_ref="E1"),),
+            assertions=(
+                _unary(
+                    "A1", "вошёл", "войти", "Кто-то",
+                    entity_ref="E1", quantified=True,
+                ),
+            ),
         ),
         context,
     )
@@ -236,8 +254,14 @@ def test_two_same_signature_unknowns_do_not_create_arbitrary_cross_turn_anchor()
         PerceptionResult(
             "Кто-то вошёл. Кто-то вышел.",
             assertions=(
-                _unary("A1", "вошёл", "войти", "Кто-то", entity_ref="E1"),
-                _unary("A2", "вышел", "выйти", "Кто-то", entity_ref="E2"),
+                _unary(
+                    "A1", "вошёл", "войти", "Кто-то",
+                    entity_ref="E1", quantified=True,
+                ),
+                _unary(
+                    "A2", "вышел", "выйти", "Кто-то",
+                    entity_ref="E2", quantified=True,
+                ),
             ),
         ),
         context,
@@ -263,8 +287,22 @@ def test_multi_variable_existential_is_not_guessed_as_cross_turn_person_anchor()
                     "A1",
                     "увидел",
                     "увидеть",
-                    ActantCandidate(ActantRole.SUBJECT, mention="Кто-то", entity_ref="E1"),
-                    ActantCandidate(ActantRole.OBJECT, mention="что-то", entity_ref="E2"),
+                    ActantCandidate(
+                        ActantRole.SUBJECT,
+                        mention="Кто-то",
+                        entity_ref="E1",
+                        quantifier=QuantifierCandidate(
+                            QuantifierKind.EXISTS, "Кто-то"
+                        ),
+                    ),
+                    ActantCandidate(
+                        ActantRole.OBJECT,
+                        mention="что-то",
+                        entity_ref="E2",
+                        quantifier=QuantifierCandidate(
+                            QuantifierKind.EXISTS, "что-то"
+                        ),
+                    ),
                 ),
             ),
         ),
@@ -285,7 +323,12 @@ def test_named_subject_supersedes_older_existential_anchor() -> None:
     service.integrate_external(
         PerceptionResult(
             "Кто-то вошёл.",
-            assertions=(_unary("A1", "вошёл", "войти", "Кто-то", entity_ref="E1"),),
+            assertions=(
+                _unary(
+                    "A1", "вошёл", "войти", "Кто-то",
+                    entity_ref="E1", quantified=True,
+                ),
+            ),
         ),
         context,
     )
@@ -322,7 +365,12 @@ def test_cross_turn_existential_anchor_survives_context_persistence_roundtrip(tm
     first = service.integrate_external(
         PerceptionResult(
             "Кто-то вошёл.",
-            assertions=(_unary("A1", "вошёл", "войти", "Кто-то", entity_ref="E1"),),
+            assertions=(
+                _unary(
+                    "A1", "вошёл", "войти", "Кто-то",
+                    entity_ref="E1", quantified=True,
+                ),
+            ),
         ),
         context,
     )
@@ -360,7 +408,12 @@ def test_cross_turn_anchor_and_new_unknown_get_distinct_bound_variables() -> Non
     service.integrate_external(
         PerceptionResult(
             "Кто-то вошёл.",
-            assertions=(_unary("A1", "вошёл", "войти", "Кто-то", entity_ref="E1"),),
+            assertions=(
+                _unary(
+                    "A1", "вошёл", "войти", "Кто-то",
+                    entity_ref="E1", quantified=True,
+                ),
+            ),
         ),
         context,
     )
@@ -374,7 +427,14 @@ def test_cross_turn_anchor_and_new_unknown_get_distinct_bound_variables() -> Non
                     "увидел",
                     "увидеть",
                     ActantCandidate(ActantRole.SUBJECT, mention="Он", normalized_hint="он"),
-                    ActantCandidate(ActantRole.OBJECT, mention="что-то", entity_ref="E2"),
+                    ActantCandidate(
+                        ActantRole.OBJECT,
+                        mention="что-то",
+                        entity_ref="E2",
+                        quantifier=QuantifierCandidate(
+                            QuantifierKind.EXISTS, "что-то"
+                        ),
+                    ),
                 ),
             ),
         ),

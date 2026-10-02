@@ -1,0 +1,1 @@
+Choose a supplied value only when the source explicitly assigns it as ENTITY CANDIDATE's conventional personal or entity name or identifying label. A profession, class, social role, property, condition, appointment, description, action, or encounter is OTHER_PREDICATION. Use UNCLEAR when unresolved. Use only supplied text and candidates; invent nothing.

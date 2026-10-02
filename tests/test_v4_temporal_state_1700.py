@@ -24,6 +24,7 @@ from ah.perception import (
 )
 from ah.temporal import (
     TemporalAnchorContext,
+    TemporalCandidate,
     TemporalKind,
     TemporalNormalizer,
     TemporalPrecision,
@@ -268,7 +269,7 @@ def test_start_then_stop_builds_state_intervals_and_transition_wrappers():
     )
 
 
-def test_stop_without_prior_open_state_fails_atomically():
+def test_stop_without_prior_open_state_keeps_transition_without_state_projection():
     core, context, integration = services()
     result = PerceptionResult(
         "Сервер перестал работать 5 сентября 2026.",
@@ -283,10 +284,54 @@ def test_stop_without_prior_open_state_fails_atomically():
             ),
         ),
     )
-    before = set(core.store.all_uids())
-    with pytest.raises(ValueError, match="STOP requires"):
-        integration.integrate_external(result, context)
-    assert set(core.store.all_uids()) == before
+    commit = integration.integrate_external(result, context)
+    wrapper = core.store.get_element_any_domain(commit.assertions[0].ref.uid)
+    assert isinstance(wrapper, FunctionSymbol)
+    assert wrapper.function_id == TransitionOperator.STOP.value
+    operand = core.store.get_hypernode(wrapper.operands[0].uid)
+    assert operand.meta["semantic_scope"] == "TRANSITION_OPERAND"
+    assert not any(
+        isinstance(node, Hypernode)
+        and node.meta.get("temporal_mode") == TemporalMode.STATE.value
+        for node in core.store.all_elements()
+    )
+
+
+def test_nonorderable_transition_time_keeps_wrapper_without_state_projection():
+    core, context, integration = services()
+    temporal = TemporalValue(
+        TemporalKind.POINT,
+        "morning",
+        None,
+        TemporalPrecision.UNKNOWN,
+        source_text="утром",
+    )
+    result = PerceptionResult(
+        "Сервер продолжил работать утром.",
+        assertions=(
+            assertion(
+                "A1",
+                "работать",
+                ActantCandidate(ActantRole.SUBJECT, mention="сервер"),
+                ActantCandidate(
+                    ActantRole.TIME,
+                    mention="утром",
+                    temporal=TemporalCandidate(temporal),
+                ),
+                temporal_mode=TemporalMode.TRANSITION,
+                transition_operator=TransitionOperator.CONTINUE,
+            ),
+        ),
+    )
+    commit = integration.integrate_external(result, context)
+    wrapper = core.store.get_element_any_domain(commit.assertions[0].ref.uid)
+    assert isinstance(wrapper, FunctionSymbol)
+    assert wrapper.function_id == TransitionOperator.CONTINUE.value
+    assert not any(
+        isinstance(node, Hypernode)
+        and node.meta.get("temporal_mode") == TemporalMode.STATE.value
+        for node in core.store.all_elements()
+    )
 
 
 def _transition(core, context, integration, operator: TransitionOperator, when: str):
@@ -395,10 +440,25 @@ def test_continue_uses_only_open_positive_state_not_open_negation():
 
     # Once P has stopped, an open NOT(P) interval must not satisfy CONTINUE(P).
     _transition(core, context, integration, TransitionOperator.STOP, "5 сентября 2026")
-    before = set(core.store.all_uids())
-    with pytest.raises(ValueError, match="CONTINUE requires"):
-        _transition(core, context, integration, TransitionOperator.CONTINUE, "6 сентября 2026")
-    assert set(core.store.all_uids()) == before
+    negative_before = [
+        temporal_value_from_ref(core, node.actants[ActantRole.TIME])
+        for node in core.store.all_elements()
+        if isinstance(node, Hypernode)
+        and node.meta.get("semantic_scope") == "NEGATED_STATE"
+    ]
+    skipped = _transition(
+        core, context, integration, TransitionOperator.CONTINUE, "6 сентября 2026"
+    )
+    wrapper = core.store.get_element_any_domain(skipped.assertions[0].ref.uid)
+    assert isinstance(wrapper, FunctionSymbol)
+    assert wrapper.function_id == TransitionOperator.CONTINUE.value
+    negative_after = [
+        temporal_value_from_ref(core, node.actants[ActantRole.TIME])
+        for node in core.store.all_elements()
+        if isinstance(node, Hypernode)
+        and node.meta.get("semantic_scope") == "NEGATED_STATE"
+    ]
+    assert negative_after == negative_before
 
 
 def test_again_closes_existing_negative_interval_and_reopens_positive_state():
@@ -435,14 +495,16 @@ def test_again_closes_existing_negative_interval_and_reopens_positive_state():
     assert tracker.current_truth(prototype, day_8) is StateTruth.POSITIVE
 
 
-def test_transition_cannot_close_state_before_its_start_and_rolls_back():
+def test_out_of_order_transition_keeps_wrapper_and_rolls_back_state_projection():
     core, context, integration = services()
     _transition(core, context, integration, TransitionOperator.START, "5 сентября 2026")
-    before_uids = set(core.store.all_uids())
-    with pytest.raises(ValueError, match="before it starts"):
-        _transition(core, context, integration, TransitionOperator.STOP, "1 сентября 2026")
-    assert set(core.store.all_uids()) == before_uids
-    # Atomic transaction rollback also restores the previously open interval.
+    stopped = _transition(
+        core, context, integration, TransitionOperator.STOP, "1 сентября 2026"
+    )
+    wrapper = core.store.get_element_any_domain(stopped.assertions[0].ref.uid)
+    assert isinstance(wrapper, FunctionSymbol)
+    assert wrapper.function_id == TransitionOperator.STOP.value
+    # The nested state projection rollback restores the previously open interval.
     open_states = [
         node for node in core.store.all_elements()
         if isinstance(node, Hypernode)

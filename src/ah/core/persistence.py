@@ -228,6 +228,7 @@ def _serialize_context(context: InteractionContext | None) -> dict[str, Any] | N
                 "existential_ref": _ref(anchor.existential_ref),
                 "member_refs": [_ref(ref) for ref in anchor.member_refs],
                 "variable_id": anchor.variable_id,
+                "restriction_lemma": anchor.restriction_lemma,
             }
             for k, anchor in context.existential_pronoun_anchors.items()
         },
@@ -276,7 +277,10 @@ def _parse_context(core: AHCore, raw: dict[str, Any] | None) -> InteractionConte
             continue
         try:
             anchors[str(key)] = ExistentialDiscourseAnchor(
-                root, members, int(value.get("variable_id", 0))
+                root,
+                members,
+                int(value.get("variable_id", 0)),
+                value.get("restriction_lemma"),
             )
         except (TypeError, ValueError):
             continue

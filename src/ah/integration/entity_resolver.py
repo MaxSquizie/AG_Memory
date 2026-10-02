@@ -8,9 +8,14 @@ from ah.agent import InteractionContext
 from ah.core import AHCore
 from ah.model import ActantRole, Domain, Ref, RefKind, SemanticEntity
 from ah.perception import ActantCandidate
-from ah.perception.morphology import build_morphology, stable_normal_form
+from ah.perception.morphology import (
+    build_morphology,
+    material_analyses,
+    stable_normal_form,
+)
 
 from .deixis_resolver import DeixisResolver
+from .identity_graph import is_identity_name_entity
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,8 +65,6 @@ class EntityResolver:
         ActantRole.CAUSE, ActantRole.PURPOSE, ActantRole.TOOL, ActantRole.MATERIAL,
         ActantRole.AMOUNT, ActantRole.HOW_TO, ActantRole.STATE,
     }
-
-
 
     _DECIMAL_LITERAL_RE = re.compile(r"^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$")
 
@@ -118,6 +121,66 @@ class EntityResolver:
     def _tokens(text: str) -> tuple[str, ...]:
         import re
         return tuple(re.findall(r"[A-Za-zА-Яа-яЁё-]+", text.casefold()))
+
+    def _is_common_nominal_candidate(self, candidate: ActantCandidate) -> bool:
+        """Return True only when source morphology prefers an ordinary common noun.
+
+        C/P is provenance of propositions, not a reason to duplicate lexical/common
+        referents.  A bare common noun such as ``ворона`` or ``стол`` should therefore
+        be allowed to reuse its canonical C M even inside a P fact (``я видел ...``).
+        Proper names remain domain-sensitive: lexical equality alone is not identity
+        evidence for two people named alike.
+        """
+        text = (candidate.mention or candidate.normalized_hint or "").strip()
+        words = self._tokens(text)
+        if not words:
+            return False
+        head = words[-1]
+        try:
+            values = material_analyses(tuple(self.morphology.analyze_all(head)))
+        except (AttributeError, TypeError):
+            single = self.morphology.analyze(head)
+            values = () if single is None else (single,)
+        nominal = tuple(item for item in values if item.pos == "NOUN")
+        if not nominal:
+            return False
+        proper = tuple(
+            item
+            for item in nominal
+            if {"Name", "Surn", "Patr"} & set(item.grammemes)
+        )
+        if not proper:
+            return True
+        common = tuple(item for item in nominal if item not in proper)
+        if not common:
+            return False
+        best_proper = max(float(item.score) for item in proper)
+        best_common = max(float(item.score) for item in common)
+        return best_common > best_proper
+
+    def _common_nominal_c_anchor(
+        self,
+        candidate: ActantCandidate,
+        lookup: str,
+    ) -> Ref | None:
+        """Return one existing C common-noun identity independent of fact domain.
+
+        The anchor is used only for an exact lexical/name-index match and only when
+        morphology prefers a common noun. Identity-name label nodes are excluded.
+        Multiple C candidates remain genuinely ambiguous and are not guessed.
+        """
+        if not self._is_common_nominal_candidate(candidate):
+            return None
+        entities = self.core.store.find_entities_by_name(lookup, Domain.C)
+        entities = self._filter_by_grammatical_number(
+            entities, candidate.grammatical_number
+        )
+        ordinary = tuple(
+            entity for entity in entities if not is_identity_name_entity(entity)
+        )
+        if len(ordinary) == 1:
+            return self.core.ref(ordinary[0].uid)
+        return None
 
     def _possessive_owner(
         self,
@@ -334,13 +397,16 @@ class EntityResolver:
                 )
 
         for lookup in lookup_forms:
-            # Name/alias is a retrieval index, never a cross-domain identity key.
-            # Once Integration has provenance evidence for the current assertion,
-            # lexical resolution stays inside that semantic domain. This prevents
-            # a prior generic C entity with the same surface name from hijacking a
-            # newly introduced personalized P entity. Stronger identity evidence
-            # (deixis, candidate_ref, turn-local entity_ref) is resolved before this
-            # lookup and may still route the assertion to P.
+            # Proposition domain and common-noun identity are intentionally separate.
+            # A P fact can reference the same C lexical/common M as a C fact.  This
+            # keeps ``ворона`` one entity across ``у вороны есть лапки`` (C) and
+            # ``я видел ворону`` (P), instead of manufacturing C/P duplicates that
+            # later become a fake clarification. Proper names/custom identities keep
+            # the mature domain-sensitive path below.
+            c_anchor = self._common_nominal_c_anchor(candidate, lookup)
+            if c_anchor is not None:
+                return ExistingEntity(c_anchor)
+
             entities = self.core.store.find_entities_by_name(lookup, preferred_domain)
             entities = self._filter_by_grammatical_number(
                 entities, candidate.grammatical_number

@@ -1,1 +1,1 @@
-Choose exactly one label from CHOICES. Decide only the TARGET relation in this sentence. Do not explain.
+Classify only TARGET's descriptive or state relation to the fixed predicate using the supplied meanings.

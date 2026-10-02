@@ -96,14 +96,31 @@ class HackathonMetricsV023Tests(unittest.TestCase):
 
     def test_m3_committee_shape_removes_200_and_preserves_live_component(self) -> None:
         config = load_config(PROJECT / "config/default.toml")
-        report = run_m3_gc_acceptance(config)
-        self.assertTrue(report.passed)
-        self.assertEqual(report.orphan_nodes_before, 200)
-        self.assertEqual(report.orphan_nodes_after, 0)
-        self.assertEqual(report.live_nodes_before, report.live_nodes_after)
-        self.assertLessEqual(report.ticks_until_orphans_gone or 999, 50)
-        self.assertAlmostEqual(report.gc_efficiency, 1.0)
-        self.assertAlmostEqual(report.live_preservation, 1.0)
+        with TemporaryDirectory() as td:
+            report = run_m3_gc_acceptance(config, data_dir=td)
+            self.assertTrue(report.pacemaker_enabled)
+            self.assertTrue(report.passed)
+            self.assertEqual(report.orphan_nodes_before, 200)
+            self.assertEqual(report.orphan_nodes_after, 0)
+            self.assertEqual(report.live_nodes_before, report.live_nodes_after)
+            self.assertLessEqual(report.ticks_until_orphans_gone or 999, 50)
+            self.assertAlmostEqual(report.gc_efficiency, 1.0)
+            self.assertAlmostEqual(report.live_preservation, 1.0)
+            self.assertIsNotNone(report.output_dir)
+            bundle = Path(report.output_dir)
+            for name in (
+                "summary.json",
+                "report.txt",
+                "config_snapshot.json",
+                "orphans.json",
+                "live.json",
+                "ticks.jsonl",
+                "remaining_after.json",
+            ):
+                self.assertTrue((bundle / name).is_file(), name)
+            summary = json.loads((bundle / "summary.json").read_text(encoding="utf-8"))
+            self.assertTrue(summary["passed"])
+            self.assertEqual(summary["orphan_nodes_after"], 0)
 
     def test_tick_benchmark_uses_at_least_1000_n_plus_l_units(self) -> None:
         config = load_config(PROJECT / "config/default.toml")

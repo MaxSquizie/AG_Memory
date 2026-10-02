@@ -7,8 +7,10 @@ from ah.config import InferenceSettings, IntegrationSettings
 from ah.core import AHCore, SequentialUidGenerator
 from ah.inference import (
     AllOfGoal,
+    AnyOfGoal,
     CauseEntailmentGoal,
     InferenceEngine,
+    ExactlyOneOfGoal,
     LogicalStatus,
     RelationGoal,
     SemanticGoalCompiler,
@@ -244,7 +246,7 @@ def test_cause_entailment_uses_asserted_source_as_explicit_premise():
     assert outcome.logical_depth == 2
 
 
-def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and():
+def test_explicit_proposition_and_or_xor_compile_to_distinct_typed_goals():
     core, context, integration, engine = _runtime()
     a = core.add_entity(Domain.C, properties={"name": Property("name", "A", "str")})
     b = core.add_entity(Domain.C, properties={"name": Property("name", "B", "str")})
@@ -297,8 +299,149 @@ def test_explicit_proposition_and_compiles_to_all_of_but_or_is_not_faked_as_and(
     commit_or = integration.integrate_external(perception_or, context)
     built_or = SemanticGoalCompiler(core).build(commit_or, context, perception_or)
     assert len(built_or) == 1
-    assert built_or[0].goal is None
-    assert built_or[0].diagnostics == ("semantic:OR_goal_not_supported",)
+    assert isinstance(built_or[0].goal.goal.target, AnyOfGoal)
+    assert built_or[0].diagnostics[0] == "semantic:explicit_OR"
+    assert engine.solve(built_or[0].goal).status is LogicalStatus.PROVED
+
+    xor_expr = PropositionExprCandidate(
+        PropositionOperator.XOR,
+        members=(
+            PropositionExprCandidate.ref_expr("A1"),
+            PropositionExprCandidate.ref_expr("A2"),
+        ),
+    )
+    raw_xor = PerceptionResult(
+        source_text="request exactly one",
+        assertions=assertions,
+        commands=(_command(proposition=xor_expr),),
+        act_dependencies=raw.act_dependencies,
+        act_relations=relations,
+    )
+    perception_xor = apply_speech_act_scoping(raw_xor)
+    commit_xor = integration.integrate_external(perception_xor, context)
+    built_xor = SemanticGoalCompiler(core).build(
+        commit_xor, context, perception_xor
+    )
+    assert len(built_xor) == 1
+    assert isinstance(built_xor[0].goal.goal.target, ExactlyOneOfGoal)
+    assert built_xor[0].diagnostics[0] == "semantic:explicit_XOR"
+    # Both structural relation branches are proved, so exact-one is false.
+    assert engine.solve(built_xor[0].goal).status is LogicalStatus.DISPROVED
+
+
+def test_modal_proposition_goal_is_read_only_and_does_not_prove_operand():
+    core, context, integration, engine = _runtime()
+    assertion = _classification_assertion("A1", "Server", "working")
+    possible_expr = PropositionExprCandidate(
+        PropositionOperator.POSSIBLE,
+        members=(PropositionExprCandidate.ref_expr("A1"),),
+    )
+    raw = PerceptionResult(
+        source_text="request whether possible",
+        assertions=(assertion,),
+        commands=(_command(proposition=possible_expr),),
+        act_dependencies=(
+            ActDependencyCandidate(
+                "C1", "A1", ActDependencyKind.SUBORDINATE
+            ),
+        ),
+    )
+    perception = apply_speech_act_scoping(raw)
+    commit = integration.integrate_external(perception, context)
+    built = SemanticGoalCompiler(core).build(commit, context, perception)
+    assert len(built) == 1
+    assert built[0].goal is not None
+    assert built[0].diagnostics == (
+        "semantic:modal_formula_goal:POSSIBLE",
+    )
+    outcome = engine.solve(built[0].goal)
+    assert outcome.status is LogicalStatus.UNKNOWN
+    assert "No canonical formula matches" in outcome.diagnostics[0]
+    # Compiling or executing the modal query does not manufacture POSSIBLE(P)
+    # and does not promote its query-scoped operand to an ordinary fact.
+    operand = core.store.get_hypernode(commit.assertions[0].ref.uid)
+    assert operand.meta.get("semantic_scope") == "EMBEDDED"
+    assert int(operand.meta.get("occurrence_count", 0)) == 0
+
+
+def test_matrix_attitude_query_proves_attitude_fact_not_embedded_content():
+    core, context, integration, engine = _runtime()
+
+    stored_child = _event_assertion(
+        "A2", "Server", "working", status=AssertionStatus.EMBEDDED
+    )
+    stored_parent = AssertionCandidate(
+        "A1",
+        PredicateCandidate(
+            "believe",
+            "believe",
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.OBJECT)
+            ),
+        ),
+        (
+            ActantCandidate(ActantRole.SUBJECT, mention="Anna"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                proposition=PropositionExprCandidate.ref_expr("A2"),
+            ),
+        ),
+    )
+    integration.integrate_external(
+        PerceptionResult(
+            "Anna believes that the server is working.",
+            assertions=(stored_parent, stored_child),
+        ),
+        context,
+    )
+
+    queried_child = _event_assertion(
+        "A2", "Server", "working", status=AssertionStatus.EMBEDDED
+    )
+    query = QueryCandidate(
+        PredicateCandidate(
+            "believe",
+            "believe",
+            template_candidate=TemplateCandidate(
+                (ActantRole.SUBJECT, ActantRole.OBJECT)
+            ),
+        ),
+        (
+            ActantCandidate(ActantRole.SUBJECT, mention="Anna"),
+            ActantCandidate(
+                ActantRole.OBJECT,
+                proposition=PropositionExprCandidate.ref_expr("A2"),
+            ),
+        ),
+        query_mode=QueryMode.EXISTS,
+        local_id="Q1",
+    )
+    perception = PerceptionResult(
+        "Does Anna believe that the server is working?",
+        assertions=(queried_child,),
+        queries=(query,),
+        act_dependencies=(
+            ActDependencyCandidate(
+                "Q1", "A2", ActDependencyKind.SUBORDINATE
+            ),
+        ),
+    )
+    commit = integration.integrate_external(perception, context)
+    built = SemanticGoalCompiler(core).build(
+        commit, context, perception
+    )
+    assert len(built) == 1
+    assert built[0].diagnostics == (
+        "semantic:matrix_proposition_query",
+    )
+    outcome = engine.solve(built[0].goal)
+    assert outcome.status is LogicalStatus.PROVED
+
+    # The embedded content itself is not promoted merely because the attitude
+    # query succeeded.
+    embedded_ref = commit.assertions[0].ref
+    embedded_node = core.store.get_hypernode(embedded_ref.uid)
+    assert embedded_node.meta.get("semantic_scope") == "EMBEDDED"
 
 
 def test_goal_semantic_service_adds_typed_relation_from_bounded_classifier():
@@ -358,7 +501,7 @@ def test_adaptive_act_relation_probe_is_fixed_choice_and_uid_free():
     assert len(backend.prompts) == 1
     prompt, _system, _override, role = backend.prompts[0]
     assert role == "perception_act_relation"
-    assert "CHOICES:" in prompt and "NONE" in prompt and "R1" in prompt
+    assert "Answer options:" in prompt and "1 = NONE" in prompt and "2 = R1" in prompt
     assert "UID" not in prompt
 
 

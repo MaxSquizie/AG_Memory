@@ -229,6 +229,11 @@ def import_json_payload(core: AHCore, payload: dict[str, Any], *, default_domain
     if not isinstance(payload, dict):
         raise CorpusError("JSON corpus must be an object")
     domain = parse_domain(payload.get("domain"), default_domain)
+    with core.store.established_snapshot_insertions():
+        return _import_json_payload_unlocked(core, payload, domain=domain)
+
+
+def _import_json_payload_unlocked(core: AHCore, payload: dict[str, Any], *, domain: Domain) -> CorpusImportResult:
     writer = ColdCorpusWriter(core, domain=domain, fact_weight=float(payload.get("weight", 0.4)), link_weight=float(payload.get("link_weight", 0.2)))
     for item in payload.get("symbols") or ():
         if isinstance(item, str):

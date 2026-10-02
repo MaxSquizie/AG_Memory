@@ -1,0 +1,305 @@
+from __future__ import annotations
+
+from ah.model import FunctionSymbol, Group, Hypernode, Ref, RefKind, SemanticEntity
+
+from .contracts import AssociationBudget, AssociationDomainPolicy, AssociationOutcome
+from .coordinator import _LEFT, _RIGHT
+from .coordinator_specific import AssociationCoordinator as _StructuredAssociationCoordinator
+from .history import remember_signature
+
+
+class AssociationCoordinator(_StructuredAssociationCoordinator):
+    """Structured association search with scoped runtime result history.
+
+    Explicit association restrictions (LOCATION/TIME/etc.) are stop conditions, not
+    prose hints.  A structured frame is admissible only when *both* supporting facts
+    satisfy every restriction.  Under a scoped goal, an unscoped raw concept is not
+    an answer because it cannot establish that the requested condition held.
+    """
+
+    @staticmethod
+    def _goal_constraints(state) -> tuple:
+        goal = getattr(state, "goal", None)
+        return tuple(getattr(goal, "constraints", ()) or ())
+
+    @staticmethod
+    def _fold_label(value: object) -> str:
+        return str(value).strip().casefold().replace("ё", "е")
+
+    def _lexical_labels(self, ref: Ref) -> frozenset[str]:
+        """Return deterministic lexical labels for a lexical S or semantic M.
+
+        Association constraints are compiled read-only. If entity resolution cannot
+        select one canonical M without guessing, the compiler may legally fall back
+        to an already known lexical S. A supporting fact, however, normally carries
+        the semantic M in its role slot. Treat S<->M as two representation levels of
+        the same lexical value only when their explicit stored labels intersect.
+
+        M<->M equality is intentionally *not* inferred from names: two distinct
+        entities may share a name. This bridge therefore cannot collapse identities.
+        """
+        if ref.kind is RefKind.S:
+            try:
+                symbol = self.core.store.get_symbol(ref.uid)
+            except Exception:
+                return frozenset()
+            return frozenset(
+                self._fold_label(form) for form in symbol.forms if str(form).strip()
+            )
+
+        if ref.kind is not RefKind.M:
+            return frozenset()
+        try:
+            entity = self.core.store.get_element_any_domain(ref.uid)
+        except Exception:
+            return frozenset()
+        if not isinstance(entity, SemanticEntity):
+            return frozenset()
+
+        labels: set[str] = set()
+        name = entity.properties.get("name")
+        if name is not None and str(name.value).strip():
+            labels.add(self._fold_label(name.value))
+        aliases = entity.properties.get("aliases")
+        if aliases is not None:
+            raw = aliases.value
+            if isinstance(raw, str):
+                if raw.strip():
+                    labels.add(self._fold_label(raw))
+            elif isinstance(raw, (tuple, list, set, frozenset)):
+                labels.update(
+                    self._fold_label(item)
+                    for item in raw
+                    if str(item).strip()
+                )
+        return frozenset(labels)
+
+    def _constraint_value_matches(self, actual: Ref, requested: Ref) -> bool:
+        if actual == requested:
+            return True
+
+        # Conditions use the same canonical taxonomy direction as ordinary role
+        # matching: an observed subtype may satisfy a requested ancestor.
+        ancestors = self._is_a_ancestors(actual)
+        if requested.uid in ancestors:
+            return True
+
+        # Read-only query compilation can resolve a phrase such as ``во дворе`` to
+        # lexical S while the stored role contains semantic M(двор). Bridge only
+        # this representation mismatch; never merge two M identities by spelling.
+        if {actual.kind, requested.kind} == {RefKind.S, RefKind.M}:
+            actual_labels = self._lexical_labels(actual)
+            requested_labels = self._lexical_labels(requested)
+            return bool(actual_labels and requested_labels and actual_labels & requested_labels)
+        return False
+
+    def _fact_satisfies_constraints(self, fact: Hypernode, constraints) -> bool:
+        for constraint in constraints:
+            actual = fact.actants.get(constraint.role)
+            if not isinstance(actual, Ref):
+                return False
+            if not self._constraint_value_matches(actual, constraint.value):
+                return False
+        return True
+
+    def _pattern_for_pair(self, state, left_ref, left, right_ref, right):
+        constraints = self._goal_constraints(state)
+        if constraints and (
+            not self._fact_satisfies_constraints(left, constraints)
+            or not self._fact_satisfies_constraints(right, constraints)
+        ):
+            return None
+        return super()._pattern_for_pair(state, left_ref, left, right_ref, right)
+
+    def _path_uses_fact(self, state, front: str, ref: Ref) -> bool:
+        """Whether reaching ``ref`` on this front depended on a concrete N fact.
+
+        A raw representation reached *through* an assertion/episode is useful
+        propagation evidence but is a lossy terminal answer: stopping at one actant,
+        formula or other child throws away the predicate frame that explains why the
+        endpoints are related. Direct/taxonomic convergence remains eligible because
+        it does not cross an N fact and therefore does not hide that richer frame.
+        """
+        if state is None:
+            return False
+        try:
+            path = state.path(front, ref, self.core)
+        except Exception:
+            return False
+        if path is None:
+            return False
+
+        # Most N-mediated paths expose the supporting fact directly in refs.
+        if any(item.kind is RefKind.N for item in path.refs[1:-1]):
+            return True
+
+        # Memory-query/propagation hops can also keep the structural carrier in
+        # provenance rather than as an explicit path vertex.
+        for hop in path.hops:
+            via_uid = hop.via_uid
+            if not via_uid:
+                continue
+            try:
+                if self.core.ref(via_uid).kind is RefKind.N:
+                    return True
+            except Exception:
+                continue
+        return False
+
+    def _is_pair_container_ref(self, state, ref: Ref) -> bool:
+        """Whether ``ref`` merely packages both queried origins.
+
+        Coordination K and logical/compositional g nodes can be traversed in both
+        directions by the association recall machinery.  If such a container holds
+        both endpoints, walking through it and then unpacking the opposite member is
+        not a discovered commonality; it is only a round trip through the query pair
+        itself.  This predicate is structural and operator-agnostic.
+        """
+        if state is None or ref.kind not in {RefKind.K, RefKind.G}:
+            return False
+        obj = self._element(ref)
+        if not isinstance(obj, (Group, FunctionSymbol)):
+            return False
+        return (
+            self._operand_contains(ref, state.goal.left)
+            and self._operand_contains(ref, state.goal.right)
+        )
+
+    def _path_uses_pair_container(self, state, front: str, ref: Ref) -> bool:
+        """Whether one front reached ``ref`` by unpacking a container of the pair."""
+        if state is None:
+            return False
+        try:
+            path = state.path(front, ref, self.core)
+        except Exception:
+            return False
+        if path is None:
+            return False
+
+        for item in path.refs[1:-1]:
+            if self._is_pair_container_ref(state, item):
+                return True
+
+        # As with N provenance, a query hop may expose the carrier only as via_uid.
+        for hop in path.hops:
+            via_uid = hop.via_uid
+            if not via_uid:
+                continue
+            try:
+                via_ref = self.core.ref(via_uid)
+            except Exception:
+                continue
+            if self._is_pair_container_ref(state, via_ref):
+                return True
+        return False
+
+    def _raw_common_allowed(self, state, uid: str) -> bool:
+        ref = self.core.ref(uid)
+        # K produced by actant coordination is a structural carrier, not a useful
+        # answer to "what do these two things have in common?".
+        if ref.kind is RefKind.K:
+            return False
+
+        # A functional container whose operands recursively contain both queried
+        # endpoints is likewise only packaging of the pair, not a property shared by
+        # the pair. This is deliberately structural rather than an AND/OR blacklist:
+        # any g that merely encloses both origins remains usable for propagation but
+        # cannot terminate the association as ``(left) FUNCTION (right)``.
+        if ref.kind is RefKind.G and self._is_pair_container_ref(state, ref):
+            return False
+
+        # Do not let a pair-container leak one of its members (or another raw child)
+        # back as a later "common" result.  This is the continuation bug that could
+        # emit ``ворона`` and then ``стол`` after a valid MAKE frame had already been
+        # returned: one front traversed endpoint -> K/g(pair) -> other endpoint.
+        # Direct taxonomic convergence is unaffected because that path contains no
+        # pair container.
+        if ref.kind is not RefKind.N and (
+            self._path_uses_pair_container(state, _LEFT, ref)
+            or self._path_uses_pair_container(state, _RIGHT, ref)
+        ):
+            return False
+
+        # Do not terminate on a raw child that a front reached through a concrete
+        # fact. Example: two SEE facts share SUBJECT=user. Returning raw M(user)
+        # discards SEE(OBJECT=_, SUBJECT=user, LOCATION=...) and can stop the search
+        # one tick before the structured frame becomes available. The same invariant
+        # applies to any non-N child representation; a concrete N that itself
+        # contains both endpoints remains eligible in the structured base layer.
+        if ref.kind is not RefKind.N and (
+            self._path_uses_fact(state, _LEFT, ref)
+            or self._path_uses_fact(state, _RIGHT, ref)
+        ):
+            return False
+
+        constraints = self._goal_constraints(state) if state is not None else ()
+        if constraints:
+            # A raw concept/template cannot prove LOCATION=yard (or any other
+            # explicit scope). Only a concrete fact carrying that role may be a raw
+            # terminal result. Structured two-fact frames are handled above.
+            if ref.kind is not RefKind.N:
+                return False
+            obj = self._element(ref)
+            if not isinstance(obj, Hypernode):
+                return False
+            if not self._fact_satisfies_constraints(obj, constraints):
+                return False
+        return super()._raw_common_allowed(state, uid)
+
+    def _remember_outcome(self, outcome: AssociationOutcome) -> None:
+        left = outcome.goal.left
+        right = outcome.goal.right
+        constraints = tuple(getattr(outcome.goal, "constraints", ()) or ())
+
+        def remember(signature: str | None) -> None:
+            remember_signature(
+                self.core,
+                left,
+                right,
+                signature,
+                constraints,
+            )
+
+        remember(outcome.result_signature)
+        pattern = outcome.frame_pattern
+        if pattern is None:
+            return
+        remember(f"REF:{pattern.template.uid}")
+        remember(f"REF:{pattern.predicate.uid}")
+
+        # A frame and its canonical supporting facts are one answer, not several
+        # answers at different representation levels.
+        for fact_ref in (pattern.left_fact, pattern.right_fact):
+            remember(f"REF:{fact_ref.uid}")
+
+        left_fact = self.core.store.get_hypernode(pattern.left_fact.uid)
+        right_fact = self.core.store.get_hypernode(pattern.right_fact.uid)
+        for binding in pattern.bindings:
+            remember(f"REF:{binding.value.uid}")
+            if not binding.generalized:
+                continue
+            for fact in (left_fact, right_fact):
+                operand = fact.actants.get(binding.role)
+                if isinstance(operand, Ref):
+                    remember(f"REF:{operand.uid}")
+
+    def solve(
+        self,
+        request,
+        *,
+        budget: AssociationBudget | None = None,
+        domain_policy: AssociationDomainPolicy = AssociationDomainPolicy.ALL,
+        excluded_signatures=(),
+    ) -> AssociationOutcome:
+        inherited = tuple(getattr(request, "excluded_signatures", ()) or ())
+        explicit = tuple(excluded_signatures or ())
+        combined = tuple(dict.fromkeys((*inherited, *explicit)))
+        outcome = super().solve(
+            request,
+            budget=budget,
+            domain_policy=domain_policy,
+            excluded_signatures=combined,
+        )
+        if outcome.found:
+            self._remember_outcome(outcome)
+        return outcome

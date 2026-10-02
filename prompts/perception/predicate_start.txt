@@ -1,1 +1,1 @@
-Choose the predicate head from OPTIONS. Reply only with the integer option number, without brackets or punctuation.
+Choose the predicate head from the supplied candidates. Reply only with its integer option number, without brackets or punctuation.

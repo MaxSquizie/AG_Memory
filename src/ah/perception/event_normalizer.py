@@ -5,6 +5,7 @@ import re
 from typing import Mapping
 
 from ah.model import ActantRole
+from ah.temporal import TemporalMode
 
 from .contracts import (
     ActantCandidate,
@@ -539,6 +540,7 @@ class EventNormalizer:
                     actants=(synthetic_subject, state),
                     evidence=evidence,
                     status=AssertionStatus.ASSERTED,
+                    temporal_mode=TemporalMode.STATE,
                 )
             )
             existing.add(signature)

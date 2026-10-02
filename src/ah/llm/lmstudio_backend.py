@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from threading import Lock
-from typing import Any
+from typing import Any, Sequence
 import re
 import uuid
 
@@ -277,6 +277,15 @@ class LMStudioBackend:
         self.stop()
         self.start()
 
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        model = (self.config.llm.lmstudio_embed_model or self._active_model or self.config.llm.lmstudio_model).strip()
+        if not model:
+            raise RuntimeError("LM Studio embedding model is not configured")
+        try:
+            return self._client.embed(model=model, texts=texts)
+        except LMStudioClientError as exc:
+            raise RuntimeError(str(exc)) from exc
+
     def _generation_options(self, override: dict[str, Any]) -> dict[str, Any]:
         return {
             "temperature": float(override.get("temperature", self.config.llm.temperature)),
@@ -332,7 +341,11 @@ class LMStudioBackend:
             if str(system or "").strip():
                 messages.append({"role": "system", "content": str(system).strip()})
             messages.append({"role": "user", "content": str(prompt)})
-            is_protocol_probe = role.startswith("perception_") or role.startswith("semantic_")
+            is_protocol_probe = (
+                role.startswith("perception_")
+                or role.startswith("semantic_")
+                or role == "lexical_recovery_choice"
+            )
             if is_protocol_probe and not bool(defaults.get("enable_thinking", False)):
                 # The OpenAI-compatible chat endpoint accepts only the documented
                 # OpenAI-style sampling keys and may ignore custom Jinja variables.

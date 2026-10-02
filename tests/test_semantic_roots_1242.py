@@ -88,8 +88,8 @@ class SemanticRoots1242Tests(unittest.TestCase):
             if role == "perception_role_cue" and "TARGET:\nМарию\n" in prompt
         )
         self.assertIn("RECEIVER_OR_ADDRESSEE:", recipient_prompt)
-        self.assertIn("CHOICES:", recipient_prompt)
-        self.assertNotIn("CHOICES:\nRECIPIENT", recipient_prompt)
+        self.assertIn("Answer options:", recipient_prompt)
+        self.assertNotIn("= RECIPIENT", recipient_prompt)
         self.assertNotIn("perception_content_addressee", [role for role, _ in backend.calls])
 
 

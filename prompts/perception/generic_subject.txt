@@ -1,0 +1,1 @@
+GENERIC_CLASS means SUBJECT denotes an arbitrary member of a class and asks whether the relation holds generally. SPECIFIC_ENTITY means one particular person, object, or group, including named, deictic, definite, or context-bound references. Use UNCLEAR only when the whole source leaves genericity unresolved. Judge meaning, not one word.

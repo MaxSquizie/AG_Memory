@@ -5313,49 +5313,25 @@
           "assertions": [
             {
               "key": "a1",
-              "predicate": "начать",
+              "predicate": "читать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Анна",
-                "OBJECT": {
-                  "assertion": "a2"
-                }
+                "OBJECT": "книга"
               }
             },
             {
               "key": "a2",
               "predicate": "читать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a1.SUBJECT"
-                },
-                "OBJECT": "книга"
-              }
-            },
-            {
-              "key": "a3",
-              "predicate": "начать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Ольга",
-                "OBJECT": {
-                  "assertion": "a4"
-                }
-              }
-            },
-            {
-              "key": "a4",
-              "predicate": "читать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a3.SUBJECT"
-                },
                 "OBJECT": "отчёт"
               }
             }
@@ -5368,9 +5344,7 @@
           "must_succeed": true,
           "domains": {
             "a1": "C",
-            "a2": "C",
-            "a3": "C",
-            "a4": "C"
+            "a2": "C"
           }
         }
       },
@@ -7136,49 +7110,25 @@
           "assertions": [
             {
               "key": "a1",
-              "predicate": "начать",
+              "predicate": "писать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Анна",
-                "OBJECT": {
-                  "assertion": "a2"
-                }
+                "OBJECT": "письмо"
               }
             },
             {
               "key": "a2",
               "predicate": "писать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a1.SUBJECT"
-                },
-                "OBJECT": "письмо"
-              }
-            },
-            {
-              "key": "a3",
-              "predicate": "начать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Мария",
-                "OBJECT": {
-                  "assertion": "a4"
-                }
-              }
-            },
-            {
-              "key": "a4",
-              "predicate": "писать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a3.SUBJECT"
-                },
                 "OBJECT": "отчёт"
               }
             }
@@ -7191,9 +7141,7 @@
           "must_succeed": true,
           "domains": {
             "a1": "C",
-            "a2": "C",
-            "a3": "C",
-            "a4": "C"
+            "a2": "C"
           }
         }
       },
@@ -7292,49 +7240,25 @@
           "assertions": [
             {
               "key": "a1",
-              "predicate": "начать",
+              "predicate": "работать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Анна",
-                "OBJECT": {
-                  "assertion": "a2"
-                }
+                "TIME": "утром"
               }
             },
             {
               "key": "a2",
               "predicate": "работать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a1.SUBJECT"
-                },
-                "TIME": "утром"
-              }
-            },
-            {
-              "key": "a3",
-              "predicate": "начать",
               "status": "ASSERTED",
               "negated": false,
+              "temporal_mode": "TRANSITION",
+              "transition_operator": "START",
               "roles": {
                 "SUBJECT": "Ольга",
-                "OBJECT": {
-                  "assertion": "a4"
-                }
-              }
-            },
-            {
-              "key": "a4",
-              "predicate": "работать",
-              "status": "EMBEDDED",
-              "negated": false,
-              "roles": {
-                "SUBJECT": {
-                  "same_as": "a3.SUBJECT"
-                },
                 "TIME": "вечером"
               }
             }
@@ -7347,9 +7271,7 @@
           "must_succeed": true,
           "domains": {
             "a1": "C",
-            "a2": "C",
-            "a3": "C",
-            "a4": "C"
+            "a2": "C"
           }
         }
       },

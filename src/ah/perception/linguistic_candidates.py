@@ -228,6 +228,12 @@ _COMPOUND_SUBORDINATORS: dict[tuple[str, ...], str | None] = {
     ("потому", "что"): None,
     ("так", "как"): None,
     ("для", "того", "чтобы"): None,
+    # Conditional particles form one structural connective span. Their logical
+    # direction is intentionally NOT encoded here; Perception resolves that later
+    # from the already bounded subordinate/matrix pair.
+    ("только", "если"): None,
+    ("лишь", "если"): None,
+    ("если", "только"): None,
 }
 _SUBORDINATOR_MARKERS = frozenset(_SUBORDINATORS) | frozenset("_".join(parts) for parts in _COMPOUND_SUBORDINATORS)
 _RELATIVE_PREFIXES = ("котор",)
@@ -261,6 +267,7 @@ class LinguisticCandidateBuilder:
         tokens = self._tokens(text)
         graph = self._build_from_tokens(text, tokens)
         if self.lexical_recovery is None:
+            self._emit_candidate_diagnostics(graph, lexical_pass=None)
             return graph
 
         # Bounded recurrent lexical recovery.  A first safe correction can expose a
@@ -270,6 +277,7 @@ class LinguisticCandidateBuilder:
         # covering the short dependency chains expected from ordinary typing noise.
         for _pass in range(4):
             decisions = self.lexical_recovery.recover(text, tokens, graph)
+            self._emit_lexical_diagnostics(decisions, lexical_pass=_pass + 1)
             by_index = {item.token_index: item for item in decisions}
             recovered: list[SourceToken] = []
             changed = False
@@ -299,7 +307,65 @@ class LinguisticCandidateBuilder:
             graph = self._build_from_tokens(text, tokens)
             if not changed:
                 break
+        self._emit_candidate_diagnostics(graph, lexical_pass=_pass + 1)
         return graph
+
+    @staticmethod
+    def _emit_lexical_diagnostics(decisions, *, lexical_pass: int) -> None:
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_lexical_recovery",
+            pass_index=lexical_pass,
+            tokens=[
+                {
+                    "index": item.token_index,
+                    "raw": item.raw_text,
+                    "normalized": item.normalized_text,
+                    "status": item.status.value,
+                    "alternatives": list(item.alternatives),
+                    "confidence": item.confidence,
+                    "reason": item.reason,
+                }
+                for item in decisions
+            ],
+        )
+
+    @staticmethod
+    def _emit_candidate_diagnostics(graph: LinguisticCandidateGraph, *, lexical_pass: int | None) -> None:
+        from ah.diagnostics.session_log import emit
+
+        emit(
+            "pipeline_candidates",
+            lexical_pass=lexical_pass,
+            tokens=[
+                {
+                    "index": token.index,
+                    "raw": token.provenance_text,
+                    "text": token.text,
+                    "recovery": None if token.recovery is None else token.recovery.status.value,
+                }
+                for token in graph.tokens
+            ],
+            predicates=[
+                {
+                    "token_index": item.token_index,
+                    "lemma": getattr(item, "lemma", None),
+                }
+                for item in graph.predicates
+            ],
+            clauses=[
+                {
+                    "clause_id": item.clause_id,
+                    "start": item.span.start_index,
+                    "end": item.span.end_index,
+                    "ellipsis": None if item.ellipsis_kind is None else item.ellipsis_kind.value,
+                }
+                for item in graph.clauses
+            ],
+            coordination_count=len(graph.coordinations),
+            frame_dependency_count=len(graph.frame_graph.dependencies),
+        )
 
     def _build_from_tokens(
         self, text: str, tokens: tuple[SourceToken, ...]
@@ -394,6 +460,32 @@ class LinguisticCandidateBuilder:
     def _predicate_heads(self, tokens: tuple[SourceToken, ...]) -> tuple[PredicateHeadCandidate, ...]:
         result: list[PredicateHeadCandidate] = []
 
+        def determiner_hyphen_suffix(index: int) -> bool:
+            """Reject a spurious predicate reading inside one hyphenated pronoun.
+
+            Tokenization intentionally preserves punctuation as separate source
+            tokens.  Dictionary morphology can nevertheless read the right-hand
+            part of ``pronoun/determiner-suffix`` as an imperative verb.  The
+            left-hand pronominal/determiner morphology plus two source-adjacent
+            hyphens is stronger lexical-unit evidence; no suffix vocabulary is
+            needed.
+            """
+
+            if index < 3:
+                return False
+            hyphen = tokens[index - 2]
+            left = tokens[index - 3]
+            current = tokens[index - 1]
+            if hyphen.text not in {"-", "‐", "‑"}:
+                return False
+            if left.end != hyphen.start or hyphen.end != current.start:
+                return False
+            return any(
+                item.pos == "NPRO"
+                or bool({"Apro", "Anum", "Ques", "Dmns"} & set(item.grammemes))
+                for item in self._material_analyses(left)
+            )
+
         def governed_oblique_nominal(index: int) -> bool:
             """Return True when a weak predicate reading sits inside a PP.
 
@@ -432,6 +524,8 @@ class LinguisticCandidateBuilder:
             return False
 
         for token in tokens:
+            if determiner_hyphen_suffix(token.index):
+                continue
             strong = self._lemma_candidates(token, _STRONG_PREDICATE_POS)
             secondary = self._lemma_candidates(token, _SECONDARY_PREDICATE_POS)
             if strong:
@@ -1027,17 +1121,28 @@ class LinguisticCandidateBuilder:
             owner_start = max(b for b in boundaries if b <= dash)
             if owner_start > left:
                 owner_first = tokens[owner_start - 1].text.casefold()
+                earlier_dash_in_peer = any(
+                    tokens[index - 1].text in {"—", "–", "-"}
+                    for index in range(owner_start, dash)
+                )
                 if (
-                    owner_start in implicit_peer_starts
-                    or owner_first in (_CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR)
-                    or not any(owner_start <= p < dash for p in finite_positions)
+                    (
+                        owner_start in implicit_peer_starts
+                        or owner_first in (_CLAUSE_COORDINATORS | _COORD_AND | _COORD_OR)
+                        or not any(owner_start <= p < dash for p in finite_positions)
+                    )
+                    and not earlier_dash_in_peer
                 ):
                     # A punctuation/coordinator boundary already licensed the
-                    # predicate-free peer.  Splitting inside it caused nested
-                    # frames such as ``а Анна`` + ``журнал — на полку``.
+                    # first predicate-free peer. A later dash can still license a
+                    # subsequent peer in a punctuation-free chain; the earlier
+                    # dash is the independent structural separator in that case.
                     continue
 
             last_finite = max(prior_finite)
+            source_transitivity = stable_transitivity(
+                tokens[last_finite - 1].analyses
+            )
             candidates: list[tuple[float, int]] = []
             for index in range(last_finite + 1, dash):
                 if index in boundaries:
@@ -1046,7 +1151,9 @@ class LinguisticCandidateBuilder:
                 if not re.search(r"\w", item.text):
                     continue
                 dominance = nominative_dominance(item)
-                if dominance < 0.75:
+                if dominance < 0.75 and not (
+                    source_transitivity == "intr" and dominance > 0.0
+                ):
                     continue
                 if not has_non_subject_realization(index, dash, right):
                     continue

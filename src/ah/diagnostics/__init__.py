@@ -19,8 +19,8 @@ from .document_acceptance import (
     DocumentVerdict,
     evaluate_document_graph,
     load_document_specs,
-    run_document_acceptance,
 )
+from .document_runtime_acceptance import run_document_acceptance
 from .hidden_valency_diagnostic import (
     HiddenValencyDiagnosticCase,
     HiddenValencyDiagnosticResult,
@@ -33,8 +33,9 @@ from .summary import RuntimeDiagnostics, RuntimeSummary
 from .trace_view import TraceView
 from .inference_proof import (
     ProofCheck, ProofChainSnapshot, ProofEdgeSnapshot, ProofNodeSnapshot,
-    ProofSnapshotBuilder, ProofStepSnapshot,
+    ProofStepSnapshot,
 )
+from .association_proof import ProofSnapshotBuilder
 from .m2_acceptance import (
     M2AcceptanceCaseResult,
     M2AcceptanceRunResult,
@@ -49,11 +50,17 @@ from .hackathon_metrics import (
     M1Report, M2QuestionObservation, M2ScoreReport, M3Report, M4Report, M5Report, TickBenchmarkReport,
     RoleMetric, run_m3_gc_acceptance, score_m1_acceptance_bundle, score_m1_role_f1,
     score_m2_explainability, score_m4_comparison, score_m5_robustness, run_tick_benchmark, write_metric_report,
+    M3_RUNS_DIRNAME,
 )
-
 from .propagation_audit import (
     FanoutAudit, PropagationAudit, PropagationEdgeAudit, analyze_propagation, propagation_edges,
 )
+
+# M1 adapters consume only already-typed Perception contracts. Installing them at
+# diagnostics package import time keeps the existing GUI import surface stable while
+# allowing newly introduced semantic query types to own an explicit presentation.
+from .m1_identity_presentation import install_identity_m1_presentation
+install_identity_m1_presentation()
 
 __all__ = [
     "AcceptanceCase",
@@ -117,13 +124,44 @@ __all__ = [
     "score_m1_acceptance_bundle",
     "score_m2_explainability",
     "run_m3_gc_acceptance",
+    "M3_RUNS_DIRNAME",
     "score_m4_comparison",
     "score_m5_robustness",
     "run_tick_benchmark",
     "write_metric_report",
+    "DEFAULT_M4_QUESTIONS",
+    "InjectedAhAnswer",
+    "M4AcceptanceError",
+    "M4AcceptanceReport",
+    "M4CaseRecord",
+    "M4Question",
+    "M4_RUNS_DIRNAME",
+    "load_m4_questions",
+    "run_m4_acceptance",
     "FanoutAudit",
     "PropagationAudit",
     "PropagationEdgeAudit",
     "analyze_propagation",
     "propagation_edges",
 ]
+
+_M4_EXPORTS = {
+    "DEFAULT_M4_QUESTIONS",
+    "InjectedAhAnswer",
+    "M4AcceptanceError",
+    "M4AcceptanceReport",
+    "M4CaseRecord",
+    "M4Question",
+    "M4_RUNS_DIRNAME",
+    "load_m4_questions",
+    "run_m4_acceptance",
+}
+
+
+def __getattr__(name: str):
+    if name in _M4_EXPORTS:
+        from . import m4_acceptance as _m4
+        value = getattr(_m4, name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

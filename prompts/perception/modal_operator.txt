@@ -1,0 +1,1 @@
+Classify how CUE changes commitment to the fixed proposition. POSSIBLE, REQUIRED, and PERMITTED add their modal force. FACTUAL confirms actuality or certainty without a modal wrapper. NONE means ordinary proposition material. UNCLEAR means a commitment effect exists but its type is unresolved. Invent nothing.

@@ -233,6 +233,7 @@ class RuntimeServices:
                     "builtin_process": "LocalLLMProcessBackend",
                     "ollama": "OllamaBackend",
                     "lmstudio": "LMStudioBackend",
+                    "android_npu": "AndroidNpuBackend",
                 }[new_config.llm.backend]
                 if type(self.llm).__name__ != expected_backend_type:
                     self.llm.stop()

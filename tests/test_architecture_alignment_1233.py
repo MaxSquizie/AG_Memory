@@ -78,7 +78,10 @@ def parser(backend):
 
 class ArchitectureAlignment1233Tests(unittest.TestCase):
     def test_worker_calibration_can_reverse_a_raw_continuation_prior(self):
-        import torch
+        try:
+            import torch
+        except ModuleNotFoundError:
+            self.skipTest("optional torch test dependency is not installed")
 
         class Tokenizer:
             def __call__(self, text, *, return_tensors="pt", add_special_tokens=False):

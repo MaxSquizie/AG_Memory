@@ -4,5 +4,38 @@ __pycache__/
 *.pyc
 *.pyo
 *.log
+.DS_Store
 
 data/ah_memory.json
+data/ah_android_memory.json
+
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/build/
+android/build/
+android/app/src/main/python/ah/
+
+/personal_docs/
+/logs/
+/acceptance_runs/
+/data/acceptance_runs/
+/data/acceptance_runs_*/
+/data/document_acceptance_runs/
+/data/hidden_valency_diagnostics/
+/data/m2_runs/
+/data/m3_runs/
+/data/m4_runs/
+
+# build / cache artifacts
+*.egg-info/
+.pytest_cache/
+
+# local scratch / tooling (not part of the project)
+asar_*.js
+tmp_*.py
+SWAG.txt
+docs/_fv5_p*.md
+*.patch
+.kripl/
+tmp_main_audit/

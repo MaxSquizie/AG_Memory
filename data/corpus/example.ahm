@@ -1,0 +1,30 @@
+module example
+
+symbol gift
+  forms = "дарить подарить"
+
+entity ivan
+  name = "Иван"
+
+entity book
+  name = "книга"
+
+entity maria
+  name = "Мария"
+
+entity person
+  name = "человек"
+
+template gift_event gift
+  roles = "SUBJECT OBJECT RECIPIENT"
+
+fact gift_1
+  template = gift_event
+  SUBJECT = ivan
+  OBJECT = book
+  RECIPIENT = maria
+
+link ivan_is_person
+  relation = IS-A
+  from = ivan
+  to = person

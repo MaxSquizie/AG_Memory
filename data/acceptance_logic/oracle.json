@@ -1,0 +1,2484 @@
+{
+  "version": 1,
+  "corpus_id": "logical-formalization-v1-33",
+  "case_count": 33,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Dedicated point-2 acceptance for source-level AND/OR/XOR/NOT/IMPLIES formalization, scope, canonical materialization and safe open-world semantics.",
+    "rule": "The oracle fixes proposition leaves and exact AST topology. Python owns operands/candidate trees; bounded semantic probes may only classify local relation, scope, exclusivity, implication direction, or negation scope. No case is ARCHITECTURE_GAP."
+  },
+  "coverage": {
+    "and": 4,
+    "or": 4,
+    "xor": 6,
+    "local_not": 6,
+    "whole_not": 1,
+    "implies": 8,
+    "mixed_scope": 4
+  },
+  "cases": [
+    {
+      "text": "Иван пришёл и Мария ушла.",
+      "grade": "EXACT",
+      "family": "and",
+      "tags": [
+        "AND",
+        "coordinator"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_001"
+    },
+    {
+      "text": "Иван пришёл, но Мария ушла.",
+      "grade": "EXACT",
+      "family": "and",
+      "tags": [
+        "AND",
+        "adversative"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_002"
+    },
+    {
+      "text": "Иван пришёл, а Мария позвонила.",
+      "grade": "EXACT",
+      "family": "and",
+      "tags": [
+        "AND",
+        "adversative"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_003"
+    },
+    {
+      "text": "Иван пришёл, однако Мария осталась.",
+      "grade": "EXACT",
+      "family": "and",
+      "tags": [
+        "AND",
+        "adversative"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "остаться",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_004"
+    },
+    {
+      "text": "Иван придёт или Мария позвонит.",
+      "grade": "EXACT",
+      "family": "or",
+      "tags": [
+        "OR",
+        "inclusive"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_005"
+    },
+    {
+      "text": "Иван придёт или Мария позвонит, возможно оба.",
+      "grade": "EXACT",
+      "family": "or",
+      "tags": [
+        "OR",
+        "inclusive",
+        "semantic-cue"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_006"
+    },
+    {
+      "text": "Иван придёт или Мария позвонит или Пётр уйдёт.",
+      "grade": "EXACT",
+      "family": "or",
+      "tags": [
+        "OR",
+        "nary"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2",
+                  "a3"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2",
+                  "a3"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_007"
+    },
+    {
+      "text": "По крайней мере одно: Иван придёт или Мария позвонит.",
+      "grade": "EXACT",
+      "family": "or",
+      "tags": [
+        "OR",
+        "semantic-paraphrase"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "note": "The prefix is semantic evidence for inclusive at-least-one disjunction; it is not a dictionary authority.",
+      "scenario": "logic_v1_008"
+    },
+    {
+      "text": "Одно из двух: Иван придёт, Мария позвонит.",
+      "grade": "EXACT",
+      "family": "xor",
+      "tags": [
+        "XOR",
+        "semantic-paraphrase",
+        "no-or-keyword"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "note": "Relation discovery and exclusivity are separate bounded decisions.",
+      "scenario": "logic_v1_009"
+    },
+    {
+      "text": "Ровно одно из двух: Иван придёт или Мария позвонит.",
+      "grade": "EXACT",
+      "family": "xor",
+      "tags": [
+        "XOR",
+        "exactly-one"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_010"
+    },
+    {
+      "text": "Иван придёт или Мария позвонит, но не оба.",
+      "grade": "EXACT",
+      "family": "xor",
+      "tags": [
+        "XOR",
+        "not-both"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_011"
+    },
+    {
+      "text": "Иван придёт либо Мария позвонит — только одно.",
+      "grade": "EXACT",
+      "family": "xor",
+      "tags": [
+        "XOR",
+        "correlative-paraphrase"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_012"
+    },
+    {
+      "text": "Один и только один вариант: Иван придёт или Мария позвонит.",
+      "grade": "EXACT",
+      "family": "xor",
+      "tags": [
+        "XOR",
+        "one-and-only-one"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_013"
+    },
+    {
+      "text": "Ровно одно из трёх: Иван придёт, Мария позвонит или Пётр уйдёт.",
+      "grade": "EXACT",
+      "family": "xor",
+      "tags": [
+        "XOR",
+        "nary",
+        "exactly-one"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2",
+                  "a3"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "XOR",
+                "args": [
+                  "a1",
+                  "a2",
+                  "a3"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "note": "N-ary XOR means exactly one true branch, never odd parity.",
+      "scenario": "logic_v1_014"
+    },
+    {
+      "text": "Иван не пришёл и Мария ушла.",
+      "grade": "EXACT",
+      "family": "local_not",
+      "tags": [
+        "NOT",
+        "AND",
+        "left"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_015"
+    },
+    {
+      "text": "Иван пришёл и Мария не ушла.",
+      "grade": "EXACT",
+      "family": "local_not",
+      "tags": [
+        "NOT",
+        "AND",
+        "right"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_016"
+    },
+    {
+      "text": "Иван не пришёл или Мария ушла.",
+      "grade": "EXACT",
+      "family": "local_not",
+      "tags": [
+        "NOT",
+        "OR",
+        "left"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_017"
+    },
+    {
+      "text": "Иван не пришёл или Мария не ушла.",
+      "grade": "EXACT",
+      "family": "local_not",
+      "tags": [
+        "NOT",
+        "OR",
+        "both"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_018"
+    },
+    {
+      "text": "Иван не пришёл, но Мария позвонила.",
+      "grade": "EXACT",
+      "family": "local_not",
+      "tags": [
+        "NOT",
+        "AND",
+        "adversative"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  "a2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_019"
+    },
+    {
+      "text": "Ни Иван не пришёл, ни Мария не позвонила.",
+      "grade": "EXACT",
+      "family": "local_not",
+      "tags": [
+        "NOT",
+        "AND",
+        "ni-ni",
+        "semantic-relation"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": true,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a1"
+                    ]
+                  },
+                  {
+                    "op": "NOT",
+                    "args": [
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_020"
+    },
+    {
+      "text": "Не оба: Иван пришёл и Мария ушла.",
+      "grade": "EXACT",
+      "family": "whole_not",
+      "tags": [
+        "NOT",
+        "whole-scope",
+        "AND"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "NOT",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "NOT",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "note": "Wide-scope negation must wrap the complete already-built conjunction.",
+      "scenario": "logic_v1_021"
+    },
+    {
+      "text": "Если Иван придёт, Мария уйдёт.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "fronted"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_022"
+    },
+    {
+      "text": "Мария уйдёт, если Иван придёт.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "postposed"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a2"
+              ],
+              "then": [
+                "a1"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  "a2",
+                  "a1"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти"
+              ]
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_023"
+    },
+    {
+      "text": "Мария уйдёт только если Иван придёт.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "only-if",
+        "direction"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  "a1",
+                  "a2"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "уйти"
+              ],
+              "then": [
+                "прийти"
+              ]
+            }
+          ]
+        }
+      },
+      "note": "\"B only if A\" is B -> A; connective surface never directly writes the direction.",
+      "scenario": "logic_v1_024"
+    },
+    {
+      "text": "Если Иван придёт и Пётр останется, Мария уйдёт.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "AND",
+        "antecedent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "остаться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1",
+                "a2"
+              ],
+              "then": [
+                "a3"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  },
+                  "a3"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти",
+                "остаться"
+              ],
+              "then": [
+                "уйти"
+              ],
+              "if_operator": "AND"
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_025"
+    },
+    {
+      "text": "Если Иван придёт, Мария уйдёт и Пётр останется.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "AND",
+        "consequent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "остаться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2",
+                "a3"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  "a1",
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти",
+                "остаться"
+              ],
+              "then_operator": "AND"
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_026"
+    },
+    {
+      "text": "Если Иван придёт, Мария уйдёт или Пётр останется.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "OR",
+        "consequent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "остаться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2",
+                "a3"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  "a1",
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти",
+                "остаться"
+              ],
+              "then_operator": "OR"
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_027"
+    },
+    {
+      "text": "Если Иван придёт или Пётр останется, Мария уйдёт.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "OR",
+        "antecedent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "остаться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1",
+                "a2"
+              ],
+              "then": [
+                "a3"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  },
+                  "a3"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти",
+                "остаться"
+              ],
+              "then": [
+                "уйти"
+              ],
+              "if_operator": "OR"
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_028"
+    },
+    {
+      "text": "Если Иван придёт, Мария уйдёт или Пётр останется, но не оба.",
+      "grade": "EXACT",
+      "family": "implies",
+      "tags": [
+        "IMPLIES",
+        "XOR",
+        "consequent"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "уйти",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "остаться",
+              "status": "CONDITIONAL",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [
+            {
+              "if": [
+                "a1"
+              ],
+              "then": [
+                "a2",
+                "a3"
+              ]
+            }
+          ],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "IMPLIES",
+                "args": [
+                  "a1",
+                  {
+                    "op": "XOR",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "world_assertion_count": 0,
+          "conditionals": [
+            {
+              "if": [
+                "прийти"
+              ],
+              "then": [
+                "уйти",
+                "остаться"
+              ],
+              "then_operator": "XOR"
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_029"
+    },
+    {
+      "text": "Иван пришёл и (Мария позвонила или Пётр ушёл).",
+      "grade": "EXACT",
+      "family": "mixed_scope",
+      "tags": [
+        "AND",
+        "OR",
+        "parentheses"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  "a1",
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_030"
+    },
+    {
+      "text": "(Иван пришёл или Мария позвонила) и Пётр ушёл.",
+      "grade": "EXACT",
+      "family": "mixed_scope",
+      "tags": [
+        "AND",
+        "OR",
+        "parentheses"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  },
+                  "a3"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "AND",
+                "args": [
+                  {
+                    "op": "OR",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  },
+                  "a3"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_031"
+    },
+    {
+      "text": "Иван пришёл или (Мария позвонила и Пётр ушёл).",
+      "grade": "EXACT",
+      "family": "mixed_scope",
+      "tags": [
+        "OR",
+        "AND",
+        "parentheses"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  "a1",
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a2",
+                      "a3"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_032"
+    },
+    {
+      "text": "(Иван пришёл и Мария позвонила) или Пётр ушёл.",
+      "grade": "EXACT",
+      "family": "mixed_scope",
+      "tags": [
+        "OR",
+        "AND",
+        "parentheses"
+      ],
+      "expect": {
+        "perception": {
+          "must_parse": true,
+          "assertions": [
+            {
+              "key": "a1",
+              "predicate": "прийти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Иван"
+              }
+            },
+            {
+              "key": "a2",
+              "predicate": "позвонить",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Мария"
+              }
+            },
+            {
+              "key": "a3",
+              "predicate": "уйти",
+              "status": "ASSERTED",
+              "negated": false,
+              "roles": {
+                "SUBJECT": "Пётр"
+              }
+            }
+          ],
+          "queries": [],
+          "relations": [],
+          "conditionals": [],
+          "proposition_roots": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  },
+                  "a3"
+                ]
+              }
+            }
+          ]
+        },
+        "integration": {
+          "must_succeed": true,
+          "formulas": [
+            {
+              "expr": {
+                "op": "OR",
+                "args": [
+                  {
+                    "op": "AND",
+                    "args": [
+                      "a1",
+                      "a2"
+                    ]
+                  },
+                  "a3"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "scenario": "logic_v1_033"
+    }
+  ]
+}

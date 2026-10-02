@@ -68,7 +68,7 @@ class NeutralRoleProtocol1254Tests(unittest.TestCase):
         self.assertEqual(call_role, "perception_role_cue")
         self.assertIn("INSTRUMENT:", prompt)
         self.assertIn("TIME_POINT:", prompt)
-        self.assertIn("CHOICES:", prompt)
+        self.assertIn("Answer options:", prompt)
         self.assertNotIn("choice_outputs", override)
         self.assertNotIn("return_choice_scores", override)
         self.assertNotIn("decision_margin_threshold", override)

@@ -11,12 +11,14 @@ from ah.model import FunctionSymbol, Hypernode, Ref, RefKind
 from .attention import InferenceAttention
 from .contracts import (
     AllOfGoal,
+    AnyOfGoal,
     CauseEntailmentGoal,
     CounterfactualGoal,
     CompositeConclusion,
     DerivedLinkConclusion,
     ExistingRefConclusion,
     ExistsGoal,
+    ExactlyOneOfGoal,
     FormulaGoal,
     GoalSpec,
     InferenceGoal,
@@ -36,6 +38,7 @@ from .context import CounterfactualContext, ProofContext
 from .schema import InferenceSchemaRegistry
 from .formula import GroundFormulaReasoner
 from .runtime import GoalRuntime
+from .subsumption import taxonomy_path
 
 
 class InferenceEngine:
@@ -106,7 +109,13 @@ class InferenceEngine:
         if isinstance(goal, MultiRoleFillGoal):
             return self._multi_role_fill(goal, runtime)
         if isinstance(goal, ExistsGoal):
-            return self._exists(goal, runtime)
+            return self._exists(
+                goal,
+                query,
+                attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
         if isinstance(goal, RelationGoal):
             return self._relation(goal, query, workspace_refs, attention, runtime)
         if isinstance(goal, CauseEntailmentGoal):
@@ -122,6 +131,26 @@ class InferenceEngine:
         if isinstance(goal, AllOfGoal):
             return self._all_of(
                 goal, query, workspace_refs, attention, proof_context=proof_context, runtime=runtime
+            )
+        if isinstance(goal, AnyOfGoal):
+            return self._alternative_goal(
+                goal.goals,
+                exclusive=False,
+                query=query,
+                workspace_refs=workspace_refs,
+                attention=attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
+        if isinstance(goal, ExactlyOneOfGoal):
+            return self._alternative_goal(
+                goal.goals,
+                exclusive=True,
+                query=query,
+                workspace_refs=workspace_refs,
+                attention=attention,
+                proof_context=proof_context,
+                runtime=runtime,
             )
         raise TypeError(f"Unsupported inference goal: {type(goal).__name__}")
 
@@ -222,7 +251,11 @@ class InferenceEngine:
         )
         runtime.subgoal(
             logical_depth=0,
-            ref=goal.target.expression,
+            ref=(
+                goal.target.expression
+                if isinstance(goal.target, FormulaGoal)
+                else None
+            ),
             detail=f"counterfactual overlay with {len(assumptions)} explicit assumption(s)",
         )
         outcome = self._solve_goal(
@@ -232,6 +265,174 @@ class InferenceEngine:
             outcome,
             diagnostics=("counterfactual overlay; canonical AH unchanged", *outcome.diagnostics),
             proof_context=context,
+        )
+
+    def _alternative_goal(
+        self,
+        goals: tuple[InferenceGoal, ...],
+        *,
+        exclusive: bool,
+        query: InferenceQuery,
+        workspace_refs: tuple[Ref, ...],
+        attention: InferenceAttention | None,
+        proof_context: ProofContext,
+        runtime: GoalRuntime,
+    ) -> InferenceOutcome:
+        """Evaluate typed OR/XOR without materializing a canonical formula."""
+
+        max_depth, budget = self._limits(query)
+        outcomes: list[InferenceOutcome] = []
+        total_expanded = 0
+        operator = "XOR" if exclusive else "OR"
+        for index, child in enumerate(goals, 1):
+            remaining_budget = budget - total_expanded
+            if remaining_budget < 1:
+                outcomes.append(
+                    InferenceOutcome(
+                        LogicalStatus.UNKNOWN,
+                        StopReason.BUDGET_EXHAUSTED,
+                        None,
+                        (),
+                        (),
+                        None,
+                        0,
+                        (f"{operator} child {index} not attempted: budget exhausted",),
+                        proof_context=proof_context,
+                    )
+                )
+                break
+            runtime.subgoal(
+                logical_depth=0,
+                detail=f"{operator} child {index}/{len(goals)}: {type(child).__name__}",
+            )
+            child_query = InferenceQuery(
+                GoalSpec(child),
+                premise_refs=query.premise_refs,
+                max_depth=max_depth,
+                max_expanded_states=remaining_budget,
+                proof_context=proof_context,
+            )
+            outcome = self._solve_goal(
+                child,
+                child_query,
+                workspace_refs,
+                attention,
+                proof_context=proof_context,
+                runtime=runtime,
+            )
+            outcomes.append(outcome)
+            total_expanded += outcome.expanded_states
+            if not exclusive and outcome.status is LogicalStatus.PROVED:
+                break
+
+        evaluated = tuple(outcomes)
+        proved = tuple(
+            item for item in evaluated if item.status is LogicalStatus.PROVED
+        )
+        disproved = tuple(
+            item for item in evaluated if item.status is LogicalStatus.DISPROVED
+        )
+        selected: tuple[InferenceOutcome, ...] = ()
+        status = LogicalStatus.UNKNOWN
+        stop_reason = next(
+            (
+                item.stop_reason
+                for item in evaluated
+                if item.status is LogicalStatus.UNKNOWN
+            ),
+            StopReason.SEARCH_EXHAUSTED,
+        )
+        rule_id: str | None = None
+        conclusion = None
+        if not exclusive and proved:
+            status = LogicalStatus.PROVED
+            stop_reason = StopReason.GOAL_SATISFIED
+            selected = (proved[0],)
+            conclusion = proved[0].conclusion
+            rule_id = "OR_INTRO"
+        elif not exclusive and len(disproved) == len(goals):
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            selected = evaluated
+            rule_id = "OR_REFUTED"
+        elif exclusive and len(proved) >= 2:
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            selected = proved[:2]
+            rule_id = "XOR_MULTI_TRUE"
+        elif (
+            exclusive
+            and len(proved) == 1
+            and len(disproved) == len(goals) - 1
+        ):
+            status = LogicalStatus.PROVED
+            stop_reason = StopReason.GOAL_SATISFIED
+            selected = evaluated
+            conclusion = proved[0].conclusion
+            rule_id = "XOR_INTRO"
+        elif exclusive and len(disproved) == len(goals):
+            status = LogicalStatus.DISPROVED
+            stop_reason = StopReason.GOAL_REFUTED
+            selected = evaluated
+            rule_id = "XOR_ALL_FALSE"
+
+        if rule_id is None:
+            return InferenceOutcome(
+                LogicalStatus.UNKNOWN,
+                stop_reason,
+                None,
+                (),
+                (),
+                None,
+                total_expanded,
+                (
+                    f"{operator} remains open: UNKNOWN is not explicit FALSE",
+                ),
+                logical_depth=max(
+                    (item.logical_depth for item in evaluated), default=0
+                ),
+                proof_context=proof_context,
+            )
+
+        premises: list[Ref] = []
+        premise_seen: set[tuple[str, str]] = set()
+        trace: list[Ref] = []
+        trace_seen: set[tuple[str, str]] = set()
+        supports: list[ProofSupport] = []
+        for outcome in selected:
+            supports.extend(outcome.proof_support)
+            for source, target, seen in (
+                (outcome.premise_refs, premises, premise_seen),
+                (outcome.uid_trace, trace, trace_seen),
+            ):
+                for ref in source:
+                    key = (ref.kind.value, ref.uid)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    target.append(ref)
+        premise_tuple = tuple(premises)
+        logical_depth = max(
+            (item.logical_depth for item in selected), default=0
+        )
+        runtime.rule(
+            rule_id,
+            logical_depth=logical_depth,
+            detail=f"runtime-only typed {operator} goal",
+        )
+        supports.append(ProofSupport(premise_tuple, rule_id=rule_id))
+        return InferenceOutcome(
+            status,
+            stop_reason,
+            conclusion,
+            premise_tuple,
+            tuple(trace),
+            domain_from_premises(self.core, premise_tuple) if premise_tuple else None,
+            total_expanded,
+            (f"Resolved runtime-only typed {operator} goal",),
+            logical_depth=logical_depth,
+            proof_support=tuple(supports),
+            proof_context=proof_context,
         )
 
     def _all_of(
@@ -536,10 +737,30 @@ class InferenceEngine:
             # an asserted world fact, so ordinary EXISTS/ROLE_FILL must ignore them.
             if element.meta.get("semantic_scope"):
                 continue
-            if all(element.actants.get(role) == ref for role, ref in known_roles.items()):
+            if self._actant_subsumption_support(element.actants, known_roles) is not None:
                 out.append(element)
         out.sort(key=lambda n: n.uid)
         return out
+
+    def _actant_subsumption_support(
+        self, actual_roles, required_roles
+    ) -> tuple[Ref, ...] | None:
+        support: list[Ref] = []
+        seen: set[str] = set()
+        for role, required in required_roles.items():
+            actual = actual_roles.get(role)
+            if not isinstance(actual, Ref) or not isinstance(required, Ref):
+                return None
+            path = taxonomy_path(
+                self.core, actual, required, max_depth=self.settings.max_depth
+            )
+            if path is None:
+                return None
+            for ref in path:
+                if ref.uid not in seen:
+                    seen.add(ref.uid)
+                    support.append(ref)
+        return tuple(support)
 
     def _role_fill(self, goal: RoleFillGoal, runtime: GoalRuntime) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
@@ -557,13 +778,16 @@ class InferenceEngine:
                 continue
             runtime.focus(fact_ref, logical_depth=0, reason="matched factual premise")
             runtime.rule("FACT_MATCH", logical_depth=0, detail=f"requested role={goal.requested_role.value}")
-            premises = (fact_ref,)
+            subsumption = self._actant_subsumption_support(
+                node.actants, goal.known_roles
+            ) or ()
+            premises = (fact_ref, *subsumption)
             return InferenceOutcome(
                 LogicalStatus.PROVED,
                 StopReason.GOAL_SATISFIED,
                 RoleBindingConclusion(goal.requested_role, value, fact_ref),
                 premises,
-                (fact_ref, value),
+                (fact_ref, *subsumption, value),
                 domain_from_premises(self.core, premises),
                 1,
                 proof_support=self._proof_support(premises, rule_id="FACT_MATCH"),
@@ -605,8 +829,15 @@ class InferenceEngine:
                 continue
             runtime.focus(fact_ref, logical_depth=0, reason="matched factual premise")
             runtime.rule("FACT_MATCH", logical_depth=0, detail="multi-role binding")
-            premises = (fact_ref,)
-            trace = (fact_ref, *(value for _role, value in bindings))
+            subsumption = self._actant_subsumption_support(
+                node.actants, goal.known_roles
+            ) or ()
+            premises = (fact_ref, *subsumption)
+            trace = (
+                fact_ref,
+                *subsumption,
+                *(value for _role, value in bindings),
+            )
             return InferenceOutcome(
                 LogicalStatus.PROVED,
                 StopReason.GOAL_SATISFIED,
@@ -630,7 +861,15 @@ class InferenceEngine:
             len(matches),
         )
 
-    def _exists(self, goal: ExistsGoal, runtime: GoalRuntime) -> InferenceOutcome:
+    def _exists(
+        self,
+        goal: ExistsGoal,
+        query: InferenceQuery,
+        attention: InferenceAttention | None,
+        *,
+        proof_context: ProofContext,
+        runtime: GoalRuntime,
+    ) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
         matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime)
         conflicted: list[Ref] = []
@@ -643,13 +882,16 @@ class InferenceEngine:
             if false_ref is None:
                 runtime.focus(ref, logical_depth=0, reason="EXISTS witness")
                 runtime.rule("EXISTS_WITNESS", logical_depth=0, detail="explicit canonical witness")
-                premises = (ref,)
+                subsumption = self._actant_subsumption_support(
+                    node.actants, goal.known_roles
+                ) or ()
+                premises = (ref, *subsumption)
                 return InferenceOutcome(
                     LogicalStatus.PROVED,
                     StopReason.GOAL_SATISFIED,
                     ExistingRefConclusion(ref),
                     premises,
-                    (ref,),
+                    (ref, *subsumption),
                     domain_from_premises(self.core, premises),
                     1,
                     proof_support=self._proof_support(premises, rule_id="EXISTS_WITNESS"),
@@ -675,6 +917,68 @@ class InferenceEngine:
         conflict = self._conflict_outcome(tuple(conflicted), expanded=len(matches))
         if conflict is not None:
             return conflict
+
+        # A direct EXISTS query may target an atom which was asserted only as a
+        # leaf of a source-level formula.  Such N nodes deliberately have zero
+        # ordinary occurrences, so FACT_MATCH must not accept them directly; let
+        # the formula reasoner establish the leaf through AND elimination,
+        # implication, or another registered logical rule.  Candidate generation
+        # remains local to the goal's template index and no scoped mention becomes
+        # a truth premise merely by existing in the store.
+        scoped_candidates = sorted(
+            (
+                node
+                for node in self.core.store.find_hypernodes_by_template(
+                    goal.template_ref.uid
+                )
+                if node.meta.get("semantic_scope")
+                and self._actant_subsumption_support(
+                    node.actants, goal.known_roles
+                ) is not None
+            ),
+            key=lambda node: node.uid,
+        )
+        reasoner = GroundFormulaReasoner(
+            self.core,
+            self.settings,
+            query,
+            attention=attention,
+            proof_context=proof_context,
+            runtime=runtime,
+        )
+        for node in scoped_candidates:
+            candidate_ref = self.core.ref(node.uid)
+            runtime.subgoal(
+                logical_depth=0,
+                ref=candidate_ref,
+                detail="derive scoped EXISTS witness through formula rules",
+            )
+            derived = reasoner.solve(FormulaGoal(candidate_ref))
+            if derived.status is LogicalStatus.PROVED:
+                subsumption = self._actant_subsumption_support(
+                    node.actants, goal.known_roles
+                ) or ()
+                premises = tuple(dict.fromkeys((*derived.premise_refs, *subsumption)))
+                trace = tuple(dict.fromkeys((*derived.uid_trace, *subsumption)))
+                return replace(
+                    derived,
+                    premise_refs=premises,
+                    uid_trace=trace,
+                    diagnostics=(
+                        "EXISTS witness derived from asserted formula",
+                        *derived.diagnostics,
+                    ),
+                    proof_support=(
+                        *derived.proof_support,
+                        *(
+                            self._proof_support(
+                                subsumption,
+                                rule_id="ROLE_IS_A_SUBSUMPTION",
+                            )
+                            if subsumption else ()
+                        ),
+                    ),
+                )
         return InferenceOutcome(
             LogicalStatus.UNKNOWN,
             StopReason.SEARCH_EXHAUSTED,
@@ -736,6 +1040,98 @@ class InferenceEngine:
                     premises, rule_id="DIRECT_RELATION", relation_id=relation
                 ),
             )
+
+        schema = self.schema_registry.get(relation)
+        if goal.source == goal.target:
+            if schema.irreflexive:
+                runtime.rule("IRREFLEXIVE", logical_depth=1, detail=relation)
+                return InferenceOutcome(
+                    LogicalStatus.DISPROVED,
+                    StopReason.GOAL_REFUTED,
+                    None,
+                    (goal.source,),
+                    (goal.source,),
+                    domain_from_premises(self.core, (goal.source,)),
+                    1,
+                    (f"{relation} is explicitly registered IRREFLEXIVE",),
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        (goal.source,), rule_id="IRREFLEXIVE", relation_id=relation
+                    ),
+                )
+            if schema.reflexive:
+                runtime.rule("REFLEXIVE", logical_depth=1, detail=relation)
+                premises = (goal.source,)
+                return InferenceOutcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    DerivedLinkConclusion(relation, goal.source, goal.target),
+                    premises,
+                    premises,
+                    domain_from_premises(self.core, premises),
+                    1,
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        premises, rule_id="REFLEXIVE", relation_id=relation
+                    ),
+                )
+
+        if schema.symmetric:
+            reverse = self.core.store.find_link(relation, goal.target.uid, goal.source.uid)
+            runtime.memory_query(
+                "SYMMETRIC_RELATION",
+                f"{relation}|{goal.target.uid}|{goal.source.uid}",
+                logical_depth=0,
+                focus_ref=goal.source,
+                candidate_count=1 if reverse is not None else 0,
+                detail="reverse typed link lookup licensed by SYMMETRIC schema",
+            )
+            if reverse is not None:
+                link_ref = self.core.ref(reverse.uid)
+                premises = (goal.source, link_ref, goal.target)
+                runtime.rule("SYMMETRY", logical_depth=1, detail=relation)
+                return InferenceOutcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    DerivedLinkConclusion(relation, goal.source, goal.target),
+                    premises,
+                    premises,
+                    domain_from_premises(self.core, premises),
+                    1,
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        premises, rule_id="SYMMETRY", relation_id=relation
+                    ),
+                )
+
+        inverse = self.schema_registry.inverse_for(relation)
+        if inverse is not None:
+            inverse_link = self.core.store.find_link(inverse, goal.target.uid, goal.source.uid)
+            runtime.memory_query(
+                "INVERSE_RELATION",
+                f"{inverse}|{goal.target.uid}|{goal.source.uid}",
+                logical_depth=0,
+                focus_ref=goal.source,
+                candidate_count=1 if inverse_link is not None else 0,
+                detail=f"inverse typed link lookup licensed by {relation}<->{inverse}",
+            )
+            if inverse_link is not None:
+                link_ref = self.core.ref(inverse_link.uid)
+                premises = (goal.source, link_ref, goal.target)
+                runtime.rule("INVERSE_OF", logical_depth=1, detail=f"{relation}<->{inverse}")
+                return InferenceOutcome(
+                    LogicalStatus.PROVED,
+                    StopReason.GOAL_SATISFIED,
+                    DerivedLinkConclusion(relation, goal.source, goal.target),
+                    premises,
+                    premises,
+                    domain_from_premises(self.core, premises),
+                    1,
+                    logical_depth=1,
+                    proof_support=self._proof_support(
+                        premises, rule_id="INVERSE_OF", relation_id=relation
+                    ),
+                )
 
         if not self.schema_registry.is_transitive(relation):
             return InferenceOutcome(

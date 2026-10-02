@@ -1,0 +1,1 @@
+EVENT_RELATION means TARGET is a circumstance or filler of the predicate. EVENT_TRANSITION changes that occurrence's phase or recurrence. DISCOURSE_OPERATOR modifies the utterance, question, focus, contrast, or answer set rather than the event; requesting another answer belongs here. Use UNCLEAR when scope is unresolved. Use the whole source only.

@@ -10,6 +10,7 @@ class ProjectionMode(str, Enum):
     ACTIVE = "ACTIVE"
     DEPENDENCY = "DEPENDENCY"
     INFERENCE = "INFERENCE"
+    ASSOCIATION = "ASSOCIATION"
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,8 +51,6 @@ class AgentContextDiagnostic:
     settle_ticks: int = 0
 
 
-
-
 @dataclass(frozen=True, slots=True)
 class SourceScope:
     """Runtime provenance scope used for source-bounded recall/projection.
@@ -68,6 +67,32 @@ class SourceScope:
     def __post_init__(self) -> None:
         if not self.source_ref.strip():
             raise ValueError("SourceScope.source_ref must be non-empty")
+
+
+@dataclass(frozen=True, slots=True)
+class SourceProjectionCursor:
+    """Runtime cursor over ordered semantic roots of one canonical source."""
+
+    source_ref: str
+    next_index: int = 0
+
+    def __post_init__(self) -> None:
+        if not self.source_ref.strip():
+            raise ValueError("SourceProjectionCursor.source_ref must be non-empty")
+        if self.next_index < 0:
+            raise ValueError("SourceProjectionCursor.next_index must be >= 0")
+
+
+@dataclass(frozen=True, slots=True)
+class SourceScopeSlice:
+    """One bounded source slice plus causal/temporal boundary overlap."""
+
+    scope: SourceScope
+    cursor: SourceProjectionCursor
+    next_cursor: SourceProjectionCursor
+    primary_refs: tuple[Ref, ...]
+    overlap_refs: tuple[Ref, ...] = ()
+    done: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,7 +140,10 @@ class AgentContext:
     # Runtime-only provenance/budget diagnostics; never serialized into ``rendered``.
     source_scope_ref: str | None = None
     estimated_tokens: int = 0
+    # Association is representation convergence, not proof. Keep it out of
+    # inference_blocks even when both appear in the same response context.
+    association_blocks: tuple[ProjectionBlock, ...] = ()
 
     @property
     def all_blocks(self) -> tuple[ProjectionBlock, ...]:
-        return self.workspace_blocks + self.inference_blocks
+        return self.workspace_blocks + self.inference_blocks + self.association_blocks

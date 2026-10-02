@@ -1,0 +1,1 @@
+ENTITY_NAME means the sentence assigns NAME VALUE as OWNER's conventional name, naming title, or identifying label. OTHER_PREDICATION means NAME VALUE states a class, property, brand, model, description, possession value, or ordinary predication. Use UNCLEAR when the source does not decide. Do not infer world knowledge.

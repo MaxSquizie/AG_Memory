@@ -1,1 +1,1 @@
-Choose exactly one English label from OPTIONS. Return only MATCH or NO_MATCH.
+Decide whether the supplied English predicate symbol matches TARGET's local sentence meaning.

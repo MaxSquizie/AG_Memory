@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "corpus_id": "association-goal-compiler-v1-24",
+  "case_count": 24,
+  "policy": {
+    "grade": "EXACT",
+    "purpose": "Point 6 acceptance: natural-language association intent -> typed endpoint selectors -> read-only AssociationGoal -> AssociationCoordinator -> non-proof AgentContext projection.",
+    "invariants": [
+      "Association intent is a bounded semantic decision over parser-supplied endpoint candidates, not a marker-word dictionary lookup.",
+      "The semantic probe receives no canonical AH UIDs and returns only ORDINARY, UNKNOWN, or one enumerated ASSOCIATION:Ea:Eb pair.",
+      "The association protocol probe runs with thinking disabled.",
+      "A composed actant exposes independently addressable member selectors without flattening the parser structure.",
+      "Only AssociationActRelationCandidate may carry the runtime ASSOCIATION relation id.",
+      "ASSOCIATION and a canonical world-relation goal cannot coexist on one act; Perception must resolve the operation before GoalCompiler so relation ordering is irrelevant.",
+      "GoalCompiler does not create M, N, T, G, K, S, or L while resolving endpoints.",
+      "Existing entity endpoints resolve to canonical M; local proposition/formula endpoints resolve to already integrated N/G.",
+      "When no M exists, only a unique already indexed lexical S may be used as a fallback origin.",
+      "Entity ambiguity, lexical homography, unresolved handles, missing local proposition refs, and noncanonical formula expressions fail closed.",
+      "Parser endpoint selectors are distinct, but both may resolve to the same excitable canonical ref; L is never a valid origin.",
+      "AssociationGoal is executed by AssociationCoordinator and never wrapped in InferenceQuery for InferenceEngine.",
+      "Association search may converge on S/M/T/N/G/K according to ordinary AH activation/incidence mechanics.",
+      "AssociationOutcome is projected through AgentContext.association_blocks with ProjectionMode.ASSOCIATION, never through inference_blocks.",
+      "FOUND means representation convergence, not entailment and not a new asserted fact.",
+      "An ASSOCIATION runtime marker is never materialized as canonical L."
+    ]
+  },
+  "cases": [
+    {
+      "id": "direct_question",
+      "text": "Что связывает огонь и дым?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["огонь", "дым"],
+      "expected_marker": "AssociationActRelationCandidate",
+      "expected_goal": "AssociationGoal(A,B)"
+    },
+    {
+      "id": "association_noun_paraphrase",
+      "text": "Какая общая ассоциация у вороны и стола?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["ворона", "стол"]
+    },
+    {
+      "id": "semantic_bridge_command",
+      "text": "Найди смысловой мост между ключом и замком.",
+      "expected_intent": "ASSOCIATION",
+      "expected_act_type": "COMMAND",
+      "expected_goal": "AssociationGoal(A,B)"
+    },
+    {
+      "id": "memory_connection_paraphrase",
+      "text": "Попробуй связать море с солью через память.",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["море", "соль"]
+    },
+    {
+      "id": "convergence_paraphrase",
+      "text": "Через что в памяти сходятся дождь и зонт?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["дождь", "зонт"]
+    },
+    {
+      "id": "polar_surface_association",
+      "text": "Есть ли у кошки и клавиатуры общая ассоциация?",
+      "expected_intent": "ASSOCIATION",
+      "note": "Surface polarity does not convert explicit associative search into ordinary factual EXISTS."
+    },
+    {
+      "id": "common_representation_paraphrase",
+      "text": "Что общего в представлениях о дереве и книге?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["дерево", "книга"]
+    },
+    {
+      "id": "path_paraphrase",
+      "text": "Какой путь ассоциаций соединяет поезд и часы?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["поезд", "часы"]
+    },
+    {
+      "id": "intersection_without_association_word",
+      "text": "Где пересекаются в памяти ворона и стол?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["ворона", "стол"],
+      "must_not_require_marker_lexeme": true
+    },
+    {
+      "id": "expanded_representation_paraphrase",
+      "text": "Если развернуть оба представления, в чём сходятся ключ и замок?",
+      "expected_intent": "ASSOCIATION",
+      "expected_endpoints": ["ключ", "замок"],
+      "must_not_require_marker_lexeme": true
+    },
+    {
+      "id": "proposition_endpoints",
+      "text": "Что связывает утверждение, что сервер упал, и утверждение, что сеть недоступна?",
+      "expected_intent": "ASSOCIATION",
+      "typed_precondition": "both proposition actants reference already integrated local assertion/formula roots",
+      "expected_origin_kinds": ["N_OR_G", "N_OR_G"],
+      "new_entity_count": 0
+    },
+    {
+      "id": "local_candidate_refs",
+      "text": "Найди связь между первым утверждением и вторым.",
+      "typed_precondition": "discourse formalization has resolved both endpoint actants to local candidate_ref values present in IntegrationCommit",
+      "expected_intent": "ASSOCIATION",
+      "expected_resolution": "candidate_ref -> existing IntegratedAssertion/IntegratedFormula ref",
+      "global_scan": false
+    },
+    {
+      "id": "three_way_request_not_binary",
+      "text": "Что связывает огонь, дым и тревогу?",
+      "expected_intent": "UNKNOWN",
+      "expected_goal": null,
+      "reason": "Current AssociationGoal contract is binary and the text does not determine one endpoint pair."
+    },
+    {
+      "id": "named_relation_query_is_ordinary",
+      "text": "Связаны ли огонь и дым отношением CAUSE?",
+      "expected_intent": "ORDINARY",
+      "expected_association_goal": false,
+      "reason": "The requested operation is truth checking of a named factual relation, not representation convergence."
+    },
+    {
+      "id": "ordinary_role_query",
+      "text": "Кто связал Анну и Бориса?",
+      "expected_intent": "ORDINARY",
+      "expected_association_goal": false
+    },
+    {
+      "id": "comparison_command",
+      "text": "Сравни Анну и Бориса.",
+      "expected_intent": "ORDINARY",
+      "expected_association_goal": false
+    },
+    {
+      "id": "ordinary_event_query",
+      "text": "Анна встретила Бориса в парке?",
+      "expected_intent": "ORDINARY",
+      "expected_association_goal": false
+    },
+    {
+      "id": "negated_association_command",
+      "text": "Не ищи связь между огнём и дымом.",
+      "expected_association_goal": false,
+      "validation": "negated COMMAND is ineligible for runtime ASSOCIATION execution"
+    },
+    {
+      "id": "quoted_association_command",
+      "text": "Анна сказала: «Найди связь между огнём и дымом».",
+      "expected_association_goal": false,
+      "validation": "quoted association act is content, not an executable user goal"
+    },
+    {
+      "id": "quantified_association_not_composed",
+      "text": "Найди связь хотя бы между одним городом и рекой.",
+      "typed_precondition": "query is formalized with QuantifiedQuerySpec",
+      "expected_association_goal": false,
+      "expected_failure": "quantified+association requires a separate combined contract"
+    },
+    {
+      "id": "identical_canonical_origins",
+      "text": "Найди связь между огнём и огнём.",
+      "expected_intent": "ASSOCIATION",
+      "typed_precondition": "two distinct parser endpoint selectors both resolve to the same canonical ref A",
+      "expected_goal": "AssociationGoal(A,A)",
+      "expected_runtime_status": "FOUND",
+      "expected_common": "A",
+      "expected_depth": 0
+    },
+    {
+      "id": "unknown_endpoint_no_creation",
+      "text": "Найди связь между ксарпом и дымом.",
+      "typed_precondition": "no canonical M or S exists for ксарп",
+      "expected_goal": null,
+      "expected_diagnostic_prefix": "semantic:association_endpoint_not_found",
+      "new_entity_count": 0,
+      "new_symbol_count": 0
+    },
+    {
+      "id": "lexical_symbol_fallback",
+      "text": "Что связывает понятия «гореть» и «дымить»?",
+      "typed_precondition": "no M exists for either endpoint but each source form belongs to exactly one existing S",
+      "expected_intent": "ASSOCIATION",
+      "expected_origin_kinds": ["S", "S"],
+      "new_entity_count": 0
+    },
+    {
+      "id": "composition_member_selectors_and_projection",
+      "text": "Как соотносятся в памяти море и маяк — через какую общую репрезентацию?",
+      "typed_precondition": "parser may encode море и маяк as one composed actant role with two members; coordinator has a convergent path",
+      "expected_intent": "ASSOCIATION",
+      "expected_selector_shape": [
+        {"role": "SAME_ROLE_ALLOWED", "member_index": 0},
+        {"role": "SAME_ROLE_ALLOWED", "member_index": 1}
+      ],
+      "expected_runtime": "AssociationCoordinator",
+      "expected_context_section": "ASSOCIATION RESULTS",
+      "expected_projection_mode": "ASSOCIATION",
+      "inference_blocks_contain_association": false,
+      "canonical_association_link_created": false,
+      "found_means_proof": false
+    }
+  ],
+  "synthetic_edge_checks": [
+    {
+      "id": "ambiguous_entity",
+      "precondition": "endpoint text resolves to two canonical M candidates and no deterministic identity constraint selects one",
+      "expected_goal": null,
+      "expected_diagnostic_prefix": "semantic:association_endpoint_entity_ambiguous"
+    },
+    {
+      "id": "homographic_symbol",
+      "precondition": "no M exists and one endpoint wordform belongs to multiple S nodes with no unique active S",
+      "expected_goal": null,
+      "expected_diagnostic": "semantic:association_endpoint_symbol_ambiguous"
+    },
+    {
+      "id": "noncanonical_formula",
+      "precondition": "proposition endpoint expression has resolved operands but no exact existing canonical G parent",
+      "expected_goal": null,
+      "expected_diagnostic": "semantic:association_endpoint_formula_not_canonical"
+    },
+    {
+      "id": "generic_marker_rejected",
+      "precondition": "PerceptionResult contains plain ActRelationCandidate('ASSOCIATION', ...) instead of typed AssociationActRelationCandidate",
+      "expected_integration_validation": "FAIL"
+    },
+    {
+      "id": "mixed_relation_marker_rejected",
+      "precondition": "one act carries both typed ASSOCIATION and a canonical world relation such as IS-A in any order",
+      "expected_integration_validation": "FAIL",
+      "order_independent": true
+    },
+    {
+      "id": "common_node_kinds",
+      "precondition": "separate coordinator fixtures converge respectively on S, M, T, N, G and K",
+      "expected_status": "FOUND",
+      "allowed_common_kinds": ["S", "M", "T", "N", "G", "K"],
+      "hub_filter_required": false
+    }
+  ]
+}

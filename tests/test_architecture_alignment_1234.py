@@ -88,8 +88,9 @@ class ArchitectureAlignment1234Tests(unittest.TestCase):
 
     def test_generation_protocol_is_binary_and_slot_specific(self):
         instruction = (PROJECT / "prompts/perception" / "template_hidden_valency.txt").read_text(encoding="utf-8")
-        self.assertIn("Choose exactly one label from CHOICES", instruction)
-        self.assertIn("Known roles", instruction)
+        self.assertIn("known roles", instruction)
+        self.assertNotIn("CHOICES", instruction)
+        self.assertNotIn("Return only", instruction)
         self.assertNotIn("RECIPIENT,SOURCE", instruction)
         self.assertNotIn("AMBIGUOUS", instruction)
 

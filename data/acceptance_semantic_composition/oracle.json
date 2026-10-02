@@ -1,0 +1,29 @@
+{
+  "version": "0.25.26",
+  "roadmap_step": "A1_TEMPORAL_NEVER",
+  "case_count": 20,
+  "canonical_contract": "NOT(EXISTS($t:TIME,AND(P@$t,RELEVANT_PAST($t,anchor))))",
+  "open_world_contract": "absence_is_UNKNOWN",
+  "cases": [
+    {"id":"never_001","text":"Лев никогда не проверял мотор.","family":"never","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_002","text":"Ни разу Лев не проверял мотор.","family":"never","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_003","text":"За всю службу мотор Львом ни единого раза не проверялся.","family":"never_inversion","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_004","text":"Не случалось Льву проверять мотор.","family":"never_matrix","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_005","text":"Лев так и не проверил мотор прежде.","family":"never_paraphrase","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_006","text":"Мотор прежде ни при каких обстоятельствах Львом не проверялся.","family":"never_inversion","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_007","text":"Лев отродясь не видел маяк.","family":"never_paraphrase","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"never_008","text":"До этого Лев не имел случая увидеть маяк.","family":"never_matrix","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"negative_001","text":"Лев не проверял мотор вчера.","family":"plain_negative","decision":"PLAIN_NEGATION","scope":"ASSERTED","expected_formula":false},
+    {"id":"negative_002","text":"Лев сейчас не проверяет мотор.","family":"plain_negative","decision":"PLAIN_NEGATION","scope":"ASSERTED","expected_formula":false},
+    {"id":"negative_003","text":"Лев проверял не мотор, а насос.","family":"contrastive_negative","decision":"PLAIN_NEGATION","scope":"ASSERTED","expected_formula":false},
+    {"id":"negative_004","text":"Не Лев проверял мотор.","family":"contrastive_negative","decision":"PLAIN_NEGATION","scope":"ASSERTED","expected_formula":false},
+    {"id":"ambiguous_001","text":"Лев почти никогда не проверял мотор.","family":"ambiguous","decision":"AMBIGUOUS","scope":"ASSERTED","expected_formula":false},
+    {"id":"ambiguous_002","text":"Неясно, случалось ли Льву проверять мотор.","family":"ambiguous","decision":"AMBIGUOUS","scope":"EMBEDDED","expected_formula":false},
+    {"id":"quoted_001","text":"Лев сказал: «Я никогда не проверял мотор».","family":"quoted_scope","decision":"NEVER","scope":"QUOTED","expected_formula":true},
+    {"id":"quoted_002","text":"Фраза «Лев никогда не проверял мотор» записана в журнале.","family":"quoted_scope","decision":"NEVER","scope":"QUOTED","expected_formula":true},
+    {"id":"modal_001","text":"Возможно, Лев никогда не проверял мотор.","family":"modal_scope","decision":"NEVER","scope":"POSSIBLE","expected_formula":true},
+    {"id":"modal_002","text":"Лев обязан никогда не включать насос.","family":"modal_scope","decision":"NEVER","scope":"REQUIRED","expected_formula":true},
+    {"id":"ellipsis_001","text":"Мотор Лев не проверял ни разу, а насос — проверял.","family":"ellipsis","decision":"NEVER","scope":"ASSERTED","expected_formula":true},
+    {"id":"ellipsis_002","text":"Лев никогда не проверял мотор, а Мария — насос.","family":"ellipsis","decision":"NEVER","scope":"ASSERTED","expected_formula":true}
+  ]
+}

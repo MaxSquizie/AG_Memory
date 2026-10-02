@@ -60,7 +60,7 @@ class SemanticRoots1243Tests(unittest.TestCase):
             if role == "perception_role_cue" and "TARGET:\nМарию\n" in prompt
         )
         self.assertIn("RECEIVER_OR_ADDRESSEE:", prompt)
-        self.assertNotIn("CHOICES:\nRECIPIENT", prompt)
+        self.assertNotIn("= RECIPIENT", prompt)
         self.assertFalse(any(role == "perception_content_addressee" for role, _ in backend.calls))
 
     def test_canonical_recipient_label_is_rejected_by_runtime_cue_protocol(self):
@@ -72,7 +72,7 @@ class SemanticRoots1243Tests(unittest.TestCase):
         })
         with self.assertRaisesRegex(
             AdaptiveParseError,
-            "role_cue expected exactly one of:",
+            "role_cue failed after 1 attempt.*expected exactly one current option:",
         ):
             make_parser(backend).parse("Иван попросил Марию прочитать книгу.")
 

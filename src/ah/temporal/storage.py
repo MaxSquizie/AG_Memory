@@ -42,20 +42,53 @@ def temporal_value_from_ref(core: AHCore, ref: Ref) -> TemporalValue | None:
     return temporal_value_from_entity(element)
 
 
+def _semantic_time_match(core: AHCore, refs, value: TemporalValue) -> Ref | None:
+    """Return one existing time entity with the same normalized semantic identity."""
+    seen: set[str] = set()
+    for ref in refs:
+        if ref.uid in seen or ref.kind.value != "M":
+            continue
+        seen.add(ref.uid)
+        element = core.store.get_element_any_domain(ref.uid)
+        if not isinstance(element, SemanticEntity):
+            continue
+        existing = temporal_value_from_entity(element)
+        if existing is not None and existing.canonical_key == value.canonical_key:
+            return ref
+    return None
+
+
 def ensure_time_entity(core: AHCore, value: TemporalValue, *, domain: Domain = Domain.C) -> tuple[Ref, bool]:
     """Materialize/reuse semantic time as ordinary ``m``.
 
     ``temporal_key`` is a deterministic normalization key used only as an identity
     accelerator for semantic time values. It does not create a new canonical type.
+    Calendar-date identity deliberately ignores source timezone once the date has
+    been resolved.  The secondary start/end lookup keeps pre-migration entities
+    reusable even when their stored ``temporal_key`` was produced by the older
+    timezone-sensitive rule.
     """
 
-    matches = core.store.find_elements_with_property(_TIME_KEY, value.canonical_key)
-    for ref in matches:
-        if ref.kind.value != "M":
-            continue
-        element = core.store.get_element_any_domain(ref.uid)
-        if isinstance(element, SemanticEntity) and bool(element.meta.get("semantic_time", False)):
-            return ref, False
+    exact = core.store.find_elements_with_property(_TIME_KEY, value.canonical_key)
+    matched = _semantic_time_match(core, exact, value)
+    if matched is not None:
+        return matched, False
+
+    # Compatibility path for already persisted semantic-time entities whose old
+    # temporal_key included an irrelevant timezone for YEAR/MONTH/DAY values.
+    # Property-index lookup keeps this bounded; no global AH scan is introduced.
+    legacy_candidates = []
+    if value.start is not None:
+        legacy_candidates.extend(
+            core.store.find_elements_with_property("start", value.start)
+        )
+    if value.end is not None:
+        legacy_candidates.extend(
+            core.store.find_elements_with_property("end", value.end)
+        )
+    matched = _semantic_time_match(core, legacy_candidates, value)
+    if matched is not None:
+        return matched, False
 
     display = value.source_text or value.start or value.end or value.canonical_key
     properties = {

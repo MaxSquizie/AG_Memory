@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "d_max": 6,
+  "questions": [
+    {
+      "id": "cooling_station.pump_stop",
+      "document_id": "cooling_station",
+      "text": "Почему автоматика остановила насос?",
+      "path": [
+        "temperature_drop",
+        "water_freeze",
+        "ice_expand",
+        "tube_crack",
+        "fluid_leak",
+        "pressure_drop",
+        "pump_stop"
+      ],
+      "depth": 6,
+      "must_contain": ["давление упало"],
+      "gold_spans": ["Автоматика остановила насос, потому что давление упало."]
+    },
+    {
+      "id": "greenhouse_control.yield_drop",
+      "document_id": "greenhouse_control",
+      "text": "Почему урожай снизился?",
+      "path": [
+        "switch_off",
+        "controller_off",
+        "timer_miss",
+        "watering_delay",
+        "soil_dry",
+        "seedling_wilt",
+        "yield_drop"
+      ],
+      "depth": 6,
+      "must_contain": ["рассада увяла"],
+      "gold_spans": ["Урожай снизился, потому что рассада увяла."]
+    },
+    {
+      "id": "archive_leak.door_check",
+      "document_id": "archive_leak",
+      "text": "Какая цепочка событий привела от засорения водостока к проверке двери?",
+      "path": [
+        "drain_clog",
+        "water_pool",
+        "ceiling_wet",
+        "water_enter",
+        "sensor_trigger",
+        "boxes_move",
+        "hall_close",
+        "door_check"
+      ],
+      "depth": 6,
+      "must_contain": ["водосток засорился", "проверила дверь"],
+      "gold_spans": [
+        "Водосток засорился.",
+        "После того как сотрудники перенесли коробки, Марина закрыла зал. Потом охрана проверила дверь."
+      ]
+    },
+    {
+      "id": "archive_leak.boxes_move",
+      "document_id": "archive_leak",
+      "text": "Почему сотрудники перенесли коробки?",
+      "path": [
+        "drain_clog",
+        "water_pool",
+        "ceiling_wet",
+        "water_enter",
+        "sensor_trigger",
+        "boxes_move"
+      ],
+      "depth": 5,
+      "must_contain": ["датчик сработал"],
+      "gold_spans": ["Сотрудники перенесли коробки, потому что датчик сработал."]
+    },
+    {
+      "id": "house_by_pier_monolith.window_jam",
+      "document_id": "house_by_pier_monolith",
+      "text": "Какая причинная цепочка привела от удара ветки по желобу к заклинившему окну?",
+      "path": [
+        "branch_touch",
+        "gutter_shift",
+        "water_go",
+        "beam_wet",
+        "beam_swell",
+        "frame_warp",
+        "window_jam"
+      ],
+      "depth": 6,
+      "must_contain": ["рама перекосилась"],
+      "gold_spans": [
+        "Желоб сдвинулся, потому что ветка задела его.",
+        "Окно заклинилось, потому что рама перекосилась."
+      ]
+    },
+    {
+      "id": "house_by_pier_monolith.water_drip",
+      "document_id": "house_by_pier_monolith",
+      "text": "Что произошло после того, как дождь ослаб?",
+      "path": ["rain_weaken", "water_drip"],
+      "depth": 1,
+      "must_contain": ["вода капала реже"],
+      "gold_spans": ["После того как дождь ослаб, вода капала реже."]
+    },
+    {
+      "id": "house_by_pier_monolith.curl_stop",
+      "document_id": "house_by_pier_monolith",
+      "text": "Что произошло после того, как Марина отодвинула письма?",
+      "path": ["marina_move_letters", "curl_stop"],
+      "depth": 1,
+      "must_contain": ["коробление прекратилось"],
+      "gold_spans": ["Она отодвинула письма от огня. Потом коробление прекратилось."]
+    },
+    {
+      "id": "belyaev_amphibian_mutiny.grabber_fall",
+      "document_id": "belyaev_amphibian_mutiny",
+      "text": "Какая причинная цепочка привела от попытки матроса схватить Зурита к падению матроса на палубу?",
+      "path": ["sailor_grab", "zurita_hit", "grabber_fall"],
+      "depth": 2,
+      "must_contain": ["упал на палубу"],
+      "gold_spans": ["Матрос ухватил его за ногу, но Зурита свободной ногой ударил его по голове, и оглушенный матрос упал на палубу."]
+    },
+    {
+      "id": "belyaev_amphibian_mutiny.zurita_cry_help",
+      "document_id": "belyaev_amphibian_mutiny",
+      "text": "Почему Зурита закричал о помощи?",
+      "path": ["zurita_see_submarine", "zurita_cry_help"],
+      "depth": 1,
+      "must_contain": ["подводная лодка"],
+      "gold_spans": [
+        "Зурита увидел, что к «Медузе», разрезая гладь океана, с необычайной быстротой приближалась подводная лодка.",
+        "— На помощь! Скорей! Убивают! — закричал Зурита изо всей силы."
+      ]
+    },
+    {
+      "id": "belyaev_amphibian_mutiny.sailors_stop",
+      "document_id": "belyaev_amphibian_mutiny",
+      "text": "Почему вооружённые матросы остановились на палубе?",
+      "path": ["submarine_approach", "sailors_stop"],
+      "depth": 1,
+      "must_contain": ["подводная"],
+      "gold_spans": [
+        "Из люка шхуны уже показались вооруженные матросы. Они высыпали на палубу и теперь нерешительно остановились.",
+        "К «Медузе» приближалась подводная вооруженная лодка"
+      ]
+    },
+    {
+      "id": "old_observatory_monolith.push_gate",
+      "document_id": "old_observatory_monolith",
+      "text": "Какая последовательность действий привела от отпирания калитки к тому, что Алексей толкнул её?",
+      "path": ["unlock_gate", "push_gate"],
+      "depth": 1,
+      "must_contain": ["толкнул"],
+      "gold_spans": ["Отперев ржавую калитку, он толкнул её плечом и услышал, как в тишине протяжно звякнула цепь."]
+    },
+    {
+      "id": "old_observatory_monolith.throw_curtain",
+      "document_id": "old_observatory_monolith",
+      "text": "Какая последовательность событий связана с занавеской после того, как Алексей увидел дым?",
+      "path": ["see_smoke", "tear_curtain", "throw_curtain"],
+      "depth": 2,
+      "must_contain": ["сорвал занавеску"],
+      "gold_spans": ["Увидев дым, Алексей сорвал занавеску с крючков и бросил её на каменный пол."]
+    },
+    {
+      "id": "old_observatory_monolith.put_letters",
+      "document_id": "old_observatory_monolith",
+      "text": "Как Вера убрала письма в ящик?",
+      "path": ["collect_letters", "carry_letters", "put_letters"],
+      "depth": 2,
+      "must_contain": ["положила в нижний ящик"],
+      "gold_spans": ["Потом Вера собрала письма, унесла их из продуваемого кабинета и положила в нижний ящик письменного стола."]
+    },
+    {
+      "id": "old_observatory_monolith.put_basin",
+      "document_id": "old_observatory_monolith",
+      "text": "Что Вера сделала после того, как заметила воду?",
+      "path": ["notice_water", "bring_basin", "put_basin"],
+      "depth": 2,
+      "must_contain": ["принесла из кухни таз"],
+      "gold_spans": ["Заметив воду, Вера принесла из кухни таз и поставила его под протечку."]
+    }
+  ]
+}

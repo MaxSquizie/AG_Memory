@@ -1,1 +1,1 @@
-Write only the dictionary lemma used by TARGET in this TEXT. Do not add labels, brackets, punctuation, or explanation.
+Identify which supplied dictionary lemma TARGET uses in this TEXT. Use the whole local sentence meaning.

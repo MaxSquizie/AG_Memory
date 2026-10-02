@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 from pathlib import Path
 from ah.core import AHCore
 from ah.model import Domain
@@ -72,6 +73,28 @@ def import_ahm_file(core: AHCore, path: Path, *, default_domain: Domain = Domain
     marker = str(source)
     if marker in visited:
         raise CorpusError(f"Cyclic .ahm/.prj import: {source}")
+    owns_writer = writer is None
+    context = core.store.established_snapshot_insertions() if owns_writer else nullcontext()
+    with context:
+        return _import_ahm_file_unlocked(
+            core,
+            source,
+            marker=marker,
+            visited=visited,
+            default_domain=default_domain,
+            writer=writer,
+        )
+
+
+def _import_ahm_file_unlocked(
+    core: AHCore,
+    source: Path,
+    *,
+    marker: str,
+    visited: frozenset[str],
+    default_domain: Domain,
+    writer: ColdCorpusWriter | None,
+) -> CorpusImportResult:
     active = writer or ColdCorpusWriter(core, domain=default_domain)
     for kind, name, fields in parse_ahm_text(source.read_text(encoding="utf-8-sig")):
         if kind == "import":

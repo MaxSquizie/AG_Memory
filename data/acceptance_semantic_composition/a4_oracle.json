@@ -1,0 +1,32 @@
+{
+  "roadmap_step": "A4_CORRELATED_NESTED_AMBIGUITY",
+  "case_count": 18,
+  "invariants": [
+    "each ambiguity option is one complete proposition reading",
+    "correlated role tuples never become a Cartesian product",
+    "nested logical and matrix scopes keep the ambiguity group at the original AST position",
+    "clarification targets N/G proposition alternatives as well as entity references",
+    "selection is revalidated and committed atomically",
+    "unselected alternatives never become asserted facts"
+  ],
+  "cases": [
+    {"id":"correlated_001","text":"Анна передала ключ Марии — или Мария передала книгу Анне?","shape":"TWO_ROLE_TUPLES","expected":"PRESERVE_PAIRS"},
+    {"id":"correlated_002","text":"То ли инженер открыл шлюз ключом, то ли оператор закрыл клапан рычагом.","shape":"MULTI_ROLE_TUPLES","expected":"PRESERVE_COMPLETE_READINGS"},
+    {"id":"correlated_003","text":"Пётр показал Анне карту или Анна показала Петру письмо?","shape":"THREE_ROLE_TUPLES","expected":"PRESERVE_COMPLETE_READINGS"},
+    {"id":"correlated_004","text":"Иван поставил чашку на стол либо Мария положила книгу на полку.","shape":"THREE_ROLE_TUPLES","expected":"PRESERVE_COMPLETE_READINGS"},
+    {"id":"correlated_005","text":"Либо врач вызвал водителя, либо водитель вызвал врача.","shape":"ROLE_INVERSION","expected":"PRESERVE_PAIRS"},
+    {"id":"nested_modal_001","text":"Возможно, Анна передала ключ Марии или Мария передала книгу Анне.","shape":"POSSIBLE(AMBIGUITY)","expected":"NESTED_GROUP"},
+    {"id":"nested_matrix_001","text":"Считается, что либо инженер открыл шлюз, либо оператор закрыл клапан.","shape":"MATRIX(AMBIGUITY)","expected":"NESTED_GROUP"},
+    {"id":"nested_conditional_001","text":"Если Анна взяла ключ или Мария взяла карту, сигнал включился.","shape":"IMPLIES(AMBIGUITY,P)","expected":"NESTED_GROUP"},
+    {"id":"nested_quote_001","text":"Лев сказал: «Анна передала ключ Марии или Мария передала книгу Анне».","shape":"QUOTED(AMBIGUITY)","expected":"NONFACTIVE"},
+    {"id":"ambiguous_001","text":"Неясно, кто кому передал письмо: Анна Марии или Мария Анне.","shape":"TWO_ROLE_TUPLES","expected":"CLARIFICATION"},
+    {"id":"inversion_001","text":"Ключ Марии передала Анна — или книгу Анне передала Мария?","shape":"TWO_ROLE_TUPLES","expected":"PRESERVE_PAIRS"},
+    {"id":"ellipsis_001","text":"Анна передала ключ Марии, а может, Мария — книгу Анне.","shape":"ELLIPSIS","expected":"PRESERVE_COMPLETE_READINGS"},
+    {"id":"inversion_002","text":"Передала Анна Марии ключ или Мария Анне книгу?","shape":"THREE_ROLE_TUPLES","expected":"PRESERVE_COMPLETE_READINGS"},
+    {"id":"ellipsis_002","text":"То ли Анна отдала Марии ключ, то ли наоборот.","shape":"ELLIPSIS_INVERSION","expected":"PRESERVE_PAIRS"},
+    {"id":"unknown_001","text":"Анна передала ключ Марии или книгу Петру?","shape":"SCOPE_UNCLEAR","expected":"UNKNOWN"},
+    {"id":"unknown_002","text":"Анна передала его ей.","shape":"MULTIPLE_PRONOUNS","expected":"AMBIGUOUS"},
+    {"id":"collapse_001","text":"Либо Анна передала ключ Марии, либо Анна передала ключ Марии.","shape":"DUPLICATE_READINGS","expected":"COLLAPSE_SINGLE"},
+    {"id":"guard_001","text":"Выбери первый вариант, если второй вариант больше не существует.","shape":"STALE_SELECTION","expected":"ATOMIC_REJECT"}
+  ]
+}

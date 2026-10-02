@@ -139,14 +139,16 @@ class TestE_StructuralClosure(unittest.TestCase):
         st = t0(self.TEXT)
         srl(st); t1(st); t2(st); td(st)
         st.close_structures()
-        with self.assertRaises(RuntimeError):
-            srl(st)  # creating structure after closure is a contract violation
+        for stage in (srl, t1, td, t2):  # EVERY structural producer is guarded
+            with self.subTest(stage=stage.__name__):
+                with self.assertRaises(RuntimeError):
+                    stage(st)
 
     def test_e_missing_argument_candidate(self):
         st = run_full("Взял.")
         mas = st.missing_argument_candidates
         self.assertEqual(len(mas), 1)
-        self.assertEqual(mas[0].status, "UNRESOLVED")
+        self.assertEqual(mas[0].status, "POSSIBLE_GAP")  # three-state machine, not binary
         self.assertIn("valency_check_v1", mas[0].provenance.pattern_ids)
         self.assertTrue(any("argument gap" in m for m in st.miss_reports))
 
