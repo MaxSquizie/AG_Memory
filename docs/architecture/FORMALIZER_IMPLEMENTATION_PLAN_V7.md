@@ -160,7 +160,7 @@ src/ah/formalizer/
 Приёмка: частичный G3 (P1-применимые A/DR) + доказанный replay через ProviderCallLog.
 
 ### P2 — Commit & revision C/T5/T6/T6b + goal + temporal (основная постройка)
-Статус: ◐ (WP2.1–WP2.4 + WP2.6 temporal license готовы). Самая большая фаза; даёт вертикальные трассы DR1–DR31.
+Статус: ◐ (WP2.1–WP2.4, WP2.6 temporal license и ядро WP2.7 T6b готовы). Самая большая фаза; даёт вертикальные трассы DR1–DR31.
 
 | WP | Содержание | Модули | V7 |
 |---|---|---|---|
@@ -170,7 +170,7 @@ src/ah/formalizer/
 | WP2.4 ✅ | Опоры + SOM-инвариант: add_root_support только O/C/W (R/D/M/A/P → InvalidFactGround); add_derived_support валидна пока живы premises; F-visible vs S-accessible (итеративные fixpoint, cycle-safe); retract → каскад SUPERSEDED орфанированных asserted + структурных операндов; независимый путь выживает; som_violations | support_som.py + test_formalizer_support_som.py (10 тестов) | §7.4/§7.5 |
 | WP2.5 | SOM + UsageLink layer: неутверждённые структурные операнды как типизированные N/G/M без truth-support; ATTITUDE vs OPERATOR links; S-access/F-visible; MaterializeUsageLink/RetractUsageLink | som.py, ir.py | §7.5/§3 |
 | WP2.6 ✅(ядро) | Temporal license algebra: POINT/EXISTENTIAL/CONTINUOUS/UNDATED; normalize вырожденного EXISTENTIAL({t})→POINT(t); covers (subset) + or_elimination_license (таблица §7.4, mixed/unknown-boundary diagnostics) и forall_inst_license (таблица §6.3, intersection); оба недатированные → пропозиционный вывод | temporal_license.py + test_formalizer_temporal_license.py (21 тест). Остаток WP2.6: TimeAssertion-ledger store-адаптер + двухуровневый отзыв (наблюдение vs смерть пути) — частично в WP2.7 | §6.3/§7.4 |
-| WP2.7 | T6b ревизия/отзыв/recovery: триггеры, пересчёт видимости по путям, атомарная смена видимой версии, таблицы переходов состояний, crash recovery drain от head'а | t6b_revision.py | §8 |
+| WP2.7 ✅(ядро) | T6b отзыв: таблицы переходов (LIVE→RETRACTED/SUPERSEDED; терминальные без исходящих); observation-level retraction пишет RETRACTED всем TimeAssertions с совпадающим source_tag + инвалидирует root-опоры (каскад узлов SUPERSEDED); двухуровневость §8.2(a)/(b) — смерть пути при живом O НЕ пишет RETRACTED (assertion остаётся LIVE, отчёт закрывается пересчётом); независимый путь держит узел F-visible и отчёт OPEN; закрытие conflict-отчётов идемпотентно по report_id; supersede = атомарная смена версии | t6b_revision.py + test_formalizer_t6b_revision.py (7 тестов). Остаток WP2.7: crash recovery drain R0/R1/R2 от head'а — в WP2.9 | §8.1/§8.2 |
 | WP2.8 | Goal-транзакция + GoalExecutor: append-only derived N/G; OR_ELIMINATION/FORALL_INST on-demand (без новой версии/SetMarker); GOAL_DECISION record; DB-N race; временные лицензии | goal_executor.py | §6.4 |
 | WP2.9 | **Crash-stop runs на AH — единственный прогон, засчитывающий коммит/recovery:** те же сценарии с остановками после T5 / после D-транзакции / до APPLIED; проверка атомарности marker+D и recovery-from-D (§7.3/§8.3). Результаты memory double НЕ засчитываются для G4 | ah_adapter.py, tests/oracle/crash | §7.3/§8.3 |
 
@@ -253,9 +253,9 @@ P4 ──► G5 (generalization)        [real provider + ≥500 unseen corpus]
 
 R1 решено (см. §6 п.5): AH-контракт фиксируется сразу, память — двойник для чистых решений.
 
-**Выполнено в текущем коммите:** WP0.1/0.2/0.3/0.4/0.7/0.8 (spine детерминизма + store-контракт + два канала), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1), **WP2.1** (C-консолидация), **WP2.2** (T5 batch + журнал), **WP2.3** (T6 claim/admission), **WP2.4** (опоры/SOM) и **WP2.6** (temporal license algebra). 329 тест зелёных.
+**Выполнено в текущем коммите:** WP0.1/0.2/0.3/0.4/0.7/0.8 (spine детерминизма + store-контракт + два канала), весь P1 (WP1.1–WP1.6) и skeleton oracle harness (WC1), **WP2.1** (C-консолидация), **WP2.2** (T5 batch + журнал), **WP2.3** (T6 claim/admission), **WP2.4** (опоры/SOM) и **WP2.6** (temporal license algebra) + ядро **WP2.7** (T6b отзыв/двухуровневость). 336 тест зелёных.
 
 **Осталось до G1:**
 1. **WP0.6 (остаток)** — 4 оставшихся G1-адаптерных теста (§12/§20): legacy_roundtrip, v2_integration, known_mapping_failure, proposal_validation — все требуют C/T6 и пишутся в P2. Готовы уже: concurrent_run_binding, idempotent_recommit, unresolved_replay, open_template_isolation, crash_recovery.
 2. **WP0.5 (AH-side)** — реальная интеграция маркера/COMMIT_DECISION в AHStore + crash-stop прогоны (WP2.9); контракт уже атомен в `store_interface`.
-3. **P2 (остаток)** — WP2.5/WP2.7–WP2.9: SOM+UsageLink/T6b/goal + crash-stop runs; вертикальные трассы DR1–DR31. (WP2.1 C-консолидация, WP2.2 T5 batch, WP2.3 T6 claim/admission, WP2.4 опоры/SOM и WP2.6 temporal license готовы.)
+3. **P2 (остаток)** — WP2.5/WP2.7(остаток)/WP2.8–WP2.9: SOM+UsageLink/goal + crash-stop runs; вертикальные трассы DR1–DR31. (WP2.1 C-консолидация, WP2.2 T5 batch, WP2.3 T6 claim/admission, WP2.4 опоры/SOM, WP2.6 temporal license и ядро WP2.7 T6b готовы.)
