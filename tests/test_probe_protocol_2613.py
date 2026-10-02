@@ -191,12 +191,12 @@ def test_every_short_prompt_is_small_plain_english_and_has_no_stale_wire_contrac
 
 
 def test_active_temporal_and_logical_operator_stages_have_own_instructions() -> None:
-    assert "scope of source negation" in (PROMPTS / "temporal_scope.txt").read_text()
-    assert "truth-functional" in (PROMPTS / "logical_operator_source.txt").read_text()
+    assert "scope of source negation" in (PROMPTS / "temporal_scope.txt").read_text(encoding="utf-8")
+    assert "truth-functional" in (PROMPTS / "logical_operator_source.txt").read_text(encoding="utf-8")
 
 
 def test_prompt_editor_discovers_real_prompt_files_instead_of_a_stale_registry() -> None:
-    source = (ROOT / "src" / "ah" / "gui" / "llm_panel.py").read_text()
+    source = (ROOT / "src" / "ah" / "gui" / "llm_panel.py").read_text(encoding="utf-8")
     assert 'glob("*.txt")' in source
     assert "PROBE_PROMPTS" not in source
     assert "lexeme_hypothesis" not in source
