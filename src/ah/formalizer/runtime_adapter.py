@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""NewFormalizerAdapter — path B replacement seam (V7 §14 / integration).
+"""FormalizerAdapter — path B replacement seam (V7 §14 / integration).
 
 Replaces :class:`ah.perception.adaptive_parser.AdaptivePerceptionParser` as the perception→formalization
 entry point while leaving ``IntegrationService`` and the canonical store UNTOUCHED: it runs the new
@@ -18,7 +18,7 @@ from __future__ import annotations
 _PREDICATE_LABELS = {"V1": "HAVE", "V2": "HAS_PART", "V3": "LOCATIVE", "V4": "LIKE"}
 
 
-class NewFormalizerAdapter:
+class FormalizerAdapter:
     """Drop-in replacement for AdaptivePerceptionParser.parse(): text -> PerceptionResult.
 
     ``selector`` is any object with ``select(prompt) -> raw JSON string`` (RealBackendSelector in production,
@@ -59,12 +59,10 @@ class NewFormalizerAdapter:
             # as an explicit unresolved note so downstream sees honest incompleteness, not silence.
             if dec.outcome == "RESOLVED" and len(dec.selected) == 1:
                 value = dec.selected[0]
-                label = _PREDICATE_LABELS.get(value, value)
-                predicate = PredicateCandidate(surface=label, normalized_hint=value)
-                actants = tuple(
-                    ActantCandidate(role=role, mention=mention)
-                    for role, mention in self._assign_roles(frame)
-                )
+                actant_pairs = self._assign_roles(frame, state)
+                roles = tuple(role for role, _ in actant_pairs)
+                predicate = self._build_predicate(frame, state, value, roles)
+                actants = tuple(ActantCandidate(role=role, mention=mention) for role, mention in actant_pairs)
                 assertions.append(AssertionCandidate(local_id=f"{frame.frame_id}:A0", predicate=predicate, actants=actants))
             else:
                 notes.append(f"UNRESOLVED_PREDICATE {frame.frame_id}: outcome={dec.outcome} selected={list(dec.selected)}")
@@ -72,25 +70,49 @@ class NewFormalizerAdapter:
         diagnostics = tuple(f"{d.code}: {d.detail}" for d in state.diagnostics) + tuple(notes)
         return PerceptionResult(source_text=state.text, assertions=tuple(assertions), diagnostics=diagnostics)
 
+    # -- predicate: real verb when present, else a declared STRUCTURAL predicate ---- #
+    def _build_predicate(self, frame, state, value, roles=()):
+        from ah.perception.contracts import EvidenceSpan, PredicateCandidate, TemplateCandidate
+
+        # The frame's role structure IS the valency declaration: integration needs a TemplateCandidate
+        # to materialize an unknown predicate (structural rule, no LLM probe).
+        template = TemplateCandidate(tuple(roles)) if roles else None
+        for ev in state.evidence:
+            for var in ev.variants:
+                if var.pos == "VERB":  # verbal frame: carry the real surface + lemma
+                    return PredicateCandidate(
+                        surface=ev.span,
+                        normalized_hint=var.lemma,
+                        evidence=EvidenceSpan(text=ev.span),
+                        template_candidate=template,
+                    )
+        # relation-only frame (copula/ellipsis): a declared STRUCTURAL predicate, never a fake lexeme.
+        label = _PREDICATE_LABELS.get(value, value)
+        return PredicateCandidate(
+            surface=label, normalized_hint=value, sense_hint=f"STRUCTURAL_{label}", template_candidate=template
+        )
+
     # -- declared structural role assignment (from T2 frame construction) -- #
-    def _assign_roles(self, frame):
+    def _assign_roles(self, frame, state):
         from ah.model.types import ActantRole as R
 
-        parts = list(frame.participants)
+        # The verbal predicate is NOT an actant: drop any participant that is a VERB in the evidence.
+        verb_spans = {ev.span for ev in state.evidence if any(v.pos == "VERB" for v in ev.variants)}
+        parts = [p for p in frame.participants if p not in verb_spans]
         if not parts:
             return []
         con = (frame.construction or "").upper()
         possessive = "GEN" in con and ("U+" in con or frame.copula_ellipsis)  # у+GEN+NOM / copula ellipsis
+        locative = "LOC" in con or "PREP" in con
         if possessive:
             # whole-part / possession: possessor(whole)=SUBJECT, part(theme)=OBJECT (surface order)
             roles = [R.SUBJECT] + [R.OBJECT] * max(0, len(parts) - 1)
-            return list(zip(roles, parts))
-        if "LOC" in con or "PREP" in con:
+        elif locative:
             # locative: first nominal=SUBJECT (if any), the locative participant=LOCATION
             roles = [R.LOCATION] * len(parts)
             if len(parts) >= 2:
                 roles[0] = R.SUBJECT
-            return list(zip(roles, parts))
-        # verbal frame (NOM+V+ACC ...): first nominal before the verb=SUBJECT, remainder=OBJECT
-        roles = [R.SUBJECT] + [R.OBJECT] * max(0, len(parts) - 1)
+        else:
+            # verbal frame (NOM+V+ACC ...): first nominal before the verb=SUBJECT, remainder=OBJECT
+            roles = [R.SUBJECT] + [R.OBJECT] * max(0, len(parts) - 1)
         return list(zip(roles, parts))
