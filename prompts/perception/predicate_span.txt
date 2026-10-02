@@ -1,1 +1,1 @@
-Choose the main predicate in TOKENS. Reply only N, N-M, IMPLICIT, or NONE.
+Choose the main predicate in TOKENS. Reply with a single token index, two indices joined by a hyphen for a range, IMPLICIT, or NONE.

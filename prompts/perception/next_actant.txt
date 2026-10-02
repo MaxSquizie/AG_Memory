@@ -1,1 +1,1 @@
-Choose one semantic argument span not excluded. Reply only N, N-M, or NONE.
+Choose one semantic argument span not excluded. Reply with a single token index, two indices joined by a hyphen for a range, or NONE.

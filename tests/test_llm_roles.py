@@ -201,6 +201,11 @@ class LLMRoleTests(unittest.TestCase):
                     "perception_predicate_symbol": ["be"],
                     "perception_actant_start": ["1", "1"],
                     "perception_role_cue": ["ACTOR_OR_EXPERIENCER", "PREDICATED_STATE"],
+                    # Whole-binary possession-orientation probes (added after these
+                    # fixtures were written). Neutral label leaves the parse unchanged;
+                    # dedicated possession tests script an explicit orientation.
+                    "semantic_binary_relation_frame": ["OTHER_RELATION"],
+                    "semantic_predicate_semantics": ["OTHER_RELATION"],
                 }
 
             def generate(self, prompt, *, system="", override=None, role="generic"):
@@ -249,6 +254,10 @@ class LLMRoleTests(unittest.TestCase):
                     "perception_query_mode": ["2"],
                     "perception_role_cue": ["AFFECTED_OR_CONTENT", "ACTOR_OR_EXPERIENCER"],
                     "perception_actant_start": ["1"],
+                    # Whole-binary possession-orientation probes (added after these
+                    # fixtures were written). Neutral label leaves the parse unchanged.
+                    "semantic_binary_relation_frame": ["OTHER_RELATION"],
+                    "semantic_predicate_semantics": ["OTHER_RELATION"],
                 }
             def generate(self, prompt, *, system="", override=None, role="generic"):
                 return LLMResponse(self.answers[role].pop(0), {})
@@ -303,6 +312,10 @@ class LLMRoleTests(unittest.TestCase):
                     # not accept punctuation. This test keeps punctuation only on
                     # the numeric/open-text probes it is meant to exercise.
                     "perception_role_cue": ["ACTOR_OR_EXPERIENCER", "PREDICATED_STATE"],
+                    # Whole-binary possession-orientation probes (added after these
+                    # fixtures were written). Neutral label leaves the parse unchanged.
+                    "semantic_binary_relation_frame": ["OTHER_RELATION"],
+                    "semantic_predicate_semantics": ["OTHER_RELATION"],
                 }
 
             def generate(self, prompt, *, system="", override=None, role="generic"):
