@@ -760,9 +760,14 @@ def td(state: FormalizationState) -> FormalizationState:
                 ]))
         cands = [span for span, _, _, _, _ in survivors]
         evid = [(cat, det) for _, _, _, _, evd in survivors for cat, det in evd]
-        state.reference_candidates.append(ReferenceCandidate(
-            mention_id=ev.span, candidates=tuple(cands), evidence=evid, provenance=prov,
-        ))
+        rc = ReferenceCandidate(mention_id=ev.span, candidates=tuple(cands), evidence=evid, provenance=prov)
+        # Resolution act [Rev16/H2]: the declared filter+ranking narrows to a set; identity is asserted
+        # ONLY when exactly one candidate survives (RESOLVED). Several survivors stay AMBIGUOUS and an
+        # empty set stays UNRESOLVED — in both cases no 'mention = antecedent' pair is created here (I24);
+        # the semantic outcome itself is granted by T4, this only records the resolved identity for materialization.
+        if len(cands) == 1:
+            rc.resolved_antecedent = cands[0]
+        state.reference_candidates.append(rc)
         dec = Decision(slot_id="reference", frame_id=ev.span, candidates=tuple(cands), provenance=prov)
         for span, mev, _, _, _ in survivors:  # value-specific positive grounds per candidate
             if mev is not None:

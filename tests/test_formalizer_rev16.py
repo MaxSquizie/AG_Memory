@@ -109,6 +109,21 @@ class TestCD_Reference(unittest.TestCase):
         self.assertEqual(dec.candidates, ("птица", "самолёт"))
         self.assertEqual(dec.outcome, "AMBIGUOUS")  # every survivor grounded on its own evidence
 
+    def test_d_single_memory_records_resolved_identity(self):
+        st = run_full(self.TEXT, memory_mentions=("птица",))
+        rc = next(r for r in st.reference_candidates if r.candidates == ("птица",))
+        self.assertEqual(rc.resolved_antecedent, "птица")  # the resolution act records identity
+
+    def test_d_two_memory_records_no_identity(self):
+        st = run_full(self.TEXT, memory_mentions=("птица", "самолёт"))
+        rc = next(r for r in st.reference_candidates if len(r.candidates) == 2)
+        self.assertIsNone(rc.resolved_antecedent)  # AMBIGUOUS -> no identity asserted (I24)
+
+    def test_c_zero_memory_records_no_identity(self):
+        st = run_full(self.TEXT, memory_mentions=())
+        rc = next(r for r in st.reference_candidates if not r.candidates)
+        self.assertIsNone(rc.resolved_antecedent)  # UNRESOLVED -> no identity asserted (I24)
+
     def test_no_pair_before_resolution(self):
         st = run_full(self.TEXT, memory_mentions=())
         rc = st.reference_candidates[0]
