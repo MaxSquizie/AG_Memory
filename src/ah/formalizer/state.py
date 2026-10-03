@@ -221,6 +221,7 @@ class ReferenceCandidate:
 
     mention_id: str  # the anaphoric span ('он')
     candidates: tuple[str, ...]  # admissible antecedent spans (observation + memory window)
+    resolved_antecedent: str | None = None  # set ONLY by an explicit resolution act; None -> unresolved (I24)
     evidence: list[tuple[str, str]] = field(default_factory=list)  # (category, detail), per candidate
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)
 

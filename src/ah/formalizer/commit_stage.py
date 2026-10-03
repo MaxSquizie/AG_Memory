@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from .composition import assemble_ir
-from .ir_to_graph import build_graph_ops, build_scope_tree_ops
+from .ir_to_graph import CorefCluster, build_coref_ops, build_graph_ops, build_scope_tree_ops
 from .state import FormalizationState
 from .store_interface import (
     CommitDecision,
@@ -67,6 +67,22 @@ def _scope_ops_from_ir(ir) -> list[StoreOp]:
     for tree in ir.operator_trees:
         ops.extend(build_scope_tree_ops(tree, frames_by_id))
     return ops
+
+
+def _coref_ops_from_ir(ir) -> list[StoreOp]:
+    """Emit K(COREF_CLUSTER) groups for RESOLVED reference decisions only (I24 guard).
+
+    A ReferenceCandidate is a candidate SET and asserts no identity on its own; it materializes only
+    once an explicit resolution act has set ``resolved_antecedent``. Unresolved sets emit nothing —
+    never a silent identity link.
+    """
+    clusters = [
+        CorefCluster(cluster_id=rc.mention_id, mention_span=rc.mention_id,
+                     antecedent_spans=(rc.resolved_antecedent,))
+        for rc in ir.coreference_candidates
+        if getattr(rc, "resolved_antecedent", None)
+    ]
+    return build_coref_ops(tuple(clusters))
 
 
 def _batch_hash(ir, run_id: str) -> str:
@@ -116,6 +132,9 @@ def commit(
         # Scope-tree materialization (§15.3/Rev13): each operator tree's EVENT leaf resolves against this
         # run's own graph nodes; an unresolved leaf emits nothing (SCOPE_NOT_COVERED — never a silent drop).
         plan_ops = (*plan_ops, *_scope_ops_from_ir(ir))
+        # Coreference: only EXPLICITLY-resolved mention=antecedent pairs materialize as K groups (I24);
+        # an unresolved candidate set asserts no identity and emits nothing.
+        plan_ops = (*plan_ops, *_coref_ops_from_ir(ir))
 
     batch_hash = _batch_hash(ir, run_id)
     marker = MaterializationMarker(observation_id=ir.observation_id, interpretation_version=ir.interpretation_version)

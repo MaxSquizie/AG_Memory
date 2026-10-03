@@ -21,7 +21,8 @@ from ah.formalizer.candidate_ir import (
     ScopeTreeCandidate,
     SemanticGraphCandidate,
 )
-from ah.formalizer.commit_stage import _scope_ops_from_ir, commit
+from ah.formalizer.commit_stage import _coref_ops_from_ir, _scope_ops_from_ir, commit
+from ah.formalizer.state import ReferenceCandidate
 from ah.formalizer.memory_store import MemoryStore
 from ah.formalizer.state import FrameCandidate, FormalizationState, TokenEvidence
 from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, StoreOp, TerminalOutcome
@@ -143,6 +144,40 @@ class TestScopeOpsFromIr(unittest.TestCase):
 
     def test_unresolved_event_emits_nothing(self):
         self.assertEqual(_scope_ops_from_ir(self._ir("GHOST")), [], "an unresolved leaf is SCOPE_NOT_COVERED, not dropped silently")
+
+
+class TestCorefOpsFromIr(unittest.TestCase):
+    """I24 guard: an unresolved candidate set asserts no identity; only an explicit resolution materializes."""
+
+    @staticmethod
+    def _ir(resolved=None) -> CandidateIR:
+        rc = ReferenceCandidate(mention_id="он", candidates=("Ворона", "перья"), resolved_antecedent=resolved)
+        return CandidateIR(ir_id="IR-x", observation_id="obs1", interpretation_version=1,
+                          coreference_candidates=(rc,))
+
+    def test_unresolved_set_emits_nothing(self):
+        self.assertEqual(_coref_ops_from_ir(self._ir(None)), [], "a candidate set without a resolution asserts no identity")
+
+    def test_resolved_pair_emits_group_op(self):
+        ops = _coref_ops_from_ir(self._ir("Ворона"))
+        groups = [o for o in ops if o.op_type == "ADD_GROUP"]
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(set(groups[0].payload["member_forms"]), {"он", "Ворона"})
+
+    def test_resolved_coref_materializes_in_real_store(self):
+        from ah.core import AHCore
+        from ah.formalizer.graph_ops import register_graph_handlers
+
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        core = AHCore()
+        a = AHStoreAdapter(core.store, JournalChannel(Path(self._tmp.name) / "j.log"), core=core)
+        register_graph_handlers(a)
+        st = _state()
+        st.reference_candidates.append(
+            ReferenceCandidate(mention_id="он", candidates=("Ворона",), resolved_antecedent="Ворона"))
+        self.assertTrue(commit(st, a, run_id="r1").applied)
+        self.assertTrue(core.store.find_symbols_by_form("он"), "a resolved coref mention must materialize in C")
 
 
 class TestGraphMaterialization(unittest.TestCase):
