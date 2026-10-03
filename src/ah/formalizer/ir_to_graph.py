@@ -297,6 +297,48 @@ def build_scope_ops(
     ]
 
 
+def _node_to_op(node) -> ScopeOperator:
+    """Map a Rev13 ScopeOperatorNode to the materialization ScopeOperator.
+
+    The node's local_variable_id is interpretation-local (not a canonical BoundVar); a numeric id is
+    carried through, anything else degrades to the handler default. AT_LEAST_N thresholds are not
+    carried by the node (restriction_ref is an expression ref, not a number), so no bound_value.
+    """
+    vid = getattr(node, "local_variable_id", None)
+    try:
+        var: int | None = int(vid) if vid is not None else None
+    except (TypeError, ValueError):
+        var = None
+    return ScopeOperator(
+        op_type=node.operator_type,
+        target_slot=getattr(node, "target_slot_ref", None),
+        variable_id=var,
+    )
+
+
+def build_scope_tree_ops(tree, frames_by_id: dict) -> list[StoreOp]:
+    """Materialize one Rev13 scope tree (Rev13): walk root->EVENT leaf, resolve the scoped event to a
+    base frame in this graph, and emit a single ADD_SCOPE carrying the inner->outer operator chain.
+
+    Honest incompleteness: if the EVENT leaf does not resolve to a known frame here, no op is emitted
+    (SCOPE_NOT_COVERED) — the trigger's meaning is never silently dropped, it just stays unmaterialized.
+    """
+    from .candidate_ir import ScopeOperatorNode  # lazy: avoid any top-level import cycle
+
+    node = tree.root
+    outer_to_inner: list[ScopeOperator] = []
+    while isinstance(node.operand, ScopeOperatorNode):  # descend through nested operators
+        outer_to_inner.append(_node_to_op(node))
+        node = node.operand
+    outer_to_inner.append(_node_to_op(node))  # the innermost operator itself
+    event_ref = node.operand if isinstance(node.operand, str) else None
+    base = frames_by_id.get(event_ref) if event_ref else None
+    if base is None:
+        return []  # SCOPE_NOT_COVERED: scoped event not in this graph -> honest no-op
+    chain = tuple(reversed(outer_to_inner))  # inner -> outer (build_scope_ops' order)
+    return build_scope_ops(base, chain)
+
+
 def build_graph_ops(
     graph: SemanticGraphCandidate,
     default_domain: Domain = Domain.C,

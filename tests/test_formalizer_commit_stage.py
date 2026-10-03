@@ -13,7 +13,15 @@ from ah.core.journal import JournalChannel
 from ah.core.store import AHStore
 
 from ah.formalizer.ah_adapter import AHStoreAdapter
-from ah.formalizer.commit_stage import commit
+from ah.formalizer.candidate_ir import (
+    ArgumentSpec,
+    CandidateIR,
+    EventFrame,
+    ScopeOperatorNode,
+    ScopeTreeCandidate,
+    SemanticGraphCandidate,
+)
+from ah.formalizer.commit_stage import _scope_ops_from_ir, commit
 from ah.formalizer.memory_store import MemoryStore
 from ah.formalizer.state import FrameCandidate, FormalizationState, TokenEvidence
 from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, StoreOp, TerminalOutcome
@@ -107,6 +115,34 @@ class TestCrashStopCommit(unittest.TestCase):
         report = a2.recover_from_head()
         self.assertFalse(report.re_admitted)
         self.assertIn(("batch:hX", TerminalOutcome.APPLIED), report.recovered)  # restored from D, not re-admitted
+
+
+class TestScopeOpsFromIr(unittest.TestCase):
+    """Slice #4 seam: the wired helper resolves each scope tree's EVENT leaf against this run's graph nodes."""
+
+    @staticmethod
+    def _ir(event_ref: str) -> CandidateIR:
+        frame = EventFrame(
+            frame_id="F1", predicate="видит",
+            participants=(
+                ArgumentSpec(slot_ref="SUBJECT", arg_type="ENTITY", value="он"),
+                ArgumentSpec(slot_ref="OBJECT", arg_type="ENTITY", value="дождь"),
+            ),
+        )
+        graph = SemanticGraphCandidate(graph_id="G1", ir_ref="IR-x", nodes=(frame,), edges=())
+        tree = ScopeTreeCandidate(
+            tree_id="T1", graph_id="G1",
+            root=ScopeOperatorNode(operator_id="OP0", operator_type="NOT", operand=event_ref),
+        )
+        return CandidateIR(ir_id="IR-x", observation_id="obs1", interpretation_version=1,
+                          semantic_candidates=(graph,), operator_trees=(tree,))
+
+    def test_resolved_event_emits_scope_op(self):
+        ops = _scope_ops_from_ir(self._ir("F1"))
+        self.assertTrue(any(o.op_type == "ADD_SCOPE" for o in ops), "a resolved scope tree must emit a scope op")
+
+    def test_unresolved_event_emits_nothing(self):
+        self.assertEqual(_scope_ops_from_ir(self._ir("GHOST")), [], "an unresolved leaf is SCOPE_NOT_COVERED, not dropped silently")
 
 
 class TestGraphMaterialization(unittest.TestCase):

@@ -109,7 +109,12 @@ def handle_add_scope(core: Any, p: dict) -> None:
             continue  # unregistered operator -> not materialized (honest incompleteness)
         node_domain = Domain.H if op in ("POSSIBLE", "NECESSARY") else domain
         if op in ("SOME", "EVERY", "AT_LEAST_N"):
-            var = BoundVar(int(step.get("variable_id", 0)), VariableSort.ENTITY)
+            raw_vid = step.get("variable_id")
+            try:
+                vid: int | None = int(raw_vid) if raw_vid is not None else None
+            except (TypeError, ValueError):
+                vid = None
+            var = BoundVar(vid or 0, VariableSort.ENTITY)
             q_actants = dict(base_actants)
             slot = step.get("target_slot")
             if slot and slot in ROLE_MAP:

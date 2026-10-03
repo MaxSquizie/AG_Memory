@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from .composition import assemble_ir
-from .ir_to_graph import build_graph_ops
+from .ir_to_graph import build_graph_ops, build_scope_tree_ops
 from .state import FormalizationState
 from .store_interface import (
     CommitDecision,
@@ -55,6 +55,17 @@ def _ops_from_ir(ir) -> list[PlanOp]:
         gid = g.graph_id or f"G{i + 1}"
         frame_deps = tuple(f"frame:{fid}" for fid in ir.predicate_frames)
         ops.append(PlanOp(uid=f"graph:{gid}", deps=frame_deps or (f"obs:{ir.observation_id}",), in_E=True))
+    return ops
+
+
+def _scope_ops_from_ir(ir) -> list[StoreOp]:
+    """Emit scope-tree ops for one IR (Rev13): each operator tree's EVENT leaf resolves against this
+    run's own graph nodes. Unresolved leaves emit nothing (SCOPE_NOT_COVERED, honest). The caller gates
+    the result on head-only admission."""
+    frames_by_id = {n.frame_id: n for g in ir.semantic_candidates for n in g.nodes if hasattr(n, "frame_id")}
+    ops: list[StoreOp] = []
+    for tree in ir.operator_trees:
+        ops.extend(build_scope_tree_ops(tree, frames_by_id))
     return ops
 
 
@@ -102,6 +113,9 @@ def commit(
         for g in ir.semantic_candidates:
             graph_ops, _report = build_graph_ops(g)  # default resolver: spans as S symbols
             plan_ops = (*plan_ops, *graph_ops)
+        # Scope-tree materialization (§15.3/Rev13): each operator tree's EVENT leaf resolves against this
+        # run's own graph nodes; an unresolved leaf emits nothing (SCOPE_NOT_COVERED — never a silent drop).
+        plan_ops = (*plan_ops, *_scope_ops_from_ir(ir))
 
     batch_hash = _batch_hash(ir, run_id)
     marker = MaterializationMarker(observation_id=ir.observation_id, interpretation_version=ir.interpretation_version)

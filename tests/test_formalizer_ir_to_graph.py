@@ -19,12 +19,14 @@ from ah.core.store import AHStore
 from ah.formalizer.ah_adapter import AHStoreAdapter
 from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, PropositionNode, SemanticGraphCandidate
 from ah.formalizer.graph_ops import register_graph_handlers
+from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, ScopeOperatorNode, ScopeTreeCandidate
 from ah.formalizer.ir_to_graph import (
     CorefCluster,
     ScopeOperator,
     build_coref_ops,
     build_graph_ops,
     build_scope_ops,
+    build_scope_tree_ops,
 )
 from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, TerminalOutcome
 from ah.model import ActantRole, BoundVar, Domain
@@ -208,6 +210,56 @@ class TestIrToGraph(unittest.TestCase):
     def test_unresolved_coref_emits_nothing(self):
         ops = build_coref_ops((CorefCluster("c1", "он", ()),))  # no resolved antecedent (I24)
         self.assertEqual(ops, [], "an unresolved candidate set must not assert identity")
+
+    # -- scope trees (slice #4) ----------------------------------------------
+    @staticmethod
+    def _named_frame() -> EventFrame:
+        return EventFrame(
+            frame_id="F1", predicate="видит",
+            participants=(
+                ArgumentSpec(slot_ref="SUBJECT", arg_type="ENTITY", value="он"),
+                ArgumentSpec(slot_ref="OBJECT", arg_type="ENTITY", value="дождь"),
+            ),
+        )
+
+    def test_scope_tree_not_over_event_emits_chain(self):
+        tree = ScopeTreeCandidate(
+            tree_id="T1", graph_id="G1",
+            root=ScopeOperatorNode(operator_id="OP0", operator_type="NOT", operand="F1"),
+        )
+        ops = build_scope_tree_ops(tree, {"F1": self._named_frame()})
+        self.assertEqual(len(ops), 2)  # predicate symbol + the scope
+        chain = ops[1].payload["chain"]
+        self.assertEqual([c["op_type"] for c in chain], ["NOT"])
+
+    def test_nested_scope_tree_orders_inner_to_outer(self):
+        not_node = ScopeOperatorNode(operator_id="OP1", operator_type="NOT", operand="F1")
+        some_node = ScopeOperatorNode(
+            operator_id="OP0", operator_type="SOME", target_slot_ref="SUBJECT",
+            local_variable_id="x", operand=not_node,
+        )
+        tree = ScopeTreeCandidate(tree_id="T2", graph_id="G1", root=some_node)
+        ops = build_scope_tree_ops(tree, {"F1": self._named_frame()})
+        chain = ops[1].payload["chain"]
+        self.assertEqual([c["op_type"] for c in chain], ["NOT", "SOME"])  # inner -> outer
+
+    def test_scope_tree_unresolved_event_emits_nothing(self):
+        tree = ScopeTreeCandidate(
+            tree_id="T3", graph_id="G1",
+            root=ScopeOperatorNode(operator_id="OP0", operator_type="NOT", operand="GHOST"),
+        )
+        self.assertEqual(build_scope_tree_ops(tree, {"F1": self._named_frame()}), [])  # SCOPE_NOT_COVERED
+
+    def test_scope_tree_materializes_not_over_frame_in_store(self):
+        tree = ScopeTreeCandidate(
+            tree_id="T4", graph_id="G1",
+            root=ScopeOperatorNode(operator_id="OP0", operator_type="NOT", operand="F1"),
+        )
+        ops = build_scope_tree_ops(tree, {"F1": self._named_frame()})
+        self._commit(ops, "b1")
+        node = self._plain_node("видит")
+        not_nodes = [g for g in self.core.store.function_parents(node.uid) if g.function_id == "NOT"]
+        self.assertTrue(not_nodes, "the scope tree must wrap the base frame with a NOT G-node")
 
 
 if __name__ == "__main__":
