@@ -109,5 +109,49 @@ class TestCrashStopCommit(unittest.TestCase):
         self.assertIn(("batch:hX", TerminalOutcome.APPLIED), report.recovered)  # restored from D, not re-admitted
 
 
+class TestGraphMaterialization(unittest.TestCase):
+    """Slice #3: the commit seam materializes admitted semantic graphs into a REAL store."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.log_path = Path(self._tmp.name) / "journal.log"
+
+    def _adapter(self):
+        from ah.core import AHCore
+        from ah.formalizer.graph_ops import register_graph_handlers
+
+        # Graph ops are applied only when the adapter is given a live core (see AHStoreAdapter._apply_ops).
+        self._core = AHCore()
+        a = AHStoreAdapter(self._core.store, JournalChannel(self.log_path), core=self._core)
+        register_graph_handlers(a)
+        return a
+
+    def _predicate_templates(self, st) -> tuple:
+        from ah.formalizer.composition import _lemma_of
+
+        store = self._core.store
+        lemma = _lemma_of(st.evidence, "имеет")
+        sym = store.find_symbol_by_form(lemma)
+        return store.find_templates_by_predicate(sym.uid) if sym else ()
+
+    def test_admitted_commit_materializes_graph_in_real_store(self):
+        st = _state()
+        a = self._adapter()
+        rep = commit(st, a, run_id="r1")
+        self.assertTrue(rep.applied)
+        templates = self._predicate_templates(st)
+        self.assertTrue(templates, "an admitted commit must materialize its semantic graph's template in C")
+
+    def test_non_head_run_writes_no_graph_facts(self):
+        st = _state()
+        a = self._adapter()
+        rep = commit(st, a, run_id="zzz", pending=[PendingBatch(batch_id="aaa", seq=0)])
+        self.assertFalse(rep.admitted_at_head)
+        self.assertEqual(
+            self._predicate_templates(st), (), "a non-head run writes no version-specific graph facts"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

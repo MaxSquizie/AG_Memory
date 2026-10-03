@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from .composition import assemble_ir
+from .ir_to_graph import build_graph_ops
 from .state import FormalizationState
 from .store_interface import (
     CommitDecision,
@@ -95,6 +96,12 @@ def commit(
     if admitted_at_head:
         forms = sorted({str(u).strip() for u in ir.lexical_units if str(u).strip()})
         plan_ops = (*plan_ops, *(StoreOp("ADD_SYMBOL", {"form": f}) for f in forms))
+        # Graph materialization (§16/§17): admitted semantic candidates become live T+N in the store.
+        # Gated on admission exactly like lexical symbols (DR13) — a non-head run writes no version-specific
+        # graph facts. The store must have the graph handlers registered (register_graph_handlers).
+        for g in ir.semantic_candidates:
+            graph_ops, _report = build_graph_ops(g)  # default resolver: spans as S symbols
+            plan_ops = (*plan_ops, *graph_ops)
 
     batch_hash = _batch_hash(ir, run_id)
     marker = MaterializationMarker(observation_id=ir.observation_id, interpretation_version=ir.interpretation_version)
