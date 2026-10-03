@@ -19,9 +19,9 @@ from ah.core.store import AHStore
 from ah.formalizer.ah_adapter import AHStoreAdapter
 from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, PropositionNode, SemanticGraphCandidate
 from ah.formalizer.graph_ops import register_graph_handlers
-from ah.formalizer.ir_to_graph import build_graph_ops
+from ah.formalizer.ir_to_graph import ScopeOperator, build_graph_ops, build_scope_ops
 from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, TerminalOutcome
-from ah.model import ActantRole, Domain
+from ah.model import ActantRole, BoundVar, Domain
 
 
 def _frame(fid: str, pred: str, subj: str, obj: str) -> EventFrame:
@@ -124,6 +124,62 @@ class TestIrToGraph(unittest.TestCase):
         after_nodes = len(self._hypernode_domains("имеет"))
         self.assertEqual(before_symbols, after_symbols, "re-apply must not duplicate symbols")
         self.assertEqual(before_nodes, after_nodes, "re-apply must not duplicate hypernodes")
+
+    # -- scope operators (slice #1) ------------------------------------------
+    def _hypernodes(self, pred_form: str):
+        t = self._template_for(pred_form)
+        return list(self.core.store.find_hypernodes_by_template(t.uid)) if t else []
+
+    def _plain_node(self, pred_form: str):
+        for n in self._hypernodes(pred_form):
+            if not any(isinstance(a, BoundVar) for a in n.actants.values()):
+                return n
+        raise AssertionError(f"no plain (non-quantified) instance of {pred_form!r}")
+
+    def _quant_node(self, pred_form: str):
+        for n in self._hypernodes(pred_form):
+            if any(isinstance(a, BoundVar) for a in n.actants.values()):
+                return n
+        raise AssertionError(f"no quantified (BoundVar) instance of {pred_form!r}")
+
+    def test_not_wraps_asserted_frame_in_C(self):
+        ops = build_scope_ops(_frame("f1", "имеет", "Ворона", "перья"), (ScopeOperator("NOT"),))
+        self._commit(ops, "b1")
+        parents = self.core.store.function_parents(self._plain_node("имеет").uid)
+        not_nodes = [g for g in parents if g.function_id == "NOT"]
+        self.assertTrue(not_nodes, "an asserted frame must be wrapped by a NOT G-node")
+        self.assertEqual(self.core.store.domain_of(not_nodes[0].uid), Domain.C)
+
+    def test_some_binds_boundvar_and_exists_in_C(self):
+        ops = build_scope_ops(
+            _frame("f1", "видит", "он", "дождь"), (ScopeOperator("SOME", target_slot="SUBJECT", variable_id=0),)
+        )
+        self._commit(ops, "b1")
+        qnode = self._quant_node("видит")  # the quantified instance carries a BoundVar
+        parents = self.core.store.function_parents(qnode.uid)
+        exists = next((g for g in parents if g.function_id == "EXISTS"), None)
+        self.assertIsNotNone(exists, "SOME must materialize an EXISTS G-node over the scoped instance")
+        self.assertIsInstance(exists.operands[0], BoundVar)  # var is a quantifier operand
+        self.assertEqual(self.core.store.domain_of(exists.uid), Domain.C)
+
+    def test_at_least_n_binds_value_link(self):
+        ops = build_scope_ops(
+            _frame("f1", "сдал", "студент", "экзамен"),
+            (ScopeOperator("AT_LEAST_N", target_slot="SUBJECT", variable_id=0, bound_value=6),)
+        )
+        self._commit(ops, "b1")
+        kinds = {link.relation_id for link in self.core.store.links()}
+        self.assertIn("AT_LEAST", kinds, "the numeric bound must be a Link from the scope to its value token")
+
+    def test_possible_quarantined_to_H(self):
+        ops = build_scope_ops(_frame("f1", "может", "он", "летать"), (ScopeOperator("POSSIBLE"),))
+        self._commit(ops, "b1")
+        parents = self.core.store.function_parents(self._plain_node("может").uid)
+        poss = next((g for g in parents if g.function_id == "POSSIBLE"), None)
+        self.assertIsNotNone(poss, "a POSSIBLE attitude must materialize a modal G-node")
+        self.assertEqual(
+            self.core.store.domain_of(poss.uid), Domain.H, "non-asserted (possible) content is quarantined to H"
+        )
 
 
 if __name__ == "__main__":

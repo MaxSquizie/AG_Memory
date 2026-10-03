@@ -202,6 +202,64 @@ class GraphBuilder:
         return ops, report
 
 
+@dataclass(frozen=True)
+class ScopeOperator:
+    """One scope operator to materialize as a G-node wrapping the base frame.
+
+    ``op_type`` is from the declared set (NOT/EVERY/SOME/AT_LEAST_N/POSSIBLE/NECESSARY/IF/ONLY).
+    Quantifiers bind ``target_slot`` with a fresh BoundVar; ``bound_value`` carries an AT_LEAST_N
+    threshold (materialized as a value-ref + Link, per the brain-faithful "bounded concept" rule);
+    ``only`` marks RESTRICT uniqueness on the scope.
+    """
+
+    op_type: str
+    target_slot: str | None = None  # role name for QUANT/RESTRICT binding
+    variable_id: int = 0            # BoundVar local id (shared across the scoped atoms)
+    bound_value: float | None = None  # AT_LEAST_N threshold
+    only: bool = False              # RESTRICT -> uniqueness property on the scope
+
+
+def build_scope_ops(
+    base_frame: EventFrame,
+    operators: tuple[ScopeOperator, ...],
+    domain: Domain = Domain.C,
+) -> list[StoreOp]:
+    """Emit ops materializing a (possibly nested) operator chain over one base frame.
+
+    A single self-contained ``ADD_SCOPE`` op carries the base-frame descriptor + the inner->outer
+    operator chain; the handler threads created refs internally, so nesting needs no cross-op uid
+    plumbing. The predicate symbol is emitted first so it exists before the scope is built.
+    """
+    roles = [ROLE_MAP[a.slot_ref].value for a in base_frame.participants if a.slot_ref in ROLE_MAP]
+    actants = {
+        ROLE_MAP[a.slot_ref].value: a.value
+        for a in base_frame.participants
+        if isinstance(a.value, str) and a.slot_ref in ROLE_MAP
+    }
+    return [
+        StoreOp("ADD_SYMBOL", {"form": base_frame.predicate}),
+        StoreOp(
+            "ADD_SCOPE",
+            {
+                "domain": domain.value,
+                "base_predicate_form": base_frame.predicate,
+                "base_roles": roles,
+                "base_actants": actants,
+                "chain": [
+                    {
+                        "op_type": o.op_type,
+                        "target_slot": o.target_slot,
+                        "variable_id": o.variable_id,
+                        "bound_value": o.bound_value,
+                        "only": o.only,
+                    }
+                    for o in operators
+                ],
+            },
+        ),
+    ]
+
+
 def build_graph_ops(
     graph: SemanticGraphCandidate,
     default_domain: Domain = Domain.C,
