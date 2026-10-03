@@ -20,6 +20,8 @@ from ah.formalizer.ah_adapter import AHStoreAdapter
 from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, PropositionNode, SemanticGraphCandidate
 from ah.formalizer.graph_ops import register_graph_handlers
 from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, ScopeOperatorNode, ScopeTreeCandidate
+from ah.formalizer.composition import _flat_participants, build_graphs
+from ah.formalizer.state import FrameCandidate, FormalizationState, TokenEvidence
 from ah.formalizer.ir_to_graph import (
     CorefCluster,
     ScopeOperator,
@@ -249,6 +251,27 @@ class TestIrToGraph(unittest.TestCase):
             root=ScopeOperatorNode(operator_id="OP0", operator_type="NOT", operand="GHOST"),
         )
         self.assertEqual(build_scope_tree_ops(tree, {"F1": self._named_frame()}), [])  # SCOPE_NOT_COVERED
+
+    def test_flat_frame_participants_get_declared_roles(self):
+        # declared word-order rule (same as _clause_event): first nominal before the anchor = SUBJECT, rest OBJECT
+        evs = [TokenEvidence(span="Ворона"), TokenEvidence(span="имеет"), TokenEvidence(span="перья")]
+        frame = FrameCandidate(frame_id="F1", kind="FLAT", anchor_span="имеет",
+                              participants=("Ворона", "перья"))
+        parts = _flat_participants(evs, frame)
+        self.assertEqual([p.slot_ref for p in parts], ["SUBJECT", "OBJECT"])
+
+    def test_flat_frame_actants_materialize_in_store(self):
+        # slice #5 end-to-end: a FLAT frame's participants now bind as actants (no more silent 'ARG' drop)
+        st = FormalizationState.new("Ворона имеет перья")
+        for span in ("Ворона", "имеет", "перья"):
+            st.evidence.append(TokenEvidence(span=span))
+        st.frames.append(FrameCandidate(frame_id="F1", kind="FLAT", anchor_span="имеет",
+                                       participants=("Ворона", "перья")))
+        ops, _ = build_graph_ops(build_graphs(st)[0])
+        self._commit(ops, "b1")
+        node = self._plain_node("имеет")
+        roles = {k.value for k in node.actants}  # actants is keyed by ActantRole
+        self.assertEqual(roles, {"SUBJECT", "OBJECT"})
 
     def test_scope_tree_materializes_not_over_frame_in_store(self):
         tree = ScopeTreeCandidate(

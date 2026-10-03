@@ -208,6 +208,32 @@ def _clause_event(state: FormalizationState, rng: tuple[int, int]) -> EventFrame
     )
 
 
+def _flat_participants(evs, frame) -> tuple[ArgumentSpec, ...]:
+    """Apply the SAME declared slot rule as ``_clause_event`` to a FLAT frame (no per-word rules):
+    in surface order, the first nominal mention before the predicate anchor is SUBJECT, the rest OBJECT.
+
+    This closes the historical 'ARG' gap: flat frames now carry role-typed participants exactly like
+    clause events do, so downstream materialization can bind them as actants."""
+
+    def pos(span: str) -> int | None:
+        for i, e in enumerate(evs):
+            if e.span == span:
+                return i
+        return None
+
+    center = pos(frame.anchor_span)
+    ordered = sorted(((pos(p), p) for p in frame.participants if pos(p) is not None), key=lambda t: t[0])
+    parts: list[ArgumentSpec] = []
+    subject_seen = False
+    for i, span in ordered:
+        if center is not None and i < center and not subject_seen:
+            slot, subject_seen = "SUBJECT", True
+        else:
+            slot = "OBJECT"
+        parts.append(ArgumentSpec(slot_ref=slot, arg_type="ENTITY", value=span))
+    return tuple(parts)
+
+
 def build_graphs(state: FormalizationState) -> list[SemanticGraphCandidate]:
     """Competing SemanticGraphCandidates (§16.7). With declared connectives: the PRIMARY
     derivation (each subclause attaches to its NEAREST matrix center) plus ONE alternative
@@ -224,8 +250,7 @@ def build_graphs(state: FormalizationState) -> list[SemanticGraphCandidate]:
     if not conns:
         nodes = tuple(
             EventFrame(frame_id=f.frame_id, predicate=_lemma_of(evs, f.anchor_span),
-                       participants=tuple(ArgumentSpec(slot_ref="ARG", arg_type="ENTITY", value=p)
-                                          for p in f.participants),
+                       participants=_flat_participants(evs, f),
                        state="PROPOSED", provenance=prov)
             for f in state.frames if f.kind == "FLAT"
         )
