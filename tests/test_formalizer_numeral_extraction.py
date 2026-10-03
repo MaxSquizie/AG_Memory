@@ -86,6 +86,36 @@ class TestSeedLayer(unittest.TestCase):
             self.assertEqual(NUMERAL_LEXICON_V1[lemma], value)
 
 
+class _SpanTok:  # minimal token carrying only a surface form (digit rule reads ev.span first)
+    def __init__(self, span):
+        self.span = span
+        self.lemma = None
+        self.pos = None
+
+
+class TestDigitLiterals(unittest.TestCase):
+    """Digits are an unambiguous orthographic literal -> read directly (no table, no model)."""
+
+    def test_bare_digits_read_directly(self):
+        sources: list = []
+        self.assertEqual(extract_cardinal_value([_SpanTok("52")], sources=sources), 52)
+        self.assertEqual(sources, [("digits", 52)])
+
+    def test_grouped_thousands_read_directly(self):
+        self.assertEqual(extract_cardinal_value([_SpanTok("1 000")]), 1000)
+        self.assertEqual(extract_cardinal_value([_SpanTok("1.000")]), 1000)
+
+    def test_decimal_and_ordinal_are_not_cardinal_literals(self):
+        self.assertIsNone(extract_cardinal_value([_SpanTok("3,5")]))   # decimal -> not a clean count
+        self.assertIsNone(extract_cardinal_value([_SpanTok("42-й")]))  # ordinal, different construct
+
+    def test_digit_beats_seed_and_needs_no_probe(self):
+        sel = FakeSelect({})  # would raise if the model were ever consulted
+        toks = [_NumTok("52")]  # even with a POS, the digit literal short-circuits first
+        self.assertEqual(extract_cardinal_value(toks, probe=NumeralProbe(sel)), 52)
+        self.assertEqual(sel.calls, [])
+
+
 class TestBoundedProbe(unittest.TestCase):
     def test_table_hit_short_circuits_without_probing(self):
         sel = FakeSelect({})  # would raise if ever called
@@ -182,6 +212,15 @@ class TestProbeEndToEnd(unittest.TestCase):
         at_least = [n for t in ir.operator_trees for n in t.nodes if n.operator_type == "AT_LEAST_N"]
         self.assertTrue(at_least)
         self.assertIsNone(at_least[0].threshold)  # honest incompleteness, never a guess
+
+    def test_digit_literal_threshold_flows_end_to_end_without_a_model(self):
+        """'Минимум 52 перья выпало.' — the digit is OOV to pymorphy3 (POS None), yet it reads straight to
+        its integer through t1->composition. No selector answer is needed for the numeral itself."""
+        st = run("Минимум 52 перья выпало.", load_decision_schema(), FakeSelector(), morph=MorphProvider())
+        ir = assemble_ir(st)
+        at_least = [n for t in ir.operator_trees for n in t.nodes if n.operator_type == "AT_LEAST_N"]
+        self.assertTrue(at_least, "the declared 'минимум' trigger must yield an AT_LEAST_N scope")
+        self.assertEqual(at_least[0].threshold, 52)
 
 
 if __name__ == "__main__":

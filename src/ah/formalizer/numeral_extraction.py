@@ -7,22 +7,27 @@ as ADJF) and no NUMB* grammeme is exposed. Therefore the integer VALUE of a nume
 the tagset; it must come from one of the two channels the project invariant sanctions for lexical-semantic
 mappings: (a) a declared language resource, or (b) a bounded LLM probe.
 
-Two layers — no per-word logic in code:
-  * NUMERAL_LEXICON_V1 : the DECLARED SEED RESOURCE. A single numeral token maps to its base value
-    deterministically; adjacent numerals compose additively ('двадцать три' = 20+3, 'сто пять' = 100+5).
+Three layers, in priority order — no per-word logic in code:
+  * digit literals     : a token whose surface form IS an unambiguous numeric literal ('52', '1 000') reads
+    straight to its integer. This is an ORTHOGRAPHIC/structural rule (not lexical-semantic, not per-word):
+    digits carry no ambiguity, so they need neither the seed table nor a model.
+  * NUMERAL_LEXICON_V1 : the DECLARED SEED RESOURCE for spelled-out numerals. A single numeral token maps to
+    its base value deterministically; adjacent numerals compose additively ('двадцать три' = 20+3, 'сто пять'
+    = 100+5).
   * bounded probe      : for a token NOT in the seed that is structurally a numeral candidate (POS == NUMR),
     a BOUNDED model judgment resolves its value. The probe is bounded three ways — by the extraction window,
     by the POS==NUMR candidate gate, and by an explicit call budget. A refusal (or provider unavailability)
     contributes nothing and terminates the run: an unknown numeral is never assigned a guessed value.
 
-Provenance: each resolved component records whether its value came from the seed ('table') or the model
-('probe'). Probe-derived values are MODEL JUDGMENT (M), not declared fact — downstream must treat them as
-such, unlike seed values which are declared resource data (R).
+Provenance: each resolved component records its origin — 'digits' (orthographic literal, unambiguous),
+'table' (declared seed resource = R) or 'probe' (model judgment = M). Probe-derived values are MODEL
+JUDGMENT, not declared fact; downstream must treat them as such, unlike digit/seed values.
 """
 
 from __future__ import annotations
 
 import json
+import re
 
 # Declared language resource [numeral_lexicon_v1]: Russian cardinal lemmas -> base value.
 # Standard forms 0..1000; the long tail is resolved by the bounded probe, not by growing this table.
@@ -107,6 +112,23 @@ def _surface_of(ev) -> str:
     return span or ""
 
 
+# Unambiguous integer literals: bare digits ('52') or grouped thousands ('1 000', '1.000', '1 000 000').
+# Decimals ('3,5'), ordinals ('42-й') and anything with letters are NOT cardinal literals -> no value.
+_DIGIT_RE = re.compile(r"^\d{1,3}(?:[ \u00a0.,]\d{3})*$|^[0-9]+$")
+
+
+def _digit_value(surface: str) -> int | None:
+    """Read an unambiguous integer literal directly from the surface form (orthographic rule).
+    Returns the integer, or None when the token is not a clean cardinal literal."""
+    s = (surface or "").strip()
+    if not _DIGIT_RE.match(s):
+        return None
+    try:
+        return int(re.sub(r"[\s\u00a0.,]", "", s))
+    except ValueError:
+        return None
+
+
 def extract_cardinal_value(
     evs,
     start: int = 0,
@@ -124,8 +146,8 @@ def extract_cardinal_value(
     composes additively; the first non-resolving token terminates the run. Returns None when no numeral
     resolves in the window — an unknown value is never guessed.
 
-    If ``sources`` is a list, each resolved component appends (origin, value) with origin in {'table','probe'}
-    so probe-derived values can be tagged as model judgment (M) downstream.
+    If ``sources`` is a list, each resolved component appends (origin, value) with origin in
+    {'digits','table','probe'} so probe-derived values can be tagged as model judgment (M) downstream.
     """
     stop = len(evs) if end is None else min(end, len(evs))
     probes_used = 0
@@ -137,6 +159,11 @@ def extract_cardinal_value(
         nonlocal probes_used
         if idx in cache:
             return cache[idx]
+        # Layer 1: unambiguous digit literal reads directly (no table, no model).
+        digits = _digit_value(_surface_of(evs[idx]))
+        if digits is not None:
+            cache[idx] = (digits, "digits")
+            return (digits, "digits")
         value = table.get(_lemma_of(evs[idx]))
         if value is not None:
             cache[idx] = (value, "table")
