@@ -90,6 +90,12 @@ def commit(
     admitted_uids = {o.uid for o in ops_desc if o.in_E} if admitted_at_head else set()
     plan_ops = compute_plan_E(ops_desc, admitted_uids)
 
+    # Lexical materialization (§12/§17): admitted lexical units become AbstractSymbols (S) in the LIVE graph,
+    # not just journal records. Gated on admission exactly like plan E (DR13) — a non-head run writes none.
+    if admitted_at_head:
+        forms = sorted({str(u).strip() for u in ir.lexical_units if str(u).strip()})
+        plan_ops = (*plan_ops, *(StoreOp("ADD_SYMBOL", {"form": f}) for f in forms))
+
     batch_hash = _batch_hash(ir, run_id)
     marker = MaterializationMarker(observation_id=ir.observation_id, interpretation_version=ir.interpretation_version)
     outcome = select_terminal_outcome(admitted_at_head=admitted_at_head, superseded=superseded)

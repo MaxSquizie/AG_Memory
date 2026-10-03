@@ -102,14 +102,14 @@ class AHStoreAdapter(Store):
     def _apply_ops(self, plan_ops: Sequence[StoreOp]) -> tuple[str, ...]:
         uids = [str(op.payload["uid"]) for op in plan_ops if op.payload.get("uid") is not None]
         if self._core is not None and self._op_handlers:
-            from ah.core.store import AHTransaction
-
-            txn = AHTransaction(self._core.store)
-            for op in plan_ops:
-                handler = self._op_handlers.get(op.op_type)
-                if handler is not None:
-                    handler(txn, dict(op.payload))
-            txn.commit()  # atomic in-memory application (COW)
+            # Handlers receive an AHCore over the COW transaction store: they may use the clean write API
+            # (add_abstract_symbol/add_template/...) or fall back to raw mutation via core.store. The
+            # transaction commits on a clean exit and rolls back if any handler raises (§12/§17 op→graph).
+            with self._core.transaction() as core:
+                for op in plan_ops:
+                    handler = self._op_handlers.get(op.op_type)
+                    if handler is not None:
+                        handler(core, dict(op.payload))
         return tuple(uids)
 
     # -- terminal / retraction -------------------------------------------- #

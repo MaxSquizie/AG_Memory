@@ -87,7 +87,8 @@ class NoPrivateLexiconsTests(unittest.TestCase):
                     continue
                 path = os.path.join(dirpath, fn)
                 rel = os.path.relpath(path, _HERE).replace(os.sep, "/")
-                src = open(path, encoding="utf-8").read()
+                with open(path, encoding="utf-8") as fh:
+                    src = fh.read()
                 code = _strip_docstrings_and_comments(src)
                 lines = code.splitlines()
                 for i, line in enumerate(lines):
@@ -115,7 +116,8 @@ class NoPrivateLexiconsTests(unittest.TestCase):
         for fn, var in SANCTIONED_LEXICONS:
             path = os.path.join(_FORMALIZER_ROOT, fn)
             self.assertTrue(os.path.isfile(path), f"missing sanctioned resource file {fn}")
-            code = _strip_docstrings_and_comments(open(path, encoding="utf-8").read())
+            with open(path, encoding="utf-8") as fh:
+                code = _strip_docstrings_and_comments(fh.read())
             lines = code.splitlines()
             found = False
             for i, line in enumerate(lines):
