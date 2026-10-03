@@ -297,7 +297,33 @@ def build_scope_ops(
     ]
 
 
-def _node_to_op(node) -> ScopeOperator:
+_QUANT_OPS = {"EVERY", "SOME", "AT_LEAST_N"}
+
+
+def _assign_quant_vars(root) -> dict:
+    """Pre-order sequential variable indices for every quantifier node in a tree.
+
+    Guarantees uniqueness INDEPENDENT of the source id format: 'x0'/'x1'/None all map to distinct
+    0,1,2... in binding (outer-first) order. Without this pass two quantifiers whose ids fail numeric
+    parsing would both degrade to BoundVar(0) and collide.
+    """
+    from .candidate_ir import ScopeOperatorNode  # lazy: avoid any top-level import cycle
+
+    assigned: dict = {}
+    counter = [0]
+
+    def walk(n):
+        if isinstance(n, ScopeOperatorNode) and n.operator_type in _QUANT_OPS:
+            assigned[id(n)] = counter[0]
+            counter[0] += 1
+            if isinstance(n.operand, ScopeOperatorNode):
+                walk(n.operand)
+
+    walk(root)
+    return assigned
+
+
+def _node_to_op(node, var_override: int | None = None) -> ScopeOperator:
     """Map a Rev13 ScopeOperatorNode to the materialization ScopeOperator.
 
     The node's local_variable_id is interpretation-local (not a canonical BoundVar); a numeric id is
@@ -305,11 +331,14 @@ def _node_to_op(node) -> ScopeOperator:
     becomes bound_value; when absent no number is asserted (restriction_ref alone is an expression ref,
     not a value — so an unbounded node materializes with no threshold link).
     """
-    vid = getattr(node, "local_variable_id", None)
-    try:
-        var: int | None = int(vid) if vid is not None else None
-    except (TypeError, ValueError):
-        var = None
+    if var_override is not None:
+        var: int | None = var_override
+    else:
+        vid = getattr(node, "local_variable_id", None)
+        try:
+            var = int(vid) if vid is not None else None
+        except (TypeError, ValueError):
+            var = None
     thr = getattr(node, "threshold", None)
     return ScopeOperator(
         op_type=node.operator_type,
@@ -329,11 +358,12 @@ def build_scope_tree_ops(tree, frames_by_id: dict) -> list[StoreOp]:
     from .candidate_ir import ScopeOperatorNode  # lazy: avoid any top-level import cycle
 
     node = tree.root
+    assigned = _assign_quant_vars(node)  # unique var per quantifier, independent of source id format
     outer_to_inner: list[ScopeOperator] = []
     while isinstance(node.operand, ScopeOperatorNode):  # descend through nested operators
-        outer_to_inner.append(_node_to_op(node))
+        outer_to_inner.append(_node_to_op(node, assigned.get(id(node))))
         node = node.operand
-    outer_to_inner.append(_node_to_op(node))  # the innermost operator itself
+    outer_to_inner.append(_node_to_op(node, assigned.get(id(node))))  # the innermost operator itself
     event_ref = node.operand if isinstance(node.operand, str) else None
     base = frames_by_id.get(event_ref) if event_ref else None
     if base is None:

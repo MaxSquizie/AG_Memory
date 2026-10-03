@@ -253,6 +253,20 @@ class TestIrToGraph(unittest.TestCase):
         )
         return ScopeTreeCandidate(tree_id="T5", graph_id="G1", root=node)
 
+    def test_nested_quantifiers_get_distinct_vars(self):
+        # 'x0'/'x1' are NOT int()-parseable -> without the sequential-index pass both would degrade to
+        # BoundVar(0) and collide. The pre-order pass must assign distinct vars regardless of id format.
+        inner = ScopeOperatorNode(operator_id="OP1", operator_type="SOME", target_slot_ref="OBJECT",
+                                 local_variable_id="x1", operand="F1")
+        outer = ScopeOperatorNode(operator_id="OP0", operator_type="EVERY", target_slot_ref="SUBJECT",
+                                 local_variable_id="x0", operand=inner)
+        tree = ScopeTreeCandidate(tree_id="T6", graph_id="G1", root=outer)
+        ops = build_scope_tree_ops(tree, {"F1": self._named_frame()})
+        chain = next(o for o in ops if o.op_type == "ADD_SCOPE").payload["chain"]
+        vars_ = [step["variable_id"] for step in chain if step["op_type"] in ("EVERY", "SOME")]
+        self.assertEqual(len(vars_), 2)
+        self.assertEqual(len(set(vars_)), 2, "nested quantifiers must not collide on the same BoundVar")
+
     def test_at_least_n_with_threshold_materializes_value_token(self):
         ops = build_scope_tree_ops(self._at_least_n(3), {"F1": self._named_frame()})
         self._commit(ops, "b1")
