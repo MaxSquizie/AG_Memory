@@ -86,7 +86,9 @@ def _predicate_centers(evs) -> list[int]:
 
 # ---------------------------------------------------------------- scope engine (§15.3)
 
-def build_scope_trees(state: FormalizationState) -> list[ScopeTreeCandidate]:
+def build_scope_trees(
+    state: FormalizationState, probe: "NumeralProbe | None" = None
+) -> list[ScopeTreeCandidate]:
     """OperatorCompositionEngine [Rev13a]: one generic depth rule for all types.
 
     A trigger without a rightward predicate center is NOT silently dropped — it yields
@@ -148,7 +150,7 @@ def build_scope_trees(state: FormalizationState) -> list[ScopeTreeCandidate]:
             if otype == "AT_LEAST_N":
                 # Declared cardinal extraction over the trigger's scope window (up to its center);
                 # an unknown numeral yields None -> no threshold asserted (honest incompleteness).
-                threshold = extract_cardinal_value(evs, i + 1, center)
+                threshold = extract_cardinal_value(evs, i + 1, center, probe=probe)
         node = ScopeOperatorNode(
             operator_id=f"OP{i}",
             operator_type=otype,
@@ -359,13 +361,15 @@ def journal_mentions_from(obs_state: FormalizationState) -> tuple[str, ...]:
 
 # ---------------------------------------------------------------- IR assembly (§2.1)
 
-def assemble_ir(state: FormalizationState) -> CandidateIR:
+def assemble_ir(
+    state: FormalizationState, numeral_probe: "NumeralProbe | None" = None
+) -> CandidateIR:
     """Freeze ALL local structures into the immutable CandidateIR — the ONLY exit of
     the formalizer (Rev14.1). No identity links, no memory facts, no commits here."""
     prov = ResourceProvenance(
         pattern_ids=("assemble_ir",), resource_versions={"candidate_ir": "v1"},
     )
-    trees = build_scope_trees(state)
+    trees = build_scope_trees(state, probe=numeral_probe)
     graphs = build_graphs(state)
     ambiguous: list[tuple[str, ...]] = []
     for dec in state.decisions.values():
