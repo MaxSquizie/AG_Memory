@@ -26,11 +26,27 @@ Implements docs/PILOT_DEMO_REFERENCES_V1.md (frozen v1), section 8.2:
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping
 
 OUTCOMES = ("ONE_SELECTED", "MULTIPLE_ADMISSIBLE", "INSUFFICIENT_CONTEXT", "NONE_FIT")
+
+# A single well-formed markdown code-fence wrapper is a common LLM output convention
+# (e.g. ```json ... ```). Real small models emit it even when told to return raw JSON;
+# the hermetic stub never did, so this gap only surfaces against a live backend.
+# Stripping ONE outer fence is deterministic transport normalization -- NOT a semantic
+# relaxation: the inner payload still passes every strict check below (closed outcome
+# enum, cardinality binding, closed-set membership). Malformed or nested content is
+# left for json.loads to reject as before.
+_FENCE_RE = re.compile(r"^\s*```[A-Za-z0-9_-]*\n?(.*?)\n?\s*```\s*$", re.DOTALL)
+
+
+def _strip_code_fence(raw: str) -> str:
+    """Remove a single outer ```lang ... ``` wrapper if present; else return unchanged."""
+    match = _FENCE_RE.match(raw)
+    return match.group(1).strip() if match else raw
 
 
 class ProtocolError(Exception):
@@ -159,7 +175,7 @@ def validate_selection_response(
     candidates is still a protocol error (selecting outside the declared set).
     """
     try:
-        data = json.loads(raw)
+        data = json.loads(_strip_code_fence(raw))
     except (json.JSONDecodeError, TypeError) as exc:
         raise ProtocolError(f"malformed JSON: {exc}") from exc
 

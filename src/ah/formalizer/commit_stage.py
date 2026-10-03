@@ -102,6 +102,10 @@ def commit(
     # The run's fate is set by admission + supersession (select_terminal_outcome); a store-level
     # idempotency no-op does not change it. ``applied`` separately reports store acceptance.
     terminal = outcome
-    store.append_terminal(run_id, terminal)
+    # Key the terminal by the batch identity (batch:<hash>) — the SAME key recover_from_head looks up
+    # (§7.3 DR15). A complete commit's terminal is then found on restart, so an already-APPLIED batch is
+    # NOT double-restored; a crash before this line leaves no terminal and recovery surfaces it from D.
+    if applied:
+        store.append_terminal(f"batch:{batch_hash}", terminal)
     return CommitReport(admitted_at_head=admitted_at_head, applied=applied, batch_hash=batch_hash,
                        n_ops=len(plan_ops), terminal=terminal)

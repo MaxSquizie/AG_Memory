@@ -5,33 +5,20 @@ import unittest
 
 from ah.config import LLMRoleSettings
 from ah.llm import LLMResponse
-from ah.model import ActantRole
-from ah.perception import PredicateCandidate
-from ah.perception.adaptive_parser import (
-    AdaptiveParseError, AdaptivePerceptionParser, AdaptiveSettings,
-    _EVENT_NONE_COMPLETION, _EVENT_RECIPIENT_COMPLETION,
-)
+from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.morphology import MorphInfo
 
 PROJECT = Path(__file__).resolve().parents[1]
 
 
 class SequenceBackend:
-    def __init__(self, answers=None):
-        self.answers = {key: list(values) for key, values in (answers or {}).items()}
+    def __init__(self) -> None:
         self.calls: list[tuple[str, str, dict]] = []
 
     def generate(self, prompt, *, system="", override=None, role="generic"):
-        ov = dict(override or {})
-        self.calls.append((role, prompt, ov))
-        values = self.answers.get(role)
-        if not values:
-            raise AssertionError(f"unexpected LLM call: {role}\n{prompt}")
-        item = values.pop(0)
-        if isinstance(item, tuple):
-            text, margin = item
-            return LLMResponse(text, {"choice_margin": margin})
-        return LLMResponse(str(item), {})
+        # Any LLM call is a contract violation for deterministic lexeme resolution.
+        self.calls.append((role, prompt, dict(override or {})))
+        raise AssertionError(f"unexpected LLM call: {role}\n{prompt}")
 
 
 class HomographAgreementMorphology:
@@ -74,26 +61,7 @@ class HomographAgreementMorphology:
         return values[0] if values else None
 
 
-class TransitiveMorphology:
-    name = "transitive"
-
-    def analyze_all(self, word: str):
-        values = {
-            "подарил": (
-                MorphInfo("подарить", "VERB", number="sing", mood="indc", transitivity="tran", score=1.0),
-            ),
-            "читает": (
-                MorphInfo("читать", "VERB", number="sing", mood="indc", transitivity="tran", score=1.0),
-            ),
-        }
-        return values.get(word.casefold(), ())
-
-    def analyze(self, word: str):
-        values = self.analyze_all(word)
-        return values[0] if values else None
-
-
-def parser(backend, morphology):
+def parser(backend, morphology) -> AdaptivePerceptionParser:
     return AdaptivePerceptionParser(
         backend,
         AdaptiveSettings(
@@ -107,76 +75,29 @@ def parser(backend, morphology):
 
 
 class ArchitectureAlignment1232Tests(unittest.TestCase):
-    def test_calibrated_semantic_low_margin_is_rejected(self):
-        backend = SequenceBackend({
-            "perception_template_hidden_valency": [
-                ("AMBIGUOUS", 0.01),
-            ],
-        })
-        with self.assertRaises(AdaptiveParseError) as raised:
-            parser(backend, TransitiveMorphology()).propose_template_candidate(
-                "Иван подарил книгу.",
-                PredicateCandidate("подарил", "подарить"),
-                (ActantRole.SUBJECT, ActantRole.OBJECT),
-            )
-        self.assertIn("invalid binary protocol answer", str(raised.exception))
-        self.assertEqual(len(backend.calls), 1)
-        role, _prompt, override = backend.calls[0]
-        self.assertEqual(role, "perception_template_hidden_valency")
-        self.assertNotIn("choice_calibration_prompt", override)
-        self.assertNotIn("choice_outputs", override)
+    """v0.12.39 contract: predicate lexeme resolution is deterministic and bounded.
 
-    def test_calibrated_none_adds_no_directional_role(self):
-        backend = SequenceBackend({
-            "perception_template_hidden_valency": [
-                (_EVENT_NONE_COMPLETION, 0.8),
-                ("NO_SOURCE_SLOT", 0.8),
-            ],
-        })
-        result = parser(backend, TransitiveMorphology()).propose_template_candidate(
-            "Иван читает книгу.",
-            PredicateCandidate("читает", "читать"),
-            (ActantRole.SUBJECT, ActantRole.OBJECT),
-        )
-        self.assertEqual(result.candidate.roles, (ActantRole.SUBJECT, ActantRole.OBJECT))
-        self.assertEqual(len(backend.calls), 2)
+    One-shot calibrated hidden-valency generation was removed from the production
+    template path (see test_architecture_alignment_1235).  The still-live behavior
+    here is verb-number homograph disambiguation in ``_predicate_lemma``: a plural
+    subject selects the plural-compatible reading without any LLM call, and an
+    equally compatible same-lexeme pair resolves to that shared lexeme.
+    """
 
-    def test_calibrated_recipient_maps_to_one_recipient(self):
-        backend = SequenceBackend({
-            "perception_template_hidden_valency": [
-                (_EVENT_RECIPIENT_COMPLETION, 0.8),
-            ],
-        })
-        result = parser(backend, TransitiveMorphology()).propose_template_candidate(
-            "Иван подарил книгу.",
-            PredicateCandidate("подарил", "подарить"),
-            (ActantRole.SUBJECT, ActantRole.OBJECT),
-        )
-        self.assertEqual(
-            result.candidate.roles,
-            (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT),
-        )
-        self.assertEqual(len(backend.calls), 1)
-        self.assertNotIn("choice_outputs", backend.calls[0][2])
-
-    def test_template_reuses_already_resolved_predicate_lexeme_before_transitivity(self):
+    def test_plural_subject_selects_compatible_verb_homograph_without_llm(self):
         backend = SequenceBackend()
         p = parser(backend, HomographAgreementMorphology())
+        tokens = p._source_tokens("Иван и Мария пришли и ушли.")
         for surface, lemma in (("пришли", "прийти"), ("ушли", "уйти")):
             with self.subTest(surface=surface):
-                result = p.propose_template_candidate(
-                    "Иван и Мария пришли и ушли.",
-                    PredicateCandidate(surface, lemma),
-                    (ActantRole.SUBJECT,),
+                index = next(t.index for t in tokens if t.text == surface)
+                self.assertEqual(
+                    p._predicate_lemma(tokens, index, index, act_type="ASSERTION"),
+                    lemma,
                 )
-                self.assertEqual(result.candidate.roles, (ActantRole.SUBJECT,))
-                self.assertTrue(any(
-                    trace.stage == "template_predicate_lexeme_filter"
-                    for trace in result.traces
-                ))
         self.assertEqual(backend.calls, [])
 
-    def test_subject_number_filter_removes_incompatible_homograph_when_lexeme_is_not_unique(self):
+    def test_same_lexeme_homograph_pair_resolves_to_shared_lemma(self):
         class SameLexemeMorphology(HomographAgreementMorphology):
             def analyze_all(self, word: str):
                 if word.casefold() == "ушли":
@@ -193,18 +114,14 @@ class ArchitectureAlignment1232Tests(unittest.TestCase):
                 return super().analyze_all(word)
 
         backend = SequenceBackend()
-        result = parser(backend, SameLexemeMorphology()).propose_template_candidate(
-            "Иван и Мария ушли.",
-            PredicateCandidate("ушли", "уйти"),
-            (ActantRole.SUBJECT,),
+        p = parser(backend, SameLexemeMorphology())
+        tokens = p._source_tokens("Иван и Мария ушли.")
+        index = next(t.index for t in tokens if t.text == "ушли")
+        self.assertEqual(
+            p._predicate_lemma(tokens, index, index, act_type="ASSERTION"),
+            "уйти",
         )
-        self.assertEqual(result.candidate.roles, (ActantRole.SUBJECT,))
         self.assertEqual(backend.calls, [])
-        self.assertTrue(any(
-            trace.stage == "template_predicate_morphology_filter"
-            and "NUMBER=plur" in (trace.normalized_answer or "")
-            for trace in result.traces
-        ))
 
 
 if __name__ == "__main__":

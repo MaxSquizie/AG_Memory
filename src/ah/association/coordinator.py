@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from ah.core import AHCore
-from ah.ignition import IgnitionEngine, PropagationEvent
 from ah.inference import GoalMode, GoalSpec
 from ah.integration.contracts import ActivationSeedRequest, SeedReason
 from ah.model import Domain, FunctionSymbol, Group, Hypernode, Ref, RefKind, Template
@@ -21,6 +21,13 @@ from .contracts import (
     AssociationTraceEvent,
     AssociationTraceKind,
 )
+
+if TYPE_CHECKING:
+    # Imported only for the ``__init__`` annotation. A top-level runtime import
+    # here creates a circular-import cycle (ah.ignition -> ... -> this module),
+    # so it is deferred to type-checking time; annotations are lazy under
+    # ``from __future__ import annotations``.
+    from ah.ignition import IgnitionEngine, PropagationEvent
 
 
 _LEFT = "LEFT"

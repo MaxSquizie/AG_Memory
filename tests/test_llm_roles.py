@@ -231,7 +231,14 @@ class LLMRoleTests(unittest.TestCase):
             (ActantRole.SUBJECT, "Яблоки"),
             (ActantRole.STATE, "красные"),
         ])
-        self.assertTrue(all(call[0].startswith("perception_") for call in backend.calls))
+        # The adaptive parser drives discrete perception_* probes; the whole-binary
+        # possession-orientation probes (semantic_*) are legitimate additions that may
+        # fire on qualitative sentences, so allow exactly those two extra roles.
+        allowed = {"semantic_binary_relation_frame", "semantic_predicate_semantics"}
+        self.assertTrue(all(
+            call[0].startswith("perception_") or call[0] in allowed
+            for call in backend.calls
+        ))
         self.assertTrue(all(len(call[2]) < 360 for call in backend.calls))
         self.assertTrue(all(call[3]["max_new_tokens"] <= 10 for call in backend.calls))
         for role, prompt, _system, override in backend.calls:
@@ -243,37 +250,11 @@ class LLMRoleTests(unittest.TestCase):
         self.assertEqual(diag.attempts[0].normalized_answer, "ASSERTION")
         self.assertTrue(any(a.raw_text == "<deterministic>" for a in diag.attempts))
 
-    def test_adaptive_query_fill_role_is_built_from_numeric_choices(self) -> None:
-        class Backend:
-            def __init__(self):
-                self.answers = {
-                    "perception_act_type": ["0"],
-                    "perception_predicate_start": ["2"],
-                    "perception_predicate_end": ["2"],
-                    "perception_predicate_symbol": ["love"],
-                    "perception_query_mode": ["2"],
-                    "perception_role_cue": ["AFFECTED_OR_CONTENT", "ACTOR_OR_EXPERIENCER"],
-                    "perception_actant_start": ["1"],
-                    # Whole-binary possession-orientation probes (added after these
-                    # fixtures were written). Neutral label leaves the parse unchanged.
-                    "semantic_binary_relation_frame": ["OTHER_RELATION"],
-                    "semantic_predicate_semantics": ["OTHER_RELATION"],
-                }
-            def generate(self, prompt, *, system="", override=None, role="generic"):
-                return LLMResponse(self.answers[role].pop(0), {})
-
-        parser = LLMPerceptionService(
-            Backend(),
-            LLMPerceptionSettings(protocol="adaptive_v2", morphology_backend="none", probe_prompt_dir=PROJECT / "prompts/perception", probe_retry_attempts=0),
-        )
-        result = parser.parse("Кто любит чай?", InteractionContext())
-        self.assertEqual(len(result.queries), 1)
-        query = result.queries[0]
-        self.assertEqual(query.predicate.lookup_form, "love")
-        self.assertEqual(query.requested_role, ActantRole.SUBJECT)
-        self.assertEqual(query.query_mode.value, "FILL_ROLE")
-        self.assertEqual([(a.role, a.mention) for a in query.actants], [(ActantRole.OBJECT, "чай")])
-        self.assertIsNone(query.predicate.template_candidate)
+    # NOTE: the old ``test_adaptive_query_fill_role_is_built_from_numeric_choices``
+    # asserted that EXISTS/FILL_ROLE was driven by a numeric LLM choice.  That
+    # mechanism was intentionally removed (query mode is now structural syntax via
+    # ``_explicit_question_words``, not a model guess).  The new contract is covered
+    # by tests/test_structural_speech_act_2609.py, so the stale test is dropped.
 
     def test_adaptive_command_uses_same_discrete_span_and_role_pipeline(self) -> None:
         class Backend:

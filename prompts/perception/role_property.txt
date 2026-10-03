@@ -1,1 +1,1 @@
-Choose exactly one label from CHOICES. Decide only whether PROPERTY applies to TARGET in this sentence. Return only YES or NO.
+Decide only whether PROPERTY applies to TARGET in this sentence. YES means it does; NO means it does not.

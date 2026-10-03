@@ -94,6 +94,33 @@ class SelectionProtocolTests(unittest.TestCase):
                 self.assertNotIn("RESOLVED", str(value))
             self.assertNotIn("contract_outcome", vars(type(r)))
 
+    # -- transport normalization: markdown code fences -----------------------
+
+    def test_code_fence_wrapped_valid_json_accepted(self):
+        # A real small model wraps the payload in ```json ... ```; that must parse.
+        raw = '```json\n{"outcome": "ONE_SELECTED", "selected": ["V2"]}\n```'
+        r = validate_selection_response(raw, self.schema)
+        self.assertEqual(r.selected, ("V2",))
+        self.assertEqual(r.outcome, "ONE_SELECTED")
+
+    def test_code_fence_without_lang_tag_accepted(self):
+        raw = '```\n{"outcome": "MULTIPLE_ADMISSIBLE", "selected": ["V1", "V2"]}\n```'
+        r = validate_selection_response(raw, self.schema)
+        self.assertEqual(set(r.selected), {"V1", "V2"})
+
+    def test_code_fence_still_enforces_cardinality(self):
+        # Fence stripping is transport-only: the inner payload keeps full strictness.
+        raw = '```json\n{"outcome": "ONE_SELECTED", "selected": ["V1", "V2"]}\n```'
+        self._expect_protocol_error(raw)
+
+    def test_code_fence_with_garbage_inside_rejected(self):
+        # Stripping a fence must NOT mask a genuinely malformed payload.
+        self._expect_protocol_error('```json\nnot json at all\n```')
+
+    def test_double_nested_fence_rejected(self):
+        # Two stacked fences are not the single well-formed wrapper we tolerate.
+        self._expect_protocol_error('```\n```json\n{"outcome": "NONE_FIT", "selected": []}\n```\n```')
+
     # -- validator: protocol errors (rejected call, not mechanism violation) -
 
     def _expect_protocol_error(self, raw):

@@ -16,7 +16,7 @@ from ah.formalizer.ah_adapter import AHStoreAdapter
 from ah.formalizer.commit_stage import commit
 from ah.formalizer.memory_store import MemoryStore
 from ah.formalizer.state import FrameCandidate, FormalizationState, TokenEvidence
-from ah.formalizer.store_interface import TerminalOutcome
+from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, StoreOp, TerminalOutcome
 from ah.formalizer.t6_core import PendingBatch
 
 
@@ -79,6 +79,34 @@ class TestCrashStopCommit(unittest.TestCase):
         self.assertIsNotNone(a2.read_global_head())
         again = commit(_state(), a2, run_id="r1")
         self.assertFalse(again.applied)              # idempotent across restart
+
+    def test_complete_commit_not_double_restored_after_restart(self):
+        """WP0.5 — a COMPLETE vertical commit (D + terminal both on disk) must NOT be re-surfaced by recovery.
+
+        Regression for the run_id-vs-batch:<hash> key mismatch: the terminal is now keyed by the batch identity
+        that recover_from_head looks up, so an already-APPLIED batch stays restored exactly once."""
+        a1 = self._adapter()
+        commit(_state(), a1, run_id="r1")            # writes D + the batch-keyed terminal to disk
+
+        a2 = AHStoreAdapter(AHStore(), JournalChannel(self.log_path))  # restart from the SAME file
+        report = a2.recover_from_head()
+        self.assertFalse(report.re_admitted)
+        self.assertEqual(report.recovered, ())       # terminal present -> NOT double-restored
+
+    def test_crash_before_terminal_recovers_without_readmission(self):
+        """WP0.5 — crash AFTER the commit unit D but BEFORE the terminal: recovery restores the decided APPLIED
+        batch from D WITHOUT re-running admission (re_admitted stays False)."""
+        a1 = self._adapter()
+        decision = CommitDecision(run_id="r9", batch_hash="hX",
+                                 marker=MaterializationMarker("obs1", 2), ops_digest="d",
+                                 outcome=TerminalOutcome.APPLIED)
+        a1.commit_transaction((StoreOp("ADD_ELEMENT", {"uid": "u1"}),), decision.marker, decision)  # D only
+        # (no append_terminal -> the crash happened before the terminal was durably written)
+
+        a2 = AHStoreAdapter(AHStore(), JournalChannel(self.log_path))
+        report = a2.recover_from_head()
+        self.assertFalse(report.re_admitted)
+        self.assertIn(("batch:hX", TerminalOutcome.APPLIED), report.recovered)  # restored from D, not re-admitted
 
 
 if __name__ == "__main__":

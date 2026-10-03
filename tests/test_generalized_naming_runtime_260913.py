@@ -19,6 +19,7 @@ from ah.perception import (
 )
 from ah.perception.adaptive_parser import AdaptiveSettings
 from ah.perception.generalized_naming import GeneralizedNamingLLMPerceptionService
+from ah.perception.higher_order_queries import HigherOrderQueryLLMPerceptionService
 from ah.perception.linguistic_candidates import LinguisticCandidateBuilder
 from ah.perception.morphology import MorphInfo
 
@@ -130,7 +131,11 @@ def _evidence(graph, surface: str) -> EvidenceSpan:
 
 
 def test_public_perception_runtime_uses_generalized_naming_service() -> None:
-    assert LLMPerceptionService is GeneralizedNamingLLMPerceptionService
+    # The public runtime alias now points at the higher-order-query service, which
+    # sits on top of (and therefore IS-A) the generalized-naming service.  Assert
+    # both the concrete alias and the preserved generalized-naming contract.
+    assert LLMPerceptionService is HigherOrderQueryLLMPerceptionService
+    assert issubclass(LLMPerceptionService, GeneralizedNamingLLMPerceptionService)
 
 
 def test_verbal_naming_rewrite_is_structural_not_verb_dictionary() -> None:

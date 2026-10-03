@@ -142,6 +142,10 @@ def _parser_for(text: str):
         morphology=morphology,
     )
     parser._candidate_graph = graph
+    # The test drives _extract_actants directly without running the full candidate
+    # build path; seed the nominal-subject state that path normally initializes.
+    parser._nominal_subject_spans: dict[int, object] = {}
+    parser._nominal_linker_tokens: set[int] = set()
     tokens = parser._source_tokens_from_graph(graph)
     return parser, tokens
 

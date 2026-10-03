@@ -4,35 +4,29 @@ from pathlib import Path
 import unittest
 
 from ah.config import LLMRoleSettings
-from ah.llm import LLMResponse
 from ah.model import ActantRole
 from ah.perception import PredicateCandidate
-from ah.perception.adaptive_parser import (
-    AdaptiveParseError,
-    AdaptivePerceptionParser,
-    AdaptiveSettings,
-    _TEMPLATE_HIDDEN_VALENCY_LABELS,
-)
+from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
+from ah.diagnostics.hidden_valency_diagnostic import _choices_for, _semantic_label
 
 from test_acceptance_regressions_1218 import AcceptanceMorphology
+
+
+class NoCallBackend:
+    """Any LLM call is a contract violation for the production template path."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def generate(self, prompt, *, system="", override=None, role="generic"):
+        self.calls += 1
+        raise AssertionError(f"production template path must not call the LLM (role={role})")
+
 
 PROJECT = Path(__file__).resolve().parents[1]
 
 
-class GenerationBackend:
-    def __init__(self, answer: str):
-        self.answer = answer
-        self.calls: list[tuple[str, str, dict, str]] = []
-
-    def generate(self, prompt, *, system="", override=None, role="generic"):
-        ov = dict(override or {})
-        self.calls.append((role, prompt, ov, system))
-        if role != "perception_template_hidden_valency":
-            raise AssertionError(f"unexpected LLM call: {role}\n{prompt}")
-        return LLMResponse(self.answer, {})
-
-
-def parser(backend: GenerationBackend) -> AdaptivePerceptionParser:
+def parser(backend: NoCallBackend) -> AdaptivePerceptionParser:
     return AdaptivePerceptionParser(
         backend,
         AdaptiveSettings(
@@ -46,98 +40,74 @@ def parser(backend: GenerationBackend) -> AdaptivePerceptionParser:
 
 
 class ArchitectureAlignment1235Tests(unittest.TestCase):
-    def test_hidden_valency_uses_one_normal_generation_without_choice_scoring(self):
-        backend = GenerationBackend("RECIPIENT")
+    """v0.12.39 contract: production template creation never predicts hidden roles.
+
+    ``propose_template_candidate`` returns only the explicit semantic roles already
+    extracted by Perception and makes zero LLM calls; one-shot hidden-valency
+    generation was removed from the canonical schema path and lives only in the
+    standalone capability diagnostic (order-swap, AH-unchanged).
+    """
+
+    def test_propose_template_candidate_makes_no_llm_call(self):
+        backend = NoCallBackend()
         result = parser(backend).propose_template_candidate(
             "Иван подарил книгу.",
             PredicateCandidate("подарил", "подарить"),
             (ActantRole.SUBJECT, ActantRole.OBJECT),
             ((ActantRole.SUBJECT, "Иван"), (ActantRole.OBJECT, "книга")),
         )
-        self.assertEqual(
-            result.candidate.roles,
-            (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT),
-        )
-        self.assertEqual(len(backend.calls), 1)
-        role, prompt, override, system = backend.calls[0]
-        self.assertEqual(role, "perception_template_hidden_valency")
-        self.assertNotIn("choice_outputs", override)
-        self.assertNotIn("return_choice_scores", override)
-        self.assertNotIn("choice_calibration_prompt", override)
-        self.assertEqual(override["temperature"], 0.0)
-        self.assertLessEqual(override["max_new_tokens"], 8)
-        self.assertIn("SOURCE TEXT:\nИван подарил книгу.", prompt)
-        self.assertIn("SUBJECT: Иван", prompt)
-        self.assertIn("OBJECT: книга", prompt)
-        for label in _TEMPLATE_HIDDEN_VALENCY_LABELS:
-            self.assertIn(label, system)
-
-    def test_none_keeps_only_known_roles(self):
-        backend = GenerationBackend("NONE")
-        result = parser(backend).propose_template_candidate(
-            "Иван читает книгу.",
-            PredicateCandidate("читает", "читать"),
-            (ActantRole.SUBJECT, ActantRole.OBJECT),
-        )
+        self.assertEqual(backend.calls, 0)
         self.assertEqual(result.candidate.roles, (ActantRole.SUBJECT, ActantRole.OBJECT))
 
-    def test_source_and_recipient_source_are_mapped_deterministically(self):
-        cases = (
-            ("SOURCE", (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.SOURCE)),
-            (
-                "RECIPIENT,SOURCE",
-                (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT, ActantRole.SOURCE),
-            ),
-        )
-        for answer, expected in cases:
-            with self.subTest(answer=answer):
-                backend = GenerationBackend(answer)
-                result = parser(backend).propose_template_candidate(
-                    "Иван обработал объект.",
-                    PredicateCandidate("обработал", "обработать"),
-                    (ActantRole.SUBJECT, ActantRole.OBJECT),
-                )
-                self.assertEqual(result.candidate.roles, expected)
-
-    def test_ambiguous_answer_fails_closed_before_template_creation(self):
-        backend = GenerationBackend("AMBIGUOUS")
-        with self.assertRaises(AdaptiveParseError) as raised:
-            parser(backend).propose_template_candidate(
-                "Иван подарил книгу.",
-                PredicateCandidate("подарил", "подарить"),
-                (ActantRole.SUBJECT, ActantRole.OBJECT),
-            )
-        self.assertIn("ambiguous hidden directional participant", str(raised.exception))
-        self.assertTrue(any(
-            trace.stage == "template_hidden_valency"
-            and trace.normalized_answer == "AMBIGUOUS"
-            for trace in raised.exception.traces
-        ))
-
-    def test_explanatory_or_unknown_output_is_protocol_error(self):
-        for answer in ("RECIPIENT\nbecause someone receives it", "RECEIVER"):
-            with self.subTest(answer=answer):
-                backend = GenerationBackend(answer)
-                with self.assertRaises(AdaptiveParseError) as raised:
-                    parser(backend).propose_template_candidate(
-                        "Иван подарил книгу.",
-                        PredicateCandidate("подарил", "подарить"),
-                        (ActantRole.SUBJECT, ActantRole.OBJECT),
-                    )
-                self.assertIn("invalid protocol answer", str(raised.exception))
-
-    def test_observed_directional_role_disables_hidden_valency_generation(self):
-        backend = GenerationBackend("SOURCE")
+    def test_only_explicit_roles_are_returned_in_canonical_order(self):
+        backend = NoCallBackend()
         result = parser(backend).propose_template_candidate(
             "Иван подарил Марии книгу.",
             PredicateCandidate("подарил", "подарить"),
-            (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT),
+            (ActantRole.OBJECT, ActantRole.RECIPIENT, ActantRole.SUBJECT),
         )
+        self.assertEqual(backend.calls, 0)
+        # Roles are re-emitted in the canonical ActantRole declaration order.
         self.assertEqual(
             result.candidate.roles,
             (ActantRole.SUBJECT, ActantRole.OBJECT, ActantRole.RECIPIENT),
         )
-        self.assertEqual(backend.calls, [])
+
+    def test_no_explicit_roles_yields_empty_candidate(self):
+        backend = NoCallBackend()
+        result = parser(backend).propose_template_candidate(
+            "Иван читает.",
+            PredicateCandidate("читает", "читать"),
+            (ActantRole.SUBJECT,),
+        )
+        self.assertEqual(backend.calls, 0)
+        self.assertEqual(result.candidate.roles, (ActantRole.SUBJECT,))
+
+    def test_diagnostic_choices_are_role_specific_and_closed(self):
+        self.assertEqual(
+            _choices_for(ActantRole.RECIPIENT),
+            ("HAS_RECIPIENT_SLOT", "NO_RECIPIENT_SLOT"),
+        )
+        self.assertEqual(
+            _choices_for(ActantRole.SOURCE),
+            ("HAS_SOURCE_SLOT", "NO_SOURCE_SLOT"),
+        )
+        with self.assertRaises(ValueError):
+            _choices_for(ActantRole.OBJECT)
+
+    def test_diagnostic_semantic_label_is_exact_or_recovers_only_orphan_think_close(self):
+        choices = ("HAS_RECIPIENT_SLOT", "NO_RECIPIENT_SLOT")
+        self.assertEqual(_semantic_label("HAS_RECIPIENT_SLOT", choices), ("HAS_RECIPIENT_SLOT", "EXACT"))
+        # A trailing orphan Qwen think-close wrapper is the only tolerated recovery.
+        self.assertEqual(
+            _semantic_label("NO_RECIPIENT_SLOT\n</think>", choices),
+            ("NO_RECIPIENT_SLOT", "RECOVERED_ORPHAN_THINK_CLOSE"),
+        )
+
+    def test_diagnostic_semantic_label_rejects_explanations_and_unknowns(self):
+        choices = ("HAS_SOURCE_SLOT", "NO_SOURCE_SLOT")
+        self.assertEqual(_semantic_label("because it receives it", choices), (None, "MALFORMED"))
+        self.assertEqual(_semantic_label("RECEIVER", choices), (None, "MALFORMED"))
 
 
 if __name__ == "__main__":

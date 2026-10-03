@@ -8,9 +8,14 @@ GUI = ROOT / "src" / "ah" / "gui"
 
 
 def test_production_gui_uses_semantic_test_window() -> None:
+    # The production entry now uses the merged window, which subclasses the
+    # semantic-test window as its base -- so the semantic surface is still in
+    # production (transitively), while the plain main_window stays out.
     app = (GUI / "app.py").read_text(encoding="utf-8")
-    assert "from ah.gui.semantic_test_window import MainWindow" in app
+    merged = (GUI / "merged_main_window.py").read_text(encoding="utf-8")
+    assert "from ah.gui.merged_main_window import MainWindow" in app
     assert "from ah.gui.main_window import MainWindow" not in app
+    assert "from .semantic_test_window import MainWindow as _BaseMainWindow" in merged
 
 
 def test_semantic_test_surface_has_current_semantic_suites_only() -> None:

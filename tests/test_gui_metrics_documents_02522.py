@@ -36,7 +36,8 @@ def test_m1_gui_exposes_every_bound_acceptance_family_and_raw_prompt_evidence():
         "acceptance_runs_m1_typo",
     ):
         assert dirname in source
-    assert "Исходный промпт" in source
+    # The raw-prompt evidence tab is now labeled «Техника · Исходный текст».
+    assert "Исходный текст" in source
     assert "Домен" in source
     assert "Связи" in source
 
@@ -67,7 +68,10 @@ def test_document_pipeline_uses_one_document_batch_and_bounded_source_continuati
     assert "BatchKind.DOCUMENT" in pipeline
     assert "build_source_slice" in pipeline
     assert "SourceProjectionCursor" in pipeline
-    assert "raw source/chunk" in pipeline
+    # The no-raw-text contract is now worded as prose ("never raw source or raw
+    # chunks"); guard both terms so the wording cannot silently drift away.
+    assert "raw source" in pipeline
+    assert "raw chunks" in pipeline
 
     assert "DEFAULT_DOCUMENT_SUMMARY_BUDGET_TOKENS = 4096" in runtime
     assert "_reduce_partial_results" in runtime
