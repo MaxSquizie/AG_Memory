@@ -74,6 +74,14 @@ def _value_token(core: Any, n) -> Ref:
     return _ensure_symbol(core, f"n{float(n):g}")
 
 
+def handle_add_group(core: Any, p: dict) -> None:
+    """Materialize a K-group (e.g. a COREF_CLUSTER): resolve member forms to Refs, then group them."""
+    domain = Domain(p["domain"])
+    members = tuple(_operand(core, form) for form in p.get("member_forms", ()))
+    meta = {"kind": p["kind"]} if p.get("kind") else None
+    core.add_group(domain, members, meta=meta)
+
+
 def handle_add_scope(core: Any, p: dict) -> None:
     """Materialize a base frame then wrap it with an inner->outer operator chain (G-nodes).
 
@@ -124,6 +132,7 @@ GRAPH_HANDLERS: dict[str, Callable[[Any, dict], Any]] = {
     "ADD_TEMPLATE": handle_add_template,
     "ADD_HYPERNODE": handle_add_hypernode,
     "ADD_LINK": handle_add_link,
+    "ADD_GROUP": handle_add_group,
     "ADD_SCOPE": handle_add_scope,
 }
 

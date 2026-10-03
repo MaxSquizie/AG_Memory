@@ -19,7 +19,13 @@ from ah.core.store import AHStore
 from ah.formalizer.ah_adapter import AHStoreAdapter
 from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, PropositionNode, SemanticGraphCandidate
 from ah.formalizer.graph_ops import register_graph_handlers
-from ah.formalizer.ir_to_graph import ScopeOperator, build_graph_ops, build_scope_ops
+from ah.formalizer.ir_to_graph import (
+    CorefCluster,
+    ScopeOperator,
+    build_coref_ops,
+    build_graph_ops,
+    build_scope_ops,
+)
 from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, TerminalOutcome
 from ah.model import ActantRole, BoundVar, Domain
 
@@ -180,6 +186,28 @@ class TestIrToGraph(unittest.TestCase):
         self.assertEqual(
             self.core.store.domain_of(poss.uid), Domain.H, "non-asserted (possible) content is quarantined to H"
         )
+
+    # -- coreference clusters (slice #2) -------------------------------------
+    def _groups_for(self, form: str):
+        s = self.core.store.find_symbol_by_form(form)
+        return self.core.store.groups_containing(s.uid) if s else ()
+
+    def test_resolved_coref_cluster_materializes_in_K(self):
+        ops = build_coref_ops((CorefCluster("c1", "он", ("студент",)),))
+        self.assertEqual(len(ops), 1)
+        self._commit(ops, "b1")
+        groups = self._groups_for("студент")
+        self.assertEqual(len(groups), 1, "a resolved coref must form exactly one K-group")
+        g = groups[0]
+        self.assertEqual(self.core.store.domain_of(g.uid), Domain.C)  # asserted identity fact
+        self.assertEqual(g.meta.get("kind"), "COREF_CLUSTER")
+        member_uids = {m.uid for m in g.members}
+        for form in ("он", "студент"):
+            self.assertIn(self.core.store.find_symbol_by_form(form).uid, member_uids)
+
+    def test_unresolved_coref_emits_nothing(self):
+        ops = build_coref_ops((CorefCluster("c1", "он", ()),))  # no resolved antecedent (I24)
+        self.assertEqual(ops, [], "an unresolved candidate set must not assert identity")
 
 
 if __name__ == "__main__":

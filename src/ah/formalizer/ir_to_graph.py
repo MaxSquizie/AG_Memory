@@ -219,6 +219,43 @@ class ScopeOperator:
     only: bool = False              # RESTRICT -> uniqueness property on the scope
 
 
+@dataclass(frozen=True)
+class CorefCluster:
+    """A RESOLVED coreference (I24): an anaphoric mention bound to its chosen antecedent(s).
+
+    Only a resolved identity assertion is materialized. A bare candidate set with no selected
+    antecedent is NOT an identity claim and emits nothing.
+    """
+
+    cluster_id: str
+    mention_span: str  # the anaphoric span ('он')
+    antecedent_spans: tuple[str, ...] = ()  # resolved antecedent(s); empty -> not materialized
+
+
+def build_coref_ops(clusters: tuple[CorefCluster, ...]) -> list[StoreOp]:
+    """Emit K(COREF_CLUSTER) group ops for RESOLVED coreferences only (I24 guard).
+
+    Each resolved cluster becomes one Group in Domain.K whose members are the mention + its chosen
+    antecedent(s), tagged ``meta.kind = COREF_CLUSTER``. Unresolved candidates emit no op.
+    """
+    ops: list[StoreOp] = []
+    for c in clusters:
+        if not c.antecedent_spans:
+            continue  # I24: a candidate set without a resolved antecedent asserts no identity
+        member_forms = [c.mention_span, *c.antecedent_spans]
+        ops.append(
+            StoreOp(
+                "ADD_GROUP",
+                {
+                    "domain": Domain.C.value,  # a resolved identity is an asserted fact (K is the element kind)
+                    "member_forms": member_forms,
+                    "kind": "COREF_CLUSTER",
+                },
+            )
+        )
+    return ops
+
+
 def build_scope_ops(
     base_frame: EventFrame,
     operators: tuple[ScopeOperator, ...],
