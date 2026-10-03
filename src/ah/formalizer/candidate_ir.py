@@ -126,6 +126,7 @@ class ScopeOperatorNode:
     target_slot_ref: str | None = None  # required for QUANT/RESTRICT [Rev13]
     local_variable_id: str | None = None
     restriction_ref: str | None = None
+    threshold: int | None = None  # AT_LEAST_N numeric bound (declared); None -> no number asserted
     scope_span: tuple[str, ...] = ()  # surface trigger span(s)
     binding: object = None  # materialization reference (Phase 2)
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)

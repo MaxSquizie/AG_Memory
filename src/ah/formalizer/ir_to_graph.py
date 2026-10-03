@@ -301,18 +301,21 @@ def _node_to_op(node) -> ScopeOperator:
     """Map a Rev13 ScopeOperatorNode to the materialization ScopeOperator.
 
     The node's local_variable_id is interpretation-local (not a canonical BoundVar); a numeric id is
-    carried through, anything else degrades to the handler default. AT_LEAST_N thresholds are not
-    carried by the node (restriction_ref is an expression ref, not a number), so no bound_value.
+    carried through, anything else degrades to the handler default. A declared AT_LEAST_N ``threshold``
+    becomes bound_value; when absent no number is asserted (restriction_ref alone is an expression ref,
+    not a value — so an unbounded node materializes with no threshold link).
     """
     vid = getattr(node, "local_variable_id", None)
     try:
         var: int | None = int(vid) if vid is not None else None
     except (TypeError, ValueError):
         var = None
+    thr = getattr(node, "threshold", None)
     return ScopeOperator(
         op_type=node.operator_type,
         target_slot=getattr(node, "target_slot_ref", None),
         variable_id=var,
+        bound_value=float(thr) if thr is not None else None,
     )
 
 

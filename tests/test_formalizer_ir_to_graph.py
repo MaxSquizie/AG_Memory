@@ -245,6 +245,26 @@ class TestIrToGraph(unittest.TestCase):
         chain = ops[1].payload["chain"]
         self.assertEqual([c["op_type"] for c in chain], ["NOT", "SOME"])  # inner -> outer
 
+    @staticmethod
+    def _at_least_n(threshold=None) -> ScopeTreeCandidate:
+        node = ScopeOperatorNode(
+            operator_id="OP0", operator_type="AT_LEAST_N", target_slot_ref="SUBJECT",
+            local_variable_id="x", operand="F1", threshold=threshold,
+        )
+        return ScopeTreeCandidate(tree_id="T5", graph_id="G1", root=node)
+
+    def test_at_least_n_with_threshold_materializes_value_token(self):
+        ops = build_scope_tree_ops(self._at_least_n(3), {"F1": self._named_frame()})
+        self._commit(ops, "b1")
+        self.assertTrue(self.core.store.find_symbols_by_form("n3"),
+                       "a declared AT_LEAST_N threshold must materialize as a value token + link")
+
+    def test_at_least_n_without_threshold_asserts_no_number(self):
+        ops = build_scope_tree_ops(self._at_least_n(None), {"F1": self._named_frame()})
+        self._commit(ops, "b1")
+        self.assertFalse(self.core.store.find_symbols_by_form("n3"),
+                        "an unbounded node must not assert a number (honest incompleteness)")
+
     def test_scope_tree_unresolved_event_emits_nothing(self):
         tree = ScopeTreeCandidate(
             tree_id="T3", graph_id="G1",
