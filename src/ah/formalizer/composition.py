@@ -37,6 +37,7 @@ from ah.formalizer.candidate_ir import (
     ScopeTreeCandidate,
     SemanticGraphCandidate,
 )
+from ah.formalizer.numeral_extraction import NUMERAL_LEX_VERSION, extract_cardinal_value
 from ah.formalizer.state import FormalizationState, LinkedAlternative, ResourceProvenance
 
 # ---------------------------------------------------------------- declared resources
@@ -48,6 +49,8 @@ SCOPE_LEXICON_V1: dict[tuple[str, str], str] = {
     ("PRCL", "не"): "NOT",
     ("ADJF", "каждый"): "EVERY",
     ("VERB", "мочь"): "POSSIBLE",
+    # AT_LEAST_N: a declared lower-bound trigger followed by a cardinal numeral expression.
+    ("NOUN", "минимум"): "AT_LEAST_N",
 }
 _SCOPE_LEX_VERSION = "scope_lexicon_v1"
 
@@ -91,7 +94,7 @@ def build_scope_trees(state: FormalizationState) -> list[ScopeTreeCandidate]:
     evs = state.evidence
     prov = ResourceProvenance(
         pattern_ids=("OperatorCompositionEngine",),
-        resource_versions={"scope_lexicon": _SCOPE_LEX_VERSION},
+        resource_versions={"scope_lexicon": _SCOPE_LEX_VERSION, "numeral_lexicon": NUMERAL_LEX_VERSION},
     )
     centers = _predicate_centers(evs)
     triggers: list[tuple[int, str]] = []  # (token index, operator type)
@@ -134,6 +137,7 @@ def build_scope_trees(state: FormalizationState) -> list[ScopeTreeCandidate]:
     operand: object = event_ref
     for _depth, i, otype in reversed(ranked):  # innermost first
         target = None
+        threshold: int | None = None
         if otype in _QUANT_TYPES:
             center = min(c for c in centers if c > i)
             for j in range(i + 1, center):
@@ -141,12 +145,17 @@ def build_scope_trees(state: FormalizationState) -> list[ScopeTreeCandidate]:
                     target = evs[j].span
                     break
             x_count += 1
+            if otype == "AT_LEAST_N":
+                # Declared cardinal extraction over the trigger's scope window (up to its center);
+                # an unknown numeral yields None -> no threshold asserted (honest incompleteness).
+                threshold = extract_cardinal_value(evs, i + 1, center)
         node = ScopeOperatorNode(
             operator_id=f"OP{i}",
             operator_type=otype,
             operand=operand,
             target_slot_ref=(f"slot:{target}" if otype in _QUANT_TYPES else None),
             local_variable_id=(f"x{x_count}" if otype in _QUANT_TYPES else None),
+            threshold=threshold,
             restriction_ref=target,
             scope_span=(evs[i].span,),
             provenance=prov,

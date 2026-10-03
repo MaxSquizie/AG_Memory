@@ -36,6 +36,7 @@ _FORMALIZER_ROOT = os.path.normpath(
 SANCTIONED_LEXICONS = {
     ("composition.py", "CONNECTIVES_V1"),   # [connectives_v1] subordinator connective pattern
     ("composition.py", "SCOPE_LEXICON_V1"),  # [scope_lexicon_v1] (pos, lemma) -> operator type
+    ("numeral_extraction.py", "NUMERAL_LEXICON_V1"),  # [numeral_lexicon_v1] cardinal lemma -> base value
 }
 
 # A Cyrillic string literal used as a dict key followed by ':' — the lexical-semantic-map
