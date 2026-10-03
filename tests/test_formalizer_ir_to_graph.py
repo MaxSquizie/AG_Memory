@@ -1,0 +1,130 @@
+# -*- coding: utf-8 -*-
+"""P2 — CandidateIR -> live AHStore graph (proves the locked type/domain mapping end-to-end).
+
+Asserts, on a REAL store + durable journal:
+* an asserted EventFrame materializes as Template(predicate=S) + Hypernode in Domain.C;
+* an EMBEDDED / non-ASSERTED PropositionNode's head frame is quarantined to Domain.H (not C);
+* graph edges become Links;
+* re-committing identical ops under a NEW batch hash does NOT duplicate symbols/hypernodes
+  (self-contained find-or-create handlers are idempotent).
+"""
+
+import tempfile
+import unittest
+from pathlib import Path
+
+from ah.core.journal import JournalChannel
+from ah.core.operations import AHCore
+from ah.core.store import AHStore
+from ah.formalizer.ah_adapter import AHStoreAdapter
+from ah.formalizer.candidate_ir import ArgumentSpec, EventFrame, PropositionNode, SemanticGraphCandidate
+from ah.formalizer.graph_ops import register_graph_handlers
+from ah.formalizer.ir_to_graph import build_graph_ops
+from ah.formalizer.store_interface import CommitDecision, MaterializationMarker, TerminalOutcome
+from ah.model import ActantRole, Domain
+
+
+def _frame(fid: str, pred: str, subj: str, obj: str) -> EventFrame:
+    return EventFrame(
+        frame_id=fid,
+        predicate=pred,
+        participants=(ArgumentSpec("SUBJECT", "ENTITY", subj), ArgumentSpec("OBJECT", "ENTITY", obj)),
+    )
+
+
+class TestIrToGraph(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.core = AHCore(AHStore())
+        self.adapter = AHStoreAdapter(
+            self.core.store, JournalChannel(Path(self._tmp.name) / "j.jsonl"), core=self.core
+        )
+        register_graph_handlers(self.adapter)
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def _graph(self) -> SemanticGraphCandidate:
+        return SemanticGraphCandidate(
+            graph_id="g1",
+            ir_ref="ir1",
+            nodes=(
+                _frame("f1", "имеет", "Ворона", "перья"),  # asserted -> C
+                _frame("f2", "читает", "студент", "книга"),  # asserted -> C
+                PropositionNode(
+                    expr_id="p1",
+                    head=_frame("f3", "видит", "он", "дождь"),
+                    status="EMBEDDED",
+                    epistemic_status="POSSIBLE",  # non-asserted -> H quarantine
+                ),
+            ),
+            edges=(("f1", "f2", "dependency"),),
+        )
+
+    def _commit(self, ops, batch_hash: str):
+        marker = MaterializationMarker(observation_id="obs1", interpretation_version=1)
+        decision = CommitDecision(
+            run_id="r1", batch_hash=batch_hash, marker=marker, ops_digest="d", outcome=TerminalOutcome.APPLIED
+        )
+        return self.adapter.commit_transaction(ops, marker, decision)
+
+    def _template_for(self, pred_form: str):
+        s = self.core.store.find_symbol_by_form(pred_form)
+        if s is None:
+            return None
+        for t in self.core.store.find_templates_by_predicate(s.uid):
+            if ActantRole.SUBJECT in t.roles and ActantRole.OBJECT in t.roles:
+                return t
+        return None
+
+    def _hypernode_domains(self, pred_form: str) -> list[Domain]:
+        t = self._template_for(pred_form)
+        if t is None:
+            return []
+        return [self.core.store.domain_of(n.uid) for n in self.core.store.find_hypernodes_by_template(t.uid)]
+
+    def test_asserted_frames_materialize_in_C(self):
+        ops, _ = build_graph_ops(self._graph())
+        self._commit(ops, "b1")
+        store = self.core.store
+        # predicate materialized as a live AbstractSymbol (S)
+        for form in ("имеет", "читает"):
+            self.assertIsNotNone(store.find_symbol_by_form(form), f"predicate {form!r} must be a symbol")
+        # asserted frames -> hypernodes in C, never H
+        for form in ("имеет", "читает"):
+            domains = self._hypernode_domains(form)
+            self.assertIn(Domain.C, domains, f"{form!r} frame must materialize an asserted (C) hypernode")
+            self.assertNotIn(Domain.H, domains, f"{form!r} is asserted; it must not be quarantined to H")
+
+    def test_embedded_non_asserted_frame_is_quarantined_to_H(self):
+        ops, _ = build_graph_ops(self._graph())
+        self._commit(ops, "b1")
+        domains = self._hypernode_domains("видит")
+        self.assertEqual(domains, [Domain.H], "EMBEDDED/POSSIBLE head frame must live in H, not C/P")
+
+    def test_edges_become_links(self):
+        ops, _ = build_graph_ops(self._graph())
+        self._commit(ops, "b1")
+        kinds = {link.relation_id for link in self.core.store.links()}
+        self.assertIn("dependency", kinds)
+
+    def test_recommit_same_hash_is_noop(self):
+        ops, _ = build_graph_ops(self._graph())
+        first = self._commit(ops, "b1")
+        second = self._commit(ops, "b1")  # identical batch hash -> idempotent no-op
+        self.assertTrue(second.idempotent_noop)
+
+    def test_reapply_same_ops_new_hash_does_not_duplicate(self):
+        ops, _ = build_graph_ops(self._graph())
+        self._commit(ops, "b1")
+        before_symbols = len(self.core.store.find_symbols_by_form("имеет"))
+        before_nodes = len(self._hypernode_domains("имеет"))
+        self._commit(ops, "b2")  # same ops, new hash -> handlers re-run but find-or-create
+        after_symbols = len(self.core.store.find_symbols_by_form("имеет"))
+        after_nodes = len(self._hypernode_domains("имеет"))
+        self.assertEqual(before_symbols, after_symbols, "re-apply must not duplicate symbols")
+        self.assertEqual(before_nodes, after_nodes, "re-apply must not duplicate hypernodes")
+
+
+if __name__ == "__main__":
+    unittest.main()
