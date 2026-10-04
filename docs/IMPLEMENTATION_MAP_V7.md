@@ -1,7 +1,9 @@
 # Карта соответствия V7 → код (статус реализации)
 
 Нормативный документ: `docs/FORMALIZER_ARCHITECTURE_V7.md` (V4 устарел).
-Пакет: `src/ah/formalizer/`. Базовый прогон (2026-10): unittest 467 OK + pytest composition/formalization 246 passed / 1 xfailed.
+Пакет: `src/ah/formalizer/`. Базовый прогон (2026-10): unittest **558 OK** по формализатору + pytest composition/formalization 246 passed / 1 xfailed.
+
+> **Единый источник правды по остатку:** `docs/FORMALIZER_STATUS_AND_REMAINING_WORK.md` (runtime wiring, legacy→V7 аудит, open-set генерация). Эта карта — по-§ статус; устаревшие deferred-пункты ниже закрыты.
 
 Статусы: **DONE** — реализовано и покрыто тестами; **PARTIAL** — ядро есть, часть контракта не закрыта; **DEFERRED** — отложено по V7 (явно), план ниже.
 
@@ -53,10 +55,10 @@
 | §14 runtime adapter / path B seam | `runtime_adapter.py`, `ah_adapter.py`, `integration_ir.py` | test_formalizer_runtime_adapter, _ah_adapter, _integration_e2e | DONE |
 | §15 FunctionRegistry / serialization | `operator_algebra.py`, `ir_to_graph.py` | test_formalizer_ir_to_graph, _registry | DONE |
 | §17 goal channel end-to-end | `goal_executor.py`, `inference_engine.py` | test_formalizer_goal_executor, e2e suites | DONE |
-| §18 speech-act / modus (DR27) | `pipeline.py` (modus), composition | test_ambiguity_semantic_composition_02529 | PARTIAL (см. ниже) |
+| §18 speech-act / modus (DR27/A37) | `speech_act.py`, `pipeline.py` (modus), composition | test_formalizer_speech_act, test_ambiguity_semantic_composition_02529 | **DONE** (эта сессия: косвенный запрос → linked {QUERY,COMMAND}, действие не утверждается) |
 
-## Отложено → план реализации
-1. **Bounded-count reader** (§6.3/§17.3): читать утверждённый bound квантора и рендерить «как минимум N» / «ровно N» / «не более N»; UNKNOWN+reason без bound / без DomainCertificate для EXACTLY_N/AT_MOST_N. → `count_reader.py` (реализуется в этом ходе).
+## Отложено → план реализации (все пункты ниже закрыты; остаток — в статус-доке)
+1. ~~**Bounded-count reader**~~ (§6.3/§17.3) — **DONE**: `count_reader.py` + test_formalizer_query_surfaces. читать утверждённый bound квантора и рендерить «как минимум N» / «ровно N» / «не более N»; UNKNOWN+reason без bound / без DomainCertificate для EXACTLY_N/AT_MOST_N. → `count_reader.py` (реализуется в этом ходе).
 2. **Широкий реестр интеррогативов** (§6.3): полный request_kind → goal kind + answer surface с UNKNOWN-fallback; запрет произвольного EXISTS; IF требует clause-детекции. → `interrogatives.py` (реализуется в этом ходе).
 3. ~~Clause-детекция~~ — **DONE (этот ход)**: `clause_detection.py` + `tests/test_formalizer_clause_detection.py`. Границы clauses из морф-тегов (подчинительный союз / относительное местоимение) + объявленная пунктуация как разделитель; untagged fallback = маленький объявленный набор однозначных subordinators (`если/когда/хотя/пока/чтобы`) + stem `котор-`; неоднозначное «что» — только по тегу. Парные границы (antecedent, consequent) для IMPLIES/TD; single-clause → честно UNRESOLVED. Сквозной тест: IF компилируется только при реальных парных границах.
    - **DONE (этот ход)** — `tag_source.py` + `tests/test_formalizer_tag_source.py`: адаптер источника тегов. pymorphy3 (+ опциональная bounded LLM-проба) → `list[Token]` с тегами для `detect_clauses`. Основано на фактах pymorphy3: однозначные subordinators (`если/хотя/чтобы/дабы`) → авто `CONJ_SUB`; относительные (`который` = ADJF+Subx) → `RELPRON`; сочинительные (`и/а/но`) → plain CONJ (не открывают); неоднозначные (`когда/пока/что`) → только через LLM-пробу, иначе честно content. Тег кэшируется на слово; пунктуация сохраняется как отдельные разделители.

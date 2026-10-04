@@ -44,11 +44,11 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 |---|---|---|---|
 | `quantifier_formalization.py` | 660 | `quantifiers.py` | ✅ портировано (alpha-norm, on-demand inst) |
 | `temporal_mode_formalization.py`, `temporal_scope_formalization.py` | 224+ | `temporal*.py`, `inference_engine.py` | ✅ портировано (ledger, licenses, TimeAssertion) |
-| `logical_formalization.py` | 1037 | `operator_algebra.py`, `composition.py` | ⚠️ ядро есть; **нужен по-модульный аудит** полноты правил вывода |
-| `modal_formalization.py` | 663 | §6.1 эпистемика в `composition.py` / `temporal_license.py` | ⚠️ **аудит**: покрыта ли вся модальность |
-| `semantic_predicates.py` | 422 | T3/T4 + decision schema (`pipeline.py`) | ⚠️ **аудит** (закрытый набор vs legacy-смыслы) |
-| `structural_speech_act.py` | 379 | modus в `pipeline.py` (§18 DR27) | ⚠️ **PARTIAL** по карте V7 — не закрыто |
-| `higher_order_queries.py`, `identity_query.py` | 459+485 | `interrogatives.py`, `count_reader.py`, coref в T6b | ⚠️ **аудит**: покрыты ли все виды запросов/идентичности |
+| `logical_formalization.py` | 1037 | `operator_algebra.py` (8 операторов + inference rules), `composition.py`, `inference_engine.py` | ✅ ядро покрыто; **остаток**: parity-тест полного набора правил вывода legacy |
+| `modal_formalization.py` | 663 | эпистемика в `composition.py` / `temporal_license.py` / `goal_executor.py` | ✅ покрыто (модальные лицензии); **остаток**: dedicated regression на legacy-модалках |
+| `semantic_predicates.py` | 422 | T3/T4 + decision schema (`pipeline.py`) | ⚠️ закрытый демо-набор; **аудит** полноты vs legacy-смыслы (см. D) |
+| `structural_speech_act.py` | 379 | `speech_act.py` (§18 DR27/A37) + modus в `pipeline.py` | ✅ **ЗАКРЫТО (эта сессия)**: детекция косвенного запроса → linked {QUERY,COMMAND}, действие не утверждается |
+| `higher_order_queries.py`, `identity_query.py` | 459+485 | `interrogatives.py` (полный класс + UNKNOWN-fallback), `count_reader.py`, coref в T6b | ✅ заявленный класс покрыт; **остаток**: parity-проверка конкретных legacy-форм запросов/идентичности |
 | `generalized_naming.py`, `coordination_normalization.py`, `correlated_alternatives.py`, `association_continuation.py` | 563+274+389+333 | — (heuristics адаптивного парсера) | ❓ **не в скопе V7 явно** — решить: мигрировать или сознательно отбросить при удалении legacy |
 | `llm_parser.py` | 1294 | `lmstudio_selector.py`, `real_backend.py`, LLM-проба в `tag_source.py`/`numeral_extraction.py` | ⚠️ **аудит**: что из LLM-ролей ещё не покрыто bounded-пробами |
 | `runtime_semantics.py`, `runtime_invariants.py` | 714+ | рантайм-клей (новый: `orchestrator.py`) | ❓ **аудит** |
@@ -71,9 +71,10 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 3. Тест: сквозной «агент получает текст → факт в каноническом AHStore» через production-путь (не только e2e на фикстурах).
 
 ### B. По-модульный аудит покрытия legacy→V7 + миграция неперенесённого
-1. Для каждого ⚠️/❓ модуля из §2: написать тест, доказывающий, что конкретная способность legacy покрыта новым (или зафиксировать gap).
-2. Закрыть **PARTIAL**: speech-act/modus (§18 DR27) — довести до DONE.
-3. Принять решение по heuristics адаптивного парсера (naming/coordination/correlated_alternatives/continuation): мигрировать в V7 или сознательно отбросить с записью причины.
+1. ✅ **PARTIAL закрыт (эта сессия)**: speech-act/modus (§18 DR27/A37) → `speech_act.py` + адаптер; 5 тестов доказывают linked {QUERY,COMMAND} и отсутствие фабрикации действия.
+2. ✅ **Capability-пробы (эта сession)** подтвердили покрытие ядра: logical (`operator_algebra` 8 операторов + inference rules), modal (`composition`/`temporal_license`/`goal_executor`), queries (`interrogatives` полный класс + UNKNOWN-fallback, `count_reader`).
+3. **Остаток B**: dedicated parity-тесты на конкретных legacy-формах (полный набор правил вывода logical_formalization; конкретные модалки modal_formalization; специфичные запросы higher_order_queries/identity_query) — довести «ядро покрыто» до доказанного паритета.
+4. **Решение по heuristics адаптивного парсера** (generalized_naming / coordination_normalization / correlated_alternatives / association_continuation): **не мигрировать в V7 как есть**. Это эвристики *поведения* legacy-парсера, а не формальные способности; V7 намеренно заменяет их declared structural rules + bounded LLM-пробами. При удалении `adaptive_parser.py` эти модули отбрасываются; если конкретная способность окажется нужной — она добавляется как явная declared rule/проба с тестом, а не копируется эвристика.
 
 ### C. Обновить `IMPLEMENTATION_MAP_V7.md`
 Синхронизировать со 548 тестами, пометить закрытые deferred-пункты, переслать остаток на этот документ как единый источник правды.
