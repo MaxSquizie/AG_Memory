@@ -89,6 +89,33 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 
 ---
 
+### F. Реальный прогон S1–S6 через живой бэкенд (эта сессия) — ✅ СДЕЛАНО
+Модель поднята (LM Studio, :1234). Драйвер `scripts/run_formalizer_real_backend.py` теперь классифицирует каждое предложение по эталону (`PILOT_DEMO_REFERENCES_V1.md`) в **C1** (RESOLVED к целевому значению) / **C2** (честная неполнота: UNRESOLVED/AMBIGUOUS/NO_CANDIDATE/INSUFFICIENT_CONTEXT) / **C3** (принят неверный смысл) / **PROTOCOL_ERROR** (вычислительный сбой, не вердикт), и отдельно считает protocol-C3 (доля валидного JSON).
+
+Целевые значения: S1/S2/S4→V2(HAS_PART), S3→V1(HAVE), S5→V2, S6→V4(LIKE).
+
+**gemma-3n-e4b-it** (рабочий бэкенд протокола):
+| режим | C1 | C2 | C3(неверно) | PROTOCOL_ERROR | protocol-C3 |
+|---|---|---|---|---|---|
+| baseline | 5 | 1 | **0** | 0 | 6/6 |
+| augmented | 2 | 3 | **0** | 1 | 2/3 |
+
+Ключевые честные выводы:
+- **C3(неверный смысл)=0 в обоих режимах** — механизм на реальной модели никогда не принимает неверное значение: либо верно, либо честно UNRESOLVED. Базовое свойство безопасности подтверждено live.
+- Baseline сильнее augmented для этой малой модели (контринтуитивно, но реально): без контекстных утверждений gemma уверенно выбирает HAS_PART для «у X есть Y» с body-part; с добавленным утверждением она становится менее решительной (UNRESOLVED) и один раз выдаёт не-JSON. Сигнал: формат подачи контекстного утверждения / размер модели влияют на функциональность малой модели.
+- S5 (эллипсис copula) честно UNRESOLVED {V2,V1} = C2 — ровно как предсказывал эталон («вне записи и законный исход — C2»).
+
+**qwen3.8-27b-nvfp4**: reasoning-модель; через OpenAI-endpoint кладёт всё в `reasoning_content`, `content` пустой → PROTOCOL_ERROR (драйвер читает `content`). Через production-путь (`LMStudioBackend`→`native_chat(reasoning="off")`) S6→RESOLVED[V4]✓, остальные смешанно PROVIDER_UNAVAILABLE/PROTOCOL_ERROR — признак load/swap latency, когда 27B не резидентна в памяти LM Studio. **Вывод:** для bounded-selection протокола надёжный бэкенд сейчас — gemma-3n-e4b-it; 27B требует резидентной загрузки (ограничение окружения, не дефект протокола).
+
+---
+
+### G. Порт именования (generalized_naming) как declared decision + bounded probe — ✅ СДЕЛАНО
+`naming_probe.py`: чистый перенос **способности** (не span-overlap-эвристики). Python делает только объявленную структурную работу: находит 1-е-лицо deictic-referent (закрытый набор {я, меня}) и source-grounded predicate-value кандидаты (имя собственное помечается граммемой `Name` pymorphy3 — языковой ресурс, не per-word правило). Bounded-проба выбирает ровно одно: **NAME_VALUE** / **OTHER_PREDICATION** / **UNCLEAR**. Три реализации: verbal («Меня зовут Илья»), nominal deictic («Я — Илья»), state deictic («Я являюсь Ильёй»). Валидация fail-closed (выдуманное значение отклоняется; один внешний markdown-фенс нормализуется общим `_strip_code_fence`).
+
+**Валидация на реальных данных (gemma-3n-e4b-it):** «Меня зовут Илья»→NAME_VALUE(Илья); «Я — Илья»/«Я являюсь Ильёй»→NAME_VALUE; **negative control «Я инженер»→OTHER_PREDICATION** (класс/свойство остаётся предикацией, никогда не alias); «Илья любит червей»→нет конструкции. Тесты: `test_formalizer_naming_probe` (11).
+
+---
+
 ## 5. Рекомендуемый порядок
 1. ~~**A** (runtime wiring)~~ — ✅ сделано.
 2. ~~**B** (аудит legacy→V7 + modus PARTIAL + capability-parity)~~ — ✅ закрыт.

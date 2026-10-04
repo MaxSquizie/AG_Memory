@@ -20,6 +20,36 @@ from ah.llm.lmstudio_client import LMStudioClient
 from ah.formalizer.real_backend import RealBackendSelector, run_s1s6
 from ah.formalizer.selection_protocol import load_decision_schema, validate_selection_response
 
+# Etalon targets (PILOT_DEMO_REFERENCES_V1.md): the value each sentence SHOULD resolve to.
+# V1=HAVE  V2=HAS_PART  V3=LOCATIVE  V4=LIKE
+_TARGETS = {
+    "У вороны есть лапки.": "V2",
+    "У стола есть ножки.": "V2",
+    "У меня есть книга.": "V1",
+    "Ворона обладает перьями.": "V2",
+    "У вороны лапки.": "V2",
+    "Вороны любят червей.": "V4",
+}
+
+
+def _classify(text: str, outcome, selected) -> str:
+    """Map a (outcome, selected) pair to the etalon's C1/C2/C3 functional class.
+
+    - PROTOCOL_ERROR / None  : computational failure — NOT a semantic verdict (§0.8); counted separately.
+    - C1                     : RESOLVED to exactly the target value (correct meaning committed).
+    - C3                     : RESOLVED but to a non-target value (a wrong meaning was accepted).
+    - C2                     : honest incompleteness — UNRESOLVED / AMBIGUOUS / NO_CANDIDATE /
+                              INSUFFICIENT_CONTEXT (the right reading is preserved or reported as a miss).
+    """
+    if outcome is None:
+        return "PROTOCOL_ERROR"
+    if outcome == "RESOLVED":
+        target = _TARGETS.get(text)
+        if target is not None and list(selected) == [target]:
+            return "C1"
+        return "C3"  # resolved to a wrong meaning
+    return "C2"
+
 
 class _LMChatBackend:
     """Minimal product-LLM-contract wrapper over LMStudioClient (``.generate -> .text``).
@@ -68,11 +98,16 @@ def main() -> None:
         print(f"\n=== {mode} (model={args.model}) ===")
         before = len(backend.raw_responses)
         report = run_s1s6(selector, mode)
+        tally = {"C1": 0, "C2": 0, "C3": 0, "PROTOCOL_ERROR": 0}
         for text, outcome, selected, diags in report:
-            print(f"  {text!r}\n      outcome={outcome} selected={selected} diag={diags}")
+            cls = _classify(text, outcome, selected)
+            tally[cls] += 1
+            target = _TARGETS.get(text, "?")
+            print(f"  [{cls}] {text!r}\n      target={target} outcome={outcome} selected={selected} diag={diags}")
         raws = backend.raw_responses[before:]
         valid = sum(1 for r in raws if _valid(r, schema))
-        print(f"  C3: {valid}/{len(raws)} protocol-valid responses")
+        print(f"  functional: C1={tally['C1']} C2={tally['C2']} C3(wrong)={tally['C3']} PROTOCOL_ERROR={tally['PROTOCOL_ERROR']}")
+        print(f"  protocol C3 (valid JSON): {valid}/{len(raws)}")
 
 
 def _valid(raw: str, schema) -> bool:
