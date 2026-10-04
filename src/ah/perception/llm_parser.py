@@ -126,9 +126,12 @@ class LLMPerceptionService:
     all AH writes remain deterministic and outside the model boundary.
     """
 
-    def __init__(self, backend: TextGenerator, settings: LLMPerceptionSettings) -> None:
+    def __init__(self, backend: TextGenerator, settings: LLMPerceptionSettings, formalizer=None) -> None:
         self.backend = backend
         self.settings = settings
+        # Optional path-B seam (V7 §14): when set, parse() routes through the new formalizer
+        # vertical instead of the legacy adaptive chain. Legacy remains the default (None).
+        self._formalizer = formalizer
         self._diagnostic_lock = Lock()
         self._diagnostic_sequence = 0
         self._diagnostics: deque[PerceptionDiagnostic] = deque(maxlen=30)
@@ -158,6 +161,10 @@ class LLMPerceptionService:
             )
 
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
+        if self._formalizer is not None:
+            # Path B (V7 §14): the new formalizer vertical produces the PerceptionResult; the
+            # legacy adaptive chain is bypassed entirely. Legacy stays the default when unset.
+            return self._formalizer.parse(text)
         if self.settings.protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
             return self._parse_adaptive(text)
         return self._parse_legacy_protocol(text, interaction_context)

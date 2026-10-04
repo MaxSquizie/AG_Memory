@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, fields, replace
 from datetime import datetime
 from pathlib import Path
@@ -29,6 +30,24 @@ from ah.perception import (
     build_morphology,
 )
 from ah.projection import ContextProjector
+
+
+def _build_formalizer_adapter(config):
+    """Path-B seam (V7 §14). Enabled ONLY by env flag ``AH_FORMALIZER=1``; degrades to None
+    (legacy adaptive chain stays the default) whenever the flag is off, LLM is disabled, or any
+    construction error occurs. Keeps the legacy parser as the behavioral reference until validated."""
+    if os.environ.get("AH_FORMALIZER") != "1":
+        return None
+    try:
+        from ah.formalizer.real_backend import selector_from_config
+        from ah.formalizer.runtime_adapter import FormalizerAdapter
+
+        sel = selector_from_config(config)
+        if sel is None:
+            return None
+        return FormalizerAdapter(sel)
+    except Exception:
+        return None
 
 
 @dataclass(slots=True)
@@ -128,6 +147,7 @@ class RuntimeServices:
                     morphology_backend=config.llm.perception_morphology_backend,
                     embedding_model=config.llm.perception_embedding_model,
                 ),
+                formalizer=_build_formalizer_adapter(config),
             )
             if llm is not None
             else None
@@ -254,6 +274,7 @@ class RuntimeServices:
                     morphology_backend=new_config.llm.perception_morphology_backend,
                     embedding_model=new_config.llm.perception_embedding_model,
                 ),
+                formalizer=_build_formalizer_adapter(new_config),
             )
             self.agent = LLMAgent(
                 self.llm,
