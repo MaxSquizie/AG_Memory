@@ -44,11 +44,11 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 |---|---|---|---|
 | `quantifier_formalization.py` | 660 | `quantifiers.py` | ✅ портировано (alpha-norm, on-demand inst) |
 | `temporal_mode_formalization.py`, `temporal_scope_formalization.py` | 224+ | `temporal*.py`, `inference_engine.py` | ✅ портировано (ledger, licenses, TimeAssertion) |
-| `logical_formalization.py` | 1037 | `operator_algebra.py` (8 операторов + inference rules), `composition.py`, `inference_engine.py` | ✅ ядро покрыто; **остаток**: parity-тест полного набора правил вывода legacy |
-| `modal_formalization.py` | 663 | эпистемика в `composition.py` / `temporal_license.py` / `goal_executor.py` | ✅ покрыто (модальные лицензии); **остаток**: dedicated regression на legacy-модалках |
+| `logical_formalization.py` | 1037 | `operator_algebra.py` (8 операторов + inference rules), `composition.py`, `inference_engine.py` | ✅ ядро покрыто; **capability-parity готов** (`test_formalizer_capability_parity`: DR16 counterexample, OR-elimination license) |
+| `modal_formalization.py` | 663 | эпистемика в `composition.py` / `temporal_license.py` / `goal_executor.py` | ✅ покрыто; **capability-parity готов** (операторы NOT/COUNTERFACTUAL/IMPLIES + prohibitions) |
 | `semantic_predicates.py` | 422 | T3/T4 + decision schema (`pipeline.py`) | ⚠️ закрытый демо-набор; **аудит** полноты vs legacy-смыслы (см. D) |
 | `structural_speech_act.py` | 379 | `speech_act.py` (§18 DR27/A37) + modus в `pipeline.py` | ✅ **ЗАКРЫТО (эта сессия)**: детекция косвенного запроса → linked {QUERY,COMMAND}, действие не утверждается |
-| `higher_order_queries.py`, `identity_query.py` | 459+485 | `interrogatives.py` (полный класс + UNKNOWN-fallback), `count_reader.py`, coref в T6b | ✅ заявленный класс покрыт; **остаток**: parity-проверка конкретных legacy-форм запросов/идентичности |
+| `higher_order_queries.py`, `identity_query.py` | 459+485 | `interrogatives.py` (полный класс + UNKNOWN-fallback), `count_reader.py`, coref в T6b | ✅ заявленный класс покрыт; **capability-parity готов** (compile→goal kinds, bounded-count honesty) |
 | `generalized_naming.py`, `coordination_normalization.py`, `correlated_alternatives.py`, `association_continuation.py` | 563+274+389+333 | — (heuristics адаптивного парсера) | ❓ **не в скопе V7 явно** — решить: мигрировать или сознательно отбросить при удалении legacy |
 | `llm_parser.py` | 1294 | `lmstudio_selector.py`, `real_backend.py`, LLM-проба в `tag_source.py`/`numeral_extraction.py` | ⚠️ **аудит**: что из LLM-ролей ещё не покрыто bounded-пробами |
 | `runtime_semantics.py`, `runtime_invariants.py` | 714+ | рантайм-клей (новый: `orchestrator.py`) | ❓ **аудит** |
@@ -75,28 +75,29 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 ### B. По-модульный аудит покрытия legacy→V7 + миграция неперенесённого
 1. ✅ **PARTIAL закрыт (эта сессия)**: speech-act/modus (§18 DR27/A37) → `speech_act.py` + адаптер; 5 тестов доказывают linked {QUERY,COMMAND} и отсутствие фабрикации действия.
 2. ✅ **Capability-пробы (эта сession)** подтвердили покрытие ядра: logical (`operator_algebra` 8 операторов + inference rules), modal (`composition`/`temporal_license`/`goal_executor`), queries (`interrogatives` полный класс + UNKNOWN-fallback, `count_reader`).
-3. **Остаток B**: dedicated parity-тесты на конкретных legacy-формах (полный набор правил вывода logical_formalization; конкретные модалки modal_formalization; специфичные запросы higher_order_queries/identity_query) — довести «ядро покрыто» до доказанного паритета.
+3. ✅ **Capability-parity готов (эта сессия)**: `test_formalizer_capability_parity` (14) фиксирует конкретные формы из трёх legacy-областей, которые теперь корректно производит ядро V7 — logical (DR16 counterexample: ограниченное вчерашнее отрицание НЕ опровергает сегодняшнюю пропозицию; OR-elimination license), modal (NOT/COUNTERFACTUAL/IMPLIES + prohibitions, unknown function rejected at write boundary), queries (compile→goal kinds, bounded-count honesty). Полный before/after паритет на произвольных входах — задача live-model harness (`test_formalizer_legacy_parity`).
 4. **Решение по heuristics адаптивного парсера** (generalized_naming / coordination_normalization / correlated_alternatives / association_continuation): **не мигрировать в V7 как есть**. Это эвристики *поведения* legacy-парсера, а не формальные способности; V7 намеренно заменяет их declared structural rules + bounded LLM-пробами. При удалении `adaptive_parser.py` эти модули отбрасываются; если конкретная способность окажется нужной — она добавляется как явная declared rule/проба с тестом, а не копируется эвристика.
 
 ### C. Обновить `IMPLEMENTATION_MAP_V7.md` — ✅ СДЕЛАНО (эта сессия)
 Карта синхронизирована со **562** тестами, deferred-пункты пометки закрыты, остаток переслан сюда как единый источник правды.
 
-### D. Open-set генерация значений предиката — ✅ триггер готов, сама генерация отложена
-Триггер по V7 — накопленные miss reports (`coverage.py` уже их агрегирует). **Сделано (эта сессия):** `open_set_gate.py` предлагает расширение value-space только когда honest NO_CANDIDATE повторяется на ≥N **различных** входов; ниже порога молчит, значения не выдумывает и не применяет автоматически (`test_formalizer_open_set_gate`, 4). **Остаток:** саму bounded LLM-пробу нового значения + его верификацию — по данным реального бэкенда, когда триггер начнёт срабатывать; до этого out-of-set честно NO_CANDIDATE/UNRESOLVED.
+### D. Open-set генерация значений предиката — ✅ триггер + механизм готовы
+**Сделано (эта сессия):** `open_set_gate.py` (триггер: расширение только когда honest NO_CANDIDATE повторяется на ≥N **различных** входов; ниже порога молчит) + `open_set_probe.py` (bounded LLM-проба нового значения, запущенная **только** при срабатывании триггера и наличии селектора; значение обязано быть **заземлено в тексте** — незаземлённое отклоняется, дубликат объявленного значения отбрасывается; результат — лишь *provisional* предложение, **ничего не применяется автоматически**; off-by-default). Тесты: `test_formalizer_open_set_gate` (4) + `test_formalizer_open_set_probe` (6). **Остаток:** прогон на данных реального бэкенда, когда триггер начнёт срабатывать; до этого out-of-set честно NO_CANDIDATE/UNRESOLVED.
 
-### E. Reader-contract §7.4 (выделенные тесты)
-Проверить наличие выделенного свита: HYPOTHETICAL / EMBEDDED / ObservationRecord **не** должны удовлетворять fact-requiring goals без явного разрешения. Если нет — написать.
+### E. Reader-contract §7.4 (выделенные тесты) — ✅ СДЕЛАНО
+Выделенного свита не было → написан. `fact_query.py` делает инвариант исполняемым: fact-requiring goal удовлетворяет только LIVE-запись допустимого kind'а (по умолчанию ASSERTED); HYPOTHETICAL / EMBEDDED / OBSERVATION_RECORD **не** удовлетворяют без явного разрешения (`allow_kinds`). Тесты: `test_formalizer_reader_contract` (9).
 
 ---
 
 ## 5. Рекомендуемый порядок
 1. ~~**A** (runtime wiring)~~ — ✅ сделано.
-2. **B** (аудит legacy→V7 + modus PARTIAL) — ✅ PARTIAL закрыт; остаток: dedicated parity-тесты.
+2. ~~**B** (аудит legacy→V7 + modus PARTIAL + capability-parity)~~ — ✅ закрыт.
 3. ~~**C** (обновить карту)~~ — ✅ сделано.
-4. **E**, затем **D** (по накопленным данным).
+4. ~~**D** (open-set триггер + механизм)~~ — ✅ готов (прогон на данных реального бэкенда — когда триггер начнёт срабатывать).
+5. ~~**E** (reader-contract §7.4)~~ — ✅ сделано.
 
 ## 6. Финальная верификация (эта сессия)
-- **A–E выполнены.** A: production-wiring (`LLMPerceptionService.parse` + bootstrap env-gate). B: DR27/A37 speech-act закрыт (`speech_act.py`) + capability-пробы legacy→V7 + решение по heuristics (не мигрировать как есть). C: карта обновлена. D: open-set триггер (`open_set_gate.py`). E: полный прогон.
-- **Формализатор**: `tests/test_formalizer_*` = **562/562 OK** (~22 c).
+- **A–E выполнены.** A: production-wiring (`LLMPerceptionService.parse` + bootstrap env-gate). B: DR27/A37 speech-act закрыт (`speech_act.py`) + capability-parity legacy→V7 (`test_formalizer_capability_parity`, 14) + решение по heuristics (не мигрировать как есть). C: карта обновлена. D: open-set триггер (`open_set_gate.py`) + механизм bounded-пробы с верификацией заземления (`open_set_probe.py`). E: reader-contract §7.4 (`fact_query.py` + `test_formalizer_reader_contract`, 9).
+- **Формализатор**: `tests/test_formalizer_*` = **591/591 OK**.
 - **Полный проект**: 1068 тестов, **3 падения — предсуществующие и НЕ связаны с A–E**: `test_mvp_memory_smoke`, `test_projection_inference`, `test_semantic_roots_1241`. Доказано: с откатом моих production-изменений (`llm_parser.py`/`bootstrap.py`) к базе сессии те же 3 теста падают идентично; ни один из них не импортирует изменённый код.
-- **Новые модули**: `speech_act.py`, `open_set_gate.py`. **Новые тесты**: `test_formalizer_runtime_wiring` (5), `test_formalizer_speech_act` (5), `test_formalizer_open_set_gate` (4).
+- **Новые модули**: `speech_act.py`, `open_set_gate.py`, `open_set_probe.py`, `fact_query.py`. **Новые тесты**: `test_formalizer_runtime_wiring` (5), `test_formalizer_speech_act` (5), `test_formalizer_open_set_gate` (4), `test_formalizer_open_set_probe` (6), `test_formalizer_capability_parity` (14), `test_formalizer_reader_contract` (9).
