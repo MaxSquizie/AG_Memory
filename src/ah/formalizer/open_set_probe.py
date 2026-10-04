@@ -56,9 +56,12 @@ def propose_value(slot_id: str, miss_texts, selector, existing_values=()) -> Val
     """Run the bounded probe. Returns a grounded :class:`ValueProposal`, or ``None`` (no value / ungrounded / duplicate)."""
     if not miss_texts:
         return None
+    # Real small models wrap the payload in a single markdown code fence; normalize that transport
+    # convention (shared _strip_code_fence) before parsing, or a valid grounded proposal is silently lost.
+    from ah.formalizer.selection_protocol import _strip_code_fence
     raw = selector.select(build_probe_prompt(slot_id, miss_texts, existing_values))
     try:
-        parsed = json.loads(raw)
+        parsed = json.loads(_strip_code_fence(raw))
     except (TypeError, ValueError):
         return None
     if not isinstance(parsed, dict):

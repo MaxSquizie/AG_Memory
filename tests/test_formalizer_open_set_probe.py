@@ -46,6 +46,18 @@ class TestOpenSetProbe(unittest.TestCase):
         # provisional only: the declared set is untouched (no auto-apply)
         self.assertEqual(existing, ["HAVE", "HAS_PART"])
 
+    def test_fenced_json_payload_is_accepted_not_lost(self):
+        # Real small models wrap the probe payload in a single markdown code fence. That transport
+        # convention must be normalized (shared _strip_code_fence) or a valid grounded proposal is
+        # silently dropped as EMPTY_PROPOSAL -- the exact failure seen on live gemma-3n-e4b-it data.
+        from ah.formalizer.open_set_probe import maybe_extend, ValueProposal
+
+        sel = _ProbeSelector('```json\n{"value": "MELT", "grounding_text": "снег тает"}\n```')
+        states = [_miss_state("снег тает"), _miss_state("лёд тает"), _miss_state("воск тает")]
+        res = maybe_extend(states, selector=sel, existing_values=["HAVE", "HAS_PART"])
+        self.assertIsInstance(res, ValueProposal)
+        self.assertEqual(res.value, "MELT")
+
     def test_ungrounded_proposal_is_rejected(self):
         from ah.formalizer.open_set_probe import maybe_extend
 
