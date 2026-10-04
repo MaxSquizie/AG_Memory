@@ -47,7 +47,34 @@ COMPARE_MODELS=gemma-3n-e4b-it,qwen2.5-32b-instruct GEMMA_ATTEMPTS=2 \
 
 **Bounded retry-once.** Живые слабые модели иногда выдают не-JSON (PROTOCOL_ERROR). Политика: `attempts_per_slot` (по умолчанию 1 = без retry, сохраняет single-charge контракт rev8; live-скрипты ставят 2). Каждый attempt заряжается ровно один раз и логируется; bounded retry переспрашивает тот же промпт. Вычислительный сбой **никогда** не становится семантическим вердиктом (§1.4/§0.8): решение остаётся un-evaluated (`outcome=None`), а `PROTOCOL_ERROR`/`PROVIDER_UNAVAILABLE` уходят в `provider_failures`, отдельно от honest gaps.
 
-> **Live-числа:** фиксируются при поднятом LM Studio через `compare_models.py`. Наблюдавшееся ранее поведение gemma-3n-e4b-it (2/7 PROTOCOL_ERROR) — мотивация retry-once; после включения retry и сравнения с qwen2.5-32b-instruct таблица C3 дополняется сюда.
+### Live-результаты (LM Studio, `attempts_per_slot=2`, temperature 0)
+
+| # | Предложение | gemma-3n-e4b-it | qwen2.5-32b-instruct |
+|---|---|---|---|
+| S1 base | У вороны есть лапки. | UNRESOLVED [V1,V2] | **RESOLVED V2** |
+| S1 aug  | + «Лапки — часть тела…» | UNRESOLVED [V1,V2] | **RESOLVED V2** |
+| S2 base | У стола есть ножки. | UNRESOLVED [V2,V1] | **RESOLVED V2** |
+| S2 aug  | + «Ножки — часть…» | UNRESOLVED [V2,V1] | **RESOLVED V2** |
+| S3 base | У меня есть книга. | **RESOLVED V1** | **RESOLVED V1** |
+| S4 base | Ворона обладает перьями. | UNRESOLVED [V1,V2] | **RESOLVED V2** |
+| S4 aug  | + «Перья — часть…» | UNRESOLVED [V1,V2] | **RESOLVED V2** |
+| S5 base | У вороны лапки. | UNRESOLVED [V1,V2] | **RESOLVED V2** |
+| S6 base | Вороны любят червей. | **RESOLVED V4** | **RESOLVED V4** |
+
+**Side-by-side coverage (C3):**
+
+| model | answered | ratio | honest gaps | provider failures |
+|---|---|---|---|---|
+| gemma-3n-e4b-it | 2/9 | 0.22 | 0 | 0 |
+| qwen2.5-32b-instruct | 9/9 | **1.00** | 0 | 0 |
+
+### Чтение результатов
+- **Ключевое различие HAVE vs HAS_PART (S3=V1 против S1/S2/S4=V2) обе модели держат верно.** Qwen разрешает его и в baseline — модель сама подтягивает world knowledge («у меня есть книга» → HAVE, «у вороны есть лапки» → HAS_PART), не дожидаясь объявленного контекста.
+- **Gemma (4B) честна, но консервативна:** разрешает только S3/S6; на S1/S2/S4/S5 остаётся `UNRESOLVED` даже с объявленным контекстным утверждением — модель сообщает «несколько допустимо», а не угадывает. Это сильный C2 (честная неполнота) и слабый C3.
+- **Qwen (32B): полное покрытие 1.00** при верных значениях во всех девяти кейсах — сильный C3.
+- **Ни у одной модели нет provider/protocol сбоев** после включения retry-once: вычислительные сбои не превратились в семантические вердикты (§1.4/§0.8). Наблюдавшееся ранее 2/7 PROTOCOL_ERROR у gemma погашено bounded retry.
+
+> **Вывод:** механизм (C1) и честная неполнота (C2) подтверждены на обеих моделях; функциональность (C3) масштабируется с размером модели. Для production-целевого качества на демо-наборе достаточно qwen2.5-32b-instruct; gemma-3n-e4b-it пригодна там, где важна честная неполнота при ограниченном бюджете.
 
 ## Инварианты, подтверждённые тестами (C1)
 - Validator возвращает только protocol outcome; семантический исход выносит **только T4** (`test_validator_never_grants_semantic_outcomes`).
@@ -57,4 +84,4 @@ COMPARE_MODELS=gemma-3n-e4b-it,qwen2.5-32b-instruct GEMMA_ATTEMPTS=2 \
 - Bounded retry: `attempts_per_slot` ограничивает число вызовов селектора на слот (тесты `TestRetryPolicy`).
 
 ## Sign-off и остаток
-Phase 1 **валидирован**: механизм корректен на детерминированном прогоне и подключён к реальному backend по одному интерфейсу. Остаток Phase 1 — снять live-таблицу C3 при поднятом сервере (скрипты готовы). Далее — **Phase 2: T5/T6/T6b** (batch-сборка, head-only admission, отзыв/recovery) и интеграция `if_query` в production GoalMode.
+Phase 1 **закрыта**: механизм корректен на детерминированном прогоне, подключён к реальному backend по одному интерфейсу, live-C3 снят (gemma 0.22 / qwen 1.00). Далее — **Phase 2: T5/T6/T6b** (batch-сборка, head-only admission, отзыв/recovery) и интеграция `if_query` в production GoalMode.
