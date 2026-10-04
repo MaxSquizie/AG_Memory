@@ -54,7 +54,7 @@ def _clause_predicate(tag_source, clause_text: str) -> tuple[PredicateCandidate,
     return PredicateCandidate(predicate, predicate, template_candidate=TemplateCandidate((ActantRole.SUBJECT,))), actants
 
 
-def if_to_perception(text: str, tag_source) -> PerceptionResult | None:
+def if_to_perception(text: str, tag_source=None) -> PerceptionResult | None:
     """Convert IF clause detection into a typed counterfactual perception.
 
     Returns ``None`` (honest UNBOUND) when there are no paired IF boundaries — a single-clause input or an unpaired
@@ -62,6 +62,10 @@ def if_to_perception(text: str, tag_source) -> PerceptionResult | None:
     HYPOTHETICAL assertion and the consequent a QUERY target linked by a SUBORDINATE dependency, exactly the shape
     :func:`ah.perception.apply_speech_act_scoping` consumes.
     """
+    if tag_source is None:
+        from ah.formalizer.tag_source import TagSource
+
+        tag_source = TagSource()
     structure = tag_source.detect(text)
     pairs = structure.if_pairs()
     if not pairs:
