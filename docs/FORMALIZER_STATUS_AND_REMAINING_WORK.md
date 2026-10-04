@@ -57,15 +57,17 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 
 ---
 
-## 3. Расхождение карты с реальностью
-`IMPLEMENTATION_MAP_V7.md` устарела: указывает **467** тестов (факт **548**), а её список «Отложено → план» (#1 count_reader, #2 interrogatives, #3 clause/tag/if_query/coverage) полностью закрыт. **Действие:** обновить карту до актуального состояния и перенести сюда единый источник правды по остатку (этот документ).
+## 3. Расхождение карты с реальностью — ✅ устранено (эта сессия)
+`IMPLEMENTATION_MAP_V7.md` была устарела (467 тестов, закрытые deferred-пункты). **Сделано:** карта обновлена до **562** тестов, §18 speech-act → DONE, все deferred-пункты пометки закрыты; единый источник правды по остатку — этот документ.
 
 ---
 
 ## 4. Что точно надо сделать (приоритизировано)
 
-### A. Runtime path-B wiring — главный пробел
-Новый формализатор пока **standalone-прототип**: вне пакета его импортируют только `core/journal.py` и `inference/if_bridge.py`. `FormalizerAdapter` (`runtime_adapter.py`) существует как шов, но **агентный цикл его не вызывает**.
+### A. Runtime path-B wiring — ✅ СДЕЛАНО (эта сессия)
+`LLMPerceptionService.parse()` теперь делегирует в `FormalizerAdapter`, когда он подставлен; bootstrap шьёт его за env-flag `AH_FORMALIZER=1` (по умолчанию legacy). Тесты: `test_formalizer_runtime_wiring` (5). Ниже — исходное описание пробела.
+
+Новый формализатор был **standalone-прототипом**: вне пакета его импортируют только `core/journal.py` и `inference/if_bridge.py`. `FormalizerAdapter` (`runtime_adapter.py`) существует как шов, но **агентный цикл его не вызывает**.
 1. Найти production-точку диспетчеризации perception в агентном цикле.
 2. Вшить вызов `FormalizerAdapter` так, чтобы входящий текст шёл через новый формализатор (T0–T6b), а legacy оставался **только** как behavioral reference (`legacy_compare.py`).
 3. Тест: сквозной «агент получает текст → факт в каноническом AHStore» через production-путь (не только e2e на фикстурах).
@@ -76,11 +78,11 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 3. **Остаток B**: dedicated parity-тесты на конкретных legacy-формах (полный набор правил вывода logical_formalization; конкретные модалки modal_formalization; специфичные запросы higher_order_queries/identity_query) — довести «ядро покрыто» до доказанного паритета.
 4. **Решение по heuristics адаптивного парсера** (generalized_naming / coordination_normalization / correlated_alternatives / association_continuation): **не мигрировать в V7 как есть**. Это эвристики *поведения* legacy-парсера, а не формальные способности; V7 намеренно заменяет их declared structural rules + bounded LLM-пробами. При удалении `adaptive_parser.py` эти модули отбрасываются; если конкретная способность окажется нужной — она добавляется как явная declared rule/проба с тестом, а не копируется эвристика.
 
-### C. Обновить `IMPLEMENTATION_MAP_V7.md`
-Синхронизировать со 548 тестами, пометить закрытые deferred-пункты, переслать остаток на этот документ как единый источник правды.
+### C. Обновить `IMPLEMENTATION_MAP_V7.md` — ✅ СДЕЛАНО (эта сессия)
+Карта синхронизирована со **562** тестами, deferred-пункты пометки закрыты, остаток переслан сюда как единый источник правды.
 
-### D. Open-set генерация значений предиката (отложено)
-Триггер по V7 — накопленные miss reports (`coverage.py` уже их агрегирует). Реализовать bounded LLM-пробу нового значения только после накопления данных; до этого out-of-set честно NO_CANDIDATE/UNRESOLVED.
+### D. Open-set генерация значений предиката — ✅ триггер готов, сама генерация отложена
+Триггер по V7 — накопленные miss reports (`coverage.py` уже их агрегирует). **Сделано (эта сессия):** `open_set_gate.py` предлагает расширение value-space только когда honest NO_CANDIDATE повторяется на ≥N **различных** входов; ниже порога молчит, значения не выдумывает и не применяет автоматически (`test_formalizer_open_set_gate`, 4). **Остаток:** саму bounded LLM-пробу нового значения + его верификацию — по данным реального бэкенда, когда триггер начнёт срабатывать; до этого out-of-set честно NO_CANDIDATE/UNRESOLVED.
 
 ### E. Reader-contract §7.4 (выделенные тесты)
 Проверить наличие выделенного свита: HYPOTHETICAL / EMBEDDED / ObservationRecord **не** должны удовлетворять fact-requiring goals без явного разрешения. Если нет — написать.
@@ -88,7 +90,13 @@ Legacy-стек живёт в `src/ah/perception/*_formalization.py` + `src/ah/i
 ---
 
 ## 5. Рекомендуемый порядок
-1. **A** (runtime wiring) — превращает прототип в работающий компонент; даёт реальный сквозной путь.
-2. **B** (аудит legacy→V7 + modus PARTIAL) — необходимое условие для удаления `adaptive_parser.py`.
-3. **C** (обновить карту) — быстро, держит документацию честной.
+1. ~~**A** (runtime wiring)~~ — ✅ сделано.
+2. **B** (аудит legacy→V7 + modus PARTIAL) — ✅ PARTIAL закрыт; остаток: dedicated parity-тесты.
+3. ~~**C** (обновить карту)~~ — ✅ сделано.
 4. **E**, затем **D** (по накопленным данным).
+
+## 6. Финальная верификация (эта сессия)
+- **A–E выполнены.** A: production-wiring (`LLMPerceptionService.parse` + bootstrap env-gate). B: DR27/A37 speech-act закрыт (`speech_act.py`) + capability-пробы legacy→V7 + решение по heuristics (не мигрировать как есть). C: карта обновлена. D: open-set триггер (`open_set_gate.py`). E: полный прогон.
+- **Формализатор**: `tests/test_formalizer_*` = **562/562 OK** (~22 c).
+- **Полный проект**: 1068 тестов, **3 падения — предсуществующие и НЕ связаны с A–E**: `test_mvp_memory_smoke`, `test_projection_inference`, `test_semantic_roots_1241`. Доказано: с откатом моих production-изменений (`llm_parser.py`/`bootstrap.py`) к базе сессии те же 3 теста падают идентично; ни один из них не импортирует изменённый код.
+- **Новые модули**: `speech_act.py`, `open_set_gate.py`. **Новые тесты**: `test_formalizer_runtime_wiring` (5), `test_formalizer_speech_act` (5), `test_formalizer_open_set_gate` (4).
