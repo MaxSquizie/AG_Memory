@@ -67,6 +67,17 @@ class FormalizerAdapter:
             else:
                 notes.append(f"UNRESOLVED_PREDICATE {frame.frame_id}: outcome={dec.outcome} selected={list(dec.selected)}")
 
+        # DR27/A37: surface the speech-act reading as a diagnostic (never a world fact). An indirect
+        # request keeps linked QUERY/COMMAND alternatives; the embedded content is NOT asserted.
+        from ah.formalizer.speech_act import detect_speech_act
+
+        readings = detect_speech_act(state.text)
+        if len(readings) > 1:
+            kinds = "/".join(r.kind for r in readings)
+            notes.append(f"SPEECH_ACT_LINKED {kinds} (no action asserted; context determines the act)")
+        elif readings and readings[0].kind == "QUERY":
+            notes.append("SPEECH_ACT_QUERY")
+
         diagnostics = tuple(f"{d.code}: {d.detail}" for d in state.diagnostics) + tuple(notes)
         return PerceptionResult(source_text=state.text, assertions=tuple(assertions), diagnostics=diagnostics)
 
