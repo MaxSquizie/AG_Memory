@@ -7,6 +7,14 @@ and a minimal, injectable fact store. It is deliberately an **experimental Phase
 kept decoupled from the OR_ELIMINATION/FORALL_INST goal channel (which has its own temporal-license contract) so it can be
 validated in isolation and later folded into the production GoalMode without a rewrite.
 
+**STATUS / boundary.** This module is an *isolated experimental surface*: it keeps its own toy :class:`IfStore` and a
+declared connective set (:data:`_CONNECTIVES`) purely for store-content normalization. It is **not** the production path
+and must not be treated as one. The production GoalMode seam for IF/hypothetical questions is
+:func:`ah.inference.if_bridge.if_to_perception`, which converts paired-clause detection into the *typed, non-lexical*
+counterfactual perception (HYPOTHETICAL assumption + QUERY target + SUBORDINATE dependency) consumed by
+``apply_speech_act_scoping`` -> ``CounterfactualSemanticGoalCompiler`` -> ``InferenceEngine``. Surface words are never
+authority there; only paired morphological boundaries open a counterfactual scope. Do not add production logic here.
+
 Honest outcomes (never guessed):
 * ``UNBOUND``      — no paired clause boundaries (single-clause / detector absent). Reuses :func:`interrogatives.compile`'s gate.
 * ``NOT_ASSERTED`` — the antecedent is not an established fact in the store; an implication with an unestablished premise
