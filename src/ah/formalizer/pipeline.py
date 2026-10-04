@@ -549,9 +549,11 @@ def t3(
     schema,
     selector,
     detector: OscillationDetector | None = None,
+    attempts_per_slot: int = 1,  # bounded retry policy; default 1 = no retry (preserves rev8 single-charge)
 ) -> FormalizationState:
     """Bounded selection. Every pick is PROVISIONAL; a semantic outcome is granted by T4 only."""
     det = detector or OscillationDetector()
+    attempts = max(1, attempts_per_slot)
     for frame in state.frames:
         if frame.kind not in ("FLAT", "NESTED"):
             # OP5 COORD remains a declared stub: honest incompleteness, never silent.
@@ -590,24 +592,38 @@ def t3(
             contextual_statements=state.context_facts,
             candidates=candidates,  # rev8: THIS decision's closed set, not the whole schema
         )
-        try:
-            raw = selector.select(prompt)
-        except Exception as exc:  # ProviderUnavailableError and friends
-            state.budget.spend_llm(failed=True)  # exactly ONE charge per attempt (rev8)
-            state.diag("PROVIDER_UNAVAILABLE", f"{key}: {exc}")
-            break
+        def _attempt():
+            """Bounded select+validate for this slot (attempts_per_slot). Returns (resp, kind):
+            'ok' | 'provider' | 'protocol'. Every attempt — success or failure — is charged exactly
+            once (rev8); a bounded retry re-asks the SAME prompt. Default attempts=1 = no retry."""
+            last = "protocol"
+            for n in range(1, attempts + 1):
+                try:
+                    raw = selector.select(prompt)
+                except Exception as exc:  # ProviderUnavailableError and friends
+                    state.budget.spend_llm(failed=True)
+                    state.diag("PROVIDER_UNAVAILABLE", f"{key}: attempt {n}/{attempts}: {exc}")
+                    last = "provider"
+                    continue  # bounded retry if attempts remain
+                try:
+                    resp = validate_selection_response(raw, schema, allowed=frozenset(candidates))
+                except ProtocolError as exc:
+                    state.budget.spend_llm(failed=True)
+                    state.diag("PROTOCOL_ERROR", f"{key}: attempt {n}/{attempts}: {exc}")
+                    last = "protocol"
+                    continue  # bounded retry if attempts remain
+                state.budget.spend_llm()  # successful call: exactly ONE charge (rev8)
+                dec.last_prompt = prompt      # rev8: recorded I/O — the run is replayable
+                dec.raw_response = raw
+                return resp, "ok"
+            return None, last
 
-        try:
-            resp = validate_selection_response(raw, schema, allowed=frozenset(candidates))
-        except ProtocolError as exc:
-            state.budget.spend_llm(failed=True)  # rejected call: one charge, flagged failed
-            state.diag("PROTOCOL_ERROR", f"{key}: {exc}")
-            continue
-
-        state.budget.spend_llm()  # successful call: exactly ONE charge (rev8)
+        resp, kind = _attempt()
+        if kind == "provider":
+            break  # provider down after all attempts: stop processing further frames (original semantics)
+        if kind != "ok":
+            continue  # protocol failure after all attempts: honest, move to the next frame
         dec.selector_outcome = resp.outcome
-        dec.last_prompt = prompt      # rev8: recorded I/O — the run is replayable
-        dec.raw_response = raw
         if resp.selected:
             verdict = det.record(key, "/".join(resp.selected), dec.grounds)
             if verdict == "frozen":
@@ -893,6 +909,9 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
                     state.miss_reports.append(f"{key}: no declared relation fits (demo boundary)")
             elif dec.selector_outcome == "INSUFFICIENT_CONTEXT":
                 dec.outcome = "INSUFFICIENT_CONTEXT"
+            # else: no validated response at all (provider/protocol/budget) -> NOT a semantic outcome.
+            # A computational failure is not UNRESOLVED (§1.4/§0.8): the decision stays un-evaluated
+            # (outcome None, lifecycle OPEN) and carries its diagnostic; it is never conflated with a verdict.
             continue
 
         per_value = {g.value for g in dec.grounds if g.type in _POSITIVE and g.value is not None}
@@ -932,6 +951,7 @@ def run(
     context_facts: tuple[str, ...] = (),
     budget: Budget | None = None,
     memory_mentions: tuple[str, ...] = (),  # declared journal-window input (V5 §17.4/H5)
+    attempts_per_slot: int = 1,  # bounded retry policy for the selector (default: no retry)
 ) -> FormalizationState:
     """Full Phase 1 vertical: RawInput -> T0 -> SRL -> T1 -> T2 -> TD -> [I30 closure]
     -> T3/T4. Consolidator/Canonical Memory are Phase 2; nothing here commits facts."""
@@ -945,7 +965,7 @@ def run(
     t2(state)
     td(state)
     structural_seal(state)  # WP1.1/§4.3: closure validation + structural hash + freeze (I30)
-    t3(state, schema, selector)
+    t3(state, schema, selector, attempts_per_slot=attempts_per_slot)
     t4(state, schema)
     return state
 
@@ -957,6 +977,7 @@ def revise(
     morph: MorphProvider | None = None,
     memory_mentions: tuple[str, ...] = (),  # updated journal window (GENERATION channel)
     context_facts: tuple[str, ...] | None = None,  # None -> keep the base version's facts
+    attempts_per_slot: int = 1,
 ) -> FormalizationState:
     """Rev18/check4 — context revision of the SAME ObservationRecord.
 
@@ -967,7 +988,7 @@ def revise(
     st = run(
         base_state.text, schema, selector, morph=morph,
         context_facts=context_facts if context_facts is not None else base_state.context_facts,
-        memory_mentions=memory_mentions,
+        memory_mentions=memory_mentions, attempts_per_slot=attempts_per_slot,
     )
     st.interpretation_version = base_state.interpretation_version + 1
     return st

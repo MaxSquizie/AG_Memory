@@ -78,6 +78,10 @@ class LMStudioSelector:
             raise LMStudioSelectorError(f"LM Studio HTTP {exc.code} at {url}: {detail}") from exc
         except urllib.error.URLError as exc:
             raise LMStudioSelectorError(f"LM Studio unreachable at {self.base_url}: {exc.reason}") from exc
+        except TimeoutError as exc:  # socket read/connect timeout (socket.timeout is TimeoutError on 3.10+)
+            raise LMStudioSelectorError(
+                f"LM Studio timed out at {self.base_url} (>{self.timeout}s)"
+            ) from exc
         if not raw.strip():
             return {}
         try:

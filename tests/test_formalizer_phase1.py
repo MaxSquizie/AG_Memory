@@ -482,5 +482,55 @@ class Phase1MechanismTest(unittest.TestCase):
         self.assertTrue(st.has_diag("CLUSTER_CONFLICT"))
 
 
+class TestRetryPolicy(unittest.TestCase):
+    """Bounded retry-once (attempts_per_slot) on protocol/provider failure.
+
+    Default attempts=1 preserves the rev8 single-charge contract; enabling it re-asks the SAME
+    prompt at most once more. A failed attempt is always charged and logged; a computational
+    failure never becomes a semantic verdict."""
+
+    def _sel(self, seq):
+        return FakeSelector({("predicate_value", S1): list(seq)})
+
+    def test_default_is_single_attempt_no_retry(self):
+        sel = self._sel(["{bad json"])
+        st = run(S1, SCHEMA, sel)  # default attempts_per_slot=1
+        dec = value_dec(st)
+        self.assertTrue(st.has_diag("PROTOCOL_ERROR"))
+        self.assertEqual(sel._calls.get(("predicate_value", S1)), 1)  # exactly one select() call
+        self.assertIsNone(dec.outcome)  # un-evaluated, not a verdict
+
+    def test_retry_once_recovers_from_protocol_error(self):
+        good = json.dumps({"outcome": "ONE_SELECTED", "selected": ["V1"], "note": "recovered on retry"})
+        sel = self._sel(["{not valid json at all", good])
+        st = run(S1, SCHEMA, sel, attempts_per_slot=2)
+        dec = value_dec(st)
+        self.assertEqual(sel._calls.get(("predicate_value", S1)), 2)  # two select() calls
+        self.assertTrue(st.has_diag("PROTOCOL_ERROR"))  # the failed attempt is logged...
+        self.assertEqual(dec.selected, ("V1",))          # ...but the bounded retry recovered a real pick
+        self.assertEqual(dec.lifecycle, "PROVISIONAL")
+        self.assertEqual(dec.outcome, "RESOLVED")  # value-specific M ground -> RESOLVED at T4
+
+    def test_retry_exhausted_stays_honest(self):
+        sel = self._sel(["{bad", "{also bad"])
+        st = run(S1, SCHEMA, sel, attempts_per_slot=2)
+        dec = value_dec(st)
+        self.assertEqual(sel._calls.get(("predicate_value", S1)), 2)  # both attempts consumed
+        self.assertFalse(dec.selected)
+        self.assertIsNone(dec.outcome)  # not AMBIGUOUS/RESOLVED: computational, not semantic
+
+    def test_provider_retry_then_break(self):
+        sel = FakeSelector({("predicate_value", S1): ["PROVIDER_UNAVAILABLE", "PROVIDER_UNAVAILABLE"]})
+        st = run(S1, SCHEMA, sel, attempts_per_slot=2)
+        self.assertTrue(st.has_diag("PROVIDER_UNAVAILABLE"))
+        self.assertEqual(sel._calls.get(("predicate_value", S1)), 2)  # retried once, then the loop stops
+
+    def test_retry_is_bounded_never_unlimited(self):
+        # Even with a large budget, attempts_per_slot caps the number of select() calls per slot.
+        sel = self._sel(["{bad", "{bad", "SHOULD_NOT_BE_REACHED"])
+        st = run(S1, SCHEMA, sel, attempts_per_slot=2, budget=Budget(llm_limit=50))
+        self.assertEqual(sel._calls.get(("predicate_value", S1)), 2)  # capped at the declared bound
+
+
 if __name__ == "__main__":
     unittest.main()

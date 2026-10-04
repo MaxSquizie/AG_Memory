@@ -41,11 +41,18 @@ class FakeSelector:
     def __init__(self, scripts: dict | None = None, fallback: dict | None = None):
         self.scripts: dict = scripts or {}
         self._fallback: dict = fallback or {}
+        self._calls: dict = {}  # per-key call counter for list-valued (retry) scripts
 
     def select(self, prompt: str) -> str:
         for (slot_id, span), script in self.scripts.items():
             if f"Context span: {span}" not in prompt:
                 continue
+            if isinstance(script, list):
+                # A sequence of raw responses: each select() call advances through it (bounded-retry
+                # fixture). The last element is held once the sequence is exhausted.
+                idx = self._calls.get((slot_id, span), 0)
+                self._calls[(slot_id, span)] = idx + 1
+                script = script[min(idx, len(script) - 1)]
             if isinstance(script, _Script):
                 missing = [s for s in script.requires if f"- {s}" not in prompt]
                 if missing:  # the statement was never declared to it -> no reliance
