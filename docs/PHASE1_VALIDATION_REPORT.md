@@ -76,6 +76,28 @@ COMPARE_MODELS=gemma-3n-e4b-it,qwen2.5-32b-instruct GEMMA_ATTEMPTS=2 \
 
 > **Вывод:** механизм (C1) и честная неполнота (C2) подтверждены на обеих моделях; функциональность (C3) масштабируется с размером модели. Для production-целевого качества на демо-наборе достаточно qwen2.5-32b-instruct; gemma-3n-e4b-it пригодна там, где важна честная неполнота при ограниченном бюджете.
 
+## Свежий live-репрогон (gemma-3n-e4b-it) — 2026-10-04
+
+Полный прогон S1–S6 (baseline + augmented) через тот же `run()` на реальном backend (LM Studio, `http://127.0.0.1:1234`, модель `gemma-3n-e4b-it`, temperature 0, `attempts_per_slot=2`). Воспроизводит прошлый снапшот gemma (coverage 0.22) — результат стабилен.
+
+| # | Предложение | outcome | selected |
+|---|---|---|---|
+| S1 base | У вороны есть лапки. | UNRESOLVED | [V1,V2] |
+| S1 aug  | + «Лапки — часть тела…» | UNRESOLVED | [V1,V2] |
+| S2 base | У стола есть ножки. | UNRESOLVED | [V2,V1] |
+| S2 aug  | + «Ножки — часть этого стола.» | UNRESOLVED | [V2,V1] |
+| S3 base | У меня есть книга. | **RESOLVED** | [V1] (HAVE) |
+| S4 base | Ворона обладает перьями. | UNRESOLVED | [V1,V2] |
+| S4 aug  | + «Перья — часть тела…» | UNRESOLVED | [V1,V2] |
+| S5 base | У вороны лапки. | UNRESOLVED | [V1,V2] |
+| S6 base | Вороны любят червей. | **RESOLVED** | [V4] (LIKE) |
+
+**Coverage:** answered=2/9, ratio 0.22; provider_failures=0 на демо-наборе.
+
+**Чтение.** Gemma e4b честна и консервативна: S3 (HAVE V1) и S6 (LIKE V4) разрешаются с верными значениями; S1/S2/S4/S5 остаются `UNRESOLVED` даже в augmented — модель сообщает «несколько допустимо» без value-specific ground, а не угадывает. Сильный C2 (честная неполнота), слабый C3.
+
+**Диагностика PROTOCOL_ERROR вне демо-набора.** На out-of-set LOCATIVE-предложениях («Ворона сидит на ветке», «Ворона летает высоко над городом») gemma возвращает **валидный JSON**, но с `outcome="MULTIPLE_ADMISSIBLE"` и **одним** значением (`["V3"]`). По контракту протокола (rev7b) MULTIPLE_ADMISSIBLE требует ≥2 значений — нарушение кардинальности, поэтому валидатор честно отклоняет как `PROTOCOL_ERROR` (вычислительный сбой, а не семантический вердикт; §1.4/§0.8). Это реальная точка C3 о надёжности протокола модели, отдельная от qwen2.5-32b-instruct, который обрабатывал эти кейсы корректно.
+
 ## Инварианты, подтверждённые тестами (C1)
 - Validator возвращает только protocol outcome; семантический исход выносит **только T4** (`test_validator_never_grants_semantic_outcomes`).
 - RESOLVED требует все три условия: value-specific ground + completed search + cluster validity.
