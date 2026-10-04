@@ -260,3 +260,37 @@ R1 решено (см. §6 п.5): AH-контракт фиксируется с�
 **Осталось до полного старта P2:**
 1. **WP0.5 (AH-side) — store-level завершён.** Интеграция маркера/COMMIT_DECISION в реальный AHStore уже была (`commit_stage.commit` → `AHStoreAdapter.commit_transaction` на реальном файле). Добавлено: фикс ID-mismatch (терминал теперь под ключом `batch:<hash>`, тот же, что ищет `recover_from_head`) + 2 вертикальных crash-stop теста на реальном файле (полный commit → НЕ восстанавливается повторно; crash до терминала → восстановление из D без readmission). **Остаток WP0.5 = P2-seam**: полные op→graph mutation handlers (`register_op_handler` в `ah_adapter`) — явное расширение P2, не блокер для старта.
 2. **P2 (ядро готово)** — все 9 WP core-complete (WP2.1–WP2.9) + интеграционное ядро Orchestrator (seam для DR-трасс: retraction→goal, idempotent recovery, multi-backer). Остаток P2 = расширение на полные вертикальные трассы DR1–DR31 + kill после T5/D/APPLIED на реальном store. Затем P3 (WP3.1–WP3.6).
+
+---
+
+## 8. План G2–G5 (дальнейшие действия)
+
+Ворота строго последовательны: **G2 → G3 → G4 → G5**, каждое BLOCKED до PASS предыдущего (§20). G1 снят (WP0.6, §7).
+
+### Шаг 0 — домкнуть артефакт G1 (housekeeping)
+- [ ] Сгенерировать машиночитаемый **compatibility manifest** `artifacts/g1_compatibility_manifest.json` = `{ah_commit: <SHA>, formalizer_api_version: "v7", required_ah_changes[], adapter_tests[]}`. `adapter_tests[]` — 9 кейсов из tests/test_formalizer_g1_adapters.py; `required_ah_changes[]` — AH-side поверхность §12 (AHStoreAdapter, JournalChannel, commit_transaction/recover_from_head). Пин к конкретному ah_commit снимает последний хвост G1.
+
+### G2 — Подписанный resource release + coverage report
+Зависимости: G1/loader, фиксированный корпус и версии. Артефакт = подписанный релиз §2.4 + coverage report.
+- [ ] **R1.** Собрать signed release ресурсов §2.1 (R1/R-V/SyntaxRules/TemplateMap) **+ RoleRegistry, ProposalPolicy, OpenTemplatePolicy** с dependency closure и `reviewed_sha256` на каждый; валидация схемы/ссылок/циклов/зависимых версий **до T0**; несовпадение → `RESOURCE_MISSING`, а не пустой успешный релиз.
+- [ ] **R2.** Зафиксировать unseen corpus (SHA256-pinned) до оценки; запретить правки ресурсов по ходу прогона.
+- [ ] **R3.** Реализовать coverage-report generator: прогон T0–T4 по корпусу → `case_outcomes {FULL_CANONICAL, OPEN_LEXICAL, PARTIAL, NONE, false_commit, first_lost_stage}`; отдельно ресурсные единицы и outcomes (не смешивать «запись словаря» и «ввод пользователя» в одном знаменателе).
+
+### G3 — Машиночитаемые oracle A01–A39
+Зависимости: G1/G2 + все стадии минимальной фазы случая (§11.1). Артефакт = OracleCase по §11.2.
+- [ ] **O1.** Завершить harness (WC1 skeleton есть): схема `OracleCase` {resource snapshot, контекст, scripted/real TP/T3 calls, structural candidates до/после seal, пять CandidateSourceTrace на semantic value slot, coverage, decisions, forbidden aliases/facts, дельта AH/TemporalLedger/journal, crash points}.
+- [ ] **O2.** Написать A01–A39 (A31–A38 — открытый структурный/лексический путь; A39 — исчерпывающий T3-поиск) с oracle-фиксацией resource snapshot + proposal-ответов по §0.8/§11.2.
+- [ ] **O3.** Реализовать replay-компаратор: сравнение IDs, diagnostics multiset, tree/graph/ground structure и состояний; нерелевантные стадии P1 помечать «не пройдены», а не зелёными.
+
+### G4 — Вертикальные dry-runs DR1–DR31
+Зависимости: G2/G3 + полный путь P2–P4. Артефакт = evidence bundle.
+- [ ] **D1.** Расширить DR-harness на полные вертикальные трассы DR1–DR31 на реальном store с kill после T5 / после D-транзакции / до APPLIED (durable-state + idempotent recovery).
+- [ ] **D2.** Запускать под ProviderAdapter + ProviderCallLog + StageTimingLog и тем же signed release + coverage_report_ref из G2.
+- [ ] **D3.** Фиксировать evidence: hash входа/снимка/логов/релиза + `corpus_sha256` + итоговый AH/TemporalLedger/journal. DR9/DR23 (повтор unresolved без маркера), DR6 (две ветки known-mapping и полного исчерпания пяти источников) — обязательны.
+
+### G5 — Проверка обобщения без правил под примеры
+Зависимости: G2/G4. До просмотра корпуса фиксируются релиз, model_key, prompt templates, бюджеты, код, SHA256 корпуса и запрет правок SyntaxRules/ScopeLexicon/графовых операций.
+- [ ] **C1.** Собрать ≥500 ранее не использованных входов: ≥100 nonfinite/impersonal/nominal, ≥100 незнакомая лексика, ≥100 scope/modus/discourse, ≥100 перефразы/время (категории пересекаются; уникальных ≥500).
+- [ ] **C2.** Экспертная разметка допустимых структур, ролей и forbidden facts по каждому входу.
+- [ ] **C3.** Прогон + отчёт: FULL/OPEN/PARTIAL/NONE (отдельно OPEN_LEXICAL с SURFACE_ARG и без), recall gold-совместимого кандидата до seal и после T4, first_lost_stage, число новых механизмов/правил, false asserted fact count, время/бюджет, раздельный resource-miss.
+- [ ] **C4.** PASS-пороги: ≥95% входов имеют экспертно допустимый FULL или OPEN_LEXICAL; ≥95% gold-структур выживают до seal; 0 ложных asserted facts в проверочной выборке; 0 правок механизма/ресурса под встретившийся пример. Иначе FAIL_IMPLEMENTATION либо SPEC_GAP (верная интерпретация структурно невыразима); отчёт с частичным покрытием не маркируется PASS по одному факту типизированного отказа.

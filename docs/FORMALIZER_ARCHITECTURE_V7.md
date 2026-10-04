@@ -6,6 +6,8 @@
 
 **Доказательство G0:** отдельный review manifest фиксирует SHA256 именно этой редакции и результаты независимой проверки. Источник происхождения документа указывается в manifest, не добавляя неявных правил к нормативному тексту.
 
+**Редакция (name-reconciliation):** текст ворот G1 (§20) приведён к фактическим символам кода — вместо «LinkOpenTemplate migration» как P0-адаптера указан open-template isolation key + `ADAPTER_NOT_COVERED` для немигрируемого open template (сама known/open LinkOpenTemplate-миграция §7.x — T6b/G4, не P0); вместо абстрактного «status writer» указан канал отзыва `TemporalAdapter.retract_observation` (LIVE→RETRACTED; durable-запись TIME_ASSERTION_RETRACTED §8.2/§17) + crash-recovery адаптер на реальном файле. Изменение байтов требует нового SHA256 и повторного G0-review (§20 G0); нормативное тело (§8.2/§17/DR) не изменено.
+
 ## 0. Предмет, границы и язык требований
 
 1. «Фаза» означает этап поставки продукта (P0–P4, §12); `T0`, `SRL`, `T1`, `TD`, `T2`, `TP`, `structural_seal`, `T3`, `T4`, `C`, `T5`, `T6`, `T6b` — стадии одного контура. TP — bounded local hypothesis generation и проверка до seal; фазы не меняют семантику стадий.
@@ -714,7 +716,7 @@ Compliance-матрица «нормативный контракт → целе
 | Commit decision record (§14) | COMMIT_DECISION атомарно с маркером; recovery дописывает ровно один APPLIED из D без повторного admission | G4: трасса DR15 (crash-окно до APPLIED) |
 | Goal decision record (§14) | GOAL_DECISION{goal_run_id, outcome} — R0 различает APPLIED/APPLIED_NOOP по goal_run_id; зафиксированное решение — исторический факт | G4: трассы DR19/DR20 (гонка и crash-окна) |
 | ExactAttestationGoal (§6.3/§17) | source-scoped/activated lookup OPEN_LEXICAL по lexical anchor + roles + scope; никаких синонимов по имени | G1: adapter test; G3: A33; G4: DR23 |
-| Retraction protocol (§14) | статусные переходы ledger/TemporalLedger без физического удаления; отзыв по assertion_id любого provenance.source с durable TIME_ASSERTION_RETRACTED, без инвалидации root support; каскад и идемпотентное recovery | G1: status writer/crash adapter; G3: oracle A07/A23-A24; G4: DR8/DR16/DR17/DR28–DR30 |
+| Retraction protocol (§14) | статусные переходы ledger/TemporalLedger без физического удаления; отзыв по assertion_id любого provenance.source с durable TIME_ASSERTION_RETRACTED, без инвалидации root support; каскад и идемпотентное recovery | G1: retraction-status + crash-recovery adapters; G3: oracle A07/A23-A24; G4: DR8/DR16/DR17/DR28–DR30 |
 | FunctionRegistry v2 (§14) | отклонение неизвестных ID на границе (REGISTRY_REJECT); роли — порядок операндов | G1: адаптерный тест на текущем коммите |
 | SupportLedger с binding_refs[] (§14) | add_root_support / add_derived_support; живость пути — по собственным premises, `binding_refs[]` и эффективно видимым `temporal_premise_assertion_refs[]` | G3: A07/A23-A24; G4: DR8 (смерть пути vs отзыв) |
 | TemporalLedger TimeAssertions (§14) | две оси provenance source×support, матрица легитимных комбинаций, эффективная видимость = LIVE ∧ живой путь, включая temporal_premise_assertion_refs[] | G3: A23/A24; G4: DR7/DR12/DR16/DR28–DR30 |
@@ -1145,7 +1147,7 @@ TP до seal представляет «перестала» как содерж
 
 ### G1 Compatibility manifest на актуальном коммите AH
 
-Зависимости: G0, P0, конкретный ah_commit. Артефакт: {ah_commit, formalizer_api_version=v7, required_ah_changes[], adapter_tests[]}. Проверяются все контракты §14, включая: EnsureOpenTemplate, RoleRegistry/EXPERIENCER, isolation key, LinkOpenTemplate migration, proposal provenance/schema, отказ неизвестных g/L, сохранение T/N/writer/granularity, replay TP/T3, атомарный InterpretationRunBinding до вызова провайдера и отдельный status writer для TIME_ASSERTION_RETRACTED по assertion_id с crash recovery. Адаптеры: legacy_roundtrip, v2_integration, idempotent_recommit, open_template_isolation, known_mapping_failure, proposal_validation, concurrent_run_binding, unresolved_replay, crash_recovery. PASS только по наблюдаемым вызовам API, не по существованию имени в документе. Иначе FAIL_IMPLEMENTATION или SPEC_GAP. Начальный статус BLOCKED.
+Зависимости: G0, P0, конкретный ah_commit. Артефакт: {ah_commit, formalizer_api_version=v7, required_ah_changes[], adapter_tests[]}. Проверяются все контракты §14, включая: EnsureOpenTemplate, RoleRegistry/EXPERIENCER, isolation key (open-template), немигрируемый open template → ADAPTER_NOT_COVERED (сама known/open LinkOpenTemplate-миграция §7.x — T6b/G4, не P0-адаптер), proposal provenance/schema, отказ неизвестных g/L, сохранение T/N/writer/granularity, replay TP/T3, атомарный InterpretationRunBinding до вызова провайдера и канал отзыва `TemporalAdapter.retract_observation` (LIVE→RETRACTED; durable-запись TIME_ASSERTION_RETRACTED §8.2/§17) + crash-recovery адаптер на реальном файле. Адаптеры: legacy_roundtrip, v2_integration, idempotent_recommit, open_template_isolation, known_mapping_failure, proposal_validation, concurrent_run_binding, unresolved_replay, crash_recovery — реализованы в tests/test_formalizer_g1_adapters.py (9/9), интеграционный слой §12/§17 — src/ah/formalizer/integration_ir.py. PASS только по наблюдаемым вызовам API, не по существованию имени в документе. Иначе FAIL_IMPLEMENTATION или SPEC_GAP. Начальный статус BLOCKED.
 
 ### G2 Подписанный resource release и coverage report
 
