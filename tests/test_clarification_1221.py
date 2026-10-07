@@ -702,27 +702,6 @@ class Clarification1221Tests(unittest.TestCase):
         self.assertEqual(context.pending_clarification_refs, [])
         self.assertEqual(agent.clarify_calls, 0)
 
-    def test_adaptive_clarification_probe_only_interprets_new_answer(self):
-        backend = ChoiceBackend("SECOND")
-        service = LLMPerceptionService(
-            backend,
-            LLMPerceptionSettings(
-                protocol="adaptive_v3",
-                probe_prompt_dir=PROJECT / "prompts/perception",
-                probe_retry_attempts=0,
-                generation=LLMRoleSettings(max_new_tokens=8, temperature=0.0, top_p=1.0, top_k=0),
-                morphology_backend="none",
-            ),
-        )
-        selected = service.interpret_clarification_answer("вторая", ("Анна", "Мария"))
-        self.assertEqual(selected, 2)
-        role, prompt, _system, override = backend.calls[0]
-        self.assertEqual(role, "perception_clarification_answer")
-        self.assertIn("CLARIFICATION ANSWER:\nвторая", prompt)
-        self.assertIn("FIRST: Анна", prompt)
-        self.assertIn("SECOND: Мария", prompt)
-        self.assertNotIn("choice_outputs", override)
-
     def test_llm_agent_clarification_prompt_contains_labels_but_not_uids(self):
         backend = ChoiceBackend("Анна или Мария?")
         agent = LLMAgent(

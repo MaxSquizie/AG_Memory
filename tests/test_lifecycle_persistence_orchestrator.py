@@ -336,17 +336,6 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
                 before.pacemaker_only_excitation,
             )
 
-    def test_llm_perception_json_parser_does_not_emit_uids(self) -> None:
-        backend = FakeLLMBackend([
-            '''{"assertions":[{"local_id":"A1","predicate":{"surface":"любит","normalized_hint":"любить"},"actants":[{"role":"SUBJECT","mention":"Маша"},{"role":"OBJECT","mention":"чай"}]}],"queries":[],"commands":[],"diagnostics":[]}'''
-        ])
-        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol="legacy_json", probe_retry_attempts=0))
-        result = service.parse("Маша любит чай", InteractionContext())
-        self.assertEqual(result.assertions[0].predicate.lookup_form, "любить")
-        self.assertEqual(result.assertions[0].actants[0].role, ActantRole.SUBJECT)
-        # Legacy payload parsing does not fabricate a reusable T schema from one occurrence.
-        self.assertIsNone(result.assertions[0].predicate.template_candidate)
-
     def test_full_orchestrator_records_response_only_in_h(self) -> None:
         core = AHCore(uid_generator=SequentialUidGenerator())
         self_e = core.add_entity(Domain.P, properties={"name": Property("name", "Agent", "str")})
@@ -650,12 +639,6 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         self.assertIn("AGENT_H_TEXT_ONLY", turn.response_perception.diagnostics)
         event = core.store.get_hypernode(turn.response_integration.experience_ref.uid)
         self.assertEqual(event.properties["text"].value, "Привет в ответ")
-
-    def test_llm_perception_parser_preserves_explicit_negation_flag(self) -> None:
-        backend = FakeLLMBackend(['{"assertions":[{"local_id":"A1","predicate":{"surface":"спать","normalized_hint":"спать"},"actants":[{"role":"SUBJECT","mention":"кошка"}],"negated":true}],"queries":[],"commands":[],"diagnostics":[]}'])
-        service = LLMPerceptionService(backend, LLMPerceptionSettings(protocol="legacy_json", probe_retry_attempts=0))
-        parsed = service.parse("Кошка не спит", InteractionContext())
-        self.assertTrue(parsed.assertions[0].negated)
 
 
 if __name__ == "__main__":

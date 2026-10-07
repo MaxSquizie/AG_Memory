@@ -51,6 +51,7 @@ from .query_semantics import (
     IdentityQueryKind,
 )
 from .llm_parser import (
+    LLMPerceptionService,
     LLMPerceptionSettings,
     PerceptionAttemptDiagnostic,
     PerceptionDiagnostic,
@@ -63,12 +64,7 @@ from .association_semantics import (
     AssociationQueryDecision,
     AssociationSemanticClassifier,
 )
-from .generalized_naming import GeneralizedNamingAdaptiveParser
-from .runtime_invariants import RuntimeSemanticAdaptiveParser
-from .identity_query import IdentityQueryAdaptiveParser
-from .semantic_predicates import SemanticPredicateAdaptiveParser
 from .association_continuation import AssociationContinuationQueryCandidate
-from .higher_order_queries import HigherOrderQueryLLMPerceptionService as LLMPerceptionService
 from .text_sensory import TextSensoryResult, TextSensoryService
 from .lexical_recovery import (
     EmbeddingSemanticReranker,
@@ -148,10 +144,6 @@ __all__ = [
     "AssociationQueryDecision",
     "AssociationSemanticClassifier",
     "AssociationContinuationQueryCandidate",
-    "GeneralizedNamingAdaptiveParser",
-    "RuntimeSemanticAdaptiveParser",
-    "IdentityQueryAdaptiveParser",
-    "SemanticPredicateAdaptiveParser",
     "TextSensoryResult",
     "TextSensoryService",
     "TemporalCandidate",
