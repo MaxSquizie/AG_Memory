@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, fields, replace
 from datetime import datetime
 from pathlib import Path
@@ -32,20 +31,28 @@ from ah.perception import (
 from ah.projection import ContextProjector
 
 
-def _build_formalizer_adapter(config):
-    """Path-B seam (V7 §14). Enabled ONLY by env flag ``AH_FORMALIZER=1``; degrades to None
-    (legacy adaptive chain stays the default) whenever the flag is off, LLM is disabled, or any
-    construction error occurs. Keeps the legacy parser as the behavioral reference until validated."""
-    if os.environ.get("AH_FORMALIZER") != "1":
-        return None
+def _build_formalizer_adapter(config, core):
+    """The formalizer vertical is the ONLY runtime perception path (V7 §14). Built whenever an LLM
+    backend is present; there is no legacy adaptive fallback and no env gate. Returns None only when
+    construction genuinely fails (no usable selector), which surfaces as a configuration error rather
+    than a silent degradation to a removed parser.
+
+    I01: also wires the V7-native durable path — a persistent two-channel journal under ``paths.data_dir``
+    over ``core.store`` plus an InterpretationRunBinding — so real input can be committed durably and read
+    back from the store (native mode) instead of only being translated to a PerceptionResult (legacy mode)."""
     try:
+        from ah.core.journal import JournalChannel
+        from ah.formalizer.ah_adapter import AHStoreAdapter
         from ah.formalizer.real_backend import selector_from_config
+        from ah.formalizer.run_binding import InterpretationRunBinding
         from ah.formalizer.runtime_adapter import FormalizerAdapter
 
         sel = selector_from_config(config)
         if sel is None:
             return None
-        return FormalizerAdapter(sel)
+        store = AHStoreAdapter(core.store, JournalChannel(config.paths.data_dir / config.formalizer.journal_filename))
+        binding = InterpretationRunBinding()
+        return FormalizerAdapter(sel, store=store, binding=binding)
     except Exception:
         return None
 
@@ -147,7 +154,8 @@ class RuntimeServices:
                     morphology_backend=config.llm.perception_morphology_backend,
                     embedding_model=config.llm.perception_embedding_model,
                 ),
-                formalizer=_build_formalizer_adapter(config),
+                formalizer=_build_formalizer_adapter(config, core),
+                native_commit=config.formalizer.native_commit,
             )
             if llm is not None
             else None

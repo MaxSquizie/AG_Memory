@@ -458,6 +458,24 @@ class OrchestratorSettings:
 
 
 @dataclass(frozen=True, slots=True)
+class FormalizerSettings:
+    """V7 formalizer vertical (I01): the single traceable production path.
+
+    ``native_commit`` selects the V7-native perception mode: real input is run through the full chain
+    (T0..T4 -> C -> T5 gate + binding CAS -> T6 durable commit) on a persistent store, and downstream
+    reads the COMMITTED facts from that store. When False, the legacy PerceptionResult translation
+    (``FormalizerAdapter.parse``) remains the explicitly-selected mode. ``journal_filename`` is the durable
+    two-channel journal under ``paths.data_dir``."""
+
+    native_commit: bool = False
+    journal_filename: str = "formalizer_journal.log"
+
+    def __post_init__(self) -> None:
+        if not self.journal_filename or "/" in self.journal_filename or "\\" in self.journal_filename:
+            raise ValueError("formalizer.journal_filename must be a bare filename")
+
+
+@dataclass(frozen=True, slots=True)
 class AppConfig:
     source_path: Path
     paths: PathsConfig
@@ -472,6 +490,7 @@ class AppConfig:
     identity: IdentitySettings = field(default_factory=IdentitySettings)
     gui: GUISettings = field(default_factory=GUISettings)
     orchestrator: OrchestratorSettings = field(default_factory=OrchestratorSettings)
+    formalizer: FormalizerSettings = field(default_factory=FormalizerSettings)
 
 
 def load_config(path: str | Path) -> AppConfig:
@@ -635,6 +654,7 @@ def load_config(path: str | Path) -> AppConfig:
     identity_raw = _section(data, "identity")
     gui_raw = _section(data, "gui")
     orchestrator_raw = _section(data, "orchestrator")
+    formalizer_raw = _section(data, "formalizer")
 
     return AppConfig(
         source_path=source,
@@ -701,6 +721,10 @@ def load_config(path: str | Path) -> AppConfig:
             ticks_after_response=int(orchestrator_raw.get("ticks_after_response", 1)),
             auto_materialize_inference=bool(orchestrator_raw.get("auto_materialize_inference", True)),
             parse_agent_response_to_h=bool(orchestrator_raw.get("parse_agent_response_to_h", False)),
+        ),
+        formalizer=FormalizerSettings(
+            native_commit=bool(formalizer_raw.get("native_commit", False)),
+            journal_filename=str(formalizer_raw.get("journal_filename", "formalizer_journal.log")),
         ),
     )
 

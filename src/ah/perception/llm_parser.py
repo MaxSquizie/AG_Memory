@@ -120,12 +120,16 @@ class LLMPerceptionService:
     all AH writes remain deterministic and outside the model boundary.
     """
 
-    def __init__(self, backend: TextGenerator, settings: LLMPerceptionSettings, formalizer=None) -> None:
+    def __init__(self, backend: TextGenerator, settings: LLMPerceptionSettings, formalizer=None,
+                 native_commit: bool = False) -> None:
         self.backend = backend
         self.settings = settings
         # Optional path-B seam (V7 §14): when set, parse() routes through the new formalizer
         # vertical instead of the legacy adaptive chain. Legacy remains the default (None).
         self._formalizer = formalizer
+        # I01: V7-native mode — real input is committed durably on the store and downstream reads the
+        # committed facts from it, rather than being translated to a PerceptionResult for integrate_external.
+        self._native_commit = native_commit
         self._diagnostic_lock = Lock()
         self._diagnostic_sequence = 0
         self._diagnostics: deque[PerceptionDiagnostic] = deque(maxlen=30)
@@ -164,6 +168,16 @@ class LLMPerceptionService:
                 "LLMPerceptionService requires an attached formalizer; the legacy adaptive parser has been removed"
             )
         return self._formalizer.parse(text)
+
+    def perceive(self, text: str, interaction_context: InteractionContext):
+        """I01 perception entry. In V7-native mode (``native_commit`` + a wired durable store) real input is
+        run through the full chain and committed durably; downstream reads the committed facts from the store
+        by observation_id (returns NativePerceptionResult). Otherwise it falls back to the legacy
+        PerceptionResult translation (:meth:`parse`)."""
+        del interaction_context
+        if self._native_commit and self._formalizer is not None and self._formalizer.native_available:
+            return self._formalizer.interpret(text)
+        return self.parse(text, interaction_context)
 
     def parse_with_structural_resolution(
         self,

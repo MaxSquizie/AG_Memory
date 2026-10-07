@@ -14,20 +14,76 @@ subsequent slices; until wired they surface as honest diagnostics, not fabricate
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 # Declared relation labels for the demo-boundary closed set (already declared in decision_schema_v1.json).
 _PREDICATE_LABELS = {"V1": "HAVE", "V2": "HAS_PART", "V3": "LOCATIVE", "V4": "LIKE"}
+
+
+@dataclass(frozen=True)
+class NativePerceptionResult:
+    """Outcome of the V7-native perception path (I01): real input committed durably on the store.
+
+    Downstream reads the COMMITTED facts from the store by ``observation_id``; this result is the receipt
+    (terminal state + which fragments asserted a fact), not a re-derivation. Legacy mode returns a
+    PerceptionResult instead."""
+
+    observation_id: str
+    version: int
+    terminal: str                       # APPLIED | STALE_SUPERSEDED | REJECTED_ADMISSION
+    committed_fragments: tuple[str, ...] = ()   # fragments whose FACT was asserted (T5)
+    applied: bool = False               # fresh durable write (not an idempotent no-op)
+    batch_hash: str = ""
+    diagnostics: tuple[str, ...] = field(default_factory=tuple)
 
 
 class FormalizerAdapter:
     """Drop-in replacement for AdaptivePerceptionParser.parse(): text -> PerceptionResult.
 
     ``selector`` is any object with ``select(prompt) -> raw JSON string`` (RealBackendSelector in production,
-    FakeSelector.demo() in the deterministic dry run). ``morph``/``schema`` are optional overrides."""
+    FakeSelector.demo() in the deterministic dry run). ``morph``/``schema`` are optional overrides.
 
-    def __init__(self, selector, morph=None, schema=None):
+    Two modes:
+      * legacy  — :meth:`parse` translates FormalizationState to a PerceptionResult for integrate_external();
+      * native  — :meth:`interpret` runs the full V7 chain (T0..T4 -> C -> T5 gate + binding CAS -> T6 durable
+        commit) on ``store`` and returns a NativePerceptionResult; downstream reads committed facts from the store.
+    The native path is only available when a durable ``store`` + ``binding`` are wired (see bootstrap)."""
+
+    def __init__(self, selector, morph=None, schema=None, store=None, binding=None):
         self._selector = selector
         self._morph = morph
         self._schema = schema  # lazily loaded if None
+        self._store = store      # AHStoreAdapter (durable) — native path prerequisite
+        self._binding = binding  # InterpretationRunBinding — native path prerequisite
+
+    @property
+    def native_available(self) -> bool:
+        return self._store is not None and self._binding is not None
+
+    # -- V7-native entry (I01): real input committed durably on the store ---- #
+    def interpret(self, text: str, context_facts: tuple[str, ...] = ()) -> NativePerceptionResult:
+        """Run one observation through T0..T4 -> C -> T5 gate (+binding CAS) -> T6 durable commit.
+
+        Returns the receipt; downstream reads committed facts from ``self._store`` by observation_id."""
+        if not self.native_available:
+            raise RuntimeError("native commit path is not wired (no durable store/binding)")
+        from ah.formalizer.selection_protocol import load_decision_schema
+        from ah.formalizer.v7_pipeline import interpretation_run
+
+        schema = self._schema or load_decision_schema()
+        rep = interpretation_run(
+            text, schema, self._selector, self._store, self._binding,
+            morph=self._morph, context_facts=context_facts,
+        )
+        return NativePerceptionResult(
+            observation_id=rep.observation_id,
+            version=rep.version,
+            terminal=rep.terminal,
+            committed_fragments=rep.committed_fragments,
+            applied=rep.applied,
+            batch_hash=rep.batch_hash,
+            diagnostics=rep.diagnostics,
+        )
 
     # -- public entry (mirrors AdaptivePerceptionParser.parse) -------------- #
     def parse(self, text: str, context_facts: tuple[str, ...] = ()) -> "PerceptionResult":
@@ -43,18 +99,31 @@ class FormalizerAdapter:
         from ah.perception.contracts import (
             ActantCandidate,
             AssertionCandidate,
-            EvidenceSpan,
+            CommandCandidate,
             PerceptionResult,
-            PredicateCandidate,
+            QueryCandidate,
+            QueryMode,
         )
+        from ah.formalizer.speech_act import detect_speech_act, detect_negation
 
-        assertions = []
+        # I02 write-boundary gate: the speech act and NEG scope are decided ONCE for the utterance and
+        # constrain EVERY emitted candidate regardless of what the selector answered. A question's content
+        # is a goal to be answered (never an asserted world fact); an imperative is a directive; a negated
+        # declarative is NOT(P), never a positive fact.
+        readings = detect_speech_act(state.text, state.context_facts)
+        kinds = {r.kind for r in readings}
+        is_query = "QUERY" in kinds
+        negated = detect_negation(state.text)
+
+        assertions: list = []
+        queries: list = []
+        commands: list = []
         notes: list[str] = []
         for frame in state.frames:
             dec = state.decisions.get(f"{frame.frame_id}|predicate_value")
             if dec is None or not dec.selected:
                 continue  # no candidate selected -> honest miss, never fabricated
-            # A single assertion is emitted ONLY for a RESOLVED unique pick. An AMBIGUOUS/UNRESOLVED
+            # A single candidate is emitted ONLY for a RESOLVED unique pick. An AMBIGUOUS/UNRESOLVED
             # decision is NOT collapsed to its first value (that would fabricate a fact); it is surfaced
             # as an explicit unresolved note so downstream sees honest incompleteness, not silence.
             if dec.outcome == "RESOLVED" and len(dec.selected) == 1:
@@ -63,23 +132,42 @@ class FormalizerAdapter:
                 roles = tuple(role for role, _ in actant_pairs)
                 predicate = self._build_predicate(frame, state, value, roles)
                 actants = tuple(ActantCandidate(role=role, mention=mention) for role, mention in actant_pairs)
-                assertions.append(AssertionCandidate(local_id=f"{frame.frame_id}:A0", predicate=predicate, actants=actants))
+                local_id = f"{frame.frame_id}:A0"
+                if is_query:
+                    # DR27: a question's content is NOT asserted as a world fact — it is an EXISTS goal.
+                    queries.append(QueryCandidate(predicate=predicate, actants=actants, query_mode=QueryMode.EXISTS, local_id=local_id))
+                    notes.append(f"SPEECH_ACT_QUERY {frame.frame_id}: content not asserted")
+                elif self._predicate_is_imperative(frame, state):
+                    # An imperative is a directive, not an asserted fact about the world.
+                    commands.append(CommandCandidate(predicate=predicate, actants=actants, negated=negated, local_id=local_id))
+                    notes.append(f"SPEECH_ACT_COMMAND {frame.frame_id}: directive, not asserted")
+                else:
+                    # DECLARATIVE: assert — but a NEG scope makes it NOT(P), never a positive fact (I02).
+                    assertions.append(AssertionCandidate(local_id=local_id, predicate=predicate, actants=actants, negated=negated))
+                    if negated:
+                        notes.append(f"NEGATED_ASSERTION {frame.frame_id}: represented as NOT(P)")
             else:
                 notes.append(f"UNRESOLVED_PREDICATE {frame.frame_id}: outcome={dec.outcome} selected={list(dec.selected)}")
 
-        # DR27/A37: surface the speech-act reading as a diagnostic (never a world fact). An indirect
-        # request keeps linked QUERY/COMMAND alternatives; the embedded content is NOT asserted.
-        from ah.formalizer.speech_act import detect_speech_act
-
-        readings = detect_speech_act(state.text)
-        if len(readings) > 1:
-            kinds = "/".join(r.kind for r in readings)
-            notes.append(f"SPEECH_ACT_LINKED {kinds} (no action asserted; context determines the act)")
-        elif readings and readings[0].kind == "QUERY":
-            notes.append("SPEECH_ACT_QUERY")
+        # DR27/A37: an indirect request keeps linked QUERY/COMMAND alternatives; the embedded content is
+        # NOT asserted. Surface the reading as a diagnostic (never a world fact).
+        if len(readings) > 1 and any(not r.grounded for r in readings):
+            notes.insert(0, f"SPEECH_ACT_LINKED {'/'.join(r.kind for r in readings)} (no action asserted; context determines the act)")
 
         diagnostics = tuple(f"{d.code}: {d.detail}" for d in state.diagnostics) + tuple(notes)
-        return PerceptionResult(source_text=state.text, assertions=tuple(assertions), diagnostics=diagnostics)
+        return PerceptionResult(
+            source_text=state.text,
+            assertions=tuple(assertions),
+            queries=tuple(queries),
+            commands=tuple(commands),
+            diagnostics=diagnostics,
+        )
+
+    # -- declared structural imperative cue (morphological mood; two-tier invariant) ---- #
+    def _predicate_is_imperative(self, frame, state) -> bool:
+        """True when the frame's predicate is a VERB in imperative mood — a directive, not a fact."""
+        imp_spans = {ev.span for ev in state.evidence if any(v.pos == "VERB" and v.mood == "imperative" for v in ev.variants)}
+        return bool(imp_spans & (set(frame.participants) | {frame.anchor_span}))
 
     # -- predicate: real verb when present, else a declared STRUCTURAL predicate ---- #
     def _build_predicate(self, frame, state, value, roles=()):

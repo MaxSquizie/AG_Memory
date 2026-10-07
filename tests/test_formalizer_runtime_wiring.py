@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""A — Runtime path-B wiring (V7 §14).
+"""A — Runtime wiring (V7 §14).
 
-Proves the production perception entry (``orchestrator_base -> services.perception.parse``) actually
-delegates to the new formalizer vertical when a :class:`FormalizerAdapter` is attached, that legacy
-stays the default when none is set, and that the bootstrap env-flag gate degrades gracefully.
+The new formalizer vertical is the ONLY runtime perception path: ``orchestrator_base ->
+services.perception.parse`` delegates to a :class:`FormalizerAdapter` whenever one is attached, and the
+bootstrap builds it unconditionally (no env gate). Proves delegation works and that the removed
+``AH_FORMALIZER`` flag no longer has any effect on construction.
 """
 
 import os
@@ -48,34 +49,28 @@ class TestFormalizerDelegation(unittest.TestCase):
         result = svc.parse("У меня есть книгу.", None)  # S3 baseline -> NO_CANDIDATE: honest, not fabricated
         self.assertEqual(result.assertions, ())
 
-    def test_default_is_legacy_no_formalizer(self):
+    def test_service_without_explicit_formalizer_has_none(self):
         from ah.perception.llm_parser import LLMPerceptionService
 
         svc = LLMPerceptionService(_StubBackend(), _settings())
         self.assertIsNone(svc._formalizer)
 
 
-class TestBootstrapGate(unittest.TestCase):
-    def test_gate_off_by_default(self):
+class TestBootstrapWiring(unittest.TestCase):
+    def test_removed_flag_has_no_effect_on_construction(self):
+        """The AH_FORMALIZER gate is gone: setting or unsetting it changes nothing."""
         from ah import bootstrap
+        from ah.core.operations import AHCore
 
+        class _Cfg:  # no LLM backend -> selector_from_config yields None / raises -> adapter None
+            pass
+
+        core = AHCore()
         old = os.environ.pop("AH_FORMALIZER", None)
         try:
-            self.assertIsNone(bootstrap._build_formalizer_adapter(object()))
-        finally:
-            if old is not None:
-                os.environ["AH_FORMALIZER"] = old
-
-    def test_gate_on_degrades_gracefully_without_llm(self):
-        from ah import bootstrap
-
-        old = os.environ.get("AH_FORMALIZER")
-        os.environ["AH_FORMALIZER"] = "1"
-        try:
-            class _Cfg:  # no LLM backend configured -> selector_from_config returns None / raises -> None
-                pass
-
-            self.assertIsNone(bootstrap._build_formalizer_adapter(_Cfg()))
+            self.assertIsNone(bootstrap._build_formalizer_adapter(_Cfg(), core))
+            os.environ["AH_FORMALIZER"] = "1"  # the flag no longer exists as a gate
+            self.assertIsNone(bootstrap._build_formalizer_adapter(_Cfg(), core))
         finally:
             if old is None:
                 os.environ.pop("AH_FORMALIZER", None)
