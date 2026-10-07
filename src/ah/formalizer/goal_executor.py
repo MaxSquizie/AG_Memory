@@ -25,9 +25,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Optional
 
+from ah.formalizer.inference_engine import DEFAULT_RULES
 from ah.formalizer.temporal_license import (
     or_elimination_license, forall_inst_license,
 )
+
+# I25: the canonical rule table is a SINGLE source of truth shared with InferenceEngine. The goal executor
+# must not trust ``rule_id`` blindly — an unregistered rule is rejected before any node/path is written.
+_DEFAULT_RULE_TABLE = {r.name: r for r in DEFAULT_RULES}
 
 
 @dataclass(frozen=True)
@@ -37,6 +42,7 @@ class GoalRequest:
     premise_support_ids: tuple         # support ids that must be live at apply time
     conclusion_signature: str          # canonical content signature (node + path dedup)
     temporal: Optional[tuple] = None   # regions for licensing, e.g. (w_or, w_not) / (w_interval, w_instance)
+    conclusion_operator: Optional[str] = None  # I25: declared operator of the conclusion (form check)
 
 
 @dataclass
@@ -75,13 +81,31 @@ class GoalStore:
 
 
 class GoalExecutor:
-    def __init__(self, store: GoalStore):
+    def __init__(self, store: GoalStore, rules=None):
         self.store = store
+        # I25: mandatory rule registry (defaults to the canonical InferenceEngine table).
+        self.rules = dict(rules) if rules is not None else dict(_DEFAULT_RULE_TABLE)
 
     def execute(self, req: GoalRequest, interleave: Optional[Callable] = None) -> dict:
         # Idempotency: lookup by goal_run_id precedes any write; a re-execution returns the fixed decision.
         if req.goal_run_id in self.store.decisions:
             return dict(self.store.decisions[req.goal_run_id])
+
+        # (1) I25 mandatory registry lookup: an unregistered rule is rejected BEFORE any node/path is written.
+        rule = self.rules.get(req.rule_id)
+        if rule is None:
+            return self._decide(req, "ABORTED", reason="GOAL_RULE_UNKNOWN")
+
+        # (1b) I25 form check: when the caller supplies the conclusion's operator it must match the rule's
+        #      declared operator (OR_ELIMINATION -> OR / P∨Q; FORALL_INST -> EVERY / ∀x). A mismatch is a
+        #      malformed derivation and is refused, not silently materialized.
+        if req.conclusion_operator is not None and req.conclusion_operator != rule.operator:
+            return self._decide(req, "ABORTED", reason="GOAL_FORM_MISMATCH")
+
+        # (1c) I25: a derivation must rest on >=1 typed proof. An empty premise set is an ungrounded conclusion
+        #      and is refused BEFORE any node/path is written (the audit's R03 "conclusion=anything" case).
+        if not req.premise_support_ids:
+            return self._decide(req, "ABORTED", reason="GOAL_NO_PREMISES")
 
         # (2) read-only preflight license (§6.3/§7.4). Failure -> ABORTED{GOAL_LICENSE_FAILED}, no node/path.
         lic = self._license(req)

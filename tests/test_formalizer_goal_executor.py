@@ -95,5 +95,63 @@ class TestGoalTransaction(unittest.TestCase):
         self.assertEqual(store.decisions["run8"]["outcome"], "APPLIED")   # ...but never rewrites the decision
 
 
+class TestI25RegistryAndForm(unittest.TestCase):
+    """I25: the executor must not trust rule_id blindly — unknown rules are rejected before any write, and a
+    supplied conclusion operator that mismatches the rule's declared form is refused."""
+
+    def test_unknown_rule_is_rejected_before_any_write(self):
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("runX", "NOT_A_REGISTERED_RULE", ("s_or",), "P1", (point(5), cont(3, 7)))
+
+        res = ex.execute(req)
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_RULE_UNKNOWN")
+        self.assertEqual(len(store.paths), 0)   # no derived path written for an unknown rule
+        self.assertEqual(len(store.nodes), 0)   # and no node materialized
+
+    def test_form_mismatch_is_rejected(self):
+        ex, store = _executor("s_or", "s_not")
+        # OR_ELIMINATION concludes a disjunction (operator OR); claiming the conclusion is an AND-form is malformed.
+        req = GoalRequest("runY", "OR_ELIMINATION", ("s_or", "s_not"), "P1",
+                         (point(5), cont(3, 7)), conclusion_operator="AND")
+
+        res = ex.execute(req)
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_FORM_MISMATCH")
+        self.assertEqual(len(store.paths), 0)
+
+    def test_correct_conclusion_operator_proceeds(self):
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("runZ", "OR_ELIMINATION", ("s_or", "s_not"), "P1",
+                         (point(5), cont(3, 7)), conclusion_operator="OR")
+
+        res = ex.execute(req)
+        self.assertEqual(res["outcome"], "APPLIED")   # form matches the rule's declared operator -> proceeds
+        self.assertEqual(len(store.paths), 1)
+
+    def test_empty_premises_are_rejected_before_any_write(self):
+        # I25: a registered rule with an EMPTY premise set is an ungrounded conclusion -> refused, no node/path.
+        ex, store = _executor("s_or", "s_not")
+        req = GoalRequest("runE", "OR_ELIMINATION", (), "P1", (point(5), cont(3, 7)))
+
+        res = ex.execute(req)
+        self.assertEqual(res["outcome"], "ABORTED")
+        self.assertEqual(res["reason"], "GOAL_NO_PREMISES")
+        self.assertEqual(len(store.paths), 0)   # no derived path for an ungrounded conclusion
+        self.assertEqual(len(store.nodes), 0)   # and no node materialized
+
+    def test_custom_rule_table_is_respected(self):
+        from ah.formalizer.inference_engine import InferenceRule
+
+        store = GoalStore()
+        store.live_premises.update({"s_or"})
+        ex = GoalExecutor(store, rules={"MY_RULE": InferenceRule("MY_RULE", "OR", "CONTINUOUS")})
+
+        self.assertEqual(ex.execute(GoalRequest("r1", "MY_RULE", ("s_or",), "P1"))["outcome"], "APPLIED")
+        # a rule absent from the supplied table is unknown even if it exists in the default table
+        res = ex.execute(GoalRequest("r2", "OR_ELIMINATION", ("s_or",), "P1"))
+        self.assertEqual(res["reason"], "GOAL_RULE_UNKNOWN")
+
+
 if __name__ == "__main__":
     unittest.main()
