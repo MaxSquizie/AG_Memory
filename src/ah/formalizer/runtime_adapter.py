@@ -22,12 +22,15 @@ _PREDICATE_LABELS = {"V1": "HAVE", "V2": "HAS_PART", "V3": "LOCATIVE", "V4": "LI
 
 @dataclass(frozen=True)
 class NativePerceptionResult:
-    """Outcome of the V7-native perception path (I01): real input committed durably on the store.
+    """Outcome of the V7-native perception path (I01/I02): real input committed durably on the store.
 
-    Downstream reads the COMMITTED facts from the store by ``observation_id``; this result is the receipt
-    (terminal state + which fragments asserted a fact), not a re-derivation. Legacy mode returns a
-    PerceptionResult instead."""
+    ``perception`` is the FULL candidate set (assertions/queries/commands/diagnostics via speech-act
+    detection) — capability-complete vs the legacy parse(), so flipping the agent loop to it regresses
+    nothing. The durable receipt fields below record which resolved assertion facts were committed; downstream
+    reads those canonical facts from the store by ``observation_id`` (the "b" value-add: restart-safe).
+    Legacy mode returns a bare PerceptionResult instead."""
 
+    perception: object                  # full ah.perception.contracts.PerceptionResult
     observation_id: str
     version: int
     terminal: str                       # APPLIED | STALE_SUPERSEDED | REJECTED_ADMISSION
@@ -68,14 +71,15 @@ class FormalizerAdapter:
         if not self.native_available:
             raise RuntimeError("native commit path is not wired (no durable store/binding)")
         from ah.formalizer.selection_protocol import load_decision_schema
-        from ah.formalizer.v7_pipeline import interpretation_run
+        from ah.formalizer.v7_pipeline import interpret_full
 
         schema = self._schema or load_decision_schema()
-        rep = interpretation_run(
+        state, rep = interpret_full(
             text, schema, self._selector, self._store, self._binding,
             morph=self._morph, context_facts=context_facts,
         )
         return NativePerceptionResult(
+            perception=self._to_perception_result(state),   # full candidate set (I02: capability-complete)
             observation_id=rep.observation_id,
             version=rep.version,
             terminal=rep.terminal,

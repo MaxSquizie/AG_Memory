@@ -233,3 +233,31 @@ def interpretation_run(
         schema=schema, run_id=run_id, version=version, observation_id=observation_id,
         template_map=template_map, registry=registry, policy=policy,
     )
+
+
+def interpret_full(
+    text: str,
+    schema: DecisionSchema,
+    selector,
+    store,
+    binding: InterpretationRunBinding,
+    *,
+    morph=None,
+    context_facts: Sequence[str] = (),
+    run_id: str = "run",
+    version: int = 1,
+    observation_id: str | None = None,
+    template_map: Mapping | None = None,
+    registry: RoleRegistry | None = None,
+    policy: OpenTemplatePolicy | None = None,
+) -> tuple["FormalizationState", InterpretationReport]:
+    """Like :func:`interpretation_run` but ALSO returns the FormalizationState, so a caller can build the
+    full perception candidate set (queries/commands/assertions via speech-act detection) from it — i.e. make
+    the native path capability-complete vs the legacy parse() rather than assertion-only."""
+    state = _run_t04(text, schema, selector, morph=morph, context_facts=context_facts)
+    report = run_from_state(
+        state, store, binding,
+        schema=schema, run_id=run_id, version=version, observation_id=observation_id,
+        template_map=template_map, registry=registry, policy=policy,
+    )
+    return state, report
