@@ -156,6 +156,16 @@ class AgentOrchestrator:
         self.runtime_lock = runtime_lock
         self.turn_clock = turn_clock or (lambda: datetime.now().astimezone())
 
+    def _perceive(self, text: str) -> "PerceptionResult":
+        """Native-aware perception entry (I01/I02). Routes through ``LLMPerceptionService.perceive()`` when it
+        exists — V7-native durable commit + full candidate set, falling back to parse() when native_commit is off
+        — else the plain legacy parse(). Downstream consumes a PerceptionResult in both cases, so flipping the
+        agent loop to the native path regresses nothing."""
+        perceive = getattr(self.perception, "perceive", None)
+        if callable(perceive):
+            return perceive(text, self.context)
+        return self.perception.parse(text, self.context)
+
     def _settle_input_wave(self) -> tuple[TickResult, ...]:
         """Drain the current prompt's causal wave before freezing Workspace.
 
@@ -285,7 +295,7 @@ class AgentOrchestrator:
         self, response_text: str, lock
     ) -> tuple[PerceptionResult, IntegrationCommit, tuple[TickResult, ...]]:
         if self.settings.parse_agent_response_to_h:
-            response_perception = self.perception.parse(response_text, self.context)
+            response_perception = self._perceive(response_text)
             response_perception = self._complete_dynamic_templates(response_perception, lock)
         else:
             response_perception = PerceptionResult(
@@ -515,7 +525,7 @@ class AgentOrchestrator:
         )
 
         try:
-            perception = self.perception.parse(text, self.context)
+            perception = self._perceive(text)
             perception = self._complete_dynamic_templates(perception, lock)
             perception = apply_speech_act_scoping(perception)
             perception = GoalSemanticService(self.perception).complete(perception)

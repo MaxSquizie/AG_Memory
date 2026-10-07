@@ -81,5 +81,47 @@ class TestNativeProductionPath(unittest.TestCase):
             self.assertEqual(native.perception.commands, legacy.commands, f"commands diverge: {text}")
 
 
+class TestPerceiveRouting(unittest.TestCase):
+    """I01/I02 agent-loop flip: LLMPerceptionService.perceive() routes to the native durable path when
+    native_commit is on (full PerceptionResult + a real journal write), and is byte-identical to parse()
+    when it is off — so swapping the orchestrator call sites regresses nothing."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.log_path = Path(self._tmp.name) / "journal.log"
+        self.core = AHCore(AHStore())
+        self.adapter = FormalizerAdapter(
+            FakeSelector.demo("augmented"),
+            store=AHStoreAdapter(self.core.store, JournalChannel(self.log_path)),
+            binding=InterpretationRunBinding(),
+        )
+
+    def _svc(self, native_commit: bool):
+        from ah.perception.llm_parser import LLMPerceptionService, LLMPerceptionSettings
+        return LLMPerceptionService(
+            backend=object(), settings=LLMPerceptionSettings(),
+            formalizer=self.adapter, native_commit=native_commit,
+        )
+
+    def test_perceive_native_routes_to_durable_commit(self):
+        svc = self._svc(native_commit=True)
+        res = svc.perceive(S3, None)
+        self.assertIsInstance(res, PerceptionResult)          # full candidate set, not a receipt
+        self.assertEqual(len(res.assertions), 1)             # S3 augmented -> one resolved fact
+        # durable commit side-effect: records physically present in the journal after reopen
+        reopened = JournalChannel(self.log_path)
+        recs = reopened.scan_unprocessed(0, "observation") + reopened.scan_unprocessed(0, "resolution_log")
+        self.assertGreater(len(recs), 0)
+
+    def test_perceive_native_off_equals_parse(self):
+        svc = self._svc(native_commit=False)
+        a = svc.perceive(S3, None)
+        b = svc.parse(S3, None)
+        self.assertEqual(a.assertions, b.assertions)
+        self.assertEqual(a.queries, b.queries)
+        self.assertEqual(a.commands, b.commands)
+
+
 if __name__ == "__main__":
     unittest.main()

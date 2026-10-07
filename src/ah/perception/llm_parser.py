@@ -169,14 +169,15 @@ class LLMPerceptionService:
             )
         return self._formalizer.parse(text)
 
-    def perceive(self, text: str, interaction_context: InteractionContext):
-        """I01 perception entry. In V7-native mode (``native_commit`` + a wired durable store) real input is
-        run through the full chain and committed durably; downstream reads the committed facts from the store
-        by observation_id (returns NativePerceptionResult). Otherwise it falls back to the legacy
-        PerceptionResult translation (:meth:`parse`)."""
-        del interaction_context
+    def perceive(self, text: str, interaction_context: InteractionContext) -> "PerceptionResult":
+        """I01/I02 perception entry for the agent loop. In V7-native mode (``native_commit`` + a wired durable
+        store) real input is run through T0..T4 -> C -> T5 gate (+binding CAS) -> T6 and committed durably as a
+        side effect; this returns the FULL PerceptionResult (assertions/queries/commands via speech-act detection)
+        so downstream (_complete_dynamic_templates -> integrate_external -> ignition) is unchanged. Otherwise it
+        falls back to :meth:`parse` — byte-for-byte identical behavior when ``native_commit`` is off."""
         if self._native_commit and self._formalizer is not None and self._formalizer.native_available:
-            return self._formalizer.interpret(text)
+            del interaction_context
+            return self._formalizer.interpret(text).perception
         return self.parse(text, interaction_context)
 
     def parse_with_structural_resolution(
