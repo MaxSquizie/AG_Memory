@@ -10,6 +10,7 @@ from itertools import product,islice
 import re
 from ah.model import ActantRole,Ref,RefKind,BoundVar,TimeLiteral,VariableSort,CountLiteral
 from ah.inference.contracts import (NativeFormulaGoal,NativeBindingGoal,NativeBindingsConclusion,CountGoal,CountConclusion,
+    NativeCounterfactualGoal,NativeQuestionGoal,AggregateCountGoal,
     ExistsGoal,RoleFillGoal,MultiRoleFillGoal,InferenceQuery,GoalSpec,LogicalStatus,
     StopReason,InferenceOutcome,ExistingRefConclusion,ProofSupport,
     AssociationGoal,TemporalComparisonConclusion,FormulaQueryConclusion)
@@ -35,6 +36,8 @@ class Pattern:
     actants: tuple=()
     lexical_anchor: str | None=None
     temporal: dict | None=None
+    query_owner: bool=False  # runtime intent attachment; never part of content identity
+    occurrence_ref: str | None=None  # pin one already canonical event for aggregate verification
 
 
 @dataclass(frozen=True)
@@ -72,10 +75,10 @@ def project_native_queries(state,release):
         for role,child in f.semantic.get('proposition_args',{}).items():
             roles.append((role,{'proposition':child.get('tree') or {'frame_ref':child['frame_ref']}}))
         request=f.semantic.get('query_request',{})
-        all_roles={r for r,v in roles}|set(request.get('requested_roles',()))|({request['count_role']} if request.get('count_role') else set())
+        all_roles={r for r,v in roles}|set(request.get('requested_roles',()))|({request['count_role']} if request.get('count_role') else set())|set(selected.get('query_existential_roles',()))
         mapping=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==all_roles]
         atoms[f.frame_id]={'template_ref':mapping[0]['template_ref'] if len(mapping)==1 else None,
-            'roles':roles,'temporal':f.semantic.get('region'),'lexical_anchor':f.semantic.get('lexical_units',{}).get(f.predicate_token_ref,{}).get('surface',evidence[f.predicate_token_ref].span).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
+            'roles':roles,'query_existential_roles':selected.get('query_existential_roles',()),'temporal':f.semantic.get('region'),'lexical_anchor':f.semantic.get('lexical_units',{}).get(f.predicate_token_ref,{}).get('surface',evidence[f.predicate_token_ref].span).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
     structural=set().union(*(leaves(t) for t in trees))
     for f in state.frames:
         if f.frame_id in structural or f.frame_id in embedded: continue
@@ -118,11 +121,24 @@ def compile_native_queries(core,roots,context,attention_refs=()):
     results=[]
     for root in roots:
         try:
-            request=root.request; mode=request.get('mode','FORMULA')
-            gaps=tuple(request.get('requested_roles',())) if mode=='WH' else (request['count_role'],) if mode=='COUNT' else ()
-            if mode in {'WH','COUNT'} and (not gaps or len(set(gaps))!=len(gaps) or root.owner_frame_ref is None):
+            from .query_requests import validate_request
+            request=validate_request(dict(root.request)); mode=request.get('mode','FORMULA')
+            if mode=='HOW': mode='WH'
+            gaps=tuple(request.get('requested_roles',())) if mode in {'WH','SUPERLATIVE'} else (request['count_role'],) if mode=='COUNT' and request.get('count_unit','ENTITY')=='ENTITY' else ()
+            if mode in {'WH','SUPERLATIVE'} or mode=='COUNT' and request.get('count_unit','ENTITY')=='ENTITY':
+                if not gaps or len(set(gaps))!=len(gaps) or root.owner_frame_ref is None:
+                    raise ValueError('QUERY_TARGET_UNBOUND')
+            if mode=='COUNT' and request.get('count_unit','ENTITY')=='EVENT' and root.owner_frame_ref is None:
                 raise ValueError('QUERY_TARGET_UNBOUND')
-            visited=set()
+            visited=set(); used_variables=set()
+            def collect_variables(value):
+                if isinstance(value,dict):
+                    if 'bound_var' in value: used_variables.add(value['bound_var'])
+                    for v in value.values(): collect_variables(v)
+                elif isinstance(value,(list,tuple)):
+                    for v in value: collect_variables(v)
+            collect_variables(root.tree); collect_variables(root.atoms)
+            next_variable=[max(used_variables,default=-1)+1]
             def compile_tree(tree,depth=0):
                 if depth>32: raise ValueError('COMPUTATION_LIMIT')
                 if 'time_literal' in tree: return TimeLiteral(tuple(tree['time_literal']))
@@ -156,20 +172,41 @@ def compile_native_queries(core,roots,context,attention_refs=()):
                     if gaps and (not atom['template_ref'] or not set(gaps)<=set(r.value for r in core.store.get_template(atom['template_ref']).roles)):
                         raise ValueError('QUERY_REQUEST_INVALID')
                     actants.extend((ActantRole(role),QueryVar(role,VariableSort.ENTITY if mode=='COUNT' else VariableSort.UNKNOWN)) for role in gaps)
+                implicit=[]
+                for role in atom.get('query_existential_roles',()):
+                    variable=BoundVar(next_variable[0],VariableSort.ENTITY); next_variable[0]+=1
+                    actants.append((ActantRole(role),variable)); implicit.append(variable)
                 visited.remove(fid)
                 if len({r for r,v in actants})!=len(actants): raise ValueError('QUERY_ARGUMENT_GROUP_UNBOUND')
-                return Pattern(template_ref=atom['template_ref'],actants=tuple(actants),lexical_anchor=atom['lexical_anchor'],temporal=atom['temporal'])
+                atom_pattern=Pattern(template_ref=atom['template_ref'],actants=tuple(actants),lexical_anchor=atom['lexical_anchor'],temporal=atom['temporal'],query_owner=fid==root.owner_frame_ref)
+                for variable in reversed(implicit): atom_pattern=Pattern('EXISTS',(variable,atom_pattern))
+                return atom_pattern
             pattern=compile_tree(root.tree)
             temporal=normalize(region(root.temporal)); point=temporal.point if temporal.kind=='POINT' else None
             window=(temporal.lo,temporal.hi) if temporal.kind in {'EXISTENTIAL','CONTINUOUS'} else None
-            if not set(request)<={'mode','requested_roles','count_role','expected_count','comparison','domain_certificate'}:
-                raise ValueError('QUERY_REQUEST_INVALID')
             if len(root.source_scope)>16 or any(not isinstance(s,str) or not s for s in root.source_scope):
                 raise ValueError('QUERY_SOURCE_SCOPE_INVALID')
             target=NativeFormulaGoal(pattern,point,window,tuple(attention_refs),root.source_scope)
-            if mode in {'WH','COUNT'}:
-                release=getattr(getattr(core,'_formalizer_adapter',None),'resource_release',None)
-                if not pattern.operator and not pattern.lexical_anchor and all(isinstance(v,(Ref,QueryVar)) for r,v in pattern.actants):
+            release=getattr(getattr(core,'_formalizer_adapter',None),'resource_release',None)
+            snapshot=release.sha256 if release is not None else None
+            if mode=='COUNT' and (request.get('aggregate',window is not None) or request.get('count_unit')=='EVENT'):
+                interval=window or ((point,point) if point is not None else None)
+                if interval is None: raise ValueError('COUNT_WINDOW_REQUIRED')
+                target=AggregateCountGoal(pattern,request.get('count_unit','ENTITY'),interval,
+                    gaps[0] if gaps else None,request.get('expected_count'),request.get('comparison','EXACTLY_N'),
+                    request.get('domain_certificate'),snapshot,tuple(attention_refs),root.source_scope)
+            elif mode in {'WHY','WHEN','COMPARE','SUPERLATIVE'}:
+                if mode=='COMPARE' and request.get('compare_mention'):
+                    resolved=EntityResolver(core).resolve(ActantCandidate(ActantRole.SUBJECT,mention=request['compare_mention']),context,
+                        first_person_ref=context.user_ref,second_person_ref=context.self_ref,attention_refs=attention_refs)
+                    if not isinstance(resolved,ExistingEntity): raise ValueError('QUERY_ENTITY_UNBOUND')
+                    request={k:v for k,v in request.items() if k!='compare_mention'}
+                    request['compare_entity_ref']=resolved.ref.uid
+                target=NativeQuestionGoal(pattern,mode,request,point,window,tuple(attention_refs),root.source_scope,snapshot)
+            elif mode in {'WH','COUNT'}:
+                def hypothetical(p):
+                    return isinstance(p,Pattern) and (p.operator=='COUNTERFACTUAL' or any(hypothetical(m) for m in p.members) or any(hypothetical(v) for r,v in p.actants))
+                if not hypothetical(pattern) and not pattern.operator and not pattern.lexical_anchor and all(isinstance(v,(Ref,QueryVar)) for r,v in pattern.actants):
                     tref=core.ref(pattern.template_ref); known={r:v for r,v in pattern.actants if isinstance(v,Ref)}
                     if mode=='WH':
                         roles=tuple(ActantRole(r) for r in gaps)
@@ -180,11 +217,7 @@ def compile_native_queries(core,roots,context,attention_refs=()):
                     target=NativeBindingGoal(pattern,gaps,mode,point,window,tuple(attention_refs),root.source_scope,
                         request.get('expected_count'),request.get('comparison','EXACTLY_N'),request.get('domain_certificate'),release.sha256 if release is not None else None)
             elif mode!='FORMULA': raise ValueError('QUERY_TARGET_UNBOUND')
-            if pattern.operator=='COUNTERFACTUAL':
-                # Legacy proof does not filter native derived paths by temporary
-                # assumptions. A world answer is not a counterfactual proof.
-                raise ValueError('COUNTERFACTUAL_NATIVE_SCOPE_NOT_IMPLEMENTED')
-            if pattern.operator=='ASSOCIATION':
+            if pattern.operator=='ASSOCIATION' and mode=='FORMULA':
                 adapter=getattr(core,'_formalizer_adapter',None)
                 if adapter is None: raise ValueError('QUERY_TARGET_UNBOUND')
                 with adapter._journal.atomic(),core.store._lock:
@@ -230,6 +263,7 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None):
         if steps>limit: raise ValueError('COMPUTATION_LIMIT')
         node=ledger.data['nodes'].get(uid)
         if node is None: return False
+        if p.occurrence_ref is not None and p.occurrence_ref!=uid: return False
         if p.operator is not None:
             if node.get('function_id')!=p.operator or len(node.get('operands',()))!=len(p.members): return False
             actual=list(node['operands'])
@@ -272,13 +306,13 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None):
 
 def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_budget=None,_depth=0):
     adapter=getattr(engine.core,'_formalizer_adapter',None)
-    def outcome(status,refs=(),diagnostics=(),conclusion=None):
+    def outcome(status,refs=(),diagnostics=(),conclusion=None,temporal_regions=()):
         if runtime is not None:
             for ref in refs: runtime.focus(ref,logical_depth=_depth,reason='native query proof premise')
             if status is not LogicalStatus.UNKNOWN:
                 runtime.rule('NATIVE_QUERY',logical_depth=_depth,detail='status='+status.value)
         stop=StopReason.GOAL_SATISFIED if status is LogicalStatus.PROVED else StopReason.GOAL_REFUTED if status is LogicalStatus.DISPROVED else StopReason.SEARCH_EXHAUSTED
-        return InferenceOutcome(status,stop,conclusion or (ExistingRefConclusion(refs[0]) if refs else None),tuple(refs),tuple(refs),None,len(refs)+1,tuple(diagnostics),proof_support=(ProofSupport(tuple(refs),rule_id='NATIVE_FACT_MATCH'),) if refs else ())
+        return InferenceOutcome(status,stop,conclusion or (ExistingRefConclusion(refs[0]) if refs else None),tuple(refs),tuple(refs),None,len(refs)+1,tuple(diagnostics),proof_support=(ProofSupport(tuple(refs),rule_id='NATIVE_FACT_MATCH'),) if refs else (),proof_context=context,temporal_regions=tuple(temporal_regions))
     if adapter is None: return outcome(LogicalStatus.UNKNOWN,diagnostics=('NATIVE_STORE_REQUIRED',))
     if _budget is None:
         _budget=[query.max_expanded_states if query.max_expanded_states is not None else engine.settings.max_expanded_states]
@@ -288,9 +322,44 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
     with adapter._journal.atomic(),engine.core.store._lock:
         adapter._refresh(); ledger=adapter.ledger
         try:
+            from .native_scope import proof_ledger, overrides, assumed_status, solve_counterfactual
+            if isinstance(goal,NativeCounterfactualGoal):
+                return solve_counterfactual(engine,goal,query,workspace,attention,context,runtime,_budget,_depth,outcome)
+            outer=getattr(goal,'pattern',None)
+            if isinstance(outer,Pattern) and outer.operator=='COUNTERFACTUAL':
+                if len(outer.members)!=2 or not all(isinstance(p,Pattern) for p in outer.members):
+                    raise ValueError('REGISTRY_REJECT')
+                assumption=outer.members[0]
+                if outer.temporal is not None and assumption.temporal is None:
+                    assumption=replace(assumption,temporal=outer.temporal)
+                child_goal=replace(goal,pattern=outer.members[1])
+                if outer.temporal is not None:
+                    r=normalize(region(outer.temporal))
+                    if isinstance(goal,AggregateCountGoal):
+                        if r.kind!='UNDATED':
+                            child_goal=replace(child_goal,temporal_window=(r.point,r.point) if r.kind=='POINT' else (r.lo,r.hi))
+                    else:
+                        child_goal=replace(child_goal,temporal_point=r.point if r.kind=='POINT' else None,
+                                           temporal_window=(r.lo,r.hi) if r.kind in {'CONTINUOUS','EXISTENTIAL'} else None)
+                return solve_counterfactual(engine,NativeCounterfactualGoal((assumption,),child_goal),
+                    query,workspace,attention,context,runtime,_budget,_depth,outcome)
+            if context.is_counterfactual() and not overrides(context):
+                from .native_scope import make_context
+                from .native_derivations import pattern_from_ref
+                assumed=context.visible_assumptions()
+                if not assumed: raise ValueError('COUNTERFACTUAL_CONTEXT_UNBOUND')
+                context=make_context(context,tuple(pattern_from_ref(engine.core,ledger,r.uid,_budget) for r in assumed))
+            hypothetical_scope=bool(overrides(context))
+            ledger=proof_ledger(engine.core,ledger,context,goal,_budget,(*workspace,*getattr(goal,'workspace_refs',())))
+            if isinstance(goal,NativeQuestionGoal):
+                from .native_questions import solve_question
+                return solve_question(engine,adapter,ledger,goal,query,workspace,attention,context,runtime,_budget,_depth,outcome)
+            if isinstance(goal,AggregateCountGoal):
+                from .aggregate_count import solve_aggregate
+                return solve_aggregate(engine,adapter,ledger,goal,query,workspace,attention,context,runtime,_budget,_depth,outcome)
             if isinstance(goal,NativeBindingGoal):
                 from .query_bindings import solve_bindings
-                return solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime,_budget,_depth,outcome)
+                return solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime,_budget,_depth,outcome,ledger=ledger)
             if isinstance(goal,CountGoal):
                 witnesses={}; scanned=0
                 if runtime is not None:
@@ -309,7 +378,7 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                     if isinstance(value,str) and engine.core.store.kind_of(value) is RefKind.M: witnesses.setdefault(value,engine.core.ref(node.uid))
                 claimed_lower,claimed_upper,bound_refs=_numeric_bounds(engine.core,ledger,goal,_budget)
                 lower=max(len(witnesses),claimed_lower or 0)
-                certificate=_complete_domain(adapter,ledger,goal)
+                certificate=None if hypothetical_scope else _complete_domain(adapter,ledger,goal)
                 certificate_supports=certificate['completeness_evidence'] if certificate else ()
                 complete=bool(certificate_supports)
                 if complete and certificate.get('closure_mode','ENUMERATED')=='ASSERTED_BOUND':
@@ -334,41 +403,64 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 own=normalize(region(pattern.temporal))
                 goal=replace(goal,temporal_point=own.point if own.kind=='POINT' else None,
                              temporal_window=(own.lo,own.hi) if own.kind in {'CONTINUOUS','EXISTENTIAL'} else None)
+                if hypothetical_scope:
+                    ledger=proof_ledger(engine.core,adapter.ledger,context,goal,_budget,(*workspace,*goal.workspace_refs))
+            if pattern.operator=='COUNTERFACTUAL':
+                if len(pattern.members)!=2: raise ValueError('REGISTRY_REJECT')
+                return solve_counterfactual(engine,NativeCounterfactualGoal((pattern.members[0],),replace(goal,pattern=pattern.members[1])),
+                    query,workspace,attention,context,runtime,_budget,_depth,outcome)
+            assumed=assumed_status(pattern,goal,context) if hypothetical_scope else None
+            if assumed is not None:
+                status,regions=assumed
+                return outcome(status,diagnostics=('COUNTERFACTUAL_ASSUMPTION',),
+                               conclusion=FormulaQueryConclusion('ASSUMPTION',()),temporal_regions=regions)
             if pattern.operator in {'BEFORE','AFTER','DURING'} and all(isinstance(p,TimeLiteral) for p in pattern.members):
                 from .temporal_order import compare_anchors
                 value=compare_anchors(pattern.operator,*pattern.members)
                 return outcome(LogicalStatus.UNKNOWN if value is None else LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,
                                diagnostics=('TEMPORAL_ANCHOR_COMPARISON',),
                                conclusion=TemporalComparisonConclusion(pattern.operator,pattern.members[0].bounds,pattern.members[1].bounds) if value is not None else None)
-            if pattern.operator is None and not pattern.lexical_anchor and all(isinstance(v,Ref) for r,v in pattern.actants):
+            if not hypothetical_scope and pattern.occurrence_ref is None and pattern.operator is None and not pattern.lexical_anchor and all(isinstance(v,Ref) for r,v in pattern.actants):
                 atom=ExistsGoal(engine.core.ref(pattern.template_ref),dict(pattern.actants),goal.temporal_point,goal.temporal_window)
-                return engine._solve_goal(atom,query,workspace,attention,proof_context=context,runtime=runtime)
-            scoped=[]
+                answer=engine._solve_goal(atom,query,workspace,attention,proof_context=context,runtime=runtime)
+                if isinstance(answer.conclusion,ExistingRefConclusion):
+                    answer=replace(answer,temporal_regions=_answer_regions(adapter.ledger,answer.conclusion.ref.uid,goal,
+                        'NO' if answer.status is LogicalStatus.DISPROVED else 'YES',core=engine.core),proof_context=context)
+                return answer
+            attested_refs=[]
             if goal.source_scope:
                 paths=ledger.paths()
                 for i,(sid,s) in enumerate(ledger.data['supports'].items()):
                     if i>=10000: raise ValueError('COMPUTATION_LIMIT')
                     if sid in paths and s.get('source_tag',[None])[0] in goal.source_scope:
-                        scoped.append(engine.core.ref(s['conclusion_ref']))
-            refs=_matching_refs(engine.core,ledger,pattern,limit=4096,workspace=(*workspace,*goal.workspace_refs,*scoped))
+                        attested_refs.append(engine.core.ref(s['conclusion_ref']))
+            refs=_matching_refs(engine.core,ledger,pattern,limit=4096,workspace=(*workspace,*goal.workspace_refs,*attested_refs))
             if runtime is not None:
                 runtime.memory_query('NATIVE_FORMULA',pattern.operator or pattern.template_ref or pattern.lexical_anchor,logical_depth=_depth,candidate_count=len(refs),detail='template/reverse-function index or declared attestation workspace')
             conflicts=set()
             for uid in refs:
                 if not _uniform_windows(pattern,goal): continue
-                answer=ledger.query_proposition(uid,point=goal.temporal_point,window=goal.temporal_window)
+                answer=(ledger.query if pattern.occurrence_ref is not None else ledger.query_proposition)(uid,point=goal.temporal_point,window=goal.temporal_window)
                 conflicts.update(answer['conflict_ref'])
                 if answer['answer'] in {'YES','NO'}:
-                    return outcome(LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED,(engine.core.ref(answer.get('evidence_ref',uid)),),tuple('conflict_ref:'+r for r in sorted(conflicts)))
+                    evidence_uid=answer.get('evidence_ref',uid)
+                    regions=_answer_regions(ledger,evidence_uid,goal,answer['answer'],core=engine.core)
+                    return outcome(LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED,(engine.core.ref(evidence_uid),),tuple('conflict_ref:'+r for r in sorted(conflicts)),temporal_regions=regions)
+            if hypothetical_scope:
+                from .native_derivations import runtime_derivation
+                derived=runtime_derivation(engine,ledger,goal,query,workspace,attention,context,runtime,_budget,_depth)
+                if derived is not None:
+                    premises,rule,derived_region=derived
+                    return outcome(LogicalStatus.PROVED,premises,(rule,),FormulaQueryConclusion(rule,premises),(derived_region,))
             if pattern.operator in {'BEFORE','AFTER','DURING'}:
                 from .temporal_order import prove_order
-                result=prove_order(engine.core,ledger,pattern,goal,_budget,(*workspace,*goal.workspace_refs,*scoped))
+                result=prove_order(engine.core,ledger,pattern,goal,_budget,(*workspace,*goal.workspace_refs,*attested_refs))
                 if result is not None:
                     value,premises=result
                     return outcome(LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,premises,
                                    ('TEMPORAL_EVIDENCE_ORDER',),FormulaQueryConclusion(pattern.operator,premises))
             if pattern.operator=='EXISTS' and len(pattern.members)==2 and isinstance(pattern.members[0],BoundVar):
-                witness=_existential_witness(engine,adapter,pattern.members[0],pattern.members[1],goal,query,workspace,attention,context,runtime,_budget,_depth)
+                witness=_existential_witness(engine,adapter,pattern.members[0],pattern.members[1],goal,query,workspace,attention,context,runtime,_budget,_depth,ledger=ledger)
                 if witness is not None: return witness
             # Negation is proof inversion, never absence-as-negative. The child
             # is a typed query, so its own open-world/time contract remains intact.
@@ -386,7 +478,7 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 if pattern.operator=='AND':
                     if no: status=LogicalStatus.DISPROVED
                     elif len(yes)==len(children):
-                        if goal.temporal_point is None and goal.temporal_window is None or _joint_witness(adapter.ledger,children,goal):
+                        if goal.temporal_point is None and goal.temporal_window is None or _joint_witness(ledger,children,goal):
                             status=LogicalStatus.PROVED
                 elif pattern.operator=='OR':
                     if yes: status=LogicalStatus.PROVED
@@ -397,7 +489,16 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 if status is not LogicalStatus.UNKNOWN:
                     premises=tuple(dict.fromkeys(r for c in children for r in c.premise_refs))
                     diagnostics=tuple(dict.fromkeys(d for c in children for d in c.diagnostics))
-                    return outcome(status,premises,diagnostics,FormulaQueryConclusion(pattern.operator,premises))
+                    if pattern.operator=='AND':
+                        regions=_joint_regions(ledger,yes,goal) if status is LogicalStatus.PROVED else tuple(r for c in no for r in c.temporal_regions)
+                    elif pattern.operator=='OR':
+                        regions=tuple(r for c in yes for r in c.temporal_regions) if status is LogicalStatus.PROVED else _joint_regions(ledger,no,goal)
+                    else:
+                        decisive=yes if status is LogicalStatus.DISPROVED and len(yes)>1 else children
+                        regions=_joint_regions(ledger,decisive,goal)
+                        if (goal.temporal_point is not None or goal.temporal_window is not None) and not regions:
+                            return outcome(LogicalStatus.UNKNOWN,premises,(*diagnostics,'SIMULTANEITY_NOT_ESTABLISHED'))
+                    return outcome(status,premises,diagnostics,FormulaQueryConclusion(pattern.operator,premises),regions)
             return outcome(LogicalStatus.UNKNOWN,diagnostics=tuple('conflict_ref:'+r for r in sorted(conflicts)))
         except (ValueError,KeyError,TypeError) as exc:
             return outcome(LogicalStatus.UNKNOWN,diagnostics=(str(exc),))
@@ -467,11 +568,11 @@ def _complete_domain(adapter,ledger,goal):
     return None
 
 
-def _existential_witness(engine,adapter,variable,body,goal,query,workspace,attention,context,runtime,budget,depth):
+def _existential_witness(engine,adapter,variable,body,goal,query,workspace,attention,context,runtime,budget,depth,*,ledger=None):
     """Bind a candidate then prove the entire nested body; absence is UNKNOWN."""
     from .query_bindings import candidate_values,substitute
     if variable.sort not in {VariableSort.ENTITY,VariableSort.UNKNOWN}: return None
-    values=candidate_values(engine.core,adapter.ledger,body,(variable.local_id,),budget,bound=True)[variable.local_id]
+    values=candidate_values(engine.core,ledger or adapter.ledger,body,(variable.local_id,),budget,bound=True,context=context)[variable.local_id]
     for uid in sorted(values):
         ground=substitute(body,{variable.local_id:engine.core.ref(uid)},bound=True)
         answer=solve_native_goal(engine,replace(goal,pattern=ground),query,workspace,attention,context,runtime,_budget=budget,_depth=depth+1)
@@ -481,41 +582,44 @@ def _existential_witness(engine,adapter,variable,body,goal,query,workspace,atten
             if runtime is not None: runtime.rule('EXISTS_WITNESS',logical_depth=depth,detail='one shared entity binding; full body proved')
             return InferenceOutcome(LogicalStatus.PROVED,StopReason.GOAL_SATISFIED,
                 FormulaQueryConclusion('EXISTS',refs),refs,refs,None,answer.expanded_states+1,
-                answer.diagnostics,proof_support=(ProofSupport(refs,rule_id='EXISTS_WITNESS'),))
+                answer.diagnostics,proof_support=(ProofSupport(refs,rule_id='EXISTS_WITNESS'),),proof_context=context,temporal_regions=answer.temporal_regions)
     return None
 
 
-def _joint_witness(ledger,children,goal):
-    """Never turn independent existential windows into one simultaneous AND."""
+def _joint_regions(ledger,children,goal):
+    """Conclusion regions with a joint realization, including runtime proofs."""
+    from .temporal_license import forall_inst_license
     options=[]
     for child in children:
-        if not isinstance(child.conclusion,ExistingRefConclusion): return False
-        uid=child.conclusion.ref.uid
-        evidence=[a for aid,a in ledger.data['assertions'].items()
-                  if a['target_ref']==uid and ledger.evidence_live({'record_id':aid})]
-        if not evidence: return False
+        evidence=[]
+        if isinstance(child.conclusion,ExistingRefConclusion) and child.status is LogicalStatus.PROVED:
+            uid=child.conclusion.ref.uid
+            evidence=[(normalize(region(a['region'])),a.get('witness_ref'))
+                      for aid,a in ledger.data['assertions'].items()
+                      if a['target_ref']==uid and ledger.evidence_live({'record_id':aid})]
+        evidence.extend((r,None) for r in child.temporal_regions)
+        evidence=list(dict.fromkeys(evidence))
+        if not evidence: return ()
         options.append(evidence)
+    if not options: return ()
+    result=[]
     for i,combo in enumerate(islice(product(*options),65)):
         if i==64: raise ValueError('COMPUTATION_LIMIT')
-        regions=[normalize(region(a['region'])) for a in combo]
-        witness=combo[0].get('witness_ref')
-        if witness and all(a.get('witness_ref')==witness and a['region']==combo[0]['region'] for a in combo):
-            if _answers_window(regions[0],goal): return True
-        points=[r.point for r in regions if r.kind=='POINT']
-        continuous=[r for r in regions if r.kind=='CONTINUOUS']
-        existential=[r for r in regions if r.kind=='EXISTENTIAL']
-        if points:
-            if len(set(points))!=1 or existential: continue
-            p=TemporalRegion('POINT',point=points[0])
-            if all(covers(r,p) is True for r in continuous) and _answers_window(p,goal): return True
-        elif continuous:
-            if any(r.lo is None or r.hi is None for r in continuous): continue
-            lo=max(r.lo for r in continuous); hi=min(r.hi for r in continuous)
-            if lo>hi: continue
-            common=TemporalRegion('CONTINUOUS',lo=lo,hi=hi)
-            if not existential and _answers_window(common,goal): return True
-            if len(existential)==1 and covers(common,existential[0]) is True and _answers_window(existential[0],goal): return True
-    return False
+        regions=[r for r,w in combo]; witness=combo[0][1]
+        if witness and all(w==witness and r==regions[0] for r,w in combo):
+            common=regions[0]  # shared AND witness, not independent existentials
+        else:
+            common=regions[0]
+            for r in regions[1:]:
+                license=forall_inst_license(common,r)
+                if license.status!='LICENSED': common=None; break
+                common=normalize(license.derived_region)
+        if common is not None and _answers_window(common,goal) and common not in result: result.append(common)
+    return tuple(result)
+
+
+def _joint_witness(ledger,children,goal):
+    return bool(_joint_regions(ledger,children,goal))
 
 
 def _uniform_windows(pattern,goal):
@@ -539,3 +643,26 @@ def _answers_window(r,goal):
     return (r.kind=='POINT' and lo<=r.point<=hi or
             r.kind=='CONTINUOUS' and r.lo is not None and r.hi is not None and max(lo,r.lo)<=min(hi,r.hi) or
             r.kind=='EXISTENTIAL' and covers(TemporalRegion('CONTINUOUS',lo=lo,hi=hi),r) is True)
+
+
+def _answer_regions(ledger,uid,goal,answer='YES',*,core=None):
+    """Regions of the actual conclusion proof, not arbitrary premise dates."""
+    from .native_scope import query_region
+    from .native_records import record_index
+    paths=ledger.paths(); result=[]
+    index=record_index(core,ledger) if core is not None else None
+    support_ids=index['supports'].get(uid,()) if index is not None else tuple(ledger.data['supports'])
+    for sid in support_ids:
+        s=ledger.data['supports'][sid]
+        if sid not in paths or s['conclusion_ref']!=uid: continue
+        assertion_ids=index['assertions'].get(sid,()) if index is not None else tuple(aid for aid,a in ledger.data['assertions'].items() if a['support_record_id']==sid)
+        dated=[ledger.data['assertions'][aid] for aid in assertion_ids if ledger.evidence_live({'record_id':aid})]
+        for a in dated:
+            r=normalize(region(a['region']))
+            if (goal.temporal_point is None and goal.temporal_window is None or
+                (covers(r,query_region(goal)) is True if answer=='NO' else _answers_window(r,goal))):
+                if r not in result: result.append(r)
+        if not assertion_ids and goal.temporal_point is None and goal.temporal_window is None:
+            r=TemporalRegion('UNDATED')
+            if r not in result: result.append(r)
+    return tuple(result)

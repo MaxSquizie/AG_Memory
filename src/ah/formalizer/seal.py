@@ -56,6 +56,8 @@ def _canonical_records(state: FormalizationState) -> list[dict]:
             records.append(rec)
     records.extend({**rec, '_kind': 'syntax_trace'} for rec in state.syntax_trace)
     records.extend({'_kind':'logical_root','tree':rec} for rec in state.logical_roots)
+    if state.query_intents:
+        records.extend({'_kind':'query_intent',**rec} for rec in state.query_intents)
     return records
 
 

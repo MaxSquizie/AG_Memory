@@ -753,7 +753,10 @@ class ContextProjector:
         )
 
     def _inference_block(self, outcome: InferenceOutcome) -> ProjectionBlock | None:
-        from ah.inference.contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion,NativeBindingsConclusion
+        from ah.inference.contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion,NativeBindingsConclusion,QuestionAnswerConclusion
+        if isinstance(outcome.conclusion,QuestionAnswerConclusion):
+            from ah.formalizer.question_projection import question_text
+            return ProjectionBlock(None,ProjectionMode.INFERENCE,question_text(outcome,self.model_semantic,self.core))
         if isinstance(outcome.conclusion,NativeBindingsConclusion):
             c=outcome.conclusion
             rows='; '.join(', '.join(f'{name}={ref.uid}' for name,ref in zip(c.variables,row)) for row in c.rows)

@@ -16,7 +16,7 @@ from .selection_protocol import ProtocolError
 
 FEATURES = {'lemma', 'POS', 'cases', 'number', 'gender', 'person', 'tense', 'mood', 'features', 'surface', 'oov'}
 RELATIONS = {'BEFORE', 'AFTER', 'ADJACENT', 'OVERLAPS', 'CONTAINS', 'AGREES'}
-OUTPUTS = {'CANDIDATE_GRAPH', 'CLAUSE_BOUNDARY', 'ELLIPSIS', 'TOKEN_HYPOTHESIS'}
+OUTPUTS = {'CANDIDATE_GRAPH', 'CLAUSE_BOUNDARY', 'ELLIPSIS', 'TOKEN_HYPOTHESIS', 'QUERY_INTENT'}
 NODE_KINDS = {'PREDICATE', 'ENTITY', 'BOUND_VAR', 'TIME', 'WH', 'COUNT_REQUEST', 'NOT', 'AND', 'OR', 'XOR', 'IMPLIES', 'FORALL', 'EXISTS', 'POSSIBLE', 'NECESSARY', 'COUNTERFACTUAL', 'BEFORE', 'AFTER', 'DURING', 'ASSOCIATION'}
 NODE_KINDS.update({'NUMERAL','AT_LEAST_N','EXACTLY_N','AT_MOST_N'})
 
@@ -227,7 +227,7 @@ def validate_rules(rules, roles, declared_reads=()):
             except ProtocolError as exc:
                 raise SyntaxRuleError('invalid typed graph: '+str(exc)) from exc
         else:
-            allowed = {'capture', 'side'} if rule['output_kind'] == 'CLAUSE_BOUNDARY' else {'capture', 'gap_kind', 'antecedent'} if rule['output_kind'] == 'ELLIPSIS' else {'capture', 'variants'}
+            allowed = {'capture','request','compare_capture'} if rule['output_kind']=='QUERY_INTENT' else {'capture', 'side'} if rule['output_kind'] == 'CLAUSE_BOUNDARY' else {'capture', 'gap_kind', 'antecedent'} if rule['output_kind'] == 'ELLIPSIS' else {'capture', 'variants'}
             if not set(output) <= allowed or output.get('capture') not in captures:
                 raise SyntaxRuleError('invalid structural output')
             if rule['output_kind'] == 'CLAUSE_BOUNDARY' and output.get('side', 'BEFORE') not in {'BEFORE', 'AFTER'}:
@@ -236,6 +236,15 @@ def validate_rules(rules, roles, declared_reads=()):
                 raise SyntaxRuleError('invalid ellipsis output')
             if rule['output_kind'] == 'TOKEN_HYPOTHESIS' and (not isinstance(output.get('variants'), list) or 'keep_as_is' not in output['variants'] or any(not isinstance(v, str) or not v for v in output['variants'])):
                 raise SyntaxRuleError('KEEP_AS_IS missing')
+            if rule['output_kind']=='QUERY_INTENT':
+                from .query_requests import validate_request
+                request=dict(output.get('request',{}))
+                if output.get('compare_capture'):
+                    if output['compare_capture'] not in captures or 'compare_mention' in request or 'compare_entity_ref' in request:
+                        raise SyntaxRuleError('invalid query comparison capture')
+                    request['compare_mention']='@captured'
+                try: validate_request(request,roles)
+                except ValueError as exc: raise SyntaxRuleError(str(exc)) from exc
 
 
 def _feature_value(variant, token, key):
@@ -406,6 +415,13 @@ def run_srl(state, release, morph):
             state.ellipsis_candidates.append(EllipsisCandidate(rid, token.span, output['gap_kind'], state.evidence[match.assignment[antecedent][0]].span if antecedent else None, provenance=prov))
         elif kind == 'TOKEN_HYPOTHESIS':
             state.token_hypotheses.append(TokenHypothesis(rid, token.span, tuple(output['variants']), prov))
+        elif kind=='QUERY_INTENT':
+            from .query_requests import validate_request
+            request=dict(output['request'])
+            if output.get('compare_capture'):
+                request['compare_mention']=state.evidence[match.assignment[output['compare_capture']][0]].span
+            state.query_intents.append({'intent_id':rid,'token_ref':token.token_id,'request':validate_request(request),
+                                       'provenance':{'pattern_ids':list(prov.pattern_ids),'resource_versions':prov.resource_versions},'variant':_plain_variant(v)})
     n = len(state.evidence)
     if n:
         state.clause_candidates.append(ClauseCandidate('syntax:unsegmented', ((0, n - 1),), ResourceProvenance(('UNSEGMENTED_INPUT',), {'release': release.sha256})))

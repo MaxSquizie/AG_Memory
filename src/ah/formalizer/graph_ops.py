@@ -151,12 +151,25 @@ def register_graph_handlers(adapter: Any) -> None:
 # resolve an ENTITY argument to an S token or fabricate a known TemplateMap entry.
 def ensure_entity(core,p):
     uid=p['uid']
+    scalar={}
+    for raw in p.get('scalar_properties',()):
+        from decimal import Decimal,InvalidOperation
+        if not isinstance(raw,dict) or set(raw)!={'name','value','type_name','unit'} or raw['type_name']!='decimal' or not isinstance(raw['value'],str) or len(raw['value'])>80 or any(not isinstance(raw[k],str) or not raw[k] for k in ('name','unit')):
+            raise ValueError('SCALAR_VALUE_INVALID')
+        try: value=Decimal(raw['value'])
+        except InvalidOperation as exc: raise ValueError('SCALAR_VALUE_INVALID') from exc
+        if not value.is_finite() or raw['name'] in scalar: raise ValueError('SCALAR_VALUE_INVALID')
+        scalar[raw['name']]=Property(**raw)
     if p.get('reference_existing') and not core.store.has_uid(uid): raise ValueError('STALE_PLAN')
     if not core.store.has_uid(uid):
         props={}
         if p.get('name'): props['name']=Property('name',p['name'],'str')
+        if 'name' in scalar: raise ValueError('SCALAR_VALUE_INVALID')
+        props.update(scalar)
         core.add_entity(Domain(p.get('domain','C')),props,meta={'source_tag':p.get('source_tag'),'mention_ref':p.get('mention_ref')},uid=uid)
     elif core.store.kind_of(uid).value!='M': raise ValueError('ENTITY_REF_TYPE_MISMATCH')
+    elif any(core.store.get_element_any_domain(uid).properties.get(k)!=v for k,v in scalar.items()):
+        raise ValueError('SCALAR_VALUE_CONFLICT')
     return uid
 
 

@@ -30,6 +30,10 @@ def build_plan(state,release,store):
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         e=evidence[f.predicate_token_ref]
         roles={}; mention_roles={}
+        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))
+        mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==selected_roles]
+        measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
+                  if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
         for tid,role in selected['roles'].items():
             if tid in state.observation.get('unresolved_references',()): raise ValueError('REFERENCE_UNKNOWN')
             if tid in f.semantic.get('bound_arguments',{}):
@@ -43,7 +47,15 @@ def build_plan(state,release,store):
             local=state.observation.get('local_reference_targets',{}).get(mid)
             if known and not local and (not store.has_uid(known) or store._store.kind_of(known).value!='M'): raise ValueError('IDENTITY_CONFLICT')
             name=local['label'] if local else unit.get('surface',ev.span)
-            emit('ENSURE_ENTITY',{'uid':mid,'name':name,'mention_ref':local['mention_ref'] if local else mention_ref,'source_tag':tag,'reference_existing':bool(known and store.has_uid(known))},frag)
+            scalar=[]
+            for measure in measures:
+                if measure['value_role']==role:
+                    from .scalar_values import scalar_property
+                    value=scalar_property(unit.get('surface',ev.span),measure)
+                    if value is not None and value not in scalar: scalar.append(value)
+            if len({v['name'] for v in scalar})!=len(scalar): raise ValueError('SCALAR_VALUE_CONFLICT')
+            emit('ENSURE_ENTITY',{'uid':mid,'name':name,'mention_ref':local['mention_ref'] if local else mention_ref,'source_tag':tag,'reference_existing':bool(known and store.has_uid(known)),
+                                  **({'scalar_properties':scalar} if scalar else {})},frag)
             bid='binding:'+digest([tag,mention_ref,mid])
             from .coreference import mention_features
             emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)

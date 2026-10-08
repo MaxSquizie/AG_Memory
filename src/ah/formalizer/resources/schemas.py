@@ -30,7 +30,9 @@ EMIT_SCHEMAS = {
     'CLAUSE_BOUNDARY': obj(('capture',), {'capture': S, 'side': enum('BEFORE', 'AFTER')}),
     'ELLIPSIS': obj(('capture', 'gap_kind'), {'capture': S, 'gap_kind': enum('PREDICATE_GAP', 'ARGUMENT_GAP', 'SUBORDINATOR_GAP'), 'antecedent': S}),
     'TOKEN_HYPOTHESIS': obj(('capture', 'variants'), {'capture': S, 'variants': array(S, minimum=1)}),
+    'QUERY_INTENT': obj(('capture','request'), {'capture':S,'request':O,'compare_capture':S}),
 }
+BASE_EMITS=frozenset({'CANDIDATE_GRAPH','CLAUSE_BOUNDARY','ELLIPSIS','TOKEN_HYPOTHESIS'})
 
 ROLE = obj(('role_id',), {'role_id': S, 'allowed_cases': array(), 'allowed_preps': array(),
     'argument_types': array(), 'cardinality': obj((), {'min': I, 'max': {'type': ['integer', 'null'], 'minimum': 0}}),
@@ -39,6 +41,22 @@ READ = obj(('read_id', 'lemma', 'snapshot_version'), {'read_id': S, 'lemma': S, 
     'sense_id': S, 'value_id': S, 'fact_ref': S, 'ground_type': enum('C', 'W'), 'provenance': O,
     'premise_support_refs': array(), 'binding_refs': array()})
 RESOURCE_SCHEMAS = {
+    'MeasureSchema': obj(('measure_id','template_ref','subject_role','value_role','numeric_property','unit','version'), {
+        'measure_id':S,'template_ref':S,'subject_role':S,'value_role':S,'numeric_property':S,'unit':S,'version':S,
+        'literal_syntax':enum('INTEGER','DECIMAL_DOT','DECIMAL_COMMA')}),
+    'CausalSchema': obj(('schema_id','template_ref','cause_role','effect_role','version'), {
+        'schema_id':S,'template_ref':S,'cause_role':S,'effect_role':S,'version':S,
+        'temporal_policy':enum('SAME_SCOPE','ATEMPORAL_RULE')}),
+    'ComparisonDomainCertificate': obj(('domain_id','pattern_signature','variable','measure_id','request_window','member_refs','completeness_evidence','version'), {
+        'domain_id':S,'pattern_signature':{'type':'string','pattern':'^[0-9a-f]{64}$'},'variable':S,
+        'measure_id':S,'request_window':{'type':['array','null'],'items':{'type':'number'},'minItems':2,'maxItems':2},
+        'member_refs':{'type':'array','items':S,'uniqueItems':True,'maxItems':1024},
+        'completeness_evidence':array(S,minimum=1),'version':S}),
+    'CountDomain': obj(('domain_id','pattern_signature','count_unit','request_window','members','completeness_evidence','version'), {
+        'domain_id':S,'pattern_signature':{'type':'string','pattern':'^[0-9a-f]{64}$'},'count_unit':enum('ENTITY','EVENT'),
+        'count_variable':S,'request_window':{'type':'array','items':{'type':'number'},'minItems':2,'maxItems':2},
+        'members':{'type':'array','maxItems':1024,'items':obj(('key','node_refs'),{'key':S,'node_refs':{'type':'array','items':S,'minItems':1,'maxItems':1024,'uniqueItems':True},'entity_ref':S})},
+        'identity_evidence':array(S),'completeness_evidence':array(S,minimum=1),'version':S}),
     'FormulaDomainCertificate': obj(('domain_id','pattern_signature','count_variable','request_window','completeness_evidence','version'), {
         'domain_id':S,'pattern_signature':{'type':'string','pattern':'^[0-9a-f]{64}$'},'count_variable':S,
         'closure_mode':enum('ENUMERATED','ASSERTED_BOUND'),
@@ -112,6 +130,7 @@ def validate_resources(resources):
                 raise ValueError(f'{kind}[{i}] {list(error.path)}: {error.message}')
     candidate_entries = resources['CandidateSchema']['entries']
     schemas = {e['candidate_kind']: e['schema'] for e in candidate_entries}
-    if len(schemas) != len(candidate_entries) or schemas != EMIT_SCHEMAS:
-        raise ValueError('CandidateSchema must pin every registered Emit contract exactly')
+    if (len(schemas)!=len(candidate_entries) or not BASE_EMITS<=set(schemas) or not set(schemas)<=set(EMIT_SCHEMAS)
+            or any(schema!=EMIT_SCHEMAS[k] for k,schema in schemas.items())):
+        raise ValueError('CandidateSchema must pin the base and every used optional Emit exactly')
     return {k: Draft202012Validator(v) for k, v in schemas.items()}

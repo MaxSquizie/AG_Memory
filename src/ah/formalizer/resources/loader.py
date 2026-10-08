@@ -163,6 +163,10 @@ class ResourceRelease:
                 try: TimeLiteral(tuple(window))
                 except ValueError as exc: raise ResourceMissing('invalid domain window') from exc
             seen_domains.add(c['domain_id'])
+
+        from ..query_resources import validate_query_resources
+        try: validate_query_resources(self,roles,seen_domains)
+        except (ValueError,TypeError,KeyError) as exc: raise ResourceMissing(str(exc)) from exc
         for c in self.resources.get('FormulaDomainCertificate',{}).get('entries',()):
             if c['domain_id'] in seen_domains: raise ResourceMissing('duplicate domain_id')
             if c['request_window'] is not None:
@@ -179,6 +183,9 @@ class ResourceRelease:
         """Validate every declared mapping against the actual AH before T0."""
         self.assert_integrity()
         from ah.model import RefKind
+        from ..query_resources import validate_query_store
+        try: validate_query_store(self,store)
+        except (ValueError,TypeError,KeyError) as exc: raise ResourceMissing(str(exc)) from exc
         for row in self.entries('TemplateMap'):
             uid = row['template_ref']
             if (not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T

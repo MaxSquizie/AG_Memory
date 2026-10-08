@@ -210,6 +210,22 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
                     f.semantic['structural_unresolved']=True
                     state.diag('QUERY_TARGET_UNBOUND','mixed count/WH slots require an explicit scope')
                 f.semantic['query_request']={'mode':'COUNT','count_role':counts[0].role_id} if counts else {'mode':'WH','requested_roles':[edge.role_id for edge in slots]}
+            bound_variant=morph_bindings.get(h.local_id,{}).get(anchor.token_id)
+            intents=[q for q in state.query_intents if q['token_ref']==anchor.token_id
+                     and (q['variant'] is None or bound_variant is None or q['variant']==bound_variant)]
+            if intents:
+                requests={digest(q['request']):q['request'] for q in intents}
+                if len(requests)!=1:
+                    f.semantic['structural_unresolved']=True
+                    state.diag('QUERY_TARGET_UNBOUND','conflicting reviewed query intents')
+                else:
+                    explicit=next(iter(requests.values()))
+                    previous=f.semantic.get('query_request')
+                    if previous and previous.get('requested_roles',[])!=explicit.get('requested_roles',[]) and explicit.get('mode') not in {'WHY','WHEN','COMPARE'}:
+                        f.semantic['structural_unresolved']=True
+                        state.diag('QUERY_TARGET_UNBOUND','intent/structural gap mismatch')
+                    f.semantic['query_request']=explicit
+                    f.semantic['query_intent_refs']=[q['intent_id'] for q in intents]
             if i in owners:
                 f.semantic['explicit_region']=time_regions[owners[i]]
                 f.semantic['time_scope_owner']=i
@@ -331,10 +347,10 @@ def _propose(state,selector,release):
     state.frames.extend(fs)
 
 
-def _bindings(frame,evidence,valency):
+def _bindings(frame,evidence,valency,extra_gaps=()):
     roles=valency.get('roles',())
     request=frame.semantic.get('query_request',{})
-    gaps=set(request.get('requested_roles',())) | ({request['count_role']} if request.get('count_role') else set())
+    gaps=set(request.get('requested_roles',())) | ({request['count_role']} if request.get('count_role') else set()) | set(extra_gaps)
     if not gaps<={r['role_id'] for r in roles}: return []
     if any(not any(r['role_id']==role and set(r.get('argument_types',())) & {'PROPOSITION','EVENT'} for r in roles) for role in frame.semantic.get('proposition_args',{})):
         return []
@@ -381,6 +397,19 @@ def run_native(text,selector,release,observation,morph=None):
         ev.variants=tuple(sorted(ev.variants,key=lambda v:(-int((v.lemma,v.pos) in preferred),-v.score)))
     state.frames=_grammar_frames(state,release)
     _propose(state,selector,release)
+    if observation.get('goal_request'):
+        from .query_requests import validate_request
+        owners=[f for f in state.frames if f.semantic.get('query_request')]
+        if len(owners)==1 or not owners and len(state.frames)==1:
+            owner=owners[0] if owners else state.frames[0]
+            try:
+                request=validate_request(observation['goal_request'])
+                old=owner.semantic.get('query_request',{})
+                if old.get('requested_roles') and request.get('requested_roles')!=old['requested_roles']:
+                    raise ValueError('QUERY_TARGET_UNBOUND')
+                owner.semantic['query_request']=request
+            except ValueError as exc:
+                owner.semantic['structural_unresolved']=True; state.diag(str(exc),'host query intent')
     preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
     state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
     from .coreference import prepare_references,resolve_references
@@ -434,13 +463,28 @@ def run_native(text,selector,release,observation,morph=None):
         for s in senses:
             valencies=[v for v in release.entries('R-V') if v['sense_id']==s['sense_id']]
             for v in valencies:
-                try: bindings=_bindings(frame,evidence,v)
+                # A declared measured-value question can existentially bind
+                # an omitted value. This is licensed by its actual mapped T,
+                # not by an arbitrary missing mandatory predicate argument.
+                request=frame.semantic.get('query_request',{}); extra=()
+                if request.get('mode') in {'SUPERLATIVE','COMPARE'}:
+                    measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',()) if m['measure_id']==request.get('measure_id')]
+                    if len(measures)==1:
+                        measure=measures[0]
+                        mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==s['sense_id'] and m['template_ref']==measure['template_ref']
+                                  and set(m['roles'])=={r['role_id'] for r in v.get('roles',())}]
+                        supplied=set(frame.semantic.get('proposed_roles',{}).values())|set(request.get('requested_roles',()))
+                        if mappings and measure['value_role'] not in supplied:
+                            extra=(measure['value_role'],)
+                try: bindings=_bindings(frame,evidence,v,extra)
                 except ValueError:
                     frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
                 for bs in bindings:
                     mode=v.get('temporal_mode_hint') or v.get('state_class') or 'UNKNOWN'
-                    cid=s['sense_id']+':'+digest([bs,v])[:16]
-                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'state_class':mode,'valency_ref':v.get('construction_id',digest(v))})
+                    implicit=tuple(r for r in extra if r not in bs.values())
+                    cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
+                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                                  **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
         if not senses:
             policy=release.entries('OpenTemplatePolicy')
