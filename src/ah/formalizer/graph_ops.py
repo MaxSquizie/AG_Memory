@@ -106,7 +106,7 @@ def handle_add_scope(core: Any, p: dict) -> None:
             continue
         fid = "EXISTS" if op == "AT_LEAST_N" else OPERATOR_TO_FUNCTION.get(op)
         if fid is None:
-            continue  # unregistered operator -> not materialized (honest incompleteness)
+            raise ValueError("SCOPE_NOT_COVERED:"+op)
         node_domain = Domain.H if op in ("POSSIBLE", "NECESSARY") else domain
         if op in ("SOME", "EVERY", "AT_LEAST_N"):
             raw_vid = step.get("variable_id")
@@ -128,7 +128,7 @@ def handle_add_scope(core: Any, p: dict) -> None:
             current = gref
         else:  # NOT / POSSIBLE / REQUIRED (unary); IF deferred to a two-operand slice
             if op == "IF":
-                continue
+                raise ValueError("IMPLIES_REQUIRES_TWO_OPERANDS")
             current = core.ref(core.add_function(node_domain, fid, (current,)).uid)
 
 
@@ -146,3 +146,67 @@ def register_graph_handlers(adapter: Any) -> None:
     """Register all graph op handlers on a Store adapter (idempotent)."""
     for op_type, handler in GRAPH_HANDLERS.items():
         adapter.register_op_handler(op_type, handler)
+
+# Native operations carry typed references and preassigned stable IDs. They never
+# resolve an ENTITY argument to an S token or fabricate a known TemplateMap entry.
+def ensure_entity(core,p):
+    uid=p['uid']
+    if p.get('reference_existing') and not core.store.has_uid(uid): raise ValueError('STALE_PLAN')
+    if not core.store.has_uid(uid):
+        props={}
+        if p.get('name'): props['name']=Property('name',p['name'],'str')
+        core.add_entity(Domain(p.get('domain','C')),props,meta={'source_tag':p.get('source_tag'),'mention_ref':p.get('mention_ref')},uid=uid)
+    elif core.store.kind_of(uid).value!='M': raise ValueError('ENTITY_REF_TYPE_MISMATCH')
+    return uid
+
+
+def ensure_template(core,p):
+    uid=p['uid']
+    if core.store.has_uid(uid):
+        if core.store.kind_of(uid).value!='T': raise ValueError('TEMPLATE_REF_TYPE_MISMATCH')
+        return uid
+    if p.get('semantic_status')!='UNLINKED': raise ValueError('CANONICAL_MAPPING_MISSING')
+    pred=_ensure_symbol(core,p['predicate_form'])
+    core.add_template(Domain(p.get('domain','C')),pred,_roles(p['roles']),uid=uid)
+    return uid
+
+
+def native_operand(core,value):
+    if isinstance(value,dict) and 'bound_var' in value:
+        return BoundVar(value['bound_var'],VariableSort(value.get('sort','ENTITY')))
+    uid=value['ref'] if isinstance(value,dict) else value
+    return core.ref(uid)
+
+
+def ensure_node(core,p):
+    uid=p['uid']
+    if core.store.has_uid(uid):
+        if core.store.kind_of(uid).value!='N': raise ValueError('NODE_REF_TYPE_MISMATCH')
+        old=core.store.get_hypernode(uid)
+        actants={ActantRole(k):native_operand(core,v) for k,v in p['actants'].items()}
+        if old.template!=core.ref(p['template_ref']) or dict(old.actants)!=actants:
+            raise ValueError('INTEGRITY_ERROR: node content changed')
+        return uid
+    core.add_hypernode(Domain(p.get('domain','C')),core.ref(p['template_ref']),{ActantRole(k):native_operand(core,v) for k,v in p['actants'].items()},float(p.get('weight',0.5)),meta={'semantic_status':p.get('semantic_status','KNOWN'),'identity_key':p.get('identity_key'), 'temporal_mode':p.get('temporal_mode','UNKNOWN'),'source_tag':p.get('source_tag')},uid=uid,deduplicate=False,count_occurrence=False)
+    return uid
+
+
+def ensure_function(core,p):
+    uid=p['uid']; fid=core.function_registry.canonical_id(p['function_id'])
+    operands=tuple(native_operand(core,x) for x in p['operands'])
+    if fid in {'AND','OR','XOR'}:
+        operands=tuple(sorted(operands,key=lambda x:(getattr(x,'kind',None).value if isinstance(x,Ref) else 'VAR',getattr(x,'uid',str(x)))))
+    if fid in {'FORALL','EXISTS'} and len(operands)!=2: raise ValueError('QUANTIFIER_ARITY_INVALID')
+    if core.store.has_uid(uid):
+        old=core.store.get_element_any_domain(uid)
+        if getattr(old,'function_id',None)!=fid or old.operands!=operands: raise ValueError('INTEGRITY_ERROR: function content changed')
+    else: core.add_function(Domain(p.get('domain','C')),fid,operands,uid=uid)
+    return uid
+
+
+def ensure_group(core,p):
+    if not core.store.has_uid(p['uid']):
+        core.add_group(Domain(p.get('domain','C')),tuple(core.ref(r) for r in p['members']),uid=p['uid'])
+    return p['uid']
+
+GRAPH_HANDLERS.update(ENSURE_ENTITY=ensure_entity,ENSURE_TEMPLATE=ensure_template,ENSURE_NODE=ensure_node,ENSURE_FUNCTION=ensure_function,ENSURE_GROUP=ensure_group)

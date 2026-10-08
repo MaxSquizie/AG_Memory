@@ -32,6 +32,9 @@ class _StoreState:
     )
     links: dict[str, Link] = field(default_factory=dict)
 
+    # Canonical V7 proof / usage / temporal records; persisted with AH.
+    formalizer_state: dict = field(default_factory=dict)
+
     # Runtime state exists only for excitable S/C/P/H elements. L has no x.
     runtime: dict[str, RuntimeState] = field(default_factory=dict)
 
@@ -92,6 +95,12 @@ class AHStore:
     def __init__(self) -> None:
         self._state = _StoreState()
         self._lock = RLock()
+
+    def formalizer_fact_visible(self, uid: str) -> bool | None:
+        """None denotes legacy data; managed N/G require their own live proof."""
+        if uid not in self._state.formalizer_state.get('nodes',{}): return None
+        from ah.formalizer.canonical_ledger import CanonicalLedger
+        return uid in CanonicalLedger(self._state.formalizer_state).f_visible()
 
     def clone(self) -> "AHStore":
         other = AHStore()

@@ -159,26 +159,31 @@ class LLMPerceptionService:
             )
 
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
-        # The formalizer vertical is the ONLY runtime perception path (V7 §14). There is no
-        # legacy adaptive fallback and no single-call protocol fallback: a service without an
-        # attached formalizer cannot perceive rather than silently degrading to a removed parser.
-        del interaction_context
-        if self._formalizer is None:
-            raise PerceptionParseError(
-                "LLMPerceptionService requires an attached formalizer; the legacy adaptive parser has been removed"
-            )
-        return self._formalizer.parse(text)
+        return self.perceive(text, interaction_context)
 
-    def perceive(self, text: str, interaction_context: InteractionContext) -> "PerceptionResult":
-        """I01/I02 perception entry for the agent loop. In V7-native mode (``native_commit`` + a wired durable
-        store) real input is run through T0..T4 -> C -> T5 gate (+binding CAS) -> T6 and committed durably as a
-        side effect; this returns the FULL PerceptionResult (assertions/queries/commands via speech-act detection)
-        so downstream (_complete_dynamic_templates -> integrate_external -> ignition) is unchanged. Otherwise it
-        falls back to :meth:`parse` — byte-for-byte identical behavior when ``native_commit`` is off."""
-        if self._native_commit and self._formalizer is not None and self._formalizer.native_available:
-            del interaction_context
-            return self._formalizer.interpret(text).perception
-        return self.parse(text, interaction_context)
+    def perceive(self, text: str, interaction_context: InteractionContext, *, raw_input=None) -> PerceptionResult:
+        if self._formalizer is None or not self._formalizer.native_available:
+            raise PerceptionParseError("V7 requires a canonical store and resource release; legacy fact writes are disabled")
+        from ah.formalizer.pipeline import t0
+        from ah.temporal import exact_datetime_from_ref
+        context=interaction_context
+        declared=dict(raw_input or {})
+        declared['context_snapshot']={k:(getattr(context,k).uid if getattr(context,k,None) else None) for k in ('self_ref','user_ref','now_ref','active_location_ref')}
+        bindings={}
+        pronouns=dict(context.pronoun_refs)
+        if context.user_ref: pronouns.setdefault('я',context.user_ref)
+        if context.self_ref: pronouns.setdefault('ты',context.self_ref)
+        for ev in t0(text).evidence:
+            ref=pronouns.get(ev.span.casefold())
+            if ref: bindings[ev.token_id]=ref.uid
+        declared.setdefault('entity_bindings',bindings)
+        if context.now_ref:
+            when=exact_datetime_from_ref(self._formalizer._store._core,context.now_ref)
+            if when: declared.setdefault('time_anchor',when.isoformat())
+        receipt=self._formalizer.interpret(text,raw_input=declared)
+        if receipt.terminal=='' and receipt.diagnostics:
+            raise PerceptionParseError('; '.join(receipt.diagnostics))
+        return replace(receipt.perception,native_receipt=receipt)
 
     def parse_with_structural_resolution(
         self,

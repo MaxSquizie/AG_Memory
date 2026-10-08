@@ -96,10 +96,12 @@ _EDGE_PUNCT = "\u201c\u201d\u201e\u201f\"'.,!?;:()[]"
 
 def t0(text: str) -> FormalizationState:
     state = FormalizationState.new(text)
-    for token in re.findall(r"\S+", text):
-        span = token.strip(_EDGE_PUNCT)  # terminal punctuation is not part of the word form
+    for match in re.finditer(r"\w+(?:[-’]\w+)*|[^\w\s]", text):
+        token = match.group()
+        span = token  # preserve punctuation and source ranges
+        # span = token.strip(_EDGE_PUNCT)  # terminal punctuation is not part of the word form
         if span:
-            state.evidence.append(TokenEvidence(span=span))
+            state.evidence.append(TokenEvidence(span=span,token_id=f"tok:{match.start()}:{match.end()}",start=match.start(),end=match.end()))
     return state
 
 
@@ -411,7 +413,7 @@ def t2(state: FormalizationState) -> FormalizationState:
             return evs[j].pos == "VERB" and any(
                 v.tense in ("past", "present", "future") for v in evs[j].variants)
 
-        sub_nominals = [e.span for j, e in enumerate(evs[i + 1:end + 1]) if nominal(j)]
+        sub_nominals = [e.span for j, e in enumerate(evs[i + 1:end + 1],start=i+1) if nominal(j)]
         centers_before = [j for j in range(i) if _finite(j) and not _is_copula(evs[j])]
         sub_center = next((j for j in range(i + 1, end + 1) if _finite(j)), None)
         if not centers_before or sub_center is None:
@@ -432,7 +434,7 @@ def t2(state: FormalizationState) -> FormalizationState:
     for i, ev in enumerate(evs):
         if ev.pos == "CONJ" and (ev.lemma or "").lower() in _CONJUNCTIONS:
             left = [e.span for j, e in enumerate(evs[:i]) if nominal(j)]
-            right = [e.span for j, e in enumerate(evs[i + 1:]) if nominal(j)]
+            right = [e.span for j, e in enumerate(evs[i + 1:],start=i+1) if nominal(j)]
             if left and right:
                 frames.append(FrameCandidate(
                     frame_id=f"K{i}", kind="COORD", anchor_span=ev.span,

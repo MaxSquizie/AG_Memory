@@ -85,7 +85,7 @@ def evaluate_fragment(f: FragmentT5Input):
         return False, "COND_3"
     if not f.integrity_ok:
         return False, "COND_4"
-    if not f.truth_grounds:
+    if not f.truth_grounds or any(g not in {'O','C','W'} for g in f.truth_grounds):
         return False, "COND_5"  # no O/C/W truth ground -> the fact is not asserted
     return True, None
 
@@ -96,7 +96,7 @@ def _batch_hash(observation_id: str, version: int, fragments: Sequence[FragmentT
         "version": version,
         "fragments": sorted(
             (f.fragment_id, f.outcome, f.generation_complete, list(f.pending_reads),
-             f.dependencies_resolved, f.integrity_ok, tuple(f.truth_grounds))
+             f.dependencies_resolved, f.integrity_ok, tuple(f.truth_grounds), f.known_mapping_missing, f.candidate_source_exhausted)
             for f in fragments
         ),
     }
@@ -121,7 +121,7 @@ def t5_batch(
 
     # (1) Commit eligibility (§0.8): check run_id against the durable binding BEFORE any batch write.
     holder = binding.holder(observation_id, version)
-    if holder is not None and holder != run_id:
+    if holder != run_id:
         # A different owner holds this interpretation version -> INTEGRITY_ERROR; no canonical fact, AH unchanged.
         return T5Result(batch_hash=_batch_hash(observation_id, version, fragments), eligibility="INTEGRITY_ERROR")
 

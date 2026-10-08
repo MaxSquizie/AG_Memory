@@ -40,21 +40,25 @@ def _build_formalizer_adapter(config, core):
     I01: also wires the V7-native durable path — a persistent two-channel journal under ``paths.data_dir``
     over ``core.store`` plus an InterpretationRunBinding — so real input can be committed durably and read
     back from the store (native mode) instead of only being translated to a PerceptionResult (legacy mode)."""
+    from ah.core.journal import JournalChannel
+    from ah.formalizer.ah_adapter import AHStoreAdapter
+    from ah.formalizer.real_backend import selector_from_config
+    from ah.formalizer.run_binding import InterpretationRunBinding
+    from ah.formalizer.runtime_adapter import FormalizerAdapter
+    from ah.formalizer.resources.loader import ResourceRelease
+    journal=JournalChannel(config.paths.data_dir / config.formalizer.journal_filename)
+    sel=selector_from_config(config,journal=journal)
+    if sel is None: return None
+    import json
+    from ah.formalizer.resources.loader import ResourceMissing
     try:
-        from ah.core.journal import JournalChannel
-        from ah.formalizer.ah_adapter import AHStoreAdapter
-        from ah.formalizer.real_backend import selector_from_config
-        from ah.formalizer.run_binding import InterpretationRunBinding
-        from ah.formalizer.runtime_adapter import FormalizerAdapter
-
-        sel = selector_from_config(config)
-        if sel is None:
-            return None
-        store = AHStoreAdapter(core.store, JournalChannel(config.paths.data_dir / config.formalizer.journal_filename))
-        binding = InterpretationRunBinding()
-        return FormalizerAdapter(sel, store=store, binding=binding)
-    except Exception:
-        return None
+        trusted=json.loads((config.paths.data_dir / config.formalizer.review_records_filename).read_text(encoding='utf-8'))
+    except (OSError,ValueError) as exc:
+        raise ResourceMissing('RESOURCE_MISSING: trusted review file is required') from exc
+    release=ResourceRelease.load(config.paths.data_dir / config.formalizer.resource_release_filename,trusted_reviews=trusted)
+    store=AHStoreAdapter(core.store,journal,core=core)
+    store.recover_from_head()
+    return FormalizerAdapter(sel,store=store,binding=InterpretationRunBinding(journal),release=release)
 
 
 @dataclass(slots=True)
@@ -282,7 +286,7 @@ class RuntimeServices:
                     morphology_backend=new_config.llm.perception_morphology_backend,
                     embedding_model=new_config.llm.perception_embedding_model,
                 ),
-                formalizer=_build_formalizer_adapter(new_config),
+                formalizer=_build_formalizer_adapter(new_config, self.core),
             )
             self.agent = LLMAgent(
                 self.llm,

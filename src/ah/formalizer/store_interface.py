@@ -37,6 +37,9 @@ from typing import Any, Sequence
 class TerminalOutcome(str, Enum):
     """Terminal status appended to the journal for a committed batch/assertion."""
 
+    PENDING_ADMISSION_ORDER = "PENDING_ADMISSION_ORDER"  # transient; never journaled as terminal
+    REJECTED_COMMIT_ELIGIBILITY = "REJECTED_COMMIT_ELIGIBILITY"
+    RESOLUTION_ONLY = "RESOLUTION_ONLY"  # no batch/marker/world-fact mutation
     APPLIED = "APPLIED"
     REJECTED_CONFLICT_ADMISSION = "REJECTED_CONFLICT_ADMISSION"  # §7.3 head-only admission lost
     STALE_SUPERSEDED = "STALE_SUPERSEDED"                      # §8 superseded by a newer version
@@ -74,6 +77,8 @@ class StoreOp:
 
     op_type: str          # e.g. "ADD_ELEMENT" | "ADD_LINK" | "SET_MARKER" | ...
     payload: dict         # operation arguments, interpreted by the concrete store
+    fragment_refs: tuple[str, ...] = ()
+    deps: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -98,6 +103,11 @@ class CommitDecision:
     marker: MaterializationMarker
     ops_digest: str       # stable hash of plan\\E ops (integrity check on recovery)
     outcome: TerminalOutcome
+    committed: tuple[str, ...] = ()
+    excluded: tuple[str, ...] = ()
+    cited: tuple[str, ...] = ()
+    excluded_evidence: tuple[dict, ...] = ()
+    precheck_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

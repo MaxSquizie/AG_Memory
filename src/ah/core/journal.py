@@ -1,138 +1,131 @@
-# -*- coding: utf-8 -*-
-"""Append-only durable journal — the missing AH durability primitive (V7 §7.2).
-
-AH's existing persistence is snapshot-based (:class:`ah.core.persistence.JsonPersistence`):
-it rewrites the whole store atomically with fsync, but it has NO append-only log and no
-per-record durability. V7 needs a two-channel journal (observation / resolution_log) whose
-records survive a crash so that T5 pre-commit records and terminal outcomes can be replayed
-and recovery can restore a committed outcome from COMMIT_DECISION D without re-admission.
-
-Design (kept minimal on purpose — no new monolith):
-* ONE physical append-only log file; the two channels are logical partitions of it, each
-  record tagged with its ``channel``. A single total order (monotonic ``seq``) drives
-  head-only admission and recovery ordering.
-* Every append is flushed and fsynced before :meth:`append` returns, so a returned seq is
-  durable.
-* Crash safety: on open / :meth:`recover`, the log is scanned; the longest prefix of lines
-  that parse as well-formed records is kept, any trailing torn line (a crash mid-write) is
-  dropped by rewriting the file with only the valid prefix, and ``head`` is derived from the
-  surviving records — never from a separate counter that could lie after a crash.
-
-This module is AH-core infrastructure; the formalizer's :class:`ah_adapter` wraps it behind
-the :class:`~ah.formalizer.store_interface.Store` contract.
-"""
-
+"""Checksummed atomic journal frames and a process-shared, reentrant writer lock."""
 from __future__ import annotations
-
+import hashlib
 import json
 import os
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from threading import RLock, local
+
+
+class JournalIntegrityError(RuntimeError):
+    pass
+
+_LOCKS: dict[str, RLock] = {}
+_LOCKS_GUARD = RLock()
+_LOCAL = local()
 
 
 def _fsync_dir_best_effort(path: Path) -> None:
-    """Fsync the containing directory (new-file durability). Best-effort on Windows."""
     try:
-        dfd = os.open(str(path.parent), os.O_RDONLY)
-    except OSError:
-        return
-    try:
-        os.fsync(dfd)
+        fd = os.open(str(path.parent), os.O_RDONLY)
+        try: os.fsync(fd)
+        finally: os.close(fd)
     except OSError:
         pass
-    finally:
-        os.close(dfd)
+
+
+def canonical_json(value) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'), allow_nan=False)
 
 
 class JournalChannel:
-    """A single append-only durable log with logical observation/resolution channels."""
-
-    def __init__(self, path: str | Path) -> None:
-        self._path = Path(path)
+    def __init__(self, path: str | Path):
+        self._path = Path(path).resolve()
         self._path.parent.mkdir(parents=True, exist_ok=True)
-        is_new = not self._path.exists()
-        if is_new:
-            self._path.touch()
-            _fsync_dir_best_effort(self._path)
-        self._head = self.recover()
+        self._key = str(self._path)
+        with _LOCKS_GUARD:
+            self._lock = _LOCKS.setdefault(self._key, RLock())
+        with self.atomic():
+            if not self._path.exists():
+                self._path.touch()
+                _fsync_dir_best_effort(self._path)
+            self._head = self.recover()
 
-    # -- durability primitives -------------------------------------------- #
-    def append(self, channel: str, payload: dict[str, Any], run_id: str = "") -> int:
-        """Append one record and fsync it; return its durable ``seq``."""
-        self._head += 1
-        rec = {"seq": self._head, "channel": channel, "run_id": run_id, "payload": payload}
-        line = json.dumps(rec, ensure_ascii=False) + "\n"
-        with open(self._path, "a", encoding="utf-8") as fh:
-            fh.write(line)
-            fh.flush()
-            os.fsync(fh.fileno())
-        return self._head
+    @contextmanager
+    def atomic(self):
+        """Shared boundary for batch, goals, binding CAS and retraction (DB-N)."""
+        with self._lock:
+            held = getattr(_LOCAL, 'held', {})
+            _LOCAL.held = held
+            if self._key in held:
+                held[self._key] += 1
+                try: yield
+                finally: held[self._key] -= 1
+                return
+            lockpath = self._path.with_suffix(self._path.suffix + '.lock')
+            with open(lockpath, 'a+b') as fh:
+                if os.name == 'nt':
+                    import msvcrt
+                    if fh.tell() == 0:
+                        fh.write(b'0'); fh.flush()
+                    fh.seek(0); msvcrt.locking(fh.fileno(), msvcrt.LK_LOCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+                held[self._key] = 1
+                try: yield
+                finally:
+                    del held[self._key]
+                    if os.name == 'nt':
+                        fh.seek(0); msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+                    else:
+                        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
-    def read_global_head(self) -> int:
-        """Highest durable seq (0 if the log is empty)."""
-        return self._head
-
-    def scan_unprocessed(self, after_seq: int = 0, channel: str | None = None) -> list[dict[str, Any]]:
-        """Records with ``seq > after_seq`` in ascending order; optionally one channel."""
-        out = []
-        for rec in self._iter_valid():
-            if rec["seq"] <= after_seq:
-                continue
-            if channel is not None and rec["channel"] != channel:
-                continue
-            out.append(rec)
-        return sorted(out, key=lambda r: r["seq"])
-
-    def recover(self) -> int:
-        """Drop any trailing torn line and re-derive ``head`` from surviving records.
-
-        Returns the recovered head seq. Safe to call on open and after a simulated crash.
-        """
-        raw = self._path.read_text(encoding="utf-8") if self._path.exists() else ""
-        lines = [ln for ln in raw.split("\n") if ln.strip() != ""]
-        valid: list[str] = []
-        head = 0
-        torn_tail = False
-        for ln in lines:
+    def _read(self, repair_tail=False):
+        raw = self._path.read_bytes() if self._path.exists() else b''
+        chunks = raw.splitlines(keepends=True)
+        records = []; offset = 0
+        for i, line in enumerate(chunks):
+            if not line.endswith(b'\n'):
+                if i != len(chunks)-1 or not repair_tail:
+                    raise JournalIntegrityError('INTEGRITY_ERROR: incomplete journal tail')
+                with open(self._path, 'r+b') as f:
+                    f.truncate(offset); f.flush(); os.fsync(f.fileno())
+                break
             try:
-                rec = json.loads(ln)
-            except (json.JSONDecodeError, ValueError):
-                torn_tail = True  # first unparseable line starts the torn tail
-                break
-            if not isinstance(rec, dict) or "seq" not in rec:
-                torn_tail = True
-                break
-            valid.append(ln)
-            head = max(head, int(rec["seq"]))
+                rec = json.loads(line)
+                if not isinstance(rec, dict) or type(rec.get('seq')) is not int or rec['seq'] != len(records)+1:
+                    raise ValueError('noncontiguous seq')
+                if not isinstance(rec.get('payload'), dict) or not isinstance(rec.get('channel'), str):
+                    raise ValueError('invalid record schema')
+                checksum = rec.get('checksum')
+                body = {k:v for k,v in rec.items() if k != 'checksum'}
+                if checksum is not None and checksum != hashlib.sha256(canonical_json(body).encode()).hexdigest():
+                    raise ValueError('checksum mismatch')
+            except (ValueError, TypeError, UnicodeDecodeError) as exc:
+                raise JournalIntegrityError(f'INTEGRITY_ERROR: journal frame {i+1}: {exc}') from exc
+            records.append(rec); offset += len(line)
+        return records
 
-        if torn_tail and len(valid) != len(lines):
-            # Rewrite with only the valid prefix so future appends are clean.
-            data = "".join(v + "\n" for v in valid)
-            tmp = self._path.with_suffix(self._path.suffix + ".tmp")
-            with open(tmp, "w", encoding="utf-8", newline="\n") as fh:
-                fh.write(data)
-                fh.flush()
-                os.fsync(fh.fileno())
-            os.replace(str(tmp), str(self._path))
-            _fsync_dir_best_effort(self._path)
+    def append(self, channel: str, payload: dict, run_id: str = '') -> int:
+        with self.atomic():
+            records = self._read(repair_tail=True)
+            seq = len(records)+1
+            body = {'seq':seq, 'channel':channel, 'run_id':run_id, 'payload':payload}
+            checksum = hashlib.sha256(canonical_json(body).encode()).hexdigest()
+            encoded = (canonical_json({**body,'checksum':checksum})+'\n').encode('utf-8')
+            # Never publish an incremented head before fsync succeeded.
+            with open(self._path,'ab') as f:
+                f.write(encoded); f.flush(); os.fsync(f.fileno())
+            self._head = seq
+            return seq
 
-        self._head = head
-        return head
+    def read_global_head(self):
+        with self.atomic(): return len(self._read(repair_tail=True))
 
-    # -- internals --------------------------------------------------------- #
+    def scan_unprocessed(self, after_seq=0, channel=None):
+        with self.atomic():
+            return [r for r in self._read(repair_tail=True)
+                    if r['seq'] > after_seq and (channel is None or r['channel']==channel)]
+
+    def recover(self):
+        with self.atomic():
+            self._head = len(self._read(repair_tail=True))
+            return self._head
+
     def _iter_valid(self):
-        if not self._path.exists():
-            return
-        for ln in self._path.read_text(encoding="utf-8").split("\n"):
-            if not ln.strip():
-                continue
-            try:
-                rec = json.loads(ln)
-            except (json.JSONDecodeError, ValueError):
-                break  # torn tail — stop at first unparseable line
-            if isinstance(rec, dict) and "seq" in rec:
-                yield rec
+        yield from self.scan_unprocessed()
 
     @property
-    def path(self) -> Path:
-        return self._path
+    def path(self): return self._path

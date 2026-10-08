@@ -714,6 +714,7 @@ class InferenceEngine:
         runtime: GoalRuntime | None = None,
         *,
         logical_depth: int = 0,
+        temporal_point=None, temporal_window=None,
     ) -> list[Hypernode]:
         out: list[Hypernode] = []
         # Template index is the deterministic candidate generator. Do not scan the
@@ -732,6 +733,10 @@ class InferenceEngine:
                 detail="goal-derived T index lookup",
             )
         for element in candidates:
+            if self.core.store.formalizer_fact_visible(element.uid) is not None:
+                adapter=getattr(self.core,'_formalizer_adapter',None)
+                if adapter is None or adapter.prove_node(element.uid,point=temporal_point,window=temporal_window)['answer']!='YES':
+                    continue
             # Scoped propositions are operands of canonical semantic operators
             # (for example IMPLIES/OR/NOT scopes). Their presence represents proposition content, not
             # an asserted world fact, so ordinary EXISTS/ROLE_FILL must ignore them.
@@ -764,7 +769,7 @@ class InferenceEngine:
 
     def _role_fill(self, goal: RoleFillGoal, runtime: GoalRuntime) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
-        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime)
+        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime, temporal_point=goal.temporal_point, temporal_window=goal.temporal_window)
         conflicted: list[Ref] = []
         for node in matches:
             fact_ref = self.core.ref(node.uid)
@@ -808,7 +813,7 @@ class InferenceEngine:
     def _multi_role_fill(self, goal: MultiRoleFillGoal, runtime: GoalRuntime) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
         """Bind every requested WH role from one canonical fact."""
-        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime)
+        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime, temporal_point=goal.temporal_point, temporal_window=goal.temporal_window)
         conflicted: list[Ref] = []
         for node in matches:
             fact_ref = self.core.ref(node.uid)
@@ -871,7 +876,14 @@ class InferenceEngine:
         runtime: GoalRuntime,
     ) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
-        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime)
+        adapter=getattr(self.core,'_formalizer_adapter',None)
+        if adapter is not None:
+            answer=adapter.query_template(goal.template_ref.uid,goal.known_roles,point=goal.temporal_point,window=goal.temporal_window)
+            if answer['managed']:
+                status=LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED if answer['answer']=='NO' else LogicalStatus.UNKNOWN
+                ref=self.core.ref(answer['evidence_ref']) if answer.get('evidence_ref') else None
+                return InferenceOutcome(status,StopReason.SEARCH_EXHAUSTED if ref is None else StopReason.GOAL_SATISFIED,ExistingRefConclusion(ref) if ref else None,(ref,) if ref else (),(),None,1,tuple(answer.get('diagnostics',()))+tuple('conflict_ref:'+r for r in answer['conflict_ref']))
+        matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime, temporal_point=goal.temporal_point, temporal_window=goal.temporal_window)
         conflicted: list[Ref] = []
         for node in matches:
             ref = self.core.ref(node.uid)

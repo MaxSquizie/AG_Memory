@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 
 LIFECYCLE = ("OPEN", "PROVISIONAL", "COMMITTED")
 OUTCOMES = ("RESOLVED", "AMBIGUOUS", "INSUFFICIENT_CONTEXT", "NO_CANDIDATE", "UNRESOLVED")
-GROUND_TYPES = ("R", "C", "D", "M", "A", "W")
+GROUND_TYPES = ("R", "C", "D", "M", "A", "W", "O", "P")
 
 
 @dataclass(frozen=True)
@@ -100,6 +100,9 @@ class TokenEvidence:
     the index stays a pure derivation. Unresolved case ambiguity stays a decision."""
 
     span: str
+    token_id: str = ""
+    start: int = 0
+    end: int = 0
     lemma: str | None = None  # top variant (convenience mirror)
     pos: str | None = None  # top variant POS
     cases: frozenset[str] = frozenset()  # INDEX only: strict union over variants
@@ -126,6 +129,10 @@ class FrameCandidate:
     copula_ellipsis: bool = False
     attachment: str | None = None  # Rev18/OP4_NESTED: the matrix predicate center this subclause attaches to
     rank: int = 0
+    predicate_token_ref: str = ""
+    argument_token_refs: tuple[str, ...] = ()
+    source_range: tuple[int,int] = (0,0)
+    semantic: dict = field(default_factory=dict)
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)  # Rev16/H6
 
 
@@ -317,6 +324,8 @@ class FormalizationState:
     context_facts: tuple[str, ...] = ()  # declared contextual statements (C grounds); baseline passes none
     constraints: list[ConstraintEdge] = field(default_factory=list)  # declared cluster edges (§T4 rev8)
     miss_reports: list[str] = field(default_factory=list)
+    observation: dict = field(default_factory=dict)
+    resource_snapshot: dict = field(default_factory=dict)
     rejections: list[RejectionRecord] = field(default_factory=list)  # I29/§2.3 audit trail
 
     def reject(self, candidate_id: str, stage: str, reason: str,
@@ -329,7 +338,8 @@ class FormalizationState:
 
     @classmethod
     def new(cls, text: str, context_facts: tuple[str, ...] = ()) -> "FormalizationState":
-        uid = hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
+        from uuid import uuid4
+        uid = "observation:"+uuid4().hex
         return cls(source_uid=uid, interpretation_version=1, context_version=1,
                   text=text, context_facts=context_facts)
 

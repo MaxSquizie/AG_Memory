@@ -42,6 +42,8 @@ class SupportRecord:
     premises: tuple[str, ...] = ()   # node ids (for DERIVED)
     tag: tuple[str, int] = ("", 0)   # (observation_id, interpretation_version)
     status: str = "LIVE"             # LIVE | SUPERSEDED
+    binding_refs: tuple[str, ...] = ()
+    temporal_assertion_refs: tuple[str, ...] = ()
 
 
 @dataclass
@@ -59,12 +61,35 @@ class ProofGraph:
 
     def __init__(self, nodes: Sequence[Node] = ()) -> None:
         self.nodes: dict[str, Node] = {n.node_id: n for n in nodes}
+        self.binding_status: dict[str, str] = {}
+        self.assertion_status: dict[str, str] = {}
+        self.audit: list[dict] = []
+
+    def add_node(self, node: Node) -> None:
+        self.nodes[node.node_id] = node
+
+    def effective_supports(self) -> set[str]:
+        records = {r.record_id: r for n in self.nodes.values() for r in n.supports}
+        live: set[str] = set()
+        while True:
+            new = {rid for rid, r in records.items() if r.status == "LIVE"
+                   and all(self.binding_status.get(b, "INVALID") == "LIVE" for b in r.binding_refs)
+                   and all(self.assertion_status.get(a, "RETRACTED") == "LIVE" for a in r.temporal_assertion_refs)
+                   and ((r.kind == "ROOT" and r.ground_type in FACT_GROUNDS)
+                        or (r.kind == "DERIVED" and bool(r.premises) and all(p in live for p in r.premises)))}
+            if new <= live:
+                return live
+            live.update(new)
 
     # -- support writers ---------------------------------------------------- #
     def add_root_support(self, node_id: str, ground_type: str, tag: tuple[str, int], record_id: str) -> SupportRecord:
         """Attach a direct O/C/W support. R/D/M/A/P are rejected (they never assert a fact)."""
         if ground_type not in FACT_GROUNDS:
             raise InvalidFactGround(f"{ground_type!r} is an interpretation ground, not a fact ground")
+        existing = next((r for r in self.nodes[node_id].supports if r.record_id == record_id), None)
+        if existing is not None:
+            return existing
+        self.nodes[node_id].status = "LIVE"
         rec = SupportRecord(record_id=record_id, conclusion_ref=node_id, kind="ROOT",
                            ground_type=ground_type, tag=tag)
         self.nodes[node_id].supports.append(rec)
@@ -81,25 +106,8 @@ class ProofGraph:
     # -- liveness (monotone fixpoints, cycle-safe) -------------------------- #
     def f_visible(self) -> set[str]:
         """Nodes with >=1 live, complete support. A DERIVED path is complete iff all its premises are F-visible."""
-        visible: set[str] = set()
-        while True:
-            grew = False
-            for node in self.nodes.values():
-                if node.node_id in visible or node.status != "LIVE":
-                    continue
-                for rec in node.supports:
-                    if rec.status != "LIVE":
-                        continue
-                    if rec.kind == "ROOT":
-                        visible.add(node.node_id)
-                        grew = True
-                        break
-                    if all(p in visible for p in rec.premises):  # DERIVED: premises must be F-visible
-                        visible.add(node.node_id)
-                        grew = True
-                        break
-            if not grew:
-                return visible
+        paths = self.effective_supports()
+        return {n.node_id for n in self.nodes.values() if any(r.record_id in paths for r in n.supports)}
 
     def s_accessible(self, fvis: set[str] | None = None) -> set[str]:
         """Nodes reachable by a live UsageLink chain to an F-visible ancestor (or F-visible themselves)."""
@@ -108,7 +116,7 @@ class ProofGraph:
         while True:
             grew = False
             for node in self.nodes.values():
-                if node.node_id in acc or node.status != "LIVE":
+                if node.node_id in acc:
                     continue
                 if any(status == "LIVE" and parent in acc for parent, status in node.usage_links.items()):
                     acc.add(node.node_id)
@@ -134,13 +142,15 @@ class ProofGraph:
         premises stops being visible) and an unasserted structural operand with no own path under a dead parent.
         Reachability is computed once on the pre-supersede graph; superseding only removes liveness, so a single pass
         flags every truly unreachable node."""
-        fvis = self.f_visible()
-        sacc = self.s_accessible(fvis)
-        newly: list[str] = []
+        reachable = self.s_accessible()
+        newly = []
         for node in self.nodes.values():
-            if node.status == "LIVE" and node.node_id not in fvis and node.node_id not in sacc:
-                node.status = "SUPERSEDED"
-                newly.append(node.node_id)
+            current = "LIVE" if node.node_id in reachable else "SUPERSEDED"
+            if node.status != current:
+                self.audit.append({"node_id": node.node_id, "type": "REACCESSIBLE" if current == "LIVE" else "CASCADE_SUPERSEDED"})
+                if current == "SUPERSEDED":
+                    newly.append(node.node_id)
+                node.status = current  # replaceable projection; never gates canonical identity
         return newly
 
     def som_violations(self) -> list[str]:

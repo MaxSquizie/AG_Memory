@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ah.formalizer.operator_algebra import FunctionRegistryV2
-from ah.formalizer.temporal_license import TemporalRegion, cont, covers
+from ah.formalizer.temporal_license import TemporalRegion, cont, covers, or_elimination_license, forall_inst_license
 
 
 @dataclass(frozen=True)
@@ -70,12 +70,15 @@ class InferenceEngine:
         regions = list(premise_regions)
         if not regions:
             raise ValueError("no premises to derive from")
-        result: TemporalRegion = regions[0]
+        if rule_name == "AND_ELIMINATION":
+            if len(regions)!=1: raise ValueError("AND_ELIMINATION requires the asserted AND root's witness")
+            return regions[0]
+        fn=or_elimination_license if rule_name=="OR_ELIMINATION" else forall_inst_license
+        result=regions[0]
         for pr in regions[1:]:
-            inter = _intersect(result, pr)
-            if inter is None:
-                return None                             # TEMPORAL_MISMATCH
-            result = inter
+            lic=fn(result,pr)
+            if lic.status!="LICENSED": return None
+            result=lic.derived_region
         return result
 
     def or_elimination_status(self, covered_branches: int, total_branches: int) -> str:

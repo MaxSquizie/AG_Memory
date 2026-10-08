@@ -128,6 +128,8 @@ class CanonicalNamingIntegrationService(NamingAwareIntegrationService):
         *,
         source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
+        if result.native_receipt is not None or result.formalizer_preview:
+            return super().integrate_external(result, context, source_timestamp=source_timestamp)
         """Expose newly grounded name M nodes to the same turn's ignition wave."""
         naming = tuple(
             item for item in result.assertions

@@ -1,0 +1,111 @@
+"""Load a reviewed, content-addressed resource release with dependency closure."""
+from __future__ import annotations
+import json
+from pathlib import Path
+from ..canonical_ledger import digest
+
+class ResourceMissing(ValueError): pass
+
+class ResourceRelease:
+    REQUIRED={'R-S','R-V','TemplateMap','RoleRegistry','OpenTemplatePolicy','ScopeLexicon','AttitudeMap','ProposalPolicy','IncompatibilityRules','PredicateSchema','R-X3','DeclaredReads','TemporalRules'}
+    def __init__(self,manifest,*,require_review=True,trusted_reviews=None):
+        self.manifest=manifest
+        signed={k:manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions') if k in manifest}
+        if set(signed)!={'kind','version','schema_version','entries','dependency_versions'}:
+            raise ResourceMissing('RESOURCE_MISSING: incomplete release manifest')
+        if 'coverage_report' in manifest: signed['coverage_report']=manifest['coverage_report']
+        self.sha256=digest(signed)
+        review=manifest.get('signed_review_id') or {}
+        if require_review and (review.get('reviewed_sha256')!=self.sha256 or not all(review.get(k) for k in ('reviewer','signature','timestamp')) or not manifest.get('coverage_report')):
+            raise ResourceMissing('RESOURCE_MISSING: release has no matching review/coverage')
+        if manifest['schema_version']!='v7' or manifest['kind']!='FORMALIZER_RESOURCE_RELEASE':
+            raise ResourceMissing('RESOURCE_MISSING: unsupported release schema/kind')
+        coverage=manifest.get('coverage_report',{})
+        if require_review and (not {'corpus_id','corpus_sha256','units_by_kind','categories'}<=set(coverage) or len(str(coverage.get('corpus_sha256','')))!=64):
+            raise ResourceMissing('RESOURCE_MISSING: invalid coverage report')
+        if require_review and (not isinstance(trusted_reviews,dict) or trusted_reviews.get(self.sha256)!=review):
+            raise ResourceMissing('RESOURCE_MISSING: review is not pinned by the trusted review file')
+        self.resources={}
+        for entry in manifest['entries']:
+            if not {'kind','version','schema_version','entries','dependency_versions'}<=set(entry):
+                raise ResourceMissing('RESOURCE_MISSING: incomplete resource')
+            if not isinstance(entry['entries'],list) or not isinstance(entry['dependency_versions'],dict): raise ResourceMissing('invalid resource container')
+            if entry['schema_version']!='v7': raise ResourceMissing('unsupported resource schema')
+            kind=entry['kind']
+            if kind in self.resources: raise ResourceMissing('duplicate resource kind:'+kind)
+            self.resources[kind]=entry
+        if self.REQUIRED-set(self.resources): raise ResourceMissing('RESOURCE_MISSING:'+','.join(sorted(self.REQUIRED-set(self.resources))))
+        if set(manifest['dependency_versions'])!=set(self.resources):
+            raise ResourceMissing('RESOURCE_MISSING: release must pin every resource version')
+        active=set(); done=set()
+        def visit(kind):
+            if kind in active: raise ResourceMissing('RESOURCE_MISSING: cyclic dependency')
+            if kind in done: return
+            active.add(kind)
+            for dep,version in self.resources[kind]['dependency_versions'].items():
+                if dep not in self.resources or str(self.resources[dep]['version'])!=str(version):
+                    raise ResourceMissing('RESOURCE_MISSING: unresolved dependency '+dep)
+                visit(dep)
+            active.remove(kind); done.add(kind)
+        for kind in self.resources: visit(kind)
+        for dep,version in manifest['dependency_versions'].items():
+            if dep not in self.resources or str(self.resources[dep]['version'])!=str(version): raise ResourceMissing('RESOURCE_MISSING: release dependency '+dep)
+        for key in ('OpenTemplatePolicy','ProposalPolicy'):
+            if len(self.entries(key))!=1: raise ResourceMissing('exactly one '+key+' policy required')
+        policy=self.entries('ProposalPolicy')[0]
+        if any(type(policy.get(k)) is not int or policy[k]<=0 for k in ('max_nodes','max_edges','max_depth','max_source_tokens')): raise ResourceMissing('invalid proposal limits')
+        if type(policy.get('verify_deterministic',True)) is not bool or type(self.entries('OpenTemplatePolicy')[0].get('allow')) is not bool: raise ResourceMissing('invalid proposal/open policy')
+        senses=self.entries('R-S'); sense_ids={x['sense_id'] for x in senses}
+        if len(sense_ids)!=len(senses): raise ResourceMissing('duplicate sense_id')
+        if any(not x.get('lemma') or not x.get('POS') for x in senses): raise ResourceMissing('R-S requires lemma and POS')
+        roles={x['role_id'] for x in self.entries('RoleRegistry')}
+        from ah.model.types import ActantRole
+        if len(roles)!=len(self.entries('RoleRegistry')) or not roles<={r.value for r in ActantRole}:
+            raise ResourceMissing('ADAPTER_NOT_COVERED: duplicate or unsupported role')
+        if not {'EXPERIENCER','SURFACE_ARG'}<=roles: raise ResourceMissing('mandatory role missing')
+        for v in self.entries('R-V'):
+            if v.get('sense_id') not in sense_ids or v.get('state_class') not in {None,'STATE','EVENT'}: raise ResourceMissing('invalid R-V sense/class')
+            if v.get('temporal_mode_hint') not in {None,'STATE','EVENT','PROCESS','TRANSITION'}: raise ResourceMissing('invalid frame temporal-mode hint')
+            if any(r['role_id'] not in roles for r in v.get('roles',())): raise ResourceMissing('invalid R-V role')
+            if len({r['role_id'] for r in v.get('roles',())})!=len(v.get('roles',())): raise ResourceMissing('duplicate R-V role')
+            for r in v.get('roles',()):
+                if not all(isinstance(r.get(k,[]),list) for k in ('allowed_cases','allowed_preps','argument_types')): raise ResourceMissing('invalid R-V role lists')
+                cardinality=r.get('cardinality',{}); lo=cardinality.get('min',0); hi=cardinality.get('max',1)
+                if type(lo) is not int or lo<0 or hi is not None and (type(hi) is not int or hi<lo): raise ResourceMissing('invalid role cardinality')
+        for key in ('PredicateSchema','R-X3'):
+            for x in self.entries(key):
+                values=x.get('value_ids',()) if key=='PredicateSchema' else [x.get('sense_id')]
+                if not x.get('lemma') or any(v not in sense_ids for v in values): raise ResourceMissing('invalid '+key+' sense')
+                for ex in x.get('value_expansions',()):
+                    if not ex.get('rule_id') or any(v not in sense_ids for v in ex['value_ids']): raise ResourceMissing('invalid ValueExpansionRule')
+        for x in self.entries('DeclaredReads'):
+            if not all(x.get(k) for k in ('read_id','lemma','snapshot_version')): raise ResourceMissing('invalid declared read')
+        import re
+        for x in self.entries('ScopeLexicon'):
+            if x.get('operator') and x['operator'] not in {'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'}: raise ResourceMissing('invalid scope operator')
+            if x.get('pattern'): re.compile(x['pattern'])
+        for x in self.entries('TemporalRules'):
+            re.compile(x['pattern'])
+            if x['kind'] not in {'POINT_CLOCK','DAY_INTERVAL','INTERVAL_CLOCK'} or x.get('interval_semantics','EXISTENTIAL') not in {'EXISTENTIAL','CONTINUOUS'}: raise ResourceMissing('invalid temporal rule')
+        for x in self.entries('IncompatibilityRules'):
+            if x.get('kind')!='ROLE_EXCLUSIVE' or not all(x.get(k) for k in ('rule_id','sense_id','role_id','key_roles')) or x['sense_id'] not in sense_ids or x['role_id'] not in roles: raise ResourceMissing('invalid incompatibility rule')
+            if not set(x['key_roles'])<=roles: raise ResourceMissing('invalid incompatibility key roles')
+        for x in self.entries('AttitudeMap'):
+            if not x.get('lemma') or x.get('argument_role') not in roles or x.get('attitude') not in {'QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN'} or x.get('holder_role','SUBJECT') not in roles:
+                raise ResourceMissing('invalid AttitudeMap')
+        seen_mappings=set()
+        for m in self.entries('TemplateMap'):
+            if m['sense_id'] not in sense_ids or not m.get('template_ref') or not set(m.get('roles',()))<=roles: raise ResourceMissing('invalid TemplateMap')
+            key=(m['sense_id'],tuple(sorted(m.get('roles',()))))
+            if key in seen_mappings: raise ResourceMissing('conflicting TemplateMap key')
+            seen_mappings.add(key)
+
+    def entries(self,kind): return self.resources[kind]['entries']
+    def version(self,kind): return str(self.resources[kind]['version'])
+
+    @classmethod
+    def load(cls,path,**kwargs):
+        try: raw=json.loads(Path(path).read_text(encoding='utf-8'))
+        except (OSError,ValueError) as exc: raise ResourceMissing('RESOURCE_MISSING: '+str(path)) from exc
+        try: return cls(raw,**kwargs)
+        except (KeyError,TypeError,AttributeError) as exc: raise ResourceMissing('RESOURCE_MISSING: malformed release entry') from exc

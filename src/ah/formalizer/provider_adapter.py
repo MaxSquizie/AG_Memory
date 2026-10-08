@@ -56,6 +56,8 @@ class ProviderAdapter:
     name: str
     capabilities: frozenset[str] = frozenset()  # e.g. {"select", "propose_local"}
     transport: object = None                     # callable(prompt) -> raw JSON
+    model_key: str = ""
+    params_hash: str = "temperature=0"
     log: object = None                           # ProviderCallLog (optional; in-memory if None)
     budget: BudgetSnapshot = field(default_factory=BudgetSnapshot)
 
@@ -65,9 +67,17 @@ class ProviderAdapter:
         self._tokens_used = 0
         self._tp_calls_left = self.budget.tp_calls
         self._lexical_calls_left = self.budget.lexical_calls
-        # (run_id, digest) -> raw JSON for replay identity; digest -> owning run_id for integrity.
-        self._cache: dict[tuple[str, str], str] = {}
-        self._input_owner: dict[str, str] = {}
+        self._ordinals: dict[str,int] = {}
+
+    def start_run(self, run_id):
+        self._ordinals[run_id] = 0
+        self._tokens_used = 0
+        self._tp_calls_left = self.budget.tp_calls
+        self._lexical_calls_left = self.budget.lexical_calls
+        if self._log._journal:
+            records = self._log._journal.scan_unprocessed(0)
+            if not any(r["payload"].get("kind") == "RUN_STARTED" and r["payload"].get("run_id") == run_id for r in records):
+                self._log._journal.append("provider", {"kind":"RUN_STARTED", "run_id":run_id}, run_id=run_id)
 
     def has(self, capability: str) -> bool:
         return capability in self.capabilities and self.transport is not None
@@ -86,40 +96,52 @@ class ProviderAdapter:
         if self.budget.token_limit and self._tokens_used + cost > self.budget.token_limit:
             raise BudgetExceeded("COMPUTATION_LIMIT", f"token budget {self.budget.token_limit} exhausted")
 
-    def _exchange(self, capability: str, prompt: str, run_id: str) -> str:
+    def _exchange(self, capability: str, prompt: str, run_id: str, ordinal=None) -> str:
+        import time
         if not self.has(capability):
             raise ProviderUnavailable(f"{capability!r} not available on provider {self.name!r}")
-        digest = self._digest(prompt)
-
-        # Replay identity within the same run.
-        cached = self._cache.get((run_id, digest))
-        if cached is not None:
-            return cached
-
-        # Integrity: a NEW run reusing an input already owned by another run -> INTEGRITY_ERROR (no AH write).
-        owner = self._input_owner.get(digest)
-        if owner is not None and owner != run_id:
-            raise IntegrityError(f"INTEGRITY_ERROR: input digest reused across runs ({owner!r} vs {run_id!r})")
-
-        call_id = self._log.begin(self.name, digest)
+        if ordinal is None:
+            ordinal = self._ordinals.get(run_id,0)+1
+            self._ordinals[run_id] = ordinal
+        key = self._digest(prompt)
+        old = self._log.lookup(run_id,ordinal)
+        if old:
+            if (old['request_digest'],old.get('model_key',''),old.get('params_hash','')) != (key,self.model_key,self.params_hash):
+                raise IntegrityError('REPLAY_MISMATCH')
+            if old['state'] == 'RECEIVED':
+                raw = old.get('raw_response')
+                if raw is None or self._digest(raw) != old['response_digest']:
+                    raise IntegrityError('INTEGRITY_ERROR: missing or corrupt provider bytes')
+                cost = max(1,(len(prompt)+len(raw))//4)
+                self._check_tokens(cost)
+                self._tokens_used += cost
+                return raw
+            if old['state']=='FAILED':
+                # A durable failed exchange is part of this run's history too.
+                # Retrying it would silently change the interpretation on replay.
+                cost=max(1,len(prompt)//4)
+                self._check_tokens(cost); self._tokens_used+=cost
+                raise ProviderUnavailable(old.get('error','recorded provider failure'))
+        self._check_tokens(max(1,len(prompt)//4))
+        cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=self.params_hash,prompt=prompt)
+        started = time.monotonic()
         try:
-            raw = str(self.transport(prompt))
-        except Exception as exc:  # a failed exchange is logged FAILED, not swallowed
-            self._log.failed(call_id, error=str(exc))
-            raise ProviderUnavailable(f"provider {self.name!r} call failed") from exc
-        cost = max(1, len(raw) // 4)
-        if self.budget.token_limit and self._tokens_used + cost > self.budget.token_limit:
-            raise BudgetExceeded("COMPUTATION_LIMIT", f"token budget {self.budget.token_limit} exhausted")
+            raw = self.transport(prompt)
+            if not isinstance(raw,str): raise TypeError('provider response must be text')
+        except Exception as exc:
+            self._log.failed(cid,error=str(exc))
+            self._tokens_used += max(1,len(prompt)//4)
+            raise ProviderUnavailable(f'provider {self.name!r} call failed') from exc
+        self._log.received(cid,response_digest=self._digest(raw),raw_response=raw,response_time_ms=(time.monotonic()-started)*1000)
+        cost = max(1,(len(prompt)+len(raw))//4)
+        self._check_tokens(cost)
         self._tokens_used += cost
-        self._log.received(call_id, response_digest=digest)
-        self._cache[(run_id, digest)] = raw
-        self._input_owner.setdefault(digest, run_id)
         return raw
 
-    def select(self, prompt: str, run_id: str) -> str:
+    def select(self, prompt: str, run_id: str, ordinal=None) -> str:
         """Bounded selection call (T3). Logged; replay-identical; integrity-checked."""
         self._check_tokens(0)  # pre-check the shared token limit before spending a call
-        return self._exchange("select", prompt, run_id)
+        return self._exchange("select", prompt, run_id, ordinal)
 
     def propose_local(self, prompt: str, run_id: str) -> str:
         """Local-structure / lexical proposal (TP/T3). Consumes one tp_call; logged + integrity-checked."""

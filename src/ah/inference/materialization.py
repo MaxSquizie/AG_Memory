@@ -49,6 +49,10 @@ class InferenceMaterializer:
         conclusion = outcome.conclusion
 
         if isinstance(conclusion, ExistingRefConclusion):
+            if self.core.store.formalizer_fact_visible(conclusion.ref.uid) is not None:
+                # Native conclusions already own a durable canonical proof path.
+                # The legacy materializer cannot add a second, unjournaled path.
+                return MaterializationResult(conclusion.ref,domain,False)
             # A formula proof may establish an already-addressable N/g that was
             # previously only a zero-occurrence conclusion placeholder. Persist
             # dependency supports without manufacturing a second semantic object.

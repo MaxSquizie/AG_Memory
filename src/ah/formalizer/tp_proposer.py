@@ -63,6 +63,10 @@ class StructureProposalRequest:
     policy_version: str = "tp_policy_v1"
     budget_ok: bool = True             # result of budget_precheck; a False request must not be sent
     schema_version: str = ""
+    max_nodes: int = 64
+    max_edges: int = 128
+    max_depth: int = 16
+    required_operators: tuple = ()  # (operator kind, anchored trigger token IDs)
 
 
 @dataclass(frozen=True)
@@ -81,6 +85,14 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
     if not hyp.nodes:
         raise ProtocolError(f"hypothesis {hyp.local_id}: no nodes")
     n = len(hyp.nodes)
+    if n > req.max_nodes or len(hyp.edges) > req.max_edges or hyp.alternatives < 1:
+        raise ProtocolError("PROPOSAL_BUDGET")
+    if not hyp.local_id or not hyp.alignment or not set(hyp.alignment) <= set(req.source_spans):
+        raise ProtocolError("invalid hypothesis identity/alignment")
+    features = {str(getattr(t, "hypothesis_id", t)) for t in req.token_hypotheses}
+    for node in hyp.nodes:
+        if not node.anchor_spans or not set(node.feature_refs) <= features:
+            raise ProtocolError("unanchored node or undeclared feature ref")
     src = set(req.source_spans)
 
     for node in hyp.nodes:
@@ -93,6 +105,7 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
                 raise ProtocolError(
                     f"hypothesis {hyp.local_id}: anchor span {span!r} outside the bounded region")
 
+    graph = {i:[] for i in range(n)}
     for edge in hyp.edges:
         # (c) edge kind allowlist
         if req.allowed_edge_kinds and edge.kind not in req.allowed_edge_kinds:
@@ -102,6 +115,16 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             if not 0 <= idx < n:
                 raise ProtocolError(
                     f"hypothesis {hyp.local_id}: edge endpoint {idx} out of range [0,{n})")
+        graph[edge.from_idx].append(edge.to_idx)
+        a,b=hyp.nodes[edge.from_idx].kind,hyp.nodes[edge.to_idx].kind
+        if edge.kind in {'ARGUMENT','ATTITUDE'} and (a!='PREDICATE' or b not in {'PREDICATE','ENTITY'} or not edge.role_id):
+            raise ProtocolError('invalid typed argument edge')
+        if edge.kind=='ATTITUDE' and b!='PREDICATE':
+            raise ProtocolError('attitude target must be a proposition')
+        if edge.kind=='BIND' and (a!='BOUND_VAR' or b!='ENTITY'):
+            raise ProtocolError('invalid bound-variable edge')
+        if edge.kind=='OPERAND' and (a in {'PREDICATE','ENTITY','BOUND_VAR'} or b=='ENTITY'):
+            raise ProtocolError('invalid operator operand type')
         # (a) no invented role ids; (d) SURFACE_ARG is syntactic-only and cannot swallow the whole region
         if edge.role_id is not None:
             if edge.role_id not in req.allowed_role_ids:
@@ -115,6 +138,36 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
                     raise ProtocolError(
                         f"hypothesis {hyp.local_id}: SURFACE_ARG must anchor a proper sub-region")
 
+    for kind,spans in req.required_operators:
+        if not any(node.kind==kind and set(node.anchor_spans)&set(spans) for node in hyp.nodes):
+            raise ProtocolError('source operator scope silently lost:'+kind)
+
+    arities={'NOT':(1,1),'POSSIBLE':(1,1),'NECESSARY':(1,1),
+             'AND':(2,None),'OR':(2,None),'XOR':(2,None),
+             'IMPLIES':(2,2),'COUNTERFACTUAL':(2,2),'ASSOCIATION':(2,2),
+             'FORALL':(2,2),'EXISTS':(2,2),'BEFORE':(2,2),'AFTER':(2,2),'DURING':(2,2)}
+    for idx,node in enumerate(hyp.nodes):
+        operands=[hyp.nodes[e.to_idx] for e in hyp.edges if e.from_idx==idx and e.kind=='OPERAND']
+        if node.kind in arities:
+            lo,hi=arities[node.kind]
+            if len(operands)<lo or hi is not None and len(operands)>hi:
+                raise ProtocolError('operator arity mismatch:'+node.kind)
+            if node.kind in {'FORALL','EXISTS'}:
+                if operands[0].kind!='BOUND_VAR' or operands[1].kind in {'BOUND_VAR','ENTITY'}:
+                    raise ProtocolError('quantifier requires [bound_var, body]')
+            elif any(x.kind=='BOUND_VAR' for x in operands):
+                raise ProtocolError('bound_var outside quantifier slot')
+
+    active=set(); done=set()
+    def visit(i, depth):
+        if i in active: raise ProtocolError("cyclic local structure")
+        if depth > req.max_depth: raise ProtocolError("PROPOSAL_BUDGET: depth")
+        if i in done: return
+        active.add(i)
+        for j in graph[i]: visit(j,depth+1)
+        active.remove(i); done.add(i)
+    for i in graph: visit(i,1)
+
 
 def validate_structure_reply(req: StructureProposalRequest, reply: StructureProposalReply) -> list[Hypothesis]:
     """Validate a TP reply against its request. Raises ProtocolError on any (a)-(f) violation and
@@ -123,6 +176,10 @@ def validate_structure_reply(req: StructureProposalRequest, reply: StructureProp
     if not req.budget_ok:
         raise ProtocolError("budget pre-check failed: proposer must not be called")
     # (f) abstain is an explicit miss — accept as-is, no AMBIGUOUS substitution.
+    if reply.abstain and reply.hypotheses:
+        raise ProtocolError("abstain with hypotheses")
+    if len({h.local_id for h in reply.hypotheses}) != len(reply.hypotheses):
+        raise ProtocolError("duplicate local hypothesis id")
     if reply.abstain or not reply.hypotheses:
         return []
     for hyp in reply.hypotheses:
@@ -142,20 +199,30 @@ def parse_and_validate(req: StructureProposalRequest, raw: str | None) -> list[H
     if not isinstance(data, dict):
         raise ProtocolError("TP reply must be a JSON object")
 
-    hyps = []
-    for h in data.get("hypotheses", []):
-        nodes = tuple(
-            TNode(kind=n["kind"], anchor_spans=tuple(n.get("anchor_spans", ())),
-                 feature_refs=tuple(n.get("feature_refs", ())))
-            for n in h.get("nodes", [])
-        )
-        edges = tuple(
-            TEdge(kind=e["kind"], from_idx=int(e["from"]), to_idx=int(e["to"]),
-                  role_id=e.get("role_id"), scope=bool(e.get("scope", False)))
-            for e in h.get("edges", [])
-        )
-        hyps.append(Hypothesis(local_id=h.get("local_id", "h"), nodes=nodes, edges=edges,
-                              alternatives=int(h.get("alternatives", 1)),
-                              alignment=tuple(h.get("alignment", ()))))
-    reply = StructureProposalReply(hypotheses=tuple(hyps), abstain=bool(data.get("abstain", False)))
-    return validate_structure_reply(req, reply)
+    def fields(obj,allowed,required=()):
+        if not isinstance(obj,dict) or set(obj)-set(allowed) or not set(required)<=set(obj):
+            raise ProtocolError("unknown/missing TP fields")
+    fields(data,{"hypotheses","abstain"})
+    if not isinstance(data.get("abstain",False),bool) or not isinstance(data.get("hypotheses",[]),list):
+        raise ProtocolError("invalid TP scalar/list type")
+    hyps=[]
+    try:
+        for h in data.get("hypotheses",[]):
+            fields(h,{"local_id","nodes","edges","alternatives","alignment"},{"local_id","nodes","alignment"})
+            nodes=[]; edges=[]
+            for v in h["nodes"]:
+                fields(v,{"kind","anchor_spans","feature_refs"},{"kind","anchor_spans"})
+                if not isinstance(v["anchor_spans"],list) or not all(isinstance(x,str) for x in v["anchor_spans"]):
+                    raise ProtocolError("anchor_spans must be a list of source ids")
+                nodes.append(TNode(v["kind"],tuple(v["anchor_spans"]),tuple(v.get("feature_refs",()))))
+            for e in h.get("edges",[]):
+                fields(e,{"kind","from","to","role_id","scope"},{"kind","from","to"})
+                if type(e["from"]) is not int or type(e["to"]) is not int or type(e.get("scope",False)) is not bool:
+                    raise ProtocolError("invalid TP endpoint/scope type")
+                edges.append(TEdge(e["kind"],e["from"],e["to"],e.get("role_id"),e.get("scope",False)))
+            if type(h.get("alternatives",1)) is not int or not isinstance(h["alignment"],list):
+                raise ProtocolError("invalid alternative/alignment type")
+            hyps.append(Hypothesis(h["local_id"],tuple(nodes),tuple(edges),h.get("alternatives",1),tuple(h["alignment"])))
+    except (KeyError,TypeError,ValueError) as exc:
+        raise ProtocolError("malformed TP hypothesis") from exc
+    return validate_structure_reply(req,StructureProposalReply(tuple(hyps),data.get("abstain",False)))

@@ -175,11 +175,11 @@ def _dedup_group(key: tuple[str, str, str], members: Sequence[ResolvedValue]):
     base = "N:" + "|".join(key)
     if any(m.temporal_mode is TemporalMode.EVENT for m in members):
         # EVENT occurrences never merge: one separate node each, even within the same observation.
-        return {m.fragment_id: f"{base}#{m.fragment_id}" for m in members}, []
+        return {m.fragment_id: f"{base}#{m.observation_id}:{m.source_revision}:{m.fragment_id}" for m in members}, []
     unknowns = [m for m in members if m.temporal_mode is TemporalMode.UNKNOWN]
     if unknowns:
         # FrameTemporalMode=UNKNOWN -> NOT merged (separate N) + STATE_CLASS_UNKNOWN miss report.
-        nodes = {m.fragment_id: f"{base}#{m.fragment_id}" for m in members}
+        nodes = {m.fragment_id: f"{base}#{m.observation_id}:{m.source_revision}:{m.fragment_id}" for m in members}
         diags = [f"STATE_CLASS_UNKNOWN:{m.fragment_id}" for m in unknowns]
         return nodes, diags
     # All RESOLVED STATE with an equal RelationKey -> merge into ONE canonical N.
@@ -201,8 +201,7 @@ def unify_identity(refs: Sequence[IdentityRef]) -> tuple[frozenset[str], list[st
     diags: list[str] = []
     for ref_id, keys in sorted(by_ref.items()):
         if len(keys) > 1:
-            owner = next(r.fragment_id for r in refs if r.ref_id == ref_id)
-            conflicting.add(owner)
+            conflicting.update(r.fragment_id for r in refs if r.ref_id == ref_id)
             diags.append(f"IDENTITY_CONFLICT:{ref_id}")
     return frozenset(conflicting), diags
 

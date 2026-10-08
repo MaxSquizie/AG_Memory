@@ -625,6 +625,25 @@ class IntegrationService:
         *,
         source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
+        if result.formalizer_preview:
+            raise IntegrationError("FORMALIZER_PREVIEW_CANNOT_COMMIT")
+        if result.native_receipt is not None:
+            from ah.formalizer.canonical_ledger import CanonicalLedger
+            receipt=result.native_receipt
+            # Native T6 already committed world facts. The legacy experience
+            # mapper may attach source provenance, but cannot assert them again.
+            neutral=replace(result,assertions=(),relations=(),act_relations=(),conditionals=(),act_dependencies=(),relation_hints=(),proposition_roots=(),native_receipt=None)
+            commit=self.integrate_external(neutral,context,source_timestamp=source_timestamp)
+            visible=CanonicalLedger(self.core.store._state.formalizer_state).f_visible()
+            records=[]; seeds=list(commit.activation_seeds)
+            for uid in receipt.node_refs:
+                if uid not in visible: continue
+                ref=self.core.ref(uid)
+                records.append(IntegratedAssertion(uid,ref,self.core.store.domain_of(uid),receipt.applied))
+                seeds.append(ActivationSeedRequest(ref,SeedReason.NEW_FACT if receipt.applied else SeedReason.REACTIVATED_FACT))
+            if records:
+                ExperienceMapper(self.core,event_weight=self.config.experience_hypernode_weight,follow_weight=self.config.follow_link_weight).attach_content(commit.experience_ref,tuple(r.ref for r in records))
+            return replace(commit,assertions=tuple(records),activation_seeds=tuple(seeds))
         return self.integrate_plan(
             self.prepare_external_plan(
                 result,

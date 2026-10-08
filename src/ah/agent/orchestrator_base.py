@@ -201,6 +201,8 @@ class AgentOrchestrator:
         return TemplateCompletionService.apply_resolutions(result, candidates, selections)
 
     def _complete_dynamic_templates(self, result: PerceptionResult, lock) -> PerceptionResult:
+        if result.native_receipt is not None or result.formalizer_preview:
+            return result
         # Public reusable implementation; lock protects the canonical T snapshot.
         with lock:
             service = TemplateCompletionService(self.integration, self.perception)

@@ -24,9 +24,9 @@ _PREDICATE_LABELS = {"V1": "HAVE", "V2": "HAS_PART", "V3": "LOCATIVE", "V4": "LI
 class NativePerceptionResult:
     """Outcome of the V7-native perception path (I01/I02): real input committed durably on the store.
 
-    ``perception`` is the FULL candidate set (assertions/queries/commands/diagnostics via speech-act
-    detection) — capability-complete vs the legacy parse(), so flipping the agent loop to it regresses
-    nothing. The durable receipt fields below record which resolved assertion facts were committed; downstream
+    ``perception`` projects supported assertions/queries/commands and diagnostics.
+    Unsupported goal surfaces remain explicit gaps, not a claim of legacy parity.
+    The durable receipt fields below record which resolved assertion facts were committed; downstream
     reads those canonical facts from the store by ``observation_id`` (the "b" value-add: restart-safe).
     Legacy mode returns a bare PerceptionResult instead."""
 
@@ -38,6 +38,7 @@ class NativePerceptionResult:
     applied: bool = False               # fresh durable write (not an idempotent no-op)
     batch_hash: str = ""
     diagnostics: tuple[str, ...] = field(default_factory=tuple)
+    node_refs: tuple[str,...] = ()
 
 
 class FormalizerAdapter:
@@ -47,12 +48,13 @@ class FormalizerAdapter:
     FakeSelector.demo() in the deterministic dry run). ``morph``/``schema`` are optional overrides.
 
     Two modes:
-      * legacy  — :meth:`parse` translates FormalizationState to a PerceptionResult for integrate_external();
+      * preview — :meth:`parse` translates demo state to a noncommittable PerceptionResult;
       * native  — :meth:`interpret` runs the full V7 chain (T0..T4 -> C -> T5 gate + binding CAS -> T6 durable
         commit) on ``store`` and returns a NativePerceptionResult; downstream reads committed facts from the store.
     The native path is only available when a durable ``store`` + ``binding`` are wired (see bootstrap)."""
 
-    def __init__(self, selector, morph=None, schema=None, store=None, binding=None):
+    def __init__(self, selector, morph=None, schema=None, store=None, binding=None, release=None):
+        self._release = release
         self._selector = selector
         self._morph = morph
         self._schema = schema  # lazily loaded if None
@@ -64,7 +66,7 @@ class FormalizerAdapter:
         return self._store is not None and self._binding is not None
 
     # -- V7-native entry (I01): real input committed durably on the store ---- #
-    def interpret(self, text: str, context_facts: tuple[str, ...] = ()) -> NativePerceptionResult:
+    def interpret(self, text: str, context_facts: tuple[str, ...] = (), raw_input=None, *, version=1, observation_id=None, run_id=None) -> NativePerceptionResult:
         """Run one observation through T0..T4 -> C -> T5 gate (+binding CAS) -> T6 durable commit.
 
         Returns the receipt; downstream reads committed facts from ``self._store`` by observation_id."""
@@ -76,7 +78,7 @@ class FormalizerAdapter:
         schema = self._schema or load_decision_schema()
         state, rep = interpret_full(
             text, schema, self._selector, self._store, self._binding,
-            morph=self._morph, context_facts=context_facts,
+            morph=self._morph, context_facts=context_facts, release=self._release, raw_input=raw_input, version=version, observation_id=observation_id, run_id=run_id,
         )
         return NativePerceptionResult(
             perception=self._to_perception_result(state),   # full candidate set (I02: capability-complete)
@@ -87,6 +89,7 @@ class FormalizerAdapter:
             applied=rep.applied,
             batch_hash=rep.batch_hash,
             diagnostics=rep.diagnostics,
+            node_refs=rep.node_refs,
         )
 
     # -- public entry (mirrors AdaptivePerceptionParser.parse) -------------- #
@@ -96,7 +99,8 @@ class FormalizerAdapter:
 
         schema = self._schema or load_decision_schema()
         state = _run(text, schema, self._selector, morph=self._morph, context_facts=context_facts)
-        return self._to_perception_result(state)
+        from dataclasses import replace
+        return replace(self._to_perception_result(state), formalizer_preview=True)
 
     # -- translation: FormalizationState -> PerceptionResult --------------- #
     def _to_perception_result(self, state):
@@ -123,7 +127,10 @@ class FormalizerAdapter:
         queries: list = []
         commands: list = []
         notes: list[str] = []
+        embedded={child['frame_ref'] for f in state.frames for child in f.semantic.get('proposition_args',{}).values()}
         for frame in state.frames:
+            if frame.frame_id in embedded or frame.semantic.get('quoted') or frame.semantic.get('structural_unresolved'):
+                continue
             dec = state.decisions.get(f"{frame.frame_id}|predicate_value")
             if dec is None or not dec.selected:
                 continue  # no candidate selected -> honest miss, never fabricated
@@ -132,14 +139,28 @@ class FormalizerAdapter:
             # as an explicit unresolved note so downstream sees honest incompleteness, not silence.
             if dec.outcome == "RESOLVED" and len(dec.selected) == 1:
                 value = dec.selected[0]
+                ev=next((e for e in state.evidence if e.token_id==frame.predicate_token_ref),None)
+                pos=ev.start if ev else frame.source_range[0]
+                lo=max(state.text.rfind(c,0,pos) for c in '.!?;')+1
+                ends=[state.text.find(c,pos) for c in '.!?;' if state.text.find(c,pos)>=0]
+                hi=min(ends) if ends else len(state.text)
+                local=state.text[lo:hi]
+                is_query=hi<len(state.text) and state.text[hi]=='?'
+                negated=detect_negation(local)
                 actant_pairs = self._assign_roles(frame, state)
                 roles = tuple(role for role, _ in actant_pairs)
+                if len(set(roles))!=len(roles):
+                    notes.append("PROJECTION_ARGUMENT_GROUP_REQUIRED "+frame.frame_id)
+                    continue
                 predicate = self._build_predicate(frame, state, value, roles)
                 actants = tuple(ActantCandidate(role=role, mention=mention) for role, mention in actant_pairs)
                 local_id = f"{frame.frame_id}:A0"
+                if is_query and any(frame.semantic.get("operator_forest",())):
+                    notes.append("QUERY_SCOPE_NOT_COMPILED "+frame.frame_id)
+                    continue
                 if is_query:
                     # DR27: a question's content is NOT asserted as a world fact — it is an EXISTS goal.
-                    queries.append(QueryCandidate(predicate=predicate, actants=actants, query_mode=QueryMode.EXISTS, local_id=local_id))
+                    queries.append(QueryCandidate(predicate=predicate, actants=actants, query_mode=QueryMode.EXISTS, local_id=local_id, temporal_point=frame.semantic.get('region',{}).get('point') if frame.semantic.get('region') else None, temporal_window=(frame.semantic['region']['lo'],frame.semantic['region']['hi']) if (frame.semantic.get('region') or {}).get('kind') in {'EXISTENTIAL','CONTINUOUS'} else None))
                     notes.append(f"SPEECH_ACT_QUERY {frame.frame_id}: content not asserted")
                 elif self._predicate_is_imperative(frame, state):
                     # An imperative is a directive, not an asserted fact about the world.
@@ -177,17 +198,28 @@ class FormalizerAdapter:
     def _build_predicate(self, frame, state, value, roles=()):
         from ah.perception.contracts import EvidenceSpan, PredicateCandidate, TemplateCandidate
 
+        specs=frame.semantic.get('candidate_specs',{})
+        selected=specs.get(value)
+        selection=None
+        if selected and selected.get('sense_kind')=='KNOWN' and self._release is not None:
+            from ah.perception.contracts import TemplateSelection
+            mappings=[m for m in self._release.entries('TemplateMap') if m['sense_id']==selected['sense_id'] and tuple(sorted(m.get('roles',())))==tuple(sorted(r.value for r in roles))]
+            if len(mappings)==1: selection=TemplateSelection(existing_template_uid=mappings[0]['template_ref'])
         # The frame's role structure IS the valency declaration: integration needs a TemplateCandidate
         # to materialize an unknown predicate (structural rule, no LLM probe).
         template = TemplateCandidate(tuple(roles)) if roles else None
         for ev in state.evidence:
+            if frame.predicate_token_ref and ev.token_id != frame.predicate_token_ref:
+                continue
+            if not frame.predicate_token_ref and ev.span != frame.anchor_span:
+                continue
             for var in ev.variants:
-                if var.pos == "VERB":  # verbal frame: carry the real surface + lemma
+                if var.pos in {"VERB", "INFN", "PRED", "ADJS", "ADJF", "NOUN", "PRTF", "PRTS", "GRND"}:
                     return PredicateCandidate(
                         surface=ev.span,
                         normalized_hint=var.lemma,
                         evidence=EvidenceSpan(text=ev.span),
-                        template_candidate=template,
+                        template_candidate=template, template_selection=selection,
                     )
         # relation-only frame (copula/ellipsis): a declared STRUCTURAL predicate, never a fake lexeme.
         label = _PREDICATE_LABELS.get(value, value)
@@ -199,23 +231,17 @@ class FormalizerAdapter:
     def _assign_roles(self, frame, state):
         from ah.model.types import ActantRole as R
 
-        # The verbal predicate is NOT an actant: drop any participant that is a VERB in the evidence.
-        verb_spans = {ev.span for ev in state.evidence if any(v.pos == "VERB" for v in ev.variants)}
-        parts = [p for p in frame.participants if p not in verb_spans]
-        if not parts:
-            return []
-        con = (frame.construction or "").upper()
-        possessive = "GEN" in con and ("U+" in con or frame.copula_ellipsis)  # у+GEN+NOM / copula ellipsis
-        locative = "LOC" in con or "PREP" in con
-        if possessive:
-            # whole-part / possession: possessor(whole)=SUBJECT, part(theme)=OBJECT (surface order)
-            roles = [R.SUBJECT] + [R.OBJECT] * max(0, len(parts) - 1)
-        elif locative:
-            # locative: first nominal=SUBJECT (if any), the locative participant=LOCATION
-            roles = [R.LOCATION] * len(parts)
-            if len(parts) >= 2:
-                roles[0] = R.SUBJECT
-        else:
-            # verbal frame (NOM+V+ACC ...): first nominal before the verb=SUBJECT, remainder=OBJECT
-            roles = [R.SUBJECT] + [R.OBJECT] * max(0, len(parts) - 1)
-        return list(zip(roles, parts))
+        dec = state.decisions.get(frame.frame_id+"|predicate_value")
+        specs = frame.semantic.get('candidate_specs',{})
+        if dec and len(dec.selected)==1 and dec.selected[0] in specs:
+            evs={e.token_id:e for e in state.evidence}
+            return [(R(role),evs[tid].span) for tid,role in specs[dec.selected[0]]['roles'].items()]
+        # Legacy preview: cases may propose roles; positional assignment is forbidden.
+        pairs=[]
+        for tid in frame.argument_token_refs:
+            ev=next((e for e in state.evidence if e.token_id==tid),None)
+            if ev is None: continue
+            cases=ev.cases
+            if cases==frozenset({'nom'}): pairs.append((R.SUBJECT,ev.span))
+            elif cases==frozenset({'acc'}): pairs.append((R.OBJECT,ev.span))
+        return pairs

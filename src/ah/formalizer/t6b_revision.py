@@ -61,6 +61,7 @@ class TimeAssertionRec:
     node_id: str              # the N/G node it dates
     support_record_id: str    # the SupportRecord whose liveness gates effective visibility
     status: str = "LIVE"
+    source: str = "OBSERVATION"
 
 
 @dataclass
@@ -73,14 +74,14 @@ class ConflictReportRec:
 class RevisionLedger:
     def __init__(self, graph: ProofGraph):
         self.graph = graph
-        self.observations: dict[str, ObservationRec] = {}
+        self.observations: dict[tuple, ObservationRec] = {}
         self.assertions: dict[str, TimeAssertionRec] = {}
         self.reports: dict[str, ConflictReportRec] = {}
 
     # -- registration ---------------------------------------------------------
     def register_observation(self, obs_id: str, version: int = 0) -> ObservationRec:
         rec = ObservationRec(obs_id=obs_id, version=version)
-        self.observations[obs_id] = rec
+        self.observations[(obs_id,version)] = rec
         return rec
 
     def add_assertion(self, assertion_id: str, source_tag: tuple, node_id: str, support_record_id: str) -> TimeAssertionRec:
@@ -110,12 +111,12 @@ class RevisionLedger:
         rec = self._find_support(a.support_record_id)
         if rec is None or rec.status != "LIVE":
             return False
-        return a.node_id in self.graph.f_visible()
+        return a.support_record_id in self.graph.effective_supports()
 
     # -- retraction protocol --------------------------------------------------
     def retract_observation(self, obs_id: str, version: int = 0) -> dict:
         """§8.2 case (b): observation-level retraction — writes RETRACTED to its assertions + invalidates root supports."""
-        obs = self.observations[obs_id]
+        obs = self.observations[(obs_id,version)]
         tag = (obs_id, version)
         _transition("observation", obs.status, "RETRACTED")
         obs.status = "RETRACTED"
@@ -124,7 +125,7 @@ class RevisionLedger:
 
         retracted = []
         for a in self.assertions.values():           # every assertion with the matching source_tag (ROOT and DERIVED)
-            if a.source_tag == tag and a.status == "LIVE":
+            if a.source == "OBSERVATION" and a.source_tag == tag and a.status == "LIVE":
                 _transition("assertion", a.status, "RETRACTED")
                 a.status = "RETRACTED"
                 retracted.append(a.assertion_id)
@@ -135,16 +136,22 @@ class RevisionLedger:
 
     def supersede_observation(self, obs_id: str, version: int = 0) -> list:
         """Atomic visible-version switch (LIVE -> SUPERSEDED): invalidate the old version's supports + assertions."""
-        obs = self.observations[obs_id]
+        obs = self.observations[(obs_id,version)]
         tag = (obs_id, version)
         _transition("observation", obs.status, "SUPERSEDED")
         obs.status = "SUPERSEDED"
 
         self.graph.retract(tag)
         for a in self.assertions.values():
-            if a.source_tag == tag and a.status == "LIVE":
+            if a.source == "OBSERVATION" and a.source_tag == tag and a.status == "LIVE":
                 _transition("assertion", a.status, "SUPERSEDED")
                 a.status = "SUPERSEDED"
+        return sorted(self._close_reports())
+
+    def retract_assertion(self, assertion_id):
+        a=self.assertions[assertion_id]
+        if a.status!='LIVE': return []
+        a.status='RETRACTED'
         return sorted(self._close_reports())
 
     def _close_reports(self) -> list:

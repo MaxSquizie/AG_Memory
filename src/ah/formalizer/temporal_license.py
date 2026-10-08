@@ -50,6 +50,8 @@ def undated(): return TemporalRegion("UNDATED")
 
 def normalize(r: TemporalRegion) -> TemporalRegion:
     """Collapse a degenerate EXISTENTIAL({t}) to POINT(t); keep everything else as-is."""
+    if r.kind == "EXISTENTIAL" and r.lo is not None and r.lo == r.hi:
+        return point(r.lo)
     if r.kind == "EXISTENTIAL" and len(r.points) == 1:
         return point(next(iter(r.points)))
     return r
@@ -68,7 +70,7 @@ def covers(outer: TemporalRegion, inner: TemporalRegion):
                 return None                     # unknown boundary -> inclusion not established
             return o.lo <= t <= o.hi
         if o.kind == "EXISTENTIAL":
-            return t in o.points
+            return False  # existential occurrence does not establish any particular moment
         return False                            # UNDATED outer covers nothing
 
     if n.kind == "CONTINUOUS":                 # a whole interval must lie inside outer
@@ -82,7 +84,7 @@ def covers(outer: TemporalRegion, inner: TemporalRegion):
         if o.kind == "CONTINUOUS":
             if o.lo is None or o.hi is None:
                 return None
-            return all(o.lo <= s <= o.hi for s in n.points)
+            return (o.lo <= n.lo and n.hi <= o.hi) if n.lo is not None and n.hi is not None else (all(o.lo <= s <= o.hi for s in n.points) if n.points else None)
         return False                           # POINT / EXISTENTIAL outer cannot cover a multi-point set
 
     return False                               # UNDATED inner
@@ -157,8 +159,8 @@ def forall_inst_license(a: TemporalRegion, b: TemporalRegion) -> LicenseResult:
         e, c = pick("EXISTENTIAL"), pick("CONTINUOUS")
         if c.lo is None or c.hi is None:
             return LicenseResult("UNKNOWN", None, "INTERVAL_BOUNDARY_UNKNOWN")
-        ok = all(c.lo <= s <= c.hi for s in e.points)   # J ⊆ I
-        return LicenseResult("LICENSED", exist(*e.points)) if ok else mismatch()
+        ok = (c.lo <= e.lo and e.hi <= c.hi) if e.lo is not None and e.hi is not None else bool(e.points) and all(c.lo <= s <= c.hi for s in e.points)   # J ⊆ I
+        return LicenseResult("LICENSED", e) if ok else mismatch()
 
     return mismatch()                         # two non-degenerate EXISTENTIAL are never licensed
 

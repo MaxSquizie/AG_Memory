@@ -37,37 +37,48 @@ class RealBackendSelector:
     system: str = _SYSTEM
     role: str = "formalizer"
     run_id: str = "real-backend"
+    journal: object = None
     budget: BudgetSnapshot | None = None
+    generation_settings: dict = field(default_factory=lambda:{"temperature":0.0,"top_p":1.0,"top_k":0,"max_new_tokens":4096,"enable_thinking":False})
+    model_key: str = ""
 
     def __post_init__(self):
+        from .provider_call_log import ProviderCallLog
+        from .canonical_ledger import digest
         self._adapter = ProviderAdapter(
             name=type(self.backend).__name__,
-            capabilities=frozenset({"select"}),
+            capabilities=frozenset({"select", "propose_local"}),
+            log=ProviderCallLog(self.journal),
+            model_key=self.model_key or str(getattr(self.backend,"model",type(self.backend).__name__)),
+            params_hash=digest({"system":self.system,"role":self.role,"generation":self.generation_settings}),
             transport=self._transport,
-            budget=self.budget or BudgetSnapshot(),
+            budget=self.budget or BudgetSnapshot(tp_calls=2, lexical_calls=2, max_nodes=64, max_edges=128, max_depth=16, token_limit=32768),
         )
 
     def _transport(self, prompt: str) -> str:
-        resp = self.backend.generate(prompt, system=self.system, role=self.role)
+        resp = self.backend.generate(prompt, system=self.system, role=self.role, override=self.generation_settings)
         return resp if isinstance(resp, str) else getattr(resp, "text", "")
 
+    def start_run(self, run_id):
+        self.run_id=run_id
+        self._adapter.start_run(run_id)
+
+    def propose_local(self, prompt):
+        return self._adapter.propose_local(prompt,self.run_id)
+
     def select(self, prompt: str) -> str:
-        try:
-            return self._adapter.select(prompt, self.run_id)
-        except Exception as exc:  # ProviderUnavailable / IntegrityError / BudgetExceeded
-            raise ProviderUnavailableError(
-                f"backend {type(self.backend).__name__} unavailable: {exc}"
-            ) from exc
+        return self._adapter.select(prompt, self.run_id)
 
 
-def selector_from_config(config):
+def selector_from_config(config, journal=None):
     """Build a :class:`RealBackendSelector` from an AppConfig via the product factory; ``None`` if LLM is disabled."""
     from ah.llm.factory import build_llm_backend
 
     backend = build_llm_backend(config)
     if backend is None:
         return None
-    return RealBackendSelector(backend, system=_SYSTEM, role="formalizer")
+    model=str(getattr(config.llm,config.llm.backend.lower()+'_model',getattr(config.llm,'model_dir','')))
+    return RealBackendSelector(backend, system=_SYSTEM, role="formalizer", journal=journal,model_key=type(backend).__name__+':'+model)
 
 
 # --------------------------------------------------------------------------- #

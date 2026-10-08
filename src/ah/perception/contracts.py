@@ -507,6 +507,9 @@ class QueryCandidate:
     # orthogonal to that body (for example POSSIBLE(FORALL(...))).
     scope_operators: tuple[PropositionOperator, ...] = ()
 
+    temporal_point: float | None = None
+    temporal_window: tuple[float,float] | None = None
+
     def __post_init__(self) -> None:
         roles = self.requested_roles
         if self.requested_role is not None:
@@ -762,6 +765,8 @@ class PerceptionResult:
     # Keep this field last so legacy positional PerceptionResult construction
     # preserves its historical argument layout.
     proposition_roots: tuple[PropositionRootCandidate, ...] = ()
+    native_receipt: object | None = None
+    formalizer_preview: bool = False
 
     @property
     def acts_count(self) -> int:

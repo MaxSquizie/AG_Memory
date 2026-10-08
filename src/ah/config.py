@@ -461,16 +461,24 @@ class OrchestratorSettings:
 class FormalizerSettings:
     """V7 formalizer vertical (I01): the single traceable production path.
 
-    ``native_commit`` selects the V7-native perception mode: real input is run through the full chain
+    ``native_commit`` must be True: real input is run through the full chain
     (T0..T4 -> C -> T5 gate + binding CAS -> T6 durable commit) on a persistent store, and downstream
-    reads the COMMITTED facts from that store. When False, the legacy PerceptionResult translation
-    (``FormalizerAdapter.parse``) remains the explicitly-selected mode. ``journal_filename`` is the durable
+    reads the COMMITTED facts from that store. Legacy preview is a separate noncommittable API;
+    it cannot replace the production writer. ``journal_filename`` is the durable
     two-channel journal under ``paths.data_dir``."""
 
-    native_commit: bool = False
+    native_commit: bool = True
+    resource_release_filename: str = "formalizer_release.json"
+    review_records_filename: str = "formalizer_reviews.json"
     journal_filename: str = "formalizer_journal.log"
 
     def __post_init__(self) -> None:
+        if self.native_commit is not True:
+            raise ValueError('formalizer.native_commit must be true; preview cannot be a production writer')
+        if not self.review_records_filename or any(c in self.review_records_filename for c in ("/","\\")):
+            raise ValueError("formalizer.review_records_filename must be a bare filename")
+        if not self.resource_release_filename or any(c in self.resource_release_filename for c in ("/","\\")):
+            raise ValueError("formalizer.resource_release_filename must be a bare filename")
         if not self.journal_filename or "/" in self.journal_filename or "\\" in self.journal_filename:
             raise ValueError("formalizer.journal_filename must be a bare filename")
 
@@ -723,7 +731,9 @@ def load_config(path: str | Path) -> AppConfig:
             parse_agent_response_to_h=bool(orchestrator_raw.get("parse_agent_response_to_h", False)),
         ),
         formalizer=FormalizerSettings(
-            native_commit=bool(formalizer_raw.get("native_commit", False)),
+            native_commit=bool(formalizer_raw.get("native_commit", True)),
+            resource_release_filename=str(formalizer_raw.get("resource_release_filename", "formalizer_release.json")),
+            review_records_filename=str(formalizer_raw.get("review_records_filename", "formalizer_reviews.json")),
             journal_filename=str(formalizer_raw.get("journal_filename", "formalizer_journal.log")),
         ),
     )

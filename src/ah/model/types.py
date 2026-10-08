@@ -27,6 +27,8 @@ class RefKind(str, Enum):
 
 
 class ActantRole(str, Enum):
+    EXPERIENCER = "EXPERIENCER"
+    SURFACE_ARG = "SURFACE_ARG"
     SUBJECT = "SUBJECT"
     OBJECT = "OBJECT"
     AUXILLIARY = "AUXILLIARY"

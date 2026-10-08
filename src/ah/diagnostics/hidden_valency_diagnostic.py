@@ -9,7 +9,6 @@ import shutil
 from typing import Any, TYPE_CHECKING
 
 from ah.model import ActantRole
-from ah.perception.adaptive_parser import AdaptivePerceptionParser, AdaptiveSettings
 from ah.perception.probe_protocol import (
     CHOICE_MAX_NEW_TOKENS,
     ProbeProtocolError,
@@ -164,25 +163,25 @@ def _semantic_label(raw_text: str, choices: tuple[str, str]) -> tuple[str | None
     return None, "MALFORMED"
 
 
-def _parser_for(services: "RuntimeServices") -> AdaptivePerceptionParser:
-    perception = services.perception
-    if perception is None or not hasattr(perception, "settings"):
-        raise RuntimeError("Adaptive perception service is required for hidden-valency diagnostics")
-    settings = perception.settings
-    if settings.protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
-        raise RuntimeError("Hidden-valency diagnostics require an adaptive perception protocol")
-    return AdaptivePerceptionParser(
-        services.llm,
-        AdaptiveSettings(
-            prompt_dir=settings.probe_prompt_dir,
-            generation=settings.generation,
-            retry_attempts=0,
-            max_actants_per_act=settings.max_actants_per_act,
-            predicate_symbol_language=settings.predicate_symbol_language,
-            morphology_backend=settings.morphology_backend,
-            verify_predicate_symbol=(settings.protocol == "adaptive_v3"),
-        ),
-    )
+class _ValencyProbeProtocol:
+    """Read-only diagnostic protocol; independent of the removed adaptive parser."""
+    @staticmethod
+    def _instruction(name):
+        if name!="template_hidden_valency": raise ValueError("unknown diagnostic probe")
+        return ("Decide whether the tested semantic role is licensed by this predicate in the supplied context. "
+                "Select only a declared choice. Missing role evidence is not an argument or a fact. "
+                "Do not infer an absent participant and do not use choice order as evidence.")
+    @staticmethod
+    def _generation_override(limit):
+        return {"max_new_tokens":limit,"temperature":0.0,"top_p":1.0,"top_k":0}
+    @staticmethod
+    def _probe_system():
+        return "You are a bounded role-licence diagnostic. Return only the choice label required by the prompt."
+
+
+def _parser_for(services: "RuntimeServices") -> _ValencyProbeProtocol:
+    if services.llm is None: raise RuntimeError("A provider is required for valency diagnostics")
+    return _ValencyProbeProtocol()
 
 
 def _dump_json(path: Path, payload: Any) -> None:

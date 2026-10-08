@@ -63,7 +63,8 @@ class FormalizationCache:
         """Record NEGATIVE experience only for D/C/R rejections. Returns False (no-op) otherwise."""
         if ground_type not in _NEGATIVE_GROUNDS:
             return False  # computational diagnostics are NOT negative experience
-        rid = f"neg-{abs(hash((tuple(sorted(key.items())), stage, ground_type)))}"
+        from .canonical_ledger import digest
+        rid = 'neg-'+digest([key,stage,ground_type])
         self._records[rid] = RxRecord(
             record_id=rid, key=dict(key), stages={stage: {"rejected": True}},
             polarity=-1, priority_hint=-1.0, versions=dict(self._current if versions is None else versions),

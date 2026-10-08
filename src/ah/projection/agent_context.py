@@ -415,6 +415,8 @@ class ContextProjector:
             return None
 
         obj = self.core.store.get_element_any_domain(ref.uid)
+        if self.core.store.formalizer_fact_visible(ref.uid) is False:
+            return None
 
         if isinstance(obj, SemanticEntity):
             identity = str(obj.meta.get("identity_role", "")).upper()
@@ -461,7 +463,7 @@ class ContextProjector:
             # it model-visible factual evidence. Deterministic inference results are
             # projected separately below.
             scope = str(obj.meta.get("semantic_scope") or "").upper()
-            if scope in {"EMBEDDED", "QUOTED", "CONDITIONAL"}:
+            if scope in {"EMBEDDED", "QUOTED", "CONDITIONAL", "COMMAND", "QUERY", "HYPOTHETICAL", "STRUCTURAL"}:
                 return None
 
             source = self._source_user_utterance(ref)

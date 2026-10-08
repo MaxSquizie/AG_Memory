@@ -68,10 +68,11 @@ class TagSource:
         except Exception:  # pragma: no cover - defensive: a bad token must not break tagging
             return []
 
-    def label(self, word: str) -> str | None:
+    def label(self, word: str, *, context="", occurrence=None, resource_version="tag_source_v1") -> str | None:
         """Assign a subordination/relative label (or a coarse content POS) to one word. Cached per word."""
-        if word in self._cache:
-            return self._cache[word]
+        cache_key=(word,context,occurrence,resource_version)
+        if cache_key in self._cache:
+            return self._cache[cache_key]
         parses = self._parses(word)
         low = word.lower()
 
@@ -87,7 +88,7 @@ class TagSource:
         #     coordinators like и/а/но): resolved ONLY via the bounded LLM probe; without a probe it stays
         #     content (honest incompleteness — never guessed).
         elif any(p.tag.POS == "CONJ" for p in parses) and self._probe is not None:
-            lab = "CONJ_SUB" if self._probe(word) else None
+            lab = "CONJ_SUB" if self._probe(word, context=context, occurrence=occurrence, resource_version=resource_version) else None
 
         if lab is None:
             # Pass through the top parse's coarse POS so downstream can use it; non-opener labels are ignored by detect_clauses.
@@ -98,15 +99,15 @@ class TagSource:
         if lab is not None and not isinstance(lab, str):
             lab = str(lab)
 
-        self._cache[word] = lab
+        self._cache[cache_key] = lab
         return lab
 
     def tag(self, text: str) -> list[Token]:
         """Tag a full sentence into :class:`Token` sequence (words labeled; punctuation kept as untagged delimiters)."""
         out: list[Token] = []
-        for tok in tokenize(text):
+        for i,tok in enumerate(tokenize(text)):
             if _LETTER_RE.match(tok):
-                out.append(Token(tok, self.label(tok)))
+                out.append(Token(tok, self.label(tok,context=text,occurrence=i)))
             else:
                 out.append(Token(tok, None))   # punctuation / other -> clause delimiter, no tag
         return out

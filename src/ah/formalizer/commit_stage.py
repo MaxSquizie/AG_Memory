@@ -1,157 +1,34 @@
-# -*- coding: utf-8 -*-
-"""Commit stage (T5/T6) — the ONLY place anything is written to memory.
-
-Wires the pure pieces into one durable, idempotent commit flow (I25: nothing writes before this):
-
-    FormalizationState --assemble_ir--> CandidateIR  (the only exit of the formalizer)
-        -> T6 head-only admission (t6_core.head_only_admission)
-        -> plan\\E = admitted ∪ closure ∪ common ops   (t6_core.compute_plan_E)
-        -> batch_hash (idempotency key) + MaterializationMarker(observation, version)
-        -> store.commit_transaction(ops, marker, decision)   [atomic: E+marker+D]
-        -> terminal outcome journaled (APPLIED / REJECTED_* / STALE_SUPERSEDED)
-
-A run that is NOT admitted at the head still preserves its common observation op but writes no
-version-specific assertions — so a losing concurrent run leaves no half-materialized facts.
-"""
-
-from __future__ import annotations
-
-import hashlib
-import json
-from dataclasses import dataclass
-from typing import Sequence
-
-from .composition import assemble_ir
-from .ir_to_graph import CorefCluster, build_coref_ops, build_graph_ops, build_scope_tree_ops
-from .state import FormalizationState
-from .store_interface import (
-    CommitDecision,
-    MaterializationMarker,
-    Store,
-    StoreOp,
-    TerminalOutcome,
-)
-from .t6_core import PlanOp, PendingBatch, compute_plan_E, head_only_admission, select_terminal_outcome
-
+"""T5 journals the actual typed plan; T6 admits and applies that same plan."""
+from dataclasses import asdict,dataclass
+from .canonical_ledger import digest
+from .store_interface import CommitDecision,MaterializationMarker,JournalRecord,TerminalOutcome
 
 @dataclass(frozen=True)
 class CommitReport:
     admitted_at_head: bool
-    applied: bool                 # did the store accept this transaction?
+    applied: bool
     batch_hash: str
     n_ops: int
     terminal: TerminalOutcome
+    committed_fragments: tuple[str,...]=()
 
 
-def _ops_from_ir(ir) -> list[PlanOp]:
-    """Derive plan\\E descriptors from the IR.
-
-    The observation record is a COMMON op (always preserved). Each predicate frame and each
-    semantic graph is a version-specific E op depending on the observation it materializes."""
-    ops: list[PlanOp] = [PlanOp(uid=f"obs:{ir.observation_id}", in_E=False)]
-    for fid in ir.predicate_frames:
-        ops.append(PlanOp(uid=f"frame:{fid}", deps=(f"obs:{ir.observation_id}",), in_E=True))
-    for i, g in enumerate(ir.semantic_candidates):
-        gid = g.graph_id or f"G{i + 1}"
-        frame_deps = tuple(f"frame:{fid}" for fid in ir.predicate_frames)
-        ops.append(PlanOp(uid=f"graph:{gid}", deps=frame_deps or (f"obs:{ir.observation_id}",), in_E=True))
-    return ops
-
-
-def _scope_ops_from_ir(ir) -> list[StoreOp]:
-    """Emit scope-tree ops for one IR (Rev13): each operator tree's EVENT leaf resolves against this
-    run's own graph nodes. Unresolved leaves emit nothing (SCOPE_NOT_COVERED, honest). The caller gates
-    the result on head-only admission."""
-    frames_by_id = {n.frame_id: n for g in ir.semantic_candidates for n in g.nodes if hasattr(n, "frame_id")}
-    ops: list[StoreOp] = []
-    for tree in ir.operator_trees:
-        ops.extend(build_scope_tree_ops(tree, frames_by_id))
-    return ops
-
-
-def _coref_ops_from_ir(ir) -> list[StoreOp]:
-    """Emit K(COREF_CLUSTER) groups for RESOLVED reference decisions only (I24 guard).
-
-    A ReferenceCandidate is a candidate SET and asserts no identity on its own; it materializes only
-    once an explicit resolution act has set ``resolved_antecedent``. Unresolved sets emit nothing —
-    never a silent identity link.
-    """
-    clusters = [
-        CorefCluster(cluster_id=rc.mention_id, mention_span=rc.mention_id,
-                     antecedent_spans=(rc.resolved_antecedent,))
-        for rc in ir.coreference_candidates
-        if getattr(rc, "resolved_antecedent", None)
-    ]
-    return build_coref_ops(tuple(clusters))
-
-
-def _batch_hash(ir, run_id: str) -> str:
-    """Idempotency key: canonical serialization of the IR + run identity."""
-    payload = {
-        "observation_id": ir.observation_id,
-        "interpretation_version": ir.interpretation_version,
-        "run_id": run_id,
-        "lexical_units": list(ir.lexical_units),
-        "predicate_frames": list(ir.predicate_frames),
-        "ambiguity_sets": [list(a) for a in ir.ambiguity_sets],
-    }
-    return hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
-
-
-def commit(
-    state: FormalizationState,
-    store: Store,
-    *,
-    run_id: str,
-    pending: Sequence[PendingBatch] = (),
-    superseded: bool = False,
-) -> CommitReport:
-    """Run the full commit stage for one interpretation of one observation."""
-    ir = assemble_ir(state)
-
-    # T6 admission: is THIS run at the head of the pending order?
-    this_batch = PendingBatch(batch_id=run_id, seq=min((b.seq for b in pending), default=-1))
-    admitted, _rejected = head_only_admission(list(pending) + [this_batch])
-    admitted_at_head = admitted is not None and admitted.batch_id == run_id
-
-    ops_desc = _ops_from_ir(ir)
-    admitted_uids = {o.uid for o in ops_desc if o.in_E} if admitted_at_head else set()
-    plan_ops = compute_plan_E(ops_desc, admitted_uids)
-
-    # Lexical materialization (§12/§17): admitted lexical units become AbstractSymbols (S) in the LIVE graph,
-    # not just journal records. Gated on admission exactly like plan E (DR13) — a non-head run writes none.
-    if admitted_at_head:
-        forms = sorted({str(u).strip() for u in ir.lexical_units if str(u).strip()})
-        plan_ops = (*plan_ops, *(StoreOp("ADD_SYMBOL", {"form": f}) for f in forms))
-        # Graph materialization (§16/§17): admitted semantic candidates become live T+N in the store.
-        # Gated on admission exactly like lexical symbols (DR13) — a non-head run writes no version-specific
-        # graph facts. The store must have the graph handlers registered (register_graph_handlers).
-        for g in ir.semantic_candidates:
-            graph_ops, _report = build_graph_ops(g)  # default resolver: spans as S symbols
-            plan_ops = (*plan_ops, *graph_ops)
-        # Scope-tree materialization (§15.3/Rev13): each operator tree's EVENT leaf resolves against this
-        # run's own graph nodes; an unresolved leaf emits nothing (SCOPE_NOT_COVERED — never a silent drop).
-        plan_ops = (*plan_ops, *_scope_ops_from_ir(ir))
-        # Coreference: only EXPLICITLY-resolved mention=antecedent pairs materialize as K groups (I24);
-        # an unresolved candidate set asserts no identity and emits nothing.
-        plan_ops = (*plan_ops, *_coref_ops_from_ir(ir))
-
-    batch_hash = _batch_hash(ir, run_id)
-    marker = MaterializationMarker(observation_id=ir.observation_id, interpretation_version=ir.interpretation_version)
-    outcome = select_terminal_outcome(admitted_at_head=admitted_at_head, superseded=superseded)
-    decision = CommitDecision(
-        run_id=run_id, batch_hash=batch_hash, marker=marker, ops_digest=batch_hash[:16], outcome=outcome,
-    )
-
-    result = store.commit_transaction(plan_ops, marker, decision)
-    applied = not result.idempotent_noop   # a fresh write, not an idempotent re-commit
-    # The run's fate is set by admission + supersession (select_terminal_outcome); a store-level
-    # idempotency no-op does not change it. ``applied`` separately reports store acceptance.
-    terminal = outcome
-    # Key the terminal by the batch identity (batch:<hash>) — the SAME key recover_from_head looks up
-    # (§7.3 DR15). A complete commit's terminal is then found on restart, so an already-APPLIED batch is
-    # NOT double-restored; a crash before this line leaves no terminal and recovery surfaces it from D.
-    if applied:
-        store.append_terminal(f"batch:{batch_hash}", terminal)
-    return CommitReport(admitted_at_head=admitted_at_head, applied=applied, batch_hash=batch_hash,
-                       n_ops=len(plan_ops), terminal=terminal)
+def commit(state,store,*,run_id,plan_ops=(),committed_fragments=(),pending=(),superseded=False):
+    if not plan_ops or not committed_fragments:
+        store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,{'kind':'RESOLUTION','observation_id':state.source_uid,'version':state.interpretation_version,'outcomes':{k:d.outcome for k,d in state.decisions.items()},'diagnostics':[asdict(d) for d in state.diagnostics]}))
+        return CommitReport(False,False,'',0,TerminalOutcome.RESOLUTION_ONLY)
+    marker=MaterializationMarker(state.source_uid,state.interpretation_version)
+    raw={'observation':state.observation,'resource_snapshot':state.resource_snapshot,'structural_hash':state.structural_hash,'ops':[asdict(o) for o in plan_ops],'fragments':list(committed_fragments),'run_id':run_id}
+    bh=digest(raw)
+    previous=next((r for r in store.scan_unprocessed(0) if r.payload.get('kind')=='BATCH' and r.payload.get('batch_hash')==bh),None)
+    prechecks=tuple(previous.payload['decision'].get('precheck_refs',())) if previous else store.gate_precheck(bh,plan_ops,run_id=run_id) if hasattr(store,'gate_precheck') else ()
+    D=CommitDecision(run_id,bh,marker,digest(raw['ops']),TerminalOutcome.STALE_SUPERSEDED if superseded else TerminalOutcome.APPLIED,committed=tuple(committed_fragments),precheck_refs=prechecks)
+    if previous:
+        recorded=dict(previous.payload['decision']); recorded['marker']=MaterializationMarker(**recorded['marker']); recorded['outcome']=TerminalOutcome(recorded['outcome'])
+        D=CommitDecision(**recorded)
+    else:
+        decision=asdict(D); decision['outcome']=D.outcome.value
+        store.append_journal('observation',JournalRecord('observation',run_id,{'kind':'BATCH','batch_hash':bh,'ops':raw['ops'],'decision':decision,'observation':state.observation,'resource_snapshot':state.resource_snapshot}))
+    result=store.commit_transaction(plan_ops,marker,D)
+    actual=store.ledger.data['decisions'].get(bh,{}) if hasattr(store,'ledger') else {}
+    return CommitReport(result.outcome!=TerminalOutcome.PENDING_ADMISSION_ORDER,result.outcome==TerminalOutcome.APPLIED and not result.idempotent_noop,bh,len(plan_ops),result.outcome,tuple(actual.get('committed',())))

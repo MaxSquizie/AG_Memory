@@ -28,6 +28,10 @@ class GoalJournalRecord:
     conclusion_signature: str
     temporal: Optional[tuple] = None
     status: str = "PENDING"
+    temporal_premise_assertion_refs: tuple = ()
+    request_window: tuple | None = None
+    conclusion_ref: str | None = None
+    conclusion_ops: tuple = ()
 
 
 class GoalRecovery:
@@ -37,11 +41,11 @@ class GoalRecovery:
 
     def recover(self, rec: GoalJournalRecord) -> dict:
         # R0 — decision-first: a fixed outcome is an immutable historical fact; just return it (idempotent).
-        if rec.goal_run_id in self.store.decisions:
+        if hasattr(self.store,"decisions") and rec.goal_run_id in self.store.decisions:
             return dict(self.store.decisions[rec.goal_run_id])
 
         req = GoalRequest(rec.goal_run_id, rec.rule_id, rec.premise_support_ids,
-                         rec.conclusion_signature, rec.temporal)
+                         rec.conclusion_signature, rec.temporal,rec.temporal_premise_assertion_refs,rec.request_window,rec.conclusion_ref,rec.conclusion_ops)
         # R1/R2 — reconcile against the canonical store (dedup key), then apply or abort per current state.
         return self.executor.execute(req)
 

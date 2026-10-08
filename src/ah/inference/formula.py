@@ -131,6 +131,9 @@ class GroundFormulaReasoner:
             return False
         if self.conflicts.is_conflicted(premise):
             return False
+        managed=self.core.store.formalizer_fact_visible(premise.uid)
+        if managed is not None:
+            return managed
         if premise.kind is RefKind.N:
             if self._false_parent(premise) is not None:
                 return False
@@ -298,6 +301,9 @@ class GroundFormulaReasoner:
         return False
 
     def _asserted_function(self, ref: Ref, obj: FunctionSymbol) -> bool:
+        managed=self.core.store.formalizer_fact_visible(ref.uid)
+        if managed is not None:
+            return managed and not self._suppressed_uid(ref.uid)
         if self._suppressed_uid(ref.uid):
             return False
         if self._assumption_positive(ref):
@@ -392,6 +398,8 @@ class GroundFormulaReasoner:
         for parent_ref, obj in self._function_parents(ref, "NOT"):
             if self._suppressed_uid(parent_ref.uid):
                 continue
+            if self.core.store.formalizer_fact_visible(parent_ref.uid) is not None:
+                continue
             if len(obj.operands) == 1 and obj.operands[0] == ref and self._asserted_function(parent_ref, obj):
                 return parent_ref
         return None
@@ -409,6 +417,9 @@ class GroundFormulaReasoner:
         return None
 
     def _atom_asserted(self, ref: Ref) -> bool:
+        managed=self.core.store.formalizer_fact_visible(ref.uid)
+        if managed is not None:
+            return managed and not self._suppressed_uid(ref.uid)
         if ref.kind is not RefKind.N:
             return False
         if self._assumption_not_for(ref) is not None:
@@ -1885,6 +1896,14 @@ class GroundFormulaReasoner:
                 depth=depth,
                 diagnostics=(f"Missing formula UID: {ref.uid}",),
             )
+
+        managed=self.core.store.formalizer_fact_visible(ref.uid)
+        if managed is not None:
+            adapter=getattr(self.core,'_formalizer_adapter',None)
+            answer=adapter.prove_node(ref.uid) if adapter else {'answer':'YES' if managed else 'UNKNOWN','conflict_ref':[]}
+            status=LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED if answer['answer']=='NO' else LogicalStatus.UNKNOWN
+            evidence=self.core.ref(answer.get('evidence_ref',ref.uid))
+            return self._outcome(status,StopReason.GOAL_SATISFIED if status!=LogicalStatus.UNKNOWN else StopReason.SEARCH_EXHAUSTED,evidence if status!=LogicalStatus.UNKNOWN else None,(evidence,) if status!=LogicalStatus.UNKNOWN else (),(),depth=depth,diagnostics=tuple(answer.get('diagnostics',()))+tuple('conflict_ref:'+r for r in answer['conflict_ref']))
 
         actual = self.core.store.kind_of(ref.uid)
         if actual is not ref.kind:

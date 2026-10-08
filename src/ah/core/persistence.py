@@ -317,6 +317,22 @@ class JsonPersistence:
     ) -> None:
         if not self.settings.enabled:
             return
+        payload = self.export(core, ignition=ignition, context=context)
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        data = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
+        fd, tmp_name = tempfile.mkstemp(prefix=self.path.name + ".", suffix=".tmp", dir=self.path.parent)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(data)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp_name, self.path)
+        finally:
+            if os.path.exists(tmp_name):
+                os.unlink(tmp_name)
+
+    def export(self, core: AHCore, *, ignition=None, context=None) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "schema_version": SCHEMA_VERSION,
             "canonical": {
@@ -345,6 +361,7 @@ class JsonPersistence:
             # canonical AH. It never participates in identity/inference and is
             # optional for backward compatibility with older schema-1 files.
             "store_metadata": {
+                "formalizer_state": core.store._state.formalizer_state,
                 "creation_sequence": {
                     uid: int(seq)
                     for uid, seq in sorted(core.store.creation_items(), key=lambda item: item[1])
@@ -393,18 +410,7 @@ class JsonPersistence:
             }
             self._last_saved_tick = snap.tick_index
 
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        data = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
-        fd, tmp_name = tempfile.mkstemp(prefix=self.path.name + ".", suffix=".tmp", dir=self.path.parent)
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
-                fh.write(data)
-                fh.flush()
-                os.fsync(fh.fileno())
-            os.replace(tmp_name, self.path)
-        finally:
-            if os.path.exists(tmp_name):
-                os.unlink(tmp_name)
+        return payload
 
     def maybe_autosave(
         self,
@@ -430,6 +436,9 @@ class JsonPersistence:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
         except Exception as exc:
             raise PersistenceError(f"Cannot read persistence file {self.path}: {exc}") from exc
+        return self.import_payload(raw, uid_generator=uid_generator)
+
+    def import_payload(self, raw: dict[str, Any], *, uid_generator=None) -> PersistenceBundle:
         version = int(raw.get("schema_version", 0))
         if version != SCHEMA_VERSION:
             raise PersistenceError(f"Unsupported persistence schema {version}; expected {SCHEMA_VERSION}")
@@ -490,6 +499,7 @@ class JsonPersistence:
 
         store.rebuild_indexes()
         metadata = raw.get("store_metadata") or {}
+        store._state.formalizer_state = metadata.get("formalizer_state") or {}
         creation_raw = metadata.get("creation_sequence") or {}
         if creation_raw:
             store._restore_creation_sequence(

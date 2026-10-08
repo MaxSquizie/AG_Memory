@@ -11,7 +11,7 @@ The executable core of the goal channel:
   failure -> ABORTED{GOAL_LICENSE_FAILED} with no node/path created (pre-PENDING detection returns UNKNOWN to the caller).
 * **Premise liveness re-checked inside the atomic transaction** — a premise that dies between preflight and apply (a
   concurrent retraction commit, modeled by an ``interleave`` hook) -> ABORTED{GOAL_PREMISES_STALE} with no partial records.
-* **Dedup** — path key = (rule_id, sorted premise support ids, conclusion_signature). A hit whose premises are still live
+* **Dedup** — path key = (rule_id, sorted premise support ids, conclusion_signature, temporal assertion IDs). A hit whose premises are still live
   -> APPLIED_NOOP (no new path/TimeAssertion); a hit whose premises died -> ABORTED{GOAL_PREMISES_STALE} (the existing path
   is already invalidated by the §8.2 cascade; it is not resurrected and no duplicate is created).
 * **Fresh + licensed + live** -> node-level dedup (EnsureNode) + AddDerivedSupport atomically with GOAL_DECISION{APPLIED,
@@ -42,6 +42,10 @@ class GoalRequest:
     premise_support_ids: tuple         # support ids that must be live at apply time
     conclusion_signature: str          # canonical content signature (node + path dedup)
     temporal: Optional[tuple] = None   # regions for licensing, e.g. (w_or, w_not) / (w_interval, w_instance)
+    temporal_premise_assertion_refs: tuple[str,...] = ()
+    request_window: tuple | None = None
+    conclusion_ref: str | None = None
+    conclusion_ops: tuple = ()
     conclusion_operator: Optional[str] = None  # I25: declared operator of the conclusion (form check)
 
 
@@ -55,7 +59,7 @@ class PathRecord:
 
 
 def _path_key(req: GoalRequest):
-    return (req.rule_id, tuple(sorted(req.premise_support_ids)), req.conclusion_signature)
+    return (req.rule_id, tuple(sorted(req.premise_support_ids)), req.conclusion_signature, tuple(sorted(req.temporal_premise_assertion_refs)))
 
 
 class GoalStore:
@@ -87,6 +91,9 @@ class GoalExecutor:
         self.rules = dict(rules) if rules is not None else dict(_DEFAULT_RULE_TABLE)
 
     def execute(self, req: GoalRequest, interleave: Optional[Callable] = None) -> dict:
+        if hasattr(self.store,"_write_unit"):
+            from .goal_channel import execute
+            return execute(self.store,req,interleave)
         # Idempotency: lookup by goal_run_id precedes any write; a re-execution returns the fixed decision.
         if req.goal_run_id in self.store.decisions:
             return dict(self.store.decisions[req.goal_run_id])
@@ -130,12 +137,9 @@ class GoalExecutor:
         if dead:                                # premise died inside the transaction -> no partial records
             return self._decide(req, "ABORTED", reason="GOAL_PREMISES_STALE")
 
-        # Fresh + licensed + live: node (dedup) + AddDerivedSupport atomically with GOAL_DECISION{APPLIED}.
-        node_id = self.store.ensure_node(req.conclusion_signature)
-        rec = PathRecord(record_id=f"DS{len(self.store.paths) + 1}", rule_id=req.rule_id,
-                         premise_support_ids=tuple(sorted(req.premise_support_ids)), node_id=node_id)
-        self.store.paths[key] = rec
-        return self._decide(req, "APPLIED", conclusion_ref=node_id)
+        # A memory fixture does not contain typed premise propositions and cannot
+        # authorize arbitrary conclusions. Production uses goal_channel validation.
+        return self._decide(req, "ABORTED", reason="GOAL_FORM_NOT_VERIFIED")
 
     def _license(self, req: GoalRequest):
         if req.temporal is None:                # undated -> no temporal constraint

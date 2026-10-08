@@ -240,6 +240,9 @@ class FunctionRegistry:
                 )
             )
 
+        for fid,arity in (("NECESSARY",1),("COUNTERFACTUAL",2),("BEFORE",2),("AFTER",2),("DURING",2),("ASSOCIATION",2)):
+            self.register(FunctionSpec(fid,arity,arity,lambda xs,name=fid: name+"("+", ".join(xs)+")",operand_validator=_refs_only))
+
     def register(self, spec: FunctionSpec) -> None:
         canonical = self._key(spec.function_id)
         if canonical in self._specs or canonical in self._aliases:

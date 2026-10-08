@@ -48,6 +48,8 @@ class IdentityQueryIntegrationService(CanonicalNamingIntegrationService):
         *,
         source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
+        if result.native_receipt is not None or result.formalizer_preview:
+            return super().integrate_external(result, context, source_timestamp=source_timestamp)
         identity_queries = self._identity_queries(result)
         if not identity_queries:
             return super().integrate_external(

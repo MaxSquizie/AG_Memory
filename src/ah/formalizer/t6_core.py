@@ -6,7 +6,7 @@ on the in-memory double (fast unit tests) and against the AH adapter (crash-stop
 They encode three V7 §7.3/§6.3 decisions:
 
 * head-only admission (§6.3 PENDING_ADMISSION_ORDER): only the batch at the head of
-  the pending order is admitted; concurrent batches behind it are rejected as conflict.
+  the pending order is admitted; concurrent batches behind it remain pending without a terminal decision.
 * plan\\E computation (§7.3): the commit plan = admitted ops ∪ their transitive
   dependency closure ∪ common (non-E) ops, which are always preserved.
 * terminal-outcome selection (§7.3/§8): APPLIED vs REJECTED_CONFLICT_ADMISSION vs
@@ -45,15 +45,15 @@ def head_only_admission(pending: Sequence[PendingBatch]) -> tuple[PendingBatch |
     """Admit only the batch at the head of the pending order.
 
     Order is by journal seq (ties broken by batch_id for determinism). The earliest
-    unprocessed batch is admitted; every other concurrent batch is rejected as a
-    conflict admission. Returns ``(admitted | None, rejected_batch_ids)``.
+    unprocessed batch is admitted; every other concurrent batch remains pending.
+    Returns ``(head | None, waiting_batch_ids)``; the IDs are not rejections.
     """
     if not pending:
         return None, ()
     ordered = sorted(pending, key=lambda b: (b.seq, b.batch_id))
     admitted = ordered[0]
-    rejected = tuple(b.batch_id for b in ordered[1:])
-    return admitted, rejected
+    waiting = tuple(b.batch_id for b in ordered[1:])
+    return admitted, waiting
 
 
 def compute_plan_E(ops: Sequence[PlanOp], admitted_uids) -> tuple[StoreOp, ...]:
@@ -84,7 +84,7 @@ def compute_plan_E(ops: Sequence[PlanOp], admitted_uids) -> tuple[StoreOp, ...]:
 def select_terminal_outcome(*, admitted_at_head: bool, superseded: bool) -> TerminalOutcome:
     """Pick the terminal outcome from admission + supersession facts (§7.3/§8)."""
     if not admitted_at_head:
-        return TerminalOutcome.REJECTED_CONFLICT_ADMISSION
+        return TerminalOutcome.PENDING_ADMISSION_ORDER
     if superseded:
         return TerminalOutcome.STALE_SUPERSEDED
     return TerminalOutcome.APPLIED

@@ -48,6 +48,7 @@ class CountAnswer:
     text: str                        # rendered answer ("" when UNKNOWN)
     reason: str | None = None        # diagnostic when UNKNOWN
     lower_bound: int | None = None   # provable lower bound surfaced even on INCOMPLETE_DOMAIN
+    upper_bound: int | None = None
 
 
 def _render(kind: str, value: int) -> str:
@@ -65,7 +66,7 @@ def answer_count(claim: NumericClaim) -> CountAnswer:
 
     * AT_LEAST_N + bound  -> "как минимум N" (a lower bound is honest over an open domain; no certificate needed).
     * EXACTLY_N/AT_MOST_N + bound + certificate -> exact / upper phrasing.
-    * EXACTLY_N/AT_MOST_N without certificate   -> UNKNOWN(INCOMPLETE_DOMAIN), but the proven lower bound is still surfaced.
+    * EXACTLY_N/AT_MOST_N without certificate   -> UNKNOWN(INCOMPLETE_DOMAIN), but only the direction of the asserted bound is surfaced.
     * No asserted number                              -> UNKNOWN(NO_BOUND_ASSERTED).
     """
     if claim.kind not in _NUMERIC_KINDS:
@@ -81,12 +82,12 @@ def answer_count(claim: NumericClaim) -> CountAnswer:
 
     # EXACTLY_N / AT_MOST_N require a DomainCertificate to be exact/upper-bounded.
     if not claim.has_certificate:
-        # Exactness is impossible; but the asserted number still bounds from below (honest partial result).
+        # Exactness is impossible; but preserve the asserted inequality without reversing its direction.
         return CountAnswer(
-            "UNKNOWN", "", reason=INCOMPLETE_DOMAIN, lower_bound=value
+            "UNKNOWN", "", reason=INCOMPLETE_DOMAIN, lower_bound=(value if claim.kind == EXACTLY_N else None), upper_bound=(value if claim.kind == AT_MOST_N else None)
         )
 
-    return CountAnswer("ANSWERED", _render(claim.kind, value), lower_bound=value)
+    return CountAnswer("ANSWERED", _render(claim.kind, value), lower_bound=(value if claim.kind == EXACTLY_N else None), upper_bound=value)
 
 
 def extract_claim(graph: object, predicate_id: str) -> NumericClaim | None:

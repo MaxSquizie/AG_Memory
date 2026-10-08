@@ -206,9 +206,9 @@ class QueryGoalBuilder:
             if not query.requested_roles:
                 return QueryBuildResult(None, ("requested_roles_missing",))
             if len(query.requested_roles) == 1:
-                return QueryBuildResult(InferenceQuery(GoalSpec(RoleFillGoal(tref, known, query.requested_roles[0]))), attention_refs=tuple(discovered_attention_refs))
-            return QueryBuildResult(InferenceQuery(GoalSpec(MultiRoleFillGoal(tref, known, query.requested_roles))), attention_refs=tuple(discovered_attention_refs))
-        return QueryBuildResult(InferenceQuery(GoalSpec(ExistsGoal(tref, known))), attention_refs=tuple(discovered_attention_refs))
+                return QueryBuildResult(InferenceQuery(GoalSpec(RoleFillGoal(tref, known, query.requested_roles[0], query.temporal_point, query.temporal_window))), attention_refs=tuple(discovered_attention_refs))
+            return QueryBuildResult(InferenceQuery(GoalSpec(MultiRoleFillGoal(tref, known, query.requested_roles, query.temporal_point, query.temporal_window))), attention_refs=tuple(discovered_attention_refs))
+        return QueryBuildResult(InferenceQuery(GoalSpec(ExistsGoal(tref, known, query.temporal_point, query.temporal_window))), attention_refs=tuple(discovered_attention_refs))
 
 
 class SemanticGoalCompiler:

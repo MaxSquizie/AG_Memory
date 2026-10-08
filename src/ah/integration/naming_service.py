@@ -316,6 +316,8 @@ class NamingAwareIntegrationService(_BaseIntegrationService):
         *,
         source_timestamp: datetime | None = None,
     ) -> IntegrationCommit:
+        if result.native_receipt is not None or result.formalizer_preview:
+            return super().integrate_external(result, context, source_timestamp=source_timestamp)
         normalized = self._normalize_temporals(result, context, source_timestamp)
         naming = tuple(
             item
