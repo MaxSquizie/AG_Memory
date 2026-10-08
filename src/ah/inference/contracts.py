@@ -7,7 +7,7 @@ from typing import Mapping
 from ah.inference.bindings import BindingEnvironment
 from ah.inference.context import ProofContext
 
-from ah.model import ActantRole, Domain, Ref
+from ah.model import ActantRole, Domain, Ref, RefKind
 
 
 class LogicalStatus(str, Enum):
@@ -198,7 +198,43 @@ class ExactlyOneOfGoal:
             raise ValueError("ExactlyOneOfGoal requires at least two child goals")
 
 
-InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal | AnyOfGoal | ExactlyOneOfGoal
+@dataclass(frozen=True, slots=True)
+class NativeFormulaGoal:
+    """Runtime structural target; asking never materializes N/G or its entities."""
+    pattern: object
+    temporal_point: float | None = None
+    temporal_window: tuple[float,float] | None = None
+    workspace_refs: tuple[Ref,...] = ()
+    source_scope: tuple[str,...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class CountGoal:
+    template_ref: Ref
+    known_roles: Mapping[ActantRole,Ref]
+    count_role: ActantRole
+    temporal_point: float | None = None
+    temporal_window: tuple[float,float] | None = None
+    expected_count: int | None = None
+    comparison: str = 'EXACTLY_N'
+    domain_certificate: object | None = None
+    resource_snapshot: str | None = None
+
+    def __post_init__(self):
+        if not isinstance(self.template_ref,Ref) or self.template_ref.kind is not RefKind.T or any(not isinstance(r,ActantRole) or not isinstance(v,Ref) or v.kind is not RefKind.M for r,v in self.known_roles.items()):
+            raise ValueError('Count requires a canonical T and entity role bindings')
+        if not isinstance(self.count_role,ActantRole) or self.count_role in self.known_roles or self.comparison not in {'EXACTLY_N','AT_LEAST_N','AT_MOST_N'}:
+            raise ValueError('Invalid count target')
+        if self.expected_count is not None and (type(self.expected_count) is not int or self.expected_count<0):
+            raise ValueError('Count threshold must be a nonnegative integer')
+        if self.temporal_point is not None and self.temporal_window is not None:
+            raise ValueError('Count has one temporal scope')
+        if self.temporal_point is not None or self.temporal_window is not None:
+            from ah.model import TimeLiteral
+            TimeLiteral((self.temporal_point,) if self.temporal_point is not None else tuple(self.temporal_window))
+
+
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal | AnyOfGoal | ExactlyOneOfGoal | NativeFormulaGoal | CountGoal
 GoalTarget = InferenceGoal | AssociationGoal
 
 
@@ -284,7 +320,27 @@ class CompositeConclusion:
             raise ValueError("CompositeConclusion requires at least two conclusions")
 
 
-SemanticConclusion = SemanticConclusion | CompositeConclusion
+@dataclass(frozen=True, slots=True)
+class CountConclusion:
+    lower_bound: int
+    exact_count: int | None = None
+    witness_refs: tuple[Ref,...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class TemporalComparisonConclusion:
+    operator: str
+    first_bounds: tuple[float,...]
+    second_bounds: tuple[float,...]
+
+
+@dataclass(frozen=True, slots=True)
+class FormulaQueryConclusion:
+    operator: str
+    evidence_refs: tuple[Ref,...]
+
+
+SemanticConclusion = SemanticConclusion | CompositeConclusion | CountConclusion | TemporalComparisonConclusion | FormulaQueryConclusion
 
 
 @dataclass(frozen=True, slots=True)

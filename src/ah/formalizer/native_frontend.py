@@ -88,8 +88,8 @@ def _required_operators(state,release):
 def _grammar_frames(state,release):
     p=release.entries('ProposalPolicy')[0]
     source=tuple(e.token_id for e in state.evidence)
-    request=StructureProposalRequest('syntax:'+state.source_uid,'',source,allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR',*OPERATORS}),
-        allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),
+    request=StructureProposalRequest('syntax:'+state.source_uid,'',source,allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST',*OPERATORS}),
+        allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),
         max_nodes=p['max_nodes'],max_edges=p['max_edges'],max_depth=p['max_depth'],required_operators=_required_operators(state,release))
     try:
         hypotheses,provenance,morph_bindings=propose_graphs(state,release,request)
@@ -109,6 +109,9 @@ def _grammar_frames(state,release):
         for f in local:
             f.semantic['structural_unresolved'] |= ambiguous
         frames.extend(local)
+    if len(accepted)==1 and not accepted[0][1]:
+        hid=accepted[0][0].local_id
+        state.logical_roots=[t for r in state.syntax_trace if r.get('literal_hypothesis')==hid for t in r['operator_forest']]
     return frames
 
 
@@ -127,18 +130,31 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
     accepted=[]
     unsupported=False
     for h in hypotheses:
-        if any(n.kind in {'PREDICATE','ENTITY'} and len(n.anchor_spans)!=1 for n in h.nodes):
-            unsupported=True
-            state.grammar_search_incomplete=True
-            state.diag('STRUCTURE_NOT_COVERED','multi-head lexical anchors are not closed by the runtime'); continue
+        def unit(node):
+            anchors=sorted(node.anchor_spans,key=lambda a:bytoken[a].start)
+            head=node.head_anchor or anchors[0]
+            return {'head_ref':head,'anchor_refs':anchors,'surface':' '.join(bytoken[a].span for a in anchors),
+                    'mention_ref':head if len(anchors)==1 else 'mention:'+digest(anchors)}
         localframes={}
         proposition_nodes={}
         variable_ids={i:i+1 for i,n in enumerate(h.nodes) if n.kind=='BOUND_VAR'}
+        time_regions={}
+        for i,n in enumerate(h.nodes):
+            if n.kind!='TIME': continue
+            anchors=[bytoken[a] for a in n.anchor_spans]
+            value,errors=_temporal(state.text[min(a.start for a in anchors):max(a.end for a in anchors)],state.observation,release)
+            if errors or value is None:
+                state.diag('INTERVAL_BOUNDARY_UNKNOWN',','.join(errors))
+                unsupported=True
+            else: time_regions[i]=value
+        if any(n.kind=='TIME' and i not in time_regions for i,n in enumerate(h.nodes)): continue
+        owners={e.from_idx:e.to_idx for e in h.edges if e.kind=='TIME_SCOPE'}
         for i,n in enumerate(h.nodes):
             if n.kind!='PREDICATE': continue
-            if len(n.anchor_spans)!=1: state.diag('PROPOSAL_INVALID','predicate must have one lexical anchor'); continue
-            anchor=bytoken[n.anchor_spans[0]]
+            predicate_unit=unit(n)
+            anchor=bytoken[predicate_unit['head_ref']]
             args=[]; roles={}; propositions={}; bound_args={}; incomplete=False
+            lexical_units={anchor.token_id:predicate_unit}
             for edge in h.edges:
                 if edge.from_idx!=i or edge.kind not in {'ARGUMENT','ATTITUDE'}: continue
                 target=h.nodes[edge.to_idx]
@@ -146,7 +162,9 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
                     proposition_nodes[(i,edge.role_id)]=edge.to_idx
                     bound=morph_bindings.get(h.local_id,{}).get(anchor.token_id)
                     lemmas={bound['lemma']} if bound is not None else {v.lemma for v in anchor.variants}
-                    attitudes=[a for a in release.entries('AttitudeMap') if a['lemma'] in lemmas and a.get('argument_role')==edge.role_id]
+                    # A phrase is not its head word. A head-only attitude entry
+                    # cannot license a multi-token lexical unit.
+                    attitudes=[a for a in release.entries('AttitudeMap') if a['lemma'] in lemmas and a.get('argument_role')==edge.role_id and len(predicate_unit['anchor_refs'])==1]
                     if not attitudes:
                         state.diag('ATTITUDE_UNKNOWN','proposition slot has no declared attitude')
                         propositions[edge.role_id]={'attitude':'UNKNOWN'}
@@ -157,26 +175,47 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
                     else:
                         propositions[edge.role_id]={'attitude':attitudes[0].get('attitude','UNKNOWN'),'holder_role':attitudes[0].get('holder_role','SUBJECT')}
                     continue
-                if target.kind!='ENTITY' or len(target.anchor_spans)!=1:
+                if target.kind!='ENTITY':
                     state.diag('PROPOSAL_INVALID','entity argument not closed'); incomplete=True; continue
-                tid=target.anchor_spans[0]; args.append(tid)
+                target_unit=unit(target); tid=target_unit['head_ref']; args.append(tid)
+                if tid in lexical_units and lexical_units[tid]!=target_unit:
+                    state.diag('STRUCTURAL_OPERAND_UNRESOLVED','overlapping lexical units with one head'); incomplete=True
+                lexical_units[tid]=target_unit
                 if edge.role_id: roles[tid]=edge.role_id
                 for binding in h.edges:
                     if binding.kind=='BIND' and binding.to_idx==edge.to_idx and binding.from_idx in variable_ids:
                         bound_args[tid]=variable_ids[binding.from_idx]
             fid='TP:'+h.local_id+':'+str(i)
-            f=FrameCandidate(fid,'FLAT',anchor.span,tuple([anchor.span,*[bytoken[a].span for a in args]]),tuple(bytoken[a].span for a in args),construction='GRAMMAR' if h.local_id in provenance else 'TP',predicate_token_ref=anchor.token_id,argument_token_refs=tuple(args),source_range=(min(bytoken[a].start for a in h.alignment),max(bytoken[a].end for a in h.alignment)),semantic={'proposed_roles':roles,'hypothesis':h.local_id,'proposition_args':propositions,'bound_arguments':bound_args,'structural_unresolved':incomplete,'morph_bindings':morph_bindings.get(h.local_id,{})},provenance=provenance.get(h.local_id,ResourceProvenance(('TP_VALIDATED',),{'release':release.sha256})))
+            # Participant anchors remain original R1 spans for structural seal;
+            # lexical-unit labels are separate data, never fabricated tokens.
+            f=FrameCandidate(fid,'FLAT',anchor.span,tuple([anchor.span,*[bytoken[a].span for a in args]]),tuple(bytoken[a].span for a in args),construction='GRAMMAR' if h.local_id in provenance else 'TP',predicate_token_ref=anchor.token_id,argument_token_refs=tuple(args),source_range=(min(bytoken[a].start for a in h.alignment),max(bytoken[a].end for a in h.alignment)),semantic={'proposed_roles':roles,'hypothesis':h.local_id,'proposition_args':propositions,'bound_arguments':bound_args,'structural_unresolved':incomplete,'morph_bindings':morph_bindings.get(h.local_id,{}),'lexical_units':lexical_units},provenance=provenance.get(h.local_id,ResourceProvenance(('TP_VALIDATED',),{'release':release.sha256})))
             localframes[i]=f
+            slots=[edge for edge in h.edges if edge.from_idx==i and edge.kind=='QUERY_SLOT']
+            if slots:
+                counts=[edge for edge in slots if h.nodes[edge.to_idx].kind=='COUNT_REQUEST']
+                if counts and (len(counts)!=1 or len(slots)!=1):
+                    f.semantic['structural_unresolved']=True
+                    state.diag('QUERY_TARGET_UNBOUND','mixed count/WH slots require an explicit scope')
+                f.semantic['query_request']={'mode':'COUNT','count_role':counts[0].role_id} if counts else {'mode':'WH','requested_roles':[edge.role_id for edge in slots]}
+            if i in owners:
+                f.semantic['explicit_region']=time_regions[owners[i]]
+                f.semantic['time_scope_owner']=i
         # Logical roots preserve the entire operator tree and operand directions.
         roots=set(range(len(h.nodes)))-{e.to_idx for e in h.edges if e.kind in {'OPERAND','ATTITUDE','ARGUMENT','BIND'}}
         def tree(i):
             n=h.nodes[i]
             if n.kind=='BOUND_VAR': return {'bound_var':variable_ids[i],'sort':'ENTITY'}
+            if n.kind=='TIME':
+                region=time_regions[i]
+                bounds=[region['point']] if region['kind']=='POINT' else [region['lo'],region['hi']]
+                return {'time_literal':bounds}
             if n.kind=='PREDICATE': return {'frame_ref':localframes[i].frame_id} if i in localframes else None
             if n.kind not in OPERATORS: return None
             children=[tree(e.to_idx) for e in h.edges if e.from_idx==i and e.kind=='OPERAND']
             if not children or any(c is None for c in children): return None
-            return {'operator':n.kind,'operands':children,'anchor_refs':list(n.anchor_spans)}
+            result={'operator':n.kind,'operands':children,'anchor_refs':list(n.anchor_spans)}
+            if i in owners: result.update(region=time_regions[owners[i]],time_scope_owner=i)
+            return result
         forest=[tree(i) for i in sorted(roots) if h.nodes[i].kind in OPERATORS]
         children={key:tree(idx) for key,idx in proposition_nodes.items()}
         if any(t is None for t in [*forest,*children.values()]):
@@ -185,7 +224,18 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
             state.diag('PROPOSAL_INVALID','incomplete logical root'); continue
         for (idx,role),child in children.items():
             localframes[idx].semantic['proposition_args'][role]['tree']=child
+        def inherit_scope(t,reg=None,owner=None):
+            reg=t.get('region',reg); owner=t.get('time_scope_owner',owner)
+            if 'frame_ref' in t and reg is not None:
+                frame=next(f for f in localframes.values() if f.frame_id==t['frame_ref'])
+                frame.semantic.setdefault('explicit_region',reg)
+                frame.semantic.setdefault('time_scope_owner',owner)
+            for child in t.get('operands',()): inherit_scope(child,reg,owner)
+        for t in [*forest,*children.values()]: inherit_scope(t)
         for f in localframes.values(): f.semantic['operator_forest']=forest
+        if not localframes:
+            state.syntax_trace.append({'stage':'T2','literal_hypothesis':h.local_id,
+                                       'operator_forest':[{**t,'alignment_refs':list(h.alignment)} for t in forest]})
         accepted.append((h,list(localframes.values())))
     # An unsupported reading cannot silently disappear and turn the remaining
     # prefix into a uniquely resolved structure.
@@ -194,11 +244,13 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
 
 def _propose(state,selector,release):
     covered={f.predicate_token_ref for f in state.frames}
+    covered.update(a for f in state.frames for unit in f.semantic.get('lexical_units',{}).values() for a in unit['anchor_refs'])
+    covered.update(a for root in state.logical_roots for a in root.get('alignment_refs',()))
     uncovered=[e.token_id for e in state.evidence if e.token_id not in covered and any(v.pos in {'VERB','INFN','PRED','ADJS'} for v in e.variants)]
     attitude_lemmas={a['lemma'] for a in release.entries('AttitudeMap')}
     scope_required=state.grammar_search_incomplete or any(f.semantic.get('structural_unresolved') for f in state.frames)
     scope_required |= any(e.token_id not in covered and any(v.lemma in attitude_lemmas for v in e.variants) for e in state.evidence)
-    trees=[t for f in state.frames for t in f.semantic.get('operator_forest',())]
+    trees=[*state.logical_roots,*[t for f in state.frames for t in f.semantic.get('operator_forest',())]]
     trees.extend(child['tree'] for f in state.frames for child in f.semantic.get('proposition_args',{}).values() if child.get('tree'))
     def scoped(operator,anchors,tree):
         return (tree.get('operator')==operator and bool(set(tree.get('anchor_refs',())) & set(anchors))) or any(scoped(operator,anchors,t) for t in tree.get('operands',()))
@@ -206,7 +258,7 @@ def _propose(state,selector,release):
     scope_required |= any(not any(scoped(operator,anchors,t) for t in trees) for operator,anchors in required)
     scope_required |= any(e.span in {'«','»','"'} for e in state.evidence) and not any(f.semantic.get('proposition_args') for f in state.frames)
     verify=bool(release.entries('ProposalPolicy')[0].get('verify_deterministic',False))
-    if state.frames and not uncovered and not scope_required and not verify: return
+    if (state.frames or state.logical_roots) and not uncovered and not scope_required and not verify: return
     if scope_required or verify:
         # An unclosed scope may not be flattened into independently asserted clauses.
         for f in state.frames: f.semantic['structural_unresolved']=True
@@ -219,8 +271,8 @@ def _propose(state,selector,release):
     source=tuple(e.token_id for e in state.evidence)
     if len(source)>p.get('max_source_tokens',256):
         state.diag('COMPUTATION_LIMIT','local TP source region too large; no truncation'); return
-    req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
-    prompt=json.dumps({'task':'propose bounded local syntax; return hypotheses or abstain. Each node has kind and anchor_spans of supplied token IDs; each edge has kind, from, to, optional role_id, scope. No canonical IDs.','request':{**asdict(req),'allowed_node_kinds':sorted(req.allowed_node_kinds),'allowed_edge_kinds':sorted(req.allowed_edge_kinds),'allowed_role_ids':sorted(req.allowed_role_ids)},'tokens':[{'id':e.token_id,'text':e.span,'variants':[asdict(v) for v in e.variants]} for e in state.evidence]},ensure_ascii=False,default=lambda x:sorted(x) if isinstance(x,(set,frozenset)) else str(x))
+    req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
+    prompt=json.dumps({'task':'propose bounded local syntax; return hypotheses or abstain. Each node has kind and anchor_spans of supplied token IDs; multi-token PREDICATE/ENTITY also requires head_anchor inside its own anchors. TIME carries raw anchors only, never numeric values. Each edge has kind, from, to, optional role_id, scope. TIME_SCOPE attaches proposition to TIME; QUERY_SLOT attaches predicate to WH/COUNT_REQUEST with a registered role. No canonical IDs.','request':{**asdict(req),'allowed_node_kinds':sorted(req.allowed_node_kinds),'allowed_edge_kinds':sorted(req.allowed_edge_kinds),'allowed_role_ids':sorted(req.allowed_role_ids)},'tokens':[{'id':e.token_id,'text':e.span,'variants':[asdict(v) for v in e.variants]} for e in state.evidence]},ensure_ascii=False,default=lambda x:sorted(x) if isinstance(x,(set,frozenset)) else str(x))
     try:
         state.budget.spend_llm(); raw=selector.propose_local(prompt)
         hypotheses=parse_and_validate(req,raw)
@@ -256,6 +308,9 @@ def _propose(state,selector,release):
     # A validated proposal replaces overlapping deterministic hypotheses only by
     # recorded discard; unrelated deterministic frames remain.
     fs=accepted[0][1]; anchors={f.predicate_token_ref for f in fs}
+    if not fs:
+        hid=accepted[0][0].local_id
+        state.logical_roots=[t for r in state.syntax_trace if r.get('literal_hypothesis')==hid for t in r['operator_forest']]
     for f in list(state.frames):
         if f.predicate_token_ref in anchors:
             state.reject(f.frame_id,'TP','selected validated TP hypothesis'); state.frames.remove(f)
@@ -264,6 +319,9 @@ def _propose(state,selector,release):
 
 def _bindings(frame,evidence,valency):
     roles=valency.get('roles',())
+    request=frame.semantic.get('query_request',{})
+    gaps=set(request.get('requested_roles',())) | ({request['count_role']} if request.get('count_role') else set())
+    if not gaps<={r['role_id'] for r in roles}: return []
     if any(not any(r['role_id']==role and set(r.get('argument_types',())) & {'PROPOSITION','EVENT'} for r in roles) for role in frame.semantic.get('proposition_args',{})):
         return []
     candidates=[]
@@ -289,7 +347,7 @@ def _bindings(frame,evidence,valency):
     for choice in itertools.product(*candidates):
         rs=[r for _,r in choice]
         if len(rs)!=len(set(rs)): continue
-        if any(r.get('cardinality',{}).get('min',0)>0 and r['role_id'] not in rs and r['role_id'] not in frame.semantic.get('proposition_args',{}) for r in roles): continue
+        if any(r.get('cardinality',{}).get('min',0)>0 and r['role_id'] not in rs and r['role_id'] not in gaps and r['role_id'] not in frame.semantic.get('proposition_args',{}) for r in roles): continue
         out.append(dict(choice))
     return out
 
@@ -336,6 +394,17 @@ def run_native(text,selector,release,observation,morph=None):
                 context_senses.update(r.get('candidate_sense_ids',()))
         supplied_ids=declared_ids|priors|context_senses
         senses=[s for s in release.entries('R-S') if s['sense_id'] in supplied_ids or any(s['lemma']==v.lemma and s.get('POS') in {None,v.pos} for v in predicate_variants)]
+        lexical=frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{})
+        if len(lexical.get('anchor_refs',()))>1:
+            def phrase_match(s):
+                pattern=s.get('anchor_pattern')
+                anchors=lexical['anchor_refs']
+                if not isinstance(pattern,list) or len(pattern)!=len(anchors): return False
+                return all(any((not item.get('lemma') or item['lemma']==v.lemma) and (not item.get('POS') or item['POS']==v.pos)
+                               for v in _frame_variants(frame,evidence[tid])) for tid,item in zip(anchors,pattern))
+            senses=[s for s in senses if phrase_match(s)]
+            allowed={s['sense_id'] for s in senses}
+            declared_ids &= allowed; priors &= allowed; context_senses &= allowed
         frame.semantic['has_known_senses']=bool(senses)
         specs=[]
         for s in senses:
@@ -353,7 +422,7 @@ def run_native(text,selector,release,observation,morph=None):
             policy=release.entries('OpenTemplatePolicy')
             if policy and policy[0].get('allow',False):
                 bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
-                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':e.span,'sense_kind':'OPEN_LEXICAL','roles':bs,'state_class':'UNKNOWN'}
+                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'state_class':'UNKNOWN'}
                 specs.append(open_spec)
         if senses and not specs: state.diag('VALENCY_UNKNOWN',frame.frame_id)
         known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
@@ -366,7 +435,10 @@ def run_native(text,selector,release,observation,morph=None):
         frame.semantic['candidate_specs']={s['candidate_id']:s for s in specs}
         frame.semantic['source_traces']=traces
         # Context and prior may rank, but never invent a canonical semantic value.
-        frame.semantic['region'],temporal_diag=_temporal(text[frame.source_range[0]:frame.source_range[1]],observation,release)
+        if 'explicit_region' in frame.semantic:
+            frame.semantic['region'],temporal_diag=frame.semantic['explicit_region'],[]
+        else:
+            frame.semantic['region'],temporal_diag=_temporal(text[frame.source_range[0]:frame.source_range[1]],observation,release)
         for code in temporal_diag: state.diag(code,frame.frame_id)
         frame.semantic['temporal_unresolved']=bool(temporal_diag)
         candidate_specs[frame.frame_id]=specs

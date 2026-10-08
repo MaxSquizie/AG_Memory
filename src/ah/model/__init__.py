@@ -1,4 +1,4 @@
-from .operands import BoundVar, Operand, VariableSort
+from .operands import BoundVar, Operand, VariableSort, TimeLiteral
 from .scope import ScopeFrame, ScopeStack, ScopeType
 from .types import (
     AbstractSymbol,
@@ -35,6 +35,7 @@ __all__ = [
     "BoundVar",
     "Operand",
     "VariableSort",
+    "TimeLiteral",
     "ScopeFrame",
     "ScopeStack",
     "ScopeType",

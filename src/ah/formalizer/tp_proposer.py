@@ -30,6 +30,7 @@ class TNode:
     kind: str                          # must be in request.allowed_node_kinds (c)
     anchor_spans: tuple[str, ...]      # must be a subset of request.source_spans (b)
     feature_refs: tuple[str, ...] = ()
+    head_anchor: str | None = None      # lexical head must be one of the captured raw token IDs
 
 
 @dataclass(frozen=True)
@@ -106,6 +107,10 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             if span not in src or span not in hyp.alignment:
                 raise ProtocolError(
                     f"hypothesis {hyp.local_id}: anchor span {span!r} outside the bounded region")
+        if node.head_anchor is not None and (not isinstance(node.head_anchor,str) or node.kind not in {'PREDICATE','ENTITY'} or node.head_anchor not in node.anchor_spans):
+            raise ProtocolError('lexical head is outside its own anchors')
+        if node.kind in {'PREDICATE','ENTITY'} and len(node.anchor_spans)>1 and node.head_anchor is None:
+            raise ProtocolError('multi-head lexical unit requires an explicit morphological head')
 
     graph = {i:[] for i in range(n)}
     for edge in hyp.edges:
@@ -126,7 +131,11 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             raise ProtocolError('attitude target must be a proposition')
         if edge.kind=='BIND' and (a!='BOUND_VAR' or b!='ENTITY'):
             raise ProtocolError('invalid bound-variable edge')
-        if edge.kind=='OPERAND' and (a in {'PREDICATE','ENTITY','BOUND_VAR'} or b=='ENTITY'):
+        if edge.kind=='TIME_SCOPE' and (a not in PROPOSITION_NODE_KINDS or b!='TIME'):
+            raise ProtocolError('temporal scope requires proposition -> anchored TIME')
+        if edge.kind=='QUERY_SLOT' and (a!='PREDICATE' or b not in {'WH','COUNT_REQUEST'} or not edge.role_id):
+            raise ProtocolError('query slot requires predicate -> anchored interrogative and a registered role')
+        if edge.kind=='OPERAND' and (a in {'PREDICATE','ENTITY','BOUND_VAR','TIME'} or b=='ENTITY'):
             raise ProtocolError('invalid operator operand type')
         # (a) no invented role ids; (d) SURFACE_ARG is syntactic-only and cannot swallow the whole region
         if edge.role_id is not None:
@@ -146,7 +155,11 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             raise ProtocolError('source operator scope silently lost:'+kind)
 
     proposition_roles=set()
+    temporal_owners=set()
     for edge in hyp.edges:
+        if edge.kind=='TIME_SCOPE':
+            if edge.from_idx in temporal_owners: raise ProtocolError('temporal scope is not unique')
+            temporal_owners.add(edge.from_idx)
         if edge.kind not in {'ARGUMENT','ATTITUDE'} or hyp.nodes[edge.to_idx].kind not in PROPOSITION_NODE_KINDS: continue
         slot=(edge.from_idx,edge.role_id)
         if slot in proposition_roles: raise ProtocolError('proposition argument cardinality not closed')
@@ -163,10 +176,15 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             if len(operands)<lo or hi is not None and len(operands)>hi:
                 raise ProtocolError('operator arity mismatch:'+node.kind)
             if node.kind in {'FORALL','EXISTS'}:
-                if operands[0].kind!='BOUND_VAR' or operands[1].kind in {'BOUND_VAR','ENTITY'}:
+                if operands[0].kind!='BOUND_VAR' or operands[1].kind not in PROPOSITION_NODE_KINDS:
                     raise ProtocolError('quantifier requires [bound_var, body]')
+            elif node.kind in {'BEFORE','AFTER','DURING'}:
+                if any(x.kind!='TIME' for x in operands):
+                    raise ProtocolError('temporal operator requires [time_anchor, time_anchor]')
             elif any(x.kind=='BOUND_VAR' for x in operands):
                 raise ProtocolError('bound_var outside quantifier slot')
+            elif any(x.kind not in PROPOSITION_NODE_KINDS for x in operands):
+                raise ProtocolError('operator requires proposition operands')
 
     active=set(); done=set()
     def visit(i, depth):
@@ -221,10 +239,10 @@ def parse_and_validate(req: StructureProposalRequest, raw: str | None) -> list[H
             fields(h,{"local_id","nodes","edges","alternatives","alignment"},{"local_id","nodes","alignment"})
             nodes=[]; edges=[]
             for v in h["nodes"]:
-                fields(v,{"kind","anchor_spans","feature_refs"},{"kind","anchor_spans"})
+                fields(v,{"kind","anchor_spans","feature_refs","head_anchor"},{"kind","anchor_spans"})
                 if not isinstance(v["anchor_spans"],list) or not all(isinstance(x,str) for x in v["anchor_spans"]):
                     raise ProtocolError("anchor_spans must be a list of source ids")
-                nodes.append(TNode(v["kind"],tuple(v["anchor_spans"]),tuple(v.get("feature_refs",()))))
+                nodes.append(TNode(v["kind"],tuple(v["anchor_spans"]),tuple(v.get("feature_refs",())),v.get('head_anchor')))
             for e in h.get("edges",[]):
                 fields(e,{"kind","from","to","role_id","scope"},{"kind","from","to"})
                 if type(e["from"]) is not int or type(e["to"]) is not int or type(e.get("scope",False)) is not bool:

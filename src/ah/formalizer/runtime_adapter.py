@@ -4,7 +4,7 @@
 The native path commits through C/T5/T6 and returns a receipt that prevents a
 second legacy fact write. Projection carries supported queries/directives and
 diagnostics; nested proposition trees stay SOM content, never separate facts.
-Compound goal surfaces remain explicit misses until their compiler is wired.
+Compound goals retain the sealed native syntax for the read-only compiler.
 The demo pipeline is a separate, noncommittable preview only.
 """
 
@@ -56,6 +56,8 @@ class FormalizerAdapter:
         self._schema = schema  # lazily loaded if None
         self._store = store      # AHStoreAdapter (durable) — native path prerequisite
         self._binding = binding  # InterpretationRunBinding — native path prerequisite
+        if store is not None:
+            store.resource_release = release
 
     @property
     def native_available(self) -> bool:
@@ -161,7 +163,7 @@ class FormalizerAdapter:
                 actants = tuple(ActantCandidate(role=role, mention=mention) for role, mention in actant_pairs)
                 local_id = f"{frame.frame_id}:A0"
                 if is_query and any(frame.semantic.get("operator_forest",())):
-                    notes.append("QUERY_SCOPE_NOT_COMPILED "+frame.frame_id)
+                    notes.append("NATIVE_QUERY_SCOPE_OWNED "+frame.frame_id)
                     continue
                 if is_query:
                     # DR27: a question's content is NOT asserted as a world fact — it is an EXISTS goal.
@@ -184,6 +186,8 @@ class FormalizerAdapter:
         if len(readings) > 1 and any(not r.grounded for r in readings):
             notes.insert(0, f"SPEECH_ACT_LINKED {'/'.join(r.kind for r in readings)} (no action asserted; context determines the act)")
 
+        from .native_queries import project_native_queries
+        native_queries=project_native_queries(state,self._release) if self._release is not None else ()
         diagnostics = tuple(f"{d.code}: {d.detail}" for d in state.diagnostics) + tuple(notes)
         return PerceptionResult(
             source_text=state.text,
@@ -191,6 +195,7 @@ class FormalizerAdapter:
             queries=tuple(queries),
             commands=tuple(commands),
             diagnostics=diagnostics,
+            native_query_roots=native_queries,
         )
 
     # -- declared structural imperative cue (morphological mood; two-tier invariant) ---- #
@@ -221,9 +226,9 @@ class FormalizerAdapter:
             for var in ev.variants:
                 if var.pos in {"VERB", "INFN", "PRED", "ADJS", "ADJF", "NOUN", "PRTF", "PRTS", "GRND"}:
                     return PredicateCandidate(
-                        surface=ev.span,
-                        normalized_hint=var.lemma,
-                        evidence=EvidenceSpan(text=ev.span),
+                        surface=frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('surface',ev.span),
+                        normalized_hint=var.lemma if len(frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('anchor_refs',()))<=1 else None,
+                        evidence=EvidenceSpan(text=frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('surface',ev.span)),
                         template_candidate=template, template_selection=selection,
                     )
         # relation-only frame (copula/ellipsis): a declared STRUCTURAL predicate, never a fake lexeme.

@@ -7,6 +7,7 @@ from ah.core import AHCore
 from ah.model import (
     AbstractSymbol,
     BoundVar,
+    TimeLiteral,
     ActantRole,
     FunctionSymbol,
     Group,
@@ -93,6 +94,8 @@ class SemanticProjector:
         return f"${variable.local_id}{suffix}"
 
     def _render_operand(self, operand: Ref | BoundVar, state: _RenderState) -> str:
+        if isinstance(operand, TimeLiteral):
+            return 'TIME('+', '.join(format(x,'.17g') for x in operand.bounds)+')'
         if isinstance(operand, BoundVar):
             return self._bound_var_text(operand)
         return self._render(operand, ProjectionMode.DEPENDENCY, state)

@@ -37,6 +37,9 @@ class InferenceMaterializer:
         self.integration = integration
 
     def materialize(self, outcome: InferenceOutcome) -> MaterializationResult:
+        from .contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion
+        if isinstance(outcome.conclusion,(CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion)):
+            return MaterializationResult(None,None,False)
         if outcome.status is not LogicalStatus.PROVED or outcome.conclusion is None:
             return MaterializationResult(None, None, False)
         # Counterfactual and branch-local conclusions are runtime results only.

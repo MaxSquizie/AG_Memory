@@ -232,6 +232,26 @@ class AHStoreAdapter(Store):
                 ledger.add_support(p)
                 if new: events.append({'node_id':p['conclusion_ref'],'type':'SUPPORT_ADDED','support_id':p['record_id']})
             elif op.op_type=='ADD_TIME_ASSERTION': ledger.add_assertion(p)
+            elif op.op_type=='SUPERSEDE_VERSION':
+                continue  # Applied once, before final admission, on this draft.
+            elif op.op_type=='LINK_OPEN_TEMPLATE':
+                source,target=p['source_t_ref'],p['canonical_t_ref']
+                if not p.get('evidence_refs') or not p.get('trigger_ref') or not p.get('resource_snapshot'):
+                    raise ValueError('MIGRATION_LINK_INVALID')
+                old_nodes={uid for uid,node in ledger.data['nodes'].items()
+                           if node.get('template_ref')==source and node.get('semantic_status')=='UNLINKED'}
+                old_supports=[s for s in ledger.data['supports'].values()
+                              if s['conclusion_ref'] in old_nodes and s.get('source_tag')==p['source_tag']]
+                new_nodes={uid for uid,node in ledger.data['nodes'].items()
+                           if node.get('template_ref')==target and node.get('semantic_status')=='KNOWN'}
+                new_supports=[s for s in ledger.data['supports'].values()
+                              if s['conclusion_ref'] in new_nodes and s.get('source_tag')==p['replacement_tag']]
+                if not old_supports or not new_supports or not draft.store.has_uid(target) or draft.store.kind_of(target).value!='T':
+                    raise ValueError('MIGRATION_LINK_INVALID')
+                record={k:v for k,v in p.items() if k!='op_id'}
+                old=ledger.data['open_template_links'].get(p['link_id'])
+                if old is not None and old!=record: raise ValueError('INTEGRITY_ERROR: migration link changed')
+                ledger.data['open_template_links'].setdefault(p['link_id'],record)
             elif op.op_type=='WRITE_COMMITTED_RX':
                 if p['support_record_id'] not in ledger.paths() or not set(p['stages'])<={'T1','T2','T3'}:
                     raise ValueError('RX_COMMIT_GROUND_INVALID')
@@ -305,6 +325,27 @@ class AHStoreAdapter(Store):
             if decision.outcome==TerminalOutcome.STALE_SUPERSEDED or stale:
                 self.append_terminal(aid,TerminalOutcome.STALE_SUPERSEDED,'STALE_PLAN')
                 return CommitResult(self.read_global_head(),(),TerminalOutcome.STALE_SUPERSEDED)
+            paths=ledger.paths()
+            for op in plan_ops:
+                if op.op_type!='LINK_OPEN_TEMPLATE': continue
+                p=op.payload
+                if not p.get('evidence_refs') or any(sid not in paths or ledger.data['supports'][sid].get('source_tag')!=p.get('source_tag') for sid in p['evidence_refs']):
+                    self.append_terminal(aid,TerminalOutcome.STALE_SUPERSEDED,'MIGRATION_EVIDENCE_STALE')
+                    return CommitResult(self.read_global_head(),(),TerminalOutcome.STALE_SUPERSEDED)
+            retire=[o.payload for o in plan_ops if o.op_type=='SUPERSEDE_VERSION']
+            retirement_events=[]
+            for p in retire:
+                if (not p.get('trigger_ref') or p.get('replacement_tag')!=[marker.observation_id,marker.interpretation_version]
+                    or p['source_tag'][0]!=marker.observation_id or not 0<p['source_tag'][1]<marker.interpretation_version
+                    or ledger.data['observations'].get(digest(p['source_tag']),{}).get('status')!='LIVE'):
+                    self.append_terminal(aid,TerminalOutcome.STALE_SUPERSEDED,'MIGRATION_SOURCE_STALE')
+                    return CommitResult(self.read_global_head(),(),TerminalOutcome.STALE_SUPERSEDED)
+                retirement_events.extend(ledger.supersede(p['source_tag']))
+            if any(o.op_type=='SET_IDENTITY_BINDING' and any(p not in ledger.paths() for p in o.payload.get('premise_support_refs',())) for o in plan_ops):
+                self.append_terminal(aid,TerminalOutcome.STALE_SUPERSEDED,'MIGRATION_BINDING_STALE')
+                return CommitResult(self.read_global_head(),(),TerminalOutcome.STALE_SUPERSEDED)
+            # Retired own-version facts cannot conflict with their replacement.
+            # The draft is discarded on complete rejection or any apply error.
             excluded,evidence=self._excluded(plan_ops,ledger)
             all_fragments=set(decision.committed)
             admitted=all_fragments-excluded
@@ -312,6 +353,7 @@ class AHStoreAdapter(Store):
             D=asdict(replace(decision,outcome=outcome,committed=tuple(sorted(admitted)),excluded=tuple(sorted(excluded)),excluded_evidence=tuple(evidence)))
             D['outcome']=outcome.value
             if not admitted:
+                draft=self._draft(); ledger=CanonicalLedger(draft.store._state.formalizer_state)
                 self._reports(ledger,evidence)
                 ledger.refresh(before,decision.batch_hash,self.read_global_head()+1)
                 t={'assertion_id':aid,'outcome':outcome.value,'excluded_evidence':evidence,
@@ -328,7 +370,7 @@ class AHStoreAdapter(Store):
             applied,events=self._apply(draft,[o for o in plan_ops if id(o) in keep])
             ledger.data['markers'][marker_key]=decision.batch_hash
             ledger.data['decisions'][decision.batch_hash]=D
-            ledger.refresh(before,decision.batch_hash,self.read_global_head()+1,events)
+            ledger.refresh(before,decision.batch_hash,self.read_global_head()+1,[*retirement_events,*events])
             seq=self._write_unit(draft,tx_ref=decision.batch_hash,decision=D)
             self._finish_batch(D)
             return CommitResult(seq,applied,outcome)
@@ -383,12 +425,7 @@ class AHStoreAdapter(Store):
             self._refresh(); draft=self._draft(); ledger=CanonicalLedger(draft.store._state.formalizer_state); before=ledger.copy()
             oid=digest([observation_id,version]); old=ledger.data['observations'].get(oid)
             if old and old['status']!='LIVE': return
-            events=ledger.retract(source_tag=[observation_id,version])
-            ledger.data['observations'][oid]={'source_tag':[observation_id,version],'status':'SUPERSEDED'}
-            for a in ledger.data['assertions'].values():
-                if a['provenance']['source'].get('source_tag')==[observation_id,version]: a['status']='SUPERSEDED'
-            for c in ledger.data['candidates'].values():
-                if c.get('source_tag')==[observation_id,version]: c['status']='SUPERSEDED'
+            events=ledger.supersede([observation_id,version])
             tx='supersede:'+trigger_ref
             ledger.refresh(before,tx,self.read_global_head()+1,events)
             self._write_unit(draft,tx_ref=tx,extra={'kind':'SUPERSEDE','source_tag':[observation_id,version],'trigger_ref':trigger_ref})

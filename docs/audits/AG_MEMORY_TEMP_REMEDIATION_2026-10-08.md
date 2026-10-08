@@ -2,7 +2,7 @@
 
 **Дата:** 2026-10-08. **Исходный аудит:** `6f50c5f2cf2379359b6b13a662116a67658669f3`. **Прочитанный temp до этой работы:** `63790a6a71c59b6bec94da675df0249b87502fa6`.
 
-Последующий проход продолжен от опубликованного `bc820791f02479edd326d49f04d0fda01db99bf6`. В нём закрывается wiring ресурсного SyntaxRules AST и составных SOM-аргументов; оставшиеся границы перечислены ниже. Нормативный файл и его SHA256 в этом проходе не изменялись.
+Последующий проход продолжен от опубликованного `2bba520bc136c62c8580c955d876e0a1c3636e5e`. Подключены sealed native query compiler, typed TIME/WH/COUNT/lexical units и атомарная declared migration; оставшиеся границы перечислены ниже. Нормативный файл и его SHA256 в этом проходе не изменялись.
 
 Проверялись исходный код, архитектура и документы. **Тесты не читались, не анализировались, не запускались и не изменялись.** Проверка синтаксиса Python и импортов не является проверкой поведения. «КОД» ниже означает внесённую реализацию и статическую сверку, а не доказательство PASS.
 
@@ -20,14 +20,15 @@
 
 ## Остаток, который нельзя скрывать под DONE
 
-1. **Ресурсные данные:** реальный reviewed release и coverage report не предоставлены. Loader/CLI есть; production намеренно не подменяет их демо-словарём. TemplateMap обязан ссылаться на реальные T текущей AH.
-2. **Неполная production-композиция:** JSON SyntaxRules AST теперь подключён; остаются текстовый BNF parser/all CandidateSchema, multi-head lexical anchors, сложные temporal/order operands, числовые scope и составные/quantified query surfaces (I04/I20/I34/I38). Типизированный отказ/UNKNOWN сохраняет безопасность, но не выполняет критерий высокого покрытия G5.
-3. **R-X опыт:** запись stage-isolated cache и prior reads теперь подключены к canonical store, но их полезность/покрытие и стоимость на большой памяти не измерялись. Frozen snapshot запуска исключает чтение нового опыта на replay той же пары.
-4. **Release boundary:** валидируется поддержанный runtime JSON-формат. Полная валидация всех CandidateSchema §2.1 и криптографическая верификация подписи, если она требуется моделью доверия, не доказаны. Сейчас trust — внешне закреплённая review-атрибуция.
-5. **Миграции знаний и широкий identity linking:** per-source supersede/retraction есть; массовый open→known sense linking и общая declared migration/reinterpretation workflow ещё не завершены. Совпадение имён/написания не используется как автоматическое identity.
-6. **Проверка реализации:** race/crash/DR/oracle и unseen corpus не запускались по указанию пользователя. Новая WAL-реализация требует этого до рабочей эксплуатации; полный AH snapshot на каждую транзакцию имеет стоимость по объёму и времени.
 
-Эти пункты — конкретный оставшийся объём, а не оправдание исторического blanket DONE. В этой работе не создавались фиктивные ресурсы, reviewer signatures, oracle expected values или результаты прогонов.
+1. **Данные G2:** заполненный reviewed resource release, реальные TemplateMap refs, внешний review record и coverage corpus/report. Без них production выдаёт RESOURCE_MISSING. Новые anchor_pattern, TIME_SCOPE, QUERY_SLOT и certificates требуют версии/hash/review, а не вставки defaults в старый релиз.
+2. **DSL/CandidateSchema — SPEC_GAP и реализация:** §16 называет BNF полной, но Emit повторно использует production `fields` для stage/reads/when, не задавая fields полезной нагрузки и объявления captures. Поэтому JSON AST не выдаётся за текстовый BNF parser. Нужна однозначная нормативная грамматика captures/output fields и manifest CandidateSchema всех emit kinds; затем — parser/loader. SRL orthography/ellipsis proposals сохраняются, но полного разрешения всех реконструкций ещё нет.
+3. **Специальные цели:** native counterfactual proof должен фильтровать canonical derived paths по runtime assumptions, а не спрашивать старый reasoner о реальном мире; текущий compiler выдаёт COUNTERFACTUAL_NATIVE_SCOPE_NOT_IMPLEMENTED. CAUSAL mapping, произвольные WH под несколькими операторами, general nested quantifier joins и end-to-end AT_LEAST_N/EXACTLY_N/AT_MOST_N scope-reader ещё не завершены. Модальное/IMPLIES утверждение читается, но это не общий вывод его операнда. Неизвестная цель не превращается в EXISTS.
+4. **Identity policy:** host bindings с конкретными основаниями поддержаны; общего Resource/CorefPolicy resolver ещё нет. Совпадение имён или написаний не доказывает identity. Без разрешения сущностей cross-observation вывод может честно остаться UNKNOWN.
+5. **Проверка:** пользователь отложил тесты. Race/crash/DR/oracle/live-model/unseen corpus не выполнялись. Компиляция, импорты, сверка исходников и diff не валидируют поведение.
+6. **Масштабирование:** snapshot-WAL и bounded ledger/index reads требуют измерения на большой памяти. Delta-WAL/checkpoint допускаются только при сохранении атомарности, replay и неизменяемого audit.
+
+В этой работе не создавались фиктивные ресурсы, signatures, corpus coverage или oracle outputs.
 
 ## Реестр: Недочёт / Как исполнено сейчас / Как должно быть / Причина
 
@@ -51,7 +52,7 @@
 
 **Недочёт.** При допустимом ответе селектора LIKE ввод «Вороны не любят червей.» даёт положительный AssertionCandidate(любить). «Вороны любят червей?» тоже даёт assertion; SPEECH_ACT_QUERY добавляется лишь как диагностика. Интеграция отрицательного примера действительно записывает положительный N без логической области.
 
-**Как исполнено сейчас.** Query/command не получают root support; NOT материализуется как G(NOT,P), его операнд — SOM без root truth. Legacy assertions из native receipt не проходят второй writer. Сложный query scope остаётся явным QUERY_SCOPE_NOT_COMPILED.
+**Как исполнено сейчас.** Query/command не получают root support; NOT материализуется как G(NOT,P), его операнд — SOM без root truth. Legacy assertions из native receipt не проходят второй writer. Sealed native scope передаётся общему query compiler; неподдержанная цель остаётся явным UNKNOWN, а не leaf EXISTS.
 
 **Как должно быть.** NOT должен быть утверждённым G-корнем, P — структурным операндом без truth-support. QUERY не должен создавать asserted-факт о своём содержании. Эти ограничения обязательны на write boundary независимо от ответа селектора.
 
@@ -79,7 +80,7 @@
 
 **Недочёт.** Основной FrameGen ограничен глагольными/копульными ветками; COORD содержит заглушку, есть фиксированная бинарная арность. Встроенная schema содержит демонстрационные V1–V4. TP и open-set helpers не составляют обязательный путь run(). «Мне холодно» возвращает пустой результат без диагностики.
 
-**Как исполнено сейчас.** Native SRL/T2 читает released SyntaxRules capture/predicate AST: все общие predicate operations, целые R1 variants, typed graphs, declared schema lookups, bounded joins и durable trace. Preview callbacks и private morphology correction не участвуют в native. Одинаковые графы объединяют rule provenance, разные пересекающиеся варианты сохраняются до разрешённого выбора. TP до seal вызывается для gaps/ambiguity; дополнительная проверка deterministic frames явно включается policy. OPEN_LEXICAL создаёт occurrence-local UNLINKED T/N без alias. Текстовый BNF, все CandidateSchema, multi-head/temporal operands, numeric/query composition ещё не завершены; blanket DONE отменено.
+**Как исполнено сейчас.** Native SRL/T2 читает released SyntaxRules capture/predicate AST: все общие predicate operations, целые R1 variants, typed graphs, declared schema lookups, bounded joins и durable trace. Preview callbacks и private morphology correction не участвуют в native. Одинаковые графы объединяют rule provenance, разные пересекающиеся варианты сохраняются до разрешённого выбора. TP до seal вызывается для gaps/ambiguity; дополнительная проверка deterministic frames явно включается policy. OPEN_LEXICAL создаёт occurrence-local UNLINKED T/N без alias. Многословные единицы с explicit head и TIME/QUERY_SLOT подключены. Текстовый BNF/all CandidateSchema, полный numeric/counterfactual/CAUSAL scope остаются PARTIAL; blanket DONE отменено.
 
 **Как должно быть.** До seal исчерпывать общие структурные операции и ограниченный TP, затем пять T3-источников. При нехватке данных выдавать частичное покрытие/BLOCKED/NO_CANDIDATE с причиной. DR21 обязан проходить через тот же entry point, что обычный ввод.
 
@@ -303,7 +304,7 @@
 
 **Недочёт.** ADD_SCOPE сначала создаёт обычный базовый N, затем оболочки; нет SOM/UsageLink и отдельной опоры asserted-корня. Неизвестные function_id/IF могут пропускаться; quantified-ветка строится от base, не всегда от уже вложенного current. Реестр операторов helper и действующего AH различается.
 
-**Как исполнено сейчас.** Native plan собирает поддерживаемый operator tree с SOM links, directional operands, quantifier pair и bound variables. ARGUMENT/ATTITUDE может закрываться целым N/G-деревом; дочерние leaves не получают root support и не экспортируются compatibility projection как факты. Неизвестная attitude сохраняется UNKNOWN, не лицензирует истинность содержимого. Неизвестный оператор/неполная типизация — явный отказ. BEFORE/AFTER/DURING typed anchors, numeric scopes и все GoalSpec-поверхности пока не полностью встроены.
+**Как исполнено сейчас.** Native plan собирает поддерживаемый operator tree с SOM links, directional operands, quantifier pair и bound variables. ARGUMENT/ATTITUDE может закрываться целым N/G-деревом; дочерние leaves не получают root support и не экспортируются compatibility projection как факты. Неизвестная attitude сохраняется UNKNOWN, не лицензирует истинность содержимого. Неизвестный оператор/неполная типизация — явный отказ. BEFORE/AFTER/DURING typed TimeLiteral проходят C/T6/persistence и runtime comparison без UsageLink. Numeric scope и все GoalSpec-поверхности пока не полностью встроены.
 
 **Как должно быть.** Строить обратимо типизированное дерево G с правильным порядком операторов/BoundVar, структурными операндами и поддержкой только лицензированных корней. Неподдержанный оператор блокирует фрагмент с диагностикой.
 
@@ -499,7 +500,7 @@
 
 **Недочёт.** fact_query проверяет LIVE/kind; не проверяет конкретный proof path, bindings, временную область и конфликтные отчёты. allow_kinds способен разрешить HYPOTHETICAL без зарегистрированного bridging rule.
 
-**Как исполнено сейчас.** Canonical fact query проверяет concrete path и его время. Native Exists/role lookup и formula readers используют adapter; расширение allow_kinds не делает quote/hypothesis фактом. Остальные старые query surfaces требуют отдельной проверки/портирования и не объявлены full parity.
+**Как исполнено сейчас.** Canonical fact query проверяет concrete path и его время. Native Exists/role lookup и formula readers используют adapter; расширение allow_kinds не делает quote/hypothesis фактом. Native compiler сохраняет logical/quantified trees; WH/COUNT читают live proof/time, Counterfactual не делегируется мировому reader. Остальные специальные цели не объявлены full parity.
 
 **Как должно быть.** Обычный factual-query обязан читать через канонический F-visible и эффективные temporal evidence. Доступ к hypothetical/quoted содержимому — отдельный структурный запрос, не утверждение истинности.
 
@@ -555,7 +556,7 @@
 
 **Недочёт.** При воспроизводимом разборе «Каждое животное живое» с неоднозначной морфологией NOUN/ADJF выдаётся одно утверждение, assertion.quantifier=None и logical_propositions отсутствует. Универсальное ограничение не переносится в результат.
 
-**Как исполнено сейчас.** Production не вызывает удалённый legacy parser. FORALL/EXISTS TP tree сохраняет ordered [bound_var,body], SOM body и commit только root; экземпляры — on-demand. Новые malformed/однооперандные quantifiers не пишутся; старые shapes оставлены load-only. Простая runtime query projection не компилирует все quantified goals.
+**Как исполнено сейчас.** Production не вызывает удалённый legacy parser. FORALL/EXISTS TP tree сохраняет ordered [bound_var,body], SOM body и commit только root; экземпляры — on-demand. Новые malformed/однооперандные quantifiers не пишутся; старые shapes оставлены load-only. Native runtime projection сохраняет quantifier; explicit roots и bounded положительный EXISTS witness поддержаны. General nested quantifier/WH joins не объявлены завершёнными.
 
 **Как должно быть.** Сохранить FORALL и restriction/body в актуальном IR; при невозможности — честный unresolved scope, не простое частное утверждение.
 
@@ -611,7 +612,7 @@
 
 **Недочёт.** Изолированные OPEN/UNLINKED occurrences нельзя сливать по написанию; межнаблюдательные выводы для них запрещены. ReportBridging/EventIdentity и миграции ограничены declared rules/releases. Два новых одинаково написанных отношения могут навсегда остаться несопоставимыми без внешнего подтверждения.
 
-**Как исполнено сейчас.** OPEN сохраняет новое содержание UNLINKED, но не угадывает sense equivalence. General linking/reinterpretation требует declared resources/trigger; полноценный массовый sense migration workflow не реализован этим исправлением.
+**Как исполнено сейчас.** OPEN сохраняет новое содержание UNLINKED, но не угадывает sense equivalence. Declared reinterpretation frozen input под v+1 и audit-link open→known теперь подключены. General identity/CorefPolicy и автоматическое предложение/подтверждение sense equivalence не реализованы; spelling остаётся недостаточным основанием.
 
 **Как должно быть.** Сохранять изоляцию до доказательства, но для долгосрочной цели определить исполнимый процесс предложений/подтверждения sense linking, переинтерпретации и измерения semantic coverage. Отличать «ввод сохранён» от «смысл сопоставлен и пригоден для вывода».
 
@@ -633,11 +634,41 @@
 
 **Точки проверки:** docs/FORMALIZER_ARCHITECTURE_V7.md §7.6; formalizer/ah_adapter.py.
 
+## Дополнительные находки последнего прохода
+
+### I39 — Положительное P могло доказывать неэффективный NOT(P)
+
+**Статус:** КОД. **Недочёт.** Reader использовал общий conflict content_key для N и G(NOT,N), заимствуя положительную опору для другого выражения. **Как исполнено сейчас.** G читается по собственному пути либо явному NOT этого G; положительное N не доказывает NOT(N). Полярность двойного NOT вычисляется вложенно. **Как должно быть.** Conflict content key не является identity/proof key. **Причина.** Общий ключ несовместимости смешивался с ключом заключения. **Точки:** canonical_ledger.query_proposition; native_plan.tree_node.
+
+### I40 — Старая версия отзывалась до успешной замены
+
+**Статус:** КОД. **Недочёт.** interpret_full supersede'ил O/v до T4/T5/T6 нового запуска; неудача оставляла потерю прежних фактов. **Как исполнено сейчас.** C планирует SUPERSEDE_VERSION; T6 на draft отзывает старое, проводит admission и фиксирует replacement+retirement+marker/D одной WAL-границей. Полный отказ отбрасывает retirement draft. Open→known audit-link требует конкретных старых live supports, новых known supports, trigger и release snapshot. Stale evidence получает терминальный STALE_SUPERSEDED. **Как должно быть.** Failed replacement сохраняет старую версию; successful migration атомарна, без revival/alias. **Причина.** Отзыв находился вне commit boundary замены. **Точки:** migration; v7_pipeline; native_plan; ah_adapter.commit_transaction.
+
+### I41 — Повторный отзыв переписывал терминальное состояние TimeAssertion
+
+**Статус:** КОД. **Недочёт.** Source-wide retraction безусловно назначал RETRACTED, supersede затем безусловно SUPERSEDED даже уже отозванным записям. **Как исполнено сейчас.** Меняется только LIVE запись; old terminal reason сохраняется. Supersede задаёт собственный terminal status в той же операции, без промежуточного переписывания. **Как должно быть.** Терминальная конкретная запись не оживает и не меняет исторический исход от повторной команды. **Причина.** Source lookup не проверял прежний статус. **Точка:** CanonicalLedger.retract/supersede.
+
+### I42 — Native counterfactual не замкнут на фильтрацию derived paths
+
+**Статус:** PARTIAL / ЯВНЫЙ ОТКАЗ. **Недочёт.** GroundFormula native branch читает durable мировой proof раньше проверки runtime assumptions; результаты такого чтения нельзя выдавать за hypothetical proof. **Как исполнено сейчас.** Native compiler не делегирует COUNTERFACTUAL в этот reader и возвращает COUNTERFACTUAL_NATIVE_SCOPE_NOT_IMPLEMENTED. Legacy helper сам по себе не доказывает порт. **Как должно быть.** Runtime overlay фильтрует каждый concrete premise path; branch assumptions не создают canonical supports и не переносятся наружу. **Причина.** Каноническая видимость и допустимость предпосылки внутри ветви — разные контракты. **Точки:** native_queries.compile_native_queries; inference/formula._eval; inference/engine._counterfactual.
+
+### I43 — Native COUNT не имел источника доказательства полноты
+
+**Статус:** КОД / ДАННЫЕ BLOCKED. **Недочёт.** Pure count helper не составлял production CountGoal; вычисленное число нельзя объявлять точным только по наличию найденных N или query bool. **Как исполнено сейчас.** CountGoal считает разные entity witnesses, нижнюю границу показывает отдельно. Optional released DomainCertificate фиксирует template/role/known roles/window/release и реальные live support IDs полноты; эти источники входят в premise refs. Без сертификата — INCOMPLETE_DOMAIN. **Как должно быть.** Точный count выводится только по конкретной закрытой области; открытая область не превращается в точную. **Причина.** Перебор совпадений и доказательство исчерпанности не равны. **Точки:** native_queries; contracts.CountGoal; resources/loader; projection/agent_context.
+
+### A06 — BNF §16 не задаёт исполнимую полезную нагрузку Emit
+
+**Статус:** SPEC_GAP. **Недочёт.** `emit := Emit kind { fields }` использует то же `fields`, где разрешены только stage/reads/when/emit/priority/cost; capture declarations, payload field bindings и передача параметров lookup не определены. Полнота грамматики заявлена, но канонического перевода в CandidateSchema из неё не следует. **Как исполнено сейчас.** Работает документированный bounded JSON AST; он не объявлен BNF parser. Нормативный файл в этом проходе не изменён. **Как должно быть.** Задать отдельные capture/output-field/value productions и versioned CandidateSchema manifest с однозначной компиляцией; затем реализовать parser и round-trip. **Причина.** Исполняемую схему нельзя восстановить из перечня общих имён без выбора разработчика. **Точки:** архитектура §16; syntax_rules; FORMALIZER_RUNTIME_RESOURCES.md.
+
+### A07 — Числовой scope и незнакомая identity остаются отдельными границами покрытия
+
+**Статус:** PARTIAL / ДАННЫЕ И ТИПЫ. **Недочёт.** Наличие CountGoal не замыкает запись/чтение AT_LEAST_N/EXACTLY_N/AT_MOST_N из ScopeTree, а одинаковое имя в двух O не даёт grounded identity. **Как исполнено сейчас.** Entity-count и direct host bindings поддержаны; numeric scope-reader и общий CorefPolicy resolver не представлены как DONE. **Как должно быть.** Числовой bound имеет полный registry/operand codec/goal compiler контракт; identity связывается только с доказательством и ресурсной policy. **Причина.** Это общие типовые механизмы и данные, не проблемы, решаемые обработчиком очередной фразы. **Точки:** архитектура §6.5/§17.3; count_reader; native_frontend/native_queries; IdentityBinding.
+
 ## Проверка и предел доказательства
 
-- Анализ исходников и вызовов проводился без чтения тестов.
-- После последующего прохода синтаксис всех 277 Python-файлов `src` проверен через `compile()`; импортированы 9 ключевых runtime-модулей. Это статическая проверка загрузки, без исполнения сценариев.
-- `git diff --check` пройден. В нормативном документе сохранены A01–A39 и 31 заголовок DR1–DR31; реестр отчёта содержит все 43 находки I01–I38/A01–A05.
-- Никакой crash/race/model/e2e прогон в рамках этой работы не выполнялся.
-- Исторические численные результаты из прежних status-документов не используются как доказательство текущего кода.
-- Публикация исправлений на temp не превращает G0–G5 в PASS.
+- Тесты не читались, не анализировались, не запускались и не изменялись.
+- Синтаксис всех 280 production Python-файлов проверен через compile(); проверены импорты 12 runtime-модулей. Это не исполнение сценариев.
+- Пройдены статическая сверка call sites и git diff --check. Изменения ограничены src/docs; нормативный файл и его SHA256 сохранены.
+- Исходные 43 находки I01–I38/A01–A05 сохранены; добавлены I39–I43/A06–A07. Итого 50 записей, каждая с текущим состоянием и пределом.
+- Crash/race/model/e2e/corpus не прогонялись; чужие исторические результаты не выдаются за доказательство текущей реализации.
+- Публикация на temp не превращает G0–G5 в PASS.

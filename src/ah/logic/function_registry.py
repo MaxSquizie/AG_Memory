@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from ah.model import BoundVar, Operand, Ref, RefKind, VariableSort
+from ah.model import BoundVar, Operand, Ref, RefKind, VariableSort, TimeLiteral
 
 
 OperandValidator = Callable[[tuple[Operand, ...]], None]
@@ -63,6 +63,15 @@ def _relevant_past(operands: tuple[Operand, ...]) -> None:
         raise ValueError("RELEVANT_PAST first operand must be a TIME BoundVar")
     if not isinstance(anchor, Ref) or anchor.kind is not RefKind.M:
         raise ValueError("RELEVANT_PAST anchor must reference semantic time M")
+
+
+def _temporal_anchors(operands: tuple[Operand, ...]) -> None:
+    if all(isinstance(x,TimeLiteral) for x in operands):
+        return
+    # Old snapshots may use semantic time entities. Native V7 writes literals.
+    if all(isinstance(x,Ref) and x.kind is RefKind.M for x in operands):
+        return
+    raise ValueError('Temporal operator requires two typed time anchors')
 
 
 def _render_quantifier(name: str, operands: tuple[str, ...]) -> str:
@@ -241,7 +250,7 @@ class FunctionRegistry:
             )
 
         for fid,arity in (("NECESSARY",1),("COUNTERFACTUAL",2),("BEFORE",2),("AFTER",2),("DURING",2),("ASSOCIATION",2)):
-            self.register(FunctionSpec(fid,arity,arity,lambda xs,name=fid: name+"("+", ".join(xs)+")",operand_validator=_refs_only))
+            self.register(FunctionSpec(fid,arity,arity,lambda xs,name=fid: name+"("+", ".join(xs)+")",reasoner_handler=fid if fid in {'BEFORE','AFTER','DURING'} else None,operand_validator=_temporal_anchors if fid in {'BEFORE','AFTER','DURING'} else _proposition_refs))
 
     def register(self, spec: FunctionSpec) -> None:
         canonical = self._key(spec.function_id)

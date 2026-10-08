@@ -25,6 +25,20 @@ class InterpretationReport:
 
 def _observation(text,*,version,observation_id=None,raw_input=None,context_facts=()):
     raw=dict(raw_input or {})
+    if type(version) is not int or version<1: raise ValueError('INVALID_INTERPRETATION_VERSION')
+    links=raw.get('open_template_links',[])
+    if not isinstance(links,list) or len(links)>32: raise ValueError('MIGRATION_LINK_INVALID')
+    for link in links:
+        if (not isinstance(link,dict) or set(link)!={'source_t_ref','canonical_t_ref','evidence_refs'}
+            or any(not isinstance(link[k],str) or not link[k] for k in ('source_t_ref','canonical_t_ref'))
+            or not isinstance(link['evidence_refs'],list) or not 1<=len(link['evidence_refs'])<=64
+            or any(not isinstance(s,str) or not s for s in link['evidence_refs'])
+            or len(set(link['evidence_refs']))!=len(link['evidence_refs'])):
+            raise ValueError('MIGRATION_LINK_INVALID')
+    if links and raw.get('supersedes_version') is None: raise ValueError('DECLARED_TRIGGER_REQUIRED')
+    source_scope=raw.get('query_source_scope',[])
+    if not isinstance(source_scope,list) or len(source_scope)>16 or any(not isinstance(s,str) or not s for s in source_scope): raise ValueError('QUERY_SOURCE_SCOPE_INVALID')
+    if 'goal_request' in raw and not isinstance(raw['goal_request'],dict): raise ValueError('QUERY_REQUEST_INVALID')
     raw.setdefault('text',text)
     if raw['text']!=text: raise ValueError('INPUT_TEXT_MISMATCH')
     raw.setdefault('range',[0,len(text)])
@@ -74,8 +88,9 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
         return state,InterpretationReport(obs,version,run_id,True,'RESOURCE_MISSING',diagnostics=('RESOURCE_MISSING',))
     supersedes=observation.get('supersedes_version')
     if supersedes is not None:
-        if supersedes>=version or not observation.get('trigger_ref'): raise ValueError('DECLARED_TRIGGER_REQUIRED')
-        store.supersede_observation(obs,supersedes,trigger_ref=observation['trigger_ref'])
+        if type(supersedes) is not int or not 0<supersedes<version or not observation.get('trigger_ref'): raise ValueError('DECLARED_TRIGGER_REQUIRED')
+        # Retirement is part of T6's replacement transaction. A failed T4/T5 or
+        # an entirely rejected admission must leave the old version untouched.
     if hasattr(selector,'start_run'): selector.start_run(run_id)
     state=run_native(text,selector,release,observation,morph=morph)
     report=run_from_state(state,store,binding,schema=schema,run_id=run_id,version=version,observation_id=obs,release=release)

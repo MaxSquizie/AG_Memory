@@ -753,6 +753,18 @@ class ContextProjector:
         )
 
     def _inference_block(self, outcome: InferenceOutcome) -> ProjectionBlock | None:
+        from ah.inference.contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion
+        if isinstance(outcome.conclusion,FormulaQueryConclusion):
+            c=outcome.conclusion
+            return ProjectionBlock(None,ProjectionMode.INFERENCE,f'Составная цель {c.operator}: {outcome.status.value}. Доказательные ссылки: '+', '.join(r.uid for r in c.evidence_refs))
+        if isinstance(outcome.conclusion,CountConclusion):
+            c=outcome.conclusion
+            quantity=f'ровно {c.exact_count}' if c.exact_count is not None else f'доказанная нижняя граница: {c.lower_bound}'
+            detail='' if c.exact_count is not None else '; полнота области не доказана (INCOMPLETE_DOMAIN)'
+            return ProjectionBlock(None,ProjectionMode.INFERENCE,f'Подсчёт: {outcome.status.value}; {quantity}{detail}.')
+        if isinstance(outcome.conclusion,TemporalComparisonConclusion):
+            c=outcome.conclusion
+            return ProjectionBlock(None,ProjectionMode.INFERENCE,f'Сравнение временных якорей {c.operator}{c.first_bounds, c.second_bounds}: {outcome.status.value}.')
         # Logical status is semantic result, not debug telemetry.  UNKNOWN and
         # DISPROVED must reach the response model; otherwise the model can invent a
         # proof after the deterministic reasoner explicitly failed or refuted it.

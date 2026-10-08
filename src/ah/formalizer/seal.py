@@ -55,6 +55,7 @@ def _canonical_records(state: FormalizationState) -> list[dict]:
             rec["_kind"] = tag
             records.append(rec)
     records.extend({**rec, '_kind': 'syntax_trace'} for rec in state.syntax_trace)
+    records.extend({'_kind':'logical_root','tree':rec} for rec in state.logical_roots)
     return records
 
 

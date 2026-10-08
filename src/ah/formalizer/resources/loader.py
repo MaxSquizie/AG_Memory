@@ -63,6 +63,10 @@ class ResourceRelease:
         senses=self.entries('R-S'); sense_ids={x['sense_id'] for x in senses}
         if len(sense_ids)!=len(senses): raise ResourceMissing('duplicate sense_id')
         if any(not x.get('lemma') or not x.get('POS') for x in senses): raise ResourceMissing('R-S requires lemma and POS')
+        for sense in senses:
+            pattern=sense.get('anchor_pattern')
+            if pattern is not None and (not isinstance(pattern,list) or len(pattern)<2 or any(not isinstance(p,dict) or not p or not set(p)<={'lemma','POS'} or any(not isinstance(v,str) or not v for v in p.values()) for p in pattern)):
+                raise ResourceMissing('invalid lexical-unit anchor pattern')
         roles={x['role_id'] for x in self.entries('RoleRegistry')}
         from ah.model.types import ActantRole
         if len(roles)!=len(self.entries('RoleRegistry')) or not roles<={r.value for r in ActantRole}:
@@ -111,6 +115,24 @@ class ResourceRelease:
             key=(m['sense_id'],tuple(sorted(m.get('roles',()))))
             if key in seen_mappings: raise ResourceMissing('conflicting TemplateMap key')
             seen_mappings.add(key)
+        certificates=self.resources.get('DomainCertificate',{}).get('entries',())
+        seen_domains=set()
+        for c in certificates:
+            if (not isinstance(c.get('domain_id'),str) or not c['domain_id'] or c['domain_id'] in seen_domains
+                or not c.get('template_ref') or c.get('count_role') not in roles
+                or not isinstance(c.get('known_roles'),dict) or not set(c['known_roles'])<=roles
+                or c['count_role'] in c['known_roles'] or any(not isinstance(v,str) or not v for v in c['known_roles'].values())
+                or not isinstance(c.get('completeness_evidence'),list) or not c['completeness_evidence']
+                or any(not isinstance(v,str) or not v for v in c['completeness_evidence']) or not c.get('version')
+                or 'request_window' not in c):
+                raise ResourceMissing('invalid scoped DomainCertificate')
+            window=c['request_window']
+            if window is not None:
+                from ah.model import TimeLiteral
+                if not isinstance(window,list) or len(window)!=2: raise ResourceMissing('invalid domain window')
+                try: TimeLiteral(tuple(window))
+                except ValueError as exc: raise ResourceMissing('invalid domain window') from exc
+            seen_domains.add(c['domain_id'])
 
     def entries(self,kind): return self.resources[kind]['entries']
     def version(self,kind): return str(self.resources[kind]['version'])

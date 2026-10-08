@@ -302,6 +302,14 @@ class AssociationSessionTurnGoalCompiler(AssociationTurnGoalCompiler):
         perception: PerceptionResult | None = None,
         attention_refs=(),
     ):
+        if perception is not None and perception.native_query_roots:
+            from ah.formalizer.native_queries import compile_native_queries
+            native=compile_native_queries(self.core,perception.native_query_roots,context,tuple(attention_refs))
+            # Native roots own their leaves. Do not additionally compile them as
+            # unscoped legacy EXISTS requests through another compiler.
+            ordinary=replace(perception,queries=(),native_query_roots=())
+            remaining=replace(integration,unresolved_queries=())
+            return tuple(native)+tuple(super().build(remaining,context,ordinary,attention_refs=attention_refs))
         if perception is None:
             return super().build(
                 integration,

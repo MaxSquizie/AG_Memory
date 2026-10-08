@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ah.config import InferenceSettings
 from ah.conflict import ConflictEngine
 from ah.core import AHCore
-from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Group, Hypernode, Ref, RefKind
+from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Group, Hypernode, Ref, RefKind, TimeLiteral
 from ah.temporal import TemporalReasoner, TemporalRelation, TemporalTruth
 
 from .attention import InferenceAttention
@@ -18,6 +18,7 @@ from .contracts import (
     LogicalStatus,
     ProofSupport,
     StopReason,
+    TemporalComparisonConclusion,
 )
 from .domain import domain_from_premises
 from .context import BranchContext, CounterfactualContext, ProofContext
@@ -1896,6 +1897,18 @@ class GroundFormulaReasoner:
                 depth=depth,
                 diagnostics=(f"Missing formula UID: {ref.uid}",),
             )
+
+        # Typed anchor comparison is a runtime result. It neither asserts an
+        # event nor installs a support on the queried G (including S-only G).
+        if ref.kind is RefKind.G and self.core.store.kind_of(ref.uid) is RefKind.G:
+            obj=self.core.store.get_element_any_domain(ref.uid)
+            if isinstance(obj,FunctionSymbol) and obj.function_id in {'BEFORE','AFTER','DURING'} and len(obj.operands)==2 and all(isinstance(p,TimeLiteral) for p in obj.operands):
+                from ah.formalizer.temporal_order import compare_anchors
+                value=compare_anchors(obj.function_id,*obj.operands)
+                status=LogicalStatus.UNKNOWN if value is None else LogicalStatus.PROVED if value else LogicalStatus.DISPROVED
+                stop=StopReason.SEARCH_EXHAUSTED if value is None else StopReason.GOAL_SATISFIED if value else StopReason.GOAL_REFUTED
+                result=self._outcome(status,stop,None,(),(ref,),depth=depth,diagnostics=('TEMPORAL_ANCHOR_COMPARISON',))
+                return replace(result,conclusion=TemporalComparisonConclusion(obj.function_id,obj.operands[0].bounds,obj.operands[1].bounds)) if value is not None else result
 
         managed=self.core.store.formalizer_fact_visible(ref.uid)
         if managed is not None:

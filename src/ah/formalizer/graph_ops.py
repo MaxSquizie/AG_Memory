@@ -15,7 +15,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from ah.formalizer.ir_to_graph import OPERATOR_TO_FUNCTION, ROLE_MAP
-from ah.model import ActantRole, BoundVar, Domain, Property, Ref, VariableSort
+from ah.model import ActantRole, BoundVar, Domain, Property, Ref, VariableSort, TimeLiteral
 
 
 def _ensure_symbol(core: Any, form: str) -> Ref:
@@ -172,6 +172,8 @@ def ensure_template(core,p):
 
 
 def native_operand(core,value):
+    if isinstance(value,dict) and 'time_literal' in value:
+        return TimeLiteral(tuple(value['time_literal']))
     if isinstance(value,dict) and 'bound_var' in value:
         return BoundVar(value['bound_var'],VariableSort(value.get('sort','ENTITY')))
     uid=value['ref'] if isinstance(value,dict) else value
@@ -194,6 +196,10 @@ def ensure_node(core,p):
 def ensure_function(core,p):
     uid=p['uid']; fid=core.function_registry.canonical_id(p['function_id'])
     operands=tuple(native_operand(core,x) for x in p['operands'])
+    core.function_registry.validate(fid,operands)
+    if fid in {'BEFORE','AFTER','DURING'} and all(isinstance(x,TimeLiteral) for x in operands):
+        from .temporal_order import compare_anchors
+        if compare_anchors(fid,*operands) is False: raise ValueError('CONSTRAINT_CONFLICT')
     if fid in {'AND','OR','XOR'}:
         operands=tuple(sorted(operands,key=lambda x:(getattr(x,'kind',None).value if isinstance(x,Ref) else 'VAR',getattr(x,'uid',str(x)))))
     if fid in {'FORALL','EXISTS'} and len(operands)!=2: raise ValueError('QUANTIFIER_ARITY_INVALID')

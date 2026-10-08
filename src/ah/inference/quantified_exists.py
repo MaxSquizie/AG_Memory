@@ -266,6 +266,10 @@ class QuantifiedExistsInferenceEngine(EntityIdentityInferenceEngine):
         )
         if direct.status is not LogicalStatus.UNKNOWN:
             return direct
+        if getattr(self.core,'_formalizer_adapter',None) is not None:
+            # Native FORALL_INST already ran through the durable goal channel.
+            # A second legacy derivation must not manufacture an unjournaled path.
+            return direct
 
         reasoner = RuntimeGroundFormulaReasoner(
             self.core,

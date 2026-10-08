@@ -60,7 +60,7 @@ def incompatible(a,b,rules=()):
 class CanonicalLedger:
     def __init__(self, data=None):
         self.data = data if data is not None else {}
-        for key in ("nodes", "supports", "bindings", "assertions", "usage_links", "observations", "candidates", "reports", "markers", "decisions", "goal_decisions", "goal_paths", "witnesses", "rx_cache"):
+        for key in ("nodes", "supports", "bindings", "assertions", "usage_links", "observations", "candidates", "reports", "markers", "decisions", "goal_decisions", "goal_paths", "witnesses", "rx_cache", "open_template_links"):
             self.data.setdefault(key, {})
         self.data.setdefault("events", [])
         self.data.setdefault("closed_reports", {})
@@ -248,7 +248,8 @@ class CanonicalLedger:
             raise ValueError("INTEGRITY_ERROR: assertion identity changed")
         self.data["assertions"].setdefault(raw["assertion_id"],raw)
 
-    def retract(self, *, source_tag=None, assertion_id=None, binding_id=None):
+    def retract(self, *, source_tag=None, assertion_id=None, binding_id=None,source_status='RETRACTED'):
+        if source_status not in {'RETRACTED','SUPERSEDED'}: raise ValueError('INVALID_RETRACTION_STATUS')
         events=[]
         if source_tag is not None:
             tag = list(source_tag)
@@ -257,18 +258,25 @@ class CanonicalLedger:
                     s["status"] = "SUPERSEDED"
                     events.append({"node_id":s["conclusion_ref"],"type":"SUPPORT_RETRACTED","support_id":rid})
             for a in self.data["assertions"].values():
-                if a["provenance"]["source"].get("source_tag") == tag:
-                    a["status"] = "RETRACTED"
+                if a["provenance"]["source"].get("source_tag") == tag and a['status']=='LIVE':
+                    a["status"] = source_status
             for c in self.data["candidates"].values():
-                if c.get("source_tag") == tag:
-                    c["status"] = "RETRACTED"
+                if c.get("source_tag") == tag and c['status']=='LIVE':
+                    c["status"] = source_status
             for l in self.data["usage_links"].values():
                 if l["kind"] == "ATTITUDE" and l.get("source_tag") == tag:
                     l["status"] = "SUPERSEDED"
-        if assertion_id is not None:
+        if assertion_id is not None and self.data['assertions'][assertion_id]['status']=='LIVE':
             self.data["assertions"][assertion_id]["status"] = "RETRACTED"
         if binding_id is not None:
             self.data["bindings"][binding_id]["status"] = "INVALID"
+        return events
+
+    def supersede(self, source_tag):
+        """Terminal old-version records; callers commit this with the replacement."""
+        tag=list(source_tag)
+        events=self.retract(source_tag=tag,source_status='SUPERSEDED')
+        self.data['observations'][digest(tag)]={'source_tag':tag,'status':'SUPERSEDED'}
         return events
 
     def query(self, node_id, *, point=None, window=None):
@@ -324,6 +332,20 @@ class CanonicalLedger:
         refs={rid for rid,r in self.data['reports'].items() if self.report_open(r) and any(c.get('content_key')==ck for c in r.get('candidates',()))}
         result['conflict_ref']=sorted(set(result['conflict_ref'])|refs)
         if result['answer']=='YES': return result
+        if spec.get('function_id'):
+            # NOT(P) shares P's conflict content key, but is a different formula.
+            # A positive P path must never be borrowed as a proof of NOT(P).
+            negations=[(uid,n) for uid,n in self.data['nodes'].items()
+                       if n.get('function_id')=='NOT' and n.get('operands')==[node_id]]
+            for uid,n in negations:
+                if uid not in self.f_visible(): continue
+                if point is None and window is None:
+                    return {**result,'answer':'NO','evidence_ref':uid}
+                wanted=TemporalRegion('POINT',point=point) if point is not None else TemporalRegion('CONTINUOUS',lo=window[0],hi=window[1])
+                for aid,a in self.data['assertions'].items():
+                    if a['target_ref']==uid and self.evidence_live({'record_id':aid}) and covers(region(a['region']),wanted) is True:
+                        return {**result,'answer':'NO','evidence_ref':uid}
+            return result
         for uid,n in self.data['nodes'].items():
             if uid==node_id or n.get('function_id') or not ck or n.get('content_key')!=ck: continue
             other=self.query(uid,point=point,window=window)

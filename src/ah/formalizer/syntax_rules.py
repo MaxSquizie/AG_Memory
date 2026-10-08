@@ -17,7 +17,7 @@ from .selection_protocol import ProtocolError
 FEATURES = {'lemma', 'POS', 'cases', 'number', 'gender', 'person', 'tense', 'mood', 'features', 'surface', 'oov'}
 RELATIONS = {'BEFORE', 'AFTER', 'ADJACENT', 'OVERLAPS', 'CONTAINS', 'AGREES'}
 OUTPUTS = {'CANDIDATE_GRAPH', 'CLAUSE_BOUNDARY', 'ELLIPSIS', 'TOKEN_HYPOTHESIS'}
-NODE_KINDS = {'PREDICATE', 'ENTITY', 'BOUND_VAR', 'NOT', 'AND', 'OR', 'XOR', 'IMPLIES', 'FORALL', 'EXISTS', 'POSSIBLE', 'NECESSARY', 'COUNTERFACTUAL', 'BEFORE', 'AFTER', 'DURING', 'ASSOCIATION'}
+NODE_KINDS = {'PREDICATE', 'ENTITY', 'BOUND_VAR', 'TIME', 'WH', 'COUNT_REQUEST', 'NOT', 'AND', 'OR', 'XOR', 'IMPLIES', 'FORALL', 'EXISTS', 'POSSIBLE', 'NECESSARY', 'COUNTERFACTUAL', 'BEFORE', 'AFTER', 'DURING', 'ASSOCIATION'}
 
 
 class SyntaxRuleError(ValueError):
@@ -210,19 +210,19 @@ def validate_rules(rules, roles, declared_reads=()):
                 raise SyntaxRuleError('invalid graph output')
             names = set()
             for node in output['nodes']:
-                if not {'id', 'kind', 'anchors'} <= set(node) or not set(node) <= {'id', 'kind', 'anchors'} or node['id'] in names or node['kind'] not in NODE_KINDS or not node['anchors'] or not set(node['anchors']) <= set(captures):
+                if not {'id', 'kind', 'anchors'} <= set(node) or not set(node) <= {'id', 'kind', 'anchors', 'head'} or node['id'] in names or node['kind'] not in NODE_KINDS or not node['anchors'] or not set(node['anchors']) <= set(captures) or node.get('head') is not None and node['head'] not in node['anchors']:
                     raise SyntaxRuleError('invalid output node')
                 names.add(node['id'])
             for edge in output['edges']:
-                if not {'kind', 'from', 'to'} <= set(edge) or not set(edge) <= {'kind', 'from', 'to', 'role_id', 'scope'} or edge['from'] not in names or edge['to'] not in names or edge['kind'] not in {'ARGUMENT', 'ATTITUDE', 'OPERAND', 'BIND'} or edge.get('role_id') is not None and edge['role_id'] not in roles or type(edge.get('scope', False)) is not bool:
+                if not {'kind', 'from', 'to'} <= set(edge) or not set(edge) <= {'kind', 'from', 'to', 'role_id', 'scope'} or edge['from'] not in names or edge['to'] not in names or edge['kind'] not in {'ARGUMENT', 'ATTITUDE', 'OPERAND', 'BIND', 'TIME_SCOPE', 'QUERY_SLOT'} or edge.get('role_id') is not None and edge['role_id'] not in roles or type(edge.get('scope', False)) is not bool:
                     raise SyntaxRuleError('invalid output edge')
             indices = {n['id']: i for i, n in enumerate(output['nodes'])}
-            graph = Hypothesis(rid, tuple(TNode(n['kind'], tuple(n['anchors'])) for n in output['nodes']),
+            graph = Hypothesis(rid, tuple(TNode(n['kind'], tuple(n['anchors']),head_anchor=n.get('head')) for n in output['nodes']),
                                tuple(TEdge(e['kind'], indices[e['from']], indices[e['to']], e.get('role_id'), e.get('scope', False)) for e in output['edges']),
                                alignment=tuple(captures))
             try:
                 _validate_hypothesis(StructureProposalRequest(rid, '', tuple(captures), allowed_node_kinds=frozenset(NODE_KINDS),
-                                                             allowed_edge_kinds=frozenset({'ARGUMENT','ATTITUDE','OPERAND','BIND'}), allowed_role_ids=frozenset(roles)), graph)
+                                                             allowed_edge_kinds=frozenset({'ARGUMENT','ATTITUDE','OPERAND','BIND','TIME_SCOPE','QUERY_SLOT'}), allowed_role_ids=frozenset(roles)), graph)
             except ProtocolError as exc:
                 raise SyntaxRuleError('invalid typed graph: '+str(exc)) from exc
         else:
@@ -424,7 +424,7 @@ def propose_graphs(state, release, request):
         output = match.rule['output']
         names = {n['id']: i for i, n in enumerate(output['nodes'])}
         anchors = lambda node: tuple(state.evidence[match.assignment[c][0]].token_id for c in node['anchors'])
-        nodes = tuple(TNode(n['kind'], anchors(n)) for n in output['nodes'])
+        nodes = tuple(TNode(n['kind'], anchors(n),head_anchor=state.evidence[match.assignment[n['head']][0]].token_id if n.get('head') else None) for n in output['nodes'])
         edges = tuple(TEdge(e['kind'], names[e['from']], names[e['to']], e.get('role_id'), e.get('scope', False)) for e in output['edges'])
         lo, hi = match.window
         binding = {state.evidence[i].token_id: _plain_variant(v) for i,v in match.assignment.values()}

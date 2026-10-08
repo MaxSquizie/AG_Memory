@@ -104,9 +104,23 @@ class InferenceEngine:
         proof_context: ProofContext,
         runtime: GoalRuntime,
     ) -> InferenceOutcome:
+        from .contracts import NativeFormulaGoal,CountGoal
+        if isinstance(goal,(NativeFormulaGoal,CountGoal)):
+            from ah.formalizer.native_queries import solve_native_goal
+            return solve_native_goal(self,goal,query,workspace_refs,attention,proof_context,runtime)
         if isinstance(goal, RoleFillGoal):
+            adapter=getattr(self.core,'_formalizer_adapter',None)
+            if adapter is not None:
+                with adapter._journal.atomic(),self.core.store._lock:
+                    adapter._refresh()
+                    return self._role_fill(goal,runtime)
             return self._role_fill(goal, runtime)
         if isinstance(goal, MultiRoleFillGoal):
+            adapter=getattr(self.core,'_formalizer_adapter',None)
+            if adapter is not None:
+                with adapter._journal.atomic(),self.core.store._lock:
+                    adapter._refresh()
+                    return self._multi_role_fill(goal,runtime)
             return self._multi_role_fill(goal, runtime)
         if isinstance(goal, ExistsGoal):
             return self._exists(
@@ -719,6 +733,11 @@ class InferenceEngine:
         out: list[Hypernode] = []
         # Template index is the deterministic candidate generator. Do not scan the
         # entire AH merely because the store is large or the Workspace is noisy.
+        adapter=getattr(self.core,'_formalizer_adapter',None)
+        if adapter is not None:
+            # Registered durable rules may introduce the requested role before
+            # the candidate list is frozen; no unjournaled legacy derivation.
+            adapter.query_template(template_uid,known_roles,point=temporal_point,window=temporal_window)
         candidates = tuple(self.core.store.find_hypernodes_by_template(template_uid))
         if runtime is not None:
             role_key = ",".join(
@@ -767,6 +786,12 @@ class InferenceEngine:
                     support.append(ref)
         return tuple(support)
 
+    def _native_query_diagnostics(self,fact_ref,goal):
+        adapter=getattr(self.core,'_formalizer_adapter',None)
+        if adapter is None: return ()
+        answer=adapter.prove_node(fact_ref.uid,point=goal.temporal_point,window=goal.temporal_window)
+        return tuple(answer.get('diagnostics',()))+tuple('conflict_ref:'+r for r in answer.get('conflict_ref',()))
+
     def _role_fill(self, goal: RoleFillGoal, runtime: GoalRuntime) -> InferenceOutcome:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
         matches = self._matching_hypernodes(goal.template_ref.uid, goal.known_roles, runtime, temporal_point=goal.temporal_point, temporal_window=goal.temporal_window)
@@ -795,6 +820,7 @@ class InferenceEngine:
                 (fact_ref, *subsumption, value),
                 domain_from_premises(self.core, premises),
                 1,
+                diagnostics=self._native_query_diagnostics(fact_ref,goal),
                 proof_support=self._proof_support(premises, rule_id="FACT_MATCH"),
             )
         conflict = self._conflict_outcome(tuple(conflicted), expanded=len(matches))
@@ -851,6 +877,7 @@ class InferenceEngine:
                 trace,
                 domain_from_premises(self.core, premises),
                 1,
+                diagnostics=self._native_query_diagnostics(fact_ref,goal),
                 proof_support=self._proof_support(premises, rule_id="FACT_MATCH"),
             )
         conflict = self._conflict_outcome(tuple(conflicted), expanded=len(matches))

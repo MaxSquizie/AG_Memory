@@ -20,6 +20,7 @@ from ah.model import (
     Hypernode,
     Link,
     BoundVar,
+    TimeLiteral,
     VariableSort,
     Property,
     Ref,
@@ -61,7 +62,7 @@ def _parse_ref(raw: dict[str, Any]) -> Ref:
     return Ref(str(raw["uid"]), RefKind(str(raw["kind"])))
 
 
-def _operand(value: Ref | BoundVar) -> dict[str, Any]:
+def _operand(value: Ref | BoundVar | TimeLiteral) -> dict[str, Any]:
     if isinstance(value, Ref):
         # Keep legacy shape for ordinary AH refs so old schema-1 dumps remain
         # byte-shape compatible where no BoundVar is used.
@@ -72,10 +73,14 @@ def _operand(value: Ref | BoundVar) -> dict[str, Any]:
             "local_id": value.local_id,
             "sort": value.sort.value,
         }
+    if isinstance(value, TimeLiteral):
+        return {'__operand__':'TIME_LITERAL','bounds':list(value.bounds)}
     raise PersistenceError(f"Unsupported function operand: {type(value).__name__}")
 
 
-def _parse_operand(raw: dict[str, Any]) -> Ref | BoundVar:
+def _parse_operand(raw: dict[str, Any]) -> Ref | BoundVar | TimeLiteral:
+    if raw.get('__operand__')=='TIME_LITERAL':
+        return TimeLiteral(tuple(raw['bounds']))
     if raw.get("__operand__") == "BOUND_VAR":
         return BoundVar(
             int(raw["local_id"]),
