@@ -11,7 +11,7 @@ Native input проходит released morphology/syntax/TP/T3/T4 → C/T5/T6. S
 ## Что осталось фактически
 
 1. **Данные:** authored lexicon/valencies/TemplateMap текущих T, фиксированный корпус, реальный reviewer key/trust registry и независимо подписанный release не предоставлены. CLI готовит/проверяет эти артефакты; демо не подставляется. Лексическая availability не выдаётся за execution coverage.
-2. **Покрытие и semantics:** native counterfactual path filtering; недостающие causal/comparative/superlative/manner goals; произвольные restrictions в count body и отдельная aggregate CountDomain по временному окну. Общие trees/queries сохранены, но безопасный UNKNOWN ещё не выполняет G5.
+2. **Покрытие и semantics:** native counterfactual path filtering; недостающие causal/comparative/superlative/manner goals; содержательная типизация новых restrictions по реальным ресурсам и отдельная aggregate CountDomain по временному окну. Общие trees/queries сохранены, но безопасный UNKNOWN ещё не выполняет G5.
 3. **Измерения:** profile-rx и session metrics показывают actual retrieval/index/liveness cost. Большая production память и benefit на фиксированном корпусе не измерены. Snapshot WAL и paths могут оставаться дорогими.
 4. **Проверка:** пользователь отложил тесты. Криптографическое/поведенческое соответствие, DR/oracle/crash/race и модельный корпус не прогонялись.
 5. **Identity по дизайну:** entity references требуют explicit window/context/evidence. Event identity/report bridging выключены; массовая миграция не угадывает тождество по написанию и не переинтерпретирует контекст зависимых источников автоматически.

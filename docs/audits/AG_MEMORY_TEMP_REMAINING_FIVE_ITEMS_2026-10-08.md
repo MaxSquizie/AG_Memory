@@ -7,7 +7,7 @@
 | Направление | На базе 59fc13e | В этой доработке | Текущий предел |
 |---|---|---|---|
 | Resource release | Loader/init/check; внешний review pin без crypto | Actual T catalog; build/coverage/sign/check; content-bound coverage и Ed25519 с внешним key registry | Авторские lexicon, corpus и reviewer key не предоставлены; production release не изготовлен |
-| Структурная композиция | JSON AST, multi-token anchors, TimeLiteral, атомарный WH/COUNT, positive EXISTS join | Текстовый DSL; схемы каждого зарегистрированного Emit; numeric operators/CountLiteral; full-scope WH/COUNT и nested EXISTS; временные proposition operands | Покрытие surfaces не измерено; arbitrary counterfactual/causal, lexical restrictions и агрегатный count по окну требуют дальнейших контрактов/данных |
+| Структурная композиция | JSON AST, multi-token anchors, TimeLiteral, атомарный WH/COUNT, positive EXISTS join | Текстовый DSL; схемы каждого зарегистрированного Emit; numeric operators/CountLiteral; full-scope WH/COUNT и nested EXISTS; временные proposition operands | Покрытие surfaces не измерено; arbitrary counterfactual/causal, качество лексических данных и агрегатный count по окну требуют дальнейших контрактов/данных |
 | R-X | Stage-isolated cache и frozen reads | Индекс snapshot+R1 lexical keys, bounded retrieval, counters/timings, actual-snapshot profile CLI | На большой production памяти измерений нет; semantic benefit требует контролируемого корпусного сравнения |
 | Boundary | Поддержанный JSON и review-атрибуция | Закрытые JSON Schema, semantic/cross-record validation, Ed25519 verify/revocation/exact pin | Это граница зарегистрированного runtime; отложенные/неизвестные resource kinds отклоняются |
 | Migration/identity | Одна declared replacement и host bindings | Durable mass plan, version reservations, resumable per-source receipts; CorefPolicy resolver по declared frozen window с grounded selector | Не автоматическое слияние имён; event identity/report bridging выключены; миграционные corpus runs не выполнены |
@@ -32,7 +32,7 @@
 
 - §16 задаёт однозначную текстовую форму captures/reads/when/Emit JSON. `rule_dsl` компилирует её в существующий AST без eval; версии reads обязаны совпадать с manifest. CandidateSchema пинит закрытые схемы всех четырёх зарегистрированных Emit; далее проверяются typed graph/role/arity/cycle/anchor constraints.
 - Multi-token anchors, explicit heads и R-S anchor_pattern сохранены; numeric NUMERAL несёт только raw anchors. Значение определяется цифрами либо reviewed NumeralRules. FunctionRegistry, native plan, codec и persistence поддерживают `[entity BoundVar, body Ref(N|G), CountLiteral]` для AT_LEAST_N/EXACTLY_N/AT_MOST_N. Не создаются n вымышленных объектов.
-- CountGoal объединяет distinct-M witnesses и asserted bounds **совпадающего полного атомарного body**. Ограничение/restriction не удаляется для расширения совпадений. Exact count и proof AT_MOST_N требуют scoped completeness. ENUMERATED и ASSERTED_BOUND closure различены.
+- CountGoal объединяет distinct-M witnesses и asserted bounds атомарного body; составной numeric reader сопоставляет **полное alpha-согласованное body** с сохранёнными restrictions/scopes. Ограничение/restriction не удаляется для расширения совпадений. Exact count и proof AT_MOST_N требуют scoped completeness. ENUMERATED и ASSERTED_BOUND closure различены.
 - Query gap имеет уникального владельца внутри полного дерева. NativeBindingGoal получает кандидатов по narrow template indexes, подставляет runtime QueryVar и доказывает всё дерево. Результат WH не утверждает отдельную ветку OR/QUOTE. Составной COUNT требует FormulaDomainCertificate по typed pattern signature, variable, window и живым completeness supports. Без него публикуется лишь нижняя граница.
 - Nested EXISTS использует capture-safe substitution в полное body; NOT/OR/AND и другие scopes сохраняются. Перебор не выводит FORALL; отсутствие свидетеля — UNKNOWN. Незавершённый бюджетом поиск не становится «полным».
 - BEFORE/AFTER/DURING принимают TimeLiteral или proposition Ref. Прямой ordering root не утверждает children. Inferred BEFORE требует живых временных evidence с max(A)<min(B); DURING — гарантированного покрытия. EXISTENTIAL не становится CONTINUOUS. Не найденная event pair не опровергает открытый relation.
@@ -41,7 +41,7 @@
 
 **Причина.** Сохранённое дерево и выполненный proof contract устраняют преждевременный отсев интерпретаций. Они не заменяют ресурсные данные и доказательство реального покрытия.
 
-**Состояние:** перечисленные source paths подключены; поведение не проверено тестами. **Осталось:** контрфактический proof с фильтрацией native paths по временным assumptions; недостающие causal/superlative/manner/прочие handlers; полноценная лексическая типизация и чтение произвольного restricted count body; отдельная declared aggregate CountDomain по временному окну. Неизвестные формы дают typed UNKNOWN. Полный G5 не заявлен.
+**Состояние:** перечисленные source paths подключены; поведение не проверено тестами. **Осталось:** контрфактический proof с фильтрацией native paths по временным assumptions; недостающие causal/superlative/manner/прочие handlers; лексическая типизация новых restrictions по реальным данным; отдельная declared aggregate CountDomain по временному окну. Неизвестные формы дают typed UNKNOWN. Полный G5 не заявлен.
 
 ## 3. R-X опыт: чтение, польза и стоимость
 
@@ -75,7 +75,7 @@
 
 CorefPolicy resolver читает только declared observation window и прежние совместимые entity arguments. Snapshot candidate paths фиксируется до run binding. Hard morphology conflicts отсекаются с trace; missing feature не является конфликтом. Ранжирование лишь упорядочивает, KEEP_ALL ties сохраняет альтернативы. Выбор одного кандидата имеет D/P/M interpretation grounds (не truth ground текущего факта) и concrete antecedent support IDs; отзыв основания инвалидирует binding обычным каскадом. Speaker/addressee Ref берётся только из явного context. Одинаковое имя не запускает merge. Event identity/report bridging не включены.
 
-**Как должно быть.** Вызывающая сторона предоставляет explicit source/context windows и declared migration trigger; после новой версии ресурса запускает нужный job. Независимые изменения контекста требуют нового declared plan. Зависимые источники не переинтерпретируются самопроизвольно. Event identity требует отдельного registered proof contract, а не lexical equality.
+**Как должно быть.** Вызывающая сторона предоставляет explicit source/context windows и declared migration trigger; после новой версии ресурса запускает нужный job. Изменения контекста передаются explicit input_changes нового declared plan; whitelist не допускает смены source/text. После ancestor migration зависимый job можно направить на новый reference window; delta входит в frozen hash и replay guard. Зависимые источники не переинтерпретируются самопроизвольно. Event identity требует отдельного registered proof contract, а не lexical equality.
 
 **Причина.** Миграция связывает интерпретации и аудиторный след, но не может угадать семантическое тождество новых терминов или сущностей.
 

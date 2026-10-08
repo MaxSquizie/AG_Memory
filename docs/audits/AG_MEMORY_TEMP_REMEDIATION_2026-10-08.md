@@ -6,7 +6,7 @@
 
 Теперь подключены текстовый DSL + closed Emit/resource schemas; actual-AH release authoring/coverage/signature tools; Ed25519 verify; indexed R-X reads/metrics/profile; numeric canonical operands + bounds reader; full-scope compound WH/COUNT и nested EXISTS; temporal proposition operands; frozen grounded CorefPolicy; durable resumable mass migration. Архитектура синхронизирована. Никаких тестов/фиктивного review/корпусного PASS в этой работе нет.
 
-Реально остаются: внешний authored/reviewed release и корпус; измерение R-X на большой памяти и semantic benefit; native counterfactual overlay; произвольные causal/superlative/manner handlers и restricted/aggregate-window count contracts. Event identity/report bridging отключены по архитектуре. G0–G5 не пройдены. Механизм безопасного UNKNOWN не выдаётся за высокий G5 coverage.
+Реально остаются: внешний authored/reviewed release и корпус; измерение R-X на большой памяти и semantic benefit; native counterfactual overlay; произвольные causal/superlative/manner handlers и aggregate-window CountDomain и типизация новых lexical restrictions. Event identity/report bridging отключены по архитектуре. G0–G5 не пройдены. Механизм безопасного UNKNOWN не выдаётся за высокий G5 coverage.
 
 ## Реестр: Недочёт / Как исполнено сейчас / Как должно быть / Причина
 
@@ -634,7 +634,7 @@
 
 ### I43 — Native COUNT не имел источника доказательства полноты
 
-**Статус:** КОД / ДАННЫЕ BLOCKED. **Недочёт.** Pure count helper не составлял production CountGoal; вычисленное число нельзя объявлять точным только по наличию найденных N или query bool. **Как исполнено сейчас.** CountGoal читает distinct-M witnesses и asserted lower/upper bounds полного совпадающего атомарного body. DomainCertificate различает ENUMERATED/ASSERTED_BOUND и требует живые completeness support IDs. Составной count сохраняет полное дерево и требует FormulaDomainCertificate с typed pattern hash/variable/window. Без сертификата — INCOMPLETE_DOMAIN; window cardinality не подменяет агрегатный event count.
+**Статус:** КОД / ДАННЫЕ BLOCKED. **Недочёт.** Pure count helper не составлял production CountGoal; вычисленное число нельзя объявлять точным только по наличию найденных N или query bool. **Как исполнено сейчас.** CountGoal читает distinct-M witnesses и asserted lower/upper bounds; составной reader матчится к полному alpha-согласованному body с сохранёнными restrictions и scopes. DomainCertificate различает ENUMERATED/ASSERTED_BOUND и требует живые completeness support IDs. Составной count сохраняет полное дерево и требует FormulaDomainCertificate с typed pattern hash/variable/window. Без сертификата — INCOMPLETE_DOMAIN; window cardinality не подменяет агрегатный event count.
 
 **Как должно быть.** Точный count выводится только по конкретной закрытой области; открытая область не превращается в точную. **Причина.** Перебор совпадений и доказательство исчерпанности не равны. **Точки:** native_queries; contracts.CountGoal; resources/loader; projection/agent_context.
 

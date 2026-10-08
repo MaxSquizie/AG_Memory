@@ -8,10 +8,24 @@ from copy import deepcopy
 from .canonical_ledger import digest
 
 
+def _input_changes(changes):
+    allowed={'context_snapshot','context_facts','declared_reads','entity_bindings','entity_binding_grounds',
+             'coreference_sources','time_anchor','timezone'}
+    if not isinstance(changes,dict) or not set(changes)<=allowed:
+        raise ValueError('MIGRATION_CONTEXT_CHANGE_INVALID')
+    for key,value in changes.items():
+        expected=list if key in {'context_facts','coreference_sources'} else str if key in {'time_anchor','timezone'} else dict
+        if not isinstance(value,expected) and not (key in {'time_anchor','timezone'} and value is None):
+            raise ValueError('MIGRATION_CONTEXT_CHANGE_INVALID')
+    digest(changes)  # JSON-only frozen input, no callbacks/non-finite values.
+    return deepcopy(changes)
+
+
 def reinterpret_observation(store,binding,selector,release,*,observation_id,
-                            previous_version,trigger_ref,open_template_links=(),morph=None,target_version=None,run_id=None):
+                            previous_version,trigger_ref,open_template_links=(),morph=None,target_version=None,run_id=None,input_changes=None):
     from .v7_pipeline import interpret_full
     release.assert_integrity()
+    changes=_input_changes({} if input_changes is None else input_changes)
     if not isinstance(trigger_ref,str) or not trigger_ref or type(previous_version) is not int or previous_version<1:
         raise ValueError('DECLARED_TRIGGER_REQUIRED')
     target_version=previous_version+1 if target_version is None else target_version
@@ -28,9 +42,15 @@ def reinterpret_observation(store,binding,selector,release,*,observation_id,
         raw=deepcopy(raw)
     if replay:
         replacement=binding.input_snapshot(observation_id,target_version)
-        if replacement is None or replacement.get('trigger_ref')!=trigger_ref or replacement.get('open_template_links',[])!=list(open_template_links):
+        if (replacement is None or replacement.get('trigger_ref')!=trigger_ref
+                or replacement.get('open_template_links',[])!=list(open_template_links)
+                or replacement.get('migration_input_changes',{})!=changes):
             raise ValueError('MIGRATION_REPLAY_MISMATCH')
         raw=deepcopy(replacement)
+    else:
+        raw.pop('migration_input_changes',None)
+        raw.update(changes)
+        if changes: raw['migration_input_changes']=changes
     raw.pop('rx_reads',None)  # interpret_full restores frozen replacement reads on replay
     raw.update(supersedes_version=previous_version,trigger_ref=trigger_ref,
                open_template_links=deepcopy(list(open_template_links)))
@@ -51,13 +71,14 @@ def plan_mass_migration(store,binding,release,*,trigger_ref,items):
     rows=deepcopy(items); pairs=set()
     for item in rows:
         if (not isinstance(item,dict) or not {'observation_id','previous_version'}<=set(item)
-                or not set(item)<={'observation_id','previous_version','open_template_links'}
+                or not set(item)<={'observation_id','previous_version','open_template_links','input_changes'}
                 or not isinstance(item['observation_id'],str) or not item['observation_id']
                 or type(item['previous_version']) is not int or item['previous_version']<1):
             raise ValueError('MIGRATION_ITEM_INVALID')
         if item['observation_id'] in pairs: raise ValueError('DUPLICATE_MIGRATION_OBSERVATION')
         pairs.add(item['observation_id'])
         item.setdefault('open_template_links',[])
+        if 'input_changes' in item: item['input_changes']=_input_changes(item['input_changes'])
         if not isinstance(item['open_template_links'],list): raise ValueError('MIGRATION_LINK_INVALID')
         for link in item['open_template_links']:
             if (not isinstance(link,dict) or set(link)!={'source_t_ref','canonical_t_ref','evidence_refs'}
@@ -127,7 +148,8 @@ def _resume_mass_migration(store,binding,selector,release,*,migration_id,morph=N
         try:
             _,report=reinterpret_observation(store,binding,selector,release,observation_id=oid,
                 previous_version=item['previous_version'],target_version=item['target_version'],
-                trigger_ref=plan['trigger_ref'],open_template_links=item['open_template_links'],morph=morph,run_id=item['run_id'])
+                trigger_ref=plan['trigger_ref'],open_template_links=item['open_template_links'],morph=morph,run_id=item['run_id'],
+                input_changes=item.get('input_changes'))
             if report.terminal=='PENDING_ADMISSION_ORDER': continue
             receipt=asdict(report)
         except ValueError as exc:

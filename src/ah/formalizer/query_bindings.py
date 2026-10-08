@@ -66,6 +66,42 @@ def candidate_values(core,ledger,pattern,names,budget,*,bound=False):
     return values
 
 
+def formula_numeric_bounds(core,ledger,goal,budget):
+    """Match the entire restricted count body, including every nested scope."""
+    from .native_queries import Pattern,_matching_refs,_uniform_windows
+    if goal.temporal_window is not None or not _uniform_windows(goal.pattern,goal): return None,None,()
+    used=set()
+    def variables(p):
+        if isinstance(p,BoundVar): used.add(p.local_id)
+        elif isinstance(p,Pattern):
+            for m in p.members: variables(m)
+            for r,v in p.actants: variables(v)
+    variables(goal.pattern)
+    variable=BoundVar(max(used,default=-1)+1,VariableSort.ENTITY)
+    body=substitute(goal.pattern,{goal.variables[0]:variable})
+    bodies=_matching_refs(core,ledger,body,limit=min(4096,max(1,budget[0])))
+    lower=None; upper=None; proofs=[]; paths=ledger.paths()
+    for uid in bodies:
+        for root in core.store.function_parents(uid):
+            budget[0]-=1
+            if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
+            claim=ledger.data['nodes'].get(root.uid,{})
+            op=claim.get('function_id'); operands=claim.get('operands',())
+            if op not in {'AT_LEAST_N','EXACTLY_N','AT_MOST_N'} or len(operands)!=3 or operands[1]!=uid: continue
+            value=operands[2].get('count_literal') if isinstance(operands[2],dict) else None
+            if type(value) is not int: raise ValueError('INTEGRITY_ERROR: invalid count literal')
+            match=Pattern(op,(variable,body,CountLiteral(value)))
+            if not _matching_refs(core,ledger,match,limit=min(4096,max(1,budget[0])),target_uid=root.uid): continue
+            if goal.temporal_point is None and not any(s['conclusion_ref']==root.uid and sid in paths
+                    and not any(a['support_record_id']==sid for a in ledger.data['assertions'].values())
+                    for sid,s in ledger.data['supports'].items()): continue
+            if ledger.query(root.uid,point=goal.temporal_point)['answer']!='YES': continue
+            if op in {'AT_LEAST_N','EXACTLY_N'}: lower=value if lower is None else max(lower,value)
+            if op in {'AT_MOST_N','EXACTLY_N'}: upper=value if upper is None else min(upper,value)
+            proofs.append(core.ref(root.uid))
+    return lower,upper,tuple(dict.fromkeys(proofs))
+
+
 def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime,budget,depth,outcome):
     from .native_queries import solve_native_goal
     values=candidate_values(engine.core,adapter.ledger,goal.pattern,goal.variables,budget)
@@ -83,7 +119,9 @@ def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime
     if goal.mode=='WH':
         return outcome(LogicalStatus.PROVED if rows else LogicalStatus.UNKNOWN,refs,
                        tuple(dict.fromkeys(diagnostics)),NativeBindingsConclusion(goal.variables,tuple(rows),signature))
-    release=getattr(adapter,'resource_release',None); complete=False
+    claimed_lower,claimed_upper,bound_refs=formula_numeric_bounds(engine.core,adapter.ledger,goal,budget)
+    lower=max(len(rows),claimed_lower or 0); refs=tuple(dict.fromkeys((*refs,*bound_refs)))
+    release=getattr(adapter,'resource_release',None); complete=False; closure_mode='ENUMERATED'
     window=[goal.temporal_point,goal.temporal_point] if goal.temporal_point is not None else list(goal.temporal_window) if goal.temporal_window is not None else None
     if release is not None and release.sha256==goal.resource_snapshot:
         paths=adapter.ledger.paths(); release.assert_integrity()
@@ -92,15 +130,20 @@ def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime
                     and cert['request_window']==window
                     and (goal.domain_certificate is None or cert['domain_id']==goal.domain_certificate)
                     and all(s in paths for s in cert['completeness_evidence'])):
-                complete=True
+                closure_mode=cert.get('closure_mode','ENUMERATED')
+                complete=closure_mode=='ENUMERATED' or claimed_lower is not None and claimed_lower==claimed_upper
+                if not complete: continue
                 refs=tuple(dict.fromkeys((*refs,*(engine.core.ref(adapter.ledger.data['supports'][s]['conclusion_ref']) for s in cert['completeness_evidence']))))
                 break
-    count=len(rows); status=LogicalStatus.UNKNOWN; n=goal.expected_count
+    count=claimed_lower if complete and closure_mode=='ASSERTED_BOUND' else len(rows)
+    if claimed_upper is not None and lower>claimed_upper or complete and lower>count:
+        return outcome(LogicalStatus.UNKNOWN,refs,('COUNT_BOUNDS_CONFLICT',),CountConclusion(lower,None,refs,claimed_upper))
+    status=LogicalStatus.UNKNOWN; n=goal.expected_count
     if complete:
         valid=n is None or (count==n if goal.comparison=='EXACTLY_N' else count>=n if goal.comparison=='AT_LEAST_N' else count<=n)
         status=LogicalStatus.PROVED if valid else LogicalStatus.DISPROVED
     elif n is not None:
-        if goal.comparison=='AT_LEAST_N' and count>=n: status=LogicalStatus.PROVED
-        elif goal.comparison in {'EXACTLY_N','AT_MOST_N'} and count>n: status=LogicalStatus.DISPROVED
+        if goal.comparison=='AT_LEAST_N' and lower>=n: status=LogicalStatus.PROVED
+        elif goal.comparison in {'EXACTLY_N','AT_MOST_N'} and lower>n: status=LogicalStatus.DISPROVED
     return outcome(status,refs,tuple(dict.fromkeys([*diagnostics,*(() if complete else ('INCOMPLETE_DOMAIN',))])),
-                   CountConclusion(count,count if complete else None,refs,count if complete else None))
+                   CountConclusion(lower,count if complete else None,refs,count if complete else claimed_upper))

@@ -198,7 +198,7 @@ def compile_native_queries(core,roots,context,attention_refs=()):
     return tuple(results)
 
 
-def _matching_refs(core,ledger,pattern,*,limit,workspace=()):
+def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None):
     """Narrow leaf T lookup then reverse function index, with bounded unification."""
     steps=0
     workspace_ids={r.uid for r in workspace}
@@ -267,7 +267,7 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=()):
             return old==value['bound_var'] and value.get('sort','ENTITY')==p.sort.value and len(set(variables.values()))==len(variables)
         return False
     steps_used=[0]
-    return walk(pattern)
+    return ([target_uid] if match(pattern,target_uid,{}) else []) if target_uid is not None else walk(pattern)
 
 
 def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_budget=None,_depth=0):

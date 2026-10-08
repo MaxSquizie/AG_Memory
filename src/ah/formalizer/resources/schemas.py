@@ -41,6 +41,7 @@ READ = obj(('read_id', 'lemma', 'snapshot_version'), {'read_id': S, 'lemma': S, 
 RESOURCE_SCHEMAS = {
     'FormulaDomainCertificate': obj(('domain_id','pattern_signature','count_variable','request_window','completeness_evidence','version'), {
         'domain_id':S,'pattern_signature':{'type':'string','pattern':'^[0-9a-f]{64}$'},'count_variable':S,
+        'closure_mode':enum('ENUMERATED','ASSERTED_BOUND'),
         'request_window':{'type':['array','null'],'items':{'type':'number'},'minItems':2,'maxItems':2},
         'completeness_evidence':array(S,minimum=1),'version':S}),
     'NumeralRules': obj(('lemma','value'), {'lemma':S,'value':{'type':'integer','minimum':0,'maximum':10**12},'evidence_rule_id':S}),
