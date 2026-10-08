@@ -326,6 +326,8 @@ class FormalizationState:
     miss_reports: list[str] = field(default_factory=list)
     observation: dict = field(default_factory=dict)
     resource_snapshot: dict = field(default_factory=dict)
+    syntax_trace: list[dict] = field(default_factory=list)
+    grammar_search_incomplete: bool = False
     rejections: list[RejectionRecord] = field(default_factory=list)  # I29/§2.3 audit trail
 
     def reject(self, candidate_id: str, stage: str, reason: str,

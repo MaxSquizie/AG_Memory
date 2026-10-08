@@ -46,6 +46,7 @@ def _canonical_records(state: FormalizationState) -> list[dict]:
         ("reference", state.reference_candidates),
         ("linked_alt", state.linked_alternatives),
         ("constraint", state.constraints),
+        ("rejection", state.rejections),
     ]
     records: list[dict] = []
     for tag, objs in groups:
@@ -53,6 +54,7 @@ def _canonical_records(state: FormalizationState) -> list[dict]:
             rec = dataclasses.asdict(obj)
             rec["_kind"] = tag
             records.append(rec)
+    records.extend({**rec, '_kind': 'syntax_trace'} for rec in state.syntax_trace)
     return records
 
 

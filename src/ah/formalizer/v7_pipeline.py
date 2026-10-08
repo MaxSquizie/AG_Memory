@@ -43,6 +43,7 @@ def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,obser
         return InterpretationReport(obs,version,run_id,False,'INTEGRITY_ERROR',diagnostics=('RUN_BINDING_FOREIGN_OWNER',))
     if release is None:
         return InterpretationReport(obs,version,run_id,True,'RESOURCE_MISSING',diagnostics=('RESOURCE_MISSING: signed resource release required',))
+    release.assert_integrity()
     ops,fragments,diagnostics,nodes=build_plan(state,release,store)
     for d in diagnostics: state.diag(d.split(':',1)[0],d)
     rep=commit(state,store,run_id=run_id,plan_ops=ops,committed_fragments=fragments)
@@ -53,6 +54,7 @@ def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,obser
 
 
 def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts=(),run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,raw_input=None):
+    if release is not None: release.assert_integrity()
     observation=_observation(text,version=version,observation_id=observation_id,raw_input=raw_input,context_facts=context_facts)
     obs=observation['observation_id']; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
     frozen=binding.input_snapshot(obs,version)

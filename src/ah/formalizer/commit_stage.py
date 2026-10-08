@@ -15,7 +15,7 @@ class CommitReport:
 
 def commit(state,store,*,run_id,plan_ops=(),committed_fragments=(),pending=(),superseded=False):
     if not plan_ops or not committed_fragments:
-        store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,{'kind':'RESOLUTION','observation_id':state.source_uid,'version':state.interpretation_version,'outcomes':{k:d.outcome for k,d in state.decisions.items()},'diagnostics':[asdict(d) for d in state.diagnostics]}))
+        store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,{'kind':'RESOLUTION','observation_id':state.source_uid,'version':state.interpretation_version,'outcomes':{k:d.outcome for k,d in state.decisions.items()},'diagnostics':[asdict(d) for d in state.diagnostics],'syntax_trace':state.syntax_trace,'rejections':[asdict(r) for r in state.rejections]}))
         return CommitReport(False,False,'',0,TerminalOutcome.RESOLUTION_ONLY)
     marker=MaterializationMarker(state.source_uid,state.interpretation_version)
     raw={'observation':state.observation,'resource_snapshot':state.resource_snapshot,'structural_hash':state.structural_hash,'ops':[asdict(o) for o in plan_ops],'fragments':list(committed_fragments),'run_id':run_id}
@@ -28,7 +28,7 @@ def commit(state,store,*,run_id,plan_ops=(),committed_fragments=(),pending=(),su
         D=CommitDecision(**recorded)
     else:
         decision=asdict(D); decision['outcome']=D.outcome.value
-        store.append_journal('observation',JournalRecord('observation',run_id,{'kind':'BATCH','batch_hash':bh,'ops':raw['ops'],'decision':decision,'observation':state.observation,'resource_snapshot':state.resource_snapshot}))
+        store.append_journal('observation',JournalRecord('observation',run_id,{'kind':'BATCH','batch_hash':bh,'ops':raw['ops'],'decision':decision,'observation':state.observation,'resource_snapshot':state.resource_snapshot,'syntax_trace':state.syntax_trace,'rejections':[asdict(r) for r in state.rejections]}))
     result=store.commit_transaction(plan_ops,marker,D)
     actual=store.ledger.data['decisions'].get(bh,{}) if hasattr(store,'ledger') else {}
     return CommitReport(result.outcome!=TerminalOutcome.PENDING_ADMISSION_ORDER,result.outcome==TerminalOutcome.APPLIED and not result.idempotent_noop,bh,len(plan_ops),result.outcome,tuple(actual.get('committed',())))

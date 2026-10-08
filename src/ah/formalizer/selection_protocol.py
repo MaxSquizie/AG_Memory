@@ -181,6 +181,8 @@ def validate_selection_response(
 
     if not isinstance(data, dict):
         raise ProtocolError("response is not a JSON object")
+    if not {'outcome','selected'} <= set(data) or set(data)-{'outcome','selected','note'}:
+        raise ProtocolError('unknown/missing selection fields')
 
     outcome = data.get("outcome")
     if outcome not in OUTCOMES:
@@ -199,6 +201,8 @@ def validate_selection_response(
         )
 
     distinct = set(selected_raw)
+    if len(distinct)!=len(selected_raw):
+        raise ProtocolError('duplicate selected IDs')
     required = {
         "ONE_SELECTED": lambda n: n == 1,
         "MULTIPLE_ADMISSIBLE": lambda n: n >= 2,

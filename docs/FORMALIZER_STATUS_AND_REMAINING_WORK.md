@@ -14,10 +14,12 @@ R-X опыт пишется только с committed support, с раздель
 
 Resource loader проверяет подписываемый content hash (включая coverage), зависимости и внешний review pin. CLI умеет создать unsigned draft и проверить snapshot; не подписывает и не выдаёт PASS.
 
+Ресурсный SyntaxRules interpreter теперь подключён к SRL/T2 native-входа: data-only AST, целые R1 variants, bounded joins, трёхзначные проверки, schema lookups только по объявленным зависимостям, typed graph emission и durable trace. Встроенный preview SRL/FrameGen не участвует в native. При неоднозначности/неполном поиске работает TP до seal; приоритет не выбирает смысл. Prop-аргумент SOM принимает целое N/G-дерево (в том числе NOT/OR), не выдавая его детям root truth-support. Explicit request_kind QUERY/COMMAND/UNKNOWN проходит factual gate и compatibility projection.
+
 ## Что реально осталось
 
 1. **Данные G2:** заполненный reviewed resource release, согласованные реальные TemplateMap refs, внешний review record и coverage corpus/report. Без них production выдаёт RESOURCE_MISSING; демо values не служат автоматическим fallback.
-2. **Общий grammar DSL:** перенос полного `SyntaxRules` AST и resource schemas §2.1 в production вместо оставшихся встроенных SRL demo declarations. Сейчас общий typed TP может покрыть пробел, а при отказе безопасно блокирует фрагмент; это не замена всем данным грамматики.
+2. **Грамматические данные и границы типов:** подключён JSON AST SyntaxRules с общими предикатами DSL. Не завершены парсер текстового BNF §16, все CandidateSchema §2.1, multi-head lexical nodes и типизированные непропозициональные temporal operands; ресурсные орфографические/ellipsis alternatives сохраняются, но не заменяют полноценное разрешение всех таких случаев. Реальное покрытие правил подтверждает corpus/release, не размер интерпретатора.
 3. **Запросы и время:** композиционный compiler всех GoalSpec (logical/quantified/IF/count/multi-scope), typed temporal/order anchors и end-to-end numeric scopes. Сейчас unsupported class помечается, а не упрощается до ложного положительного факта. Старые helpers не означают интеграцию.
 4. **Миграция знаний:** полный declared open→known linking/reinterpretation и широкая identity policy с основаниями. По-source supersede есть; совпадение написания не доказывает identity. Не вводить handlers под отдельные примеры.
 5. **Проверка:** пользователь отложил тесты. Race/crash/DR/oracle/live-model/unseen corpus не выполнялись. Источники компилируются и ключевые модули импортируются; это не валидация поведения.

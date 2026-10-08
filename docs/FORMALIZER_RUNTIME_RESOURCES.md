@@ -17,7 +17,7 @@ PYTHONPATH=src python -m ah.formalizer.resources.release_cli check data/formaliz
 
 Manifest: `kind=FORMALIZER_RESOURCE_RELEASE`, `version`, `schema_version=v7`, `entries[]`, `dependency_versions{}`; у каждого ресурса такие же version/schema/entries/dependencies. Все resource versions закреплены верхним manifest. Зависимости должны замыкаться внутри текущего поддержанного bundle, без cycles. Runtime hash — SHA256 канонического JSON с sorted keys, компактными separators и UTF-8 (`ensure_ascii=false`): `{kind,version,schema_version,entries,dependency_versions,coverage_report}`; отсутствующий coverage допустим только для draft. Review metadata не хеширует сам себя.
 
-Обязательные resource kinds runtime: R-S, R-V, TemplateMap, RoleRegistry, PredicateSchema, R-X3, DeclaredReads, ScopeLexicon, AttitudeMap, TemporalRules, OpenTemplatePolicy, ProposalPolicy, IncompatibilityRules. Отсутствующий контейнер не подменяется CHECKED_EMPTY.
+Обязательные resource kinds runtime: R-S, R-V, TemplateMap, RoleRegistry, PredicateSchema, R-X3, DeclaredReads, SyntaxRules, ScopeLexicon, AttitudeMap, TemporalRules, OpenTemplatePolicy, ProposalPolicy, IncompatibilityRules. Отсутствующий контейнер не подменяется CHECKED_EMPTY.
 
 | Вид | Поддержанный payload |
 |---|---|
@@ -28,14 +28,42 @@ Manifest: `kind=FORMALIZER_RESOURCE_RELEASE`, `version`, `schema_version=v7`, `e
 | R-X3 | `lemma`, `sense_id`; released prior, дополненный support-backed committed cache. Не truth ground |
 | DeclaredReads | `read_id`, `lemma`, `snapshot_version`; RawInput содержит `declared_reads[read_id]` с `source_kind=W/C`, `source_ref`, `snapshot_version`, `candidate_sense_ids[]`. Нет чтения → BLOCKED |
 | RoleRegistry | `role_id` из поддержанного ActantRole; обязательно EXPERIENCER/SURFACE_ARG. Неизвестный core role — ADAPTER_NOT_COVERED |
-| ScopeLexicon | regex `pattern`, `operator`; для clause boundary — `kind=CLAUSE_BOUNDARY`, `trigger`. Реальный lexical trigger не может исчезнуть из TP tree |
-| AttitudeMap | `lemma`, `argument_role`, `attitude` QUOTED/EMBEDDED/HYPOTHETICAL/UNKNOWN, optional `holder_role` |
+| SyntaxRules | data-only capture/predicate AST и typed output; полный формат и ограничения ниже. SRL и T2 читают только текущий released snapshot |
+| ScopeLexicon | regex `pattern`, `operator`; реальный lexical trigger не может исчезнуть из grammar/TP tree. Clause boundary задаётся через SyntaxRules |
+| AttitudeMap | `lemma`, `argument_role`, `attitude` QUOTED/EMBEDDED/HYPOTHETICAL/UNKNOWN, optional `holder_role`; ключ (lemma, argument_role) уникален |
 | TemporalRules | regex `pattern`, kind POINT_CLOCK/DAY_INTERVAL/INTERVAL_CLOCK, `day_offset`, `interval_semantics` (default EXISTENTIAL). Named clock groups: hour/minute или start_hour/start_minute/end_hour/end_minute. CONTINUOUS pattern требует реального маркера/основания непрерывности, не голого «вчера» |
-| ProposalPolicy | одна запись: `max_nodes`, `max_edges`, `max_depth`, `max_source_tokens`, `verify_deterministic` (default true) |
+| ProposalPolicy | одна запись: `max_nodes`, `max_edges`, `max_depth`, `max_source_tokens`; `max_rule_steps` (default 20000), `max_rule_matches` (default 256), `verify_deterministic` (default false) |
 | OpenTemplatePolicy | одна запись: `allow`; OPEN не создаёт alias/taxonomy к known sense |
 | IncompatibilityRules | поддержан `kind=ROLE_EXCLUSIVE`, `rule_id`, `sense_id`, `key_roles[]`, `role_id`; расширения DSL не исполняются произвольным callback |
 
 Ресурсное покрытие всех §2.1 и semantic correctness записей подтверждает отдельный review/G2, а не таблица выше.
+
+## Исполняемый SyntaxRules AST
+
+Native путь использует `syntax_rules.py`, а не Python callbacks из preview `rules.py`. Правило содержит `rule_id`, `input_feature_pattern`, `output_kind`, `output`, `constraints[]`, `priority`, `min_evidence`, `coverage_tag`; optional `stage` должен совпадать с видом выхода. Это JSON-сериализация поддержанной части DSL, а не парсер текстового BNF §16 и не заявление о поддержке всех CandidateSchema.
+
+`input_feature_pattern = {captures: {alias: feature_pattern}, window?: SENTENCE|CLAUSE, distinct?: true, where?: predicate_AST}`. Имена captures — ASCII identifiers; `item` зарезервирован для WINDOW_HAS. Feature pattern проверяет `lemma`, `POS`, `cases`, `number`, `gender`, `person`, `tense`, `mood`, `features`, `surface` (списки значений), `oov` (boolean); допускаются вложенные `all`, `any`, `not`. Проверяются целые R1 variants. Отсутствующий признак даёт UNKNOWN, в том числе под NOT. Лексический matcher не принимает строку с пробелами как «правило под предложение».
+
+`where` — AST с `op`: AND/OR (`args[]`), NOT (`arg`), feature_eq (`field`, `value`), feature_in (`field`, `values[]`), span_relation (`left`, `right`, `relation`), agreement (`left`, `right`, optional `features[]`), window_has (`source=TOKEN|R1`, `expr`), schema_lookup (`resource`, `key{}`). Field имеет форму `capture.feature`; внутри WINDOW_HAS `item` обозначает текущий целый разбор токена ограниченного окна. Lookup keys — пути в resource rows, значения — literal или `{field: capture.feature}`; ресурс обязан быть объявлен в `SyntaxRules.dependency_versions`. NOT_FOUND не становится семантическим false. AND/OR/NOT используют трёхзначную логику.
+
+`constraints[]` содержит `{kind, left, right, features?}`. Отношения: BEFORE, AFTER, ADJACENT, OVERLAPS, CONTAINS, AGREES; для AGREES явно задаётся непустой список number/gender/person/cases. Ни приоритет, ни порядок слов не выбирают победителя интерпретации. Если `distinct=false` разрешает повторный capture токена, все captures этого токена всё равно должны ссылаться на один и тот же целый разбор.
+
+Выходы:
+
+| output_kind / stage | output |
+|---|---|
+| CANDIDATE_GRAPH / T2 | `nodes[{id,kind,anchors:[capture...]}]`, `edges[{kind,from,to,role_id?,scope?}]`; типы/арность/циклы/границы проверяются общим TP validator. ARGUMENT/ATTITUDE может ссылаться на целое пропозициональное дерево N/G |
+| CLAUSE_BOUNDARY / SRL | `{capture, side?: BEFORE|AFTER}`; каждый boundary остаётся альтернативой, unsegmented вариант сохраняется |
+| ELLIPSIS / SRL | `{capture, gap_kind: PREDICATE_GAP|ARGUMENT_GAP|SUBORDINATOR_GAP, antecedent?: capture}` |
+| TOKEN_HYPOTHESIS / SRL | `{capture, variants:[...]}`; обязательно `keep_as_is`, исправление не подтверждается дистанцией |
+
+Перебор aliases и ресурсов канонически упорядочен. Каждый capture сохраняет целый морфологический вариант в гипотезе и sealed frame; T3/R-V не возвращается к объединению признаков разных разборов. Одинаковые графы с теми же variant bindings объединяются с сохранением всех rule IDs; действительно разные пересекающиеся структуры остаются LinkedAlternative до разрешённого выбора. TP вызывается для незакрытой области/неоднозначности; `verify_deterministic=true` дополнительно запрашивает его проверку уже покрытого ввода.
+
+Бюджет действует отдельно для SRL и T2: проверки признаков/constraints/AST/lookup rows/joins учитываются в `max_rule_steps`; число matches ограничено `max_rule_matches`, окно — `max_source_tokens`. При превышении весь незавершённый набор соответствующего этапа отбрасывается, остаются trace + COMPUTATION_LIMIT и переход к bounded TP. Успешный префикс поиска не выдаётся за исчерпанность. Положительные, отрицательные и UNKNOWN результаты пишутся в `syntax_trace`, входят в structural seal и durable RESOLUTION/BATCH; ресурсные callbacks/eval не исполняются. TP alternatives тоже остаются адресными; выбор/исключение имеет trace и причину. Selection protocol запрещает посторонние поля, пропущенные outcome/selected и дубли ID.
+
+Ограничения текущего compiler: lexical PREDICATE/ENTITY имеет один anchor; multi-head lexical nodes и непропозициональные temporal operands требуют следующего расширения типов. SRL альтернативы орфографии/эллипсиса сохраняются как кандидаты, а не превращаются автоматически в выбранный текст/подставленное событие. Все данные и coverage остаются предметом G2/G5.
+
+Прежний release без SyntaxRules теперь получает RESOURCE_MISSING. Добавление этого ресурса/зависимостей требует новой версии, нового content hash и внешнего review pin; незаметная вставка defaults в подписанный snapshot запрещена. Загруженный manifest копируется в каноническом порядке; native вход и C проверяют неизменность его hash перед использованием.
 
 ## Review и доверие
 

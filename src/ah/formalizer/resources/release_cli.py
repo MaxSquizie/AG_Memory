@@ -19,8 +19,8 @@ def main():
     if args.command=='init':
         defaults={'RoleRegistry':[{'role_id':r.value} for r in ActantRole],
                   'OpenTemplatePolicy':[{'allow':False}],
-                  'ProposalPolicy':[{'max_nodes':64,'max_edges':128,'max_depth':16,'max_source_tokens':256,'verify_deterministic':True}]}
-        dependencies={'R-V':{'R-S':'1','RoleRegistry':'1'},'TemplateMap':{'R-S':'1','RoleRegistry':'1'},'PredicateSchema':{'R-S':'1'},'R-X3':{'R-S':'1'}}
+                  'ProposalPolicy':[{'max_nodes':64,'max_edges':128,'max_depth':16,'max_source_tokens':256,'max_rule_steps':20000,'max_rule_matches':256,'verify_deterministic':False}]}
+        dependencies={'R-V':{'R-S':'1','RoleRegistry':'1'},'TemplateMap':{'R-S':'1','RoleRegistry':'1'},'PredicateSchema':{'R-S':'1'},'R-X3':{'R-S':'1'},'SyntaxRules':{'RoleRegistry':'1'}}
         manifest={'kind':'FORMALIZER_RESOURCE_RELEASE','version':'1','schema_version':'v7','entries':[{'kind':k,'version':'1','schema_version':'v7','entries':defaults.get(k,[]),'dependency_versions':dependencies.get(k,{})} for k in sorted(ResourceRelease.REQUIRED)],'dependency_versions':{k:'1' for k in sorted(ResourceRelease.REQUIRED)}}
         # Exclusive creation preserves an existing release.
         with args.path.open('x',encoding='utf-8') as f: json.dump(manifest,f,ensure_ascii=False,indent=2)

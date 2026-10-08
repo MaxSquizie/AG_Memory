@@ -49,7 +49,7 @@ def build_plan(state,release,store):
                 emit('ENSURE_GROUP',{'uid':kid,'members':members},frag); roles[role]=kid
             else: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')
         for role,child in f.semantic.get('proposition_args',{}).items():
-            roles[role]=node_for(child['frame_ref'],frag,True,active)[0]
+            roles[role]=tree_node(child.get('tree') or {'frame_ref':child['frame_ref']},frag,active)[0]
         sense=selected.get('sense_id')
         if selected['sense_kind']=='KNOWN':
             mapping=next((m for m in release.entries('TemplateMap') if m['sense_id']==sense and tuple(sorted(m.get('roles',())))==tuple(sorted(roles))),None)
@@ -72,11 +72,11 @@ def build_plan(state,release,store):
         nodes[fid]=nid
         return nid,ck
 
-    def tree_node(tree,frag):
+    def tree_node(tree,frag,active=None):
         if 'bound_var' in tree: return tree,digest(tree)
-        if 'frame_ref' in tree: return node_for(tree['frame_ref'],frag,True)
+        if 'frame_ref' in tree: return node_for(tree['frame_ref'],frag,True,active)
         fid=tree['operator']
-        children=[tree_node(t,frag) for t in tree['operands']]
+        children=[tree_node(t,frag,active) for t in tree['operands']]
         if fid in {'AND','OR','XOR'}: children.sort(key=lambda item:item[0])
         ops=[n for n,c in children]
         if fid in {'FORALL','EXISTS'} and (len(ops)!=2 or not isinstance(ops[0],dict) or 'bound_var' not in ops[0]): raise ValueError('BOUND_VAR_REQUIRED')
@@ -130,7 +130,8 @@ def build_plan(state,release,store):
         return set().union(*(leaf_refs(c) for c in t['operands']))
     for t in forests: structural_leaves.update(leaf_refs(t))
     for f in state.frames:
-        for child in f.semantic.get('proposition_args',{}).values(): structural_leaves.add(child['frame_ref'])
+        for child in f.semantic.get('proposition_args',{}).values():
+            structural_leaves.update(leaf_refs(child.get('tree') or {'frame_ref':child['frame_ref']}))
     roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
     for frag,t in roots:
@@ -150,6 +151,11 @@ def build_plan(state,release,store):
             is_query |= hi<len(entire) and entire[hi]=='?'
         is_command=any(any(v.mood=='imperative' for v in evidence[f.predicate_token_ref].variants) for f in fs)
         quoted=any(f.semantic.get('quoted') for f in fs)
+        requested=state.observation.get('request_kind')
+        if requested in {'QUERY','COMMAND','UNKNOWN'}:
+            diagnostics.append(('MODUS_UNKNOWN' if requested=='UNKNOWN' else 'SPEECH_ACT_'+requested)+':'+frag); continue
+        if requested is not None and requested not in {'STATEMENT','MIXED'}:
+            diagnostics.append('INPUT_REJECTED:unknown request_kind:'+frag); continue
         if is_query or is_command or quoted:
             diagnostics.append(('SPEECH_ACT_QUERY' if is_query else 'SPEECH_ACT_COMMAND' if is_command else 'QUOTED_CONTENT')+':'+frag); continue
         reg=fs[0].semantic.get('region') if fs else None

@@ -7,8 +7,12 @@ from ..canonical_ledger import digest
 class ResourceMissing(ValueError): pass
 
 class ResourceRelease:
-    REQUIRED={'R-S','R-V','TemplateMap','RoleRegistry','OpenTemplatePolicy','ScopeLexicon','AttitudeMap','ProposalPolicy','IncompatibilityRules','PredicateSchema','R-X3','DeclaredReads','TemporalRules'}
+    REQUIRED={'R-S','R-V','TemplateMap','RoleRegistry','OpenTemplatePolicy','ScopeLexicon','AttitudeMap','ProposalPolicy','IncompatibilityRules','PredicateSchema','R-X3','DeclaredReads','TemporalRules','SyntaxRules'}
     def __init__(self,manifest,*,require_review=True,trusted_reviews=None):
+        # Canonical map order must agree with the signed hash; caller-owned
+        # dictionaries cannot mutate the loaded snapshot after construction.
+        try: manifest=json.loads(json.dumps(manifest,ensure_ascii=False,sort_keys=True,allow_nan=False))
+        except (ValueError,TypeError) as exc: raise ResourceMissing('RESOURCE_MISSING: invalid JSON values') from exc
         self.manifest=manifest
         signed={k:manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions') if k in manifest}
         if set(signed)!={'kind','version','schema_version','entries','dependency_versions'}:
@@ -54,7 +58,8 @@ class ResourceRelease:
             if len(self.entries(key))!=1: raise ResourceMissing('exactly one '+key+' policy required')
         policy=self.entries('ProposalPolicy')[0]
         if any(type(policy.get(k)) is not int or policy[k]<=0 for k in ('max_nodes','max_edges','max_depth','max_source_tokens')): raise ResourceMissing('invalid proposal limits')
-        if type(policy.get('verify_deterministic',True)) is not bool or type(self.entries('OpenTemplatePolicy')[0].get('allow')) is not bool: raise ResourceMissing('invalid proposal/open policy')
+        if any(type(policy.get(k,default)) is not int or policy.get(k,default)<=0 for k,default in (('max_rule_steps',20000),('max_rule_matches',256))): raise ResourceMissing('invalid syntax search limits')
+        if type(policy.get('verify_deterministic',False)) is not bool or type(self.entries('OpenTemplatePolicy')[0].get('allow')) is not bool: raise ResourceMissing('invalid proposal/open policy')
         senses=self.entries('R-S'); sense_ids={x['sense_id'] for x in senses}
         if len(sense_ids)!=len(senses): raise ResourceMissing('duplicate sense_id')
         if any(not x.get('lemma') or not x.get('POS') for x in senses): raise ResourceMissing('R-S requires lemma and POS')
@@ -63,6 +68,9 @@ class ResourceRelease:
         if len(roles)!=len(self.entries('RoleRegistry')) or not roles<={r.value for r in ActantRole}:
             raise ResourceMissing('ADAPTER_NOT_COVERED: duplicate or unsupported role')
         if not {'EXPERIENCER','SURFACE_ARG'}<=roles: raise ResourceMissing('mandatory role missing')
+        from ..syntax_rules import validate_rules
+        try: validate_rules(self.entries('SyntaxRules'), roles, self.resources['SyntaxRules']['dependency_versions'])
+        except (ValueError,KeyError,TypeError,AttributeError) as exc: raise ResourceMissing('RESOURCE_MISSING: invalid SyntaxRules: '+str(exc)) from exc
         for v in self.entries('R-V'):
             if v.get('sense_id') not in sense_ids or v.get('state_class') not in {None,'STATE','EVENT'}: raise ResourceMissing('invalid R-V sense/class')
             if v.get('temporal_mode_hint') not in {None,'STATE','EVENT','PROCESS','TRANSITION'}: raise ResourceMissing('invalid frame temporal-mode hint')
@@ -90,9 +98,13 @@ class ResourceRelease:
         for x in self.entries('IncompatibilityRules'):
             if x.get('kind')!='ROLE_EXCLUSIVE' or not all(x.get(k) for k in ('rule_id','sense_id','role_id','key_roles')) or x['sense_id'] not in sense_ids or x['role_id'] not in roles: raise ResourceMissing('invalid incompatibility rule')
             if not set(x['key_roles'])<=roles: raise ResourceMissing('invalid incompatibility key roles')
+        attitudes=set()
         for x in self.entries('AttitudeMap'):
             if not x.get('lemma') or x.get('argument_role') not in roles or x.get('attitude') not in {'QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN'} or x.get('holder_role','SUBJECT') not in roles:
                 raise ResourceMissing('invalid AttitudeMap')
+            key=(x['lemma'],x['argument_role'])
+            if key in attitudes: raise ResourceMissing('duplicate/ambiguous AttitudeMap key')
+            attitudes.add(key)
         seen_mappings=set()
         for m in self.entries('TemplateMap'):
             if m['sense_id'] not in sense_ids or not m.get('template_ref') or not set(m.get('roles',()))<=roles: raise ResourceMissing('invalid TemplateMap')
@@ -102,6 +114,12 @@ class ResourceRelease:
 
     def entries(self,kind): return self.resources[kind]['entries']
     def version(self,kind): return str(self.resources[kind]['version'])
+
+    def assert_integrity(self):
+        signed={k:self.manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions')}
+        if 'coverage_report' in self.manifest: signed['coverage_report']=self.manifest['coverage_report']
+        if digest(signed)!=self.sha256 or self.resources!={r['kind']:r for r in self.manifest['entries']}:
+            raise ResourceMissing('INTEGRITY_ERROR: loaded resource snapshot changed')
 
     @classmethod
     def load(cls,path,**kwargs):

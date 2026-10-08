@@ -21,6 +21,8 @@ from ah.formalizer.selection_protocol import ProtocolError
 # The only role ids a TP reply may name without inventing new registry entries: the two roles that
 # MUST exist (EXPERIENCER) plus the syntactic-only SURFACE_ARG. Anything else is a protocol error (a).
 DEFAULT_ALLOWED_ROLES = frozenset({"EXPERIENCER", "SURFACE_ARG"})
+PROPOSITION_NODE_KINDS = frozenset({'PREDICATE','NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS',
+                                   'POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'})
 
 
 @dataclass(frozen=True)
@@ -101,7 +103,7 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             raise ProtocolError(f"hypothesis {hyp.local_id}: node kind {node.kind!r} not allowed")
         # (b) bounded region: every anchor span must lie inside the declared local region
         for span in node.anchor_spans:
-            if span not in src:
+            if span not in src or span not in hyp.alignment:
                 raise ProtocolError(
                     f"hypothesis {hyp.local_id}: anchor span {span!r} outside the bounded region")
 
@@ -117,9 +119,10 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
                     f"hypothesis {hyp.local_id}: edge endpoint {idx} out of range [0,{n})")
         graph[edge.from_idx].append(edge.to_idx)
         a,b=hyp.nodes[edge.from_idx].kind,hyp.nodes[edge.to_idx].kind
-        if edge.kind in {'ARGUMENT','ATTITUDE'} and (a!='PREDICATE' or b not in {'PREDICATE','ENTITY'} or not edge.role_id):
+        proposition = b in PROPOSITION_NODE_KINDS
+        if edge.kind in {'ARGUMENT','ATTITUDE'} and (a!='PREDICATE' or b!='ENTITY' and not proposition or not edge.role_id):
             raise ProtocolError('invalid typed argument edge')
-        if edge.kind=='ATTITUDE' and b!='PREDICATE':
+        if edge.kind=='ATTITUDE' and not proposition:
             raise ProtocolError('attitude target must be a proposition')
         if edge.kind=='BIND' and (a!='BOUND_VAR' or b!='ENTITY'):
             raise ProtocolError('invalid bound-variable edge')
@@ -141,6 +144,13 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
     for kind,spans in req.required_operators:
         if not any(node.kind==kind and set(node.anchor_spans)&set(spans) for node in hyp.nodes):
             raise ProtocolError('source operator scope silently lost:'+kind)
+
+    proposition_roles=set()
+    for edge in hyp.edges:
+        if edge.kind not in {'ARGUMENT','ATTITUDE'} or hyp.nodes[edge.to_idx].kind not in PROPOSITION_NODE_KINDS: continue
+        slot=(edge.from_idx,edge.role_id)
+        if slot in proposition_roles: raise ProtocolError('proposition argument cardinality not closed')
+        proposition_roles.add(slot)
 
     arities={'NOT':(1,1),'POSSIBLE':(1,1),'NECESSARY':(1,1),
              'AND':(2,None),'OR':(2,None),'XOR':(2,None),

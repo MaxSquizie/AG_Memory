@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-"""FormalizerAdapter — path B replacement seam (V7 §14 / integration).
+"""Native V7 entry and compatibility projection (V7 §14 / integration).
 
-Replaces :class:`ah.perception.adaptive_parser.AdaptivePerceptionParser` as the perception→formalization
-entry point while leaving ``IntegrationService`` and the canonical store UNTOUCHED: it runs the new
-formalizer vertical (T0..T6b) and translates its :class:`~ah.formalizer.state.FormalizationState` into the
-product's :class:`ah.perception.contracts.PerceptionResult`, so ``integrate_external()`` consumes it exactly
-as before. Role assignment is STRUCTURAL (derived from the frame construction declared in T2), never a
-per-word rule — consistent with the two-tier invariant.
-
-Slice 1 (this file): resolved predicate_value decisions -> assertions. Queries / quantifiers / temporal are
-subsequent slices; until wired they surface as honest diagnostics, not fabricated candidates (V7 §0.8).
+The native path commits through C/T5/T6 and returns a receipt that prevents a
+second legacy fact write. Projection carries supported queries/directives and
+diagnostics; nested proposition trees stay SOM content, never separate facts.
+Compound goal surfaces remain explicit misses until their compiler is wired.
+The demo pipeline is a separate, noncommittable preview only.
 """
 
 from __future__ import annotations
@@ -81,7 +77,7 @@ class FormalizerAdapter:
             morph=self._morph, context_facts=context_facts, release=self._release, raw_input=raw_input, version=version, observation_id=observation_id, run_id=run_id,
         )
         return NativePerceptionResult(
-            perception=self._to_perception_result(state),   # full candidate set (I02: capability-complete)
+            perception=self._to_perception_result(state),
             observation_id=rep.observation_id,
             version=rep.version,
             terminal=rep.terminal,
@@ -127,7 +123,13 @@ class FormalizerAdapter:
         queries: list = []
         commands: list = []
         notes: list[str] = []
-        embedded={child['frame_ref'] for f in state.frames for child in f.semantic.get('proposition_args',{}).values()}
+        def leaves(tree):
+            if 'frame_ref' in tree: return {tree['frame_ref']}
+            return set().union(*(leaves(c) for c in tree.get('operands',())))
+        embedded=set()
+        for f in state.frames:
+            for child in f.semantic.get('proposition_args',{}).values():
+                embedded.update(leaves(child.get('tree') or {'frame_ref':child['frame_ref']}))
         for frame in state.frames:
             if frame.frame_id in embedded or frame.semantic.get('quoted') or frame.semantic.get('structural_unresolved'):
                 continue
@@ -145,7 +147,10 @@ class FormalizerAdapter:
                 ends=[state.text.find(c,pos) for c in '.!?;' if state.text.find(c,pos)>=0]
                 hi=min(ends) if ends else len(state.text)
                 local=state.text[lo:hi]
-                is_query=hi<len(state.text) and state.text[hi]=='?'
+                requested=state.observation.get('request_kind')
+                is_query=requested=='QUERY' or hi<len(state.text) and state.text[hi]=='?'
+                if requested=='UNKNOWN':
+                    notes.append('MODUS_UNKNOWN '+frame.frame_id); continue
                 negated=detect_negation(local)
                 actant_pairs = self._assign_roles(frame, state)
                 roles = tuple(role for role, _ in actant_pairs)
@@ -162,7 +167,7 @@ class FormalizerAdapter:
                     # DR27: a question's content is NOT asserted as a world fact — it is an EXISTS goal.
                     queries.append(QueryCandidate(predicate=predicate, actants=actants, query_mode=QueryMode.EXISTS, local_id=local_id, temporal_point=frame.semantic.get('region',{}).get('point') if frame.semantic.get('region') else None, temporal_window=(frame.semantic['region']['lo'],frame.semantic['region']['hi']) if (frame.semantic.get('region') or {}).get('kind') in {'EXISTENTIAL','CONTINUOUS'} else None))
                     notes.append(f"SPEECH_ACT_QUERY {frame.frame_id}: content not asserted")
-                elif self._predicate_is_imperative(frame, state):
+                elif requested=='COMMAND' or self._predicate_is_imperative(frame, state):
                     # An imperative is a directive, not an asserted fact about the world.
                     commands.append(CommandCandidate(predicate=predicate, actants=actants, negated=negated, local_id=local_id))
                     notes.append(f"SPEECH_ACT_COMMAND {frame.frame_id}: directive, not asserted")

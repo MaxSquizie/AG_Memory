@@ -225,11 +225,12 @@ def _expand_shared_form(v: MorphVariant, token: str) -> MorphVariant:
     return v
 
 
-def t1(state: FormalizationState, morph: MorphProvider | None = None) -> FormalizationState:
+def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserve_variants=False, shared_form_expansion=True) -> FormalizationState:
     state.require_structures_open("T1")  # I30: T1 consumes SRL output; it is a structural producer
-    provider = morph or MorphProvider()
+    provider = morph if preserve_variants else morph or MorphProvider()
     for ev in state.evidence:
-        variants = tuple(_expand_shared_form(v, ev.span) for v in provider.analyze(ev.span))
+        observed = ev.variants if preserve_variants else provider.analyze(ev.span)
+        variants = tuple(_expand_shared_form(v, ev.span) for v in observed) if shared_form_expansion else tuple(observed)
         if not variants:
             # OOV is a first-class candidate (keep-as-is), not an error. Dictionary
             # distance may rank candidates later; it never proves a correction.

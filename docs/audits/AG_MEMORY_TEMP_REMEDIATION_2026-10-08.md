@@ -2,6 +2,8 @@
 
 **Дата:** 2026-10-08. **Исходный аудит:** `6f50c5f2cf2379359b6b13a662116a67658669f3`. **Прочитанный temp до этой работы:** `63790a6a71c59b6bec94da675df0249b87502fa6`.
 
+Последующий проход продолжен от опубликованного `bc820791f02479edd326d49f04d0fda01db99bf6`. В нём закрывается wiring ресурсного SyntaxRules AST и составных SOM-аргументов; оставшиеся границы перечислены ниже. Нормативный файл и его SHA256 в этом проходе не изменялись.
+
 Проверялись исходный код, архитектура и документы. **Тесты не читались, не анализировались, не запускались и не изменялись.** Проверка синтаксиса Python и импортов не является проверкой поведения. «КОД» ниже означает внесённую реализацию и статическую сверку, а не доказательство PASS.
 
 ## Что было сделано между аудитом и началом этой работы
@@ -12,12 +14,14 @@
 
 Внесены native frontend/plan, CanonicalLedger, COW+WAL AH writer, durable goal channel, строгий journal/provider replay/run binding, support/time/SOM/retraction readers, resource loader и защита от второго legacy fact commit. Добавлены diagnostic-only GATE_PRECHECK и lifecycle integrity validation. Перед публикацией проверены source compilation/imports и diff; G1–G5 не объявляются PASS.
 
+Последующая доработка: native SRL/T2 читает released SyntaxRules через общий JSON AST interpreter вместо preview Python-правил. Whole-variant bindings сохраняются до T3; UNKNOWN не становится отрицательным доказательством; priority только упорядочивает полный поиск; budget exhaustion сохраняет trace и не использует неполный успешный префикс. Типизированный ARGUMENT/ATTITUDE принимает целую пропозицию N/G; SOM материализует её структуру без поддержки истинности содержимого. Явный RawInput request_kind не теряется на factual gate/projection.
+
 Текущий SHA256 архитектуры: `8da66250fe043c0488f1b35af60957ce68fae3ad2b93e1aa4e48c2d67587e580`. **G0 BLOCKED**: прежняя подпись относилась к другому SHA256; новые нормы §7.6 требуют независимой проверки. Это исправляет I36, а не подделывает новую подпись.
 
 ## Остаток, который нельзя скрывать под DONE
 
 1. **Ресурсные данные:** реальный reviewed release и coverage report не предоставлены. Loader/CLI есть; production намеренно не подменяет их демо-словарём. TemplateMap обязан ссылаться на реальные T текущей AH.
-2. **Неполная production-композиция:** общий SyntaxRules DSL, сложные temporal/order anchors, числовые scope и составные/quantified query surfaces не полностью встроены в native path (I04/I20/I34/I38). Типизированный отказ/UNKNOWN сохраняет безопасность, но не выполняет критерий высокого покрытия G5.
+2. **Неполная production-композиция:** JSON SyntaxRules AST теперь подключён; остаются текстовый BNF parser/all CandidateSchema, multi-head lexical anchors, сложные temporal/order operands, числовые scope и составные/quantified query surfaces (I04/I20/I34/I38). Типизированный отказ/UNKNOWN сохраняет безопасность, но не выполняет критерий высокого покрытия G5.
 3. **R-X опыт:** запись stage-isolated cache и prior reads теперь подключены к canonical store, но их полезность/покрытие и стоимость на большой памяти не измерялись. Frozen snapshot запуска исключает чтение нового опыта на replay той же пары.
 4. **Release boundary:** валидируется поддержанный runtime JSON-формат. Полная валидация всех CandidateSchema §2.1 и криптографическая верификация подписи, если она требуется моделью доверия, не доказаны. Сейчас trust — внешне закреплённая review-атрибуция.
 5. **Миграции знаний и широкий identity linking:** per-source supersede/retraction есть; массовый open→known sense linking и общая declared migration/reinterpretation workflow ещё не завершены. Совпадение имён/написания не используется как автоматическое identity.
@@ -75,13 +79,13 @@
 
 **Недочёт.** Основной FrameGen ограничен глагольными/копульными ветками; COORD содержит заглушку, есть фиксированная бинарная арность. Встроенная schema содержит демонстрационные V1–V4. TP и open-set helpers не составляют обязательный путь run(). «Мне холодно» возвращает пустой результат без диагностики.
 
-**Как исполнено сейчас.** Общий bounded TP включён до seal; по умолчанию проверяет и deterministic frames. OPEN_LEXICAL создаёт occurrence-local UNLINKED T/N без canonical alias. Полный DSL SyntaxRules, сложные временные/order-операнды, числовые scope и вся query-композиция ещё не замкнуты на production path; прежнее blanket DONE отменено.
+**Как исполнено сейчас.** Native SRL/T2 читает released SyntaxRules capture/predicate AST: все общие predicate operations, целые R1 variants, typed graphs, declared schema lookups, bounded joins и durable trace. Preview callbacks и private morphology correction не участвуют в native. Одинаковые графы объединяют rule provenance, разные пересекающиеся варианты сохраняются до разрешённого выбора. TP до seal вызывается для gaps/ambiguity; дополнительная проверка deterministic frames явно включается policy. OPEN_LEXICAL создаёт occurrence-local UNLINKED T/N без alias. Текстовый BNF, все CandidateSchema, multi-head/temporal operands, numeric/query composition ещё не завершены; blanket DONE отменено.
 
 **Как должно быть.** До seal исчерпывать общие структурные операции и ограниченный TP, затем пять T3-источников. При нехватке данных выдавать частичное покрытие/BLOCKED/NO_CANDIDATE с причиной. DR21 обязан проходить через тот же entry point, что обычный ввод.
 
 **Причина.** Пока расширение покрытия требует добавления специальных веток и ручного соединения модулей. Это противоречит цели пользователя — расширять данные и композиции, не обработчики предложений.
 
-**Точки проверки:** formalizer/native_frontend.py; formalizer/native_plan.py; formalizer/tp_proposer.py.
+**Точки проверки:** formalizer/syntax_rules.py; formalizer/native_frontend.py; formalizer/native_plan.py; formalizer/tp_proposer.py; formalizer/resources/loader.py.
 
 ### I05 — Теряется идентичность наблюдения и контекст входа
 
@@ -117,7 +121,7 @@
 
 **Недочёт.** Принимается hypothesis с пустым anchor_spans, посторонним полем UID и циклическим ARG ребром узла на себя. Декодирование не обеспечивает весь контракт whitelist/sort/alignment/структурных ограничений.
 
-**Как исполнено сейчас.** TP проверяет whitelist полей/видов/ролей, непустые anchors и alignment, typed edges, operator arity и [bound_var,body], обязательные scope triggers, cycles/depth/node/edge budgets. Ошибка не превращается в выбранную структуру.
+**Как исполнено сейчас.** TP проверяет whitelist полей/видов/ролей, непустые anchors внутри собственного alignment, typed edges (включая N/G-пропозициональный аргумент), operator arity и [bound_var,body], обязательные scope triggers, cycles/depth/node/edge budgets и закрытую cardinality proposition slot. Тот же validator проверяет resource graph emission. Alternatives, выбор и причины исключения сохраняются в sealed/durable trace; selection protocol запрещает посторонние/пропущенные поля и дубли ID. Неподдержанное чтение не исчезает ради «однозначного» успешного префикса.
 
 **Как должно быть.** До принятия TP отклонять неизвестные поля, неякорённые узлы и запрещённые циклы; проверять типы слотов, границы, морфологическую совместимость и бюджеты. Разрешённые виды циклов, если нужны, перечислить отдельно.
 
@@ -145,7 +149,7 @@
 
 **Недочёт.** Есть registry и флаги released, но не найден исполняемый общий контракт проверки reviewed_sha256 канонического манифеста, транзитивного dependency_versions и загрузки согласованного snapshot. IMPLEMENTATION_MAP_V7 помечает signed release DONE.
 
-**Как исполнено сейчас.** Добавлен загрузчик versioned manifest, хеша содержимого и coverage report, dependency closure/cycles, sense/role/mapping/policy references и внешне закреплённой review-атрибуции. CLI создаёт только unsigned draft. Это pinned review record, не криптографическая проверка подписи; полный CandidateSchema всех §2.1 и фактический подписанный release ещё требуют G2.
+**Как исполнено сейчас.** Добавлен загрузчик versioned manifest, хеша содержимого и coverage report, dependency closure/cycles, sense/role/mapping/policy references и внешне закреплённой review-атрибуции. SyntaxRules обязателен, AST/typed outputs валидируются до использования. Manifest копируется в каноническом порядке; его неизменность проверяется на native/C boundary. CLI создаёт только unsigned draft. Это pinned review record, не криптографическая проверка подписи; полный CandidateSchema всех §2.1 и фактический подписанный release ещё требуют G2.
 
 **Как должно быть.** Загрузчик должен проверять версию схемы, содержимое и хеш релиза, review-атрибуцию, ссылки и транзитивные зависимости; pipeline должен фиксировать этот snapshot. До этого статус механики PARTIAL/BLOCKED, независимо от размера словаря.
 
@@ -299,7 +303,7 @@
 
 **Недочёт.** ADD_SCOPE сначала создаёт обычный базовый N, затем оболочки; нет SOM/UsageLink и отдельной опоры asserted-корня. Неизвестные function_id/IF могут пропускаться; quantified-ветка строится от base, не всегда от уже вложенного current. Реестр операторов helper и действующего AH различается.
 
-**Как исполнено сейчас.** Native plan собирает полный поддерживаемый operator tree с SOM links, directional operands, quantifier pair и bound variables; неизвестный оператор/неполная типизация — явный отказ. BEFORE/AFTER/DURING typed anchors, numeric quantifier extraction/reader и все GoalSpec-поверхности пока не полностью встроены в этот path.
+**Как исполнено сейчас.** Native plan собирает поддерживаемый operator tree с SOM links, directional operands, quantifier pair и bound variables. ARGUMENT/ATTITUDE может закрываться целым N/G-деревом; дочерние leaves не получают root support и не экспортируются compatibility projection как факты. Неизвестная attitude сохраняется UNKNOWN, не лицензирует истинность содержимого. Неизвестный оператор/неполная типизация — явный отказ. BEFORE/AFTER/DURING typed anchors, numeric scopes и все GoalSpec-поверхности пока не полностью встроены.
 
 **Как должно быть.** Строить обратимо типизированное дерево G с правильным порядком операторов/BoundVar, структурными операндами и поддержкой только лицензированных корней. Неподдержанный оператор блокирует фрагмент с диагностикой.
 
@@ -632,7 +636,7 @@
 ## Проверка и предел доказательства
 
 - Анализ исходников и вызовов проводился без чтения тестов.
-- Синтаксис всех 276 Python-файлов `src` проверен через `compile()`; импортированы 9 ключевых runtime-модулей. Это статическая проверка загрузки, без исполнения сценариев.
+- После последующего прохода синтаксис всех 277 Python-файлов `src` проверен через `compile()`; импортированы 9 ключевых runtime-модулей. Это статическая проверка загрузки, без исполнения сценариев.
 - `git diff --check` пройден. В нормативном документе сохранены A01–A39 и 31 заголовок DR1–DR31; реестр отчёта содержит все 43 находки I01–I38/A01–A05.
 - Никакой crash/race/model/e2e прогон в рамках этой работы не выполнялся.
 - Исторические численные результаты из прежних status-документов не используются как доказательство текущего кода.
