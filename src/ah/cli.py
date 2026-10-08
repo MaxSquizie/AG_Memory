@@ -47,6 +47,27 @@ def build_parser() -> argparse.ArgumentParser:
     refute.add_argument("uid")
     refute.add_argument("--tick", action="store_true", help="apply one ignition tick immediately")
 
+    sources = sub.add_parser('native-sources', help='inspect concrete V7 source/support/witness IDs')
+    sources.add_argument('--node')
+    retract = sub.add_parser('retract-observation', help='withdraw only one V7 observation/version')
+    retract.add_argument('observation_id'); retract.add_argument('version', type=int)
+    retract.add_argument('--trigger', required=True)
+    for command, kind in (('retract-time-assertion','TIME_ASSERTION'), ('retract-support','SUPPORT')):
+        record = sub.add_parser(command, help='withdraw a selected V7 record, preserving independent paths')
+        record.add_argument('record_id'); record.add_argument('--trigger', required=True)
+        record.set_defaults(record_kind=kind)
+    reinterpret = sub.add_parser('reinterpret-observation', help='declared native v+1 replacement of the frozen input')
+    reinterpret.add_argument('observation_id'); reinterpret.add_argument('version', type=int)
+    reinterpret.add_argument('--trigger', required=True)
+    reinterpret.add_argument('--input-changes', type=Path); reinterpret.add_argument('--open-links', type=Path)
+    migration = sub.add_parser('migration-plan', help='persist an explicit source set for native migration')
+    migration.add_argument('items', type=Path); migration.add_argument('--trigger', required=True)
+    resume = sub.add_parser('migration-resume', help='idempotently resume a durable native migration')
+    resume.add_argument('migration_id')
+    sub.add_parser('native-clarifications', help='list durable unresolved V7 candidate sets')
+    clarify = sub.add_parser('native-clarify', help='apply one explicit option from native-clarifications')
+    clarify.add_argument('resolution_key')
+
     corpus = sub.add_parser("import-corpus", help="cold-load structured JSON/.ahm/.prj into canonical AH")
     corpus.add_argument("path")
     corpus.add_argument("--domain", default="C")
@@ -178,6 +199,35 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if report.passes_500ms else 1
 
     services = RuntimeServices.build(cfg)
+
+    if args.command in {'native-sources', 'retract-observation', 'retract-time-assertion',
+                        'retract-support', 'reinterpret-observation', 'migration-plan',
+                        'migration-resume', 'native-clarifications', 'native-clarify'}:
+        memory = services.native_memory
+        read = lambda path, default: json.loads(path.read_text(encoding='utf-8')) if path else default
+        try:
+            if args.command == 'native-sources':
+                result = memory.sources(args.node.lstrip('@') if args.node else None)
+            elif args.command == 'retract-observation':
+                result = memory.retract_observation(args.observation_id, args.version, trigger_ref=args.trigger)
+            elif args.command in {'retract-time-assertion', 'retract-support'}:
+                result = memory.retract_record(args.record_id, kind=args.record_kind, trigger_ref=args.trigger)
+            elif args.command == 'reinterpret-observation':
+                result = memory.reinterpret(args.observation_id, args.version, trigger_ref=args.trigger,
+                    input_changes=read(args.input_changes, {}), open_template_links=read(args.open_links, []))
+            elif args.command == 'migration-plan':
+                result = memory.plan_migration(read(args.items, []), trigger_ref=args.trigger)
+            elif args.command == 'migration-resume':
+                result = memory.resume_migration(args.migration_id)
+            elif args.command == 'native-clarifications':
+                result = memory.pending_clarifications()
+            else:
+                result = memory.clarify(args.resolution_key)
+        except (ValueError, KeyError) as exc:
+            print(json.dumps({'error': str(exc)}, ensure_ascii=False))
+            return 1
+        print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
+        return 0
 
     if args.command in {
         "semantic-acceptance",

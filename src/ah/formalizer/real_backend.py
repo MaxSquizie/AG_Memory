@@ -18,7 +18,7 @@ Contract points:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from ah.formalizer.fake_selector import ProviderUnavailableError
 from ah.formalizer.provider_adapter import BudgetSnapshot, ProviderAdapter
@@ -63,6 +63,15 @@ class RealBackendSelector:
         self.run_id=run_id
         self._adapter.start_run(run_id)
 
+    def for_run(self, run_id):
+        """Share the backend/WAL, keep ordinals and budgets local to this run.
+
+        A clarification or migration may wait on the provider concurrently
+        with another observation. Its start_run must not replace the other
+        execution's mutable run_id or ordinal counter.
+        """
+        return replace(self, run_id=run_id)
+
     def propose_local(self, prompt):
         return self._adapter.propose_local(prompt,self.run_id)
 
@@ -70,11 +79,11 @@ class RealBackendSelector:
         return self._adapter.select(prompt, self.run_id)
 
 
-def selector_from_config(config, journal=None):
+def selector_from_config(config, journal=None, *, backend=None):
     """Build a :class:`RealBackendSelector` from an AppConfig via the product factory; ``None`` if LLM is disabled."""
     from ah.llm.factory import build_llm_backend
 
-    backend = build_llm_backend(config)
+    backend = backend if backend is not None else build_llm_backend(config)
     if backend is None:
         return None
     model=str(getattr(config.llm,config.llm.backend.lower()+'_model',getattr(config.llm,'model_dir','')))

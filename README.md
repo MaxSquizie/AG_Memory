@@ -467,18 +467,20 @@ ollama serve
 ollama pull qwen2.5:7b
 ```
 
-Запуск контура V7:
+Для запуска V7 подготовьте в `paths.data_dir` ресурсный релиз
+`formalizer_release.json` с coverage report и подписью ревьюера, а также
+`formalizer_reviews.json` с внешне закреплёнными доверенными ключами и review-записями.
+Имена файлов задаются секцией `[formalizer]`. Каждый `TemplateMap.template_ref`
+должен ссылаться на реальный T загружаемого снимка AH. Проверка релиза до запуска:
 
-```powershell
-# Windows PowerShell
-$env:AH_FORMALIZER="1"
+```bash
+python -m ah.formalizer.resources.release_cli check data/formalizer_release.json --trusted-reviews data/formalizer_reviews.json --ah-snapshot data/memory.json
 ah-gui --config config/ollama.toml
 ```
 
-```bash
-# Linux / macOS
-AH_FORMALIZER=1 ah-gui --config config/ollama.toml
-```
+Пути в команде должны соответствовать вашему профилю. V7 подключается при
+создании runtime; отдельный флаг окружения не требуется. Отсутствующий релиз,
+недоверенная подпись или сломанные ссылки на T останавливают запуск.
 
 Для LM Studio используется профиль:
 
@@ -513,11 +515,42 @@ ah-agent --config config/ollama.toml dump-json
 ah-agent --config config/ollama.toml dump-dot
 ah-agent --config config/ollama.toml import-corpus data/corpus/example.json
 ah-agent --config config/ollama.toml import-text notes.txt
-ah-agent --config config/ollama.toml import-memory snapshot.json
-ah-agent --config config/ollama.toml reset-memory
+ah-agent --config config/ollama.toml native-sources
+ah-agent --config config/ollama.toml native-clarifications
 ```
 
-Для пути V7 установите `AH_FORMALIZER=1` в окружении процесса.
+Операции исправления V7 выбирают конкретный источник или запись опоры:
+
+```bash
+ah-agent --config config/ollama.toml retract-observation observation:ID 1 --trigger withdrawal:ID
+ah-agent --config config/ollama.toml retract-time-assertion assertion:ID --trigger withdrawal:ID
+ah-agent --config config/ollama.toml retract-support support:ID --trigger withdrawal:ID
+ah-agent --config config/ollama.toml reinterpret-observation observation:ID 1 --trigger revision:ID --input-changes changes.json
+ah-agent --config config/ollama.toml migration-plan sources.json --trigger release:ID
+ah-agent --config config/ollama.toml migration-resume migration:HASH
+ah-agent --config config/ollama.toml native-clarify 'v7:REQUEST_HASH:OPTION_HASH'
+```
+
+ID выбираются из `native-sources` и `native-clarifications`; `migration-plan`
+возвращает ID задания. `changes.json` содержит объявленные изменения входных
+условий, `sources.json` — список `{observation_id, previous_version,
+open_template_links?, input_changes?}`. Отзыв отдельного временного свидетельства
+сохраняет наблюдение и его опоры. Legacy `refute` не заменяет эти операции для
+V7-узлов с независимыми источниками.
+
+Контекст диалога сохраняет ограниченное окно источников для `CorefPolicy`.
+Уточнение выбирает из сохранённых проверенных вариантов и пересчитывает исходное
+наблюдение под новой версией. Объявленные `event_anaphora_rules` содержат
+`rule_id`, `pattern`, `role_ids` и, при необходимости, `template_refs` /
+`temporal_modes`: они разрешают ссылку на конкретное живое событие из окна,
+сохраняя его proof path. Совпадение написаний не объединяет события.
+
+Снимок AH и `formalizer_journal.log` принадлежат одной истории памяти.
+`import-memory` и `reset-memory` запрещены при подключённом V7-писателе:
+старый WAL мог бы восстановить данные поверх замены. Новую память создают в
+отдельном `data_dir`, загружая её каталог T и reviewed release до запуска V7.
+Существующую V7-память восстанавливают из согласованной пары снимка AH и его
+журнала; один снимок не заменяет историю запусков и решений.
 
 ### Встраивание среды выполнения в Python
 

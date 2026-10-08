@@ -80,8 +80,28 @@ class FormalizerAdapter:
             text, schema, self._selector, self._store, self._binding,
             morph=self._morph, context_facts=context_facts, release=self._release, raw_input=raw_input, version=version, observation_id=observation_id, run_id=run_id,
         )
+        return self._receipt(state, rep)
+
+    def clarify(self, resolution_key, *, source_text=None):
+        from .clarifications import resolve
+        state, rep = resolve(self, resolution_key, source_text=source_text)
+        result = self._receipt(state, rep)
+        if rep.terminal in {'APPLIED', 'RESOLUTION_ONLY'}:
+            rid = resolution_key.split(':')[1]
+            with self._store._journal.atomic():
+                if not any(r['payload'].get('kind') == 'CLARIFICATION_COMPLETED'
+                           and r['payload'].get('request_id') == rid for r in self._store._journal.scan_unprocessed()):
+                    self._store._journal.append('resolution_log', {'kind': 'CLARIFICATION_COMPLETED',
+                        'request_id': rid, 'observation_id': rep.observation_id,
+                        'version': rep.version, 'outcome': rep.terminal, 'batch_hash': rep.batch_hash})
+        return result
+
+    def _receipt(self, state, rep):
+        from .clarifications import persist_offers
+        from dataclasses import replace
+        offers = persist_offers(state, self._store, self._binding, self._release) if state.clarification_candidates else ()
         return NativePerceptionResult(
-            perception=self._to_perception_result(state),
+            perception=replace(self._to_perception_result(state), native_clarifications=offers),
             observation_id=rep.observation_id,
             version=rep.version,
             terminal=rep.terminal,

@@ -92,6 +92,14 @@ class InteractionContext:
     last_experience_ref: Ref | None = None
     pending_clarification_refs: list[Ref] = field(default_factory=list)
     association_session: AssociationDiscourseSession | None = None
+    # Declared GenerationContext only. No name-based identity or implicit global
+    # read: perception freezes the released, bounded suffix before run binding.
+    formalizer_sources: list[tuple[str, int]] = field(default_factory=list)
+
+    def remember_formalizer_source(self, observation_id: str, version: int) -> None:
+        self.formalizer_sources = [t for t in self.formalizer_sources if t[0] != observation_id]
+        self.formalizer_sources.append((observation_id, version))
+        self.formalizer_sources = self.formalizer_sources[-128:]
 
     def resolve_pronoun(self, text: str) -> Ref | None:
         return self.pronoun_refs.get(text.casefold())

@@ -76,8 +76,17 @@ class ResourceRelease:
         for key in ('OpenTemplatePolicy','ProposalPolicy'):
             if len(self.entries(key))!=1: raise ResourceMissing('exactly one '+key+' policy required')
         if 'CorefPolicy' in self.resources:
-            if len(self.entries('CorefPolicy'))!=1 or self.entries('CorefPolicy')[0]['event_anaphora_rules']:
-                raise ResourceMissing('RESOURCE_MISSING: one entity CorefPolicy required; event identity handlers are not registered')
+            if len(self.entries('CorefPolicy'))!=1:
+                raise ResourceMissing('RESOURCE_MISSING: exactly one CorefPolicy required')
+            import re
+            rules=self.entries('CorefPolicy')[0]['event_anaphora_rules']
+            if len({r['rule_id'] for r in rules})!=len(rules):
+                raise ResourceMissing('RESOURCE_MISSING: duplicate event reference rule')
+            for rule in rules:
+                try: re.compile(rule['pattern'])
+                except re.error as exc: raise ResourceMissing('RESOURCE_MISSING: invalid event reference pattern') from exc
+                if not set(rule['role_ids']) <= {r['role_id'] for r in self.entries('RoleRegistry')}:
+                    raise ResourceMissing('RESOURCE_MISSING: unknown event reference role')
         policy=self.entries('ProposalPolicy')[0]
         if any(type(policy.get(k)) is not int or policy[k]<=0 for k in ('max_nodes','max_edges','max_depth','max_source_tokens')): raise ResourceMissing('invalid proposal limits')
         if any(type(policy.get(k,default)) is not int or policy.get(k,default)<=0 for k,default in (('max_rule_steps',20000),('max_rule_matches',256))): raise ResourceMissing('invalid syntax search limits')
@@ -186,6 +195,11 @@ class ResourceRelease:
         from ..query_resources import validate_query_store
         try: validate_query_store(self,store)
         except (ValueError,TypeError,KeyError) as exc: raise ResourceMissing(str(exc)) from exc
+        for policy in self.resources.get('CorefPolicy',{}).get('entries',()):
+            for rule in policy['event_anaphora_rules']:
+                for uid in rule.get('template_refs',()):
+                    if not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T:
+                        raise ResourceMissing('RESOURCE_MISSING: event reference T missing:'+uid)
         for row in self.entries('TemplateMap'):
             uid = row['template_ref']
             if (not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T

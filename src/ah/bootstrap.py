@@ -31,7 +31,7 @@ from ah.perception import (
 from ah.projection import ContextProjector
 
 
-def _build_formalizer_adapter(config, core):
+def _build_formalizer_adapter(config, core, *, backend=None):
     """The formalizer vertical is the ONLY runtime perception path (V7 §14). Built whenever an LLM
     backend is present; there is no legacy adaptive fallback and no env gate. Returns None only when
     construction genuinely fails (no usable selector), which surfaces as a configuration error rather
@@ -47,7 +47,7 @@ def _build_formalizer_adapter(config, core):
     from ah.formalizer.runtime_adapter import FormalizerAdapter
     from ah.formalizer.resources.loader import ResourceRelease
     journal=JournalChannel(config.paths.data_dir / config.formalizer.journal_filename)
-    sel=selector_from_config(config,journal=journal)
+    sel=selector_from_config(config,journal=journal,backend=backend)
     if sel is None: return None
     import json
     from ah.formalizer.resources.loader import ResourceMissing
@@ -84,6 +84,11 @@ class RuntimeServices:
     llm: LLMBackend | None
     perception: LLMPerceptionService | None
     agent: LLMAgent | None
+
+    @property
+    def native_memory(self):
+        from ah.formalizer.memory_service import NativeMemoryService
+        return NativeMemoryService(self)
 
     def document_processor(self, *, max_chunk_chars: int = 6000):
         """Create the lightweight document facade over these live services."""
@@ -158,7 +163,7 @@ class RuntimeServices:
                     morphology_backend=config.llm.perception_morphology_backend,
                     embedding_model=config.llm.perception_embedding_model,
                 ),
-                formalizer=_build_formalizer_adapter(config, core),
+                formalizer=_build_formalizer_adapter(config, core, backend=llm),
                 native_commit=config.formalizer.native_commit,
             )
             if llm is not None
@@ -286,7 +291,8 @@ class RuntimeServices:
                     morphology_backend=new_config.llm.perception_morphology_backend,
                     embedding_model=new_config.llm.perception_embedding_model,
                 ),
-                formalizer=_build_formalizer_adapter(new_config, self.core),
+                formalizer=_build_formalizer_adapter(new_config, self.core, backend=self.llm),
+                native_commit=new_config.formalizer.native_commit,
             )
             self.agent = LLMAgent(
                 self.llm,
@@ -387,6 +393,8 @@ class RuntimeServices:
     def import_memory(self, path: str | Path, *, save: bool = True, cold_restore: bool = True):
         from ah.corpus import import_memory_snapshot
         with self.operation_lock:
+            if getattr(self.core, '_formalizer_adapter', None) is not None:
+                raise ValueError('V7_MEMORY_REPLACEMENT_REQUIRES_NEW_JOURNAL: restore a matching snapshot and journal in a separate data_dir before building the native runtime')
             result = import_memory_snapshot(self, path, cold_restore=cold_restore)
             if save:
                 self._save_import_result(cold_save=cold_restore)
@@ -410,10 +418,14 @@ class RuntimeServices:
     def reset_memory(self, *, persist: bool = True) -> None:
         """Reset canonical AH/runtime/context while preserving service wiring."""
         with self.operation_lock:
+            if getattr(self.core, '_formalizer_adapter', None) is not None:
+                raise ValueError('V7_MEMORY_REPLACEMENT_REQUIRES_NEW_JOURNAL: initialize a fresh data_dir and its reviewed template catalog')
             was_running = self.clock.running
             if was_running:
                 self.clock.stop()
             self.core.store.replace_from(AHCore().store)
+            from ah.core.supports import SupportLedger
+            self.core.supports.replace_from(SupportLedger())
             fresh_context = InteractionContext()
             self._ensure_identity_context(self.core, fresh_context, self.config)
             for item in fields(InteractionContext):

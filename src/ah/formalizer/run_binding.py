@@ -18,6 +18,12 @@ class InterpretationRunBinding:
         if self._journal is None: return
         for rec in self._journal.scan_unprocessed():
             p = rec['payload']
+            if p.get('kind') == 'CLARIFICATION_SELECTED':
+                key = (p['observation_id'], p['target_version'])
+                old = self._reservations.get(key)
+                if old is not None and old != p['run_id']:
+                    raise RuntimeError('INTEGRITY_ERROR: clarification reservation conflict')
+                self._reservations[key] = p['run_id']
             if p.get('kind') == 'MIGRATION_PLANNED':
                 for item in p['items']:
                     key=(item['observation_id'],item['target_version'])

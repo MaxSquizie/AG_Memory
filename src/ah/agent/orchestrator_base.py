@@ -156,13 +156,16 @@ class AgentOrchestrator:
         self.runtime_lock = runtime_lock
         self.turn_clock = turn_clock or (lambda: datetime.now().astimezone())
 
-    def _perceive(self, text: str) -> "PerceptionResult":
+    def _perceive(self, text: str, *, source_timestamp: datetime | None = None) -> "PerceptionResult":
         """Native-aware perception entry (I01/I02). Routes through ``LLMPerceptionService.perceive()`` when it
         exists — V7-native durable commit + full candidate set, falling back to parse() when native_commit is off
         — else the plain legacy parse(). Downstream consumes a PerceptionResult in both cases, so flipping the
         agent loop to the native path regresses nothing."""
         perceive = getattr(self.perception, "perceive", None)
         if callable(perceive):
+            if getattr(self.perception, 'native_available', False):
+                stamp = source_timestamp or self.turn_clock()
+                return perceive(text, self.context, raw_input={'time_anchor': stamp.isoformat()})
             return perceive(text, self.context)
         return self.perception.parse(text, self.context)
 
@@ -288,7 +291,13 @@ class AgentOrchestrator:
         while self.context.pending_clarification_refs:
             ref = self.context.pending_clarification_refs[0]
             try:
-                return self.integration.clarification_request(ref)
+                request = self.integration.clarification_request(ref)
+                if request.kind == 'STRUCTURAL' and getattr(self.perception, 'native_available', False):
+                    _text, key, _experience = self.integration.structural_clarification_selection(ref, request.options[0].ref)
+                    if not self.perception.native_clarification_current(key):
+                        self.context.pending_clarification_refs.pop(0)
+                        continue
+                return request
             except IntegrationError:
                 self.context.pending_clarification_refs.pop(0)
         return None
@@ -296,7 +305,7 @@ class AgentOrchestrator:
     def _record_agent_utterance(
         self, response_text: str, lock
     ) -> tuple[PerceptionResult, IntegrationCommit, tuple[TickResult, ...]]:
-        if self.settings.parse_agent_response_to_h:
+        if self.settings.parse_agent_response_to_h and not getattr(self.perception, 'native_available', False):
             response_perception = self._perceive(response_text)
             response_perception = self._complete_dynamic_templates(response_perception, lock)
         else:
@@ -398,6 +407,8 @@ class AgentOrchestrator:
                     resolution = self.integration.finalize_structural_clarification(
                         request.ambiguous_ref, selected.ref
                     )
+                    if generate_response and delayed.clarifications:
+                        self._enqueue_clarifications(delayed.clarifications)
                 else:
                     resolution = self.integration.resolve_clarification(
                         request.ambiguous_ref, selected.ref
@@ -527,7 +538,7 @@ class AgentOrchestrator:
         )
 
         try:
-            perception = self._perceive(text)
+            perception = self._perceive(text, source_timestamp=turn_timestamp)
             perception = self._complete_dynamic_templates(perception, lock)
             perception = apply_speech_act_scoping(perception)
             perception = GoalSemanticService(self.perception).complete(perception)
@@ -664,7 +675,9 @@ class AgentOrchestrator:
             input_ticks = self._settle_input_wave()
             workspace = self.ignition.workspace_refs()
 
-            discourse_review = self.discourse.prepare(integration, workspace, text)
+            # Optional legacy enrichment cannot become another canonical writer
+            # for V7 facts. Native semantic relations require released T5 plans.
+            discourse_review = None if perception.native_receipt is not None else self.discourse.prepare(integration, workspace, text)
 
         # Cross-turn semantic probes follow the same trust boundary as primary
         # Perception: never hold the canonical runtime lock while waiting on the
@@ -744,6 +757,12 @@ class AgentOrchestrator:
                 # black-box path the proof system is meant to eliminate. Fail closed
                 # and expose the compiler failure through diagnostics/Proof Explorer.
                 producer = lambda: self._unresolved_goal_response(text)
+            elif (perception.native_receipt is not None and not perception.native_receipt.committed_fragments
+                  and not perception.queries and not perception.commands and not perception.native_query_roots):
+                # A stored H utterance is communication, not proof that T6
+                # accepted its content. Never turn a typed refusal into an
+                # acknowledgement generated from the same uncommitted prose.
+                producer = lambda: 'Не удалось однозначно формализовать и записать это утверждение. Уточните его смысл или участников.'
             else:
                 producer = lambda: self.agent.respond(agent_context)
             response_text, response_error = self._safe_generate_response(producer)

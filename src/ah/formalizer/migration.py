@@ -10,11 +10,12 @@ from .canonical_ledger import digest
 
 def _input_changes(changes):
     allowed={'context_snapshot','context_facts','declared_reads','entity_bindings','entity_binding_grounds',
-             'coreference_sources','time_anchor','timezone'}
+             'coreference_sources','time_anchor','timezone', 'clarification_choices',
+             'clarification_structures', 'clarification_selection_ref', 'clarification_generation'}
     if not isinstance(changes,dict) or not set(changes)<=allowed:
         raise ValueError('MIGRATION_CONTEXT_CHANGE_INVALID')
     for key,value in changes.items():
-        expected=list if key in {'context_facts','coreference_sources'} else str if key in {'time_anchor','timezone'} else dict
+        expected=list if key in {'context_facts','coreference_sources'} else str if key in {'time_anchor','timezone','clarification_selection_ref'} else dict
         if not isinstance(value,expected) and not (key in {'time_anchor','timezone'} and value is None):
             raise ValueError('MIGRATION_CONTEXT_CHANGE_INVALID')
     digest(changes)  # JSON-only frozen input, no callbacks/non-finite values.
@@ -35,10 +36,15 @@ def reinterpret_observation(store,binding,selector,release,*,observation_id,
         store._refresh()
         previous=store.ledger.data['observations'].get(digest([observation_id,previous_version]))
         marker=digest({'observation_id':observation_id,'interpretation_version':target_version})
-        replay=marker in store.ledger.data['markers']
-        if not previous or previous['status']!='LIVE' and not replay: raise ValueError('MIGRATION_SOURCE_STALE')
+        target_input = binding.input_snapshot(observation_id, target_version)
+        replay=marker in store.ledger.data['markers'] or target_input is not None
+        if previous is not None and previous['status']!='LIVE' and not replay: raise ValueError('MIGRATION_SOURCE_STALE')
         raw=binding.input_snapshot(observation_id,previous_version)
         if raw is None: raise ValueError('MIGRATION_INPUT_MISSING')
+        if previous is None and not any(r['payload'].get('kind') == 'RESOLUTION'
+                and r['payload'].get('observation_id') == observation_id
+                and r['payload'].get('version') == previous_version for r in store._journal.scan_unprocessed()):
+            raise ValueError('MIGRATION_SOURCE_STALE')
         raw=deepcopy(raw)
     if replay:
         replacement=binding.input_snapshot(observation_id,target_version)
@@ -49,6 +55,16 @@ def reinterpret_observation(store,binding,selector,release,*,observation_id,
         raw=deepcopy(replacement)
     else:
         raw.pop('migration_input_changes',None)
+        clarification_fields = {'clarification_choices', 'clarification_structures',
+                                'clarification_selection_ref', 'clarification_generation'}
+        generation = raw.get('clarification_generation', {})
+        # Frozen syntax is specific to the released resources and original
+        # interpretation inputs. A declared context/time/resource migration
+        # regenerates candidates; an explicit clarification alone preserves
+        # the already validated closed candidate set.
+        if set(changes) - clarification_fields or generation and generation.get('resource_snapshot') != release.sha256:
+            for key in clarification_fields:
+                raw.pop(key, None)
         raw.update(changes)
         if changes: raw['migration_input_changes']=changes
     raw.pop('rx_reads',None)  # interpret_full restores frozen replacement reads on replay

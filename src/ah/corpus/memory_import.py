@@ -132,7 +132,7 @@ def _import_user_turn(services, text: str, *, parse_user: bool):
 
 
 def _import_agent_turn(services, text: str, *, parse_semantics: bool):
-    if parse_semantics and services.perception is not None:
+    if parse_semantics and services.perception is not None and not getattr(services.perception, 'native_available', False):
         parsed = services.perception.parse(text, services.context)
         parsed = _complete_templates(services, parsed)
         parsed = apply_speech_act_scoping(parsed)
@@ -188,6 +188,7 @@ def import_memory_snapshot(services, path: str | Path, *, cold_restore: bool = T
     loader = JsonPersistence(source, PersistenceSettings(enabled=True, load_on_start=True, autosave_every_ticks=services.config.persistence.autosave_every_ticks, save_runtime_state=not cold_restore, save_pending_impulses=not cold_restore))
     bundle = loader.load(uid_generator=services.core.uid)
     services.core.store.replace_from(bundle.core.store)
+    services.core.supports.replace_from(bundle.core.supports)
     if cold_restore:
         services.core.store._replace_runtime_states({uid: RuntimeState() for uid, _ in services.core.store.runtime_items()})
     if bundle.interaction_context is not None:

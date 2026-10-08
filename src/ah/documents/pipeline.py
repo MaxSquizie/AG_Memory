@@ -96,9 +96,10 @@ class DocumentSummary:
 class DocumentProcessor:
     """Ingest and project a whole document without raw-text response shortcuts.
 
-    Chunks are operational perception windows only. Every window is parsed and
-    template-completed before one ``FormalizationBatch(DOCUMENT)`` is submitted to
-    the one canonical transaction. Summary input is frozen AH projection, never
+    Chunks are source observations. Native V7 commits each window through T6;
+    one ``FormalizationBatch(DOCUMENT)`` then joins their receipts into the H
+    carrier without a second world write. Legacy staging is separate.
+    Summary input is frozen AH projection, never
     raw source or raw chunks. Large-source summarization advances over deterministic
     source-scope slices and aggregates only model results produced from those
     frozen AH contexts.
@@ -256,9 +257,25 @@ class DocumentProcessor:
 
         completion = TemplateCompletionService(self.services.integration, perception)
         units: list[PerceptionResult] = []
-        # Complete every staging unit before the first canonical write.
+        # Native source IDs and ranges remain stable across repeat ingestion;
+        # each window is its own durable observation, not a legacy batch fact.
         for chunk in chunks:
-            units.append(completion.complete(perception.parse(chunk.text, self.services.context)))
+            if getattr(perception, 'native_available', False):
+                declared = {'source_id': source_ref, 'revision': self.source_id(source_text, title),
+                            'range': [chunk.start, chunk.end]}
+                if source_timestamp is not None:
+                    declared['time_anchor'] = source_timestamp.isoformat()
+                from ah.formalizer.canonical_ledger import digest
+                oid = 'observation:' + digest([source_ref, declared['revision'], declared['range']])
+                original = perception._formalizer._binding.input_snapshot(oid, 1)
+                if original is not None:
+                    if original['text'] != chunk.text or source_timestamp is not None and original.get('time_anchor') != declared['time_anchor']:
+                        raise DocumentProcessingError('DOCUMENT_REPLAY_INPUT_CHANGED: use a declared reinterpretation')
+                    declared = original
+                unit = perception.perceive(chunk.text, self.services.context, raw_input=declared)
+            else:
+                unit = perception.parse(chunk.text, self.services.context)
+            units.append(completion.complete(unit))
 
         batch = FormalizationBatch(
             source_text=source_text,

@@ -6,6 +6,7 @@ used, and missing resources never become CHECKED_EMPTY.
 """
 from __future__ import annotations
 from dataclasses import asdict
+from copy import deepcopy
 from datetime import datetime, timedelta
 import itertools
 import json
@@ -98,6 +99,10 @@ def _grammar_frames(state,release):
     except (SearchLimit,ProtocolError) as exc:
         state.grammar_search_incomplete=True
         state.diag('COMPUTATION_LIMIT' if isinstance(exc,SearchLimit) else 'STRUCTURE_NOT_COVERED',str(exc)); return []
+    from .clarifications import choose_structures
+    for h, _frames in accepted:
+        state.linked_alternatives.append(LinkedAlternative(h.local_id,'STRUCTURAL_HYPOTHESIS',digest(asdict(h)),h.local_id,provenance=provenance[h.local_id]))
+    accepted = choose_structures(state, accepted, stage='GRAMMAR', provenance=provenance)
     # Multiple overlapping structures are alternatives, never multiple facts.
     by_anchor={}
     for h,frames in accepted:
@@ -106,7 +111,6 @@ def _grammar_frames(state,release):
     frames=[]
     for h,local in accepted:
         ambiguous=any(len(by_anchor[f.predicate_token_ref])>1 for f in local)
-        state.linked_alternatives.append(LinkedAlternative(h.local_id,'STRUCTURAL_HYPOTHESIS',digest(asdict(h)),h.local_id,provenance=provenance[h.local_id]))
         for f in local:
             f.semantic['structural_unresolved'] |= ambiguous
         frames.extend(local)
@@ -287,15 +291,17 @@ def _propose(state,selector,release):
     required=_required_operators(state,release)
     scope_required |= any(not any(scoped(operator,anchors,t) for t in trees) for operator,anchors in required)
     scope_required |= any(e.span in {'«','»','"'} for e in state.evidence) and not any(f.semantic.get('proposition_args') for f in state.frames)
+    frozen = state.observation.get('clarification_structures', {})
+    scope_required |= bool(frozen)
     verify=bool(release.entries('ProposalPolicy')[0].get('verify_deterministic',False))
     if (state.frames or state.logical_roots) and not uncovered and not scope_required and not verify: return
     if scope_required or verify:
         # An unclosed scope may not be flattened into independently asserted clauses.
         for f in state.frames: f.semantic['structural_unresolved']=True
     policy=release.entries('ProposalPolicy')
-    if not policy or not hasattr(selector,'propose_local'):
+    if not policy or not frozen and not hasattr(selector,'propose_local'):
         state.diag('STRUCTURE_NOT_COVERED','no declared TP capability/policy'); return
-    if state.budget.llm_exhausted:
+    if state.budget.llm_exhausted and not frozen:
         state.diag('COMPUTATION_LIMIT','TP budget exhausted'); return
     p=policy[0]
     source=tuple(e.token_id for e in state.evidence)
@@ -303,8 +309,12 @@ def _propose(state,selector,release):
         state.diag('COMPUTATION_LIMIT','local TP source region too large; no truncation'); return
     req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
     prompt=json.dumps({'task':'propose bounded local syntax; return hypotheses or abstain. Each node has kind and anchor_spans of supplied token IDs; multi-token PREDICATE/ENTITY also requires head_anchor inside its own anchors. TIME and NUMERAL carry raw anchors only, never model-supplied numeric values. Numeric scope operands are [BOUND_VAR, proposition body, NUMERAL]; BIND connects the variable to its body argument. Temporal order operands may be TIME or proposition nodes. Each edge has kind, from, to, optional role_id, scope. TIME_SCOPE attaches proposition to TIME; QUERY_SLOT attaches predicate to WH/COUNT_REQUEST with a registered role. No canonical IDs.','request':{**asdict(req),'allowed_node_kinds':sorted(req.allowed_node_kinds),'allowed_edge_kinds':sorted(req.allowed_edge_kinds),'allowed_role_ids':sorted(req.allowed_role_ids)},'tokens':[{'id':e.token_id,'text':e.span,'variants':[asdict(v) for v in e.variants]} for e in state.evidence]},ensure_ascii=False,default=lambda x:sorted(x) if isinstance(x,(set,frozenset)) else str(x))
+    frozen_hypotheses = list(frozen.values())
     try:
-        state.budget.spend_llm(); raw=selector.propose_local(prompt)
+        if frozen_hypotheses:
+            raw = json.dumps({'hypotheses': frozen_hypotheses})
+        else:
+            state.budget.spend_llm(); raw=selector.propose_local(prompt)
         hypotheses=parse_and_validate(req,raw)
     except Exception as exc:
         state.diag(_failure_code(exc,'PROPOSAL_INVALID'),str(exc)); return
@@ -315,8 +325,13 @@ def _propose(state,selector,release):
     tp_provenance=ResourceProvenance(('TP_VALIDATED',),{'release':release.sha256})
     for h,fs in accepted:
         state.linked_alternatives.append(LinkedAlternative(h.local_id,'STRUCTURAL_HYPOTHESIS',digest(asdict(h)),h.local_id,provenance=tp_provenance))
+    from .clarifications import offer, hypothesis_json, structure_label
+    structure_key = 'structure:TP:' + digest(sorted({a for h, _ in accepted for a in h.alignment}))
+    options = [{'candidate_id': h.local_id, 'label': structure_label(state, h),
+                'hypothesis': hypothesis_json(h), 'stage': 'TP'} for h, _ in accepted]
     if len(accepted)>1:
         if state.budget.llm_exhausted:
+            offer(state, structure_key, 'STRUCTURE', state.text, options)
             state.diag('COMPUTATION_LIMIT','TP hypothesis selection'); return
         ids={h.local_id for h,fs in accepted}
         relations={cid:Relation(cid,cid,0,(),json.dumps(asdict(h),ensure_ascii=False)) for h,fs in accepted for cid in [h.local_id]}
@@ -329,15 +344,23 @@ def _propose(state,selector,release):
             state.syntax_trace.append({'stage':'TP','event':'STRUCTURE_SELECTION','candidates':sorted(ids),
                                        'outcome':reply.outcome,'selected':list(reply.selected)})
             if reply.outcome!='ONE_SELECTED':
+                offer(state, structure_key, 'STRUCTURE', state.text, options)
                 state.diag('STRUCTURE_UNRESOLVED','TP alternatives retained'); return
             chosen=reply.selected[0]
-        except Exception as exc: state.diag(_failure_code(exc,'PROTOCOL_ERROR'),str(exc)); return
+        except Exception as exc:
+            offer(state, structure_key, 'STRUCTURE', state.text, options)
+            state.diag(_failure_code(exc,'PROTOCOL_ERROR'),str(exc)); return
         for h,fs in accepted:
             if h.local_id!=chosen: state.reject(h.local_id,'TP_SELECTION','different validated hypothesis selected: '+chosen,tp_provenance)
         accepted=[pair for pair in accepted if pair[0].local_id==chosen]
     # A validated proposal replaces overlapping deterministic hypotheses only by
     # recorded discard; unrelated deterministic frames remain.
     fs=accepted[0][1]; anchors={f.predicate_token_ref for f in fs}
+    # An independently validated replacement resolves its overlapping grammar
+    # offers too; don't present alternatives that no longer survive TD.
+    replaced = {f.semantic.get('hypothesis') for f in state.frames if f.predicate_token_ref in anchors}
+    state.clarification_candidates = [r for r in state.clarification_candidates
+        if not any(o.get('candidate_id') in replaced for o in r['options'])]
     if not fs:
         hid=accepted[0][0].local_id
         state.logical_roots=[t for r in state.syntax_trace if r.get('literal_hypothesis')==hid for t in r['operator_forest']]
@@ -395,8 +418,66 @@ def run_native(text,selector,release,observation,morph=None):
     for ev in state.evidence:
         preferred={(v['lemma'],v['POS']) for x in rx1 if x['surface']==ev.span for v in x['variants']}
         ev.variants=tuple(sorted(ev.variants,key=lambda v:(-int((v.lemma,v.pos) in preferred),-v.score)))
-    state.frames=_grammar_frames(state,release)
-    _propose(state,selector,release)
+    frozen_generation=observation.get('clarification_generation')
+    if frozen_generation:
+        from .state import RejectionRecord
+        if frozen_generation['resource_snapshot'] != release.sha256:
+            raise ValueError('CLARIFICATION_RESOURCE_STALE')
+        state.frames=[]
+        for raw in frozen_generation['frames']:
+            raw=deepcopy(raw)
+            raw['provenance']=ResourceProvenance(**raw['provenance'])
+            for key in ('participants','arguments','argument_token_refs','source_range'): raw[key]=tuple(raw[key])
+            state.frames.append(FrameCandidate(**raw))
+        state.logical_roots=deepcopy(frozen_generation['logical_roots'])
+        state.syntax_trace=deepcopy(frozen_generation['syntax_trace'])
+        for raw in frozen_generation['linked_alternatives']:
+            raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
+            state.linked_alternatives.append(LinkedAlternative(**raw))
+        for raw in frozen_generation['rejections']:
+            raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
+            state.rejections.append(RejectionRecord(**raw))
+        state.grammar_search_incomplete=frozen_generation['grammar_search_incomplete']
+        from .clarifications import choice, offer
+        state.clarification_candidates=deepcopy(frozen_generation.get('pending_structures',[]))
+        for row in list(state.clarification_candidates):
+            selected=choice(state,row['decision_ref'],[o['candidate_id'] for o in row['options']])
+            if selected is None: continue
+            option=next(o for o in row['options'] if o['candidate_id']==selected)
+            p=release.entries('ProposalPolicy')[0]
+            req=StructureProposalRequest('clarification:'+state.source_uid,'',tuple(e.token_id for e in state.evidence),
+                allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),
+                allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),
+                allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),
+                max_nodes=p['max_nodes'],max_edges=p['max_edges'],max_depth=p['max_depth'],
+                required_operators=tuple((op,anchors) for op,anchors in _required_operators(state,release)
+                                         if set(anchors)&set(option['hypothesis']['alignment'])))
+            hypotheses=parse_and_validate(req,json.dumps({'hypotheses':[option['hypothesis']]}))
+            prov=ResourceProvenance(**option.get('provenance',{'pattern_ids':['TP_VALIDATED'],'resource_versions':{'release':release.sha256}}))
+            accepted=_frames_for_hypotheses(state,hypotheses,release,{selected:prov},
+                                           {selected:option.get('morph_bindings',{})})
+            if len(accepted)!=1: raise ValueError('CLARIFICATION_STRUCTURE_STALE')
+            h, fs=accepted[0]
+            alternatives={o['candidate_id'] for o in row['options']}
+            anchors={f.predicate_token_ref for f in fs}
+            removed={f.frame_id for f in state.frames if f.semantic.get('hypothesis') in alternatives
+                     or option['stage']=='TP' and f.predicate_token_ref in anchors}
+            state.frames=[f for f in state.frames if f.frame_id not in removed]+fs
+            for other in alternatives-{selected}:
+                state.reject(other,'CLARIFICATION','explicit speaker selection: '+selected,prov)
+            if not fs:
+                state.logical_roots=[t for trace in state.syntax_trace if trace.get('literal_hypothesis')==selected for t in trace['operator_forest']]
+            state.clarification_candidates.remove(row)
+    else:
+        state.frames=_grammar_frames(state,release)
+        _propose(state,selector,release)
+    state.generation_snapshot={'resource_snapshot':release.sha256,
+        'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
+        'syntax_trace':deepcopy(state.syntax_trace),
+        'linked_alternatives':[asdict(a) for a in state.linked_alternatives],
+        'rejections':[asdict(r) for r in state.rejections],
+        'pending_structures':deepcopy([r for r in state.clarification_candidates if r['kind']=='STRUCTURE']),
+        'grammar_search_incomplete':state.grammar_search_incomplete}
     if observation.get('goal_request'):
         from .query_requests import validate_request
         owners=[f for f in state.frames if f.semantic.get('query_request')]
@@ -515,11 +596,17 @@ def run_native(text,selector,release,observation,morph=None):
     for f in state.frames:
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
         d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic['source_traces']; state.decisions[f.frame_id+'|predicate_value']=d
+        from .clarifications import choice
+        selected_by_speaker = choice(state, f.frame_id+'|predicate_value', ids)
         if f.semantic.get('source_blocked'):
             d.outcome='UNRESOLVED'; state.diag('SEARCH_INCOMPLETE',f.frame_id); continue
         if not specs:
             d.outcome='UNRESOLVED' if f.semantic['has_known_senses'] else 'NO_CANDIDATE'
             state.diag('CANDIDATE_SOURCE_EXHAUSTED' if not f.semantic['has_known_senses'] else 'VALENCY_UNKNOWN',f.frame_id); continue
+        if selected_by_speaker is not None and not f.semantic.get('structural_unresolved'):
+            d.selected=(selected_by_speaker,); d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
+            d.grounds.append(Ground('C', 'durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
+            continue
         if len(specs)==1 and not f.semantic.get('structural_unresolved'):
             d.selected=ids; d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
             d.grounds.append(Ground('R' if specs[0]['sense_kind']=='KNOWN' else 'D','one compatible released sense/valency or validated literal open structure',ids[0]))
@@ -541,4 +628,15 @@ def run_native(text,selector,release,observation,morph=None):
         elif reply.outcome=='INSUFFICIENT_CONTEXT': d.outcome='INSUFFICIENT_CONTEXT'
         else:
             d.outcome='UNRESOLVED'; state.diag('NO_GROUNDED_CANDIDATE','found candidates rejected; source is not exhausted')
+    from .clarifications import offer
+    for f in state.frames:
+        d = state.decisions.get(f.frame_id+'|predicate_value')
+        if d is None or d.outcome == 'RESOLVED' or f.semantic.get('structural_unresolved') or f.semantic.get('source_blocked'):
+            continue
+        options = []
+        for cid in d.candidates:
+            spec = f.semantic['candidate_specs'][cid]
+            bindings = ', '.join(role+'='+evidence[tid].span for tid, role in sorted(spec['roles'].items()))
+            options.append({'candidate_id': cid, 'label': spec['label'] + ('; '+bindings if bindings else '')})
+        offer(state, f.frame_id+'|predicate_value', 'SEMANTIC', f.anchor_span, options)
     return state

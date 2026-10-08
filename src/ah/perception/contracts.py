@@ -768,6 +768,7 @@ class PerceptionResult:
     native_receipt: object | None = None
     formalizer_preview: bool = False
     native_query_roots: tuple[object, ...] = ()  # validated native syntax; runtime-only, never AH facts
+    native_clarifications: tuple[StructuralClarificationSpec, ...] = ()
 
     @property
     def acts_count(self) -> int:

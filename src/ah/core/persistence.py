@@ -244,6 +244,7 @@ def _serialize_context(context: InteractionContext | None) -> dict[str, Any] | N
         },
         "last_experience_ref": _ref(context.last_experience_ref) if context.last_experience_ref else None,
         "pending_clarification_refs": [_ref(ref) for ref in context.pending_clarification_refs],
+        "formalizer_sources": [list(tag) for tag in context.formalizer_sources],
     }
 
 
@@ -300,6 +301,15 @@ def _parse_context(core: AHCore, raw: dict[str, Any] | None) -> InteractionConte
         for value in (raw.get("pending_clarification_refs") or [])
         if (ref := existing(value)) is not None and ref.kind is RefKind.K
     ]
+    sources = raw.get("formalizer_sources", [])
+    if not isinstance(sources, list) or any(
+        not isinstance(t, (list, tuple)) or len(t) != 2
+        or not isinstance(t[0], str) or not t[0]
+        or type(t[1]) is not int or t[1] < 1 for t in sources
+    ):
+        raise PersistenceError("Invalid declared formalizer source window")
+    for oid, version in sources[-128:]:
+        ctx.remember_formalizer_source(oid, version)
     return ctx
 
 

@@ -71,6 +71,10 @@ def project_native_queries(state,release):
             else:
                 unit=f.semantic.get('lexical_units',{}).get(token,{})
                 value={'mention':unit.get('surface',evidence[token].span),'entity_ref':state.observation.get('entity_bindings',{}).get(unit.get('mention_ref',token))}
+                mention_ref=unit.get('mention_ref',token)
+                if mention_ref in state.observation.get('event_bindings',{}):
+                    value={'event_ref':state.observation['event_bindings'][mention_ref],
+                           'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[])}
             roles.append((role,value))
         for role,child in f.semantic.get('proposition_args',{}).items():
             roles.append((role,{'proposition':child.get('tree') or {'frame_ref':child['frame_ref']}}))
@@ -156,6 +160,13 @@ def compile_native_queries(core,roots,context,attention_refs=()):
                 for role,value in atom['roles']:
                     if 'bound_var' in value: resolved=BoundVar(value['bound_var'],VariableSort(value.get('sort','ENTITY')))
                     elif 'proposition' in value: resolved=compile_tree(value['proposition'],depth+1)
+                    elif 'event_ref' in value:
+                        from .canonical_ledger import CanonicalLedger
+                        ledger=CanonicalLedger(core.store._state.formalizer_state,core=core)
+                        if not value['premise_support_refs'] or any(s not in ledger.paths() for s in value['premise_support_refs']):
+                            raise ValueError('EVENT_REFERENCE_STALE')
+                        resolved=core.ref(value['event_ref'])
+                        if resolved.kind not in {RefKind.N,RefKind.G}: raise ValueError('EVENT_REFERENCE_TYPE_MISMATCH')
                     else:
                         if value.get('entity_ref'):
                             resolved=core.ref(value['entity_ref'])

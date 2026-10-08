@@ -161,29 +161,41 @@ class LLMPerceptionService:
     def parse(self, text: str, interaction_context: InteractionContext) -> PerceptionResult:
         return self.perceive(text, interaction_context)
 
+    @property
+    def native_available(self) -> bool:
+        return self._formalizer is not None and self._formalizer.native_available
+
     def perceive(self, text: str, interaction_context: InteractionContext, *, raw_input=None) -> PerceptionResult:
         if self._formalizer is None or not self._formalizer.native_available:
             raise PerceptionParseError("V7 requires a canonical store and resource release; legacy fact writes are disabled")
-        from ah.formalizer.pipeline import t0
         from ah.temporal import exact_datetime_from_ref
+        from ah.formalizer.canonical_ledger import digest
         context=interaction_context
         declared=dict(raw_input or {})
-        declared['context_snapshot']={k:(getattr(context,k).uid if getattr(context,k,None) else None) for k in ('self_ref','user_ref','now_ref','active_location_ref')}
-        bindings={}
-        pronouns=dict(context.pronoun_refs)
-        if context.user_ref: pronouns.setdefault('я',context.user_ref)
-        if context.self_ref: pronouns.setdefault('ты',context.self_ref)
-        for ev in t0(text).evidence:
-            ref=pronouns.get(ev.span.casefold())
-            if ref: bindings[ev.token_id]=ref.uid
-        declared.setdefault('entity_bindings',bindings)
+        declared.setdefault('context_snapshot', {k:(getattr(context,k).uid if getattr(context,k,None) else None) for k in ('self_ref','user_ref','now_ref','active_location_ref')})
+        # Third-person referents must retain their concrete proof path. Old
+        # pronoun_refs are attention hints, not permission to bypass V7 bindings.
+        policy = self._formalizer._release.resources.get('CorefPolicy', {}).get('entries', ())
+        if 'coreference_sources' not in declared and len(policy) == 1:
+            store = self._formalizer._store
+            with store._journal.atomic(), store._store._lock:
+                store._refresh()
+                observations = store.ledger.data['observations']
+                sources = [list(tag) for tag in context.formalizer_sources
+                           if observations.get(digest(list(tag)), {}).get('status') == 'LIVE']
+                limit = min(128, policy[0]['window_size'])
+                declared['coreference_sources'] = sources[-limit:] if limit else []
         if context.now_ref:
             when=exact_datetime_from_ref(self._formalizer._store._core,context.now_ref)
             if when: declared.setdefault('time_anchor',when.isoformat())
         receipt=self._formalizer.interpret(text,raw_input=declared)
         if receipt.terminal=='' and receipt.diagnostics:
             raise PerceptionParseError('; '.join(receipt.diagnostics))
-        return replace(receipt.perception,native_receipt=receipt)
+        if receipt.committed_fragments:
+            context.remember_formalizer_source(receipt.observation_id, receipt.version)
+        result = replace(receipt.perception,native_receipt=receipt)
+        self._record_diagnostic(text, [], result)
+        return result
 
     def parse_with_structural_resolution(
         self,
@@ -191,10 +203,23 @@ class LLMPerceptionService:
         interaction_context: InteractionContext,
         resolution_key: str,
     ) -> PerceptionResult:
-        del interaction_context, text, resolution_key
-        raise PerceptionParseError(
-            "Structural clarification was part of the removed adaptive parser"
-        )
+        if not self.native_available or not resolution_key.startswith('v7:'):
+            raise PerceptionParseError('Only durable V7 clarification keys are accepted')
+        try:
+            receipt = self._formalizer.clarify(resolution_key, source_text=text)
+        except ValueError as exc:
+            raise PerceptionParseError(str(exc)) from exc
+        if receipt.perception.source_text != text:
+            raise PerceptionParseError('CLARIFICATION_INPUT_MISMATCH')
+        if receipt.terminal in {'PENDING_ADMISSION_ORDER','STALE_SUPERSEDED','REJECTED_COMMIT_ELIGIBILITY','REJECTED_CONFLICT_ADMISSION'}:
+            raise PerceptionParseError('CLARIFICATION_NOT_COMMITTED: '+receipt.terminal)
+        if receipt.committed_fragments:
+            interaction_context.remember_formalizer_source(receipt.observation_id, receipt.version)
+        return replace(receipt.perception, native_receipt=receipt)
+
+    def native_clarification_current(self, resolution_key):
+        from ah.formalizer.clarifications import request_current
+        return self.native_available and request_current(self._formalizer, resolution_key)
 
     def _parse_legacy_protocol(
         self, text: str, interaction_context: InteractionContext

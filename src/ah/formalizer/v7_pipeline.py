@@ -45,6 +45,7 @@ def _observation(text,*,version,observation_id=None,raw_input=None,context_facts
             or len({tuple(t) for t in sources})!=len(sources)):
         raise ValueError('COREF_SOURCE_INVALID')
     raw.pop('coreference_context',None)  # Only the canonical reader may freeze it.
+    raw.pop('event_bindings',None)  # Produced only by grounded TD reference selection.
     raw.setdefault('text',text)
     if raw['text']!=text: raise ValueError('INPUT_TEXT_MISMATCH')
     raw.setdefault('range',[0,len(text)])
@@ -76,6 +77,8 @@ def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,obser
 def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts=(),run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,raw_input=None):
     if release is not None: release.assert_integrity()
     observation=_observation(text,version=version,observation_id=observation_id,raw_input=raw_input,context_facts=context_facts)
+    from .clarifications import validate_input
+    validate_input(store, observation)
     obs=observation['observation_id']; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
     frozen=binding.input_snapshot(obs,version)
     if frozen is not None:
@@ -105,6 +108,7 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
         if type(supersedes) is not int or not 0<supersedes<version or not observation.get('trigger_ref'): raise ValueError('DECLARED_TRIGGER_REQUIRED')
         # Retirement is part of T6's replacement transaction. A failed T4/T5 or
         # an entirely rejected admission must leave the old version untouched.
+    if hasattr(selector, 'for_run'): selector = selector.for_run(run_id)
     if hasattr(selector,'start_run'): selector.start_run(run_id)
     state=run_native(text,selector,release,observation,morph=morph)
     report=run_from_state(state,store,binding,schema=schema,run_id=run_id,version=version,observation_id=obs,release=release)

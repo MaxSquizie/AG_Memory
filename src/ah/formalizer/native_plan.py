@@ -42,6 +42,20 @@ def build_plan(state,release,store):
             ev=evidence[tid]
             unit=f.semantic.get('lexical_units',{}).get(tid,{})
             mention_ref=unit.get('mention_ref',tid)
+            event_ref=state.observation.get('event_bindings',{}).get(mention_ref)
+            if event_ref is not None:
+                valencies=[v for v in release.entries('R-V') if v['sense_id']==selected.get('sense_id')]
+                if not any(r['role_id']==role and set(r.get('argument_types',())) & {'EVENT','PROPOSITION'}
+                           for v in valencies for r in v['roles']):
+                    raise ValueError('EVENT_REFERENCE_TYPE_MISMATCH')
+                if not store.has_uid(event_ref) or store._store.kind_of(event_ref).value not in {'N','G'}:
+                    raise ValueError('EVENT_REFERENCE_STALE')
+                bid='binding:event:'+digest([tag,mention_ref,event_ref])
+                emit('SET_IDENTITY_BINDING',{'binding_id':bid,'binding_kind':'EVENT_REFERENCE','mention_ref':mention_ref,
+                    'target_ref':event_ref,'source_tag':tag,
+                    'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[])},frag)
+                roles[role]=event_ref
+                continue
             known=state.observation.get('entity_bindings',{}).get(mention_ref)
             mid=known or 'M:'+digest([state.source_uid,mention_ref])
             local=state.observation.get('local_reference_targets',{}).get(mid)
@@ -245,9 +259,12 @@ def build_plan(state,release,store):
     if previous is not None and fragments:
         if not isinstance(previous,int) or isinstance(previous,bool) or not 0<previous<state.interpretation_version or not state.observation.get('trigger_ref'):
             return (),(),tuple(diagnostics+['DECLARED_TRIGGER_REQUIRED']),nodes
-        for frag in fragments:
-            emit('SUPERSEDE_VERSION',{'source_tag':[state.source_uid,previous],
-                 'replacement_tag':tag,'trigger_ref':state.observation['trigger_ref']},frag)
+        # RESOLUTION_ONLY has a durable input/decision but no stored assertion
+        # version to retire. A clarified first commit must not fail admission.
+        if digest([state.source_uid, previous]) in store.ledger.data['observations']:
+            for frag in fragments:
+                emit('SUPERSEDE_VERSION',{'source_tag':[state.source_uid,previous],
+                     'replacement_tag':tag,'trigger_ref':state.observation['trigger_ref']},frag)
         live_paths=store.ledger.paths()
         for link in state.observation.get('open_template_links',()):
             source,target=link.get('source_t_ref'),link.get('canonical_t_ref')

@@ -270,6 +270,14 @@ class AHStoreAdapter(Store):
                 if old and old!={**p,'status':'LIVE'}: raise ValueError('INTEGRITY_ERROR: RX record changed')
                 ledger.data['rx_cache'].setdefault(p['record_id'],{**p,'status':'LIVE'})
             elif op.op_type=='SET_IDENTITY_BINDING':
+                event=p.get('binding_kind')=='EVENT_REFERENCE'
+                target=p['target_ref']
+                if not draft.store.has_uid(target) or draft.store.kind_of(target).value not in ({'N','G'} if event else {'M'}):
+                    raise ValueError('REFERENCE_BINDING_TYPE_INVALID')
+                if event and (not p.get('premise_support_refs')
+                              or any(ledger.data['supports'].get(sid,{}).get('conclusion_ref')!=target for sid in p['premise_support_refs'])
+                              or ledger.data['nodes'].get(target,{}).get('temporal_mode') not in {'EVENT','PROCESS','TRANSITION'}):
+                    raise ValueError('EVENT_REFERENCE_GROUND_INVALID')
                 old=ledger.data['bindings'].get(p['binding_id'])
                 if old and old!={**p,'status':'LIVE'}: raise ValueError('IDENTITY_CONFLICT')
                 ledger.data['bindings'].setdefault(p['binding_id'],{**p,'status':'LIVE'})
@@ -407,6 +415,7 @@ class AHStoreAdapter(Store):
         with self._journal.atomic(),self._store._lock:
             self._refresh(); draft=self._draft(); ledger=CanonicalLedger(draft.store._state.formalizer_state); before=ledger.copy()
             if assertion_id in ledger.data['assertions']:
+                if ledger.data['assertions'][assertion_id]['status'] != 'LIVE': return False
                 events=ledger.retract(assertion_id=assertion_id)
             elif assertion_id in ledger.data['bindings']:
                 events=ledger.retract(binding_id=assertion_id)

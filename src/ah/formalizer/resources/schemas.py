@@ -107,7 +107,9 @@ RESOURCE_SCHEMAS = {
     'CorefPolicy': obj(('window_size', 'hard_features', 'ranking_criteria', 'tie_policy', 'event_anaphora_rules'), {
         'window_size': I, 'hard_features': array(enum('gender', 'number', 'person', 'animacy', 'semantic_type')),
         'ranking_criteria': array(enum('EXPLICIT_REF', 'SAME_SOURCE', 'RECENCY')), 'tie_policy': enum('KEEP_ALL'),
-        'event_anaphora_rules': array(O)}),
+        'event_anaphora_rules': array(obj(('rule_id','pattern','role_ids'), {
+            'rule_id':S, 'pattern':S, 'role_ids':array(S,minimum=1),
+            'template_refs':array(S), 'temporal_modes':array(enum('EVENT','PROCESS','TRANSITION'))}))}),
     'CandidateSchema': obj(('candidate_kind', 'schema_version', 'schema'), {
         'candidate_kind': enum(*EMIT_SCHEMAS), 'schema_version': enum('emit-v1'), 'schema': O}),
 }

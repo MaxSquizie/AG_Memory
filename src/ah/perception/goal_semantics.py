@@ -48,6 +48,8 @@ class GoalSemanticService:
         self.classifier = classifier
 
     def complete(self, result: PerceptionResult) -> PerceptionResult:
+        if result.native_receipt is not None or result.formalizer_preview:
+            return result
         classify = getattr(self.classifier, "classify_act_relation", None)
         classify_nominal = getattr(
             self.classifier, "classify_nominal_taxonomy", None

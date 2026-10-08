@@ -73,6 +73,9 @@ class SemanticCorrectionService:
         if target.kind is not RefKind.N:
             raise TypeError("Explicit refutation target must be N")
         domain = self._validate_proposition(target)
+        if target.uid in self.core.store._state.formalizer_state.get('nodes', {}):
+            raise ValueError('V7_SOURCE_SELECTION_REQUIRED: use retract-observation/retract-support '
+                             'or formalize an explicit negative observation; FALSE(N) is not a V7 withdrawal')
 
         false_g, created = self.core.ensure_function(domain, "FALSE", (target,))
         false_ref = self.core.ref(false_g.uid)
@@ -91,6 +94,9 @@ class SemanticCorrectionService:
     def mark_contradiction(self, left: Ref, right: Ref) -> ContradictionCommit:
         domain = self._validate_proposition(left)
         self._validate_proposition(right)
+        if any(ref.uid in self.core.store._state.formalizer_state.get('nodes', {}) for ref in (left, right)):
+            raise ValueError('V7_CONFLICT_ADMISSION_REQUIRED: conflicts are durable evidence reports, '
+                             'not legacy CONTRADICTS graph writes')
         if left == right:
             raise ValueError("A proposition cannot contradict itself by identity")
         meta, created = self.core.ensure_function(domain, "CONTRADICTS", (left, right))
@@ -107,6 +113,8 @@ class SemanticCorrectionService:
         if target.kind is not RefKind.N:
             raise TypeError("CORRECTS target must be a concrete proposition N")
         domain = self._validate_proposition(target)
+        if target.uid in self.core.store._state.formalizer_state.get('nodes', {}):
+            raise ValueError('V7_DECLARED_REINTERPRETATION_REQUIRED: select observation/version and trigger')
         self._validate_proposition(replacement)
         if target == replacement:
             raise ValueError("Correction replacement must differ from target")

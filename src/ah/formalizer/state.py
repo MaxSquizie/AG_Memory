@@ -331,6 +331,8 @@ class FormalizationState:
     logical_roots: list[dict] = field(default_factory=list)  # formulas without lexical PREDICATE leaves
     query_intents: list[dict] = field(default_factory=list)  # reviewed SRL emits; never model-assigned truth
     rejections: list[RejectionRecord] = field(default_factory=list)  # I29/§2.3 audit trail
+    clarification_candidates: list[dict] = field(default_factory=list)
+    generation_snapshot: dict = field(default_factory=dict)
 
     def reject(self, candidate_id: str, stage: str, reason: str,
                provenance: ResourceProvenance | None = None) -> RejectionRecord:

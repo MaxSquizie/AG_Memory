@@ -553,6 +553,18 @@ class IntegrationService:
         document: the transformed plan is still committed exactly once below.
         """
 
+        if any(unit.formalizer_preview for unit in batch.units):
+            raise IntegrationError('FORMALIZER_PREVIEW_CANNOT_COMMIT')
+        native = [unit for unit in batch.units if unit.native_receipt is not None]
+        if native:
+            if len(native) != len(batch.units):
+                raise IntegrationError('MIXED_NATIVE_LEGACY_BATCH_FORBIDDEN')
+            # T6 has committed each source window. Only the document's H
+            # communication carrier is consolidated here; a legacy plan hook
+            # must not introduce another world writer or name-based bindings.
+            neutral = replace(batch, units=tuple(self._native_h_projection(unit) for unit in batch.units))
+            commit = self.integrate_plan(self.prepare_external_batch_plan(neutral, context), context)
+            return self._attach_native_receipts(commit, native)
         plan = self.prepare_external_batch_plan(batch, context)
         if plan_transform is not None:
             plan = plan_transform(plan)
@@ -628,22 +640,7 @@ class IntegrationService:
         if result.formalizer_preview:
             raise IntegrationError("FORMALIZER_PREVIEW_CANNOT_COMMIT")
         if result.native_receipt is not None:
-            from ah.formalizer.canonical_ledger import CanonicalLedger
-            receipt=result.native_receipt
-            # Native T6 already committed world facts. The legacy experience
-            # mapper may attach source provenance, but cannot assert them again.
-            neutral=replace(result,assertions=(),relations=(),act_relations=(),conditionals=(),act_dependencies=(),relation_hints=(),proposition_roots=(),native_receipt=None)
-            commit=self.integrate_external(neutral,context,source_timestamp=source_timestamp)
-            visible=CanonicalLedger(self.core.store._state.formalizer_state).f_visible()
-            records=[]; seeds=list(commit.activation_seeds)
-            for uid in receipt.node_refs:
-                if uid not in visible: continue
-                ref=self.core.ref(uid)
-                records.append(IntegratedAssertion(uid,ref,self.core.store.domain_of(uid),receipt.applied))
-                seeds.append(ActivationSeedRequest(ref,SeedReason.NEW_FACT if receipt.applied else SeedReason.REACTIVATED_FACT))
-            if records:
-                ExperienceMapper(self.core,event_weight=self.config.experience_hypernode_weight,follow_weight=self.config.follow_link_weight).attach_content(commit.experience_ref,tuple(r.ref for r in records))
-            return replace(commit,assertions=tuple(records),activation_seeds=tuple(seeds))
+            return self._integrate_native_receipt(result, context, source_timestamp=source_timestamp)
         return self.integrate_plan(
             self.prepare_external_plan(
                 result,
@@ -660,10 +657,49 @@ class IntegrationService:
         existing_experience_ref: Ref,
     ) -> IntegrationCommit:
         """Integrate delayed semantics into the original external H experience."""
+        if result.native_receipt is not None:
+            return self._integrate_native_receipt(result, context, existing_experience_ref=existing_experience_ref)
         plan = self.prepare_external_plan(
             result, context, existing_experience_ref=existing_experience_ref
         )
         return self.integrate_plan(plan, context)
+
+    def _integrate_native_receipt(self, result, context, *, source_timestamp=None, existing_experience_ref=None):
+        # H can retain the communication and pending choices. World content was
+        # already written by T6; never run legacy assertion/identity integration.
+        neutral = self._native_h_projection(result)
+        commit = self.integrate_plan(self.prepare_external_plan(
+            neutral, context, source_timestamp=source_timestamp,
+            existing_experience_ref=existing_experience_ref), context)
+        return self._attach_native_receipts(commit, (result,))
+
+    @staticmethod
+    def _native_h_projection(result):
+        return replace(result, assertions=(), relations=(), act_relations=(), conditionals=(),
+                       act_dependencies=(), relation_hints=(), proposition_roots=(),
+                       native_receipt=None, native_clarifications=())
+
+    def _attach_native_receipts(self, commit, results):
+        from ah.formalizer.canonical_ledger import CanonicalLedger
+        visible = CanonicalLedger(self.core.store._state.formalizer_state).f_visible()
+        records = []; seeds = list(commit.activation_seeds)
+        seen = set()
+        for result in results:
+            receipt = result.native_receipt
+            for uid in receipt.node_refs:
+                if uid not in visible or uid in seen: continue
+                seen.add(uid)
+                ref = self.core.ref(uid)
+                records.append(IntegratedAssertion(uid, ref, self.core.store.domain_of(uid), receipt.applied))
+                seeds.append(ActivationSeedRequest(ref, SeedReason.NEW_FACT if receipt.applied else SeedReason.REACTIVATED_FACT))
+        if records:
+            ExperienceMapper(self.core, event_weight=self.config.experience_hypernode_weight,
+                             follow_weight=self.config.follow_link_weight).attach_content(
+                                 commit.experience_ref, tuple(r.ref for r in records))
+        requests = tuple(self.register_structural_clarification(spec, commit.experience_ref)
+                         for result in results for spec in result.native_clarifications)
+        return replace(commit, assertions=tuple(records), activation_seeds=tuple(seeds),
+                       clarification_required=bool(requests), clarifications=requests)
 
     def integrate_to_h(
         self,
@@ -2602,6 +2638,11 @@ class IntegrationService:
         """
         if experience_ref.kind is not RefKind.N or self.core.store.domain_of(experience_ref.uid) is not Domain.H:
             raise CandidateValidationError("Structural clarification must anchor an H experience")
+        request_id = spec.options[0].key.split(':')[1] if spec.options[0].key.startswith('v7:') else None
+        experience = self.core.store.get_hypernode(experience_ref.uid)
+        old_refs = experience.meta.get('native_clarification_refs', {})
+        if request_id in old_refs and self.core.store.has_uid(old_refs[request_id]):
+            return self.clarification_request(self.core.ref(old_refs[request_id]))
         with self.core.transaction() as tx:
             option_refs: list[Ref] = []
             for option in spec.options:
@@ -2629,6 +2670,10 @@ class IntegrationService:
                 },
             )
             ref = tx.ref(top.uid)
+            if request_id is not None:
+                current = tx.store.get_hypernode(experience_ref.uid)
+                tx.edit_element(Domain.H, replace(current, meta={**current.meta,
+                    'native_clarification_refs': {**current.meta.get('native_clarification_refs', {}), request_id: ref.uid}}))
         return self.clarification_request(ref)
 
     def structural_clarification_selection(
@@ -2647,7 +2692,7 @@ class IntegrationService:
             raise CandidateValidationError("Structural selection is not one of the pending options")
         if not isinstance(option, Group) or option.meta.get("TYPE") != "STRUCTURAL_CLARIFICATION_OPTION":
             raise CandidateValidationError("Structural selection option is invalid")
-        source_text = str(group.meta.get("source_text") or "").strip()
+        source_text = str(group.meta.get("source_text") or "")
         key = str(option.meta.get("resolution_key") or "").strip()
         experience_uid = str(group.meta.get("experience_uid") or "").strip()
         if not source_text or not key or not experience_uid or not self.core.store.has_uid(experience_uid):
