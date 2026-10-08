@@ -753,13 +753,19 @@ class ContextProjector:
         )
 
     def _inference_block(self, outcome: InferenceOutcome) -> ProjectionBlock | None:
-        from ah.inference.contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion
+        from ah.inference.contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion,NativeBindingsConclusion
+        if isinstance(outcome.conclusion,NativeBindingsConclusion):
+            c=outcome.conclusion
+            rows='; '.join(', '.join(f'{name}={ref.uid}' for name,ref in zip(c.variables,row)) for row in c.rows)
+            return ProjectionBlock(None,ProjectionMode.INFERENCE,f'Подстановки для полной формулы {c.pattern_signature}: {outcome.status.value}. '+rows)
         if isinstance(outcome.conclusion,FormulaQueryConclusion):
             c=outcome.conclusion
             return ProjectionBlock(None,ProjectionMode.INFERENCE,f'Составная цель {c.operator}: {outcome.status.value}. Доказательные ссылки: '+', '.join(r.uid for r in c.evidence_refs))
         if isinstance(outcome.conclusion,CountConclusion):
             c=outcome.conclusion
-            quantity=f'ровно {c.exact_count}' if c.exact_count is not None else f'доказанная нижняя граница: {c.lower_bound}'
+            quantity=f'ровно {c.exact_count}' if c.exact_count is not None else '; '.join(
+                [*( [f'как минимум {c.lower_bound}'] if c.lower_bound is not None else []),
+                 *( [f'утверждённая верхняя граница: не более {c.upper_bound}'] if c.upper_bound is not None else [])]) or 'числовая граница не установлена'
             detail='' if c.exact_count is not None else '; полнота области не доказана (INCOMPLETE_DOMAIN)'
             return ProjectionBlock(None,ProjectionMode.INFERENCE,f'Подсчёт: {outcome.status.value}; {quantity}{detail}.')
         if isinstance(outcome.conclusion,TemporalComparisonConclusion):

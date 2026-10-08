@@ -15,7 +15,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from ah.formalizer.ir_to_graph import OPERATOR_TO_FUNCTION, ROLE_MAP
-from ah.model import ActantRole, BoundVar, Domain, Property, Ref, VariableSort, TimeLiteral
+from ah.model import ActantRole, BoundVar, Domain, Property, Ref, VariableSort, TimeLiteral, CountLiteral
 
 
 def _ensure_symbol(core: Any, form: str) -> Ref:
@@ -172,6 +172,8 @@ def ensure_template(core,p):
 
 
 def native_operand(core,value):
+    if isinstance(value,dict) and 'count_literal' in value:
+        return CountLiteral(value['count_literal'])
     if isinstance(value,dict) and 'time_literal' in value:
         return TimeLiteral(tuple(value['time_literal']))
     if isinstance(value,dict) and 'bound_var' in value:

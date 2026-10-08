@@ -7,7 +7,7 @@ from typing import Mapping
 from ah.inference.bindings import BindingEnvironment
 from ah.inference.context import ProofContext
 
-from ah.model import ActantRole, Domain, Ref, RefKind
+from ah.model import ActantRole, Domain, Ref, RefKind, TimeLiteral
 
 
 class LogicalStatus(str, Enum):
@@ -209,6 +209,35 @@ class NativeFormulaGoal:
 
 
 @dataclass(frozen=True, slots=True)
+class NativeBindingGoal:
+    """Read-only gaps in a complete formula, rather than isolated predicates."""
+    pattern: object
+    variables: tuple[str,...]
+    mode: str = 'WH'
+    temporal_point: float | None = None
+    temporal_window: tuple[float,float] | None = None
+    workspace_refs: tuple[Ref,...] = ()
+    source_scope: tuple[str,...] = ()
+    expected_count: int | None = None
+    comparison: str = 'EXACTLY_N'
+    domain_certificate: str | None = None
+    resource_snapshot: str | None = None
+
+    def __post_init__(self):
+        if (self.mode not in {'WH','COUNT'} or not self.variables or len(set(self.variables))!=len(self.variables)
+                or len(self.variables)>8 or any(not isinstance(v,str) or not v for v in self.variables)):
+            raise ValueError('QUERY_REQUEST_INVALID')
+        if self.comparison not in {'EXACTLY_N','AT_LEAST_N','AT_MOST_N'} or self.mode=='COUNT' and len(self.variables)!=1:
+            raise ValueError('QUERY_REQUEST_INVALID')
+        if self.expected_count is not None and (type(self.expected_count) is not int or self.expected_count<0):
+            raise ValueError('QUERY_REQUEST_INVALID')
+        if self.temporal_point is not None and self.temporal_window is not None:
+            raise ValueError('QUERY_REQUEST_INVALID')
+        if self.temporal_point is not None or self.temporal_window is not None:
+            TimeLiteral((self.temporal_point,) if self.temporal_point is not None else tuple(self.temporal_window))
+
+
+@dataclass(frozen=True, slots=True)
 class CountGoal:
     template_ref: Ref
     known_roles: Mapping[ActantRole,Ref]
@@ -234,7 +263,7 @@ class CountGoal:
             TimeLiteral((self.temporal_point,) if self.temporal_point is not None else tuple(self.temporal_window))
 
 
-InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal | AnyOfGoal | ExactlyOneOfGoal | NativeFormulaGoal | CountGoal
+InferenceGoal = RoleFillGoal | MultiRoleFillGoal | ExistsGoal | RelationGoal | CauseEntailmentGoal | FormulaGoal | CounterfactualGoal | AllOfGoal | AnyOfGoal | ExactlyOneOfGoal | NativeFormulaGoal | NativeBindingGoal | CountGoal
 GoalTarget = InferenceGoal | AssociationGoal
 
 
@@ -322,9 +351,10 @@ class CompositeConclusion:
 
 @dataclass(frozen=True, slots=True)
 class CountConclusion:
-    lower_bound: int
+    lower_bound: int | None
     exact_count: int | None = None
     witness_refs: tuple[Ref,...] = ()
+    upper_bound: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -340,7 +370,14 @@ class FormulaQueryConclusion:
     evidence_refs: tuple[Ref,...]
 
 
-SemanticConclusion = SemanticConclusion | CompositeConclusion | CountConclusion | TemporalComparisonConclusion | FormulaQueryConclusion
+@dataclass(frozen=True, slots=True)
+class NativeBindingsConclusion:
+    variables: tuple[str,...]
+    rows: tuple[tuple[Ref,...],...]
+    pattern_signature: str
+
+
+SemanticConclusion = SemanticConclusion | CompositeConclusion | CountConclusion | TemporalComparisonConclusion | FormulaQueryConclusion | NativeBindingsConclusion
 
 
 @dataclass(frozen=True, slots=True)

@@ -7,7 +7,7 @@ from ..canonical_ledger import digest
 class ResourceMissing(ValueError): pass
 
 class ResourceRelease:
-    REQUIRED={'R-S','R-V','TemplateMap','RoleRegistry','OpenTemplatePolicy','ScopeLexicon','AttitudeMap','ProposalPolicy','IncompatibilityRules','PredicateSchema','R-X3','DeclaredReads','TemporalRules','SyntaxRules'}
+    REQUIRED={'R-S','R-V','TemplateMap','RoleRegistry','OpenTemplatePolicy','ScopeLexicon','AttitudeMap','ProposalPolicy','IncompatibilityRules','PredicateSchema','R-X3','DeclaredReads','TemporalRules','SyntaxRules','CandidateSchema'}
     def __init__(self,manifest,*,require_review=True,trusted_reviews=None):
         # Canonical map order must agree with the signed hash; caller-owned
         # dictionaries cannot mutate the loaded snapshot after construction.
@@ -17,6 +17,11 @@ class ResourceRelease:
         signed={k:manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions') if k in manifest}
         if set(signed)!={'kind','version','schema_version','entries','dependency_versions'}:
             raise ResourceMissing('RESOURCE_MISSING: incomplete release manifest')
+        if (not isinstance(manifest['version'],str) or not manifest['version']
+                or not isinstance(manifest['entries'],list) or not isinstance(manifest['dependency_versions'],dict)
+                or not set(manifest)<={'kind','version','schema_version','entries','dependency_versions','coverage_report','signed_review_id'}):
+            raise ResourceMissing('RESOURCE_MISSING: invalid release container')
+        self.content_sha256=digest(signed)
         if 'coverage_report' in manifest: signed['coverage_report']=manifest['coverage_report']
         self.sha256=digest(signed)
         review=manifest.get('signed_review_id') or {}
@@ -27,11 +32,18 @@ class ResourceRelease:
         coverage=manifest.get('coverage_report',{})
         if require_review and (not {'corpus_id','corpus_sha256','units_by_kind','categories'}<=set(coverage) or len(str(coverage.get('corpus_sha256','')))!=64):
             raise ResourceMissing('RESOURCE_MISSING: invalid coverage report')
-        if require_review and (not isinstance(trusted_reviews,dict) or trusted_reviews.get(self.sha256)!=review):
-            raise ResourceMissing('RESOURCE_MISSING: review is not pinned by the trusted review file')
+        if require_review:
+            from .signatures import verify_review
+            try:
+                verify_review(review, trusted_reviews, self.sha256)
+            except Exception as exc:
+                raise ResourceMissing('RESOURCE_MISSING: review signature/trust validation failed') from exc
         self.resources={}
         for entry in manifest['entries']:
-            if not {'kind','version','schema_version','entries','dependency_versions'}<=set(entry):
+            if (not isinstance(entry,dict) or set(entry)!={'kind','version','schema_version','entries','dependency_versions'}
+                    or not isinstance(entry['kind'],str) or not entry['kind'] or not isinstance(entry['version'],str) or not entry['version']
+                    or not isinstance(entry['dependency_versions'],dict)
+                    or any(not isinstance(k,str) or not k or not isinstance(v,str) or not v for k,v in entry['dependency_versions'].items())):
                 raise ResourceMissing('RESOURCE_MISSING: incomplete resource')
             if not isinstance(entry['entries'],list) or not isinstance(entry['dependency_versions'],dict): raise ResourceMissing('invalid resource container')
             if entry['schema_version']!='v7': raise ResourceMissing('unsupported resource schema')
@@ -39,6 +51,13 @@ class ResourceRelease:
             if kind in self.resources: raise ResourceMissing('duplicate resource kind:'+kind)
             self.resources[kind]=entry
         if self.REQUIRED-set(self.resources): raise ResourceMissing('RESOURCE_MISSING:'+','.join(sorted(self.REQUIRED-set(self.resources))))
+        if 'coverage_report' in manifest:
+            from .coverage import validate_coverage
+            try: validate_coverage(manifest['coverage_report'],self.content_sha256,self.resources)
+            except ValueError as exc: raise ResourceMissing('RESOURCE_MISSING: '+str(exc)) from exc
+        from .schemas import validate_resources
+        try: self.candidate_validators = validate_resources(self.resources)
+        except ValueError as exc: raise ResourceMissing('RESOURCE_MISSING: '+str(exc)) from exc
         if set(manifest['dependency_versions'])!=set(self.resources):
             raise ResourceMissing('RESOURCE_MISSING: release must pin every resource version')
         active=set(); done=set()
@@ -56,6 +75,9 @@ class ResourceRelease:
             if dep not in self.resources or str(self.resources[dep]['version'])!=str(version): raise ResourceMissing('RESOURCE_MISSING: release dependency '+dep)
         for key in ('OpenTemplatePolicy','ProposalPolicy'):
             if len(self.entries(key))!=1: raise ResourceMissing('exactly one '+key+' policy required')
+        if 'CorefPolicy' in self.resources:
+            if len(self.entries('CorefPolicy'))!=1 or self.entries('CorefPolicy')[0]['event_anaphora_rules']:
+                raise ResourceMissing('RESOURCE_MISSING: one entity CorefPolicy required; event identity handlers are not registered')
         policy=self.entries('ProposalPolicy')[0]
         if any(type(policy.get(k)) is not int or policy[k]<=0 for k in ('max_nodes','max_edges','max_depth','max_source_tokens')): raise ResourceMissing('invalid proposal limits')
         if any(type(policy.get(k,default)) is not int or policy.get(k,default)<=0 for k,default in (('max_rule_steps',20000),('max_rule_matches',256))): raise ResourceMissing('invalid syntax search limits')
@@ -73,8 +95,16 @@ class ResourceRelease:
             raise ResourceMissing('ADAPTER_NOT_COVERED: duplicate or unsupported role')
         if not {'EXPERIENCER','SURFACE_ARG'}<=roles: raise ResourceMissing('mandatory role missing')
         from ..syntax_rules import validate_rules
-        try: validate_rules(self.entries('SyntaxRules'), roles, self.resources['SyntaxRules']['dependency_versions'])
-        except (ValueError,KeyError,TypeError,AttributeError) as exc: raise ResourceMissing('RESOURCE_MISSING: invalid SyntaxRules: '+str(exc)) from exc
+        self.syntax_rules = []
+        try:
+            from .rule_dsl import compile_rules
+            for rule in self.resources['SyntaxRules']['entries']:
+                self.syntax_rules.extend(compile_rules(rule['dsl'],roles,self.resources['SyntaxRules']['dependency_versions']).rules if 'dsl' in rule else [rule])
+            validate_rules(self.syntax_rules, roles, self.resources['SyntaxRules']['dependency_versions'])
+            for rule in self.syntax_rules:
+                self.candidate_validators[rule['output_kind']].validate(rule['output'])
+        except Exception as exc: raise ResourceMissing('RESOURCE_MISSING: invalid SyntaxRules: '+str(exc)) from exc
+        self.syntax_sha256 = digest(self.syntax_rules)
         for v in self.entries('R-V'):
             if v.get('sense_id') not in sense_ids or v.get('state_class') not in {None,'STATE','EVENT'}: raise ResourceMissing('invalid R-V sense/class')
             if v.get('temporal_mode_hint') not in {None,'STATE','EVENT','PROCESS','TRANSITION'}: raise ResourceMissing('invalid frame temporal-mode hint')
@@ -94,7 +124,7 @@ class ResourceRelease:
             if not all(x.get(k) for k in ('read_id','lemma','snapshot_version')): raise ResourceMissing('invalid declared read')
         import re
         for x in self.entries('ScopeLexicon'):
-            if x.get('operator') and x['operator'] not in {'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'}: raise ResourceMissing('invalid scope operator')
+            if x.get('operator') and x['operator'] not in {'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION','AT_LEAST_N','EXACTLY_N','AT_MOST_N'}: raise ResourceMissing('invalid scope operator')
             if x.get('pattern'): re.compile(x['pattern'])
         for x in self.entries('TemporalRules'):
             re.compile(x['pattern'])
@@ -133,14 +163,40 @@ class ResourceRelease:
                 try: TimeLiteral(tuple(window))
                 except ValueError as exc: raise ResourceMissing('invalid domain window') from exc
             seen_domains.add(c['domain_id'])
+        for c in self.resources.get('FormulaDomainCertificate',{}).get('entries',()):
+            if c['domain_id'] in seen_domains: raise ResourceMissing('duplicate domain_id')
+            if c['request_window'] is not None:
+                from ah.model import TimeLiteral
+                try: TimeLiteral(tuple(c['request_window']))
+                except ValueError as exc: raise ResourceMissing('invalid formula domain window') from exc
+            seen_domains.add(c['domain_id'])
 
-    def entries(self,kind): return self.resources[kind]['entries']
+    def entries(self,kind):
+        return self.syntax_rules if kind == 'SyntaxRules' and hasattr(self, 'syntax_rules') else self.resources[kind]['entries']
     def version(self,kind): return str(self.resources[kind]['version'])
+
+    def validate_store(self, store):
+        """Validate every declared mapping against the actual AH before T0."""
+        self.assert_integrity()
+        from ah.model import RefKind
+        for row in self.entries('TemplateMap'):
+            uid = row['template_ref']
+            if (not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T
+                    or {r.value for r in store.get_template(uid).roles} != set(row['roles'])):
+                raise ResourceMissing('RESOURCE_MISSING: TemplateMap does not match actual AH T:' + uid)
+        for row in self.resources.get('DomainCertificate', {}).get('entries', ()):
+            uid=row['template_ref']
+            if not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T:
+                raise ResourceMissing('RESOURCE_MISSING: certificate T missing:' + uid)
+            if not set(row['known_roles'])|{row['count_role']} <= {r.value for r in store.get_template(uid).roles}:
+                raise ResourceMissing('RESOURCE_MISSING: certificate roles mismatch')
+            if any(not store.has_uid(m) or store.kind_of(m) is not RefKind.M for m in row['known_roles'].values()):
+                raise ResourceMissing('RESOURCE_MISSING: certificate entity missing')
 
     def assert_integrity(self):
         signed={k:self.manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions')}
         if 'coverage_report' in self.manifest: signed['coverage_report']=self.manifest['coverage_report']
-        if digest(signed)!=self.sha256 or self.resources!={r['kind']:r for r in self.manifest['entries']}:
+        if digest(signed)!=self.sha256 or self.resources!={r['kind']:r for r in self.manifest['entries']} or digest(self.syntax_rules)!=self.syntax_sha256:
             raise ResourceMissing('INTEGRITY_ERROR: loaded resource snapshot changed')
 
     @classmethod

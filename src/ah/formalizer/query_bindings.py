@@ -1,0 +1,106 @@
+"""Bounded indexed gap search; every returned binding proves the whole formula."""
+from __future__ import annotations
+from dataclasses import replace
+from itertools import product
+from ah.model import Ref,RefKind,BoundVar,TimeLiteral,CountLiteral,VariableSort
+from ah.inference.contracts import NativeFormulaGoal,NativeBindingsConclusion,CountConclusion,LogicalStatus
+from .canonical_ledger import digest
+
+
+def pattern_signature(pattern):
+    """Typed formula/gap signature independent of surface frame IDs."""
+    from .native_queries import Pattern,QueryVar
+    variables={}
+    def encode(p):
+        if isinstance(p,Ref): return {'ref':p.uid,'kind':p.kind.value}
+        if isinstance(p,QueryVar): return {'query_var':p.name,'sort':p.sort.value}
+        if isinstance(p,BoundVar): return {'bound_var':variables.setdefault(p.local_id,len(variables)),'sort':p.sort.value}
+        if isinstance(p,TimeLiteral): return {'time_literal':list(p.bounds)}
+        if isinstance(p,CountLiteral): return {'count_literal':p.value}
+        if not isinstance(p,Pattern): raise ValueError('QUERY_TARGET_UNBOUND')
+        members=[encode(m) for m in p.members]
+        if p.operator in {'AND','OR','XOR'}: members.sort(key=digest)
+        return {'operator':p.operator,'members':members,'template_ref':p.template_ref,
+                'actants':[[r.value,encode(v)] for r,v in sorted(p.actants,key=lambda pair:pair[0].value)],
+                'lexical_anchor':p.lexical_anchor,'temporal':p.temporal}
+    return digest({'format':'native-query-pattern-v1','pattern':encode(pattern)})
+
+
+def substitute(pattern,bindings,*,bound=False):
+    from .native_queries import Pattern,QueryVar
+    if isinstance(pattern,QueryVar) and not bound: return bindings.get(pattern.name,pattern)
+    if isinstance(pattern,BoundVar) and bound: return bindings.get(pattern.local_id,pattern)
+    if not isinstance(pattern,Pattern): return pattern
+    local=bindings
+    if bound and pattern.operator in {'FORALL','EXISTS','AT_LEAST_N','EXACTLY_N','AT_MOST_N'} and pattern.members and isinstance(pattern.members[0],BoundVar):
+        local={k:v for k,v in bindings.items() if k!=pattern.members[0].local_id}
+    return replace(pattern,members=tuple(substitute(m,local,bound=bound) for m in pattern.members),
+                   actants=tuple((r,substitute(v,local,bound=bound)) for r,v in pattern.actants))
+
+
+def candidate_values(core,ledger,pattern,names,budget,*,bound=False):
+    """Candidates overapproximate results; no candidate is itself a truth proof."""
+    from .native_queries import Pattern,QueryVar
+    values={name:set() for name in names}; typ=BoundVar if bound else QueryVar
+    def walk(p,active):
+        if not isinstance(p,Pattern): return
+        if p.operator is None and not p.lexical_anchor:
+            gaps=[(r,v.local_id if bound else v.name,v.sort) for r,v in p.actants if isinstance(v,typ) and (v.local_id if bound else v.name) in active]
+            if gaps:
+                for n in core.store.find_hypernodes_by_template(p.template_ref):
+                    budget[0]-=1
+                    if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
+                    actual=ledger.data['nodes'].get(n.uid,{}).get('actants',{})
+                    if any(isinstance(v,Ref) and actual.get(r.value)!=v.uid for r,v in p.actants): continue
+                    for role,name,sort in gaps:
+                        uid=actual.get(role.value)
+                        if isinstance(uid,str) and core.store.has_uid(uid) and core.store.kind_of(uid) in ({RefKind.M} if bound or sort is VariableSort.ENTITY else {RefKind.M,RefKind.N,RefKind.G}):
+                            values[name].add(uid)
+                            if len(values[name])>1024: raise ValueError('COMPUTATION_LIMIT')
+        nested=active
+        if bound and p.operator in {'FORALL','EXISTS','AT_LEAST_N','EXACTLY_N','AT_MOST_N'} and p.members and isinstance(p.members[0],BoundVar):
+            nested=active-{p.members[0].local_id}
+        for child in p.members: walk(child,nested)
+        for role,child in p.actants: walk(child,active)
+    walk(pattern,set(names))
+    return values
+
+
+def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime,budget,depth,outcome):
+    from .native_queries import solve_native_goal
+    values=candidate_values(engine.core,adapter.ledger,goal.pattern,goal.variables,budget)
+    rows=[]; refs=[]; diagnostics=[]
+    for i,combo in enumerate(product(*(sorted(values[v]) for v in goal.variables))):
+        if i>=1024: raise ValueError('COMPUTATION_LIMIT')
+        binding={v:engine.core.ref(uid) for v,uid in zip(goal.variables,combo)}
+        target=NativeFormulaGoal(substitute(goal.pattern,binding),goal.temporal_point,goal.temporal_window,goal.workspace_refs,goal.source_scope)
+        answer=solve_native_goal(engine,target,query,workspace,attention,context,runtime,_budget=budget,_depth=depth+1)
+        diagnostics.extend(answer.diagnostics)
+        if 'COMPUTATION_LIMIT' in answer.diagnostics: raise ValueError('COMPUTATION_LIMIT')
+        if answer.status is LogicalStatus.PROVED:
+            rows.append(tuple(binding[v] for v in goal.variables)); refs.extend(answer.premise_refs)
+    refs=tuple(dict.fromkeys(refs)); signature=pattern_signature(goal.pattern)
+    if goal.mode=='WH':
+        return outcome(LogicalStatus.PROVED if rows else LogicalStatus.UNKNOWN,refs,
+                       tuple(dict.fromkeys(diagnostics)),NativeBindingsConclusion(goal.variables,tuple(rows),signature))
+    release=getattr(adapter,'resource_release',None); complete=False
+    window=[goal.temporal_point,goal.temporal_point] if goal.temporal_point is not None else list(goal.temporal_window) if goal.temporal_window is not None else None
+    if release is not None and release.sha256==goal.resource_snapshot:
+        paths=adapter.ledger.paths(); release.assert_integrity()
+        for cert in release.resources.get('FormulaDomainCertificate',{}).get('entries',()):
+            if (cert['pattern_signature']==signature and cert['count_variable']==goal.variables[0]
+                    and cert['request_window']==window
+                    and (goal.domain_certificate is None or cert['domain_id']==goal.domain_certificate)
+                    and all(s in paths for s in cert['completeness_evidence'])):
+                complete=True
+                refs=tuple(dict.fromkeys((*refs,*(engine.core.ref(adapter.ledger.data['supports'][s]['conclusion_ref']) for s in cert['completeness_evidence']))))
+                break
+    count=len(rows); status=LogicalStatus.UNKNOWN; n=goal.expected_count
+    if complete:
+        valid=n is None or (count==n if goal.comparison=='EXACTLY_N' else count>=n if goal.comparison=='AT_LEAST_N' else count<=n)
+        status=LogicalStatus.PROVED if valid else LogicalStatus.DISPROVED
+    elif n is not None:
+        if goal.comparison=='AT_LEAST_N' and count>=n: status=LogicalStatus.PROVED
+        elif goal.comparison in {'EXACTLY_N','AT_MOST_N'} and count>n: status=LogicalStatus.DISPROVED
+    return outcome(status,refs,tuple(dict.fromkeys([*diagnostics,*(() if complete else ('INCOMPLETE_DOMAIN',))])),
+                   CountConclusion(count,count if complete else None,refs,count if complete else None))

@@ -51,6 +51,8 @@ class FormalizerAdapter:
 
     def __init__(self, selector, morph=None, schema=None, store=None, binding=None, release=None):
         self._release = release
+        if release is not None and store is not None:
+            release.validate_store(store._store)
         self._selector = selector
         self._morph = morph
         self._schema = schema  # lazily loaded if None

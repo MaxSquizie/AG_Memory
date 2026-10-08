@@ -10,6 +10,7 @@ class InterpretationRunBinding:
         self._bindings = {}
         self._snapshots = {}
         self._inputs = {}
+        self._reservations = {}
         self._lock = RLock()
         self._refresh()
 
@@ -17,6 +18,13 @@ class InterpretationRunBinding:
         if self._journal is None: return
         for rec in self._journal.scan_unprocessed():
             p = rec['payload']
+            if p.get('kind') == 'MIGRATION_PLANNED':
+                for item in p['items']:
+                    key=(item['observation_id'],item['target_version'])
+                    old=self._reservations.get(key)
+                    if old is not None and old!=item['run_id']:
+                        raise RuntimeError('INTEGRITY_ERROR: migration reservation conflict')
+                    self._reservations[key]=item['run_id']
             if p.get('kind') == 'run_bind':
                 key = (p['observation_id'],p['version'])
                 current = self._bindings.get(key)
@@ -33,6 +41,7 @@ class InterpretationRunBinding:
     def acquire(self, owner, observation_id, version, snapshot_hash='', snapshot_data=None):
         with self._lock, (self._journal.atomic() if self._journal else nullcontext()):
             self._refresh(); key=(observation_id,version)
+            if key in self._reservations and self._reservations[key]!=owner: return False
             current=self._bindings.get(key)
             if current is not None:
                 if current != owner: return False
@@ -59,3 +68,8 @@ class InterpretationRunBinding:
         with self._lock:
             self._refresh()
             return deepcopy(self._inputs.get((observation_id,version)))
+
+    def versions(self, observation_id):
+        with self._lock:
+            self._refresh()
+            return tuple(sorted({v for o,v in {*self._bindings,*self._reservations} if o==observation_id}))

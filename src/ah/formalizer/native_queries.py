@@ -8,8 +8,8 @@ from __future__ import annotations
 from dataclasses import dataclass,replace
 from itertools import product,islice
 import re
-from ah.model import ActantRole,Ref,RefKind,BoundVar,TimeLiteral,VariableSort
-from ah.inference.contracts import (NativeFormulaGoal,CountGoal,CountConclusion,
+from ah.model import ActantRole,Ref,RefKind,BoundVar,TimeLiteral,VariableSort,CountLiteral
+from ah.inference.contracts import (NativeFormulaGoal,NativeBindingGoal,NativeBindingsConclusion,CountGoal,CountConclusion,
     ExistsGoal,RoleFillGoal,MultiRoleFillGoal,InferenceQuery,GoalSpec,LogicalStatus,
     StopReason,InferenceOutcome,ExistingRefConclusion,ProofSupport,
     AssociationGoal,TemporalComparisonConclusion,FormulaQueryConclusion)
@@ -24,6 +24,7 @@ class NativeQueryRoot:
     temporal: dict | None
     request: dict
     source_scope: tuple[str,...]=()
+    owner_frame_ref: str | None=None
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,12 @@ class Pattern:
     actants: tuple=()
     lexical_anchor: str | None=None
     temporal: dict | None=None
+
+
+@dataclass(frozen=True)
+class QueryVar:
+    name: str
+    sort: VariableSort=VariableSort.UNKNOWN
 
 
 def project_native_queries(state,release):
@@ -50,6 +57,8 @@ def project_native_queries(state,release):
         for child in f.semantic.get('proposition_args',{}).values():
             embedded.update(leaves(child.get('tree') or {'frame_ref':child['frame_ref']}))
         d=state.decisions.get(f.frame_id+'|predicate_value')
+        if any(t in state.observation.get('unresolved_references',()) for t in f.argument_token_refs):
+            state.diag('QUERY_ENTITY_UNBOUND',f.frame_id); continue
         if f.semantic.get('structural_unresolved') or f.semantic.get('temporal_unresolved') or not d or d.outcome!='RESOLVED' or len(d.selected)!=1:
             continue
         selected=f.semantic['candidate_specs'][d.selected[0]]
@@ -92,11 +101,13 @@ def project_native_queries(state,release):
         common=tree.get('region') or (temporal[0] if temporal and len({digest(t) for t in temporal})==1 and len(owners)<=1 else None)
         # Intent fields are typed host input. Surface recognition belongs to
         # released syntax/interrogative rules, never to word-specific handlers.
-        requests=[f.semantic['query_request'] for f in fs if f.semantic.get('query_request')]
+        request_owners=[f for f in fs if f.semantic.get('query_request')]
+        requests=[f.semantic['query_request'] for f in request_owners]
         request=dict(state.observation.get('goal_request') or (requests[0] if len(requests)==1 else {}))
-        if requests and (len(requests)!=1 or tree.get('operator')):
-            state.diag('QUERY_TARGET_UNBOUND','interrogative gaps need a unique atomic owner'); continue
-        out.append(NativeQueryRoot(tree,atoms,common,request,tuple(state.observation.get('query_source_scope',()))))
+        if len(requests)>1:
+            state.diag('QUERY_TARGET_UNBOUND','interrogative gaps need a unique owner'); continue
+        owner=request_owners[0].frame_id if request_owners else fs[0].frame_id if len(fs)==1 else None
+        out.append(NativeQueryRoot(tree,atoms,common,request,tuple(state.observation.get('query_source_scope',())),owner))
     return tuple(out)
 
 
@@ -107,10 +118,15 @@ def compile_native_queries(core,roots,context,attention_refs=()):
     results=[]
     for root in roots:
         try:
+            request=root.request; mode=request.get('mode','FORMULA')
+            gaps=tuple(request.get('requested_roles',())) if mode=='WH' else (request['count_role'],) if mode=='COUNT' else ()
+            if mode in {'WH','COUNT'} and (not gaps or len(set(gaps))!=len(gaps) or root.owner_frame_ref is None):
+                raise ValueError('QUERY_TARGET_UNBOUND')
             visited=set()
             def compile_tree(tree,depth=0):
                 if depth>32: raise ValueError('COMPUTATION_LIMIT')
                 if 'time_literal' in tree: return TimeLiteral(tuple(tree['time_literal']))
+                if 'count_literal' in tree: return CountLiteral(tree['count_literal'])
                 if 'bound_var' in tree: return BoundVar(tree['bound_var'],VariableSort(tree.get('sort','ENTITY')))
                 if 'frame_ref' not in tree:
                     operator=core.function_registry.canonical_id(tree['operator'])
@@ -135,31 +151,34 @@ def compile_native_queries(core,roots,context,attention_refs=()):
                             if not isinstance(r,ExistingEntity): raise ValueError('QUERY_ENTITY_UNBOUND:'+role)
                             resolved=r.ref
                     actants.append((ActantRole(role),resolved))
+                if fid==root.owner_frame_ref:
+                    if set(gaps)&{r.value for r,v in actants}: raise ValueError('QUERY_REQUEST_INVALID')
+                    if gaps and (not atom['template_ref'] or not set(gaps)<=set(r.value for r in core.store.get_template(atom['template_ref']).roles)):
+                        raise ValueError('QUERY_REQUEST_INVALID')
+                    actants.extend((ActantRole(role),QueryVar(role,VariableSort.ENTITY if mode=='COUNT' else VariableSort.UNKNOWN)) for role in gaps)
                 visited.remove(fid)
                 if len({r for r,v in actants})!=len(actants): raise ValueError('QUERY_ARGUMENT_GROUP_UNBOUND')
                 return Pattern(template_ref=atom['template_ref'],actants=tuple(actants),lexical_anchor=atom['lexical_anchor'],temporal=atom['temporal'])
             pattern=compile_tree(root.tree)
             temporal=normalize(region(root.temporal)); point=temporal.point if temporal.kind=='POINT' else None
             window=(temporal.lo,temporal.hi) if temporal.kind in {'EXISTENTIAL','CONTINUOUS'} else None
-            request=root.request
             if not set(request)<={'mode','requested_roles','count_role','expected_count','comparison','domain_certificate'}:
                 raise ValueError('QUERY_REQUEST_INVALID')
-            mode=request.get('mode','FORMULA')
             if len(root.source_scope)>16 or any(not isinstance(s,str) or not s for s in root.source_scope):
                 raise ValueError('QUERY_SOURCE_SCOPE_INVALID')
             target=NativeFormulaGoal(pattern,point,window,tuple(attention_refs),root.source_scope)
             if mode in {'WH','COUNT'}:
-                if pattern.operator or pattern.lexical_anchor or any(not isinstance(v,Ref) for r,v in pattern.actants):
-                    raise ValueError('QUERY_TARGET_UNBOUND')
-                tref=core.ref(pattern.template_ref); known=dict(pattern.actants)
-                if mode=='WH':
-                    roles=tuple(ActantRole(r) for r in request['requested_roles'])
-                    if not roles or len(set(roles))!=len(roles) or set(roles)&set(known) or not set(roles)<=set(core.store.get_template(tref.uid).roles):
-                        raise ValueError('QUERY_REQUEST_INVALID')
-                    target=RoleFillGoal(tref,known,roles[0],point,window) if len(roles)==1 else MultiRoleFillGoal(tref,known,roles,point,window)
+                release=getattr(getattr(core,'_formalizer_adapter',None),'resource_release',None)
+                if not pattern.operator and not pattern.lexical_anchor and all(isinstance(v,(Ref,QueryVar)) for r,v in pattern.actants):
+                    tref=core.ref(pattern.template_ref); known={r:v for r,v in pattern.actants if isinstance(v,Ref)}
+                    if mode=='WH':
+                        roles=tuple(ActantRole(r) for r in gaps)
+                        target=RoleFillGoal(tref,known,roles[0],point,window) if len(roles)==1 else MultiRoleFillGoal(tref,known,roles,point,window)
+                    else:
+                        target=CountGoal(tref,known,ActantRole(request['count_role']),point,window,request.get('expected_count'),request.get('comparison','EXACTLY_N'),request.get('domain_certificate'),release.sha256 if release is not None else None)
                 else:
-                    release=getattr(getattr(core,'_formalizer_adapter',None),'resource_release',None)
-                    target=CountGoal(tref,known,ActantRole(request['count_role']),point,window,request.get('expected_count'),request.get('comparison','EXACTLY_N'),request.get('domain_certificate'),release.sha256 if release is not None else None)
+                    target=NativeBindingGoal(pattern,gaps,mode,point,window,tuple(attention_refs),root.source_scope,
+                        request.get('expected_count'),request.get('comparison','EXACTLY_N'),request.get('domain_certificate'),release.sha256 if release is not None else None)
             elif mode!='FORMULA': raise ValueError('QUERY_TARGET_UNBOUND')
             if pattern.operator=='COUNTERFACTUAL':
                 # Legacy proof does not filter native derived paths by temporary
@@ -241,6 +260,7 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=()):
         if isinstance(p,Pattern): return isinstance(value,str) and match(p,value,variables)
         if isinstance(p,Ref): return value==p.uid
         if isinstance(p,TimeLiteral): return isinstance(value,dict) and tuple(value.get('time_literal',()))==p.bounds
+        if isinstance(p,CountLiteral): return isinstance(value,dict) and value.get('count_literal')==p.value
         if isinstance(p,BoundVar):
             if not isinstance(value,dict) or 'bound_var' not in value: return False
             old=variables.setdefault(p.local_id,value['bound_var'])
@@ -268,6 +288,9 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
     with adapter._journal.atomic(),engine.core.store._lock:
         adapter._refresh(); ledger=adapter.ledger
         try:
+            if isinstance(goal,NativeBindingGoal):
+                from .query_bindings import solve_bindings
+                return solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime,_budget,_depth,outcome)
             if isinstance(goal,CountGoal):
                 witnesses={}; scanned=0
                 if runtime is not None:
@@ -284,18 +307,27 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                     if ledger.query(node.uid,point=goal.temporal_point,window=goal.temporal_window)['answer']!='YES': continue
                     value=actual.get(goal.count_role.value)
                     if isinstance(value,str) and engine.core.store.kind_of(value) is RefKind.M: witnesses.setdefault(value,engine.core.ref(node.uid))
-                lower=len(witnesses)
-                certificate_supports=_complete_domain(adapter,ledger,goal)
+                claimed_lower,claimed_upper,bound_refs=_numeric_bounds(engine.core,ledger,goal,_budget)
+                lower=max(len(witnesses),claimed_lower or 0)
+                certificate=_complete_domain(adapter,ledger,goal)
+                certificate_supports=certificate['completeness_evidence'] if certificate else ()
                 complete=bool(certificate_supports)
+                if complete and certificate.get('closure_mode','ENUMERATED')=='ASSERTED_BOUND':
+                    complete=claimed_lower is not None and claimed_lower==claimed_upper
                 status=LogicalStatus.UNKNOWN
+                exact=(claimed_lower if certificate.get('closure_mode','ENUMERATED')=='ASSERTED_BOUND' else len(witnesses)) if complete else None
+                if complete and (lower>exact or claimed_upper is not None and exact>claimed_upper):
+                    return outcome(LogicalStatus.UNKNOWN,(*witnesses.values(),*bound_refs),('COUNT_BOUNDS_CONFLICT',),CountConclusion(lower,None,tuple(witnesses.values()),claimed_upper))
+                if claimed_upper is not None and lower>claimed_upper:
+                    return outcome(LogicalStatus.UNKNOWN,(*witnesses.values(),*bound_refs),('COUNT_BOUNDS_CONFLICT',),CountConclusion(lower,None,tuple(witnesses.values()),claimed_upper))
                 if complete:
-                    valid=goal.expected_count is None or (lower==goal.expected_count if goal.comparison=='EXACTLY_N' else lower>=goal.expected_count if goal.comparison=='AT_LEAST_N' else lower<=goal.expected_count)
+                    valid=goal.expected_count is None or (exact==goal.expected_count if goal.comparison=='EXACTLY_N' else exact>=goal.expected_count if goal.comparison=='AT_LEAST_N' else exact<=goal.expected_count)
                     status=LogicalStatus.PROVED if valid else LogicalStatus.DISPROVED
                 elif goal.expected_count is not None:
                     if goal.comparison=='AT_LEAST_N' and lower>=goal.expected_count: status=LogicalStatus.PROVED
                     elif goal.comparison in {'AT_MOST_N','EXACTLY_N'} and lower>goal.expected_count: status=LogicalStatus.DISPROVED
-                proof_refs=tuple(dict.fromkeys([*witnesses.values(),*(engine.core.ref(ledger.data['supports'][sid]['conclusion_ref']) for sid in certificate_supports)]))
-                return outcome(status,proof_refs,() if complete else ('INCOMPLETE_DOMAIN',),CountConclusion(lower,lower if complete else None,tuple(witnesses.values())))
+                proof_refs=tuple(dict.fromkeys([*witnesses.values(),*bound_refs,*(engine.core.ref(ledger.data['supports'][sid]['conclusion_ref']) for sid in certificate_supports)]))
+                return outcome(status,proof_refs,() if complete else ('INCOMPLETE_DOMAIN',),CountConclusion(lower if lower else claimed_lower,exact,tuple(witnesses.values()),exact if complete else claimed_upper))
             pattern=goal.pattern
             if not isinstance(pattern,Pattern) or len(pattern.members)>128: raise ValueError('QUERY_TARGET_UNBOUND')
             if pattern.temporal is not None:
@@ -328,6 +360,13 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 conflicts.update(answer['conflict_ref'])
                 if answer['answer'] in {'YES','NO'}:
                     return outcome(LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED,(engine.core.ref(answer.get('evidence_ref',uid)),),tuple('conflict_ref:'+r for r in sorted(conflicts)))
+            if pattern.operator in {'BEFORE','AFTER','DURING'}:
+                from .temporal_order import prove_order
+                result=prove_order(engine.core,ledger,pattern,goal,_budget,(*workspace,*goal.workspace_refs,*scoped))
+                if result is not None:
+                    value,premises=result
+                    return outcome(LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,premises,
+                                   ('TEMPORAL_EVIDENCE_ORDER',),FormulaQueryConclusion(pattern.operator,premises))
             if pattern.operator=='EXISTS' and len(pattern.members)==2 and isinstance(pattern.members[0],BoundVar):
                 witness=_existential_witness(engine,adapter,pattern.members[0],pattern.members[1],goal,query,workspace,attention,context,runtime,_budget,_depth)
                 if witness is not None: return witness
@@ -364,6 +403,46 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
             return outcome(LogicalStatus.UNKNOWN,diagnostics=(str(exc),))
 
 
+def _numeric_bounds(core,ledger,goal,budget):
+    """Read only asserted cardinality scopes matching the complete atomic body.
+
+    A conjunction/restriction is never dropped to make a count claim match.
+    More complex bodies are matched as formula goals, not broadened here.
+    """
+    lower=None; upper=None; proofs=[]
+    for body in core.store.find_hypernodes_by_template(goal.template_ref.uid):
+        budget[0]-=1
+        if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
+        spec=ledger.data['nodes'].get(body.uid,{})
+        actual=spec.get('actants',{})
+        variable=actual.get(goal.count_role.value)
+        if not isinstance(variable,dict) or 'bound_var' not in variable: continue
+        if set(actual)!={*(r.value for r in goal.known_roles),goal.count_role.value}: continue
+        if any(actual.get(r.value)!=v.uid for r,v in goal.known_roles.items()): continue
+        for root in core.store.function_parents(body.uid):
+            budget[0]-=1
+            if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
+            claim=ledger.data['nodes'].get(root.uid,{})
+            kind=claim.get('function_id'); operands=claim.get('operands',())
+            if kind not in {'AT_LEAST_N','EXACTLY_N','AT_MOST_N'} or len(operands)!=3 or operands[0]!=variable or operands[1]!=body.uid: continue
+            # A count that holds at one unknown instant in Q does not bound
+            # distinct witnesses across Q. Aggregated window domains require
+            # an explicit CountDomain contract; never reinterpret TimeAssertion.
+            if goal.temporal_window is not None: continue
+            if goal.temporal_point is None:
+                paths=ledger.paths()
+                if not any(s['conclusion_ref']==root.uid and sid in paths
+                           and not any(a['support_record_id']==sid for a in ledger.data['assertions'].values())
+                           for sid,s in ledger.data['supports'].items()): continue
+            if ledger.query(root.uid,point=goal.temporal_point,window=goal.temporal_window)['answer']!='YES': continue
+            value=operands[2].get('count_literal') if isinstance(operands[2],dict) else None
+            if type(value) is not int or value<0: raise ValueError('INTEGRITY_ERROR: invalid count scope')
+            if kind in {'AT_LEAST_N','EXACTLY_N'}: lower=value if lower is None else max(lower,value)
+            if kind in {'AT_MOST_N','EXACTLY_N'}: upper=value if upper is None else min(upper,value)
+            proofs.append(core.ref(root.uid))
+    return lower,upper,tuple(dict.fromkeys(proofs))
+
+
 def _complete_domain(adapter,ledger,goal):
     """A released certificate names its exact count scope and live truth sources.
 
@@ -373,7 +452,7 @@ def _complete_domain(adapter,ledger,goal):
     if goal.domain_certificate is not None and (not isinstance(goal.domain_certificate,str) or not goal.domain_certificate):
         raise ValueError('DOMAIN_CERTIFICATE_INVALID')
     release=getattr(adapter,'resource_release',None)
-    if release is None or goal.resource_snapshot!=release.sha256: return ()
+    if release is None or goal.resource_snapshot!=release.sha256: return None
     release.assert_integrity()
     window=([goal.temporal_point,goal.temporal_point] if goal.temporal_point is not None
             else list(goal.temporal_window) if goal.temporal_window is not None else None)
@@ -384,55 +463,25 @@ def _complete_domain(adapter,ledger,goal):
            and c['request_window']==window]
     paths=ledger.paths()
     for c in sorted(certs,key=lambda c:c['domain_id']):
-        if all(sid in paths for sid in c['completeness_evidence']): return tuple(c['completeness_evidence'])
-    return ()
+        if all(sid in paths for sid in c['completeness_evidence']): return c
+    return None
 
 
 def _existential_witness(engine,adapter,variable,body,goal,query,workspace,attention,context,runtime,budget,depth):
-    """Find one positive ground witness, using only the body's template indexes.
-
-    Absence never refutes EXISTS. The supported join fragment is a positive
-    atom/conjunction; other bodies need their own explicit quantified proof.
-    Instantiations remain runtime targets. Only existing registered goal rules
-    invoked by solve_native_goal may materialize a derived support.
-    """
+    """Bind a candidate then prove the entire nested body; absence is UNKNOWN."""
+    from .query_bindings import candidate_values,substitute
     if variable.sort not in {VariableSort.ENTITY,VariableSort.UNKNOWN}: return None
-    atoms=[]
-    def flatten(p):
-        if not isinstance(p,Pattern): return False
-        if p.operator=='AND': return all(flatten(c) for c in p.members)
-        if p.operator is not None or p.lexical_anchor: return False
-        if any(not isinstance(v,(Ref,BoundVar)) or isinstance(v,BoundVar) and v.local_id!=variable.local_id for r,v in p.actants): return False
-        atoms.append(p); return True
-    if not flatten(body) or not atoms or not any(isinstance(v,BoundVar) for p in atoms for r,v in p.actants): return None
-    seed=next(p for p in atoms if any(isinstance(v,BoundVar) for r,v in p.actants))
-    values=set()
-    for n in engine.core.store.find_hypernodes_by_template(seed.template_ref):
-        budget[0]-=1
-        if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
-        actual=adapter.ledger.data['nodes'].get(n.uid,{}).get('actants',{})
-        if set(actual)!={r.value for r,v in seed.actants}: continue
-        if any(isinstance(v,Ref) and actual.get(r.value)!=v.uid for r,v in seed.actants): continue
-        candidates={actual[r.value] for r,v in seed.actants if isinstance(v,BoundVar) and isinstance(actual[r.value],str)}
-        if len(candidates)!=1: continue
-        uid=next(iter(candidates))
-        if any(isinstance(v,BoundVar) and actual[r.value]!=uid for r,v in seed.actants): continue
-        if engine.core.store.kind_of(uid) is RefKind.M: values.add(uid)
+    values=candidate_values(engine.core,adapter.ledger,body,(variable.local_id,),budget,bound=True)[variable.local_id]
     for uid in sorted(values):
-        answers=[]
-        for atom in atoms:
-            ground=replace(atom,actants=tuple((r,engine.core.ref(uid) if isinstance(v,BoundVar) else v) for r,v in atom.actants))
-            answer=solve_native_goal(engine,replace(goal,pattern=ground),query,workspace,attention,context,runtime,_budget=budget,_depth=depth+1)
-            if answer.status is not LogicalStatus.PROVED: break
-            answers.append(answer)
-        else:
-            if len(answers)>1 and (goal.temporal_point is not None or goal.temporal_window is not None) and not _joint_witness(adapter.ledger,answers,goal): continue
-            refs=tuple(dict.fromkeys(r for a in answers for r in a.premise_refs))
-            if runtime is not None: runtime.rule('EXISTS_WITNESS',logical_depth=depth,detail='one shared entity binding')
+        ground=substitute(body,{variable.local_id:engine.core.ref(uid)},bound=True)
+        answer=solve_native_goal(engine,replace(goal,pattern=ground),query,workspace,attention,context,runtime,_budget=budget,_depth=depth+1)
+        if 'COMPUTATION_LIMIT' in answer.diagnostics: raise ValueError('COMPUTATION_LIMIT')
+        if answer.status is LogicalStatus.PROVED:
+            refs=answer.premise_refs
+            if runtime is not None: runtime.rule('EXISTS_WITNESS',logical_depth=depth,detail='one shared entity binding; full body proved')
             return InferenceOutcome(LogicalStatus.PROVED,StopReason.GOAL_SATISFIED,
-                FormulaQueryConclusion('EXISTS',refs),refs,refs,None,len(answers)+1,
-                tuple(dict.fromkeys(d for a in answers for d in a.diagnostics)),
-                proof_support=(ProofSupport(refs,rule_id='EXISTS_WITNESS'),))
+                FormulaQueryConclusion('EXISTS',refs),refs,refs,None,answer.expanded_states+1,
+                answer.diagnostics,proof_support=(ProofSupport(refs,rule_id='EXISTS_WITNESS'),))
     return None
 
 

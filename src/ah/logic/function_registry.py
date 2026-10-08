@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from ah.model import BoundVar, Operand, Ref, RefKind, VariableSort, TimeLiteral
+from ah.model import BoundVar, Operand, Ref, RefKind, VariableSort, TimeLiteral, CountLiteral
 
 
 OperandValidator = Callable[[tuple[Operand, ...]], None]
@@ -66,12 +66,21 @@ def _relevant_past(operands: tuple[Operand, ...]) -> None:
 
 
 def _temporal_anchors(operands: tuple[Operand, ...]) -> None:
+    if all(isinstance(x,TimeLiteral) or isinstance(x,Ref) and x.kind in {RefKind.N,RefKind.G} for x in operands):
+        return
     if all(isinstance(x,TimeLiteral) for x in operands):
         return
     # Old snapshots may use semantic time entities. Native V7 writes literals.
     if all(isinstance(x,Ref) and x.kind is RefKind.M for x in operands):
         return
-    raise ValueError('Temporal operator requires two typed time anchors')
+    raise ValueError('Temporal operator requires time anchors or proposition references')
+
+
+def _numeric_quantifier(operands):
+    if (not isinstance(operands[0], BoundVar) or operands[0].sort not in {VariableSort.ENTITY,VariableSort.UNKNOWN}
+            or not isinstance(operands[1], Ref) or operands[1].kind not in {RefKind.N,RefKind.G}
+            or not isinstance(operands[2], CountLiteral)):
+        raise ValueError('Numeric scope requires [entity_bound_var, body_ref, count_literal]')
 
 
 def _render_quantifier(name: str, operands: tuple[str, ...]) -> str:
@@ -133,6 +142,10 @@ class FunctionRegistry:
         return key
 
     def _register_builtins(self) -> None:
+        for numeric in ('AT_LEAST_N','EXACTLY_N','AT_MOST_N'):
+            self.register(FunctionSpec(numeric,3,3,
+                lambda xs,name=numeric: f'{name}({xs[0]}, {xs[1]}, {xs[2]})',
+                reasoner_handler=numeric,operand_validator=_numeric_quantifier))
         # AND/OR are also used by the existing canonical representation of
         # coordinated entity-valued actants.  Therefore their core validator only
         # requires Ref operands; the reasoner applies propositional semantics only

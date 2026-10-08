@@ -37,8 +37,8 @@ class InferenceMaterializer:
         self.integration = integration
 
     def materialize(self, outcome: InferenceOutcome) -> MaterializationResult:
-        from .contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion
-        if isinstance(outcome.conclusion,(CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion)):
+        from .contracts import CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion,NativeBindingsConclusion
+        if isinstance(outcome.conclusion,(CountConclusion,TemporalComparisonConclusion,FormulaQueryConclusion,NativeBindingsConclusion)):
             return MaterializationResult(None,None,False)
         if outcome.status is not LogicalStatus.PROVED or outcome.conclusion is None:
             return MaterializationResult(None, None, False)

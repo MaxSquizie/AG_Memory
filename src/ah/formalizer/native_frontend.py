@@ -11,7 +11,7 @@ import itertools
 import json
 import re
 from .canonical_ledger import digest
-from .pipeline import t0,t1,td
+from .pipeline import t0,t1
 from .state import FrameCandidate,Decision,Ground,LinkedAlternative,ResourceProvenance,MorphVariant
 from .seal import structural_seal
 from .selection_protocol import Relation,DecisionSchema,build_selection_prompt,validate_selection_response,ProtocolError
@@ -20,6 +20,7 @@ from .tp_proposer import StructureProposalRequest,parse_and_validate
 from .syntax_rules import run_srl, propose_graphs, SearchLimit
 
 OPERATORS={'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'}
+OPERATORS.update({'AT_LEAST_N','EXACTLY_N','AT_MOST_N'})
 
 
 def _failure_code(exc,default):
@@ -88,7 +89,7 @@ def _required_operators(state,release):
 def _grammar_frames(state,release):
     p=release.entries('ProposalPolicy')[0]
     source=tuple(e.token_id for e in state.evidence)
-    request=StructureProposalRequest('syntax:'+state.source_uid,'',source,allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST',*OPERATORS}),
+    request=StructureProposalRequest('syntax:'+state.source_uid,'',source,allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),
         allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),
         max_nodes=p['max_nodes'],max_edges=p['max_edges'],max_depth=p['max_depth'],required_operators=_required_operators(state,release))
     try:
@@ -139,6 +140,18 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
         proposition_nodes={}
         variable_ids={i:i+1 for i,n in enumerate(h.nodes) if n.kind=='BOUND_VAR'}
         time_regions={}
+        numerals={}
+        for i,n in enumerate(h.nodes):
+            if n.kind!='NUMERAL': continue
+            raw=' '.join(bytoken[a].span for a in sorted(n.anchor_spans,key=lambda a:bytoken[a].start))
+            values={int(raw)} if re.fullmatch(r'[0-9]{1,13}',raw) else set()
+            if len(n.anchor_spans)==1:
+                lemmas={v.lemma for v in bytoken[n.anchor_spans[0]].variants}
+                values.update(r['value'] for r in release.resources.get('NumeralRules',{}).get('entries',()) if r['lemma'] in lemmas)
+            if len(values)!=1 or not 0<=next(iter(values))<=10**12:
+                state.diag('NUMERIC_BOUND_UNRESOLVED','raw numeral has no unique released value'); unsupported=True
+            else: numerals[i]=next(iter(values))
+        if any(n.kind=='NUMERAL' and i not in numerals for i,n in enumerate(h.nodes)): continue
         for i,n in enumerate(h.nodes):
             if n.kind!='TIME': continue
             anchors=[bytoken[a] for a in n.anchor_spans]
@@ -205,6 +218,7 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
         def tree(i):
             n=h.nodes[i]
             if n.kind=='BOUND_VAR': return {'bound_var':variable_ids[i],'sort':'ENTITY'}
+            if n.kind=='NUMERAL': return {'count_literal':numerals[i]}
             if n.kind=='TIME':
                 region=time_regions[i]
                 bounds=[region['point']] if region['kind']=='POINT' else [region['lo'],region['hi']]
@@ -271,8 +285,8 @@ def _propose(state,selector,release):
     source=tuple(e.token_id for e in state.evidence)
     if len(source)>p.get('max_source_tokens',256):
         state.diag('COMPUTATION_LIMIT','local TP source region too large; no truncation'); return
-    req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
-    prompt=json.dumps({'task':'propose bounded local syntax; return hypotheses or abstain. Each node has kind and anchor_spans of supplied token IDs; multi-token PREDICATE/ENTITY also requires head_anchor inside its own anchors. TIME carries raw anchors only, never numeric values. Each edge has kind, from, to, optional role_id, scope. TIME_SCOPE attaches proposition to TIME; QUERY_SLOT attaches predicate to WH/COUNT_REQUEST with a registered role. No canonical IDs.','request':{**asdict(req),'allowed_node_kinds':sorted(req.allowed_node_kinds),'allowed_edge_kinds':sorted(req.allowed_edge_kinds),'allowed_role_ids':sorted(req.allowed_role_ids)},'tokens':[{'id':e.token_id,'text':e.span,'variants':[asdict(v) for v in e.variants]} for e in state.evidence]},ensure_ascii=False,default=lambda x:sorted(x) if isinstance(x,(set,frozenset)) else str(x))
+    req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
+    prompt=json.dumps({'task':'propose bounded local syntax; return hypotheses or abstain. Each node has kind and anchor_spans of supplied token IDs; multi-token PREDICATE/ENTITY also requires head_anchor inside its own anchors. TIME and NUMERAL carry raw anchors only, never model-supplied numeric values. Numeric scope operands are [BOUND_VAR, proposition body, NUMERAL]; BIND connects the variable to its body argument. Temporal order operands may be TIME or proposition nodes. Each edge has kind, from, to, optional role_id, scope. TIME_SCOPE attaches proposition to TIME; QUERY_SLOT attaches predicate to WH/COUNT_REQUEST with a registered role. No canonical IDs.','request':{**asdict(req),'allowed_node_kinds':sorted(req.allowed_node_kinds),'allowed_edge_kinds':sorted(req.allowed_edge_kinds),'allowed_role_ids':sorted(req.allowed_role_ids)},'tokens':[{'id':e.token_id,'text':e.span,'variants':[asdict(v) for v in e.variants]} for e in state.evidence]},ensure_ascii=False,default=lambda x:sorted(x) if isinstance(x,(set,frozenset)) else str(x))
     try:
         state.budget.spend_llm(); raw=selector.propose_local(prompt)
         hypotheses=parse_and_validate(req,raw)
@@ -357,6 +371,7 @@ def run_native(text,selector,release,observation,morph=None):
     state=t0(text); state.source_uid=observation['observation_id']; state.interpretation_version=observation['interpretation_version']; state.observation=dict(observation)
     state.resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
     state.context_facts=tuple(observation.get('context_facts',()))
+    for diagnostic in observation.get('rx_diagnostics',()): state.diag(diagnostic,'bounded optional experience retrieval')
     run_srl(state,release,morph)
     t1(state,morph=morph,preserve_variants=True,shared_form_expansion=False)
     # R-X is ordering experience only; it never adds/removes dictionary parses.
@@ -368,7 +383,8 @@ def run_native(text,selector,release,observation,morph=None):
     _propose(state,selector,release)
     preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
     state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
-    td(state)
+    from .coreference import prepare_references,resolve_references
+    reference_slots=prepare_references(state,release)
     evidence={e.token_id:e for e in state.evidence}
     candidate_specs={}
     for frame in state.frames:
@@ -443,6 +459,7 @@ def run_native(text,selector,release,observation,morph=None):
         frame.semantic['temporal_unresolved']=bool(temporal_diag)
         candidate_specs[frame.frame_id]=specs
     structural_seal(state)
+    resolve_references(state,reference_slots,selector,release)
     for f in state.frames:
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
         d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic['source_traces']; state.decisions[f.frame_id+'|predicate_value']=d

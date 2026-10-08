@@ -8,6 +8,7 @@ from ah.model import (
     AbstractSymbol,
     BoundVar,
     TimeLiteral,
+    CountLiteral,
     ActantRole,
     FunctionSymbol,
     Group,
@@ -94,6 +95,8 @@ class SemanticProjector:
         return f"${variable.local_id}{suffix}"
 
     def _render_operand(self, operand: Ref | BoundVar, state: _RenderState) -> str:
+        if isinstance(operand, CountLiteral):
+            return str(operand.value)
         if isinstance(operand, TimeLiteral):
             return 'TIME('+', '.join(format(x,'.17g') for x in operand.bounds)+')'
         if isinstance(operand, BoundVar):

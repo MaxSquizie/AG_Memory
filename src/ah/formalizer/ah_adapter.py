@@ -25,6 +25,9 @@ class AHStoreAdapter(Store):
         self._op_handlers: dict[str, Callable] = {}
         from .graph_ops import GRAPH_HANDLERS
         self._op_handlers.update(GRAPH_HANDLERS)
+        from .rx_observability import ExperienceIndex
+        self._rx_index = ExperienceIndex()
+        self.last_rx_diagnostics = ()
         self._core._formalizer_adapter = self
         self.recover_from_head(drain_pending=False)
 
@@ -67,15 +70,19 @@ class AHStoreAdapter(Store):
         if stage not in {'T1','T2','T3'}: raise ValueError('RX_STAGE_INVALID')
         return self.read_cache_snapshot(resource_snapshot)[stage]
 
-    def read_cache_snapshot(self, resource_snapshot):
+    def read_cache_snapshot(self, resource_snapshot, *, lexical_keys=None, limit=4096):
         """Freeze all stage reads against one canonical AH snapshot."""
         with self._journal.atomic(),self._store._lock:
-            self._refresh(); ledger=self.ledger; paths=ledger.paths()
-            return {stage:tuple({'record_id':rid,'payload':deepcopy(entry['stages'][stage])}
-                               for rid,entry in sorted(ledger.data['rx_cache'].items())
-                               if entry['status']=='LIVE' and entry['support_record_id'] in paths
-                               and entry['resource_snapshot']==resource_snapshot and stage in entry['stages'])
-                    for stage in ('T1','T2','T3')}
+            if type(limit) is not int or not 1 <= limit <= 100000: raise ValueError('RX_LIMIT_INVALID')
+            self._refresh(); ledger=self.ledger
+            self._rx_index.build(ledger.data['rx_cache'],self._store._state.formalizer_state.get('wal_seq',0))
+            rows, diagnostics = self._rx_index.read(ledger,resource_snapshot,lexical_keys,limit)
+            self.last_rx_diagnostics = tuple(diagnostics)
+            return rows
+
+    def experience_metrics(self):
+        with self._journal.atomic(), self._store._lock:
+            return self._rx_index.report()
 
     def append_journal(self, channel, record):
         return self._journal.append(channel, dict(record.payload), run_id=record.run_id)

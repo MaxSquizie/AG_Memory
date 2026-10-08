@@ -104,8 +104,8 @@ class InferenceEngine:
         proof_context: ProofContext,
         runtime: GoalRuntime,
     ) -> InferenceOutcome:
-        from .contracts import NativeFormulaGoal,CountGoal
-        if isinstance(goal,(NativeFormulaGoal,CountGoal)):
+        from .contracts import NativeFormulaGoal,NativeBindingGoal,CountGoal
+        if isinstance(goal,(NativeFormulaGoal,NativeBindingGoal,CountGoal)):
             from ah.formalizer.native_queries import solve_native_goal
             return solve_native_goal(self,goal,query,workspace_refs,attention,proof_context,runtime)
         if isinstance(goal, RoleFillGoal):

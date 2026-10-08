@@ -31,6 +31,7 @@ def build_plan(state,release,store):
         e=evidence[f.predicate_token_ref]
         roles={}; mention_roles={}
         for tid,role in selected['roles'].items():
+            if tid in state.observation.get('unresolved_references',()): raise ValueError('REFERENCE_UNKNOWN')
             if tid in f.semantic.get('bound_arguments',{}):
                 roles[role]={'bound_var':f.semantic['bound_arguments'][tid],'sort':'ENTITY'}
                 continue
@@ -39,10 +40,13 @@ def build_plan(state,release,store):
             mention_ref=unit.get('mention_ref',tid)
             known=state.observation.get('entity_bindings',{}).get(mention_ref)
             mid=known or 'M:'+digest([state.source_uid,mention_ref])
-            if known and (not store.has_uid(known) or store._store.kind_of(known).value!='M'): raise ValueError('IDENTITY_CONFLICT')
-            emit('ENSURE_ENTITY',{'uid':mid,'name':unit.get('surface',ev.span),'mention_ref':mention_ref,'source_tag':tag,'reference_existing':bool(known)},frag)
+            local=state.observation.get('local_reference_targets',{}).get(mid)
+            if known and not local and (not store.has_uid(known) or store._store.kind_of(known).value!='M'): raise ValueError('IDENTITY_CONFLICT')
+            name=local['label'] if local else unit.get('surface',ev.span)
+            emit('ENSURE_ENTITY',{'uid':mid,'name':name,'mention_ref':local['mention_ref'] if local else mention_ref,'source_tag':tag,'reference_existing':bool(known and store.has_uid(known))},frag)
             bid='binding:'+digest([tag,mention_ref,mid])
-            emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[])},frag)
+            from .coreference import mention_features
+            emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)
             mention_roles.setdefault(role,[]).append(mid)
         for role,members in mention_roles.items():
             if len(members)==1: roles[role]=members[0]
@@ -76,6 +80,7 @@ def build_plan(state,release,store):
         return nid,ck
 
     def tree_node(tree,frag,active=None):
+        if 'count_literal' in tree: return tree,digest(tree)
         if 'time_literal' in tree: return tree,digest(tree)
         if 'bound_var' in tree: return tree,digest(tree)
         if 'frame_ref' in tree: return node_for(tree['frame_ref'],frag,True,active)
@@ -86,9 +91,12 @@ def build_plan(state,release,store):
         if fid in {'BEFORE','AFTER','DURING'}:
             from ah.model import TimeLiteral
             from .temporal_order import compare_anchors
-            if len(ops)!=2 or any(not isinstance(n,dict) or set(n)!={'time_literal'} for n in ops): raise ValueError('TEMPORAL_ANCHOR_UNKNOWN')
-            if compare_anchors(fid,*(TimeLiteral(tuple(n['time_literal'])) for n in ops)) is False: raise ValueError('CONSTRAINT_CONFLICT')
+            if len(ops)!=2 or any(not isinstance(n,str) and (not isinstance(n,dict) or set(n)!={'time_literal'}) for n in ops): raise ValueError('TEMPORAL_ANCHOR_UNKNOWN')
+            if all(isinstance(n,dict) for n in ops) and compare_anchors(fid,*(TimeLiteral(tuple(n['time_literal'])) for n in ops)) is False: raise ValueError('CONSTRAINT_CONFLICT')
         if fid in {'FORALL','EXISTS'} and (len(ops)!=2 or not isinstance(ops[0],dict) or 'bound_var' not in ops[0]): raise ValueError('BOUND_VAR_REQUIRED')
+        if fid in {'AT_LEAST_N','EXACTLY_N','AT_MOST_N'}:
+            if len(ops)!=3 or not isinstance(ops[0],dict) or 'bound_var' not in ops[0] or not isinstance(ops[2],dict) or set(ops[2])!={'count_literal'}:
+                raise ValueError('NUMERIC_SCOPE_INVALID')
         uid='G:'+digest([fid,ops])
         content_key=children[0][1] if fid=='NOT' else digest([fid,[c for n,c in children]])
         polarity=True
@@ -138,7 +146,7 @@ def build_plan(state,release,store):
             if t not in forests: forests.append(t)
     structural_leaves=set()
     def leaf_refs(t):
-        if 'bound_var' in t or 'time_literal' in t: return set()
+        if 'bound_var' in t or 'time_literal' in t or 'count_literal' in t: return set()
         if 'frame_ref' in t: return {t['frame_ref']}
         return set().union(*(leaf_refs(c) for c in t['operands']))
     for t in forests: structural_leaves.update(leaf_refs(t))

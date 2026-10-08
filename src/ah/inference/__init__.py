@@ -2,6 +2,8 @@ from .attention import AttentionFocusEvent, IgnitionInferenceAttention, Inferenc
 from .contracts import (
     AllOfGoal,
     NativeFormulaGoal,
+    NativeBindingGoal,
+    NativeBindingsConclusion,
     CountGoal,
     CountConclusion,
     TemporalComparisonConclusion,
@@ -85,6 +87,8 @@ TurnGoalBuilder = AssociationSessionTurnGoalCompiler
 
 __all__ = [
     "NativeFormulaGoal",
+    "NativeBindingGoal",
+    "NativeBindingsConclusion",
     "CountGoal",
     "CountConclusion",
     "TemporalComparisonConclusion",

@@ -50,4 +50,14 @@ class TimeLiteral:
             raise ValueError('Temporal anchor requires finite ordered bounds')
 
 
-Operand = Ref | BoundVar | TimeLiteral
+@dataclass(frozen=True, slots=True)
+class CountLiteral:
+    """A nonnegative cardinality value, without a canonical UID."""
+    value: int
+
+    def __post_init__(self):
+        if type(self.value) is not int or not 0 <= self.value <= 10**12:
+            raise ValueError('Count bound must be an integer between 0 and 10^12')
+
+
+Operand = Ref | BoundVar | TimeLiteral | CountLiteral

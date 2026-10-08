@@ -9,6 +9,8 @@ description = "Associative-heterarchical memory core for a text LLM agent"
 requires-python = ">=3.12"
 dependencies = [
   "pymorphy3>=2.0.6,<3",
+  "cryptography>=41",
+  "jsonschema>=4.18,<5",
 ]
 
 [tool.setuptools.packages.find]

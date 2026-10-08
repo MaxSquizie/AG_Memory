@@ -21,6 +21,7 @@ from ah.model import (
     Link,
     BoundVar,
     TimeLiteral,
+    CountLiteral,
     VariableSort,
     Property,
     Ref,
@@ -62,7 +63,7 @@ def _parse_ref(raw: dict[str, Any]) -> Ref:
     return Ref(str(raw["uid"]), RefKind(str(raw["kind"])))
 
 
-def _operand(value: Ref | BoundVar | TimeLiteral) -> dict[str, Any]:
+def _operand(value: Ref | BoundVar | TimeLiteral | CountLiteral) -> dict[str, Any]:
     if isinstance(value, Ref):
         # Keep legacy shape for ordinary AH refs so old schema-1 dumps remain
         # byte-shape compatible where no BoundVar is used.
@@ -75,10 +76,14 @@ def _operand(value: Ref | BoundVar | TimeLiteral) -> dict[str, Any]:
         }
     if isinstance(value, TimeLiteral):
         return {'__operand__':'TIME_LITERAL','bounds':list(value.bounds)}
+    if isinstance(value, CountLiteral):
+        return {'__operand__':'COUNT_LITERAL','value':value.value}
     raise PersistenceError(f"Unsupported function operand: {type(value).__name__}")
 
 
-def _parse_operand(raw: dict[str, Any]) -> Ref | BoundVar | TimeLiteral:
+def _parse_operand(raw: dict[str, Any]) -> Ref | BoundVar | TimeLiteral | CountLiteral:
+    if raw.get('__operand__')=='COUNT_LITERAL':
+        return CountLiteral(raw['value'])
     if raw.get('__operand__')=='TIME_LITERAL':
         return TimeLiteral(tuple(raw['bounds']))
     if raw.get("__operand__") == "BOUND_VAR":

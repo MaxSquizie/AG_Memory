@@ -66,15 +66,36 @@ PREDICATE/ENTITY может иметь несколько raw anchors; в это
 
 Прежний release без SyntaxRules теперь получает RESOURCE_MISSING. Добавление этого ресурса/зависимостей требует новой версии, нового content hash и внешнего review pin; незаметная вставка defaults в подписанный snapshot запрещена. Загруженный manifest копируется в каноническом порядке; native вход и C проверяют неизменность его hash перед использованием.
 
-## Review и доверие
+## Review, криптография и доверие
 
-Release содержит `signed_review_id={reviewer,reviewed_sha256,signature,timestamp}` и реальный `coverage_report={corpus_id,corpus_sha256,units_by_kind,categories}`. Внешний `formalizer_reviews.json` — map: `release_sha256 → та же review-запись`. Не копировать выдуманную подпись в оба файла: этот файл является доверенным входом оператора, вне предложений модели и текста пользователя.
+Release содержит `signed_review_id={algorithm:"Ed25519",key_id,reviewer,reviewed_sha256,signature,timestamp}`. Внешний registry имеет форму:
 
-```bash
-PYTHONPATH=src python -m ah.formalizer.resources.release_cli check data/formalizer_release.json --trusted-reviews data/formalizer_reviews.json
+```json
+{"keys":{"<key_id>":{"reviewer":"<reviewer>","public_key_b64":"<external public key>","revoked":false}},"reviews":{"<release_sha256>":{"algorithm":"Ed25519","key_id":"<key_id>","reviewer":"<reviewer>","reviewed_sha256":"<release_sha256>","signature":"<actual base64 signature>","timestamp":"<review timestamp with timezone>"}}}
 ```
 
-Текущая проверка — pinning внешней review-атрибуции и content hash. Она **не криптографическая проверка подписи** и не заменяет доверенное получение файла reviewer records. Изменение entries/dependencies/coverage меняет hash и требует нового review. Команда check не утверждает G0/G1/G2 PASS.
+Это описание формы, не готовая атрибуция/подпись. Ed25519 verify проверяет exact pin, владельца/отзыв ключа и signature над canonical review envelope `purpose=AG_MEMORY_RESOURCE_REVIEW_V1` + algorithm/key_id/reviewer/timestamp/reviewed_sha256. Release не авторизует свой ключ. Старый bare map sha→attribution больше не является production trust file. Изменение resources/dependencies/coverage требует нового hash, подписи и review pin.
+
+Coverage связывается с `resource_content_sha256` **до** присоединения отчёта; финальный release hash включает coverage. CLI lexical availability измеряет реальный фиксированный корпус, но execution_coverage=null: это не G5. Каждый production TemplateMap проверяется против реального T/roles AH. Все зарегистрированные resource records имеют closed JSON Schema + semantic validation, все четыре Emit — pinned CandidateSchema; неизвестные resource kinds отклоняются.
+
+## Авторские команды
+
+В командах ниже пути обозначают **реальные внешние входы**, не предоставленные этой доработкой. Они не выдают gate PASS.
+
+```bash
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli schemas runtime_schemas.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli catalog actual_t_catalog.json --ah-snapshot actual_ah.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli build authored_resource_containers draft_release.json --version RESOURCE_VERSION --ah-snapshot actual_ah.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli compile syntax.rules draft_release.json compiled_syntax.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli coverage draft_release.json fixed_corpus.json measured_coverage.json --ah-snapshot actual_ah.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli sign draft_release.json measured_coverage.json signed_release.json --private-key reviewer_ed25519.pem --reviewer REVIEWER --key-id KEY_ID --timestamp REVIEW_TIMESTAMP_WITH_TIMEZONE --ah-snapshot actual_ah.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli check signed_release.json --trusted-reviews external_trust_registry.json --ah-snapshot actual_ah.json
+PYTHONPATH=src python -m ah.formalizer.resources.release_cli profile-rx signed_release.json fixed_corpus.json actual_rx_profile.json --trusted-reviews external_trust_registry.json --ah-snapshot actual_ah.json
+```
+
+`build` читает отдельные authored *.json resource containers, не папку с готовым manifest/catalog/report. Он добавляет только CandidateSchema metadata, не lexical senses/valencies. `init` также остаётся unsigned empty draft. Фиксированный корпус: `{corpus_id,units:[{unit_id,text}]}`. Sign использует предоставленный reviewer PEM, не создаёт ключ или reviewer. Регистрация доверенного публичного ключа и exact review pin — внешнее решение. Выходы создаются исключительно, без перезаписи старых артефактов.
+
+Textual DSL нормирован §16: reads/captures/when/Emit JSON и ordered versions компилируются в existing AST. `schemas` экспортирует действующие closed record/Emit схемы для авторов; ресурс не может ослабить обязательную Emit schema. Никакого Python/eval.
 
 ## RawInput, replay и память
 
@@ -88,4 +109,14 @@ RawInput optional `goal_request` содержит `mode=FORMULA|WH|COUNT`, `requ
 
 Для replacement используется `migration.reinterpret_observation(store,binding,selector,release, observation_id=…, previous_version=…, trigger_ref=…, open_template_links=[{source_t_ref,canonical_t_ref,evidence_refs:[support_id,…]}])`. Старый RawInput берётся из binding snapshot; run v+1 получает новый reviewed release. C проверяет source anchors/mapping, T6 повторно проверяет live evidence и атомарно фиксирует новую версию вместе с supersede старой. Failed T4/T5/полный отказ не отзывают старую версию. LinkOpenTemplate — audit relation, не reasoner alias и не скрытый перенос truth grounds. Повтор завершённой миграции требует прежних frozen входов; отозванные пути не оживают.
 
-Текстовый Rule DSL не импортируется как Python и не считается реализованным JSON AST. В §16 BNF недоопределены capture declarations и payload Emit.fields; расширение parser требует сначала однозначного нормативного синтаксиса. Полный numeric scope и counterfactual proof не подменяются обычным count/мировым EXISTS.
+## Дополнения runtime
+
+`coreference_sources=[[observation_id,version],...]` задаёт declared окно; CorefPolicy ограничивает признаки/ранжирование/ties. Замороженные candidate refs/support IDs входят в immutable run snapshot; contextual first/second-person Ref задаёт host. Совпадение имён не создаёт identity. Несколько совместимых grounded candidates проходят bounded selector, unresolved reference блокирует соответствующий fragment/query.
+
+Numeric operators имеют [entity BoundVar, body Ref(N|G), CountLiteral]; NUMERAL содержит raw anchors, словесные числа требуют NumeralRules. Составной WH/COUNT сохраняет дерево, query slots имеют уникального владельца. Nested EXISTS подставляет свидетеля во всё body; отсутствие не доказывает отрицание. Составной точный count требует FormulaDomainCertificate с typed signature полного pattern; атомарный — DomainCertificate. Window cardinality не агрегируется в число разных объектов за Q.
+
+Массовая declared job: `plan_mass_migration(...trigger_ref,items=[{observation_id,previous_version,open_template_links?}])` → durable plan/reserved versions; `resume_mass_migration(...migration_id)` → per-source immutable results. LinkOpenTemplate требует actual T refs и живые explicit evidence. Атомарность на каждое observation replacement; failed item не отзывает старое, completed replay не меняет receipt. Independent context/dependencies не мигрируют автоматически.
+
+R-X индекс сужает чтение по snapshot + всем R1 surface/lemma seeds; oversized retrieval отдаёт пустые priors + RX_PRIOR_LIMIT. `experience_metrics` показывает session counters, `profile-rx` — fixed actual snapshot/corpus retrieval cost и hits. Liveness/full snapshot-WAL стоимость остаётся предметом измерения. Semantic benefit нельзя вывести из hit counts. Frozen replay не читает новый опыт.
+
+BEFORE/AFTER/DURING допускают literal/proposition operands; порядок по событию требует live effective TimeAssertion и гарантированных bounds. Counterfactual native overlay и произвольные causal/comparative/superlative/manner/restricted count handlers не объявлены завершёнными; их цели не подменяются мировым EXISTS.

@@ -22,7 +22,8 @@ from ah.formalizer.selection_protocol import ProtocolError
 # MUST exist (EXPERIENCER) plus the syntactic-only SURFACE_ARG. Anything else is a protocol error (a).
 DEFAULT_ALLOWED_ROLES = frozenset({"EXPERIENCER", "SURFACE_ARG"})
 PROPOSITION_NODE_KINDS = frozenset({'PREDICATE','NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS',
-                                   'POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'})
+                                   'POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION',
+                                   'AT_LEAST_N','EXACTLY_N','AT_MOST_N'})
 
 
 @dataclass(frozen=True)
@@ -135,7 +136,7 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             raise ProtocolError('temporal scope requires proposition -> anchored TIME')
         if edge.kind=='QUERY_SLOT' and (a!='PREDICATE' or b not in {'WH','COUNT_REQUEST'} or not edge.role_id):
             raise ProtocolError('query slot requires predicate -> anchored interrogative and a registered role')
-        if edge.kind=='OPERAND' and (a in {'PREDICATE','ENTITY','BOUND_VAR','TIME'} or b=='ENTITY'):
+        if edge.kind=='OPERAND' and (a in {'PREDICATE','ENTITY','BOUND_VAR','TIME','NUMERAL'} or b=='ENTITY'):
             raise ProtocolError('invalid operator operand type')
         # (a) no invented role ids; (d) SURFACE_ARG is syntactic-only and cannot swallow the whole region
         if edge.role_id is not None:
@@ -168,19 +169,23 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
     arities={'NOT':(1,1),'POSSIBLE':(1,1),'NECESSARY':(1,1),
              'AND':(2,None),'OR':(2,None),'XOR':(2,None),
              'IMPLIES':(2,2),'COUNTERFACTUAL':(2,2),'ASSOCIATION':(2,2),
-             'FORALL':(2,2),'EXISTS':(2,2),'BEFORE':(2,2),'AFTER':(2,2),'DURING':(2,2)}
+             'FORALL':(2,2),'EXISTS':(2,2),'BEFORE':(2,2),'AFTER':(2,2),'DURING':(2,2),
+             'AT_LEAST_N':(3,3),'EXACTLY_N':(3,3),'AT_MOST_N':(3,3)}
     for idx,node in enumerate(hyp.nodes):
         operands=[hyp.nodes[e.to_idx] for e in hyp.edges if e.from_idx==idx and e.kind=='OPERAND']
         if node.kind in arities:
             lo,hi=arities[node.kind]
             if len(operands)<lo or hi is not None and len(operands)>hi:
                 raise ProtocolError('operator arity mismatch:'+node.kind)
-            if node.kind in {'FORALL','EXISTS'}:
+            if node.kind in {'AT_LEAST_N','EXACTLY_N','AT_MOST_N'}:
+                if operands[0].kind!='BOUND_VAR' or operands[1].kind not in PROPOSITION_NODE_KINDS or operands[2].kind!='NUMERAL':
+                    raise ProtocolError('numeric scope requires [bound_var, body, numeral]')
+            elif node.kind in {'FORALL','EXISTS'}:
                 if operands[0].kind!='BOUND_VAR' or operands[1].kind not in PROPOSITION_NODE_KINDS:
                     raise ProtocolError('quantifier requires [bound_var, body]')
             elif node.kind in {'BEFORE','AFTER','DURING'}:
-                if any(x.kind!='TIME' for x in operands):
-                    raise ProtocolError('temporal operator requires [time_anchor, time_anchor]')
+                if any(x.kind!='TIME' and x.kind not in PROPOSITION_NODE_KINDS for x in operands):
+                    raise ProtocolError('temporal operator requires typed time/proposition operands')
             elif any(x.kind=='BOUND_VAR' for x in operands):
                 raise ProtocolError('bound_var outside quantifier slot')
             elif any(x.kind not in PROPOSITION_NODE_KINDS for x in operands):

@@ -39,6 +39,12 @@ def _observation(text,*,version,observation_id=None,raw_input=None,context_facts
     source_scope=raw.get('query_source_scope',[])
     if not isinstance(source_scope,list) or len(source_scope)>16 or any(not isinstance(s,str) or not s for s in source_scope): raise ValueError('QUERY_SOURCE_SCOPE_INVALID')
     if 'goal_request' in raw and not isinstance(raw['goal_request'],dict): raise ValueError('QUERY_REQUEST_INVALID')
+    sources=raw.get('coreference_sources',[])
+    if (not isinstance(sources,list) or len(sources)>128
+            or any(not isinstance(t,list) or len(t)!=2 or not isinstance(t[0],str) or not t[0] or type(t[1]) is not int or t[1]<1 for t in sources)
+            or len({tuple(t) for t in sources})!=len(sources)):
+        raise ValueError('COREF_SOURCE_INVALID')
+    raw.pop('coreference_context',None)  # Only the canonical reader may freeze it.
     raw.setdefault('text',text)
     if raw['text']!=text: raise ValueError('INPUT_TEXT_MISMATCH')
     raw.setdefault('range',[0,len(text)])
@@ -74,9 +80,17 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
     frozen=binding.input_snapshot(obs,version)
     if frozen is not None:
         observation['rx_reads']=frozen.get('rx_reads',{})
+        for key in ('rx_diagnostics','coreference_context'):
+            if key in frozen: observation[key]=frozen[key]
     elif release is not None:
         resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
-        observation['rx_reads']={stage:list(rows) for stage,rows in store.read_cache_snapshot(resource_snapshot).items()}
+        from .rx_observability import lexical_keys
+        keys=lexical_keys(text,morph)
+        observation['rx_reads']={stage:list(rows) for stage,rows in store.read_cache_snapshot(resource_snapshot,lexical_keys=keys).items()}
+        observation['rx_diagnostics']=list(store.last_rx_diagnostics)
+        if observation.get('coreference_sources'):
+            from .coreference import freeze_context
+            observation['coreference_context']=freeze_context(store,release,observation['coreference_sources'])
     snapshot=digest([observation,{'snapshot_id':release.sha256,'release_version':release.manifest['version']} if release else {}])
     if not binding.acquire(run_id,obs,version,snapshot_hash=snapshot,snapshot_data=observation):
         from .store_interface import JournalRecord
