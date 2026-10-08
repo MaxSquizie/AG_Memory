@@ -58,7 +58,8 @@ def incompatible(a,b,rules=()):
 
 
 class CanonicalLedger:
-    def __init__(self, data=None):
+    def __init__(self, data=None, core=None):
+        self._core=core
         self.data = data if data is not None else {}
         for key in ("nodes", "supports", "bindings", "assertions", "usage_links", "observations", "candidates", "reports", "markers", "decisions", "goal_decisions", "goal_paths", "witnesses", "rx_cache", "open_template_links"):
             self.data.setdefault(key, {})
@@ -279,16 +280,22 @@ class CanonicalLedger:
         self.data['observations'][digest(tag)]={'source_tag':tag,'status':'SUPERSEDED'}
         return events
 
+    def _query_index(self):
+        from .native_records import record_index
+        return record_index(self._core,self)
+
     def query(self, node_id, *, point=None, window=None):
-        refs = sorted(rid for rid,r in self.data["reports"].items() if node_id in r.get("node_refs",()) and self.report_open(r))
+        index=self._query_index()
+        refs = sorted(rid for rid in index["report_nodes"].get(node_id,()) if self.report_open(self.data["reports"][rid]))
         result = {"answer":"UNKNOWN","conflict_ref":refs}
         if node_id not in self.f_visible():
             return result
         if point is None and window is None:
             result["answer"] = "YES"
             return result
-        for a in self.data["assertions"].values():
-            if a["target_ref"] != node_id or not self.evidence_live({"record_id":a["assertion_id"]}):
+        for aid in index["targets"].get(node_id,()):
+            a=self.data["assertions"][aid]
+            if not self.evidence_live({"record_id":aid}):
                 continue
             r = normalize(region(a["region"]))
             if point is not None:
@@ -309,10 +316,11 @@ class CanonicalLedger:
         node_id=support['conclusion_ref']
         # Only assertions of this support may answer the selected path.
         result={'answer':'YES' if point is None and window is None else 'UNKNOWN',
-                'conflict_ref':sorted(rid for rid,r in self.data['reports'].items()
-                                      if node_id in r.get('node_refs',()) and self.report_open(r))}
-        for aid,a in self.data['assertions'].items():
-            if a['support_record_id']!=support_id or not self.evidence_live({'record_id':aid}): continue
+                'conflict_ref':sorted(rid for rid in self._query_index()['report_nodes'].get(node_id,())
+                                      if self.report_open(self.data['reports'][rid]))}
+        for aid in self._query_index()['assertions'].get(support_id,()):
+            a=self.data['assertions'][aid]
+            if not self.evidence_live({'record_id':aid}): continue
             r=normalize(region(a['region']))
             if point is not None:
                 ok=covers(r,TemporalRegion('POINT',point=point)) is True
@@ -329,34 +337,38 @@ class CanonicalLedger:
         result=self.query(node_id,point=point,window=window)
         spec=self.data['nodes'].get(node_id,{})
         ck=spec.get('content_key')
-        refs={rid for rid,r in self.data['reports'].items() if self.report_open(r) and any(c.get('content_key')==ck for c in r.get('candidates',()))}
+        index=self._query_index()
+        refs={rid for rid in index['report_content'].get(ck,()) if self.report_open(self.data['reports'][rid])}
         result['conflict_ref']=sorted(set(result['conflict_ref'])|refs)
         if result['answer']=='YES': return result
         if spec.get('function_id'):
             # NOT(P) shares P's conflict content key, but is a different formula.
             # A positive P path must never be borrowed as a proof of NOT(P).
-            negations=[(uid,n) for uid,n in self.data['nodes'].items()
-                       if n.get('function_id')=='NOT' and n.get('operands')==[node_id]]
+            negations=[(uid,self.data['nodes'][uid]) for uid in index['negations'].get(node_id,())]
             for uid,n in negations:
                 if uid not in self.f_visible(): continue
                 if point is None and window is None:
                     return {**result,'answer':'NO','evidence_ref':uid}
                 wanted=TemporalRegion('POINT',point=point) if point is not None else TemporalRegion('CONTINUOUS',lo=window[0],hi=window[1])
-                for aid,a in self.data['assertions'].items():
-                    if a['target_ref']==uid and self.evidence_live({'record_id':aid}) and covers(region(a['region']),wanted) is True:
+                for aid in index['targets'].get(uid,()):
+                    a=self.data['assertions'][aid]
+                    if self.evidence_live({'record_id':aid}) and covers(region(a['region']),wanted) is True:
                         return {**result,'answer':'NO','evidence_ref':uid}
             return result
-        for uid,n in self.data['nodes'].items():
-            if uid==node_id or n.get('function_id') or not ck or n.get('content_key')!=ck: continue
+        for uid in index['content'].get(ck,()):
+            n=self.data['nodes'][uid]
+            if uid==node_id or n.get('function_id') or not ck: continue
             other=self.query(uid,point=point,window=window)
             if other['answer']=='YES':
                 result.update(answer='YES',evidence_ref=uid); return result
-        for uid,n in self.data['nodes'].items():
-            if n.get('function_id')!='NOT' or n.get('content_key')!=ck or uid not in self.f_visible(): continue
+        for uid in index['content'].get(ck,()):
+            n=self.data['nodes'][uid]
+            if n.get('function_id')!='NOT' or uid not in self.f_visible(): continue
             if point is None and window is None:
                 result.update(answer='NO',evidence_ref=uid); return result
-            for a in self.data['assertions'].values():
-                if a['target_ref']!=uid or not self.evidence_live({'record_id':a['assertion_id']}): continue
+            for aid in index['targets'].get(uid,()):
+                a=self.data['assertions'][aid]
+                if not self.evidence_live({'record_id':aid}): continue
                 r=normalize(region(a['region']))
                 wanted=TemporalRegion('POINT',point=point) if point is not None else TemporalRegion('CONTINUOUS',lo=window[0],hi=window[1])
                 if window is not None and window[0]==window[1]: wanted=TemporalRegion('POINT',point=window[0])

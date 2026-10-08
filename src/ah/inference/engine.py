@@ -906,7 +906,7 @@ class InferenceEngine:
         runtime.focus(goal.template_ref, logical_depth=0, reason="goal-generated template query seed")
         adapter=getattr(self.core,'_formalizer_adapter',None)
         if adapter is not None:
-            answer=adapter.query_template(goal.template_ref.uid,goal.known_roles,point=goal.temporal_point,window=goal.temporal_window)
+            answer=adapter.query_template(goal.template_ref.uid,goal.known_roles,point=goal.temporal_point,window=goal.temporal_window,budget=[self._limits(query)[1]])
             if answer['managed']:
                 status=LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED if answer['answer']=='NO' else LogicalStatus.UNKNOWN
                 ref=self.core.ref(answer['evidence_ref']) if answer.get('evidence_ref') else None

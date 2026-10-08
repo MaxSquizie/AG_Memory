@@ -39,7 +39,7 @@ def validate_request(request, roles=None):
         'FORMULA':{'mode'}, 'WHY':{'mode'}, 'WHEN':{'mode'},
         'WH':{'mode','requested_roles'}, 'HOW':{'mode','requested_roles'},
         'COUNT':{'mode','count_role','expected_count','comparison','domain_certificate','aggregate','count_unit'},
-        'COMPARE':{'mode','measure_id','compare_entity_ref','compare_mention','ordering'},
+        'COMPARE':{'mode','measure_id','compare_entity_ref','compare_mention','ordering','domain_certificate'},
         'SUPERLATIVE':{'mode','measure_id','requested_roles','ordering','domain_certificate'},
     }[mode]
     if not set(request)<=allowed:

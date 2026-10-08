@@ -55,6 +55,7 @@ def candidate_values(core,ledger,pattern,names,budget,*,bound=False,context=None
         if p.operator is None and not p.lexical_anchor:
             gaps=[(r,v.local_id if bound else v.name,v.sort) for r,v in p.actants if isinstance(v,typ) and (v.local_id if bound else v.name) in active]
             if gaps:
+                indexed_rules=None
                 for n in core.store.find_hypernodes_by_template(p.template_ref):
                     spend()
                     actual=ledger.data['nodes'].get(n.uid,{}).get('actants',{})
@@ -71,20 +72,26 @@ def candidate_values(core,ledger,pattern,names,budget,*,bound=False,context=None
                     # consequent is materialized. Final full-body proof still
                     # checks every role, live premise and temporal license.
                     from .native_derivations import pattern_from_ref
-                    for implication in core.store.function_parents(n.uid):
-                        spend(); impl=ledger.data['nodes'].get(implication.uid,{})
-                        if impl.get('function_id')!='IMPLIES' or impl['operands'][1]!=n.uid: continue
-                        for universal in core.store.function_parents(implication.uid):
-                            spend(); root=ledger.data['nodes'].get(universal.uid,{})
-                            if root.get('function_id')!='FORALL' or root['operands'][1]!=implication.uid or not ledger.f_visible(universal.uid): continue
-                            variable=root['operands'][0]
-                            if not isinstance(variable,dict) or variable.get('bound_var') not in set(symbolic.values()): continue
-                            restriction=pattern_from_ref(core,ledger,impl['operands'][0],budget)
-                            bound_values=candidate_values(core,ledger,restriction,tuple(sorted(set(symbolic.values()))),budget,
-                                                          bound=True,context=context,_depth=_depth+1,_seen=seen)
-                            for name,var in symbolic.items():
-                                values[name].update(bound_values[var])
-                                if len(values[name])>1024: raise ValueError('COMPUTATION_LIMIT')
+                    adapter=getattr(core,'_formalizer_adapter',None)
+                    if adapter is None: continue
+                    from .goal_queries import Search
+                    if indexed_rules is None:
+                        search=Search(adapter,budget)
+                        indexed_rules=search._rules({'template_ref':p.template_ref,'actants':{}})
+                    for root_id,variables,body_id in indexed_rules:
+                        spend()
+                        if not set(symbolic.values())<=set(variables) or not ledger.f_visible(root_id): continue
+                        impl=ledger.data['nodes'].get(body_id,{})
+                        if impl.get('function_id')!='IMPLIES': continue
+                        # A head can be an AND projection; candidate discovery
+                        # follows the same registered projections as the writer.
+                        if not any(head==n.uid for head,path in search._heads(impl['operands'][1])): continue
+                        restriction=pattern_from_ref(core,ledger,impl['operands'][0],budget)
+                        bound_values=candidate_values(core,ledger,restriction,tuple(sorted(set(symbolic.values()))),budget,
+                                                      bound=True,context=context,_depth=_depth+1,_seen=seen)
+                        for name,var in symbolic.items():
+                            values[name].update(bound_values[var])
+                            if len(values[name])>1024: raise ValueError('COMPUTATION_LIMIT')
                 if context is not None:
                     from .native_scope import overrides
                     for assumption in overrides(context):

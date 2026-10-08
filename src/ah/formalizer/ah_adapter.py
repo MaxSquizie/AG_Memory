@@ -33,29 +33,33 @@ class AHStoreAdapter(Store):
 
     @property
     def ledger(self):
-        return CanonicalLedger(self._store._state.formalizer_state)
+        return CanonicalLedger(self._store._state.formalizer_state,core=self._core)
 
-    def prove_node(self,uid,*,point=None,window=None):
+    def prove_node(self,uid,*,point=None,window=None,budget=None):
         from .goal_queries import prove_node
         with self._journal.atomic(), self._store._lock:
             self._refresh()
-            diagnostics=prove_node(self,uid,point=point,window=window) or ()
+            diagnostics=prove_node(self,uid,point=point,window=window,budget=budget) or ()
             return {**self.ledger.query_proposition(uid,point=point,window=window),'diagnostics':list(diagnostics)}
 
-    def query_template(self,template_uid,known_roles,*,point=None,window=None):
+    def query_template(self,template_uid,known_roles,*,point=None,window=None,budget=None):
         from .goal_queries import prove_instances
         roles={getattr(k,'value',k):getattr(v,'uid',v) for k,v in known_roles.items()}
         with self._journal.atomic(), self._store._lock:
             self._refresh()
-            diagnostics=prove_instances(self,template_uid,roles,point=point,window=window) or ()
+            budget=budget if budget is not None else [4096]
+            diagnostics=prove_instances(self,template_uid,roles,point=point,window=window,budget=budget) or ()
             result={'answer':'UNKNOWN','conflict_ref':[],'managed':False,'diagnostics':list(diagnostics)}
             for n in self._store.find_hypernodes_by_template(template_uid):
+                budget[0]-=1
+                if budget[0]<0:
+                    result['diagnostics']=sorted(set(result['diagnostics'])|{'COMPUTATION_LIMIT'}); return result
                 spec=self.ledger.data['nodes'].get(n.uid)
                 if spec is None: continue
                 result['managed']=True
                 actual=spec.get('proposition',{}).get('actants',{})
                 if any(actual.get(k)!=v for k,v in roles.items()): continue
-                answer=self.prove_node(n.uid,point=point,window=window)
+                answer=self.prove_node(n.uid,point=point,window=window,budget=budget)
                 result['diagnostics']=sorted(set(result['diagnostics'])|set(answer.get('diagnostics',())))
                 result['conflict_ref']=sorted(set(result['conflict_ref'])|set(answer['conflict_ref']))
                 if answer['answer']=='YES' or answer['answer']=='NO' and actual==roles:
@@ -234,7 +238,7 @@ class AHStoreAdapter(Store):
                         formula=p.get('formula_ref',p['conclusion_ref'])
                         if len(roots)!=1 or roots[0].get('function_id')!='AND' or formula not in roots[0]['operands']: raise ValueError('DERIVATION_FORM_MISMATCH')
                         if ledger.data['nodes'][p['conclusion_ref']].get('content_key')!=ledger.data['nodes'][formula].get('content_key'): raise ValueError('DERIVATION_FORM_MISMATCH')
-                    elif p.get('rule_id') not in {'OR_ELIMINATION','FORALL_INST'} or not p.get('goal_run_id'): raise ValueError('DERIVATION_RULE_INVALID')
+                    elif p.get('rule_id') not in {'OR_ELIMINATION','FORALL_INST','MODUS_PONENS'} or not p.get('goal_run_id'): raise ValueError('DERIVATION_RULE_INVALID')
                 new=p['record_id'] not in ledger.data['supports']
                 ledger.add_support(p)
                 if new: events.append({'node_id':p['conclusion_ref'],'type':'SUPPORT_ADDED','support_id':p['record_id']})

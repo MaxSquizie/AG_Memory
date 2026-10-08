@@ -231,7 +231,7 @@ def compile_native_queries(core,roots,context,attention_refs=()):
     return tuple(results)
 
 
-def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None):
+def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None,budget=None):
     """Narrow leaf T lookup then reverse function index, with bounded unification."""
     steps=0
     workspace_ids={r.uid for r in workspace}
@@ -254,12 +254,18 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None):
         for uid in walk(seed):
             for g in core.store.function_parents(uid):
                 steps_used[0]+=1
+                if budget is not None:
+                    budget[0]-=1
+                    if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
                 if steps_used[0]>limit: raise ValueError('COMPUTATION_LIMIT')
                 parents.add(g.uid)
         return [uid for uid in sorted(parents) if match(p,uid,{})]
     def match(p,uid,variables):
         nonlocal steps
         steps+=1
+        if budget is not None:
+            budget[0]-=1
+            if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
         if steps>limit: raise ValueError('COMPUTATION_LIMIT')
         node=ledger.data['nodes'].get(uid)
         if node is None: return False
@@ -273,6 +279,9 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None):
                 def pair(members,remaining,env):
                     nonlocal steps
                     steps+=1
+                    if budget is not None:
+                        budget[0]-=1
+                        if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
                     if steps>limit: raise ValueError('COMPUTATION_LIMIT')
                     if not members: variables.update(env); return True
                     for i,value in enumerate(remaining):
@@ -420,21 +429,20 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 return outcome(LogicalStatus.UNKNOWN if value is None else LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,
                                diagnostics=('TEMPORAL_ANCHOR_COMPARISON',),
                                conclusion=TemporalComparisonConclusion(pattern.operator,pattern.members[0].bounds,pattern.members[1].bounds) if value is not None else None)
-            if not hypothetical_scope and pattern.occurrence_ref is None and pattern.operator is None and not pattern.lexical_anchor and all(isinstance(v,Ref) for r,v in pattern.actants):
-                atom=ExistsGoal(engine.core.ref(pattern.template_ref),dict(pattern.actants),goal.temporal_point,goal.temporal_window)
-                answer=engine._solve_goal(atom,query,workspace,attention,proof_context=context,runtime=runtime)
-                if isinstance(answer.conclusion,ExistingRefConclusion):
-                    answer=replace(answer,temporal_regions=_answer_regions(adapter.ledger,answer.conclusion.ref.uid,goal,
-                        'NO' if answer.status is LogicalStatus.DISPROVED else 'YES',core=engine.core),proof_context=context)
-                return answer
+            if not hypothetical_scope and pattern.occurrence_ref is None and not pattern.lexical_anchor:
+                from .goal_queries import prove_pattern
+                prove_pattern(adapter,pattern,point=goal.temporal_point,window=goal.temporal_window,budget=_budget)
+                ledger=proof_ledger(engine.core,adapter.ledger,context,goal,_budget,(*workspace,*goal.workspace_refs))
             attested_refs=[]
             if goal.source_scope:
-                paths=ledger.paths()
-                for i,(sid,s) in enumerate(ledger.data['supports'].items()):
-                    if i>=10000: raise ValueError('COMPUTATION_LIMIT')
-                    if sid in paths and s.get('source_tag',[None])[0] in goal.source_scope:
-                        attested_refs.append(engine.core.ref(s['conclusion_ref']))
-            refs=_matching_refs(engine.core,ledger,pattern,limit=4096,workspace=(*workspace,*goal.workspace_refs,*attested_refs))
+                from .native_records import record_index
+                paths=ledger.paths(); index=record_index(engine.core,ledger)
+                for source in goal.source_scope:
+                    for sid in index['sources'].get(source,()):
+                        _budget[0]-=1
+                        if _budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
+                        if sid in paths: attested_refs.append(engine.core.ref(ledger.data['supports'][sid]['conclusion_ref']))
+            refs=_matching_refs(engine.core,ledger,pattern,limit=max(1,min(4096,_budget[0])),workspace=(*workspace,*goal.workspace_refs,*attested_refs),budget=_budget)
             if runtime is not None:
                 runtime.memory_query('NATIVE_FORMULA',pattern.operator or pattern.template_ref or pattern.lexical_anchor,logical_depth=_depth,candidate_count=len(refs),detail='template/reverse-function index or declared attestation workspace')
             conflicts=set()
@@ -586,7 +594,7 @@ def _existential_witness(engine,adapter,variable,body,goal,query,workspace,atten
     return None
 
 
-def _joint_regions(ledger,children,goal):
+def _joint_regions(ledger,children,goal,budget=None):
     """Conclusion regions with a joint realization, including runtime proofs."""
     from .temporal_license import forall_inst_license
     options=[]
@@ -594,9 +602,8 @@ def _joint_regions(ledger,children,goal):
         evidence=[]
         if isinstance(child.conclusion,ExistingRefConclusion) and child.status is LogicalStatus.PROVED:
             uid=child.conclusion.ref.uid
-            evidence=[(normalize(region(a['region'])),a.get('witness_ref'))
-                      for aid,a in ledger.data['assertions'].items()
-                      if a['target_ref']==uid and ledger.evidence_live({'record_id':aid})]
+            evidence=[(normalize(region(ledger.data['assertions'][aid]['region'])),ledger.data['assertions'][aid].get('witness_ref'))
+                      for aid in ledger._query_index()['targets'].get(uid,()) if ledger.evidence_live({'record_id':aid})]
         evidence.extend((r,None) for r in child.temporal_regions)
         evidence=list(dict.fromkeys(evidence))
         if not evidence: return ()
@@ -605,6 +612,9 @@ def _joint_regions(ledger,children,goal):
     result=[]
     for i,combo in enumerate(islice(product(*options),65)):
         if i==64: raise ValueError('COMPUTATION_LIMIT')
+        if budget is not None:
+            budget[0]-=1
+            if budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
         regions=[r for r,w in combo]; witness=combo[0][1]
         if witness and all(w==witness and r==regions[0] for r,w in combo):
             common=regions[0]  # shared AND witness, not independent existentials

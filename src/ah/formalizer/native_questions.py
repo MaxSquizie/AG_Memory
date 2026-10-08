@@ -196,72 +196,186 @@ def measured_values(core,ledger,entity,schema,goal,budget):
 
 
 def _compare(engine,ledger,goal,schema,query,workspace,attention,context,runtime,budget,depth,outcome):
-    from .native_queries import Pattern,solve_native_goal,_answers_window
-    from .native_scope import query_region
+    from ah.model import BoundVar, CountLiteral
+    from ah.inference.contracts import FormulaQueryConclusion, ExistingRefConclusion
+    from .native_queries import Pattern,solve_native_goal,_answers_window,_joint_regions
+    from .native_scope import query_region,proof_ledger
+    from .query_bindings import candidate_values,substitute,pattern_signature
     owner=_owner(goal.pattern)
-    left=dict(owner.actants).get(next(r for r,v in owner.actants if r.value==schema['subject_role'])) if any(r.value==schema['subject_role'] for r,v in owner.actants) else None
     uid=goal.request.get('compare_entity_ref')
-    if not isinstance(left,Ref) or left.kind is not RefKind.M or not engine.core.store.has_uid(uid) or engine.core.store.kind_of(uid) is not RefKind.M:
+    if not engine.core.store.has_uid(uid) or engine.core.store.kind_of(uid) is not RefKind.M:
         raise ValueError('QUERY_ENTITY_UNBOUND')
-    right=engine.core.ref(uid)
-    first=measured_values(engine.core,ledger,left,schema,goal,budget)
-    second=measured_values(engine.core,ledger,right,schema,goal,budget)
-    ordering=goal.request.get('ordering','GT'); observations=[]; refs=[]; regions=[]
-    for a,ar,aa in first:
-        for b,br,bb in second:
-            _spend(budget)
-            value={'GT':a>b,'LT':a<b,'EQ':a==b,'GE':a>=b,'LE':a<=b,'NE':a!=b}[ordering]
-            for ra in aa:
-                for rb in bb:
-                    license=forall_inst_license(ra,rb)
-                    if license.status!='LICENSED' or not _answers_window(normalize(license.derived_region),goal): continue
-                    # A negative pair at one unknown point does not refute an
-                    # existential comparison over an entire requested window.
-                    if not value and goal.temporal_window is not None and covers(license.derived_region,query_region(goal)) is not True: continue
-                    observations.append(value); refs.extend((ar,br)); regions.append(license.derived_region)
-    status=LogicalStatus.UNKNOWN
-    if observations and len(set(observations))==1:
-        status=LogicalStatus.PROVED if observations[0] else LogicalStatus.DISPROVED
+    right=engine.core.ref(uid); ordering=goal.request.get('ordering','GT')
+    release=engine.core._formalizer_adapter.resource_release
+    diagnostics=set(); rows=[]
+
+    def fresh():
+        return proof_ledger(engine.core,engine.core._formalizer_adapter.ledger,context,goal,budget,(*workspace,*goal.workspace_refs))
+
+    def result(status,refs=(),regions=(),kind='COMPARE_FORMULA'):
+        return outcome(status,tuple(dict.fromkeys(refs)),(),FormulaQueryConclusion(kind,tuple(refs)),tuple(dict.fromkeys(regions)))
+
+    def negative(answer):
+        if answer.status is LogicalStatus.DISPROVED and goal.temporal_window is not None:
+            if not any(covers(r,query_region(goal)) is True for r in answer.temporal_regions):
+                return replace(answer,status=LogicalStatus.UNKNOWN,temporal_regions=())
+        return answer
+
+    def leaf(p):
+        scope=fresh(); left=next((v for r,v in p.actants if r.value==schema['subject_role']),None)
+        if not isinstance(left,Ref) or left.kind is not RefKind.M:
+            diagnostics.add('QUERY_ENTITY_UNBOUND'); return result(LogicalStatus.UNKNOWN)
+        first=measured_values(engine.core,scope,left,schema,goal,budget)
+        second=measured_values(engine.core,scope,right,schema,goal,budget)
+        yes=[]; no=[]
+        for a,ar,aa in first:
+            for b,br,bb in second:
+                _spend(budget)
+                # Pin the concrete measured records. Joint evidence includes
+                # shared AND witnesses, not only independent region algebra.
+                children=[outcome(LogicalStatus.PROVED,(ar,),(),ExistingRefConclusion(ar),aa),
+                          outcome(LogicalStatus.PROVED,(br,),(),ExistingRefConclusion(br),bb)]
+                common=_joint_regions(scope,children,goal,budget)
+                if not common: continue
+                value={'GT':a>b,'LT':a<b,'EQ':a==b,'GE':a>=b,'LE':a<=b,'NE':a!=b}[ordering]
+                answer=negative(result(LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,(ar,br),common))
+                if answer.status is LogicalStatus.PROVED: yes.append(answer)
+                elif answer.status is LogicalStatus.DISPROVED: no.append(answer)
+        rows.append({'left_ref':left.uid,'left_values':[str(x[0]) for x in first],
+                     'right_values':[str(x[0]) for x in second]})
+        if yes and no:
+            diagnostics.add('CONFLICTING_MEASURES'); return result(LogicalStatus.UNKNOWN)
+        decisive=yes or no
+        if not decisive:
+            diagnostics.add('COMPARABLE_MEASURES_ABSENT'); return result(LogicalStatus.UNKNOWN)
+        return result(decisive[0].status,tuple(r for a in decisive for r in a.premise_refs),
+                      tuple(r for a in decisive for r in a.temporal_regions))
+
+    def is_owner(p):
+        return isinstance(p,Pattern) and (p.query_owner or p is owner)
+
     def contains_owner(p):
-        return isinstance(p,Pattern) and (p is owner or any(contains_owner(m) for m in p.members) or any(contains_owner(v) for r,v in p.actants))
+        return isinstance(p,Pattern) and (is_owner(p) or any(contains_owner(m) for m in p.members) or any(contains_owner(v) for r,v in p.actants))
+
     def value_gap_only(p,variable):
-        from ah.model import BoundVar
         if isinstance(p,BoundVar): return p.local_id!=variable.local_id
         if not isinstance(p,Pattern): return True
         return all(value_gap_only(m,variable) for m in p.members) and all(
-            p is owner and r.value==schema['value_role'] or value_gap_only(v,variable) for r,v in p.actants)
+            is_owner(p) and r.value==schema['value_role'] or value_gap_only(v,variable) for r,v in p.actants)
+
+    def combine(operator,children):
+        yes=[a for a in children if a.status is LogicalStatus.PROVED]
+        no=[a for a in children if a.status is LogicalStatus.DISPROVED]
+        state=LogicalStatus.UNKNOWN; decisive=[]; joint=False
+        if operator=='AND':
+            if no: state=LogicalStatus.DISPROVED; decisive=no
+            elif len(yes)==len(children): state=LogicalStatus.PROVED; decisive=yes; joint=True
+        elif operator=='OR':
+            if yes: state=LogicalStatus.PROVED; decisive=yes
+            elif len(no)==len(children): state=LogicalStatus.DISPROVED; decisive=no; joint=True
+        elif operator=='XOR':
+            if len(yes)>1: state=LogicalStatus.DISPROVED; decisive=yes; joint=True
+            elif len(no)==len(children): state=LogicalStatus.DISPROVED; decisive=no; joint=True
+            elif len(yes)==1 and len(no)==len(children)-1: state=LogicalStatus.PROVED; decisive=children; joint=True
+        regions=_joint_regions(fresh(),decisive,goal,budget) if joint else tuple(r for a in decisive for r in a.temporal_regions)
+        if joint and not regions:
+            diagnostics.add('COMPARISON_SCOPE_NOT_ESTABLISHED'); state=LogicalStatus.UNKNOWN
+        return negative(result(state,tuple(r for a in decisive for r in a.premise_refs),regions))
+
+    def domain(p,variable,body):
+        scope=fresh(); candidates=candidate_values(engine.core,scope,body,(variable.local_id,),budget,bound=True,context=context)[variable.local_id]
+        complete=False; cert_refs=(); signature=pattern_signature(p)
+        window=[goal.temporal_point,goal.temporal_point] if goal.temporal_point is not None else list(goal.temporal_window) if goal.temporal_window is not None else None
+        if not context.is_counterfactual():
+            for cert in release.resources.get('ComparisonDomainCertificate',{}).get('entries',()):
+                _spend(budget)
+                if (cert['pattern_signature']==signature and cert['variable']==str(variable.local_id) and cert['measure_id']==schema['measure_id']
+                    and cert['request_window']==window and candidates<=set(cert['member_refs'])
+                    and (goal.request.get('domain_certificate') is None or cert['domain_id']==goal.request['domain_certificate'])
+                    and all(s in scope.paths() for s in cert['completeness_evidence'])):
+                    candidates=set(cert['member_refs']); complete=True
+                    cert_refs=tuple(engine.core.ref(scope.data['supports'][s]['conclusion_ref']) for s in cert['completeness_evidence'])
+                    break
+        return candidates,complete,cert_refs
+
     def full(p,level=0):
         _spend(budget)
-        if level>engine.settings.max_depth: raise ValueError('COMPUTATION_LIMIT')
-        if p is owner: return status,tuple(dict.fromkeys(refs))
-        if not isinstance(p,Pattern): return LogicalStatus.UNKNOWN,()
-        if p.operator in {'AND','OR','XOR','NOT'}:
-            children=[full(m,level+1) for m in p.members]; statuses=[s for s,r in children]
-            evidence=tuple(dict.fromkeys(r for s,rr in children for r in rr))
-            if p.operator=='NOT' and len(statuses)==1:
-                return ({LogicalStatus.PROVED:LogicalStatus.DISPROVED,LogicalStatus.DISPROVED:LogicalStatus.PROVED}.get(statuses[0],LogicalStatus.UNKNOWN),evidence)
-            yes=statuses.count(LogicalStatus.PROVED); no=statuses.count(LogicalStatus.DISPROVED)
-            if p.operator=='AND': s=LogicalStatus.DISPROVED if no else LogicalStatus.PROVED if yes==len(statuses) else LogicalStatus.UNKNOWN
-            elif p.operator=='OR': s=LogicalStatus.PROVED if yes else LogicalStatus.DISPROVED if no==len(statuses) else LogicalStatus.UNKNOWN
-            else: s=LogicalStatus.PROVED if yes==1 and no==len(statuses)-1 else LogicalStatus.DISPROVED if yes>1 or no==len(statuses) else LogicalStatus.UNKNOWN
-            # Correlation of independent window claims is not established.
-            if p.operator=='AND' and goal.temporal_window is not None and s is LogicalStatus.PROVED:
-                s=LogicalStatus.UNKNOWN
-            return s,evidence
-        if p.operator=='EXISTS' and len(p.members)==2 and contains_owner(p.members[1]) and value_gap_only(p.members[1],p.members[0]):
-            # This is the compiler's omitted measure-value slot. Comparing
-            # actual values itself supplies that existential witness; never
-            # replace the comparison with a bare 'measurement exists' proof.
-            return full(p.members[1],level+1)
-        if contains_owner(p): return LogicalStatus.UNKNOWN,()
-        answer=solve_native_goal(engine,_formula(goal,p),query,workspace,attention,context,runtime,_budget=budget,_depth=depth+1)
+        if depth+level>engine.settings.max_depth: raise ValueError('COMPUTATION_LIMIT')
+        if is_owner(p): return leaf(p)
+        if not isinstance(p,Pattern): return result(LogicalStatus.UNKNOWN)
+        if p.operator in {'AND','OR','XOR'}:
+            return combine(p.operator,[full(m,level+1) for m in p.members])
+        if p.operator=='NOT' and len(p.members)==1:
+            answer=full(p.members[0],level+1)
+            state={LogicalStatus.PROVED:LogicalStatus.DISPROVED,LogicalStatus.DISPROVED:LogicalStatus.PROVED}.get(answer.status,LogicalStatus.UNKNOWN)
+            return negative(result(state,answer.premise_refs,answer.temporal_regions))
+        if p.operator=='IMPLIES' and len(p.members)==2:
+            antecedent=full(p.members[0],level+1); consequent=full(p.members[1],level+1)
+            inverted={LogicalStatus.PROVED:LogicalStatus.DISPROVED,LogicalStatus.DISPROVED:LogicalStatus.PROVED}.get(antecedent.status,LogicalStatus.UNKNOWN)
+            return combine('OR',[negative(result(inverted,antecedent.premise_refs,antecedent.temporal_regions)),consequent])
+        quantified=p.operator in {'EXISTS','FORALL'} and len(p.members)==2
+        numeric=p.operator in {'AT_LEAST_N','EXACTLY_N','AT_MOST_N'} and len(p.members)==3 and isinstance(p.members[2],CountLiteral)
+        if (quantified or numeric) and isinstance(p.members[0],BoundVar) and contains_owner(p.members[1]):
+            variable,body=p.members[:2]
+            if p.operator=='EXISTS' and value_gap_only(body,variable): return full(body,level+1)
+            candidates,complete,cert_refs=domain(p,variable,body)
+            children=[]
+            for value in sorted(candidates):
+                _spend(budget); ref=engine.core.ref(value)
+                if variable.sort.value=='ENTITY' and ref.kind is not RefKind.M: continue
+                children.append(full(substitute(body,{variable.local_id:ref},bound=True),level+1))
+            if numeric:
+                from itertools import combinations,islice
+                n=p.members[2].value
+                yes=[a for a in children if a.status is LogicalStatus.PROVED]
+                no=[a for a in children if a.status is LogicalStatus.DISPROVED]
+                witnesses=n if p.operator=='AT_LEAST_N' else n+1
+                if 0<witnesses<=len(yes):
+                    for group in islice(combinations(yes,witnesses),65):
+                        _spend(budget); common=_joint_regions(fresh(),group,goal,budget)
+                        if common:
+                            state=LogicalStatus.PROVED if p.operator=='AT_LEAST_N' else LogicalStatus.DISPROVED
+                            return negative(result(state,tuple(r for a in group for r in a.premise_refs),common))
+                if complete and len(yes)+len(no)==len(children):
+                    if children: common=_joint_regions(fresh(),children,goal,budget)
+                    else:
+                        from .native_derivations import proof_regions
+                        common=tuple(r for r in proof_regions(engine.core,fresh(),cert_refs,budget) if _answers_window(r,goal))
+                    if common:
+                        value={'AT_LEAST_N':len(yes)>=n,'AT_MOST_N':len(yes)<=n,'EXACTLY_N':len(yes)==n}[p.operator]
+                        return negative(result(LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,
+                            (*cert_refs,*(r for a in children for r in a.premise_refs)),common))
+                diagnostics.add('INCOMPLETE_COMPARISON_DOMAIN'); return result(LogicalStatus.UNKNOWN)
+            decisive=[a for a in children if a.status is (LogicalStatus.PROVED if p.operator=='EXISTS' else LogicalStatus.DISPROVED)]
+            if decisive:
+                state=LogicalStatus.PROVED if p.operator=='EXISTS' else LogicalStatus.DISPROVED
+                return negative(result(state,tuple(r for a in decisive for r in a.premise_refs),tuple(r for a in decisive for r in a.temporal_regions)))
+            wanted=LogicalStatus.DISPROVED if p.operator=='EXISTS' else LogicalStatus.PROVED
+            if complete and children and all(a.status is wanted for a in children):
+                regions=_joint_regions(fresh(),children,goal,budget)
+                if regions: return negative(result(wanted,(*cert_refs,*(r for a in children for r in a.premise_refs)),regions))
+            # A closed empty domain still needs the certificate's own temporal
+            # grounding before vacuous truth/falsehood is licensed.
+            if complete and not children:
+                from .native_derivations import proof_regions
+                regions=tuple(r for r in proof_regions(engine.core,fresh(),cert_refs,budget) if _answers_window(r,goal))
+                if regions: return negative(result(wanted,cert_refs,regions))
+            diagnostics.add('INCOMPLETE_COMPARISON_DOMAIN'); return result(LogicalStatus.UNKNOWN)
+        if contains_owner(p):
+            diagnostics.add('COMPARISON_FORMULA_UNSUPPORTED'); return result(LogicalStatus.UNKNOWN)
+        answer=solve_native_goal(engine,_formula(goal,p),query,workspace,attention,context,runtime,_budget=budget,_depth=depth+level+1)
         if 'COMPUTATION_LIMIT' in answer.diagnostics: raise ValueError('COMPUTATION_LIMIT')
-        return answer.status,answer.premise_refs
-    final,proofs=full(goal.pattern)
-    diagnostics=('CONFLICTING_MEASURES',) if len(set(observations))>1 else () if observations else ('COMPARABLE_MEASURES_ABSENT',)
-    return outcome(final,proofs,diagnostics,QuestionAnswerConclusion('COMPARE',{
-        'measure_id':schema['measure_id'],'unit':schema['unit'],'left_ref':left.uid,'right_ref':right.uid,'ordering':ordering,
-        'left_values':[str(x[0]) for x in first],'right_values':[str(x[0]) for x in second]},bool(observations)),regions)
+        diagnostics.update(answer.diagnostics)
+        return answer
+
+    final=full(goal.pattern)
+    left=next((v for r,v in owner.actants if r.value==schema['subject_role']),None)
+    payload={'measure_id':schema['measure_id'],'unit':schema['unit'],
+             'left_ref':left.uid if isinstance(left,Ref) else None,'right_ref':right.uid,'ordering':ordering,
+             'left_values':rows[0]['left_values'] if len(rows)==1 else [],
+             'right_values':rows[0]['right_values'] if len(rows)==1 else [],'comparisons':rows}
+    return outcome(final.status,final.premise_refs,tuple(sorted(diagnostics)),QuestionAnswerConclusion('COMPARE',payload,
+                   final.status is not LogicalStatus.UNKNOWN),final.temporal_regions)
 
 
 def _superlative(engine,release,ledger,goal,schema,query,workspace,attention,context,runtime,budget,depth,outcome):

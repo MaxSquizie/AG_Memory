@@ -38,7 +38,7 @@ _DEFAULT_RULE_TABLE = {r.name: r for r in DEFAULT_RULES}
 @dataclass(frozen=True)
 class GoalRequest:
     goal_run_id: str
-    rule_id: str                       # "OR_ELIMINATION" | "FORALL_INST"
+    rule_id: str                       # registered on-demand modus
     premise_support_ids: tuple         # support ids that must be live at apply time
     conclusion_signature: str          # canonical content signature (node + path dedup)
     temporal: Optional[tuple] = None   # regions for licensing, e.g. (w_or, w_not) / (w_interval, w_instance)
@@ -47,6 +47,11 @@ class GoalRequest:
     conclusion_ref: str | None = None
     conclusion_ops: tuple = ()
     conclusion_operator: Optional[str] = None  # I25: declared operator of the conclusion (form check)
+    instantiation: tuple = ()  # scoped outer-variable substitutions
+    antecedent_proof: dict | None = None  # checked tree of concrete support records
+    rule_root_support_id: str | None = None
+    instantiation_depth: int | None = None
+    conclusion_path: tuple[int, ...] = ()  # registered AND_ELIMINATION composition
 
 
 @dataclass
