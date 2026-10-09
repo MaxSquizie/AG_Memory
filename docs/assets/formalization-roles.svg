@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" role="img" aria-labelledby="ttl ds">
+<title id="ttl">Разбор наблюдения в типизированную структуру</title>
+<desc id="ds">Исходная фраза разделена на событие падения давления, его участника, место, время и ссылку на станцию. Линии показывают роли предиката и временное основание.</desc>
+<defs>
+<pattern id="bg" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#47665A" stroke-width=".65" opacity=".27"/></pattern>
+<linearGradient id="panel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#142B26"/><stop offset="1" stop-color="#0E201E"/></linearGradient>
+<linearGradient id="green" x1="0" x2="1"><stop stop-color="#CDF4C5"/><stop offset="1" stop-color="#6DCAB3"/></linearGradient>
+<filter id="glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="glowBig" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="19" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<marker id="mintArr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#75CCAE" stroke-width="1.7"/></marker>
+<marker id="goldArr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#F0BA73" stroke-width="1.7"/></marker>
+<style>
+text{font-family:'DejaVu Sans','Arial',sans-serif}
+.head{font-size:40px;font-weight:700;fill:#F2F0DC}
+.sub{font-size:23px;fill:#A5BEB4}
+.eyebrow{font-size:19px;font-weight:700;fill:#A8D4BE}
+.nodeText{font-size:26px;font-weight:700;fill:#ECF4E7}
+.note{font-size:20px;fill:#ABC4B5}
+</style>
+</defs><rect width="1600" height="800" fill="#0B1918"/><rect width="1600" height="800" fill="url(#bg)"/>
+<rect x="42" y="42" width="1516" height="716" rx="25" fill="#10221E" stroke="#456F5F" stroke-width="2"/>
+<text x="80" y="110" class="head" >Одно предложение — несколько разных объектов памяти</text>
+<text x="80" y="150" class="sub" >Слова становятся предикатами, аргументами, временными связями и основаниями.</text>
+<rect x="80" y="198" width="1440" height="95" rx="13" fill="#20352D" stroke="#9ABF8E" stroke-width="1.5"/>
+<text x="112" y="239" class="nodeText" style='font-size:30px'>«В 02:14 давление в отсеке О2 станции «Орион» упало».</text>
+<text x="112" y="275" class="note" style='font-size:19px'>Исходный текст сохраняется: формализация не заменяет наблюдение.</text>
+<path d="M800 295V345" fill="none" stroke="#86DAB7" stroke-width="3" marker-end="url(#mintArr)"/>
+<rect x="625" y="360" width="350" height="111" rx="18" fill="#274033" stroke="#D9B777" stroke-width="2"/>
+<text x="800" y="403" class="nodeText" text-anchor='middle' style='font-size:25px'>ПАДЕНИЕ ДАВЛЕНИЯ</text>
+<text x="800" y="438" class="note" text-anchor='middle'>событие N</text>
+<path d="M630 424C530 420 420 440 321 521" fill="none" stroke="#6FC9A7" stroke-width="3" marker-end="url(#mintArr)"/>
+<path d="M800 472V527" fill="none" stroke="#D9B777" stroke-width="3" marker-end="url(#goldArr)"/>
+<path d="M972 425C1100 427 1210 441 1278 521" fill="none" stroke="#6FC9A7" stroke-width="3" marker-end="url(#mintArr)"/>
+
+<rect x="100" y="531" width="310" height="86" rx="13" fill="#142925" stroke="#95E0B5" stroke-width="1.8"/>
+<circle cx="123" cy="574" r="7" fill="#95E0B5" filter="url(#glow)"/>
+<text x="142" y="569" class="nodeText" style='font-size:23px'>Отсек О2</text>
+<text x="142" y="598" class="note" style='font-size:18px'>место события</text>
+
+<rect x="640" y="531" width="310" height="86" rx="13" fill="#142925" stroke="#E4BB79" stroke-width="1.8"/>
+<circle cx="663" cy="574" r="7" fill="#E4BB79" filter="url(#glow)"/>
+<text x="682" y="569" class="nodeText" style='font-size:23px'>02:14</text>
+<text x="682" y="598" class="note" style='font-size:18px'>временная привязка</text>
+
+<rect x="1175" y="531" width="310" height="86" rx="13" fill="#142925" stroke="#95E0B5" stroke-width="1.8"/>
+<circle cx="1198" cy="574" r="7" fill="#95E0B5" filter="url(#glow)"/>
+<text x="1217" y="569" class="nodeText" style='font-size:23px'>Падение давления</text>
+<text x="1217" y="598" class="note" style='font-size:18px'>тип предиката</text>
+<path d="M255 619V654H520" fill="none" stroke="#5D9888" stroke-width="2" />
+<path d="M1330 619V654H1070" fill="none" stroke="#5D9888" stroke-width="2" />
+<text x="795" y="685" class="sub" text-anchor='middle'>«О2» и «Орион» связываются с уже известными сущностями.</text>
+<text x="795" y="722" class="sub" text-anchor='middle'>Время привязано к основанию наблюдения, а не просто к надписи.</text>
+</svg>
