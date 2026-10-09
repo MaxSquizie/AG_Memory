@@ -6,7 +6,9 @@ cannot send a request: missing durable reply bytes are an explicit failure.
 from copy import deepcopy
 from dataclasses import asdict
 from pathlib import Path
+import http.client
 import itertools, json, os, urllib.request, urllib.error
+from urllib.parse import urlparse
 from ah.formalizer.canonical_ledger import digest
 from ah.formalizer.real_backend import RealBackendSelector
 from ah.formalizer.run_binding import InterpretationRunBinding
@@ -154,13 +156,27 @@ class ChatBackend:
         body={'model':self.model,'messages':[{'role':'system','content':system},{'role':'user','content':prompt}],
               'temperature':settings.get('temperature',0),'top_p':settings.get('top_p',1),
               'max_tokens':settings.get('max_new_tokens',4096),'stream':False}
-        url=self.config['base_url'].rstrip('/')
-        if not url.endswith('/v1'):url+='/v1'
-        headers={'Content-Type':'application/json'}
-        key=os.environ.get('FORMALIZER_ORACLE_API_KEY')
-        if key:headers['Authorization']='Bearer '+key
-        req=urllib.request.Request(url+'/chat/completions',data=json.dumps(body,ensure_ascii=False).encode(),headers=headers)
-        with urllib.request.urlopen(req,timeout=self.config.get('timeout',120)) as resp: data=json.load(resp)
+        base=self.config['base_url'].rstrip('/')
+        if not base.endswith('/v1'):base+='/v1'
+        parsed=urlparse(base)
+        host=parsed.hostname; port=parsed.port or (443 if parsed.scheme=='https' else 80)
+        payload=json.dumps(body,ensure_ascii=False).encode('utf-8')
+        # NOTE: LM Studio's proxy returns HTTP 502 to urllib.request/requests but accepts raw
+        # http.client for the identical body (verified empirically); use http.client directly.
+        conn=http.client.HTTPConnection(host,port,timeout=self.config.get('timeout',120))
+        try:
+            conn.putrequest('POST','/v1/chat/completions')
+            conn.putheader('Content-Type','application/json'); conn.putheader('Content-Length',str(len(payload)))
+            key=os.environ.get('FORMALIZER_ORACLE_API_KEY')
+            if key:conn.putheader('Authorization','Bearer '+key)
+            conn.endheaders(); conn.send(payload)
+            resp=conn.getresponse(); raw=resp.read()
+            if resp.status!=200:
+                raise RuntimeError(f"HTTP {resp.status}: {resp.reason} at {base}/chat/completions: "
+                                   f"{raw.decode('utf-8','replace')[:300]}")
+            data=json.loads(raw)
+        finally:
+            conn.close()
         text=data['choices'][0]['message']['content']
         if not isinstance(text,str):raise ValueError('PROVIDER_RESPONSE_NOT_TEXT')
         return text
