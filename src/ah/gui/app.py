@@ -45,7 +45,9 @@ def main() -> None:
         "ollama_model": config.llm.ollama_model,
         "lmstudio_model": config.llm.lmstudio_model,
     })
-    services = RuntimeServices.build(config)
+    services = RuntimeServices.build(config, allow_missing_formalizer_resources=True)
+    if services.formalizer_resource_error:
+        print(services.formalizer_resource_error, file=sys.stderr)
 
     app = QApplication.instance() or QApplication(sys.argv)
     app.setApplicationName("AH Agent")

@@ -46,19 +46,66 @@ def _build_formalizer_adapter(config, core, *, backend=None):
     from ah.formalizer.run_binding import InterpretationRunBinding
     from ah.formalizer.runtime_adapter import FormalizerAdapter
     from ah.formalizer.resources.loader import ResourceRelease
+    if backend is None and not config.llm.enabled:
+        return None
+    import json
+    from ah.formalizer.resources.loader import ResourceMissing
+    review_path = config.paths.data_dir / config.formalizer.review_records_filename
+    release_path = config.paths.data_dir / config.formalizer.resource_release_filename
+    missing = [str(path) for path in (release_path, review_path) if not path.is_file()]
+    if missing:
+        raise ResourceMissing('RESOURCE_MISSING: missing files: ' + ', '.join(missing))
+    try:
+        trusted=json.loads(review_path.read_text(encoding='utf-8'))
+    except (OSError,ValueError) as exc:
+        raise ResourceMissing('RESOURCE_MISSING: invalid trusted review file: ' + str(review_path)) from exc
+    release=ResourceRelease.load(release_path,trusted_reviews=trusted)
     journal=JournalChannel(config.paths.data_dir / config.formalizer.journal_filename)
     sel=selector_from_config(config,journal=journal,backend=backend)
     if sel is None: return None
-    import json
-    from ah.formalizer.resources.loader import ResourceMissing
-    try:
-        trusted=json.loads((config.paths.data_dir / config.formalizer.review_records_filename).read_text(encoding='utf-8'))
-    except (OSError,ValueError) as exc:
-        raise ResourceMissing('RESOURCE_MISSING: trusted review file is required') from exc
-    release=ResourceRelease.load(config.paths.data_dir / config.formalizer.resource_release_filename,trusted_reviews=trusted)
     store=AHStoreAdapter(core.store,journal,core=core)
     store.recover_from_head()
+    release.validate_store(core.store)
     return FormalizerAdapter(sel,store=store,binding=InterpretationRunBinding(journal),release=release)
+
+
+def _build_perception_service(config, core, llm, *, allow_missing_resources=False):
+    """Keep the GUI inspectable when resources are absent; never use a legacy parser."""
+    if llm is None:
+        return None, None
+    from ah.formalizer.resources.loader import ResourceMissing
+    try:
+        formalizer = _build_formalizer_adapter(config, core, backend=llm)
+    except ResourceMissing as exc:
+        if not allow_missing_resources:
+            raise
+        import subprocess
+        prepare = subprocess.list2cmdline([
+            'python', 'tools/prepare_formalizer_v7_gui.py',
+            '--config', str(config.source_path), '--out', 'artifacts/gui-local',
+        ])
+        return None, (
+            str(exc) + '\nДля локального тестирования из корня проекта:\n' + prepare
+            + '\nЗапуск: python -m ah.gui.app --config artifacts/gui-local/gui.toml'
+        )
+    service = LLMPerceptionService(
+        llm,
+        LLMPerceptionSettings(
+            system_prompt_path=config.paths.perception_prompt_path,
+            generation=config.llm.perception,
+            protocol=config.llm.perception_protocol,
+            probe_prompt_dir=config.paths.perception_prompt_dir,
+            probe_retry_attempts=config.llm.perception_probe_retry_attempts,
+            ground_actants=config.llm.perception_ground_actants,
+            max_actants_per_act=config.llm.perception_max_actants_per_act,
+            predicate_symbol_language=config.llm.perception_predicate_symbol_language,
+            morphology_backend=config.llm.perception_morphology_backend,
+            embedding_model=config.llm.perception_embedding_model,
+        ),
+        formalizer=formalizer,
+        native_commit=config.formalizer.native_commit,
+    )
+    return service, None
 
 
 @dataclass(slots=True)
@@ -84,6 +131,21 @@ class RuntimeServices:
     llm: LLMBackend | None
     perception: LLMPerceptionService | None
     agent: LLMAgent | None
+    formalizer_resource_error: str | None = None
+    allow_missing_formalizer_resources: bool = False
+
+    @property
+    def formalizer_status(self) -> str:
+        if self.formalizer_resource_error:
+            return 'RESOURCE_MISSING — формализация отключена'
+        if self.perception is None:
+            return 'DISABLED'
+        formalizer = getattr(self.perception, '_formalizer', None)
+        release = getattr(formalizer, '_release', None)
+        review = release.manifest.get('signed_review_id', {}) if release else {}
+        if review.get('reviewer') == 'ORACLE_FIXTURE_ONLY':
+            return 'TEST_ONLY — локальные тестовые ресурсы'
+        return 'READY'
 
     @property
     def native_memory(self):
@@ -97,7 +159,8 @@ class RuntimeServices:
         return DocumentProcessor(self, max_chunk_chars=max_chunk_chars)
 
     @classmethod
-    def build(cls, config: AppConfig, *, core: AHCore | None = None) -> "RuntimeServices":
+    def build(cls, config: AppConfig, *, core: AHCore | None = None,
+              allow_missing_formalizer_resources: bool = False) -> "RuntimeServices":
         persistence = JsonPersistence(config.paths.persistence_file, config.persistence)
         loaded_snapshot = None
         loaded_context = None
@@ -148,26 +211,9 @@ class RuntimeServices:
         diagnostics = RuntimeDiagnostics(core, ignition, runtime_lock=operation_lock)
 
         llm = build_llm_backend(config)
-        perception = (
-            LLMPerceptionService(
-                llm,
-                LLMPerceptionSettings(
-                    system_prompt_path=config.paths.perception_prompt_path,
-                    generation=config.llm.perception,
-                    protocol=config.llm.perception_protocol,
-                    probe_prompt_dir=config.paths.perception_prompt_dir,
-                    probe_retry_attempts=config.llm.perception_probe_retry_attempts,
-                    ground_actants=config.llm.perception_ground_actants,
-                    max_actants_per_act=config.llm.perception_max_actants_per_act,
-                    predicate_symbol_language=config.llm.perception_predicate_symbol_language,
-                    morphology_backend=config.llm.perception_morphology_backend,
-                    embedding_model=config.llm.perception_embedding_model,
-                ),
-                formalizer=_build_formalizer_adapter(config, core, backend=llm),
-                native_commit=config.formalizer.native_commit,
-            )
-            if llm is not None
-            else None
+        perception, resource_error = _build_perception_service(
+            config, core, llm,
+            allow_missing_resources=allow_missing_formalizer_resources,
         )
         agent = (
             LLMAgent(
@@ -206,6 +252,8 @@ class RuntimeServices:
             llm=llm,
             perception=perception,
             agent=agent,
+            formalizer_resource_error=resource_error,
+            allow_missing_formalizer_resources=allow_missing_formalizer_resources,
         )
 
     @staticmethod
@@ -262,6 +310,7 @@ class RuntimeServices:
             self.llm = None
             self.perception = None
             self.agent = None
+            self.formalizer_resource_error = None
         else:
             if self.llm is None:
                 self.llm = build_llm_backend(new_config)
@@ -277,22 +326,9 @@ class RuntimeServices:
                     self.llm = build_llm_backend(new_config)
                 else:
                     self.llm.config = new_config
-            self.perception = LLMPerceptionService(
-                self.llm,
-                LLMPerceptionSettings(
-                    system_prompt_path=new_config.paths.perception_prompt_path,
-                    generation=new_config.llm.perception,
-                    protocol=new_config.llm.perception_protocol,
-                    probe_prompt_dir=new_config.paths.perception_prompt_dir,
-                    probe_retry_attempts=new_config.llm.perception_probe_retry_attempts,
-                    ground_actants=new_config.llm.perception_ground_actants,
-                    max_actants_per_act=new_config.llm.perception_max_actants_per_act,
-                    predicate_symbol_language=new_config.llm.perception_predicate_symbol_language,
-                    morphology_backend=new_config.llm.perception_morphology_backend,
-                    embedding_model=new_config.llm.perception_embedding_model,
-                ),
-                formalizer=_build_formalizer_adapter(new_config, self.core, backend=self.llm),
-                native_commit=new_config.formalizer.native_commit,
+            self.perception, self.formalizer_resource_error = _build_perception_service(
+                new_config, self.core, self.llm,
+                allow_missing_resources=self.allow_missing_formalizer_resources,
             )
             self.agent = LLMAgent(
                 self.llm,
@@ -438,6 +474,9 @@ class RuntimeServices:
                 self.clock.start()
 
     def create_orchestrator(self) -> AgentOrchestrator:
+        if self.formalizer_resource_error:
+            from ah.formalizer.resources.loader import ResourceMissing
+            raise ResourceMissing(self.formalizer_resource_error)
         if self.perception is None or self.agent is None:
             raise RuntimeError("LLM is disabled; inject a perception service/agent for orchestration tests")
         return AgentOrchestrator(

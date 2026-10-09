@@ -129,6 +129,9 @@ class MainWindow(QMainWindow):
         self.canvas_browser.sandbox_node_selected.connect(self._select_sandbox_node)
         self.canvas_browser.sandbox_edge_selected.connect(self._select_sandbox_edge)
         self.setCentralWidget(self.canvas_browser)
+        self.formalizer_status_label = QLabel(self.services.formalizer_status)
+        self.formalizer_status_label.setToolTip(self.services.formalizer_resource_error or '')
+        self.statusBar().addPermanentWidget(self.formalizer_status_label)
 
         self._build_toolbar()
         self._build_chat_dock()
@@ -680,7 +683,8 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
             return
         if self.services.perception is None:
-            QMessageBox.warning(self, "Документ", "Запустите LLM perception перед ingestion.")
+            QMessageBox.warning(self, "Документ", self.services.formalizer_resource_error
+                                or "Запустите LLM perception перед ingestion.")
             return
         if not Path(path).is_file():
             QMessageBox.warning(self, "Документ", f"Файл не найден:\n{path}")
@@ -1093,6 +1097,9 @@ class MainWindow(QMainWindow):
 
         text = self.chat_input.toPlainText().strip()
         if not text:
+            return
+        if self.services.formalizer_resource_error:
+            QMessageBox.warning(self, 'Ресурсы формализатора', self.services.formalizer_resource_error)
             return
         if self.services.llm is None or not self.services.llm.is_running:
             QMessageBox.warning(self, "Диалог", "Сначала запустите локальную LLM.")
@@ -2089,6 +2096,8 @@ class MainWindow(QMainWindow):
         return snap if snap is not None else self.services.graph_inspector.snapshot()
 
     def _refresh_status(self, force: bool = False) -> None:
+        self.formalizer_status_label.setText(self.services.formalizer_status)
+        self.formalizer_status_label.setToolTip(self.services.formalizer_resource_error or '')
         llm_running = bool(self.services.llm and self.services.llm.is_running)
         clock = self.services.clock.stats()
         snap = self._status_snapshot()

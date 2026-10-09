@@ -2,6 +2,15 @@
 
 Это формат реализации, не утверждение полноты всех CandidateSchema архитектуры. Production читает файлы из `config.paths.data_dir`: `formalizer_release.json` и `formalizer_reviews.json`; имена настраиваются в разделе `formalizer`. `native_commit` должен быть true. Legacy preview не является production writer.
 
+Для локального GUI-тестирования есть отдельная подготовка ресурсов **вместе с согласованной AH-памятью**:
+
+```powershell
+python tools/prepare_formalizer_v7_gui.py --config config/lmstudio.toml --out artifacts/gui-local
+python -m ah.gui.app --config artifacts/gui-local/gui.toml
+```
+
+Выходы имеют явную атрибуцию `TEST_ONLY / ORACLE_FIXTURE_ONLY`; исходная память и конфиг не изменяются. Это не production review и не PASS ворот. Каталог должен быть новым. Подробности — [запуск локального GUI и оракула](FORMALIZER_V7_LOCAL_ORACLE.md#gui-с-локальной-моделью). Отсутствие production-файлов не закрывает окно GUI, но блокирует формализацию с `RESOURCE_MISSING` и показывает способ настройки.
+
 ## Создание черновика
 
 Из корня репозитория (PYTHONPATH должен содержать `src`):

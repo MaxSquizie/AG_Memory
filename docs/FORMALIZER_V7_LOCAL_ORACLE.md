@@ -18,6 +18,23 @@ python tools/check_formalizer_v7_oracle.py validate data/formalizer_v7_oracle
 
 Команда сама добавляет `src` в import path; переменная `PYTHONPATH` для CLI не нужна. Используйте отдельное окружение проекта. Для pytest без editable install нужен `PYTHONPATH=src:.` в Linux/WSL.
 
+## GUI с локальной моделью
+
+GUI использует `formalizer_release.json` и `formalizer_reviews.json` из `paths.data_dir`. Эти production-файлы не поставляются как фиктивный reviewed release. Для отдельной тестовой сессии подготовьте оба файла вместе с AH-памятью, на шаблоны которой ссылается `TemplateMap`:
+
+```powershell
+python tools/prepare_formalizer_v7_gui.py --config config/lmstudio.toml --out artifacts/gui-local
+python -m ah.gui.app --config artifacts/gui-local/gui.toml
+```
+
+Команда подготовки работает из корня клона без `PYTHONPATH`; для GUI предварительно установите `python -m pip install -e ".[gui]"`. Для Ollama замените исходный конфиг на `config/ollama.toml`. Настройки модели и сервера берутся из вашего конфига; команда сама не запускает сервер модели.
+
+В новом каталоге создаются `formalizer_release.json`, `formalizer_reviews.json`, согласованная `ah_memory.json`, свежий журнал, `gui.toml` и `fixture_manifest.json`. Это те же явно маркированные `TEST_ONLY / ORACLE_FIXTURE_ONLY` ресурсы, что использует языковой runner. GUI показывает этот статус. Исходный конфиг, обычная память и production-ресурсы не изменяются. Существующий каталог назначения отклоняется; для новой сессии выберите новый путь.
+
+Не переносите только два JSON в существующую память: ссылки на T и AH-снимок должны совпадать. Подготовленный профиль — ограниченный тестовый словарь и стенд для ручного ввода; полный корпус архитектуры запускается командами runner ниже, с собственными фикстурами для каждого случая. G0–G5 и production-покрытие этим профилем не подтверждаются.
+
+При запуске обычного GUI без этих ресурсов окно теперь открывается, показывает `RESOURCE_MISSING` и точные пути/команду подготовки. Формализация и ingestion недоступны до корректной настройки. Остальные production-входы сохраняют строгий отказ; скрытого legacy fallback нет.
+
 ## LM Studio
 
 Загрузите модель, включите OpenAI-compatible server и укажите **точный идентификатор загруженной модели**. Каждый вызов самодостаточен: история диалога в запрос не добавляется. Параметры генерации фиксируются; temperature=0 не считается доказательством детерминизма модели.

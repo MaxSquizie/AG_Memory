@@ -136,6 +136,7 @@ class LLMControlWidget(QWidget):
         self.ram_label = QLabel()
         self.history_label = QLabel()
         self.perception_cfg_label = QLabel()
+        self.formalizer_resources_label = QLabel()
         self.agent_cfg_label = QLabel()
         self.stage_label = QLabel()
         # Long model paths / placement diagnostics must wrap instead of forcing
@@ -145,6 +146,7 @@ class LLMControlWidget(QWidget):
             self.device_policy_label, self.cuda_label, self.placement_label,
             self.ram_label, self.history_label, self.perception_cfg_label,
             self.agent_cfg_label, self.stage_label,
+            self.formalizer_resources_label,
         ):
             value_label.setWordWrap(True)
             value_label.setMinimumWidth(0)
@@ -158,6 +160,7 @@ class LLMControlWidget(QWidget):
         info.addRow("Process RAM", self.ram_label)
         info.addRow("History buffer", self.history_label)
         info.addRow("Perception", self.perception_cfg_label)
+        info.addRow("Ресурсы V7", self.formalizer_resources_label)
         info.addRow("Agent", self.agent_cfg_label)
         info.addRow("Stage", self.stage_label)
         self._monitor_compact_fields = (
@@ -611,6 +614,10 @@ class LLMControlWidget(QWidget):
             return
         backend = self.services.llm
         cfg = self.services.config
+        resource_error = getattr(self.services, 'formalizer_resource_error', None)
+        self.formalizer_resources_label.setText(
+            resource_error or getattr(self.services, 'formalizer_status', 'READY')
+        )
         self.model_label.setText(str(cfg.paths.llm_model_dir or "<not configured>"))
         self.history_label.setText(
             f"{cfg.llm.history_messages} сообщений — "
