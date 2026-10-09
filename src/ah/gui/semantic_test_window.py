@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import sys
+import time
 
 from PySide6.QtCore import QProcess, Slot
 from PySide6.QtWidgets import (
@@ -14,6 +15,13 @@ from PySide6.QtWidgets import (
 )
 
 from .main_window import MainWindow as _BaseMainWindow
+from .oracle_semantic_runner import (
+    build_oracle_command,
+    detect_lmstudio_models,
+    parse_run_stats,
+    render_report,
+    save_report,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,6 +141,10 @@ class MainWindow(_BaseMainWindow):
                 "tests/test_association_goal_compiler_2606.py",
                 "tests/test_association_goal_guards_2606.py",
             ),
+        ),
+        _SemanticSuite(
+            "oracle_model",
+            "V7 Oracle · semantic (LM Studio model)",
         ),
         _SemanticSuite(
             "pytest",
@@ -275,12 +287,126 @@ class MainWindow(_BaseMainWindow):
                 self._semantic_suite_idle("READY")
             return
 
+        if suite.kind == "oracle_model":
+            self._run_oracle_model()
+            # Model detection / config validation may fail synchronously before a
+            # process is created; restore the UI in that case.
+            if getattr(self, "_semantic_test_process", None) is None:
+                self._semantic_suite_idle("READY")
+            return
+
         if suite.kind == "pytest":
             self._run_semantic_pytest(suite)
             return
 
         self._semantic_suite_idle("ERROR")
         raise RuntimeError(f"unsupported semantic suite kind: {suite.kind}")
+
+    # --- V7 semantic oracle (live LM Studio model) -------------------------
+    _ORACLE_LABEL = "V7 Oracle · semantic (LM Studio model)"
+
+    def _run_oracle_model(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        llm = self.services.config.llm
+        base_url = str(getattr(llm, "lmstudio_base_url", "") or "").strip()
+        model = str(getattr(llm, "lmstudio_model", "") or "").strip()
+        api_key = str(getattr(llm, "lmstudio_api_key", "") or "").strip() or None
+        if not base_url:
+            self._semantic_suite_idle("ERROR")
+            QMessageBox.critical(
+                self, self._ORACLE_LABEL,
+                "llm.lmstudio_base_url не задан в конфиге.",
+            )
+            return
+        if not model:
+            models = detect_lmstudio_models(base_url, api_key)
+            if len(models) == 1:
+                model = models[0]
+            elif len(models) > 1:
+                self._semantic_suite_idle("ERROR")
+                QMessageBox.critical(
+                    self, self._ORACLE_LABEL,
+                    "Загружено несколько моделей; задайте llm.lmstudio_model:\n"
+                    + "\n".join(models),
+                )
+                return
+            else:
+                self._semantic_suite_idle("ERROR")
+                QMessageBox.critical(
+                    self, self._ORACLE_LABEL,
+                    f"Не удалось обнаружить загруженную модель по {base_url}/v1/models.",
+                )
+                return
+        out_dir = repo_root / ".kripl" / "oracle_v7" / ("gui_" + time.strftime("%Y%m%d_%H%M%S"))
+        argv = build_oracle_command(repo_root, base_url, model, out_dir)
+        process = QProcess(self)
+        process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+        process.setWorkingDirectory(str(repo_root))
+        if api_key:
+            env = QProcess.environment()
+            env.insert("FORMALIZER_ORACLE_API_KEY", api_key)
+            process.setEnvironment(env)
+        process.readyReadStandardOutput.connect(self._oracle_model_output)
+        process.finished.connect(self._oracle_model_finished)
+        process.errorOccurred.connect(self._oracle_model_error)
+        self._semantic_test_process = process
+        self._semantic_process_output = []
+        self._oracle_out_dir = out_dir
+        self.chat_history.append(
+            f"<b>{self._html(self._ORACLE_LABEL)}</b>: live run of model-required cases "
+            + f"(tier=pipeline) via {self._html(base_url)} model={self._html(model)}"
+        )
+        process.start(sys.executable, argv)
+
+    @Slot()
+    def _oracle_model_output(self) -> None:
+        process = self._semantic_test_process
+        if process is None:
+            return
+        chunk = bytes(process.readAllStandardOutput()).decode("utf-8", errors="replace")
+        if chunk:
+            self._semantic_process_output.append(chunk)
+
+    @Slot(int, QProcess.ExitStatus)
+    def _oracle_model_finished(self, exit_code: int, _status: QProcess.ExitStatus) -> None:
+        self._oracle_model_output()
+        raw = "".join(self._semantic_process_output).strip()
+        out_dir = getattr(self, "_oracle_out_dir", None)
+        stats = parse_run_stats(out_dir) if out_dir is not None else {}
+        report = render_report(stats) if stats else "(no run artifacts found)"
+        status = (
+            "PASS" if stats.get("status") == "PASS"
+            else ("FAIL" if stats else f"EXIT{exit_code}")
+        )
+        self.chat_history.append(
+            f"<b>{self._html(self._ORACLE_LABEL)} {status}</b><br>"
+            + f"<pre>{self._html(report[-12000:])}</pre>"
+        )
+        if out_dir is not None and stats:
+            md_path, json_path = save_report(out_dir, stats)
+            self.chat_history.append(
+                f"report: {md_path}<br>stats: {json_path}"
+            )
+        if raw:
+            self.chat_history.append(f"<b>runner tail</b><pre>{self._html(raw[-2000:])}</pre>")
+        self._semantic_test_process = None
+        self._semantic_process_output = []
+        self._oracle_out_dir = None
+        self._semantic_suite_idle(status)
+
+    @Slot(QProcess.ProcessError)
+    def _oracle_model_error(self, error: QProcess.ProcessError) -> None:
+        process = self._semantic_test_process
+        if process is None or error != QProcess.ProcessError.FailedToStart:
+            return
+        message = process.errorString() or "oracle runner failed to start"
+        self.chat_history.append(
+            f"<b>{self._html(self._ORACLE_LABEL)} ERROR:</b> {self._html(message)}"
+        )
+        self._semantic_test_process = None
+        self._semantic_process_output = []
+        self._oracle_out_dir = None
+        self._semantic_suite_idle("ERROR")
 
     def _run_semantic_pytest(self, suite: _SemanticSuite) -> None:
         if not suite.pytest_targets:
