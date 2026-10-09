@@ -92,3 +92,12 @@ def test_binding_refuses_gold_checks(tmp_path):
     from tools.formalizer_v7_extended_binding import run_case
     with pytest.raises(ValueError,match='GOLD_CHECKS_MUST_BE_REMOVED'):
         run_case({'case_id':'bad','steps':[{'action':'query','checks':[],'payload':{}}]}, {})
+
+
+@pytest.mark.parametrize('feature',['gender','number','person'])
+def test_agreement_fixture_preserves_distinct_known_values(tmp_path,feature):
+    s=Session([],tmp_path/'agreement.log')
+    result=s.action('morph_agreement',{'feature':feature,'left':'known_a','right':'known_b'})
+    assert result['constraint']['result'] is False
+    result=s.action('morph_agreement',{'feature':feature,'left':'UNKNOWN','right':'KNOWN'})
+    assert result['constraint']['result']=='UNKNOWN'

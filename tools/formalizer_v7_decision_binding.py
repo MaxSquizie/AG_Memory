@@ -18,7 +18,9 @@ def decision_action(s,a,p):
     if a=='resolve_tuples':
         n=p['surviving_tuple_count'];ids=tuple('v'+str(i) for i in range(n));state=FormalizationState.new('declared cluster fixture')
         d=Decision('predicate_value','F',ids,selected=ids,lifecycle='PROVISIONAL',selector_outcome=('ONE_SELECTED' if n==1 else 'MULTIPLE_ADMISSIBLE' if n>1 else 'NONE_FIT') if p['search_complete'] else None)
-        statuses=p['source_statuses'];d.source_traces=[CandidateSourceTrace('F','predicate_value',i+1,x,ids if x=='FOUND' else (),reason='COMPUTATION_LIMIT' if x=='BLOCKED' else 'source fixture') for i,x in enumerate(statuses)]
+        # Source FOUND describes pre-filter proposals, not surviving tuples.
+        # A constraint search may prune them all without making FOUND empty.
+        statuses=p['source_statuses'];d.source_traces=[CandidateSourceTrace('F','predicate_value',i+1,x,(ids or ('pruned-source-candidate',)) if x=='FOUND' else (),reason='COMPUTATION_LIMIT' if x=='BLOCKED' else 'source fixture') for i,x in enumerate(statuses)]
         if not p['source_complete']:d.source_traces[-1]=CandidateSourceTrace('F','predicate_value',5,'BLOCKED',reason='source incomplete')
         if p['each_value_has_positive_ground']:d.grounds=[Ground('R','fixture value-specific evidence',value) for value in ids]
         schema=DecisionSchema('fixture',{cid:Relation(cid,cid,2,('SUBJECT','OBJECT'),cid) for cid in ids})

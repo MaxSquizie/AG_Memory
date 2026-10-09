@@ -1,0 +1,1260 @@
+{
+  "acceptance": {
+    "A01": {
+      "BLOCKED": 1
+    },
+    "A02": {
+      "BLOCKED": 1
+    },
+    "A03": {
+      "BLOCKED": 1
+    },
+    "A04": {
+      "BLOCKED": 1
+    },
+    "A05": {
+      "PASS": 1
+    },
+    "A06": {
+      "BLOCKED": 1
+    },
+    "A07": {
+      "PASS": 1
+    },
+    "A08": {
+      "BLOCKED": 1
+    },
+    "A09": {
+      "BLOCKED": 1,
+      "PASS": 36
+    },
+    "A10": {
+      "BLOCKED": 1
+    },
+    "A11": {
+      "BLOCKED": 1
+    },
+    "A12": {
+      "BLOCKED": 1
+    },
+    "A13": {
+      "BLOCKED": 1
+    },
+    "A14": {
+      "BLOCKED": 1
+    },
+    "A15": {
+      "BLOCKED": 1
+    },
+    "A16": {
+      "PASS": 1
+    },
+    "A17": {
+      "BLOCKED": 1
+    },
+    "A18": {
+      "PASS": 197
+    },
+    "A19": {
+      "BLOCKED": 1
+    },
+    "A20": {
+      "PASS": 1
+    },
+    "A21": {
+      "PASS": 1
+    },
+    "A22": {
+      "FAIL": 1
+    },
+    "A23": {
+      "PASS": 1
+    },
+    "A24": {
+      "PASS": 1
+    },
+    "A25": {
+      "FAIL": 1
+    },
+    "A26": {
+      "BLOCKED": 1
+    },
+    "A27": {
+      "BLOCKED": 1
+    },
+    "A28": {
+      "BLOCKED": 1
+    },
+    "A29": {
+      "BLOCKED": 1
+    },
+    "A30": {
+      "BLOCKED": 1
+    },
+    "A31": {
+      "BLOCKED": 1
+    },
+    "A32": {
+      "PASS": 1
+    },
+    "A33": {
+      "BLOCKED": 1
+    },
+    "A34": {
+      "PASS": 1
+    },
+    "A35": {
+      "BLOCKED": 1
+    },
+    "A36": {
+      "PASS": 1
+    },
+    "A37": {
+      "BLOCKED": 1
+    },
+    "A38": {
+      "BLOCKED": 2
+    },
+    "A39": {
+      "PASS": 26
+    }
+  },
+  "actions": {
+    "admit_batch": {
+      "PASS": 1
+    },
+    "admit_with_crash": {
+      "FAIL": 6
+    },
+    "assert_content": {
+      "FAIL": 5
+    },
+    "association_query": {
+      "BLOCKED": 1
+    },
+    "candidate_id_collision": {
+      "BLOCKED": 1
+    },
+    "candidate_sources": {
+      "PASS": 27
+    },
+    "change_conflict_evidence": {
+      "BLOCKED": 2
+    },
+    "change_declared_read": {
+      "BLOCKED": 1
+    },
+    "change_declared_resource": {
+      "BLOCKED": 1
+    },
+    "change_source": {
+      "BLOCKED": 2
+    },
+    "check_simultaneity": {
+      "PASS": 196
+    },
+    "commit_batch": {
+      "BLOCKED": 1,
+      "FAIL": 2
+    },
+    "commit_dated_conjunction": {
+      "BLOCKED": 1
+    },
+    "commit_grounded_fragment": {
+      "PASS": 36
+    },
+    "commit_partial_plan": {
+      "FAIL": 1
+    },
+    "commit_som": {
+      "FAIL": 5,
+      "PASS": 5
+    },
+    "commit_two_attitudes": {
+      "PASS": 1
+    },
+    "commit_two_state_supports": {
+      "PASS": 1
+    },
+    "compile_goal": {
+      "BLOCKED": 1
+    },
+    "compile_query_kind": {
+      "FAIL": 7,
+      "PASS": 4
+    },
+    "compile_rule": {
+      "BLOCKED": 14
+    },
+    "compile_rule_pair": {
+      "FAIL": 1
+    },
+    "completed_t4_state": {
+      "BLOCKED": 5
+    },
+    "compound_binding_budget": {
+      "BLOCKED": 3
+    },
+    "compound_binding_query": {
+      "FAIL": 4,
+      "PASS": 10
+    },
+    "compute_s_access": {
+      "PASS": 1
+    },
+    "concurrent_run_claim": {
+      "PASS": 1
+    },
+    "consolidate": {
+      "PASS": 2
+    },
+    "context_candidate_reads": {
+      "BLOCKED": 2
+    },
+    "correlated_inference": {
+      "BLOCKED": 8
+    },
+    "count_from_asserted_bounds": {
+      "PASS": 12
+    },
+    "count_query": {
+      "FAIL": 6,
+      "PASS": 12
+    },
+    "count_window_aggregate": {
+      "BLOCKED": 1
+    },
+    "coverage_report": {
+      "BLOCKED": 1
+    },
+    "crash": {
+      "PASS": 1
+    },
+    "declare_context_version": {
+      "BLOCKED": 1
+    },
+    "derive_forall": {
+      "BLOCKED": 1,
+      "PASS": 225
+    },
+    "derive_operator_conclusion": {
+      "BLOCKED": 3
+    },
+    "derive_or": {
+      "BLOCKED": 1,
+      "PASS": 225
+    },
+    "disabled_rule_request": {
+      "BLOCKED": 2
+    },
+    "evaluate_boolean_expr": {
+      "FAIL": 2,
+      "PASS": 1
+    },
+    "evaluate_rule_expr": {
+      "PASS": 3
+    },
+    "exact_attestation_query": {
+      "BLOCKED": 8
+    },
+    "execute_head_calls": {
+      "BLOCKED": 18,
+      "PASS": 6
+    },
+    "execute_identical_prompts": {
+      "BLOCKED": 1
+    },
+    "execute_migration": {
+      "BLOCKED": 6
+    },
+    "explicit_assertion_retraction": {
+      "FAIL": 1,
+      "PASS": 2
+    },
+    "formalize": {
+      "BLOCKED": 640
+    },
+    "formalize_partial": {
+      "BLOCKED": 2
+    },
+    "formalize_reference_with_context": {
+      "BLOCKED": 1
+    },
+    "formalize_speech_act": {
+      "BLOCKED": 1
+    },
+    "frame_temporal_mode": {
+      "PASS": 1
+    },
+    "function_identity": {
+      "PASS": 17
+    },
+    "gate_precheck": {
+      "FAIL": 1
+    },
+    "input_identity": {
+      "FAIL": 1
+    },
+    "interleave_dbn_retraction": {
+      "FAIL": 4
+    },
+    "invalid_write_transaction": {
+      "FAIL": 7
+    },
+    "journal_batch": {
+      "FAIL": 6,
+      "PASS": 1
+    },
+    "journal_batches": {
+      "BLOCKED": 18,
+      "PASS": 7
+    },
+    "legacy_roundtrip": {
+      "PASS": 6
+    },
+    "lexical_candidates": {
+      "BLOCKED": 2
+    },
+    "load_release": {
+      "BLOCKED": 18,
+      "FAIL": 3,
+      "PASS": 77
+    },
+    "materialize_attitude_argument": {
+      "PASS": 4
+    },
+    "materialize_function_slots": {
+      "PASS": 8
+    },
+    "modus_ponens_query": {
+      "PASS": 2
+    },
+    "morph_agreement": {
+      "FAIL": 3,
+      "PASS": 4
+    },
+    "multi_premise_inference": {
+      "BLOCKED": 1
+    },
+    "nary_or_query": {
+      "PASS": 62
+    },
+    "non_factual_path": {
+      "PASS": 4
+    },
+    "numeric_scope_literal": {
+      "BLOCKED": 1,
+      "PASS": 10
+    },
+    "open_or_cross_source": {
+      "BLOCKED": 1
+    },
+    "open_template_keys": {
+      "FAIL": 2,
+      "PASS": 4
+    },
+    "ordering_query": {
+      "PASS": 15
+    },
+    "parse_time": {
+      "PASS": 1
+    },
+    "partial_commit_before_terminal": {
+      "BLOCKED": 2
+    },
+    "plan_migration": {
+      "BLOCKED": 4
+    },
+    "post_seal_proposal": {
+      "FAIL": 1
+    },
+    "proof_independence": {
+      "BLOCKED": 3
+    },
+    "proposal_budget": {
+      "BLOCKED": 2,
+      "PASS": 10
+    },
+    "query": {
+      "BLOCKED": 4,
+      "FAIL": 3,
+      "PASS": 3
+    },
+    "query_time": {
+      "PASS": 510
+    },
+    "reconcile": {
+      "BLOCKED": 1
+    },
+    "recover": {
+      "BLOCKED": 20,
+      "FAIL": 11,
+      "PASS": 9
+    },
+    "recover_bulk_migration": {
+      "BLOCKED": 4
+    },
+    "recover_goal": {
+      "PASS": 24
+    },
+    "recover_goal_atomic_pair": {
+      "PASS": 2
+    },
+    "recover_node_events": {
+      "FAIL": 1,
+      "PASS": 4
+    },
+    "recover_provider_call": {
+      "PASS": 6
+    },
+    "reject_against_evidences": {
+      "FAIL": 3
+    },
+    "repeat_goal": {
+      "BLOCKED": 10,
+      "PASS": 20
+    },
+    "repeat_selector_cycle": {
+      "BLOCKED": 2
+    },
+    "replace_not_observation": {
+      "BLOCKED": 1
+    },
+    "replay_identity": {
+      "FAIL": 1,
+      "PASS": 2
+    },
+    "rerun_same_pair": {
+      "BLOCKED": 3
+    },
+    "resolve_control": {
+      "PASS": 1
+    },
+    "resolve_deictic_reference": {
+      "BLOCKED": 4
+    },
+    "resolve_reference": {
+      "BLOCKED": 2
+    },
+    "resolve_reference_window": {
+      "BLOCKED": 3
+    },
+    "resolve_structure": {
+      "BLOCKED": 1
+    },
+    "resolve_tuples": {
+      "FAIL": 16,
+      "PASS": 16
+    },
+    "retract_assertion": {
+      "FAIL": 5
+    },
+    "retract_observation": {
+      "BLOCKED": 4,
+      "FAIL": 6,
+      "PASS": 8
+    },
+    "retract_support_batch": {
+      "PASS": 1
+    },
+    "retract_time_path": {
+      "BLOCKED": 12
+    },
+    "retract_usage_link": {
+      "PASS": 1
+    },
+    "run_fixed_fixture": {
+      "BLOCKED": 4
+    },
+    "rx_read": {
+      "PASS": 12
+    },
+    "rx_replay": {
+      "PASS": 1
+    },
+    "scope_roundtrip": {
+      "BLOCKED": 1
+    },
+    "seed_derived_paths": {
+      "FAIL": 2
+    },
+    "seed_fact": {
+      "FAIL": 1
+    },
+    "seed_goal_path": {
+      "FAIL": 4
+    },
+    "seed_occurrences": {
+      "PASS": 6
+    },
+    "seed_state": {
+      "PASS": 2
+    },
+    "seed_temporal_or": {
+      "BLOCKED": 1
+    },
+    "seed_without_incompatibility": {
+      "BLOCKED": 1
+    },
+    "solve_cluster": {
+      "BLOCKED": 1
+    },
+    "supersede_version": {
+      "BLOCKED": 1
+    },
+    "t6_with_marker": {
+      "BLOCKED": 2
+    },
+    "time_constraints": {
+      "BLOCKED": 1
+    },
+    "tokenize_alignment": {
+      "PASS": 4
+    },
+    "validate_formula_certificate": {
+      "FAIL": 1,
+      "PASS": 6
+    },
+    "validate_input": {
+      "FAIL": 9
+    },
+    "validate_proposal": {
+      "BLOCKED": 1,
+      "PASS": 8
+    },
+    "validate_scope": {
+      "BLOCKED": 6
+    },
+    "validate_selector_reply": {
+      "PASS": 9
+    }
+  },
+  "binding_action_count": 83,
+  "coverage_claim": "Executed corpus cases only; not a production release or G0–G5 PASS.",
+  "dry_runs": {
+    "DR1": {
+      "BLOCKED": 1
+    },
+    "DR10": {
+      "PASS": 62
+    },
+    "DR11": {
+      "BLOCKED": 9
+    },
+    "DR12": {
+      "BLOCKED": 21,
+      "PASS": 196
+    },
+    "DR13": {
+      "BLOCKED": 18,
+      "FAIL": 6,
+      "PASS": 8
+    },
+    "DR14": {
+      "FAIL": 1
+    },
+    "DR15": {
+      "BLOCKED": 2,
+      "FAIL": 1
+    },
+    "DR16": {
+      "BLOCKED": 1,
+      "PASS": 735
+    },
+    "DR17": {
+      "FAIL": 3,
+      "PASS": 17
+    },
+    "DR18": {
+      "BLOCKED": 10,
+      "PASS": 20
+    },
+    "DR19": {
+      "PASS": 249
+    },
+    "DR2": {
+      "BLOCKED": 2
+    },
+    "DR20": {
+      "FAIL": 4,
+      "PASS": 24
+    },
+    "DR21": {
+      "BLOCKED": 1
+    },
+    "DR22": {
+      "PASS": 1
+    },
+    "DR23": {
+      "BLOCKED": 18,
+      "FAIL": 2,
+      "PASS": 4
+    },
+    "DR24": {
+      "PASS": 2
+    },
+    "DR25": {
+      "BLOCKED": 1,
+      "FAIL": 5
+    },
+    "DR26": {
+      "PASS": 6
+    },
+    "DR27": {
+      "BLOCKED": 1
+    },
+    "DR28": {
+      "BLOCKED": 12,
+      "FAIL": 1,
+      "PASS": 227
+    },
+    "DR29": {
+      "BLOCKED": 10,
+      "FAIL": 2,
+      "PASS": 245
+    },
+    "DR3": {
+      "PASS": 1
+    },
+    "DR30": {
+      "BLOCKED": 22,
+      "FAIL": 5,
+      "PASS": 46
+    },
+    "DR31": {
+      "BLOCKED": 3,
+      "PASS": 5
+    },
+    "DR4": {
+      "BLOCKED": 1,
+      "FAIL": 5,
+      "PASS": 1
+    },
+    "DR5": {
+      "BLOCKED": 1
+    },
+    "DR6": {
+      "PASS": 3
+    },
+    "DR7": {
+      "PASS": 512
+    },
+    "DR8": {
+      "BLOCKED": 12,
+      "PASS": 196
+    },
+    "DR9": {
+      "BLOCKED": 6,
+      "PASS": 6
+    }
+  },
+  "execution_scope": "NATIVE_PIPELINE + COMPONENT_OR_WAL",
+  "mechanism_case_sets": {
+    "COMPLETE": [
+      "legacy_adapter",
+      "no_interpolation",
+      "node_events",
+      "open_world",
+      "query_not_time",
+      "reaccess",
+      "release_trust",
+      "rx",
+      "selector",
+      "simultaneity",
+      "source_trace",
+      "stale_plan",
+      "time_absent",
+      "time_symbolic"
+    ],
+    "NONE": [
+      "alpha_scope",
+      "and_commit",
+      "association",
+      "attachment",
+      "binding_paths",
+      "canonical_ids",
+      "commit_decision",
+      "conflict_late",
+      "conflict_open",
+      "coreference",
+      "coverage_gate",
+      "declared_trigger",
+      "disabled_bridges",
+      "effective_time",
+      "exact_attestation",
+      "existential_ref",
+      "forall_demand",
+      "fragment_plan",
+      "input",
+      "migration",
+      "migration_bulk",
+      "migration_failure",
+      "multi_anchor",
+      "multi_premise_time",
+      "observation_key",
+      "oracle_replay",
+      "oscillation",
+      "partial",
+      "precheck",
+      "query_budget",
+      "registry_rollback",
+      "resource_permutation",
+      "scopes",
+      "srl_boundary",
+      "witness_correlation",
+      "workspace"
+    ],
+    "PARTIAL": [
+      "alternatives",
+      "assertion_retraction",
+      "attitude_links",
+      "batch_idempotence",
+      "batch_recovery",
+      "budget",
+      "closure_independence",
+      "compound_binding",
+      "conflict_admission",
+      "conflict_pairs",
+      "constraint_search",
+      "contexts",
+      "count_domain",
+      "coverage",
+      "coverage_report",
+      "dsl",
+      "dsl_limits",
+      "event_audit_integrity",
+      "forall_time",
+      "formula_domain",
+      "full_reject",
+      "function_identity",
+      "goal_compile",
+      "goal_dbn",
+      "goal_decision",
+      "goal_dedup",
+      "goal_license_race",
+      "goal_recovery",
+      "grounds",
+      "head_order",
+      "known_mapping",
+      "modal_guard",
+      "modus",
+      "modus_ponens",
+      "morph_unknown",
+      "numeric_scope",
+      "occurrence_identity",
+      "open_key",
+      "open_lexical",
+      "operator_links",
+      "or_demand",
+      "or_time",
+      "ordering_goal",
+      "proposal_bounds",
+      "proposal_validation",
+      "provider_log",
+      "query_readonly",
+      "query_time",
+      "raw_alignment",
+      "registered_ops",
+      "resource_missing",
+      "resource_schema",
+      "revision",
+      "run_binding",
+      "s_access",
+      "seal",
+      "som",
+      "source_blocked",
+      "source_exhaustion",
+      "source_retraction",
+      "state_identity",
+      "states",
+      "structural_heads",
+      "support_paths",
+      "time_default",
+      "time_provenance",
+      "value_grounds",
+      "writers"
+    ]
+  },
+  "mechanisms": {
+    "alpha_scope": {
+      "BLOCKED": 7
+    },
+    "alternatives": {
+      "BLOCKED": 8,
+      "FAIL": 2,
+      "PASS": 5
+    },
+    "and_commit": {
+      "BLOCKED": 6
+    },
+    "assertion_retraction": {
+      "BLOCKED": 12,
+      "FAIL": 3,
+      "PASS": 2
+    },
+    "association": {
+      "BLOCKED": 1
+    },
+    "attachment": {
+      "BLOCKED": 1
+    },
+    "attitude_links": {
+      "BLOCKED": 35,
+      "FAIL": 5,
+      "PASS": 5
+    },
+    "batch_idempotence": {
+      "BLOCKED": 2,
+      "FAIL": 1,
+      "PASS": 1
+    },
+    "batch_recovery": {
+      "BLOCKED": 25,
+      "FAIL": 6,
+      "PASS": 8
+    },
+    "binding_paths": {
+      "BLOCKED": 14
+    },
+    "budget": {
+      "BLOCKED": 3,
+      "PASS": 16
+    },
+    "canonical_ids": {
+      "BLOCKED": 5,
+      "FAIL": 1
+    },
+    "closure_independence": {
+      "BLOCKED": 3,
+      "PASS": 1
+    },
+    "commit_decision": {
+      "BLOCKED": 2,
+      "FAIL": 8
+    },
+    "compound_binding": {
+      "BLOCKED": 3,
+      "FAIL": 5,
+      "PASS": 10
+    },
+    "conflict_admission": {
+      "BLOCKED": 18,
+      "FAIL": 5,
+      "PASS": 203
+    },
+    "conflict_late": {
+      "BLOCKED": 1
+    },
+    "conflict_open": {
+      "BLOCKED": 3,
+      "FAIL": 3
+    },
+    "conflict_pairs": {
+      "FAIL": 9,
+      "PASS": 1
+    },
+    "constraint_search": {
+      "BLOCKED": 2,
+      "FAIL": 16,
+      "PASS": 16
+    },
+    "contexts": {
+      "BLOCKED": 12,
+      "FAIL": 1,
+      "PASS": 3
+    },
+    "coreference": {
+      "BLOCKED": 11,
+      "FAIL": 3
+    },
+    "count_domain": {
+      "BLOCKED": 1,
+      "FAIL": 6,
+      "PASS": 30
+    },
+    "coverage": {
+      "BLOCKED": 2,
+      "PASS": 1
+    },
+    "coverage_gate": {
+      "BLOCKED": 1
+    },
+    "coverage_report": {
+      "BLOCKED": 1,
+      "PASS": 13
+    },
+    "declared_trigger": {
+      "BLOCKED": 12
+    },
+    "disabled_bridges": {
+      "BLOCKED": 2
+    },
+    "dsl": {
+      "BLOCKED": 14,
+      "FAIL": 3,
+      "PASS": 11
+    },
+    "dsl_limits": {
+      "BLOCKED": 14,
+      "PASS": 3
+    },
+    "effective_time": {
+      "BLOCKED": 13,
+      "FAIL": 2
+    },
+    "event_audit_integrity": {
+      "BLOCKED": 1,
+      "FAIL": 2,
+      "PASS": 9
+    },
+    "exact_attestation": {
+      "BLOCKED": 8
+    },
+    "existential_ref": {
+      "BLOCKED": 1
+    },
+    "forall_demand": {
+      "BLOCKED": 5
+    },
+    "forall_time": {
+      "BLOCKED": 9,
+      "PASS": 225
+    },
+    "formula_domain": {
+      "BLOCKED": 3,
+      "FAIL": 4,
+      "PASS": 30
+    },
+    "fragment_plan": {
+      "FAIL": 7
+    },
+    "full_reject": {
+      "BLOCKED": 18,
+      "FAIL": 6,
+      "PASS": 7
+    },
+    "function_identity": {
+      "BLOCKED": 1,
+      "PASS": 17
+    },
+    "goal_compile": {
+      "BLOCKED": 4,
+      "FAIL": 7,
+      "PASS": 4
+    },
+    "goal_dbn": {
+      "FAIL": 4,
+      "PASS": 24
+    },
+    "goal_decision": {
+      "BLOCKED": 11,
+      "PASS": 46
+    },
+    "goal_dedup": {
+      "BLOCKED": 10,
+      "FAIL": 2,
+      "PASS": 20
+    },
+    "goal_license_race": {
+      "BLOCKED": 1,
+      "FAIL": 4,
+      "PASS": 474
+    },
+    "goal_recovery": {
+      "FAIL": 4,
+      "PASS": 24
+    },
+    "grounds": {
+      "BLOCKED": 4,
+      "PASS": 48
+    },
+    "head_order": {
+      "BLOCKED": 18,
+      "PASS": 7
+    },
+    "input": {
+      "FAIL": 9
+    },
+    "known_mapping": {
+      "BLOCKED": 1,
+      "PASS": 2
+    },
+    "legacy_adapter": {
+      "PASS": 6
+    },
+    "migration": {
+      "BLOCKED": 10
+    },
+    "migration_bulk": {
+      "BLOCKED": 8
+    },
+    "migration_failure": {
+      "BLOCKED": 10
+    },
+    "modal_guard": {
+      "BLOCKED": 640,
+      "FAIL": 4,
+      "PASS": 77
+    },
+    "modus": {
+      "BLOCKED": 465,
+      "PASS": 4
+    },
+    "modus_ponens": {
+      "BLOCKED": 1,
+      "PASS": 2
+    },
+    "morph_unknown": {
+      "BLOCKED": 2,
+      "FAIL": 3,
+      "PASS": 8
+    },
+    "multi_anchor": {
+      "BLOCKED": 131
+    },
+    "multi_premise_time": {
+      "BLOCKED": 1
+    },
+    "no_interpolation": {
+      "PASS": 1
+    },
+    "node_events": {
+      "PASS": 10
+    },
+    "numeric_scope": {
+      "BLOCKED": 1,
+      "FAIL": 3,
+      "PASS": 30
+    },
+    "observation_key": {
+      "FAIL": 1
+    },
+    "occurrence_identity": {
+      "BLOCKED": 12,
+      "FAIL": 5,
+      "PASS": 27
+    },
+    "open_key": {
+      "BLOCKED": 130,
+      "FAIL": 2,
+      "PASS": 4
+    },
+    "open_lexical": {
+      "BLOCKED": 145,
+      "FAIL": 2,
+      "PASS": 7
+    },
+    "open_world": {
+      "PASS": 2
+    },
+    "operator_links": {
+      "BLOCKED": 2,
+      "PASS": 14
+    },
+    "or_demand": {
+      "BLOCKED": 5,
+      "PASS": 62
+    },
+    "or_time": {
+      "BLOCKED": 9,
+      "PASS": 225
+    },
+    "oracle_replay": {
+      "BLOCKED": 4
+    },
+    "ordering_goal": {
+      "BLOCKED": 1,
+      "PASS": 15
+    },
+    "oscillation": {
+      "BLOCKED": 2
+    },
+    "partial": {
+      "BLOCKED": 3
+    },
+    "precheck": {
+      "FAIL": 2
+    },
+    "proposal_bounds": {
+      "BLOCKED": 2,
+      "PASS": 10
+    },
+    "proposal_validation": {
+      "BLOCKED": 2,
+      "FAIL": 1,
+      "PASS": 10
+    },
+    "provider_log": {
+      "BLOCKED": 4,
+      "PASS": 12
+    },
+    "query_budget": {
+      "BLOCKED": 3
+    },
+    "query_not_time": {
+      "PASS": 510
+    },
+    "query_readonly": {
+      "BLOCKED": 473,
+      "FAIL": 13,
+      "PASS": 28
+    },
+    "query_time": {
+      "BLOCKED": 1,
+      "PASS": 525
+    },
+    "raw_alignment": {
+      "BLOCKED": 465,
+      "PASS": 4
+    },
+    "reaccess": {
+      "PASS": 6
+    },
+    "registered_ops": {
+      "BLOCKED": 5,
+      "FAIL": 7,
+      "PASS": 42
+    },
+    "registry_rollback": {
+      "FAIL": 7
+    },
+    "release_trust": {
+      "PASS": 13
+    },
+    "resource_missing": {
+      "BLOCKED": 18,
+      "FAIL": 3,
+      "PASS": 58
+    },
+    "resource_permutation": {
+      "BLOCKED": 4
+    },
+    "resource_schema": {
+      "BLOCKED": 18,
+      "FAIL": 3,
+      "PASS": 65
+    },
+    "revision": {
+      "BLOCKED": 1,
+      "FAIL": 2,
+      "PASS": 2
+    },
+    "run_binding": {
+      "BLOCKED": 9,
+      "FAIL": 1,
+      "PASS": 9
+    },
+    "rx": {
+      "PASS": 13
+    },
+    "s_access": {
+      "BLOCKED": 32,
+      "PASS": 7
+    },
+    "scopes": {
+      "BLOCKED": 12
+    },
+    "seal": {
+      "BLOCKED": 1,
+      "FAIL": 1,
+      "PASS": 8
+    },
+    "selector": {
+      "PASS": 9
+    },
+    "simultaneity": {
+      "PASS": 196
+    },
+    "som": {
+      "BLOCKED": 169,
+      "FAIL": 5,
+      "PASS": 11
+    },
+    "source_blocked": {
+      "FAIL": 16,
+      "PASS": 37
+    },
+    "source_exhaustion": {
+      "FAIL": 16,
+      "PASS": 37
+    },
+    "source_retraction": {
+      "BLOCKED": 23,
+      "PASS": 1
+    },
+    "source_trace": {
+      "PASS": 7
+    },
+    "srl_boundary": {
+      "BLOCKED": 2
+    },
+    "stale_plan": {
+      "PASS": 1
+    },
+    "state_identity": {
+      "BLOCKED": 10,
+      "FAIL": 5,
+      "PASS": 28
+    },
+    "states": {
+      "BLOCKED": 9,
+      "FAIL": 16,
+      "PASS": 16
+    },
+    "structural_heads": {
+      "BLOCKED": 498,
+      "PASS": 1
+    },
+    "support_paths": {
+      "BLOCKED": 4,
+      "FAIL": 2,
+      "PASS": 64
+    },
+    "time_absent": {
+      "PASS": 511
+    },
+    "time_default": {
+      "BLOCKED": 464,
+      "PASS": 1
+    },
+    "time_provenance": {
+      "BLOCKED": 22,
+      "FAIL": 7,
+      "PASS": 1
+    },
+    "time_symbolic": {
+      "PASS": 961
+    },
+    "value_grounds": {
+      "BLOCKED": 1,
+      "FAIL": 16,
+      "PASS": 20
+    },
+    "witness_correlation": {
+      "BLOCKED": 9
+    },
+    "workspace": {
+      "BLOCKED": 9
+    },
+    "writers": {
+      "FAIL": 16,
+      "PASS": 41
+    }
+  },
+  "tiers": {
+    "component": {
+      "BLOCKED": 150,
+      "FAIL": 66,
+      "PASS": 1615
+    },
+    "durability": {
+      "BLOCKED": 29,
+      "FAIL": 23,
+      "PASS": 19
+    },
+    "pipeline": {
+      "BLOCKED": 640
+    }
+  },
+  "total_action_count": 126
+}

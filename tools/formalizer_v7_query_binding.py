@@ -73,6 +73,14 @@ def solve(s,goal,limit=5000):
 
 def query_action(s,a,p):
     if a=='validate_formula_certificate':
+        if 'renaming' in p:
+            old,new=next(iter(p['renaming'].items()));body={'predicate':'STUDENT','roles':{'THEME':{'bound_var':old}}}
+            ensure_templates(s,[body]);before=pattern(s,body,old)
+            after=pattern(s,{'predicate':'STUDENT','roles':{'THEME':{'bound_var':new}}},new)
+            release=certify(s,before,old,None,'VALID')
+            answer,_=solve(s,NativeBindingGoal(after,(new,),mode='COUNT',resource_snapshot=release.sha256))
+            s.api.add('query_bindings.pattern_signature alpha-renamed runtime gap / certificate validation')
+            return {'signature':{'alpha_equal':pattern_signature(before)==pattern_signature(after)},'certificate':{'valid':isinstance(answer.conclusion,CountConclusion) and answer.conclusion.exact_count is not None}}
         change=p['change'];variant={'count_variable':'WRONG_VARIABLE','window':'WRONG_WINDOW','completeness_evidence':'STALE_SUPPORT','source_snapshot':'NONE'}.get(change,'WRONG_BODY')
         result=query_action(s,'count_query',{'body':STUDENT,'count_variable':'x','certificate':variant,'window':None,'witness_entities':['e0']})
         result['certificate']={'valid':result['answer']['domain_complete']}
@@ -82,7 +90,9 @@ def query_action(s,a,p):
         # release entry. Export the actual R-V mode lookup, not guessed tense.
         from tools.formalizer_v7_native_binding import fixture
         r,_=fixture(s.core,'known');modes={e['sense_id']:e.get('temporal_mode_hint',e.get('state_class')) for e in r.entries('R-V')}
-        return {'frames':{'temporal_modes':[modes.get(x['sense']) for x in p['frames']]},'aliases':[]}
+        mapping={e['sense_id']:e['template_ref'] for e in r.entries('TemplateMap')};refs=[mapping[x['sense']] for x in p['frames']]
+        s.api.add('ResourceRelease.entries R-V temporal_mode_hint / actual TemplateMap refs')
+        return {'frames':{'modes':[modes.get(x['sense']) for x in p['frames']],'merged_across_modes':len(refs)!=len(set(refs))},'aliases':[]}
     if a in {'count_query','count_from_asserted_bounds'}:
         body=p.get('body',STUDENT);var=p.get('count_variable','x');ensure_templates(s,[body,STUDENT])
         entities=p.get('witness_entities',p.get('counted_distinct_entities',[]));window=p.get('window')

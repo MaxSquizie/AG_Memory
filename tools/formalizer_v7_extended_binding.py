@@ -333,7 +333,9 @@ class Session(base.Session):
             v=MorphVariant('a',features.get('n.POS','NOUN'),gender=gender)
             st.evidence[0].lex_status='OOV_KEEP_AS_IS' if features.get('n.oov') else 'OK';st.evidence[0].variants=(v,)
             if a=='morph_agreement':
-                field=p['feature'];vals=[None if p[k]=='UNKNOWN' else {'gender':'masc','number':'sing','case':'nom'}[field] for k in ('left','right')]
+                field=p['feature'];vals=[None if p[k]=='UNKNOWN' else {'gender':'masc','number':'sing','case':'nom','person':'1per'}[field] for k in ('left','right')]
+                for i,k in enumerate(('left','right')):
+                    if p[k]=='known_b':vals[i]={'gender':'femn','number':'plur','case':'acc','person':'2per'}[field]
                 values=[frozenset([value]) if value else frozenset() for value in vals] if field=='case' else vals
                 x=replace(v,**{'cases' if field=='case' else field:values[0]});y=replace(v,**{'cases' if field=='case' else field:values[1]});expr={'op':'agreement','left':'n','right':'m','features':[field]};assignment={'n':(0,x),'m':(1,y)}
             else:expr=Parser(p['expression']).expr();assignment={'n':(0,v)}
