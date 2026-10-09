@@ -63,8 +63,10 @@ def covers(outer: TemporalRegion, inner: TemporalRegion):
 
     if n.kind == "POINT":                       # a single moment t
         t = n.point
+        if t is None:
+            return None
         if o.kind == "POINT":
-            return o.point == t
+            return None if o.point is None else o.point == t
         if o.kind == "CONTINUOUS":
             if o.lo is None or o.hi is None:
                 return None                     # unknown boundary -> inclusion not established
@@ -74,6 +76,10 @@ def covers(outer: TemporalRegion, inner: TemporalRegion):
         return False                            # UNDATED outer covers nothing
 
     if n.kind == "CONTINUOUS":                 # a whole interval must lie inside outer
+        if o.kind == "POINT":
+            if any(x is None for x in (o.point,n.lo,n.hi)):
+                return None
+            return n.lo == n.hi == o.point
         if o.kind != "CONTINUOUS":
             return False
         if any(x is None for x in (o.lo, o.hi, n.lo, n.hi)):
@@ -135,11 +141,13 @@ def forall_inst_license(a: TemporalRegion, b: TemporalRegion) -> LicenseResult:
 
     if kinds == {"POINT"}:
         a, b = x.point, y.point
+        if a is None or b is None:
+            return LicenseResult("UNKNOWN", None, "INTERVAL_BOUNDARY_UNKNOWN")
         return LicenseResult("LICENSED", point(a)) if a == b else mismatch()
 
     if kinds == {"POINT", "CONTINUOUS"}:
         p, c = pick("POINT"), pick("CONTINUOUS")
-        if c.lo is None or c.hi is None:
+        if p.point is None or c.lo is None or c.hi is None:
             return LicenseResult("UNKNOWN", None, "INTERVAL_BOUNDARY_UNKNOWN")
         ok = c.lo <= p.point <= c.hi
         return LicenseResult("LICENSED", point(p.point)) if ok else mismatch()

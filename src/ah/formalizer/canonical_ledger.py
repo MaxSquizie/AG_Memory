@@ -28,14 +28,14 @@ def region_data(value: TemporalRegion) -> dict:
     return {"kind": value.kind, "point": value.point, "lo": value.lo, "hi": value.hi, "points": sorted(value.points)}
 
 
-def simultaneous(a, b):
+def _guaranteed_simultaneous(a, b):
     a, b = normalize(region(a)), normalize(region(b))
     if a.kind == b.kind == "UNDATED":
         return True
     if "UNDATED" in (a.kind, b.kind):
         return False
     if a.kind == "POINT" and b.kind == "POINT":
-        return a.point == b.point
+        return a.point is not None and b.point is not None and a.point == b.point
     if a.kind == "CONTINUOUS" and b.kind == "CONTINUOUS":
         return all(x is not None for x in (a.lo,a.hi,b.lo,b.hi)) and max(a.lo,b.lo) <= min(a.hi,b.hi)
     if a.kind == "CONTINUOUS":
@@ -43,6 +43,29 @@ def simultaneous(a, b):
     if b.kind == "CONTINUOUS":
         return covers(b,a) is True
     return False
+
+
+def simultaneity_result(a, b):
+    """Guaranteed overlap and its open-world diagnostic, using the admission algebra."""
+    a, b = normalize(region(a)), normalize(region(b))
+    if a.kind == b.kind == 'UNDATED':
+        return {'guaranteed': True, 'diagnostic': None}
+    if 'UNDATED' in (a.kind,b.kind):
+        return {'guaranteed': False, 'diagnostic': None}
+    def bounds(r):
+        if r.kind == 'POINT': return r.point,r.point
+        if r.kind == 'EXISTENTIAL' and r.points: return min(r.points),max(r.points)
+        return r.lo,r.hi
+    x,y=bounds(a),bounds(b)
+    if any(v is None for v in (*x,*y)):
+        return {'guaranteed': False, 'diagnostic': 'INTERVAL_BOUNDARY_UNKNOWN'}
+    guaranteed=_guaranteed_simultaneous(a,b)
+    possible=max(x[0],y[0])<=min(x[1],y[1])
+    return {'guaranteed': guaranteed, 'diagnostic': 'SIMULTANEITY_NOT_ESTABLISHED' if possible and not guaranteed else None}
+
+
+def simultaneous(a, b):
+    return simultaneity_result(a,b)['guaranteed']
 
 
 def incompatible(a,b,rules=()):

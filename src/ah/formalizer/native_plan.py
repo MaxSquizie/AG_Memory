@@ -201,7 +201,7 @@ def build_plan(state,release,store):
         requested=state.observation.get('request_kind')
         if requested in {'QUERY','COMMAND','UNKNOWN'}:
             diagnostics.append(('MODUS_UNKNOWN' if requested=='UNKNOWN' else 'SPEECH_ACT_'+requested)+':'+frag); continue
-        if requested is not None and requested not in {'STATEMENT','MIXED'}:
+        if requested is not None and requested not in {'ASSERTION','STATEMENT','MIXED'}:
             diagnostics.append('INPUT_REJECTED:unknown request_kind:'+frag); continue
         if is_query or is_command or quoted:
             diagnostics.append(('SPEECH_ACT_QUERY' if is_query else 'SPEECH_ACT_COMMAND' if is_command else 'QUOTED_CONTENT')+':'+frag); continue
@@ -220,7 +220,10 @@ def build_plan(state,release,store):
             else:
                 uid,ck=tree_node(t,frag)
                 polarity=next(op.payload['polarity'] for op in op_by_id.values() if op.op_type in {'ENSURE_NODE','ENSURE_FUNCTION'} and op.payload['uid']==uid)
-            gate=FragmentT5Input(frag,'RESOLVED',truth_grounds=('O',))
+            observed = (state.observation.get('text') == state.text
+                        and state.observation.get('observation_id') == state.source_uid
+                        and state.observation.get('interpretation_version') == state.interpretation_version)
+            gate=FragmentT5Input(frag,'RESOLVED',truth_grounds=('O',) if observed else ())
             ok,code=evaluate_fragment(gate)
             if not ok: raise ValueError(code)
             witness='witness:'+digest([tag,frag,reg]) if reg and t.get('operator')=='AND' else None

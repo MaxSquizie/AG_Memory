@@ -203,7 +203,7 @@ class MorphProvider:
             consumed |= {g for g in grams if self._MOOD.get(g)}
             out.append(MorphVariant(
                 lemma=p.normal_form,
-                pos=tag.POS or None,
+                pos=str(tag.POS) if tag.POS is not None else None,
                 cases=cases,
                 number=next((self._NUM[g] for g in sorted(grams) if g in self._NUM), None),
                 gender=next((self._GEND[g] for g in sorted(grams) if g in self._GEND), None),

@@ -59,6 +59,15 @@ class CandidateSourceTrace:
         # FOUND with no candidates is contradictory; CHECKED_EMPTY/NOT_APPLICABLE carry none.
         if self.status == FOUND and not self.candidate_ids:
             raise ValueError(f"FOUND source {self.source_id} must list candidate_ids")
+        if self.status in TERMINAL_EMPTY and self.candidate_ids:
+            raise ValueError('INTEGRITY_ERROR: empty source carries candidates')
+
+
+def validate_source_traces(traces) -> None:
+    """Five distinct, ordered sources for one slot are mandatory, even if empty."""
+    if ([t.source_id for t in traces] != [1, 2, 3, 4, 5]
+            or len({(t.frame_id, t.semantic_slot_id) for t in traces}) != 1):
+        raise ValueError('INTEGRITY_ERROR: incomplete or mixed candidate source traces')
 
 
 def build_source_traces(
@@ -134,6 +143,7 @@ def search_blocked(traces) -> bool:
 
 def no_candidate_allowed(traces) -> bool:
     """NO_CANDIDATE only after FOUND=0 AND all five sources terminal CHECKED_EMPTY|NOT_APPLICABLE."""
+    validate_source_traces(traces)
     if search_blocked(traces):
         return False
     if found_count(traces) != 0:
@@ -143,4 +153,5 @@ def no_candidate_allowed(traces) -> bool:
 
 def resolved_allowed(traces, has_positive_grounds: bool = True) -> bool:
     """RESOLVED is forbidden under an incomplete (BLOCKED) search even with a found candidate."""
+    validate_source_traces(traces)
     return not search_blocked(traces) and has_positive_grounds

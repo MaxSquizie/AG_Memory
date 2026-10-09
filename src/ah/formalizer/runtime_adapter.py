@@ -141,7 +141,8 @@ class FormalizerAdapter:
         readings = detect_speech_act(state.text, state.context_facts)
         kinds = {r.kind for r in readings}
         is_query = "QUERY" in kinds
-        negated = detect_negation(state.text)
+        # Native projection must use the sealed per-frame scope.
+        negated = False
 
         assertions: list = []
         queries: list = []
@@ -175,7 +176,20 @@ class FormalizerAdapter:
                 is_query=requested=='QUERY' or hi<len(state.text) and state.text[hi]=='?'
                 if requested=='UNKNOWN':
                     notes.append('MODUS_UNKNOWN '+frame.frame_id); continue
-                negated=detect_negation(local)
+                negated=False if state.observation else detect_negation(local)
+                if state.observation:
+                    trees=list(state.logical_roots)
+                    for candidate in state.frames:
+                        for tree in candidate.semantic.get('operator_forest',()):
+                            if tree not in trees: trees.append(tree)
+                    scoped=[tree for tree in trees if frame.frame_id in leaves(tree)]
+                    if scoped:
+                        tree=scoped[0]
+                        while tree.get('operator')=='NOT' and len(tree.get('operands',()))==1:
+                            negated=not negated; tree=tree['operands'][0]
+                        if len(scoped)!=1 or tree!={'frame_ref':frame.frame_id}:
+                            notes.append('NATIVE_ASSERTION_SCOPE_OWNED '+frame.frame_id)
+                            continue
                 actant_pairs = self._assign_roles(frame, state)
                 roles = tuple(role for role, _ in actant_pairs)
                 if len(set(roles))!=len(roles):
@@ -245,7 +259,8 @@ class FormalizerAdapter:
                 continue
             if not frame.predicate_token_ref and ev.span != frame.anchor_span:
                 continue
-            for var in ev.variants:
+            variants=ev.variants if frame.predicate_token_ref else sorted(ev.variants,key=lambda v:v.pos!='VERB')
+            for var in variants:
                 if var.pos in {"VERB", "INFN", "PRED", "ADJS", "ADJF", "NOUN", "PRTF", "PRTS", "GRND"}:
                     return PredicateCandidate(
                         surface=frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('surface',ev.span),
@@ -270,10 +285,12 @@ class FormalizerAdapter:
             return [(R(role),evs[tid].span) for tid,role in specs[dec.selected[0]]['roles'].items()]
         # Legacy preview: cases may propose roles; positional assignment is forbidden.
         pairs=[]
-        for tid in frame.argument_token_refs:
-            ev=next((e for e in state.evidence if e.token_id==tid),None)
-            if ev is None: continue
-            cases=ev.cases
-            if cases==frozenset({'nom'}): pairs.append((R.SUBJECT,ev.span))
-            elif cases==frozenset({'acc'}): pairs.append((R.OBJECT,ev.span))
+        candidates=[e for e in state.evidence if e.token_id in frame.argument_token_refs] if frame.argument_token_refs else [e for e in state.evidence if e.span in frame.participants and e.cases]
+        possessive=frame.construction.startswith('u+')
+        subject_case,object_case=('gen','nom') if possessive else ('nom','acc')
+        for ev in candidates:
+            eligible=[]
+            if subject_case in ev.cases: eligible.append(R.SUBJECT)
+            if object_case in ev.cases: eligible.append(R.OBJECT)
+            if len(eligible)==1: pairs.append((eligible[0],ev.span))
         return pairs

@@ -14,6 +14,8 @@ def lexical_keys(text,morph=None):
         # Lazy singleton avoids loading a dictionary for every cache lookup.
         morph=_dictionary()
     words={w.casefold() for w in re.findall(r'\w+',text)}
+    if hasattr(morph, 'analyze'):
+        return words | {v.lemma.casefold() for word in words for v in morph.analyze(word) if v.lemma}
     return words|{p.normal_form.casefold() for word in words for p in morph.parse(word)}
 
 

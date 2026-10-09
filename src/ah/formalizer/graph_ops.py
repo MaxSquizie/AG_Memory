@@ -204,7 +204,11 @@ def ensure_node(core,p):
         if old.template!=core.ref(p['template_ref']) or dict(old.actants)!=actants:
             raise ValueError('INTEGRITY_ERROR: node content changed')
         return uid
-    core.add_hypernode(Domain(p.get('domain','C')),core.ref(p['template_ref']),{ActantRole(k):native_operand(core,v) for k,v in p['actants'].items()},float(p.get('weight',0.5)),meta={'semantic_status':p.get('semantic_status','KNOWN'),'identity_key':p.get('identity_key'), 'temporal_mode':p.get('temporal_mode','UNKNOWN'),'source_tag':p.get('source_tag')},uid=uid,deduplicate=False,count_occurrence=False)
+    actants={ActantRole(k):native_operand(core,v) for k,v in p['actants'].items()}
+    meta={'semantic_status':p.get('semantic_status','KNOWN'),'identity_key':p.get('identity_key'), 'temporal_mode':p.get('temporal_mode','UNKNOWN'),'source_tag':p.get('source_tag')}
+    if any(isinstance(v, BoundVar) for v in actants.values()):
+        meta['semantic_scope']='QUANTIFIED'
+    core.add_hypernode(Domain(p.get('domain','C')),core.ref(p['template_ref']),actants,float(p.get('weight',0.5)),meta=meta,uid=uid,deduplicate=False,count_occurrence=False)
     return uid
 
 

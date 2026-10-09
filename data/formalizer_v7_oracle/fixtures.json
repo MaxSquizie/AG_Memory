@@ -1,0 +1,538 @@
+{
+  "schema_version": "v7-symbolic-fixtures-1",
+  "time": {
+    "source_timestamp": "2026-10-09T12:00:00+00:00",
+    "timezone": "UTC",
+    "yesterday": [
+      "2026-10-08T00:00:00+00:00",
+      "2026-10-09T00:00:00+00:00"
+    ],
+    "today": [
+      "2026-10-09T00:00:00+00:00",
+      "2026-10-10T00:00:00+00:00"
+    ],
+    "vector_ticks": "exact fixture-relative rational coordinates, closed sets; not system clock"
+  },
+  "entities": {
+    "ivan": {
+      "naming_evidence": "explicit fixture identity binding, not spelling similarity"
+    },
+    "petr": {},
+    "maria": {},
+    "book": {},
+    "table": {},
+    "shelf": {},
+    "courier": {},
+    "letter": {},
+    "chair": {},
+    "window": {},
+    "moscow": {},
+    "speaker": {
+      "source": "declared speaker context"
+    },
+    "addressee": {
+      "source": "declared addressee context"
+    },
+    "sergey": {},
+    "alexey": {}
+  },
+  "profiles": {
+    "known": {
+      "required_registered_senses": "all non-OPEN predicate symbols used by selected cases; mapping and roles pinned independently",
+      "role_registry": [
+        "AGENT",
+        "THEME",
+        "LOCATION",
+        "CONTENT",
+        "EXPERIENCER",
+        "RECIPIENT",
+        "ADDRESSEE",
+        "DESTINATION",
+        "SOURCE",
+        "LEFT",
+        "RIGHT"
+      ],
+      "disabled_rules": [
+        "ReportBridgingRule",
+        "EventIdentityRule"
+      ],
+      "provider": "FAKE scripted, requests recorded, selected sense/role pinned by case"
+    },
+    "open": {
+      "base": "known",
+      "absent_senses": [
+        "переадресовать",
+        "глоркнуть",
+        "зумбировать",
+        "флукнуть",
+        "квелировать",
+        "бронкнуть",
+        "шарпировать",
+        "траверсировать",
+        "холодно",
+        "перестать",
+        "начать",
+        "снова-мочь"
+      ],
+      "open_template_policy": "valid",
+      "surface_roles_require_proven_attachment": true,
+      "aliases": []
+    },
+    "known_mapping_broken": {
+      "base": "known",
+      "selected_known_sense": "K_SEND",
+      "template_mapping": "deliberately absent; no open replacement"
+    },
+    "release_validation": {
+      "base": "COMPLETE_SIGNED_TEST_RELEASE",
+      "test_only_trust": true,
+      "ed25519_test_seed_hex": "7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+      "reviewer_id": "ORACLE_FIXTURE_ONLY",
+      "production_review_claim": false,
+      "recipe": "construct one valid entry per selected resource schema from source fixture builder; sign canonical release payload; mutate exactly the stated dimension after signing when testing tampering"
+    }
+  },
+  "provider_scripts": {
+    "VALID_LOCAL": {
+      "scope": "only declared fixture-local frames/roles and raw spans",
+      "no_canonical_uid": true,
+      "no_new_g_or_L": true,
+      "no_truth_claim": true,
+      "deterministic": true
+    },
+    "EQUIVALENT_NOUN_RULE": {
+      "rule_id": "noun",
+      "stage": "SRL",
+      "input_feature_pattern": {
+        "captures": {
+          "n": {
+            "POS": "NOUN"
+          }
+        },
+        "window": "SENTENCE",
+        "distinct": true,
+        "where": {
+          "op": "feature_eq",
+          "field": "n.POS",
+          "value": "NOUN"
+        }
+      },
+      "output_kind": "TOKEN_HYPOTHESIS",
+      "output": {
+        "capture": "n",
+        "variants": [
+          "keep_as_is"
+        ]
+      },
+      "constraints": [],
+      "priority": 1,
+      "min_evidence": 1,
+      "coverage_tag": "noun"
+    }
+  },
+  "binding_policy": {
+    "actual_uids": "independent fixture builder records Ref map before run",
+    "candidate_ids": "compute from fixture producers and canonical payload per §1.3, not learn from SUT",
+    "hashes": "hash actual fixture bytes and independently built initial/gold snapshots; never zero/guessed hashes",
+    "extra_actual_nodes": "must be exported with unbound:<uid> aliases, never filtered away",
+    "scope_identity": "typed AST including occurrence and variable scope; not rendered text",
+    "event_occurrences": "alias includes observation/goal path key; content equality is not event identity",
+    "stage_tests": "component cases cannot count as full G3/G4/G5 pipeline success"
+  },
+  "registered_templates": [
+    {
+      "symbol": "ARRIVE",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "ARRIVE_CITY",
+      "role_signatures": [
+        [
+          "AGENT",
+          "DESTINATION"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "BRING",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "CALL",
+      "role_signatures": [
+        [
+          "AGENT",
+          "RECIPIENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "CAUSE",
+      "role_signatures": [
+        [
+          "LEFT",
+          "RIGHT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "COLD_OBJECT",
+      "role_signatures": [
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "DECIDE",
+      "role_signatures": [
+        [
+          "AGENT",
+          "CONTENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "DEPART",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "DEPART_CITY",
+      "role_signatures": [
+        [
+          "AGENT",
+          "SOURCE"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "DESIRE",
+      "role_signatures": [
+        [
+          "CONTENT",
+          "EXPERIENCER"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "DOCTOR",
+      "role_signatures": [
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "ENTER",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "HOPE",
+      "role_signatures": [
+        [
+          "CONTENT",
+          "EXPERIENCER"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "INTEND",
+      "role_signatures": [
+        [
+          "AGENT",
+          "CONTENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "KNOW",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "LOCATIVE",
+      "role_signatures": [
+        [
+          "LOCATION",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "MEET",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "NEED_LEXICAL",
+      "role_signatures": [
+        [
+          "CONTENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "OPEN",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ],
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "OPEN_WINDOW",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "PASS_EXAM",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "PERMITTED_LEXICAL",
+      "role_signatures": [
+        [
+          "CONTENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "PERSON",
+      "role_signatures": [
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "READ",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ],
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "REQUEST",
+      "role_signatures": [
+        [
+          "ADDRESSEE",
+          "AGENT",
+          "CONTENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "RETURN",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "SAY",
+      "role_signatures": [
+        [
+          "AGENT",
+          "CONTENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "SEND",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "SIT",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "SIT_STATE",
+      "role_signatures": [
+        [
+          "LOCATION",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "SLEEP",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "SMOKE",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "STUDENT",
+      "role_signatures": [
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "THINK",
+      "role_signatures": [
+        [
+          "CONTENT",
+          "EXPERIENCER"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "TIRED",
+      "role_signatures": [
+        [
+          "EXPERIENCER"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "TRANSFER",
+      "role_signatures": [
+        [
+          "AGENT",
+          "RECIPIENT",
+          "THEME"
+        ],
+        [
+          "AGENT",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "WANT",
+      "role_signatures": [
+        [
+          "CONTENT",
+          "EXPERIENCER"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "WET",
+      "role_signatures": [
+        [
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "WORK",
+      "role_signatures": [
+        [
+          "AGENT"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    },
+    {
+      "symbol": "WRITE",
+      "role_signatures": [
+        [
+          "AGENT",
+          "THEME"
+        ]
+      ],
+      "uid_policy": "real UID returned by fixture AH template creation; record in binding manifest before SUT"
+    }
+  ]
+}

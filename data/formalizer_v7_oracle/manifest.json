@@ -1,0 +1,52 @@
+{
+  "schema_version": "v7-oracle-manifest-1",
+  "source_document": {
+    "filename": "FORMALIZER_ARCHITECTURE_V7(2).md",
+    "sha256": "a334e8d11837255577dfddf0a37bf30c41c7cee47b16ed1995d05cab87e70948",
+    "bytes": 567911
+  },
+  "gold_authoring": "independent normative symbolic fixtures; never SUT-derived",
+  "status": "AUTHORED_NOT_EXECUTED",
+  "gates": {
+    "G0": "NOT_EVALUATED",
+    "G1": "NOT_EVALUATED",
+    "G2": "NOT_EVALUATED",
+    "G3": "NOT_EVALUATED",
+    "G4": "NOT_EVALUATED",
+    "G5": "NOT_EVALUATED"
+  },
+  "requires_adapter_binding": true,
+  "project_commit_reference": "ce80c890f30bf0559da03ea8d8bae4c257647bea",
+  "stats": {
+    "cases": 2542,
+    "mechanisms": 118,
+    "acceptance_requirements": 39,
+    "dry_run_requirements": 31,
+    "steps": 2725,
+    "checks": 10902,
+    "unique_raw_inputs": 643,
+    "cases_by_tier": {
+      "pipeline": 640,
+      "component": 1831,
+      "durability": 71
+    },
+    "language_pattern_families": 32,
+    "time_vectors": 15,
+    "g5_holdout_claim": false
+  },
+  "generator_sha256": "dd861a03f5ec300efad03ee5fcb9f589aa1685d624eba842cd1b32708b557eaf",
+  "checker_sha256": "87b8db6c9343698511791cf1b021ec85bcb82ed9e9154ab1c93a1af818e73327",
+  "artifact_verifier_sha256": "9795b718b67bd2483fb851acc3f1aac7f7d84e9418c84077fdefa7b323468289",
+  "artifacts": {
+    "COVERAGE.md": "7dc5290ad95e35f07c9d1a1986c6ec4333e403a5f2f0db626495335239d6bc7d",
+    "README.md": "22bee59fff0198e703071ecf70815b55dcd6cfc1caff4068c68113e554370dac",
+    "SPEC_NOTES.md": "eed24d3b513fa65f5f88621f22b557b26dbf7d2fea24c518a9129d29ffefbbba",
+    "actions.json": "5a0af5fb643760a5226c5b447e464f463c210b6b8d45697195402cc52270f780",
+    "cases.jsonl": "c8e3ab6ac330eb19828808a5f5b3ceba9a929b133fd729757fdf1d0910edcf46",
+    "coverage.json": "1fa295f70c32bd95202ee3e76de3ba2ca20e9accbed0641bc969393c9a8251ae",
+    "fixtures.json": "1db25e9cb635d569d03c19803434acebe018971f40e39749ebe077a5a1a81cba",
+    "mechanisms.json": "0ba3bf9afb598e87eea5696f8d2ac69295f79402f73242de720f4866b25628d0",
+    "oracle.schema.json": "0b14c5a40313e2085fa2890b23a21469d9e2535b78032925d39f1d8647357af2",
+    "source_map.json": "7d6fc501fe94fcd24e934479f649c0df6e4af308fbdd69fec31838d5dd2cd62a"
+  }
+}
