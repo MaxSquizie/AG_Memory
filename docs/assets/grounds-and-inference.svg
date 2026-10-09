@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840" role="img" aria-labelledby="ttl ds">
+<title id="ttl">Сборка вывода из трёх оснований</title><desc id="ds">Правило, наблюдение о падении давления и назначение дежурного робота ведут к выводу об обязанности Кай-7 закрыть клапан К-4. Вывод не означает, что действие выполнено.</desc>
+<defs>
+<pattern id="bg" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#47665A" stroke-width=".65" opacity=".27"/></pattern>
+<linearGradient id="panel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#142B26"/><stop offset="1" stop-color="#0E201E"/></linearGradient>
+<linearGradient id="green" x1="0" x2="1"><stop stop-color="#CDF4C5"/><stop offset="1" stop-color="#6DCAB3"/></linearGradient>
+<filter id="glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="glowBig" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="19" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<marker id="mintArr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#75CCAE" stroke-width="1.7"/></marker>
+<marker id="goldArr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#F0BA73" stroke-width="1.7"/></marker>
+<style>
+text{font-family:'DejaVu Sans','Arial',sans-serif}
+.head{font-size:40px;font-weight:700;fill:#F2F0DC}
+.sub{font-size:23px;fill:#A5BEB4}
+.eyebrow{font-size:19px;font-weight:700;fill:#A8D4BE}
+.nodeText{font-size:26px;font-weight:700;fill:#ECF4E7}
+.note{font-size:20px;fill:#ABC4B5}
+</style>
+</defs><rect width="1600" height="840" fill="#0B1918"/><rect width="1600" height="840" fill="url(#bg)"/>
+<rect x="44" y="43" width="1512" height="752" rx="26" fill="#11221e" stroke="#557B69" stroke-width="2"/>
+<text x="82" y="111" class="head" >Как возникает вывод — и откуда он взялся</text>
+<text x="82" y="156" class="sub" >Три независимых утверждения сходятся в одной логической конструкции.</text>
+<rect x="72" y="210" width="458" height="232" rx="16" fill="#142A25" stroke="#9AC7A8" stroke-width="2"/>
+<text x="101" y="254" class="eyebrow" >Правило</text>
+<text x="101" y="304" class="nodeText" style='font-size:25px'>Если в О2 падает давление,</text>
+<text x="101" y="347" class="nodeText" style='font-size:25px'>дежурный робот обязан</text>
+<text x="101" y="389" class="nodeText" style='font-size:25px'>перекрыть клапан К-4.</text>
+<rect x="568" y="210" width="458" height="232" rx="16" fill="#142A25" stroke="#E2B777" stroke-width="2"/>
+<text x="598" y="254" class="eyebrow" >Наблюдение</text>
+<text x="598" y="312" class="nodeText" style='font-size:27px'>В 02:14 давление</text>
+<text x="598" y="352" class="nodeText" style='font-size:27px'>в отсеке О2 упало.</text>
+<text x="598" y="408" class="note" >Временное основание</text>
+<rect x="1064" y="210" width="458" height="232" rx="16" fill="#142A25" stroke="#9AC7A8" stroke-width="2"/>
+<text x="1094" y="254" class="eyebrow" >Роль</text>
+<text x="1094" y="312" class="nodeText" style='font-size:27px'>Кай-7 — дежурный</text>
+<text x="1094" y="352" class="nodeText" style='font-size:25px'>робот станции «Орион».</text>
+<text x="1094" y="408" class="note" >Привязка к сущности</text>
+<path d="M305 442C305 520 648 505 760 564" fill="none" stroke="#75CCAE" stroke-width="3" marker-end="url(#mintArr)"/>
+<path d="M798 443V564" fill="none" stroke="#F0BA73" stroke-width="3" marker-end="url(#goldArr)"/>
+<path d="M1285 442C1285 517 932 510 833 564" fill="none" stroke="#75CCAE" stroke-width="3" marker-end="url(#mintArr)"/>
+<circle cx="798" cy="584" r="22" fill="#F3BC78" filter="url(#glow)"/>
+<text x="798" y="591" class="nodeText" text-anchor='middle'>∴</text>
+<rect x="325" y="630" width="950" height="115" rx="20" fill="#274432" stroke="#C7E7B2" stroke-width="2.6"/>
+<text x="800" y="680" class="nodeText" text-anchor='middle' style='font-size:31px'>Кай-7 обязан перекрыть клапан К-4.</text>
+<text x="800" y="718" class="note" text-anchor='middle' style='font-size:21px'>Обязанность выведена. Факт выполнения действия не установлен.</text>
+</svg>
