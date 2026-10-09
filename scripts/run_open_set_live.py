@@ -32,14 +32,20 @@ class _LMChatBackend:
         self._client = client
         self._model = model
 
-    def generate(self, prompt: str, *, system: str = "", role: str = "generic") -> types.SimpleNamespace:
+    def generate(self, prompt: str, *, system: str = "", role: str = "generic",
+                 override: dict | None = None) -> types.SimpleNamespace:
+        ov = override or {}
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
         data = self._client.chat_completions(
-            model=self._model, messages=messages, temperature=0.0,
-            top_p=1.0, top_k=1, repeat_penalty=1.0, max_tokens=64, enable_thinking=False,
+            model=self._model, messages=messages,
+            temperature=float(ov.get("temperature", 0.0)),
+            top_p=float(ov.get("top_p", 1.0)),
+            top_k=int(ov.get("top_k") or 1), repeat_penalty=1.0,
+            max_tokens=int(ov.get("max_new_tokens", 64)),
+            enable_thinking=bool(ov.get("enable_thinking", False)),
         )
         return types.SimpleNamespace(text=data["choices"][0]["message"]["content"] or "")
 

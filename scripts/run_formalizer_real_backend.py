@@ -61,20 +61,25 @@ class _LMChatBackend:
         self._model = model
         self.raw_responses: list[str] = []
 
-    def generate(self, prompt: str, *, system: str = "", role: str = "generic") -> types.SimpleNamespace:
+    def generate(self, prompt: str, *, system: str = "", role: str = "generic",
+                 override: dict | None = None) -> types.SimpleNamespace:
+        # RealBackendSelector passes its generation_settings via ``override``; honor it.
+        ov = override or {}
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
+        # chat_completions requires top_k; map a disabled (0) value to greedy (1).
+        top_k = int(ov.get("top_k") or 1)
         data = self._client.chat_completions(
             model=self._model,
             messages=messages,
-            temperature=0.0,
-            top_p=1.0,
-            top_k=1,
+            temperature=float(ov.get("temperature", 0.0)),
+            top_p=float(ov.get("top_p", 1.0)),
+            top_k=top_k,
             repeat_penalty=1.0,
-            max_tokens=64,
-            enable_thinking=False,
+            max_tokens=int(ov.get("max_new_tokens", 64)),
+            enable_thinking=bool(ov.get("enable_thinking", False)),
         )
         text = data["choices"][0]["message"]["content"] or ""
         self.raw_responses.append(text)

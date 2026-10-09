@@ -255,21 +255,37 @@ class LMStudioClient:
         mode = str(reasoning or "off").strip().lower()
         if mode not in {"off", "low", "medium", "high", "on"}:
             raise ValueError(f"Unsupported LM Studio reasoning mode: {reasoning!r}")
-        body: dict[str, Any] = {
-            "model": model,
-            "input": str(prompt),
-            "temperature": float(temperature),
-            "top_p": float(top_p),
-            "top_k": int(top_k),
-            "repeat_penalty": float(repeat_penalty),
-            "max_output_tokens": int(max_tokens),
-            "reasoning": mode,
-            "stream": False,
-            "store": False,
-        }
-        if str(system or "").strip():
-            body["system_prompt"] = str(system).strip()
-        return self._request("POST", "/api/v1/chat", body)
+
+        def _body(include_reasoning: bool) -> dict[str, Any]:
+            b: dict[str, Any] = {
+                "model": model,
+                "input": str(prompt),
+                "temperature": float(temperature),
+                "top_p": float(top_p),
+                # LM Studio's native /api/v1/chat requires top_k >= 1. AH uses top_k=0 to mean
+                # "no explicit limit"; omit the field in that case so the server default applies
+                # instead of failing with HTTP 400 (too_small).
+                **({"top_k": int(top_k)} if top_k and int(top_k) > 0 else {}),
+                "repeat_penalty": float(repeat_penalty),
+                "max_output_tokens": int(max_tokens),
+                "stream": False,
+                "store": False,
+            }
+            # The ``reasoning`` switch only exists on reasoning-capable models; a
+            # non-reasoning model (e.g. gemma-3n-e4b-it) rejects the field with HTTP 400.
+            if include_reasoning:
+                b["reasoning"] = mode
+            if str(system or "").strip():
+                b["system_prompt"] = str(system).strip()
+            return b
+
+        try:
+            return self._request("POST", "/api/v1/chat", _body(True))
+        except LMStudioClientError as exc:
+            # Non-reasoning model rejected the ``reasoning`` field: retry once without it.
+            if "400" in str(exc) and "reasoning" in str(exc):
+                return self._request("POST", "/api/v1/chat", _body(False))
+            raise
 
     @staticmethod
     def native_chat_text(data: dict[str, Any]) -> str:

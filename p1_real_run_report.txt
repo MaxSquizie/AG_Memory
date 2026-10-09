@@ -1,33 +1,33 @@
 model='gemma-3n-e4b-it'  url=http://127.0.0.1:1234
 
 S1 'У вороны есть лапки.'
-   selected=HAS_PART  outcome=RESOLVED  -> C1   (target=HAS_PART, llm_calls=1, diags=-)  (0.7s)
+   selected=HAS_PART  outcome=RESOLVED  -> C1   (target=HAS_PART, llm_calls=1, diags=-)  (5.2s)
 S2 'У стола есть ножки.'
-   selected=HAS_PART/HAVE  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  (0.5s)
+   selected=HAS_PART  outcome=RESOLVED  -> C1   (target=HAS_PART, llm_calls=1, diags=-)  (0.5s)
 S3 'У меня есть книга.'
-   selected=HAVE  outcome=RESOLVED  -> C1   (target=HAVE, llm_calls=1, diags=-)  (0.4s)
+   selected=HAVE  outcome=RESOLVED  -> C1   (target=HAVE, llm_calls=1, diags=-)  (0.5s)
 S4 'Ворона обладает перьями.'
-   selected=HAS_PART  outcome=RESOLVED  -> C1   (target=HAS_PART, llm_calls=1, diags=-)  (0.4s)
+   selected=HAS_PART  outcome=RESOLVED  -> C1   (target=HAS_PART, llm_calls=1, diags=-)  (0.5s)
 S5 'У вороны лапки.'
-   selected=HAS_PART/HAVE  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  (0.5s)
+   selected=HAS_PART/HAVE  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  (0.6s)
 S6 'Вороны любят червей.'
    selected=LIKE  outcome=RESOLVED  -> C1   (target=LIKE, llm_calls=1, diags=-)  (0.5s)
 
 S1 'У вороны есть лапки.'
-   selected=HAVE/HAS_PART  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  fact='Лапки — часть тела этой вороны.'  (0.5s)
+   selected=HAVE/HAS_PART  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  fact='Лапки — часть тела этой вороны.'  (0.6s)
 S2 'У стола есть ножки.'
    selected=HAS_PART/HAVE  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  fact='Ножки — часть этого стола.'  (0.5s)
 S3 'У меня есть книга.'
    selected=HAVE  outcome=RESOLVED  -> C1   (target=HAVE, llm_calls=1, diags=-)  (0.5s)
 S4 'Ворона обладает перьями.'
-   selected=HAS_PART  outcome=RESOLVED  -> C1   (target=HAS_PART, llm_calls=1, diags=-)  fact='Перья — часть тела этой вороны.'  (0.4s)
+   selected=HAVE/HAS_PART  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  fact='Перья — часть тела этой вороны.'  (0.7s)
 S5 'У вороны лапки.'
-   selected=HAS_PART/HAVE  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  fact='Лапки — часть тела этой вороны.'  (0.6s)
+   selected=HAS_PART/HAVE  outcome=UNRESOLVED  -> C2   (target=HAS_PART, llm_calls=1, diags=['NO_GROUNDED_CANDIDATE'])  fact='Лапки — часть тела этой вороны.'  (0.7s)
 S6 'Вороны любят червей.'
-   selected=LIKE  outcome=RESOLVED  -> C1   (target=LIKE, llm_calls=1, diags=-)  (0.4s)
+   selected=LIKE  outcome=RESOLVED  -> C1   (target=LIKE, llm_calls=1, diags=-)  (0.5s)
 
 === ROLLUP ===
-baseline : S1=C1  S2=C2  S3=C1  S4=C1  S5=C2  S6=C1
-augmented: S1=C2  S2=C2  S3=C1  S4=C1  S5=C2  S6=C1
+baseline : S1=C1  S2=C1  S3=C1  S4=C1  S5=C2  S6=C1
+augmented: S1=C2  S2=C2  S3=C1  S4=C2  S5=C2  S6=C1
 
 mechanism passed (no C3): YES
