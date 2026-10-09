@@ -25,7 +25,7 @@
 <text x="102" y="282" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" fill="#90A69A" letter-spacing="3">01   /   ПОИСК ПО ЗАПИСЯМ</text>
 <path d="M103 307H687" stroke="#52675b"/>
 <g transform="rotate(-2 382 380)">
-  <path d="M112 337H660L652 434H119Z" fill="#D8D7C8"/>
+  <path d="M112 337H660L652 451H119Z" fill="#D8D7C8"/>
   <path d="M112 337H660" stroke="#f0eadd" stroke-width="4" opacity=".65"/>
   <text x="140" y="368" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="2" fill="#747D71">ЗАПИСЬ 01</text>
   <text x="140" y="411" font-family="Arial,Helvetica,sans-serif" font-size="26" font-weight="700" fill="#23342F">Каждый студент изучает</text>
