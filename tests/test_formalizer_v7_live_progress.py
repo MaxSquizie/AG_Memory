@@ -180,3 +180,18 @@ def test_progress_reaches_stdout_and_disk_before_blocking_http_response(tmp_path
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_plan_partial_tuple_observation_has_identical_live_and_final_results(tmp_path):
+    # This real store partial-commit case exposes tuples in memory. The oracle
+    # schema represents arrays as JSON lists; live comparison must use the
+    # persisted representation, exactly like the final checker.
+    out = tmp_path / 'partial-plan'
+    assert main(['--provider', 'disabled', '--case', 'PLAN-E-SHARED', '--out', str(out)]) == 0
+    events = rows(out / 'progress.jsonl')
+    final = checker.readjson(out / 'comparison.json')
+    case = next(e for e in events if e['event'] == 'case_finished')
+    assert case['status'] == final['results'][0]['status'] == 'PASS'
+    assert case['errors'] == final['results'][0]['errors'] == []
+    assert events[-1]['passed'] == final['passed_cases'] == 1
+    assert events[-1]['failed'] == final['failed_cases'] == 0

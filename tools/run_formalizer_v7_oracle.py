@@ -89,13 +89,17 @@ def main(argv=None):
                 except Exception as exc:
                     import traceback
                     result={'schema_version':'v7-oracle-trace-1','case_id':gold['case_id'],'checkpoints':[],'execution_status':'ERROR','runtime_error':{'type':type(exc).__name__,'message':str(exc),'traceback':traceback.format_exc()}}
-            out.write(checker.canonical(result)+'\n');out.flush()
+            serialized_result=checker.canonical(result)
+            out.write(serialized_result+'\n');out.flush()
             bindings.append({'case_id':gold['case_id'],'execution_status':result['execution_status'],
                 'level':result.get('binding_manifest',{}).get('execution_level'),
                 'api_refs':result.get('binding_manifest',{}).get('api_refs',[]),'blockers':result.get('blockers',[])})
             wal=a.out/'cases'/base.digest(gold['case_id'])/'journal.log'
             if wal.is_file():received_calls+=sum(json.loads(line)['payload'].get('kind')=='prov_call' and json.loads(line)['payload'].get('state')=='RECEIVED' for line in wal.read_text(encoding='utf-8').splitlines() if line.strip())
-            compared=checker.compare_case(gold,result)
+            # The final comparator consumes canonical JSON, not Python tuples
+            # or other in-memory observation containers. Use the identical
+            # serialized checkpoint here so live PASS/FAIL cannot disagree.
+            compared=checker.compare_case(gold,json.loads(serialized_result))
             live_counts['completed']=i
             live_counts[{'PASS':'passed','FAIL':'failed','BLOCKED':'blocked'}[compared['status']]]+=1
             progress.emit('case_finished',case_id=gold['case_id'],case_index=i,
