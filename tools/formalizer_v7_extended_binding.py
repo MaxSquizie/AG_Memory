@@ -448,10 +448,21 @@ def run_case(case,fixtures):
     for s in case['steps']:
         if s['action']=='repeat_goal':s['payload'].update(_root=OR,_not=NOT)
     def run(path):
+        from tools import formalizer_v7_progress as progress
         payloads=[s['payload'] for s in case['steps']]
         if any(s['action']=='check_simultaneity' for s in case['steps']):payloads.extend([ATOM,OTHER])
         session=Session(payloads,path)
-        cps=[{'step_id':s['id'],'actual':session.action(s['action'],s['payload'])} for s in case['steps']]
+        cps=[]
+        for index,s in enumerate(case['steps'],1):
+            with progress.context(step_id=s['id'],action=s['action'],step_index=index,step_total=len(case['steps'])):
+                progress.emit('step_started',payload=s['payload'])
+                try:
+                    observed=session.action(s['action'],s['payload'])
+                except Exception as exc:
+                    progress.emit('step_finished',status='ERROR',error={'type':type(exc).__name__,'message':str(exc)})
+                    raise
+                cps.append({'step_id':s['id'],'actual':observed})
+                progress.emit('step_finished',status='OBSERVED',actual=observed)
         m=session.manifest();m['execution_level']='NATIVE_PIPELINE' if session.native_ready else 'COMPONENT_OR_WAL';m['provider_mode']=CONFIG.get('provider')
         m['native_reports']=getattr(session,'native_reports',[])
         return {**result,'execution_status':'EXECUTED','checkpoints':cps,'binding_manifest':m,'binding_manifest_ref':digest(m)}

@@ -1,17 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 from pathlib import Path
-from enum import Enum
 import ctypes
-import json
 import os
 import sys
 
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QTextCursor
 from PySide6.QtWidgets import (
-    QComboBox,
     QFormLayout,
     QHBoxLayout,
     QLabel,
@@ -24,7 +20,9 @@ from PySide6.QtWidgets import (
 )
 
 from ah.bootstrap import RuntimeServices
-from ah.gui.perception_timeline import format_parser_decoded_history, format_parser_raw_history, pretty_json
+from ah.gui.formalizer_diagnostics import (
+    OracleDiagnostics, diagnostic_json, format_formalizer_requests, format_native_snapshot,
+)
 from ah.projection.contracts import AgentContext, AgentContextDiagnostic
 
 
@@ -96,8 +94,8 @@ def _format_ram(value: int | None) -> str:
 class LLMControlWidget(QWidget):
     """Operational + diagnostic panel for the one shared local LLM process.
 
-    Prompt editors are live files outside AH memory. Diagnostic tabs are runtime-only:
-    raw model output, decoded PerceptionResult, agent output and worker logs never enter
+    The Agent prompt editor changes a live file outside AH memory. Diagnostic tabs are runtime-only:
+    raw model output, native V7 IR, agent output and worker logs never enter
     AH/H and never affect AgentContext.
     """
 
@@ -121,6 +119,9 @@ class LLMControlWidget(QWidget):
         self._last_parser_render_key = None
         self._last_active_request_key = None
         self._last_completed_request_sequence = None
+        self._oracle_scope = False
+        self._oracle_running = False
+        self._oracle_diagnostics = OracleDiagnostics()
 
         root = QVBoxLayout(self)
         info = QFormLayout()
@@ -128,7 +129,7 @@ class LLMControlWidget(QWidget):
         self.status_label = QLabel()
         self.model_label = QLabel()
         self.model_label.setTextInteractionFlags(self.model_label.textInteractionFlags())
-        self.role_label = QLabel("Одна модель / один процесс → Perception probes + Agent")
+        self.role_label = QLabel("Формализатор V7: bounded selection / local proposals; Agent: ответ по памяти")
         self.loader_label = QLabel()
         self.device_policy_label = QLabel()
         self.cuda_label = QLabel()
@@ -159,7 +160,7 @@ class LLMControlWidget(QWidget):
         info.addRow("Placement / VRAM", self.placement_label)
         info.addRow("Process RAM", self.ram_label)
         info.addRow("History buffer", self.history_label)
-        info.addRow("Perception", self.perception_cfg_label)
+        info.addRow("Формализатор V7", self.perception_cfg_label)
         info.addRow("Ресурсы V7", self.formalizer_resources_label)
         info.addRow("Agent", self.agent_cfg_label)
         info.addRow("Stage", self.stage_label)
@@ -186,23 +187,10 @@ class LLMControlWidget(QWidget):
         root.addLayout(buttons)
 
         self.tabs = QTabWidget()
-        self.probe_prompt_widget = QWidget()
-        probe_layout = QVBoxLayout(self.probe_prompt_widget)
-        self.probe_selector = QComboBox()
-        probe_root = self.services.config.paths.perception_prompt_dir
-        probe_names = (
-            tuple(sorted(path.stem for path in probe_root.glob("*.txt")))
-            if probe_root is not None and probe_root.is_dir()
-            else ()
-        )
-        self.probe_selector.addItems(probe_names)
-        self.perception_editor = QPlainTextEdit()
-        probe_layout.addWidget(self.probe_selector)
-        probe_layout.addWidget(self.perception_editor, 1)
-        self.probe_selector.currentTextChanged.connect(self._load_selected_probe_prompt)
         self.agent_editor = QPlainTextEdit()
-        self.parser_raw_view = self._readonly("Сырой ответ parser LLM появится после perception-вызова")
-        self.parser_decoded_view = self._readonly("Decoded PerceptionResult появится после успешного разбора")
+        # Historical attribute names remain compatible with the parent window.
+        self.parser_raw_view = self._readonly("Фактический bounded request / ответ модели V7")
+        self.parser_decoded_view = self._readonly("Нативный V7 IR, решения, диагностика и commit receipt")
         self.agent_raw_view = self._readonly("Сырой ответ agent LLM появится после генерации")
         self.agent_context_view = self._readonly(
             "Точный AgentContext (CURRENT INPUT + ACTIVE MEMORY + INFERENCE RESULTS) появится после turn"
@@ -217,10 +205,9 @@ class LLMControlWidget(QWidget):
         self.log_view = self._readonly("Лог загрузки / статуса LLM worker")
         self.log_view.setMaximumBlockCount(400)
 
-        self.tabs.addTab(self.probe_prompt_widget, "Perception probe")
+        self.tabs.addTab(self.parser_raw_view, "Formalizer RAW")
+        self.tabs.addTab(self.parser_decoded_view, "V7 IR / trace")
         self.tabs.addTab(self.agent_editor, "Agent prompt")
-        self.tabs.addTab(self.parser_raw_view, "Parser RAW")
-        self.tabs.addTab(self.parser_decoded_view, "Parser decoded")
         self.tabs.addTab(self.agent_raw_view, "Agent RAW")
         self.tabs.addTab(self.agent_context_view, "Agent CONTEXT")
         self.tabs.addTab(self.agent_memory_view, "Memory INPUT")
@@ -230,7 +217,7 @@ class LLMControlWidget(QWidget):
         self.tabs.currentChanged.connect(lambda _index: self.refresh_status(force=True))
         root.addWidget(self.tabs, 1)
 
-        self.save_prompts_button = QPushButton("Сохранить prompt-файлы")
+        self.save_prompts_button = QPushButton("Сохранить Agent prompt")
         self.save_prompts_button.clicked.connect(self._save_prompts)
         root.addWidget(self.save_prompts_button)
 
@@ -250,6 +237,8 @@ class LLMControlWidget(QWidget):
 
     def begin_turn(self, source_text: str) -> None:
         """Start a new GUI diagnostics scope without touching LLM/AH state."""
+        self._oracle_scope = False
+        self._oracle_running = False
         backend = self.services.llm
         records = (
             backend.request_diagnostics()
@@ -257,13 +246,14 @@ class LLMControlWidget(QWidget):
             else ()
         )
         parser = self.services.perception
-        parser_history = (
-            parser.diagnostics()
-            if parser is not None and hasattr(parser, "diagnostics")
-            else ()
-        )
+        formalizer = getattr(parser, '_formalizer', None)
+        if formalizer is not None and hasattr(formalizer, 'diagnostic_sequence'):
+            snapshot_sequence = formalizer.diagnostic_sequence()
+        else:
+            snapshot = formalizer.diagnostic_snapshot() if formalizer is not None and hasattr(formalizer, 'diagnostic_snapshot') else None
+            snapshot_sequence = snapshot['sequence'] if snapshot else 0
         self._turn_request_floor = max((r.sequence for r in records), default=0)
-        self._turn_parser_floor = max((d.sequence for d in parser_history), default=0)
+        self._turn_parser_floor = snapshot_sequence
         self._turn_source_text = source_text
         self._turn_scope_initialized = True
         self._turn_active = True
@@ -272,8 +262,8 @@ class LLMControlWidget(QWidget):
         self._last_active_request_key = None
         self._last_completed_request_sequence = None
         waiting = f"TURN IN PROGRESS\nSOURCE:\n{source_text}"
-        self._set_text(self.parser_raw_view, waiting + "\n\nWaiting for perception diagnostics…")
-        self._set_text(self.parser_decoded_view, waiting + "\n\nWaiting for decoded PerceptionResult…")
+        self._set_text(self.parser_raw_view, waiting + "\n\nWaiting for bounded V7 model requests; deterministic stages need no model call.")
+        self._set_text(self.parser_decoded_view, waiting + "\n\nWaiting for the actual native IR / commit receipt…")
         self._set_text(self.agent_raw_view, waiting + "\n\nWaiting for agent generation…")
         self._set_text(self.agent_context_view, waiting + "\n\nWaiting for AgentContext…")
         self._set_text(self.agent_memory_view, waiting + "\n\nWaiting for model-visible ACTIVE MEMORY…")
@@ -285,6 +275,35 @@ class LLMControlWidget(QWidget):
         """Freeze diagnostics on the just-finished turn until the next submit."""
         self._turn_active = False
         self.refresh_status()
+
+    def set_oracle_running(self, running: bool) -> None:
+        """Switch to subprocess-owned diagnostics; keep them until next chat turn."""
+        if running:
+            self._oracle_diagnostics = OracleDiagnostics()
+            self._oracle_scope = True
+            self.tabs.setCurrentWidget(self.parser_raw_view)
+        self._oracle_running = bool(running)
+        self._oracle_diagnostics.running = bool(running)
+        if self._oracle_scope:
+            self._render_oracle_diagnostics()
+
+    def set_oracle_progress(self, event) -> None:
+        """Consume a real progress event on the GUI thread, never a model token."""
+        self._oracle_scope = True
+        if self._oracle_diagnostics.update(event):
+            self._render_oracle_diagnostics()
+
+    def _render_oracle_diagnostics(self) -> None:
+        diagnostics = self._oracle_diagnostics
+        self._set_text(self.parser_raw_view, diagnostics.raw_text())
+        self._set_text(self.parser_decoded_view, diagnostics.ir_text())
+        self._set_text(self.requests_view, diagnostics.requests_text())
+        self.stage_label.setText(diagnostics.stage_text())
+        if self._oracle_scope:
+            self.status_label.setText("V7 ORACLE: " + ("RUNNING" if self._oracle_running else "FINISHED"))
+            request = diagnostics.current_request or {}
+            if request.get('model'):
+                self.model_label.setText(str(request['model']) + " (oracle subprocess)")
 
     @staticmethod
     def _readonly(placeholder: str) -> QPlainTextEdit:
@@ -358,27 +377,11 @@ class LLMControlWidget(QWidget):
         self._turn_memory_trace_text = "\n".join(chunks)
         self._set_text(self.agent_memory_view, self._turn_memory_trace_text)
 
-    def _probe_prompt_path(self, name: str | None = None) -> Path | None:
-        cfg = self.services.config
-        if cfg.llm.perception_protocol not in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}:
-            return cfg.paths.perception_prompt_path
-        root = cfg.paths.perception_prompt_dir
-        if root is None:
-            return None
-        selected = name or self.probe_selector.currentText()
-        return root / f"{selected}.txt"
-
     def _agent_prompt_path(self) -> Path | None:
         return self.services.config.paths.agent_prompt_path or self.services.config.paths.system_prompt_path
 
     def reload_prompts(self) -> None:
-        adaptive = self.services.config.llm.perception_protocol in {"adaptive_v1", "adaptive_v2", "adaptive_v3"}
-        self.probe_selector.setEnabled(adaptive)
-        self._load_selected_probe_prompt()
         self.agent_editor.setPlainText(self._read(self._agent_prompt_path()))
-
-    def _load_selected_probe_prompt(self, *_args) -> None:
-        self.perception_editor.setPlainText(self._read(self._probe_prompt_path()))
 
     @staticmethod
     def _read(path: Path | None) -> str:
@@ -390,15 +393,12 @@ class LLMControlWidget(QWidget):
             return ""
 
     def _save_prompts(self) -> None:
-        perception = self._probe_prompt_path()
         agent = self._agent_prompt_path()
-        if perception is None or agent is None:
-            QMessageBox.warning(self, "LLM prompts", "Пути prompt-файлов не настроены.")
+        if agent is None:
+            QMessageBox.warning(self, "Agent prompt", "Путь Agent prompt не настроен.")
             return
         try:
-            perception.parent.mkdir(parents=True, exist_ok=True)
             agent.parent.mkdir(parents=True, exist_ok=True)
-            perception.write_text(self.perception_editor.toPlainText(), encoding="utf-8", newline="\n")
             agent.write_text(self.agent_editor.toPlainText(), encoding="utf-8", newline="\n")
         except Exception as exc:
             QMessageBox.critical(self, "LLM prompts", f"{type(exc).__name__}: {exc}")
@@ -425,29 +425,40 @@ class LLMControlWidget(QWidget):
 
     @staticmethod
     def _pretty(value) -> str:
-        return pretty_json(value)
+        return diagnostic_json(value)
 
     def _refresh_parser_diagnostics(self, *, force: bool = False) -> None:
+        if self._oracle_scope:
+            self._render_oracle_diagnostics()
+            return
         parser = self.services.perception
-        if parser is None or not hasattr(parser, "diagnostics"):
-            self._set_text(self.parser_raw_view, "")
-            self._set_text(self.parser_decoded_view, "")
-            return
-        history = parser.diagnostics()
+        formalizer = getattr(parser, '_formalizer', None)
+        snapshot = None
+        if formalizer is not None and hasattr(formalizer, 'diagnostic_sequence'):
+            sequence = formalizer.diagnostic_sequence()
+            eligible = bool(sequence and (not self._turn_scope_initialized or sequence > self._turn_parser_floor))
+            render_key = (id(formalizer), sequence if eligible else 0)
+            if eligible and (force or self._last_parser_render_key != render_key):
+                snapshot = formalizer.diagnostic_snapshot()
+                # A newer native run may finish between the cheap sequence read
+                # and the snapshot copy. Cache the sequence actually rendered.
+                render_key = (id(formalizer), snapshot['sequence'] if snapshot else 0)
+        else:
+            snapshot = formalizer.diagnostic_snapshot() if formalizer is not None and hasattr(formalizer, 'diagnostic_snapshot') else None
+            if snapshot and self._turn_scope_initialized and snapshot['sequence'] <= self._turn_parser_floor:
+                snapshot = None
+            render_key = (id(formalizer), (snapshot or {}).get('sequence', 0))
+        if force or self._last_parser_render_key != render_key:
+            self._last_parser_render_key = render_key
+            self._set_text(self.parser_decoded_view, format_native_snapshot(snapshot))
+        backend = self.services.llm
+        records = backend.request_diagnostics() if backend is not None and hasattr(backend, 'request_diagnostics') else ()
+        active = backend.active_request_diagnostic() if backend is not None and hasattr(backend, 'active_request_diagnostic') else None
         if self._turn_scope_initialized:
-            history = tuple(d for d in history if d.sequence > self._turn_parser_floor)
-        if not history:
-            if self._turn_scope_initialized and not self._turn_active:
-                text = f"SOURCE:\n{self._turn_source_text}\n\nNo perception diagnostic was produced for this turn."
-                self._set_text(self.parser_raw_view, text)
-                self._set_text(self.parser_decoded_view, text)
-            return
-        render_key = tuple((d.sequence, len(d.attempts), d.final_error, d.decoded is not None, tuple((a.role, a.raw_text, a.error, a.normalized_answer) for a in d.attempts)) for d in history)
-        if not force and render_key == self._last_parser_render_key:
-            return
-        self._last_parser_render_key = render_key
-        self._set_text(self.parser_raw_view, format_parser_raw_history(history, turn_source_text=self._turn_source_text if self._turn_scope_initialized else ""))
-        self._set_text(self.parser_decoded_view, pretty_json(format_parser_decoded_history(history)))
+            records = tuple(r for r in records if r.sequence > self._turn_request_floor)
+            if active is not None and active.sequence <= self._turn_request_floor:
+                active = None
+        self._set_text(self.parser_raw_view, format_formalizer_requests(records, active, source_text=self._turn_source_text))
 
     @staticmethod
     def _extract_context_section(rendered: str, heading: str) -> str:
@@ -464,6 +475,9 @@ class LLMControlWidget(QWidget):
         return "\n".join(out).strip()
 
     def _refresh_request_diagnostics(self, *, force: bool = False) -> None:
+        if self._oracle_scope and self.tabs.currentWidget() is self.requests_view:
+            self._set_text(self.requests_view, self._oracle_diagnostics.requests_text())
+            return
         backend = self.services.llm
         if backend is None or not hasattr(backend, "request_diagnostics"):
             return
@@ -624,10 +638,7 @@ class LLMControlWidget(QWidget):
             + ("stateless" if cfg.llm.history_messages == 0 else "history enabled")
         )
         self.perception_cfg_label.setText(
-            f"{cfg.llm.perception_protocol}, retry={cfg.llm.perception_probe_retry_attempts}, "
-            f"acts=source-bounded, actants≤{cfg.llm.perception_max_actants_per_act}, "
-            f"predicate S/T={'lexical deterministic' if cfg.llm.perception_protocol == 'adaptive_v3' else cfg.llm.perception_predicate_symbol_language}, "
-            f"T={cfg.llm.perception.temperature:g}"
+            "T0–T6 · reviewed resources · bounded model calls · native canonical commit"
         )
         self.loader_label.setText(f"{cfg.llm.loader_type} (text-only)")
         self.device_policy_label.setText(
@@ -643,10 +654,12 @@ class LLMControlWidget(QWidget):
         self.ram_label.setText(f"GUI={_format_ram(gui_ram)} | LLM=n/a")
         if backend is None:
             self.status_label.setText("DISABLED")
-            self.stage_label.setText("-")
+            self.stage_label.setText(self._oracle_diagnostics.stage_text() if self._oracle_scope else "-")
             self.start_button.setEnabled(False)
             self.stop_button.setEnabled(False)
             self.restart_button.setEnabled(False)
+            if self._oracle_scope:
+                self._render_oracle_diagnostics()
             return
 
         status = backend.status()
@@ -672,9 +685,11 @@ class LLMControlWidget(QWidget):
             quant = " | NF4 4-bit" if status.effective_4bit else ""
             self.placement_label.setText(status.placement_summary + quant)
         self.stage_label.setText(
-            status.current_stage
-            + (f" | last role={status.last_role}" if status.last_role else "")
-            + f" | requests={status.request_count}"
+            self._oracle_diagnostics.stage_text() if self._oracle_scope else (
+                status.current_stage
+                + (f" | last role={status.last_role}" if status.last_role else "")
+                + f" | requests={status.request_count}"
+            )
         )
         self.start_button.setEnabled(not status.running)
         self.stop_button.setEnabled(status.running)
@@ -692,3 +707,5 @@ class LLMControlWidget(QWidget):
             self.requests_view,
         }:
             self._refresh_request_diagnostics(force=force)
+        if self._oracle_scope:
+            self._render_oracle_diagnostics()

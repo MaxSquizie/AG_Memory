@@ -27,6 +27,19 @@ class ConfigEntry:
     apply_mode: ApplyMode
 
 
+def is_visible_config_setting(path: str) -> bool:
+    """Hide retired parser controls without removing their persisted TOML data.
+
+    V7 owns its bounded selector settings and protocol. The morphology setting
+    remains active in TextSensoryService; agent controls remain independent.
+    """
+    if path in {"paths.perception_prompt_path", "paths.perception_prompt_dir"}:
+        return False
+    if path.startswith("llm.perception."):
+        return path == "llm.perception.morphology_backend"
+    return True
+
+
 def _classify(path: str) -> ApplyMode:
     # Model loading/runtime shape is fixed inside the subprocess and therefore
     # requires an LLM restart. Pure generation parameters are read by the parent

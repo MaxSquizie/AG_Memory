@@ -21,15 +21,11 @@ def test_production_gui_uses_semantic_test_window() -> None:
 def test_semantic_test_surface_has_current_semantic_suites_only() -> None:
     source = (GUI / "semantic_test_window.py").read_text(encoding="utf-8")
 
-    # Text -> semantic oracle suites.
+    # Current V7 suites replace adaptive-parser examples and pytest launchers.
     for token in (
-        "acceptance_cases.txt",
-        "acceptance_cases_m1_adversarial.txt",
-        "acceptance_inversion/cases.txt",
-        "acceptance_ellipsis/cases.txt",
-        "acceptance_typo/cases.txt",
-        "acceptance_logic/cases.txt",
-        "acceptance_modal/cases.txt",
+        '"oracle_model"',
+        '"oracle_all"',
+        '"oracle_components"',
     ):
         assert token in source
 
@@ -39,7 +35,7 @@ def test_semantic_test_surface_has_current_semantic_suites_only() -> None:
         "test_counterfactual_goal_compiler_2605.py",
         "test_association_goal_compiler_2606.py",
     ):
-        assert token in source
+        assert token not in source
 
     # These are deliberately not runnable choices in the semantic selector.
     assert '"document_acceptance",' not in source

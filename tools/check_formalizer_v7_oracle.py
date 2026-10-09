@@ -110,6 +110,62 @@ def validate(root):
     if set(coverage['acceptance'])!={f'A{i:02}' for i in range(1,40)} or set(coverage['dry_runs'])!={f'DR{i}' for i in range(1,32)}:raise OracleError('incomplete mandatory corpus')
     return {'status':'CORPUS_VALID','execution_status':'NOT_EXECUTED','stats':manifest['stats'],'document_sha256':manifest['source_document']['sha256']}
 
+def compare_case(c, trace):
+    """Compare one completed trace using the same strict checks as the final report."""
+    ce=[]
+    if trace is not None:
+        try:
+            strictkeys(trace,['schema_version','case_id','checkpoints'],['binding_manifest_ref','execution_status','blockers','runtime_error','binding_manifest'])
+            if trace['schema_version']!='v7-oracle-trace-1':raise OracleError('trace version')
+            if trace['case_id']!=c['case_id']:raise OracleError('actual case ID mismatch')
+        except (ValueError,KeyError) as exc:
+            return {'case_id':c['case_id'],'status':'FAIL','errors':[{'error':str(exc)}]}
+    if trace is None:ce.append({'error':'missing case'})
+    elif trace.get('execution_status')=='BLOCKED':
+        if not trace.get('blockers') or trace['checkpoints']:
+            ce.append({'error':'invalid BLOCKED trace'})
+        else:
+            return {'case_id':c['case_id'],'status':'BLOCKED','blockers':trace['blockers'],'errors':[]}
+    elif trace.get('execution_status')=='ERROR':
+        ce.append({'error':'runtime error','detail':trace.get('runtime_error')})
+    else:
+        execution=trace.get('execution_status')
+        if execution not in (None,'EXECUTED'):ce.append({'error':'unknown execution_status'})
+        if execution=='EXECUTED':
+            binding=trace.get('binding_manifest')
+            if not isinstance(binding,dict) or not binding.get('api_refs'):
+                ce.append({'error':'missing concrete binding manifest'})
+            elif hashlib.sha256(canonical(binding).encode()).hexdigest()!=trace.get('binding_manifest_ref'):
+                ce.append({'error':'binding manifest digest mismatch'})
+        checkpoints={};stepids=[s['id'] for s in c['steps']]
+        for cp in trace['checkpoints']:
+            try:
+                strictkeys(cp,['step_id','actual'])
+                if not isinstance(cp['actual'],dict):raise OracleError('actual must be object')
+                if cp['step_id'] in checkpoints:raise OracleError('duplicate checkpoint')
+                checkpoints[cp['step_id']]=cp['actual']
+            except (ValueError,KeyError) as e:ce.append({'error':str(e)})
+        # Order matters for crashes, durable boundaries and same_as.
+        if [cp.get('step_id') for cp in trace['checkpoints']]!=stepids:ce.append({'error':'missing/extra/out-of-order checkpoint'})
+        previous={}
+        for s in c['steps']:
+            actual=checkpoints.get(s['id'])
+            if actual is None:ce.append({'step':s['id'],'error':'missing checkpoint'});continue
+            # A negative mutation cannot establish its boundary when the
+            # unmutated authored stimulus already violates that contract.
+            # Keep its observed validation error, but never count it PASS.
+            stimulus=actual.get('stimulus',{})
+            if stimulus.get('baseline_valid') is False or stimulus.get('mutation_contract_valid') is False:
+                ce.append({'step':s['id'],'error':'invalid oracle stimulus','detail':stimulus.get('baseline_error') or stimulus.get('defect')})
+            for ck in s['checks']:
+                try:
+                    if not evaluate(ck,actual,previous):
+                        expect=pointer(previous[ck['checkpoint']],ck['path']) if ck['op']=='same_as' else ck['value']
+                        ce.append({'step':s['id'],'path':ck['path'],'op':ck['op'],'error':'gold mismatch','expected':expect,'observed':pointer(actual,ck['path'])})
+                except (ValueError,KeyError,TypeError) as e:ce.append({'step':s['id'],'path':ck['path'],'error':str(e)})
+            previous[s['id']]=actual
+    return {'case_id':c['case_id'],'status':'FAIL' if ce else 'PASS','errors':ce}
+
 def compare(root,actual_path,case_filter=None):
     manifest,cases=load_corpus(root);selected=[c for c in cases if not case_filter or c['case_id'] in case_filter]
     if case_filter and {c['case_id'] for c in selected}!=set(case_filter):raise OracleError('unknown requested case')
@@ -123,55 +179,7 @@ def compare(root,actual_path,case_filter=None):
         except (ValueError,KeyError) as e:errors.append({'line':n,'error':str(e)})
     requested={c['case_id'] for c in selected}
     for extra in set(observed)-requested:errors.append({'case_id':extra,'error':'unexpected case'})
-    results=[]
-    for c in selected:
-        ce=[];trace=observed.get(c['case_id'])
-        if trace is None:ce.append({'error':'missing case'})
-        elif trace.get('execution_status')=='BLOCKED':
-            if not trace.get('blockers') or trace['checkpoints']:
-                ce.append({'error':'invalid BLOCKED trace'})
-            else:
-                results.append({'case_id':c['case_id'],'status':'BLOCKED','blockers':trace['blockers'],'errors':[]})
-                continue
-        elif trace.get('execution_status')=='ERROR':
-            ce.append({'error':'runtime error','detail':trace.get('runtime_error')})
-        else:
-            execution=trace.get('execution_status')
-            if execution not in (None,'EXECUTED'):ce.append({'error':'unknown execution_status'})
-            if execution=='EXECUTED':
-                binding=trace.get('binding_manifest')
-                if not isinstance(binding,dict) or not binding.get('api_refs'):
-                    ce.append({'error':'missing concrete binding manifest'})
-                elif hashlib.sha256(canonical(binding).encode()).hexdigest()!=trace.get('binding_manifest_ref'):
-                    ce.append({'error':'binding manifest digest mismatch'})
-            checkpoints={};stepids=[s['id'] for s in c['steps']]
-            for cp in trace['checkpoints']:
-                try:
-                    strictkeys(cp,['step_id','actual'])
-                    if not isinstance(cp['actual'],dict):raise OracleError('actual must be object')
-                    if cp['step_id'] in checkpoints:raise OracleError('duplicate checkpoint')
-                    checkpoints[cp['step_id']]=cp['actual']
-                except (ValueError,KeyError) as e:ce.append({'error':str(e)})
-            # Order matters for crashes, durable boundaries and same_as.
-            if [cp.get('step_id') for cp in trace['checkpoints']]!=stepids:ce.append({'error':'missing/extra/out-of-order checkpoint'})
-            previous={}
-            for s in c['steps']:
-                actual=checkpoints.get(s['id'])
-                if actual is None:ce.append({'step':s['id'],'error':'missing checkpoint'});continue
-                # A negative mutation cannot establish its boundary when the
-                # unmutated authored stimulus already violates that contract.
-                # Keep its observed validation error, but never count it PASS.
-                stimulus=actual.get('stimulus',{})
-                if stimulus.get('baseline_valid') is False or stimulus.get('mutation_contract_valid') is False:
-                    ce.append({'step':s['id'],'error':'invalid oracle stimulus','detail':stimulus.get('baseline_error') or stimulus.get('defect')})
-                for ck in s['checks']:
-                    try:
-                        if not evaluate(ck,actual,previous):
-                            expect=pointer(previous[ck['checkpoint']],ck['path']) if ck['op']=='same_as' else ck['value']
-                            ce.append({'step':s['id'],'path':ck['path'],'op':ck['op'],'error':'gold mismatch','expected':expect,'observed':pointer(actual,ck['path'])})
-                    except (ValueError,KeyError,TypeError) as e:ce.append({'step':s['id'],'path':ck['path'],'error':str(e)})
-                previous[s['id']]=actual
-        results.append({'case_id':c['case_id'],'status':'FAIL' if ce else 'PASS','errors':ce})
+    results=[compare_case(c, observed.get(c['case_id'])) for c in selected]
     failing=sum(r['status']=='FAIL' for r in results)
     # This is comparison status, not G0–G5 verdict. Full concrete binding is checked by integration owner.
     blocked=sum(r['status']=='BLOCKED' for r in results)

@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 
 from ah.config import AppConfig
 
-from .config_store import ApplyMode, ConfigDocument
+from .config_store import ApplyMode, ConfigDocument, is_visible_config_setting
 
 
 class ConfigEditor(QWidget):
@@ -67,6 +67,8 @@ class ConfigEditor(QWidget):
         self.tree.clear()
         sections: dict[str, QTreeWidgetItem] = {}
         for entry in self.document.entries():
+            if not is_visible_config_setting(entry.path):
+                continue
             section, _, local = entry.path.partition(".")
             root = sections.get(section)
             if root is None:

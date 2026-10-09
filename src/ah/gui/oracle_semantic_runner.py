@@ -1,17 +1,4 @@
-"""Semantic (model-required) V7 oracle runner helpers for the GUI.
-
-Pure logic only (no Qt imports): model detection, deterministic selection of the
-model-dependent corpus subset, subprocess command construction, and detailed
-post-run statistics aggregation + report rendering. The GUI layer in
-``semantic_test_window.py`` drives a QProcess with these helpers so the UI stays
-responsive during long live-model runs.
-
-"Model-required" cases are exactly those whose steps contain a raw-text
-``formalize`` action: they cannot execute without a live provider (the runner
-marks them ``BLOCKED_LOCAL_PROVIDER_DISABLED`` when disabled). In the current
-corpus this is precisely the 640 ``pipeline``-tier cases, so selection uses
-``--tier pipeline``.
-"""
+"""Pure V7 GUI runner helpers: commands, discovery and artifact reports."""
 from __future__ import annotations
 
 import gzip
@@ -58,9 +45,12 @@ def detect_lmstudio_models(base_url: str, api_key: str | None = None, timeout: f
     parsed = urlparse(url)
     host = parsed.hostname
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
-    conn = http.client.HTTPConnection(host, port, timeout=timeout)
+    if parsed.scheme not in {"http", "https"} or not host:
+        return []
+    connection = http.client.HTTPSConnection if parsed.scheme == "https" else http.client.HTTPConnection
+    conn = connection(host, port, timeout=timeout)
     try:
-        conn.putrequest("GET", "/v1/models")
+        conn.putrequest("GET", parsed.path.rstrip("/") + "/models")
         conn.putheader("Accept", "application/json")
         if api_key:
             conn.putheader("Authorization", f"Bearer {api_key}")
@@ -74,7 +64,7 @@ def detect_lmstudio_models(base_url: str, api_key: str | None = None, timeout: f
         return []
     finally:
         conn.close()
-    models = data.get("data") or []
+    models = (data.get("data") or []) if isinstance(data, dict) else []
     out: list[str] = []
     for item in models:
         if isinstance(item, dict):
@@ -92,21 +82,30 @@ def build_oracle_command(
     *,
     timeout: float = 300.0,
     max_tokens: int = 4096,
+    provider: str = "lmstudio",
+    tiers: tuple[str, ...] = ("pipeline",),
 ) -> list[str]:
-    """argv (after the interpreter) for a live LM Studio run of the model set."""
+    """argv after the interpreter; the GUI consumes flushed progress events."""
+    if provider not in {"disabled", "lmstudio", "ollama", "openai"}:
+        raise ValueError("unsupported GUI oracle provider")
+    if provider != "disabled" and not model.strip():
+        raise ValueError("a loaded model must be selected")
     corpus = repo_root / "data" / "formalizer_v7_oracle"
     runner = repo_root / "tools" / "run_formalizer_v7_oracle.py"
-    return [
+    argv = [
         str(runner),
         "--corpus", str(corpus),
-        "--provider", "lmstudio",
+        "--provider", provider,
         "--base-url", base_url,
         "--model", model,
         "--timeout", str(timeout),
         "--max-tokens", str(max_tokens),
-        "--tier", "pipeline",
+        "--progress-jsonl",
         "--out", str(out_dir),
     ]
+    for tier in tiers:
+        argv += ["--tier", tier]
+    return argv
 
 
 def _read_json(path: Path):
@@ -116,27 +115,30 @@ def _read_json(path: Path):
         return None
 
 
-def _iter_actual(out_dir: Path):
+def _iter_actual(out_dir: Path, warnings: list | None = None):
     gz = out_dir / "actual.jsonl.gz"
     plain = out_dir / "actual.jsonl"
-    if gz.is_file():
-        with gzip.open(gz, "rt", encoding="utf-8") as fh:
+    # The plain stream remains authoritative until compression has finished.
+    # Stop/crash during archive.write_bytes can leave a partial .gz beside it.
+    path = plain if plain.is_file() else gz
+    if not path.is_file():
+        return
+    opener = path.open if path == plain else lambda **kw: gzip.open(path, **kw)
+    try:
+        with opener(mode="rt", encoding="utf-8") as fh:
             for line in fh:
-                line = line.strip()
-                if line:
-                    try:
-                        yield json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-    elif plain.is_file():
-        for line in plain.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                yield json.loads(line)
-            except json.JSONDecodeError:
-                continue
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                    if isinstance(row, dict):
+                        yield row
+                except json.JSONDecodeError:
+                    if warnings is not None:
+                        warnings.append(f"Incomplete or invalid actual record in {path.name}")
+    except (OSError, EOFError, UnicodeError) as exc:
+        if warnings is not None:
+            warnings.append(f"Cannot read {path.name}: {exc}")
 
 
 def _provider_health(out_dir: Path) -> dict:
@@ -152,8 +154,7 @@ def _provider_health(out_dir: Path) -> dict:
             lines = journal.read_text(encoding="utf-8").splitlines()
         except Exception:
             continue
-        saw_received = False
-        case_failed_error = None
+        calls = {}
         for line in lines:
             line = line.strip()
             if not line:
@@ -165,20 +166,18 @@ def _provider_health(out_dir: Path) -> dict:
             payload = rec.get("payload") or {}
             if payload.get("kind") != "prov_call":
                 continue
+            calls[payload.get("id", (payload.get("run_id"), payload.get("ordinal"), payload.get("attempt")))] = payload
+        for payload in calls.values():
             state = payload.get("state")
             if state == "RECEIVED":
-                saw_received = True
+                received += 1
             elif state in ("FAILED", "ERROR"):
-                case_failed_error = payload.get("error") or f"provider {state}"
+                failed += 1
+                key = str(payload.get("error") or f"provider {state}")[:160]
+                errors[key] = errors.get(key, 0) + 1
             ms = payload.get("response_time_ms")
             if isinstance(ms, (int, float)):
                 times.append(float(ms))
-        if saw_received:
-            received += 1
-        elif case_failed_error is not None:
-            failed += 1
-            key = str(case_failed_error)[:160]
-            errors[key] = errors.get(key, 0) + 1
     return {
         "received": received,
         "failed": failed,
@@ -200,12 +199,13 @@ def parse_run_stats(out_dir: Path) -> dict:
     # Per-case diagnostics codes from the actual stream.
     diag_counts: dict[str, int] = {}
     per_case_diag: dict[str, list[str]] = {}
-    for rec in _iter_actual(out_dir):
+    artifact_warnings: list[str] = []
+    for rec in _iter_actual(out_dir, artifact_warnings):
         cid = rec.get("case_id")
         if not cid:
             continue
-        act = (rec.get("checkpoints") or [{}])[0].get("actual") or {}
-        codes = ((act.get("diagnostics") or {}).get("codes")) or []
+        codes = sorted({str(code) for checkpoint in rec.get("checkpoints") or []
+                        for code in ((checkpoint.get("actual") or {}).get("diagnostics") or {}).get("codes", [])})
         for code in codes:
             diag_counts[code] = diag_counts.get(code, 0) + 1
         per_case_diag[cid] = list(codes)
@@ -227,7 +227,7 @@ def parse_run_stats(out_dir: Path) -> dict:
     non_passing: list[dict] = []
     for cid in sorted(set(per_case_status) | set(per_case_diag)):
         info = per_case_status.get(cid, {})
-        status = info.get("status") or ("FAIL" if per_case_diag.get(cid) else "UNKNOWN")
+        status = info.get("status") or "INCOMPLETE"
         if status == "PASS":
             continue
         non_passing.append({
@@ -243,7 +243,7 @@ def parse_run_stats(out_dir: Path) -> dict:
         "out_dir": str(out_dir),
         "provider_config": run_config.get("provider_config"),
         "selected_case_ids": run_config.get("selected_case_ids", []),
-        "status": summary.get("status"),
+        "status": summary.get("status") or "INCOMPLETE",
         "totals": {
             "passed": summary.get("passed_cases"),
             "failed": summary.get("failed_cases"),
@@ -264,6 +264,7 @@ def parse_run_stats(out_dir: Path) -> dict:
         "diagnostic_code_counts": dict(sorted(diag_counts.items(), key=lambda kv: -kv[1])),
         "non_passing_cases": non_passing,
         "failed_case_detail": failed_detail,
+        "artifact_warnings": artifact_warnings,
     }
 
 
@@ -274,8 +275,12 @@ def render_report(stats: dict) -> str:
     prov = stats.get("provenance") or {}
     tot = stats.get("totals") or {}
 
-    lines.append("# V7 semantic oracle — model run report")
+    lines.append("# V7 oracle — run report")
     lines.append("")
+    if stats.get("artifact_warnings"):
+        lines.append("## Artifact warnings")
+        lines.extend("- " + str(w) for w in stats["artifact_warnings"][:20])
+        lines.append("")
     lines.append(f"- out_dir: {stats.get('out_dir')}")
     lines.append(f"- provider: {cfg.get('provider')}  model: {cfg.get('model') or '(auto)'}  base_url: {cfg.get('base_url')}")
     lines.append(f"- live execution: {prov.get('model_live_execution')}   received calls: {prov.get('received_provider_calls')}   elapsed: {prov.get('elapsed_seconds')}s")
@@ -347,17 +352,25 @@ def render_report(stats: dict) -> str:
     return "\n".join(lines)
 
 
+def process_run_status(status: str, exit_code: int, *, normal_exit: bool, completed: bool, cancelled: bool = False) -> str:
+    """A partial/abnormal process can never be displayed as a successful run."""
+    if cancelled:
+        return "CANCELLED"
+    if not normal_exit:
+        return "ERROR"
+    if not completed:
+        return "INCOMPLETE" if exit_code == 0 else "ERROR"
+    expected_exit = {"PASS": 0, "PARTIAL": 0, "ORACLE_MATCH": 0, "FAIL": 1, "BLOCKED": 3}
+    if status not in expected_exit:
+        return "INCOMPLETE"
+    return status if exit_code == expected_exit[status] else "ERROR"
+
+
 def save_report(out_dir: Path, stats: dict) -> tuple[Path, Path]:
     """Persist the report + raw stats into the run dir for later diagnostics."""
     out_dir = Path(out_dir)
     md_path = out_dir / "gui_report.md"
     json_path = out_dir / "gui_stats.json"
-    try:
-        md_path.write_text(render_report(stats), encoding="utf-8")
-    except Exception:
-        pass
-    try:
-        json_path.write_text(json.dumps(stats, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    except Exception:
-        pass
+    md_path.write_text(render_report(stats), encoding="utf-8")
+    json_path.write_text(json.dumps(stats, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     return md_path, json_path

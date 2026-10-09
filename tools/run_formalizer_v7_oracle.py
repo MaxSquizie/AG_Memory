@@ -9,14 +9,15 @@ sys.path[:0]=[str(ROOT),str(ROOT/'src')]
 from tools import check_formalizer_v7_oracle as checker
 from tools import formalizer_v7_extended_binding as adapter
 from tools import formalizer_v7_runtime_adapter as base
+from tools import formalizer_v7_progress as progress
 from tools.run_formalizer_v7_bound_oracle import coverage,dump,sha
 
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--corpus',type=Path,default=ROOT/'data/formalizer_v7_oracle')
     p.add_argument('--out',type=Path,required=True)
-    p.add_argument('--provider',choices=['disabled','lmstudio','openai','replay'],default='disabled')
-    p.add_argument('--base-url',default='http://127.0.0.1:1234')
+    p.add_argument('--provider',choices=['disabled','lmstudio','ollama','openai','replay'],default='disabled')
+    p.add_argument('--base-url',default=None)
     p.add_argument('--model',default='')
     p.add_argument('--timeout',type=float,default=120)
     p.add_argument('--max-tokens',type=int,default=4096)
@@ -27,9 +28,12 @@ def main(argv=None):
     p.add_argument('--dry-run',action='append',default=[],help='repeatable DR1–DR31 reference')
     p.add_argument('--replay-from',type=Path)
     p.add_argument('--list',action='store_true',help='list selected cases; no writes or provider calls')
+    p.add_argument('--progress-jsonl',action='store_true',help='emit flushed V7_PROGRESS JSON events to stdout (also saved in progress.jsonl)')
     a=p.parse_args(argv)
     if a.timeout<=0 or a.max_tokens<1:p.error('positive timeout/max-tokens required')
-    if a.provider in {'lmstudio','openai'} and not a.model:p.error('--model must name the loaded local model')
+    if a.provider in {'lmstudio','ollama','openai'} and not a.model:p.error('--model must name the loaded local model')
+    if a.base_url is None:
+        a.base_url='http://127.0.0.1:11434' if a.provider=='ollama' else 'http://127.0.0.1:1234'
     if a.provider=='replay' and not a.replay_from:p.error('--replay-from is required')
     if a.replay_from and a.provider!='replay':p.error('--replay-from requires --provider replay')
     validation=checker.validate(a.corpus);manifest,cases=checker.load_corpus(a.corpus)
@@ -70,20 +74,35 @@ def main(argv=None):
     adapter.CONFIG=config;adapter.RUN_DIR=a.out/'cases';base.RESOURCE_ARTIFACT_DIR=a.out/'resources'
     dump(a.out/'run_config.json',{'provider_config':config,'corpus_manifest_sha256':sha(a.corpus/'manifest.json'),'source_snapshot':base.source_snapshot(),'selected_case_ids':[c['case_id'] for c in selected],'production_release':False})
     actual=a.out/'actual.jsonl';started=time.monotonic();fixtures=checker.readjson(a.corpus/'fixtures.json');bindings=[];received_calls=0
+    progress.configure(a.out/'progress.jsonl',stdout=a.progress_jsonl)
+    live_counts={'completed':0,'total':len(selected),'passed':0,'failed':0,'blocked':0}
+    progress.emit('run_started',provider=a.provider,model=a.model,output_dir=str(a.out),
+        selected_case_ids=[c['case_id'] for c in selected],**live_counts)
     with actual.open('w',encoding='utf-8') as out:
         for i,gold in enumerate(selected,1):
             stimulus=json.loads(json.dumps(gold))
             for s in stimulus['steps']:del s['checks']
-            try:result=adapter.run_case(stimulus,fixtures)
-            except Exception as exc:
-                import traceback
-                result={'schema_version':'v7-oracle-trace-1','case_id':gold['case_id'],'checkpoints':[],'execution_status':'ERROR','runtime_error':{'type':type(exc).__name__,'message':str(exc),'traceback':traceback.format_exc()}}
+            case_started=time.monotonic()
+            with progress.context(case_id=gold['case_id'],case_index=i,**live_counts):
+                progress.emit('case_started',title=gold['title'],tier=gold['tier'],step_total=len(stimulus['steps']))
+                try:result=adapter.run_case(stimulus,fixtures)
+                except Exception as exc:
+                    import traceback
+                    result={'schema_version':'v7-oracle-trace-1','case_id':gold['case_id'],'checkpoints':[],'execution_status':'ERROR','runtime_error':{'type':type(exc).__name__,'message':str(exc),'traceback':traceback.format_exc()}}
             out.write(checker.canonical(result)+'\n');out.flush()
             bindings.append({'case_id':gold['case_id'],'execution_status':result['execution_status'],
                 'level':result.get('binding_manifest',{}).get('execution_level'),
                 'api_refs':result.get('binding_manifest',{}).get('api_refs',[]),'blockers':result.get('blockers',[])})
             wal=a.out/'cases'/base.digest(gold['case_id'])/'journal.log'
             if wal.is_file():received_calls+=sum(json.loads(line)['payload'].get('kind')=='prov_call' and json.loads(line)['payload'].get('state')=='RECEIVED' for line in wal.read_text(encoding='utf-8').splitlines() if line.strip())
+            compared=checker.compare_case(gold,result)
+            live_counts['completed']=i
+            live_counts[{'PASS':'passed','FAIL':'failed','BLOCKED':'blocked'}[compared['status']]]+=1
+            progress.emit('case_finished',case_id=gold['case_id'],case_index=i,
+                status=compared['status'],execution_status=result['execution_status'],
+                errors=compared['errors'],blockers=compared.get('blockers',[]),
+                runtime_error=result.get('runtime_error'),case_elapsed_seconds=round(time.monotonic()-case_started,3),
+                received_provider_calls=received_calls,**live_counts)
             if i%25==0 or i==len(selected):print(f'{i}/{len(selected)}: {gold["case_id"]} ({result["execution_status"]})',flush=True)
     case_filter=[c['case_id'] for c in selected] if len(selected)!=len(cases) else None
     report=checker.compare(a.corpus,actual,case_filter)
@@ -121,11 +140,14 @@ def main(argv=None):
     measured['execution_scope']='NATIVE_PIPELINE + COMPONENT_OR_WAL';dump(a.out/'runtime_coverage.json',measured)
     dump(a.out/'bindings.json',{'registered_actions':sorted(adapter.SUPPORTED),'cases':bindings})
     archive=a.out/'actual.jsonl.gz';archive.write_bytes(gzip.compress(actual.read_bytes(),mtime=0))
-    dump(a.out/'provenance.json',{'source_snapshot':base.source_snapshot(),'source_snapshot_at_end':source_at_end,'source_unchanged':source_unchanged,'corpus_manifest_sha256':sha(a.corpus/'manifest.json'),'document_sha256':validation['document_sha256'],'actual_sha256':sha(actual),'archive_sha256':sha(archive),'comparison_sha256':sha(a.out/'comparison.json'),'elapsed_seconds':time.monotonic()-started,'python':sys.version,'production_release':False,'gates_pass_claim':False,'model_live_execution':a.provider in {'lmstudio','openai'} and received_calls>0,'received_provider_calls':received_calls,'process_kill_crashes':False})
+    dump(a.out/'provenance.json',{'source_snapshot':base.source_snapshot(),'source_snapshot_at_end':source_at_end,'source_unchanged':source_unchanged,'corpus_manifest_sha256':sha(a.corpus/'manifest.json'),'document_sha256':validation['document_sha256'],'actual_sha256':sha(actual),'archive_sha256':sha(archive),'comparison_sha256':sha(a.out/'comparison.json'),'elapsed_seconds':time.monotonic()-started,'python':sys.version,'production_release':False,'gates_pass_claim':False,'model_live_execution':a.provider in {'lmstudio','ollama','openai'} and received_calls>0,'received_provider_calls':received_calls,'process_kill_crashes':False})
     actual.unlink()
     counts={k:report[k] for k in ('status','passed_cases','failed_cases','blocked_cases')}
     (a.out/'README.md').write_text('# Runtime oracle run\n\n```json\n'+json.dumps(counts,indent=2)+'\n```\n\nFull provider WAL, typed IR, observed AH facts, signed TEST_ONLY fixture resources and comparison are retained. BLOCKED records an unavailable prerequisite (for example, a disabled model provider); FAIL records a comparison, invalid stimulus or runtime failure. See summary.json and issues.json for attribution. This is not G0–G5 PASS or a reviewed production resource release.\n',encoding='utf-8')
     print(json.dumps(counts,ensure_ascii=False))
+    progress.emit('run_finished',status=report['status'],summary=summary,
+        errors=report['errors'],received_provider_calls=received_calls,**live_counts)
+    progress.close()
     return 1 if report['status']=='FAIL' else 3 if report['blocked_cases'] else 0
 
 if __name__=='__main__':raise SystemExit(main())

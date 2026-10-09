@@ -7,8 +7,10 @@ from copy import deepcopy
 from dataclasses import asdict
 from pathlib import Path
 import http.client
-import itertools, json, os, urllib.request, urllib.error
+import itertools, json, os, time, uuid
 from urllib.parse import urlparse
+from ah.llm.lmstudio_client import LMStudioClient
+from ah.llm.ollama_client import OllamaClientError
 from ah.formalizer.canonical_ledger import digest
 from ah.formalizer.real_backend import RealBackendSelector
 from ah.formalizer.run_binding import InterpretationRunBinding
@@ -145,40 +147,140 @@ def fixture(core, profile):
         ensure_entity(core,{'uid':'fixture:language:M:'+name,'name':name})
     return release,aliases
 
+def _provider_progress(event, **fields):
+    """Progress is observational; an unavailable consumer cannot change inference."""
+    try:
+        from tools.formalizer_v7_progress import emit
+        emit(event, **fields)
+    except Exception:
+        pass
+
+
+class _OracleHTTPClient(LMStudioClient):
+    """Shared request schema/parser, raw HTTP transport, and no endpoint fallback.
+
+    Runtime's native-chat helper can retry a non-reasoning model without the
+    reasoning flag. Oracle probes require an explicit off contract: transport
+    failures use RuntimeError so that retry branch is never taken.
+    """
+    def __init__(self, config):
+        super().__init__(config['base_url'], timeout_seconds=config.get('timeout',120),
+                         api_key=os.environ.get('FORMALIZER_ORACLE_API_KEY',''))
+        self.raw_response = ''
+        self.http_status = None
+
+    def _request(self, method, path, body=None):
+        url = self.base_url + path
+        parsed = urlparse(url)
+        if parsed.scheme not in {'http','https'} or not parsed.hostname:
+            raise RuntimeError('PROVIDER_BASE_URL_INVALID')
+        if parsed.query or parsed.fragment or parsed.username or parsed.password:
+            raise RuntimeError('PROVIDER_BASE_URL_INVALID')
+        connection = http.client.HTTPSConnection if parsed.scheme == 'https' else http.client.HTTPConnection
+        conn = connection(parsed.hostname, parsed.port or (443 if parsed.scheme=='https' else 80),
+                          timeout=self.timeout_seconds)
+        payload = None if body is None else json.dumps(body,ensure_ascii=False).encode('utf-8')
+        headers = {'Accept':'application/json'}
+        if payload is not None:
+            headers['Content-Type']='application/json'
+            headers['Content-Length']=str(len(payload))
+        if self.api_key:headers['Authorization']='Bearer '+self.api_key
+        try:
+            # Keep raw http.client: some local proxies reject urllib's equivalent
+            # request with 502. Preserve both HTTPS and reverse-proxy URL prefixes.
+            conn.request(method, parsed.path or '/', body=payload, headers=headers)
+            response=conn.getresponse()
+            self.http_status=response.status
+            self.raw_response=response.read().decode('utf-8','replace')
+            if response.status != 200:
+                raise RuntimeError(f'HTTP {response.status}: {response.reason} at {url}: '
+                                   + self.raw_response[:500])
+            try:data=json.loads(self.raw_response)
+            except json.JSONDecodeError as exc:
+                raise RuntimeError('PROVIDER_RESPONSE_INVALID_JSON') from exc
+            if not isinstance(data,dict):raise RuntimeError('PROVIDER_RESPONSE_NOT_OBJECT')
+            return data
+        finally:
+            conn.close()
+
+
 class ChatBackend:
-    """OpenAI-compatible local server; no implicit external fallback."""
+    """Stateless local protocol probes; explicit thinking off, never hidden text."""
     def __init__(self, config): self.config=config; self.model=config.get('model','')
     def generate(self,prompt,*,system='',role='',override=None):
         mode=self.config.get('provider','disabled')
         if mode=='replay':raise RuntimeError('REPLAY_BYTES_MISSING: network disabled')
         if mode=='disabled':raise RuntimeError('LOCAL_PROVIDER_DISABLED')
+        if mode not in {'lmstudio','ollama','openai'}:raise RuntimeError('LOCAL_PROVIDER_UNSUPPORTED: '+str(mode))
         settings=override or {}
-        body={'model':self.model,'messages':[{'role':'system','content':system},{'role':'user','content':prompt}],
-              'temperature':settings.get('temperature',0),'top_p':settings.get('top_p',1),
-              'max_tokens':settings.get('max_new_tokens',4096),'stream':False}
-        base=self.config['base_url'].rstrip('/')
-        if not base.endswith('/v1'):base+='/v1'
-        parsed=urlparse(base)
-        host=parsed.hostname; port=parsed.port or (443 if parsed.scheme=='https' else 80)
-        payload=json.dumps(body,ensure_ascii=False).encode('utf-8')
-        # NOTE: LM Studio's proxy returns HTTP 502 to urllib.request/requests but accepts raw
-        # http.client for the identical body (verified empirically); use http.client directly.
-        conn=http.client.HTTPConnection(host,port,timeout=self.config.get('timeout',120))
+        client=_OracleHTTPClient(self.config)
+        endpoint=client.base_url+({'lmstudio':'/api/v1/chat','ollama':'/api/chat',
+                                   'openai':'/v1/chat/completions'}[mode])
+        request_id=uuid.uuid4().hex
+        started=time.perf_counter()
+        _provider_progress('request_started',request_id=request_id,provider=mode,model=self.model,
+                           role=role,endpoint=endpoint,prompt=str(prompt),system=str(system),
+                           enable_thinking=False)
+        text=None
         try:
-            conn.putrequest('POST','/v1/chat/completions')
-            conn.putheader('Content-Type','application/json'); conn.putheader('Content-Length',str(len(payload)))
-            key=os.environ.get('FORMALIZER_ORACLE_API_KEY')
-            if key:conn.putheader('Authorization','Bearer '+key)
-            conn.endheaders(); conn.send(payload)
-            resp=conn.getresponse(); raw=resp.read()
-            if resp.status!=200:
-                raise RuntimeError(f"HTTP {resp.status}: {resp.reason} at {base}/chat/completions: "
-                                   f"{raw.decode('utf-8','replace')[:300]}")
-            data=json.loads(raw)
-        finally:
-            conn.close()
-        text=data['choices'][0]['message']['content']
-        if not isinstance(text,str):raise ValueError('PROVIDER_RESPONSE_NOT_TEXT')
+            if mode=='lmstudio':
+                data=client.native_chat(model=self.model,prompt=prompt,system=system,
+                    temperature=settings.get('temperature',0),top_p=settings.get('top_p',1),
+                    top_k=settings.get('top_k',0),repeat_penalty=settings.get('repeat_penalty',1),
+                    max_tokens=settings.get('max_new_tokens',self.config.get('max_tokens',4096)),
+                    reasoning='off')
+                text=client.native_chat_text(data)
+            elif mode=='ollama':
+                # Match OllamaClient.chat's native request schema. Its historical
+                # parser falls back to message.thinking; oracle protocol probes
+                # instead require visible content and fail closed when absent.
+                body={'model':self.model,'messages':[{'role':'system','content':system},
+                      {'role':'user','content':prompt}], 'stream':False,'think':False,
+                      'options':{'temperature':settings.get('temperature',0),
+                          'top_p':settings.get('top_p',1),'top_k':settings.get('top_k',0),
+                          'repeat_penalty':settings.get('repetition_penalty',settings.get('repeat_penalty',1)),
+                          'num_predict':settings.get('max_new_tokens',self.config.get('max_tokens',4096))}}
+                data=client._request('POST','/api/chat',body)
+                if data.get('error'):
+                    raise OllamaClientError('Ollama chat error: '+str(data['error']))
+                message=data.get('message')
+                if not isinstance(message,dict):
+                    raise OllamaClientError('Ollama chat response missing message')
+                content=message.get('content')
+                if not isinstance(content,str) or not content.strip():
+                    raise OllamaClientError('Ollama returned no visible message content; '
+                                            'hidden thinking is not a protocol answer')
+                if data.get('done') is False:
+                    raise OllamaClientError('Ollama chat response incomplete')
+                text=content.strip()
+            else:
+                body={'model':self.model,'messages':[{'role':'system','content':system},
+                      {'role':'user','content':prompt}],
+                      'temperature':settings.get('temperature',0),'top_p':settings.get('top_p',1),
+                      'max_tokens':settings.get('max_new_tokens',self.config.get('max_tokens',4096)),
+                      'stream':False,'store':False,'enable_thinking':False,
+                      'chat_template_kwargs':{'enable_thinking':False}}
+                data=client._request('POST','/v1/chat/completions',body)
+                # Typed reasoning parts are not visible assistant content. The
+                # shared parser never reads message.reasoning/reasoning_content.
+                visible=deepcopy(data)
+                choices=visible.get('choices')
+                if isinstance(choices,list) and choices and isinstance(choices[0],dict):
+                    message=choices[0].get('message')
+                    if isinstance(message,dict) and isinstance(message.get('content'),list):
+                        message['content']=[p for p in message['content'] if isinstance(p,dict)
+                            and p.get('type') in {'text','output_text'}]
+                text=client.chat_text(visible)
+        except Exception as exc:
+            _provider_progress('request_finished',request_id=request_id,status='ERROR',
+                provider=mode,model=self.model,role=role,endpoint=endpoint,
+                elapsed_seconds=time.perf_counter()-started,http_status=client.http_status,
+                raw_response=client.raw_response,error=str(exc))
+            raise
+        _provider_progress('request_finished',request_id=request_id,status='SUCCESS',
+            provider=mode,model=self.model,role=role,endpoint=endpoint,
+            elapsed_seconds=time.perf_counter()-started,http_status=client.http_status,
+            raw_response=client.raw_response,response=text)
         return text
 
 def json_safe(value):

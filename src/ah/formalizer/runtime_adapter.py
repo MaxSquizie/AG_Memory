@@ -10,7 +10,9 @@ The demo pipeline is a separate, noncommittable preview only.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, fields
+from copy import deepcopy
+from threading import Lock
 
 # Declared relation labels for the demo-boundary closed set (already declared in decision_schema_v1.json).
 _PREDICATE_LABELS = {"V1": "HAVE", "V2": "HAS_PART", "V3": "LOCATIVE", "V4": "LIKE"}
@@ -58,12 +60,58 @@ class FormalizerAdapter:
         self._schema = schema  # lazily loaded if None
         self._store = store      # AHStoreAdapter (durable) — native path prerequisite
         self._binding = binding  # InterpretationRunBinding — native path prerequisite
+        # One completed run only: UI diagnostics are a read-only view, never
+        # canonical memory, provider input or a replay source.
+        self._diagnostic_lock = Lock()
+        self._diagnostic_sequence = 0
+        self._diagnostic_snapshot = None
         if store is not None:
             store.resource_release = release
 
     @property
     def native_available(self) -> bool:
         return self._store is not None and self._binding is not None
+
+    def diagnostic_snapshot(self):
+        """Return an isolated snapshot of actual native IR and commit receipts."""
+        with self._diagnostic_lock:
+            return deepcopy(self._diagnostic_snapshot)
+
+    def diagnostic_sequence(self):
+        """Check for a new completed snapshot without copying native IR."""
+        with self._diagnostic_lock:
+            return self._diagnostic_sequence
+
+    def _capture_diagnostics(self, state, report, receipt):
+        # The canonical transaction already happened. An observer conversion
+        # failure must never turn its real successful receipt into a fake failed
+        # interpretation or invite the caller to repeat the write.
+        try:
+            snapshot = {
+                'source': 'native V7 runtime',
+                'source_text': state.text,
+                'state': asdict(state),
+                'interpretation_report': asdict(report),
+                'commit_receipt': {f.name: deepcopy(getattr(receipt, f.name)) for f in fields(receipt)
+                                   if f.name != 'perception'},
+            }
+        except Exception as exc:
+            snapshot = {
+                'source': 'native V7 runtime',
+                'source_text': state.text,
+                'diagnostic_error': {'type': type(exc).__name__, 'message': str(exc)[:1000]},
+                'interpretation_report': {'observation_id': report.observation_id,
+                                         'terminal': report.terminal, 'batch_hash': report.batch_hash},
+                'commit_receipt': {'observation_id': receipt.observation_id,
+                                  'version': receipt.version, 'terminal': receipt.terminal,
+                                  'batch_hash': receipt.batch_hash, 'applied': receipt.applied,
+                                  'committed_fragments': receipt.committed_fragments,
+                                  'node_refs': receipt.node_refs},
+            }
+        with self._diagnostic_lock:
+            self._diagnostic_sequence += 1
+            snapshot['sequence'] = self._diagnostic_sequence
+            self._diagnostic_snapshot = snapshot
 
     # -- V7-native entry (I01): real input committed durably on the store ---- #
     def interpret(self, text: str, context_facts: tuple[str, ...] = (), raw_input=None, *, version=1, observation_id=None, run_id=None) -> NativePerceptionResult:
@@ -80,7 +128,9 @@ class FormalizerAdapter:
             text, schema, self._selector, self._store, self._binding,
             morph=self._morph, context_facts=context_facts, release=self._release, raw_input=raw_input, version=version, observation_id=observation_id, run_id=run_id,
         )
-        return self._receipt(state, rep)
+        receipt = self._receipt(state, rep)
+        self._capture_diagnostics(state, rep, receipt)
+        return receipt
 
     def clarify(self, resolution_key, *, source_text=None):
         from .clarifications import resolve
@@ -94,6 +144,7 @@ class FormalizerAdapter:
                     self._store._journal.append('resolution_log', {'kind': 'CLARIFICATION_COMPLETED',
                         'request_id': rid, 'observation_id': rep.observation_id,
                         'version': rep.version, 'outcome': rep.terminal, 'batch_hash': rep.batch_hash})
+        self._capture_diagnostics(state, rep, result)
         return result
 
     def _receipt(self, state, rep):

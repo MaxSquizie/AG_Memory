@@ -1,523 +1,301 @@
+"""Production GUI control for the current V7 oracle, with live diagnostics."""
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 import sys
 import time
+from uuid import uuid4
 
-from PySide6.QtCore import QProcess, Slot
-from PySide6.QtWidgets import (
-    QComboBox,
-    QHBoxLayout,
-    QLabel,
-    QMessageBox,
-    QPushButton,
-)
+from PySide6.QtCore import QProcess, QProcessEnvironment, QTimer, Slot
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QMessageBox, QProgressBar, QPushButton
 
-from .main_window import MainWindow as _BaseMainWindow
-from .oracle_semantic_runner import (
-    build_oracle_command,
-    detect_lmstudio_models,
-    parse_run_stats,
-    render_report,
-    save_report,
-)
+from .main_window import MainWindow as _BaseMainWindow, FunctionWorker
+from .oracle_progress_state import OracleOutputParser, OracleProgressState
+from .oracle_semantic_runner import build_oracle_command, detect_lmstudio_models, parse_run_stats, process_run_status, render_report, save_report
 
 
 @dataclass(frozen=True, slots=True)
 class _SemanticSuite:
     kind: str
     label: str
-    cases_filename: str | None = None
-    oracle_filename: str | None = None
-    runs_dirname: str | None = None
-    pytest_targets: tuple[str, ...] = ()
+    tiers: tuple[str, ...]
+    needs_model: bool = True
 
 
 class MainWindow(_BaseMainWindow):
-    """GUI surface exposing only tests that evaluate semantic formalization.
+    """Only V7 suites are visible; hidden base widgets keep their slot contracts."""
 
-    Historical buttons are kept alive but hidden so inherited worker-completion
-    handlers may still safely toggle them. The visible surface is one selector and
-    one run button. Text->semantic-oracle suites keep using the production
-    acceptance runner; typed GoalCompiler contracts use narrow pytest targets because
-    their fixtures require preloaded canonical memory and cannot be represented by a
-    standalone text/oracle pair without weakening the test.
-    """
-
-    _SEMANTIC_SUITES: tuple[_SemanticSuite, ...] = (
-        _SemanticSuite(
-            "acceptance",
-            "Core · semantic formalization",
-            "acceptance_cases.txt",
-            "acceptance_oracle.json",
-            "acceptance_runs",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "Core · frozen regression40",
-            "acceptance_cases_regression40.txt",
-            "acceptance_oracle_regression40.json",
-            "acceptance_runs_regression40",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "M1 · adversarial semantics",
-            "acceptance_cases_m1_adversarial.txt",
-            "acceptance_oracle_m1_adversarial.json",
-            "acceptance_runs_m1_adversarial",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "M1 · inversion",
-            "acceptance_inversion/cases.txt",
-            "acceptance_inversion/oracle.json",
-            "acceptance_runs_m1_inversion",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "M1 · ellipsis",
-            "acceptance_ellipsis/cases.txt",
-            "acceptance_ellipsis/oracle.json",
-            "acceptance_runs_m1_ellipsis",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "M1 · typo / noise",
-            "acceptance_typo/cases.txt",
-            "acceptance_typo/oracle.json",
-            "acceptance_runs_m1_typo",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "Quantifiers · semantic formalization",
-            "acceptance_quantifiers/cases.txt",
-            "acceptance_quantifiers/oracle.json",
-            "acceptance_runs_quantifiers",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "Logic · AND / OR / XOR / NOT / IMPLIES",
-            "acceptance_logic/cases.txt",
-            "acceptance_logic/oracle.json",
-            "acceptance_runs_logic",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "Modal / attitude semantics",
-            "acceptance_modal/cases.txt",
-            "acceptance_modal/oracle.json",
-            "acceptance_runs_modal",
-        ),
-        _SemanticSuite(
-            "acceptance",
-            "TemporalMode · STATE / PROCESS / EVENT / TRANSITION",
-            "acceptance_temporal_modes/cases.txt",
-            "acceptance_temporal_modes/oracle.json",
-            "acceptance_runs_temporal_modes",
-        ),
-        _SemanticSuite("hidden_valency", "Hidden valency · semantic micro-probe"),
-        _SemanticSuite(
-            "pytest",
-            "GoalCompiler · quantified",
-            pytest_targets=(
-                "tests/test_quantified_goal_acceptance_2605.py",
-                "tests/test_quantified_goal_compiler_2605.py",
-            ),
-        ),
-        _SemanticSuite(
-            "pytest",
-            "GoalCompiler · counterfactual",
-            pytest_targets=(
-                "tests/test_counterfactual_goal_acceptance_2605.py",
-                "tests/test_counterfactual_goal_compiler_2605.py",
-            ),
-        ),
-        _SemanticSuite(
-            "pytest",
-            "GoalCompiler · association",
-            pytest_targets=(
-                "tests/test_association_goal_acceptance_2606.py",
-                "tests/test_association_goal_compiler_2606.py",
-                "tests/test_association_goal_guards_2606.py",
-            ),
-        ),
-        _SemanticSuite(
-            "oracle_model",
-            "V7 Oracle · semantic (LM Studio model)",
-        ),
-        _SemanticSuite(
-            "pytest",
-            "GoalCompiler · all current",
-            pytest_targets=(
-                "tests/test_quantified_goal_acceptance_2605.py",
-                "tests/test_quantified_goal_compiler_2605.py",
-                "tests/test_counterfactual_goal_acceptance_2605.py",
-                "tests/test_counterfactual_goal_compiler_2605.py",
-                "tests/test_association_goal_acceptance_2606.py",
-                "tests/test_association_goal_compiler_2606.py",
-                "tests/test_association_goal_guards_2606.py",
-            ),
-        ),
+    _SEMANTIC_SUITES = (
+        _SemanticSuite("oracle_model", "V7 · язык — локальная модель", ("pipeline",)),
+        _SemanticSuite("oracle_all", "V7 · весь корпус архитектуры — локальная модель", ()),
+        _SemanticSuite("oracle_components", "V7 · компоненты и recovery — без модели", ("component", "durability"), False),
     )
-
     _HIDDEN_LEGACY_CHAT_BUTTONS = (
-        "acceptance_button",
-        "m1_adversarial_button",
-        "m1_inversion_button",
-        "m1_ellipsis_button",
-        "m1_typo_button",
-        "document_acceptance_button",
-        "hidden_valency_button",
-        "m2_acceptance_button",
+        "acceptance_button", "m1_adversarial_button", "m1_inversion_button",
+        "m1_ellipsis_button", "m1_typo_button", "m1_quantifier_button",
+        "m1_temporal_mode_button", "document_acceptance_button", "hidden_valency_button", "m2_acceptance_button",
     )
-    _HIDDEN_NON_SEMANTIC_METRIC_BUTTON_TEXTS = frozenset(
-        {
-            "Запустить M2 acceptance",
-            "Запустить M3 GC acceptance",
-        }
-    )
+    _HIDDEN_NON_SEMANTIC_METRIC_BUTTON_TEXTS = frozenset({"Запустить M2 acceptance", "Запустить M3 GC acceptance"})
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._semantic_test_process: QProcess | None = None
-        self._semantic_process_output: list[str] = []
-        self._semantic_worker_failed = False
+        self._semantic_test_process = None
+        self._oracle_discovery_worker = None
+        self._oracle_closing = False
+        self._oracle_cancelled = False
+        self._oracle_output_parser = OracleOutputParser()
+        self._oracle_progress = OracleProgressState()
+        self._semantic_process_output = deque(maxlen=60)
+        self._oracle_out_dir = None
+        self._oracle_timer = QTimer(self)
+        self._oracle_timer.setInterval(250)
+        self._oracle_timer.timeout.connect(self._refresh_oracle_progress)
         self._install_semantic_test_controls()
 
     def _install_semantic_test_controls(self) -> None:
-        # Do not delete inherited widgets: old async completion slots reference them.
-        # Hiding removes obsolete/redundant controls from the actual operator UI while
-        # preserving binary compatibility with MainWindow internals.
         for name in self._HIDDEN_LEGACY_CHAT_BUTTONS:
             widget = getattr(self, name, None)
             if widget is not None:
                 widget.hide()
-
-        # M2 proof tracing and M3 GC remain available as metric/diagnostic panels,
-        # but their acceptance launchers do not belong in the semantic-test surface.
         for button in self.metrics_panel.findChildren(QPushButton):
             if button.text() in self._HIDDEN_NON_SEMANTIC_METRIC_BUTTON_TEXTS:
                 button.hide()
-
         parent = self.chat_input.parentWidget()
         layout = None if parent is None else parent.layout()
         if layout is None:
-            raise RuntimeError("chat dock layout is unavailable for semantic tests")
-
+            raise RuntimeError("chat dock layout is unavailable for V7 oracle")
         row = QHBoxLayout()
-        title = QLabel("Semantic tests")
-        title.setToolTip(
-            "Только проверки text→semantic formalization и typed GoalCompiler. "
-            "Document/M2 inference/M3 GC здесь намеренно отсутствуют."
-        )
-        row.addWidget(title)
-
+        row.addWidget(QLabel("V7 oracle"))
         self.semantic_suite = QComboBox()
         self.semantic_suite.setObjectName("semanticSuiteSelector")
         for suite in self._SEMANTIC_SUITES:
             self.semantic_suite.addItem(suite.label)
-        self.semantic_suite.setMinimumContentsLength(28)
+        self.semantic_suite.setToolTip("Языковой набор: tier=pipeline. Весь корпус: все механики, включая typed components и recovery.\nБез модели: языковые шаги внутри компонентных кейсов остаются BLOCKED.")
         row.addWidget(self.semantic_suite, 1)
-
-        self.semantic_test_button = QPushButton("Запустить semantic test")
+        self.semantic_test_button = QPushButton("Запустить V7")
         self.semantic_test_button.setObjectName("semanticTestRunButton")
         self.semantic_test_button.clicked.connect(self._run_selected_semantic_suite)
         row.addWidget(self.semantic_test_button)
-
+        self.oracle_stop_button = QPushButton("Остановить")
+        self.oracle_stop_button.setEnabled(False)
+        self.oracle_stop_button.clicked.connect(self._stop_oracle)
+        row.addWidget(self.oracle_stop_button)
         self.semantic_test_status = QLabel("READY")
         self.semantic_test_status.setObjectName("semanticTestStatus")
-        self.semantic_test_status.setMinimumWidth(70)
         row.addWidget(self.semantic_test_status)
         layout.addLayout(row)
+        self.oracle_progress_label = QLabel("Прогон не запущен")
+        self.oracle_progress_label.setObjectName("oracleLiveProgress")
+        self.oracle_progress_label.setWordWrap(True)
+        layout.addWidget(self.oracle_progress_label)
+        self.oracle_progress_bar = QProgressBar()
+        self.oracle_progress_bar.setObjectName("oracleCaseProgress")
+        self.oracle_progress_bar.setRange(0, 1)
+        self.oracle_progress_bar.setValue(0)
+        layout.addWidget(self.oracle_progress_bar)
 
     def _selected_semantic_suite(self) -> _SemanticSuite:
-        index = self.semantic_suite.currentIndex()
-        if not 0 <= index < len(self._SEMANTIC_SUITES):
-            raise RuntimeError("semantic test suite selection is invalid")
-        return self._SEMANTIC_SUITES[index]
+        return self._SEMANTIC_SUITES[self.semantic_suite.currentIndex()]
 
     def _semantic_test_busy(self) -> bool:
-        process = self._semantic_test_process
-        process_busy = (
-            process is not None
-            and process.state() != QProcess.ProcessState.NotRunning
-        )
-        return bool(
-            process_busy
-            or getattr(self, "_acceptance_worker", None) is not None
-            or getattr(self, "_hidden_valency_worker", None) is not None
-        )
+        process = getattr(self, "_semantic_test_process", None)
+        return bool(getattr(self, "_oracle_discovery_worker", None) is not None
+                    or (process is not None and process.state() != QProcess.ProcessState.NotRunning))
+
+    def _cognitive_run_active(self) -> bool:
+        # The child owns its fixture AH, but shares the model server with chat.
+        return self._semantic_test_busy() or super()._cognitive_run_active()
 
     @Slot()
     def _run_selected_semantic_suite(self) -> None:
-        if self._semantic_test_busy():
-            QMessageBox.information(
-                self,
-                "Semantic tests",
-                "Сначала дождитесь завершения текущей семантической проверки.",
-            )
+        if self._cognitive_run_active():
+            QMessageBox.information(self, "V7 oracle", "Дождитесь завершения текущего запроса или прогона.")
             return
-
-        suite = self._selected_semantic_suite()
-        self._semantic_worker_failed = False
-        self.semantic_test_status.setText("RUNNING")
+        self.semantic_test_status.setText("PREPARING")
         self.semantic_test_button.setEnabled(False)
         self.semantic_suite.setEnabled(False)
-
-        if suite.kind == "acceptance":
-            assert suite.cases_filename is not None
-            assert suite.oracle_filename is not None
-            assert suite.runs_dirname is not None
-            self._run_acceptance_pair(
-                cases_filename=suite.cases_filename,
-                oracle_filename=suite.oracle_filename,
-                runs_dirname=suite.runs_dirname,
-                label=suite.label,
-                title=suite.label,
-            )
-            # Validation may fail synchronously before a worker is created.
-            if getattr(self, "_acceptance_worker", None) is None:
-                self._semantic_suite_idle("READY")
+        suite = self._selected_semantic_suite()
+        if not suite.needs_model:
+            self._start_oracle(suite, "disabled", "", "", None)
             return
-
-        if suite.kind == "hidden_valency":
-            self._run_hidden_valency_diagnostic()
-            if getattr(self, "_hidden_valency_worker", None) is None:
-                self._semantic_suite_idle("READY")
-            return
-
-        if suite.kind == "oracle_model":
-            self._run_oracle_model()
-            # Model detection / config validation may fail synchronously before a
-            # process is created; restore the UI in that case.
-            if getattr(self, "_semantic_test_process", None) is None:
-                self._semantic_suite_idle("READY")
-            return
-
-        if suite.kind == "pytest":
-            self._run_semantic_pytest(suite)
-            return
-
-        self._semantic_suite_idle("ERROR")
-        raise RuntimeError(f"unsupported semantic suite kind: {suite.kind}")
-
-    # --- V7 semantic oracle (live LM Studio model) -------------------------
-    _ORACLE_LABEL = "V7 Oracle · semantic (LM Studio model)"
-
-    def _run_oracle_model(self) -> None:
-        repo_root = Path(__file__).resolve().parents[3]
         llm = self.services.config.llm
-        base_url = str(getattr(llm, "lmstudio_base_url", "") or "").strip()
-        model = str(getattr(llm, "lmstudio_model", "") or "").strip()
-        api_key = str(getattr(llm, "lmstudio_api_key", "") or "").strip() or None
-        if not base_url:
-            self._semantic_suite_idle("ERROR")
-            QMessageBox.critical(
-                self, self._ORACLE_LABEL,
-                "llm.lmstudio_base_url не задан в конфиге.",
-            )
+        backend = str(getattr(llm, "backend", ""))
+        if backend == "lmstudio":
+            provider = "lmstudio"
+            base_url = str(getattr(llm, "lmstudio_base_url", "")).strip()
+            model = str(getattr(llm, "lmstudio_model", "")).strip()
+            api_key = str(getattr(llm, "lmstudio_api_key", "")).strip() or None
+        elif backend == "ollama":
+            provider = "ollama"
+            base_url = str(getattr(llm, "ollama_base_url", "")).strip()
+            model = str(getattr(llm, "ollama_model", "")).strip()
+            api_key = None
+        else:
+            self._oracle_prepare_error("Для модельного oracle выберите backend=lmstudio или ollama и запущенный локальный сервер.")
             return
-        if not model:
-            models = detect_lmstudio_models(base_url, api_key)
-            if len(models) == 1:
-                model = models[0]
-            elif len(models) > 1:
-                self._semantic_suite_idle("ERROR")
-                QMessageBox.critical(
-                    self, self._ORACLE_LABEL,
-                    "Загружено несколько моделей; задайте llm.lmstudio_model:\n"
-                    + "\n".join(models),
-                )
-                return
-            else:
-                self._semantic_suite_idle("ERROR")
-                QMessageBox.critical(
-                    self, self._ORACLE_LABEL,
-                    f"Не удалось обнаружить загруженную модель по {base_url}/v1/models.",
-                )
-                return
-        out_dir = repo_root / ".kripl" / "oracle_v7" / ("gui_" + time.strftime("%Y%m%d_%H%M%S"))
-        argv = build_oracle_command(repo_root, base_url, model, out_dir)
+        if not base_url:
+            self._oracle_prepare_error("URL локального сервера модели не задан в конфиге.")
+            return
+        if model and model.lower() != "auto":
+            self._start_oracle(suite, provider, base_url, model, api_key)
+            return
+        self.oracle_progress_label.setText("Обнаружение модели на локальном сервере…")
+        self.oracle_progress_bar.setRange(0, 0)
+        worker = FunctionWorker(lambda: detect_lmstudio_models(base_url, api_key))
+        self._oracle_discovery_worker = worker
+        worker.signals.result.connect(lambda models: self._oracle_model_discovered(suite, provider, base_url, api_key, models))
+        worker.signals.error.connect(self._oracle_prepare_error)
+        self.thread_pool.start(worker)
+
+    def _oracle_model_discovered(self, suite, provider, base_url, api_key, models) -> None:
+        self._oracle_discovery_worker = None
+        if self._oracle_closing:
+            return
+        if len(models) != 1:
+            self._oracle_prepare_error("Укажите точный ключ модели в конфиге: " + (", ".join(models) if models else "сервер не вернул загруженную модель"))
+            return
+        self._start_oracle(suite, provider, base_url, models[0], api_key)
+
+    def _oracle_prepare_error(self, message: str) -> None:
+        self._oracle_discovery_worker = None
+        if self._oracle_closing:
+            return
+        self.chat_history.append(f"<b>V7 oracle ERROR:</b> {self._html(message)}")
+        self.oracle_progress_bar.setRange(0, 1)
+        self._semantic_suite_idle("ERROR")
+
+    def _start_oracle(self, suite, provider, base_url, model, api_key) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        out_dir = repo_root / ".kripl" / "oracle_v7" / ("gui_" + time.strftime("%Y%m%d_%H%M%S") + "_" + uuid4().hex[:8])
+        timeout = float(getattr(self.services.config.llm, "request_timeout_seconds", 240.0))
+        argv = build_oracle_command(repo_root, base_url, model, out_dir, provider=provider, tiers=suite.tiers, timeout=timeout)
         process = QProcess(self)
         process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         process.setWorkingDirectory(str(repo_root))
+        env = QProcessEnvironment.systemEnvironment()
+        env.insert("PYTHONUNBUFFERED", "1")
+        env.insert("PYTHONIOENCODING", "utf-8")
         if api_key:
-            env = QProcess.environment()
             env.insert("FORMALIZER_ORACLE_API_KEY", api_key)
-            process.setEnvironment(env)
+        process.setProcessEnvironment(env)
         process.readyReadStandardOutput.connect(self._oracle_model_output)
         process.finished.connect(self._oracle_model_finished)
         process.errorOccurred.connect(self._oracle_model_error)
         self._semantic_test_process = process
-        self._semantic_process_output = []
         self._oracle_out_dir = out_dir
-        self.chat_history.append(
-            f"<b>{self._html(self._ORACLE_LABEL)}</b>: live run of model-required cases "
-            + f"(tier=pipeline) via {self._html(base_url)} model={self._html(model)}"
-        )
-        process.start(sys.executable, argv)
+        self._oracle_cancelled = False
+        self._oracle_progress = OracleProgressState()
+        self._oracle_output_parser = OracleOutputParser()
+        self._semantic_process_output.clear()
+        self.semantic_test_status.setText("RUNNING")
+        self.oracle_stop_button.setEnabled(True)
+        self.oracle_progress_bar.setRange(0, 0)
+        self.llm_panel.set_oracle_running(True)
+        self.llm_dock.show()
+        self._oracle_timer.start()
+        self._refresh_oracle_progress()
+        self.chat_history.append(f"<b>{self._html(suite.label)}</b>: provider={self._html(provider)}, model={self._html(model or 'disabled')}, reasoning=off<br>Артефакты: {self._html(str(out_dir))}")
+        process.start(sys.executable, ["-u", *argv])
 
     @Slot()
     def _oracle_model_output(self) -> None:
         process = self._semantic_test_process
-        if process is None:
-            return
-        chunk = bytes(process.readAllStandardOutput()).decode("utf-8", errors="replace")
-        if chunk:
-            self._semantic_process_output.append(chunk)
+        if process is not None:
+            self._consume_oracle_output(bytes(process.readAllStandardOutput()))
+
+    def _consume_oracle_output(self, chunk: bytes, *, final: bool = False) -> None:
+        events, logs = self._oracle_output_parser.feed(chunk, final=final)
+        for event in events:
+            if not self._oracle_progress.apply(event):
+                continue
+            self.llm_panel.set_oracle_progress(event)
+            if event.get("event") == "case_finished":
+                status = event.get("status", "INCOMPLETE")
+                detail = event.get("errors") or event.get("blockers") or event.get("runtime_error") or ""
+                self.chat_history.append(f"<b>{self._html(str(event.get('case_id')))}: {self._html(str(status))}</b> {self._html(str(detail)[:600])}")
+        for line in logs:
+            self._semantic_process_output.append(line)
+            self.chat_history.append(f"<pre>{self._html(line[:2000])}</pre>")
+        self._refresh_oracle_progress()
+
+    @Slot()
+    def _refresh_oracle_progress(self) -> None:
+        self.oracle_progress_label.setText(self._oracle_progress.text())
+        if self._oracle_progress.total:
+            self.oracle_progress_bar.setRange(0, self._oracle_progress.total)
+            self.oracle_progress_bar.setValue(self._oracle_progress.completed)
 
     @Slot(int, QProcess.ExitStatus)
-    def _oracle_model_finished(self, exit_code: int, _status: QProcess.ExitStatus) -> None:
+    def _oracle_model_finished(self, exit_code: int, exit_status: QProcess.ExitStatus) -> None:
+        if self._oracle_closing:
+            return
         self._oracle_model_output()
-        raw = "".join(self._semantic_process_output).strip()
-        out_dir = getattr(self, "_oracle_out_dir", None)
-        stats = parse_run_stats(out_dir) if out_dir is not None else {}
-        report = render_report(stats) if stats else "(no run artifacts found)"
-        status = (
-            "PASS" if stats.get("status") == "PASS"
-            else ("FAIL" if stats else f"EXIT{exit_code}")
-        )
-        self.chat_history.append(
-            f"<b>{self._html(self._ORACLE_LABEL)} {status}</b><br>"
-            + f"<pre>{self._html(report[-12000:])}</pre>"
-        )
-        if out_dir is not None and stats:
-            md_path, json_path = save_report(out_dir, stats)
-            self.chat_history.append(
-                f"report: {md_path}<br>stats: {json_path}"
-            )
-        if raw:
-            self.chat_history.append(f"<b>runner tail</b><pre>{self._html(raw[-2000:])}</pre>")
-        self._semantic_test_process = None
-        self._semantic_process_output = []
-        self._oracle_out_dir = None
-        self._semantic_suite_idle(status)
+        self._consume_oracle_output(b"", final=True)
+        status = "ERROR"
+        try:
+            stats = parse_run_stats(self._oracle_out_dir) if self._oracle_out_dir is not None else {}
+            status = process_run_status(stats.get("status", "INCOMPLETE"), exit_code,
+                                        normal_exit=exit_status == QProcess.ExitStatus.NormalExit,
+                                        completed=self._oracle_progress.finished, cancelled=self._oracle_cancelled)
+            self.chat_history.append(f"<b>V7 oracle {self._html(status)}</b><pre>{self._html(render_report(stats)[-16000:])}</pre>")
+            if self._oracle_out_dir is not None and self._oracle_out_dir.is_dir():
+                stats["process_exit_code"] = exit_code
+                stats["gui_status"] = status
+                md_path, json_path = save_report(self._oracle_out_dir, stats)
+                self.chat_history.append(f"Отчёт: {self._html(str(md_path))}<br>Данные: {self._html(str(json_path))}<br>Живой trace: {self._html(str(self._oracle_out_dir / 'progress.jsonl'))}")
+        except Exception as exc:
+            self.chat_history.append(f"<b>V7 oracle: ошибка чтения/сохранения отчёта:</b> {self._html(str(exc))}")
+        finally:
+            self._release_oracle(status)
 
     @Slot(QProcess.ProcessError)
     def _oracle_model_error(self, error: QProcess.ProcessError) -> None:
         process = self._semantic_test_process
-        if process is None or error != QProcess.ProcessError.FailedToStart:
-            return
-        message = process.errorString() or "oracle runner failed to start"
-        self.chat_history.append(
-            f"<b>{self._html(self._ORACLE_LABEL)} ERROR:</b> {self._html(message)}"
-        )
-        self._semantic_test_process = None
-        self._semantic_process_output = []
-        self._oracle_out_dir = None
-        self._semantic_suite_idle("ERROR")
+        if process is not None and error == QProcess.ProcessError.FailedToStart:
+            self.chat_history.append(f"<b>V7 oracle ERROR:</b> {self._html(process.errorString())}")
+            self._release_oracle("ERROR")
 
-    def _run_semantic_pytest(self, suite: _SemanticSuite) -> None:
-        if not suite.pytest_targets:
-            self._semantic_suite_idle("ERROR")
-            raise RuntimeError("semantic pytest suite has no targets")
-
-        repo_root = Path(__file__).resolve().parents[3]
-        missing = tuple(
-            target
-            for target in suite.pytest_targets
-            if not (repo_root / target).is_file()
-        )
-        if missing:
-            self._semantic_suite_idle("ERROR")
-            QMessageBox.critical(
-                self,
-                suite.label,
-                "Не найдены semantic test targets:\n" + "\n".join(missing),
-            )
-            return
-
-        process = QProcess(self)
-        process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        process.setWorkingDirectory(str(repo_root))
-        process.readyReadStandardOutput.connect(self._semantic_pytest_output)
-        process.finished.connect(self._semantic_pytest_finished)
-        process.errorOccurred.connect(self._semantic_pytest_error)
-        self._semantic_test_process = process
-        self._semantic_process_output = []
-
-        self.chat_history.append(
-            f"<b>{self._html(suite.label)}</b>: pytest "
-            + self._html(" ".join(suite.pytest_targets))
-        )
-        process.start(
-            sys.executable,
-            ["-m", "pytest", "-q", *suite.pytest_targets],
-        )
-
-    @Slot()
-    def _semantic_pytest_output(self) -> None:
+    def _release_oracle(self, status: str) -> None:
+        self._oracle_timer.stop()
+        self.llm_panel.set_oracle_running(False)
+        self._oracle_progress.finished = True
+        self._oracle_progress.finished_at = time.monotonic()
+        self._oracle_progress.active_request_at = None
+        self._refresh_oracle_progress()
         process = self._semantic_test_process
-        if process is None:
-            return
-        chunk = bytes(process.readAllStandardOutput()).decode("utf-8", errors="replace")
-        if chunk:
-            self._semantic_process_output.append(chunk)
-
-    @Slot(int, QProcess.ExitStatus)
-    def _semantic_pytest_finished(
-        self,
-        exit_code: int,
-        _exit_status: QProcess.ExitStatus,
-    ) -> None:
-        self._semantic_pytest_output()
-        output = "".join(self._semantic_process_output).strip()
-        label = self._selected_semantic_suite().label
-        status = "PASS" if exit_code == 0 else "FAIL"
-        self.chat_history.append(
-            f"<b>{self._html(label)} {status}</b><br>"
-            f"<pre>{self._html(output[-12000:] or '(no pytest output)')}</pre>"
-        )
         self._semantic_test_process = None
-        self._semantic_process_output = []
+        if process is not None:
+            process.deleteLater()
+        self._oracle_out_dir = None
         self._semantic_suite_idle(status)
 
-    @Slot(QProcess.ProcessError)
-    def _semantic_pytest_error(self, error: QProcess.ProcessError) -> None:
+    @Slot()
+    def _stop_oracle(self) -> None:
         process = self._semantic_test_process
         if process is None:
             return
-        # FailedToStart does not reliably produce a useful finished callback on all
-        # Qt backends, so recover the UI explicitly. Runtime crashes normally still
-        # proceed through finished where the captured stderr is shown.
-        if error == QProcess.ProcessError.FailedToStart:
-            label = self._selected_semantic_suite().label
-            message = process.errorString() or "pytest process failed to start"
-            self.chat_history.append(
-                f"<b>{self._html(label)} ERROR:</b> {self._html(message)}"
-            )
-            self._semantic_test_process = None
-            self._semantic_process_output = []
-            self._semantic_suite_idle("ERROR")
+        self._oracle_cancelled = True
+        self.semantic_test_status.setText("STOPPING")
+        self.oracle_stop_button.setEnabled(False)
+        process.terminate()
+        # A stuck HTTP call must not prevent cancelling our own child process.
+        QTimer.singleShot(1500, lambda: process.kill() if self._semantic_test_process is process and process.state() != QProcess.ProcessState.NotRunning else None)
 
     def _semantic_suite_idle(self, status: str) -> None:
         self.semantic_test_status.setText(status)
         self.semantic_test_button.setEnabled(True)
         self.semantic_suite.setEnabled(True)
+        self.oracle_stop_button.setEnabled(False)
 
-    @Slot(str)
-    def _acceptance_error(self, message: str) -> None:
-        self._semantic_worker_failed = True
-        super()._acceptance_error(message)
-
-    @Slot(str)
-    def _hidden_valency_error(self, message: str) -> None:
-        self._semantic_worker_failed = True
-        super()._hidden_valency_error(message)
-
-    @Slot()
-    def _acceptance_worker_finished(self) -> None:
-        super()._acceptance_worker_finished()
-        if hasattr(self, "semantic_test_button"):
-            self._semantic_suite_idle(
-                "ERROR" if self._semantic_worker_failed else "DONE"
-            )
-
-    @Slot()
-    def _hidden_valency_worker_finished(self) -> None:
-        super()._hidden_valency_worker_finished()
-        if hasattr(self, "semantic_test_button"):
-            self._semantic_suite_idle(
-                "ERROR" if self._semantic_worker_failed else "DONE"
-            )
+    def closeEvent(self, event) -> None:
+        self._oracle_closing = True
+        self._oracle_timer.stop()
+        process = self._semantic_test_process
+        if process is not None and process.state() != QProcess.ProcessState.NotRunning:
+            process.terminate()
+            if not process.waitForFinished(1000):
+                process.kill()
+                process.waitForFinished(1000)
+        super().closeEvent(event)

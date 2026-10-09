@@ -16,7 +16,8 @@ def test_native_http_and_offline_replay(tmp_path):
         def do_POST(self):
             body=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
             requests.append((self.path,body))
-            prompt=body['messages'][-1]['content']
+            assert body['reasoning']=='off' and body['store'] is False
+            prompt=body['input']
             if prompt.startswith('{'):
                 data=json.loads(prompt)
                 tokens=data['tokens']; anchors={t['text']:t['id'] for t in tokens}
@@ -29,7 +30,7 @@ def test_native_http_and_offline_replay(tmp_path):
                 lines=prompt.split('closed set):\n',1)[1].split('\nTask:',1)[0].splitlines()
                 ids=[line.split('. ',1)[0] for line in lines if '. ' in line and 'ARRIVE' in line]
                 reply={'outcome':'ONE_SELECTED','selected':ids[:1],'note':'bounded fixture'}
-            raw=json.dumps({'choices':[{'message':{'content':json.dumps(reply)}}]}).encode()
+            raw=json.dumps({'output':[{'type':'message','content':json.dumps(reply)}]}).encode()
             self.send_response(200); self.send_header('Content-Type','application/json')
             self.send_header('Content-Length',str(len(raw))); self.end_headers();self.wfile.write(raw)
     server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
@@ -41,7 +42,7 @@ def test_native_http_and_offline_replay(tmp_path):
     live=Session([payload],tmp_path/'live.log')
     try: actual=execute_native(live,payload,config)
     finally:server.shutdown();server.server_close();thread.join(timeout=5)
-    assert requests and all(path=='/v1/chat/completions' for path,_ in requests)
+    assert requests and all(path=='/api/v1/chat' for path,_ in requests)
     assert actual['assertions']['ah']==[{'predicate':'ARRIVE','roles':{'AGENT':{'entity':'ivan'}}}],actual
     assert actual['store']['marker_count']==1
     replay=Session([payload],tmp_path/'replay.log')

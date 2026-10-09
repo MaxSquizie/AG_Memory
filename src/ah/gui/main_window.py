@@ -690,7 +690,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Документ", f"Файл не найден:\n{path}")
             return
         self.document_panel.set_busy(True)
-        self.document_panel.status.setText("Perception всех chunks → единый DOCUMENT commit…")
+        self.document_panel.status.setText("Формализатор V7: все chunks → единый DOCUMENT commit…")
         worker = FunctionWorker(lambda: self.services.document_processor().ingest_file(path))
         self._document_ingest_worker = worker
         worker.signals.result.connect(self._document_ingest_finished)
@@ -1644,8 +1644,8 @@ class MainWindow(QMainWindow):
         parser_failures = [d for d in result.perception.diagnostics if str(d).startswith("PARSER_FAILURE:")]
         if parser_failures:
             self.chat_history.append(
-                "<span style='color:#d28a2e'><b>Perception:</b> semantic parse failed; "
-                "the user turn was stored as H experience only. See LLM → Parser RAW.</span>"
+                "<span style='color:#d28a2e'><b>Формализатор V7:</b> формализация не завершилась; "
+                "ввод сохранён только как H-опыт. Диагностика: LLM → Formalizer RAW / V7 IR / trace.</span>"
             )
         self.chat_history.append(
             f"<b>{self.services.config.identity.agent_name}:</b> {self._html(result.response_text)}"
