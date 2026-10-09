@@ -1,7 +1,7 @@
 """Production goal channel: decision-first recovery and one serialized DB-N."""
 from dataclasses import asdict
 from .canonical_ledger import CanonicalLedger,digest,region,region_data
-from .temporal_license import or_elimination_license,forall_inst_license,undated,LicenseResult
+from .temporal_license import or_elimination_license,forall_inst_license,undated,LicenseResult,normalize
 from .store_interface import StoreOp
 
 
@@ -71,7 +71,7 @@ def validate_goal(ledger,req,core=None):
             s,n=found[0]
             lic=_licensed(req.rule_id,W,windows.get(s['record_id'],undated()),root_support['record_id'],s['record_id'],evidence)
             if lic.status!='LICENSED': return 'GOAL_LICENSE_FAILED',None,None
-        return None,target,W
+        return None,target,normalize(W)
     from .goal_forms import formula, substitute, equivalent, check_proof
     budget=[8192]
     try:

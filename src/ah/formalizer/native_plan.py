@@ -220,7 +220,10 @@ def build_plan(state,release,store):
             else:
                 uid,ck=tree_node(t,frag)
                 polarity=next(op.payload['polarity'] for op in op_by_id.values() if op.op_type in {'ENSURE_NODE','ENSURE_FUNCTION'} and op.payload['uid']==uid)
-            gate=FragmentT5Input(frag,'RESOLVED',truth_grounds=('O',))
+            observed = (state.observation.get('text') == state.text
+                        and state.observation.get('observation_id') == state.source_uid
+                        and state.observation.get('interpretation_version') == state.interpretation_version)
+            gate=FragmentT5Input(frag,'RESOLVED',truth_grounds=('O',) if observed else ())
             ok,code=evaluate_fragment(gate)
             if not ok: raise ValueError(code)
             witness='witness:'+digest([tag,frag,reg]) if reg and t.get('operator')=='AND' else None

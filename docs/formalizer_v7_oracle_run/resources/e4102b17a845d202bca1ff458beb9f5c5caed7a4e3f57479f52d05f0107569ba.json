@@ -1,0 +1,460 @@
+{
+  "coverage_report": {
+    "categories": {
+      "COVERED": 0,
+      "KNOWLEDGE_ABSENT": 0,
+      "NOT_COVERED": 0,
+      "OOV_KEEP_AS_IS": 0
+    },
+    "corpus_id": "isolated-test-fixture-empty-lexical-sample",
+    "corpus_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "execution_coverage": null,
+    "measured_units": [],
+    "measurement_kind": "RESOURCE_LEXICAL_AVAILABILITY",
+    "resource_content_sha256": "672676b6582eda9931c1e47566ca3ad988e1bed10ce711b143fb18699805ff54",
+    "units_by_kind": {
+      "AttitudeMap": 0,
+      "CandidateSchema": 5,
+      "DeclaredReads": 0,
+      "IncompatibilityRules": 0,
+      "OpenTemplatePolicy": 1,
+      "PredicateSchema": 0,
+      "ProposalPolicy": 1,
+      "R-S": 1,
+      "R-V": 1,
+      "R-X3": 0,
+      "RoleRegistry": 18,
+      "ScopeLexicon": 0,
+      "SyntaxRules": 0,
+      "TemplateMap": 1,
+      "TemporalRules": 0
+    }
+  },
+  "dependency_versions": {
+    "AttitudeMap": "test-v1",
+    "CandidateSchema": "test-v1",
+    "DeclaredReads": "test-v1",
+    "IncompatibilityRules": "test-v1",
+    "OpenTemplatePolicy": "test-v1",
+    "PredicateSchema": "test-v1",
+    "ProposalPolicy": "test-v1",
+    "R-S": "test-v1",
+    "R-V": "test-v1",
+    "R-X3": "test-v1",
+    "RoleRegistry": "test-v1",
+    "ScopeLexicon": "test-v1",
+    "SyntaxRules": "test-v1",
+    "TemplateMap": "test-v1",
+    "TemporalRules": "test-v1"
+  },
+  "entries": [
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "AttitudeMap",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "candidate_kind": "CANDIDATE_GRAPH",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "edges": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "from": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "role_id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "scope": {
+                      "type": "boolean"
+                    },
+                    "to": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "from",
+                    "to"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 100000,
+                "minItems": 0,
+                "type": "array"
+              },
+              "nodes": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "anchors": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "maxItems": 100000,
+                      "minItems": 1,
+                      "type": "array"
+                    },
+                    "head": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "anchors"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 100000,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "nodes",
+              "edges"
+            ],
+            "type": "object"
+          },
+          "schema_version": "emit-v1"
+        },
+        {
+          "candidate_kind": "CLAUSE_BOUNDARY",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "capture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "side": {
+                "enum": [
+                  "BEFORE",
+                  "AFTER"
+                ]
+              }
+            },
+            "required": [
+              "capture"
+            ],
+            "type": "object"
+          },
+          "schema_version": "emit-v1"
+        },
+        {
+          "candidate_kind": "ELLIPSIS",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "antecedent": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "capture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "gap_kind": {
+                "enum": [
+                  "PREDICATE_GAP",
+                  "ARGUMENT_GAP",
+                  "SUBORDINATOR_GAP"
+                ]
+              }
+            },
+            "required": [
+              "capture",
+              "gap_kind"
+            ],
+            "type": "object"
+          },
+          "schema_version": "emit-v1"
+        },
+        {
+          "candidate_kind": "QUERY_INTENT",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "capture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "compare_capture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "request": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "capture",
+              "request"
+            ],
+            "type": "object"
+          },
+          "schema_version": "emit-v1"
+        },
+        {
+          "candidate_kind": "TOKEN_HYPOTHESIS",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "capture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "variants": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 100000,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "capture",
+              "variants"
+            ],
+            "type": "object"
+          },
+          "schema_version": "emit-v1"
+        }
+      ],
+      "kind": "CandidateSchema",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "DeclaredReads",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "IncompatibilityRules",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "allow": true
+        }
+      ],
+      "kind": "OpenTemplatePolicy",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "PredicateSchema",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "max_depth": 32,
+          "max_edges": 128,
+          "max_nodes": 128,
+          "max_source_tokens": 256
+        }
+      ],
+      "kind": "ProposalPolicy",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "POS": "VERB",
+          "lemma": "arrive",
+          "sense_id": "ARRIVE:923c7db9c0c7"
+        }
+      ],
+      "kind": "R-S",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "roles": [
+            {
+              "allowed_cases": [
+                "nom"
+              ],
+              "argument_types": [
+                "ENTITY"
+              ],
+              "cardinality": {
+                "max": 1,
+                "min": 1
+              },
+              "optionality": false,
+              "role_id": "SUBJECT"
+            }
+          ],
+          "sense_id": "ARRIVE:923c7db9c0c7",
+          "state_class": "EVENT"
+        }
+      ],
+      "kind": "R-V",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "R-X3",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "role_id": "EXPERIENCER"
+        },
+        {
+          "role_id": "SURFACE_ARG"
+        },
+        {
+          "role_id": "SUBJECT"
+        },
+        {
+          "role_id": "OBJECT"
+        },
+        {
+          "role_id": "AUXILLIARY"
+        },
+        {
+          "role_id": "RECIPIENT"
+        },
+        {
+          "role_id": "SOURCE"
+        },
+        {
+          "role_id": "ABSENTEE"
+        },
+        {
+          "role_id": "LOCATION"
+        },
+        {
+          "role_id": "STATE"
+        },
+        {
+          "role_id": "TIME"
+        },
+        {
+          "role_id": "DURATION"
+        },
+        {
+          "role_id": "CAUSE"
+        },
+        {
+          "role_id": "PURPOSE"
+        },
+        {
+          "role_id": "TOOL"
+        },
+        {
+          "role_id": "MATERIAL"
+        },
+        {
+          "role_id": "AMOUNT"
+        },
+        {
+          "role_id": "HOW-TO"
+        }
+      ],
+      "kind": "RoleRegistry",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "ScopeLexicon",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "SyntaxRules",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [
+        {
+          "roles": [
+            "SUBJECT"
+          ],
+          "sense_id": "ARRIVE:923c7db9c0c7",
+          "template_ref": "fixture:T:ARRIVE:923c7db9c0c7"
+        }
+      ],
+      "kind": "TemplateMap",
+      "schema_version": "v7",
+      "version": "test-v1"
+    },
+    {
+      "dependency_versions": {},
+      "entries": [],
+      "kind": "TemporalRules",
+      "schema_version": "v7",
+      "version": "test-v1"
+    }
+  ],
+  "kind": "FORMALIZER_RESOURCE_RELEASE",
+  "schema_version": "v7",
+  "signed_review_id": {
+    "algorithm": "Ed25519",
+    "key_id": "TEST_ONLY",
+    "reviewed_sha256": "e4102b17a845d202bca1ff458beb9f5c5caed7a4e3f57479f52d05f0107569ba",
+    "reviewer": "ORACLE_FIXTURE_ONLY",
+    "signature": "U5B3YdQDq52FA1aczOFwYxVprwEpKkbQQeqautR6EJjpQvilmK9T5pzrbaMZRTUCO6YD9QEJEivzOhLOwNPQBg==",
+    "timestamp": "2026-10-09T00:00:00+00:00"
+  },
+  "version": "TEST_ONLY-v1"
+}

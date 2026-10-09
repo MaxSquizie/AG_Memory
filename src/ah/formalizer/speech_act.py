@@ -77,3 +77,8 @@ def detect_speech_act(text: str, context_facts=()) -> tuple[SpeechActReading, ..
 def has_linked_alternatives(readings: tuple[SpeechActReading, ...]) -> bool:
     """True when the utterance is an unresolved speech act (multiple linked readings)."""
     return len(readings) > 1 and any(not r.grounded for r in readings)
+
+
+def detect_negation(text: str) -> bool:
+    """Lexical NOT cue for preview; native scope comes from the sealed tree."""
+    return "не" in _words(text)

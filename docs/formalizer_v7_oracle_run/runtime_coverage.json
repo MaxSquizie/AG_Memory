@@ -1,0 +1,1142 @@
+{
+  "acceptance": {
+    "A01": {
+      "BLOCKED": 1
+    },
+    "A02": {
+      "BLOCKED": 1
+    },
+    "A03": {
+      "BLOCKED": 1
+    },
+    "A04": {
+      "BLOCKED": 1
+    },
+    "A05": {
+      "PASS": 1
+    },
+    "A06": {
+      "BLOCKED": 1
+    },
+    "A07": {
+      "BLOCKED": 1
+    },
+    "A08": {
+      "BLOCKED": 1
+    },
+    "A09": {
+      "BLOCKED": 1,
+      "PASS": 36
+    },
+    "A10": {
+      "BLOCKED": 1
+    },
+    "A11": {
+      "BLOCKED": 1
+    },
+    "A12": {
+      "BLOCKED": 1
+    },
+    "A13": {
+      "BLOCKED": 1
+    },
+    "A14": {
+      "BLOCKED": 1
+    },
+    "A15": {
+      "BLOCKED": 1
+    },
+    "A16": {
+      "BLOCKED": 1
+    },
+    "A17": {
+      "BLOCKED": 1
+    },
+    "A18": {
+      "PASS": 197
+    },
+    "A19": {
+      "BLOCKED": 1
+    },
+    "A20": {
+      "BLOCKED": 1
+    },
+    "A21": {
+      "BLOCKED": 1
+    },
+    "A22": {
+      "BLOCKED": 1
+    },
+    "A23": {
+      "BLOCKED": 1
+    },
+    "A24": {
+      "BLOCKED": 1
+    },
+    "A25": {
+      "BLOCKED": 1
+    },
+    "A26": {
+      "BLOCKED": 1
+    },
+    "A27": {
+      "BLOCKED": 1
+    },
+    "A28": {
+      "BLOCKED": 1
+    },
+    "A29": {
+      "BLOCKED": 1
+    },
+    "A30": {
+      "BLOCKED": 1
+    },
+    "A31": {
+      "BLOCKED": 1
+    },
+    "A32": {
+      "BLOCKED": 1
+    },
+    "A33": {
+      "BLOCKED": 1
+    },
+    "A34": {
+      "BLOCKED": 1
+    },
+    "A35": {
+      "BLOCKED": 1
+    },
+    "A36": {
+      "BLOCKED": 1
+    },
+    "A37": {
+      "BLOCKED": 1
+    },
+    "A38": {
+      "BLOCKED": 2
+    },
+    "A39": {
+      "BLOCKED": 26
+    }
+  },
+  "actions": {
+    "admit_batch": {
+      "PASS": 1
+    },
+    "admit_with_crash": {
+      "BLOCKED": 6
+    },
+    "assert_content": {
+      "BLOCKED": 5
+    },
+    "association_query": {
+      "BLOCKED": 1
+    },
+    "candidate_id_collision": {
+      "BLOCKED": 1
+    },
+    "candidate_sources": {
+      "BLOCKED": 27
+    },
+    "change_conflict_evidence": {
+      "BLOCKED": 2
+    },
+    "change_declared_read": {
+      "BLOCKED": 1
+    },
+    "change_declared_resource": {
+      "BLOCKED": 1
+    },
+    "change_source": {
+      "BLOCKED": 2
+    },
+    "check_simultaneity": {
+      "PASS": 196
+    },
+    "commit_batch": {
+      "BLOCKED": 3
+    },
+    "commit_dated_conjunction": {
+      "BLOCKED": 1
+    },
+    "commit_grounded_fragment": {
+      "PASS": 36
+    },
+    "commit_partial_plan": {
+      "BLOCKED": 1
+    },
+    "commit_som": {
+      "BLOCKED": 10
+    },
+    "commit_two_attitudes": {
+      "BLOCKED": 1
+    },
+    "commit_two_state_supports": {
+      "BLOCKED": 1
+    },
+    "compile_goal": {
+      "BLOCKED": 1
+    },
+    "compile_query_kind": {
+      "BLOCKED": 11
+    },
+    "compile_rule": {
+      "BLOCKED": 14
+    },
+    "compile_rule_pair": {
+      "BLOCKED": 1
+    },
+    "completed_t4_state": {
+      "BLOCKED": 5
+    },
+    "compound_binding_budget": {
+      "BLOCKED": 3
+    },
+    "compound_binding_query": {
+      "BLOCKED": 14
+    },
+    "compute_s_access": {
+      "BLOCKED": 1
+    },
+    "concurrent_run_claim": {
+      "BLOCKED": 1
+    },
+    "consolidate": {
+      "BLOCKED": 2
+    },
+    "context_candidate_reads": {
+      "BLOCKED": 2
+    },
+    "correlated_inference": {
+      "BLOCKED": 8
+    },
+    "count_from_asserted_bounds": {
+      "BLOCKED": 12
+    },
+    "count_query": {
+      "BLOCKED": 18
+    },
+    "count_window_aggregate": {
+      "BLOCKED": 1
+    },
+    "coverage_report": {
+      "BLOCKED": 1
+    },
+    "crash": {
+      "PASS": 1
+    },
+    "declare_context_version": {
+      "BLOCKED": 1
+    },
+    "derive_forall": {
+      "BLOCKED": 1,
+      "PASS": 225
+    },
+    "derive_operator_conclusion": {
+      "BLOCKED": 3
+    },
+    "derive_or": {
+      "BLOCKED": 1,
+      "PASS": 225
+    },
+    "disabled_rule_request": {
+      "BLOCKED": 2
+    },
+    "evaluate_boolean_expr": {
+      "BLOCKED": 3
+    },
+    "evaluate_rule_expr": {
+      "BLOCKED": 3
+    },
+    "exact_attestation_query": {
+      "BLOCKED": 8
+    },
+    "execute_head_calls": {
+      "BLOCKED": 18,
+      "PASS": 6
+    },
+    "execute_identical_prompts": {
+      "BLOCKED": 1
+    },
+    "execute_migration": {
+      "BLOCKED": 6
+    },
+    "explicit_assertion_retraction": {
+      "BLOCKED": 3
+    },
+    "formalize": {
+      "BLOCKED": 640
+    },
+    "formalize_partial": {
+      "BLOCKED": 2
+    },
+    "formalize_reference_with_context": {
+      "BLOCKED": 1
+    },
+    "formalize_speech_act": {
+      "BLOCKED": 1
+    },
+    "frame_temporal_mode": {
+      "BLOCKED": 1
+    },
+    "function_identity": {
+      "PASS": 17
+    },
+    "gate_precheck": {
+      "BLOCKED": 1
+    },
+    "input_identity": {
+      "BLOCKED": 1
+    },
+    "interleave_dbn_retraction": {
+      "BLOCKED": 4
+    },
+    "invalid_write_transaction": {
+      "BLOCKED": 7
+    },
+    "journal_batch": {
+      "BLOCKED": 6,
+      "PASS": 1
+    },
+    "journal_batches": {
+      "BLOCKED": 18,
+      "PASS": 7
+    },
+    "legacy_roundtrip": {
+      "BLOCKED": 6
+    },
+    "lexical_candidates": {
+      "BLOCKED": 2
+    },
+    "load_release": {
+      "BLOCKED": 98
+    },
+    "materialize_attitude_argument": {
+      "BLOCKED": 4
+    },
+    "materialize_function_slots": {
+      "BLOCKED": 8
+    },
+    "modus_ponens_query": {
+      "BLOCKED": 2
+    },
+    "morph_agreement": {
+      "BLOCKED": 7
+    },
+    "multi_premise_inference": {
+      "BLOCKED": 1
+    },
+    "nary_or_query": {
+      "PASS": 62
+    },
+    "non_factual_path": {
+      "BLOCKED": 4
+    },
+    "numeric_scope_literal": {
+      "BLOCKED": 1,
+      "PASS": 10
+    },
+    "open_or_cross_source": {
+      "BLOCKED": 1
+    },
+    "open_template_keys": {
+      "BLOCKED": 6
+    },
+    "ordering_query": {
+      "BLOCKED": 15
+    },
+    "parse_time": {
+      "BLOCKED": 1
+    },
+    "partial_commit_before_terminal": {
+      "BLOCKED": 2
+    },
+    "plan_migration": {
+      "BLOCKED": 4
+    },
+    "post_seal_proposal": {
+      "BLOCKED": 1
+    },
+    "proof_independence": {
+      "BLOCKED": 3
+    },
+    "proposal_budget": {
+      "BLOCKED": 12
+    },
+    "query": {
+      "BLOCKED": 10
+    },
+    "query_time": {
+      "PASS": 510
+    },
+    "reconcile": {
+      "BLOCKED": 1
+    },
+    "recover": {
+      "BLOCKED": 32,
+      "PASS": 8
+    },
+    "recover_bulk_migration": {
+      "BLOCKED": 4
+    },
+    "recover_goal": {
+      "BLOCKED": 24
+    },
+    "recover_goal_atomic_pair": {
+      "BLOCKED": 2
+    },
+    "recover_node_events": {
+      "BLOCKED": 5
+    },
+    "recover_provider_call": {
+      "BLOCKED": 6
+    },
+    "reject_against_evidences": {
+      "BLOCKED": 3
+    },
+    "repeat_goal": {
+      "BLOCKED": 10,
+      "PASS": 20
+    },
+    "repeat_selector_cycle": {
+      "BLOCKED": 2
+    },
+    "replace_not_observation": {
+      "BLOCKED": 1
+    },
+    "replay_identity": {
+      "BLOCKED": 3
+    },
+    "rerun_same_pair": {
+      "BLOCKED": 3
+    },
+    "resolve_control": {
+      "BLOCKED": 1
+    },
+    "resolve_deictic_reference": {
+      "BLOCKED": 4
+    },
+    "resolve_reference": {
+      "BLOCKED": 2
+    },
+    "resolve_reference_window": {
+      "BLOCKED": 3
+    },
+    "resolve_structure": {
+      "BLOCKED": 1
+    },
+    "resolve_tuples": {
+      "BLOCKED": 32
+    },
+    "retract_assertion": {
+      "BLOCKED": 5
+    },
+    "retract_observation": {
+      "BLOCKED": 18
+    },
+    "retract_support_batch": {
+      "BLOCKED": 1
+    },
+    "retract_time_path": {
+      "BLOCKED": 12
+    },
+    "retract_usage_link": {
+      "BLOCKED": 1
+    },
+    "run_fixed_fixture": {
+      "BLOCKED": 4
+    },
+    "rx_read": {
+      "BLOCKED": 12
+    },
+    "rx_replay": {
+      "BLOCKED": 1
+    },
+    "scope_roundtrip": {
+      "BLOCKED": 1
+    },
+    "seed_derived_paths": {
+      "BLOCKED": 2
+    },
+    "seed_fact": {
+      "BLOCKED": 1
+    },
+    "seed_goal_path": {
+      "BLOCKED": 4
+    },
+    "seed_occurrences": {
+      "BLOCKED": 6
+    },
+    "seed_state": {
+      "BLOCKED": 2
+    },
+    "seed_temporal_or": {
+      "BLOCKED": 1
+    },
+    "seed_without_incompatibility": {
+      "BLOCKED": 1
+    },
+    "solve_cluster": {
+      "BLOCKED": 1
+    },
+    "supersede_version": {
+      "BLOCKED": 1
+    },
+    "t6_with_marker": {
+      "BLOCKED": 2
+    },
+    "time_constraints": {
+      "BLOCKED": 1
+    },
+    "tokenize_alignment": {
+      "BLOCKED": 4
+    },
+    "validate_formula_certificate": {
+      "BLOCKED": 7
+    },
+    "validate_input": {
+      "BLOCKED": 9
+    },
+    "validate_proposal": {
+      "BLOCKED": 9
+    },
+    "validate_scope": {
+      "BLOCKED": 6
+    },
+    "validate_selector_reply": {
+      "PASS": 9
+    }
+  },
+  "binding_action_count": 16,
+  "coverage_claim": "Executed corpus cases only; not a production release or G0–G5 PASS.",
+  "dry_runs": {
+    "DR1": {
+      "BLOCKED": 1
+    },
+    "DR10": {
+      "PASS": 62
+    },
+    "DR11": {
+      "BLOCKED": 9
+    },
+    "DR12": {
+      "BLOCKED": 21,
+      "PASS": 196
+    },
+    "DR13": {
+      "BLOCKED": 24,
+      "PASS": 8
+    },
+    "DR14": {
+      "BLOCKED": 1
+    },
+    "DR15": {
+      "BLOCKED": 3
+    },
+    "DR16": {
+      "BLOCKED": 1,
+      "PASS": 735
+    },
+    "DR17": {
+      "BLOCKED": 3,
+      "PASS": 17
+    },
+    "DR18": {
+      "BLOCKED": 10,
+      "PASS": 20
+    },
+    "DR19": {
+      "BLOCKED": 24,
+      "PASS": 225
+    },
+    "DR2": {
+      "BLOCKED": 2
+    },
+    "DR20": {
+      "BLOCKED": 28
+    },
+    "DR21": {
+      "BLOCKED": 1
+    },
+    "DR22": {
+      "BLOCKED": 1
+    },
+    "DR23": {
+      "BLOCKED": 24
+    },
+    "DR24": {
+      "BLOCKED": 2
+    },
+    "DR25": {
+      "BLOCKED": 6
+    },
+    "DR26": {
+      "BLOCKED": 6
+    },
+    "DR27": {
+      "BLOCKED": 1
+    },
+    "DR28": {
+      "BLOCKED": 15,
+      "PASS": 225
+    },
+    "DR29": {
+      "BLOCKED": 12,
+      "PASS": 245
+    },
+    "DR3": {
+      "PASS": 1
+    },
+    "DR30": {
+      "BLOCKED": 53,
+      "PASS": 20
+    },
+    "DR31": {
+      "BLOCKED": 8
+    },
+    "DR4": {
+      "BLOCKED": 7
+    },
+    "DR5": {
+      "BLOCKED": 1
+    },
+    "DR6": {
+      "BLOCKED": 3
+    },
+    "DR7": {
+      "BLOCKED": 2,
+      "PASS": 510
+    },
+    "DR8": {
+      "BLOCKED": 12,
+      "PASS": 196
+    },
+    "DR9": {
+      "BLOCKED": 12
+    }
+  },
+  "mechanism_case_sets": {
+    "COMPLETE": [
+      "query_not_time",
+      "selector",
+      "simultaneity",
+      "stale_plan"
+    ],
+    "NONE": [
+      "alpha_scope",
+      "alternatives",
+      "and_commit",
+      "assertion_retraction",
+      "association",
+      "attachment",
+      "attitude_links",
+      "binding_paths",
+      "budget",
+      "canonical_ids",
+      "closure_independence",
+      "commit_decision",
+      "compound_binding",
+      "conflict_late",
+      "conflict_open",
+      "constraint_search",
+      "contexts",
+      "coreference",
+      "count_domain",
+      "coverage",
+      "coverage_gate",
+      "coverage_report",
+      "declared_trigger",
+      "disabled_bridges",
+      "dsl",
+      "dsl_limits",
+      "effective_time",
+      "event_audit_integrity",
+      "exact_attestation",
+      "existential_ref",
+      "forall_demand",
+      "formula_domain",
+      "fragment_plan",
+      "goal_compile",
+      "goal_dbn",
+      "goal_recovery",
+      "input",
+      "known_mapping",
+      "legacy_adapter",
+      "migration",
+      "migration_bulk",
+      "migration_failure",
+      "modus",
+      "modus_ponens",
+      "morph_unknown",
+      "multi_anchor",
+      "multi_premise_time",
+      "no_interpolation",
+      "node_events",
+      "observation_key",
+      "open_key",
+      "open_world",
+      "operator_links",
+      "oracle_replay",
+      "ordering_goal",
+      "oscillation",
+      "partial",
+      "precheck",
+      "proposal_bounds",
+      "query_budget",
+      "query_readonly",
+      "raw_alignment",
+      "reaccess",
+      "registry_rollback",
+      "release_trust",
+      "resource_missing",
+      "resource_permutation",
+      "resource_schema",
+      "revision",
+      "run_binding",
+      "rx",
+      "s_access",
+      "scopes",
+      "seal",
+      "som",
+      "source_blocked",
+      "source_exhaustion",
+      "source_retraction",
+      "source_trace",
+      "srl_boundary",
+      "states",
+      "structural_heads",
+      "time_default",
+      "time_provenance",
+      "witness_correlation",
+      "workspace"
+    ],
+    "PARTIAL": [
+      "batch_idempotence",
+      "batch_recovery",
+      "conflict_admission",
+      "conflict_pairs",
+      "forall_time",
+      "full_reject",
+      "function_identity",
+      "goal_decision",
+      "goal_dedup",
+      "goal_license_race",
+      "grounds",
+      "head_order",
+      "modal_guard",
+      "numeric_scope",
+      "occurrence_identity",
+      "open_lexical",
+      "or_demand",
+      "or_time",
+      "proposal_validation",
+      "provider_log",
+      "query_time",
+      "registered_ops",
+      "state_identity",
+      "support_paths",
+      "time_absent",
+      "time_symbolic",
+      "value_grounds",
+      "writers"
+    ]
+  },
+  "mechanisms": {
+    "alpha_scope": {
+      "BLOCKED": 7
+    },
+    "alternatives": {
+      "BLOCKED": 15
+    },
+    "and_commit": {
+      "BLOCKED": 6
+    },
+    "assertion_retraction": {
+      "BLOCKED": 17
+    },
+    "association": {
+      "BLOCKED": 1
+    },
+    "attachment": {
+      "BLOCKED": 1
+    },
+    "attitude_links": {
+      "BLOCKED": 45
+    },
+    "batch_idempotence": {
+      "BLOCKED": 3,
+      "PASS": 1
+    },
+    "batch_recovery": {
+      "BLOCKED": 31,
+      "PASS": 8
+    },
+    "binding_paths": {
+      "BLOCKED": 14
+    },
+    "budget": {
+      "BLOCKED": 19
+    },
+    "canonical_ids": {
+      "BLOCKED": 6
+    },
+    "closure_independence": {
+      "BLOCKED": 4
+    },
+    "commit_decision": {
+      "BLOCKED": 10
+    },
+    "compound_binding": {
+      "BLOCKED": 18
+    },
+    "conflict_admission": {
+      "BLOCKED": 23,
+      "PASS": 203
+    },
+    "conflict_late": {
+      "BLOCKED": 1
+    },
+    "conflict_open": {
+      "BLOCKED": 6
+    },
+    "conflict_pairs": {
+      "BLOCKED": 9,
+      "PASS": 1
+    },
+    "constraint_search": {
+      "BLOCKED": 34
+    },
+    "contexts": {
+      "BLOCKED": 16
+    },
+    "coreference": {
+      "BLOCKED": 14
+    },
+    "count_domain": {
+      "BLOCKED": 37
+    },
+    "coverage": {
+      "BLOCKED": 3
+    },
+    "coverage_gate": {
+      "BLOCKED": 1
+    },
+    "coverage_report": {
+      "BLOCKED": 14
+    },
+    "declared_trigger": {
+      "BLOCKED": 12
+    },
+    "disabled_bridges": {
+      "BLOCKED": 2
+    },
+    "dsl": {
+      "BLOCKED": 28
+    },
+    "dsl_limits": {
+      "BLOCKED": 17
+    },
+    "effective_time": {
+      "BLOCKED": 15
+    },
+    "event_audit_integrity": {
+      "BLOCKED": 12
+    },
+    "exact_attestation": {
+      "BLOCKED": 8
+    },
+    "existential_ref": {
+      "BLOCKED": 1
+    },
+    "forall_demand": {
+      "BLOCKED": 5
+    },
+    "forall_time": {
+      "BLOCKED": 9,
+      "PASS": 225
+    },
+    "formula_domain": {
+      "BLOCKED": 37
+    },
+    "fragment_plan": {
+      "BLOCKED": 7
+    },
+    "full_reject": {
+      "BLOCKED": 24,
+      "PASS": 7
+    },
+    "function_identity": {
+      "BLOCKED": 1,
+      "PASS": 17
+    },
+    "goal_compile": {
+      "BLOCKED": 15
+    },
+    "goal_dbn": {
+      "BLOCKED": 28
+    },
+    "goal_decision": {
+      "BLOCKED": 37,
+      "PASS": 20
+    },
+    "goal_dedup": {
+      "BLOCKED": 12,
+      "PASS": 20
+    },
+    "goal_license_race": {
+      "BLOCKED": 29,
+      "PASS": 450
+    },
+    "goal_recovery": {
+      "BLOCKED": 28
+    },
+    "grounds": {
+      "BLOCKED": 16,
+      "PASS": 36
+    },
+    "head_order": {
+      "BLOCKED": 18,
+      "PASS": 7
+    },
+    "input": {
+      "BLOCKED": 9
+    },
+    "known_mapping": {
+      "BLOCKED": 3
+    },
+    "legacy_adapter": {
+      "BLOCKED": 6
+    },
+    "migration": {
+      "BLOCKED": 10
+    },
+    "migration_bulk": {
+      "BLOCKED": 8
+    },
+    "migration_failure": {
+      "BLOCKED": 10
+    },
+    "modal_guard": {
+      "BLOCKED": 659,
+      "PASS": 62
+    },
+    "modus": {
+      "BLOCKED": 469
+    },
+    "modus_ponens": {
+      "BLOCKED": 3
+    },
+    "morph_unknown": {
+      "BLOCKED": 13
+    },
+    "multi_anchor": {
+      "BLOCKED": 131
+    },
+    "multi_premise_time": {
+      "BLOCKED": 1
+    },
+    "no_interpolation": {
+      "BLOCKED": 1
+    },
+    "node_events": {
+      "BLOCKED": 10
+    },
+    "numeric_scope": {
+      "BLOCKED": 24,
+      "PASS": 10
+    },
+    "observation_key": {
+      "BLOCKED": 1
+    },
+    "occurrence_identity": {
+      "BLOCKED": 24,
+      "PASS": 20
+    },
+    "open_key": {
+      "BLOCKED": 136
+    },
+    "open_lexical": {
+      "BLOCKED": 151,
+      "PASS": 3
+    },
+    "open_world": {
+      "BLOCKED": 2
+    },
+    "operator_links": {
+      "BLOCKED": 16
+    },
+    "or_demand": {
+      "BLOCKED": 5,
+      "PASS": 62
+    },
+    "or_time": {
+      "BLOCKED": 9,
+      "PASS": 225
+    },
+    "oracle_replay": {
+      "BLOCKED": 4
+    },
+    "ordering_goal": {
+      "BLOCKED": 16
+    },
+    "oscillation": {
+      "BLOCKED": 2
+    },
+    "partial": {
+      "BLOCKED": 3
+    },
+    "precheck": {
+      "BLOCKED": 2
+    },
+    "proposal_bounds": {
+      "BLOCKED": 12
+    },
+    "proposal_validation": {
+      "BLOCKED": 11,
+      "PASS": 2
+    },
+    "provider_log": {
+      "BLOCKED": 10,
+      "PASS": 6
+    },
+    "query_budget": {
+      "BLOCKED": 3
+    },
+    "query_not_time": {
+      "PASS": 510
+    },
+    "query_readonly": {
+      "BLOCKED": 514
+    },
+    "query_time": {
+      "BLOCKED": 16,
+      "PASS": 510
+    },
+    "raw_alignment": {
+      "BLOCKED": 469
+    },
+    "reaccess": {
+      "BLOCKED": 6
+    },
+    "registered_ops": {
+      "BLOCKED": 29,
+      "PASS": 25
+    },
+    "registry_rollback": {
+      "BLOCKED": 7
+    },
+    "release_trust": {
+      "BLOCKED": 13
+    },
+    "resource_missing": {
+      "BLOCKED": 79
+    },
+    "resource_permutation": {
+      "BLOCKED": 4
+    },
+    "resource_schema": {
+      "BLOCKED": 86
+    },
+    "revision": {
+      "BLOCKED": 5
+    },
+    "run_binding": {
+      "BLOCKED": 19
+    },
+    "rx": {
+      "BLOCKED": 13
+    },
+    "s_access": {
+      "BLOCKED": 39
+    },
+    "scopes": {
+      "BLOCKED": 12
+    },
+    "seal": {
+      "BLOCKED": 10
+    },
+    "selector": {
+      "PASS": 9
+    },
+    "simultaneity": {
+      "PASS": 196
+    },
+    "som": {
+      "BLOCKED": 185
+    },
+    "source_blocked": {
+      "BLOCKED": 53
+    },
+    "source_exhaustion": {
+      "BLOCKED": 53
+    },
+    "source_retraction": {
+      "BLOCKED": 24
+    },
+    "source_trace": {
+      "BLOCKED": 7
+    },
+    "srl_boundary": {
+      "BLOCKED": 2
+    },
+    "stale_plan": {
+      "PASS": 1
+    },
+    "state_identity": {
+      "BLOCKED": 23,
+      "PASS": 20
+    },
+    "states": {
+      "BLOCKED": 41
+    },
+    "structural_heads": {
+      "BLOCKED": 499
+    },
+    "support_paths": {
+      "BLOCKED": 8,
+      "PASS": 62
+    },
+    "time_absent": {
+      "BLOCKED": 1,
+      "PASS": 510
+    },
+    "time_default": {
+      "BLOCKED": 465
+    },
+    "time_provenance": {
+      "BLOCKED": 30
+    },
+    "time_symbolic": {
+      "BLOCKED": 1,
+      "PASS": 960
+    },
+    "value_grounds": {
+      "BLOCKED": 34,
+      "PASS": 3
+    },
+    "witness_correlation": {
+      "BLOCKED": 9
+    },
+    "workspace": {
+      "BLOCKED": 9
+    },
+    "writers": {
+      "BLOCKED": 21,
+      "PASS": 36
+    }
+  },
+  "tiers": {
+    "component": {
+      "BLOCKED": 521,
+      "PASS": 1310
+    },
+    "durability": {
+      "BLOCKED": 62,
+      "PASS": 9
+    },
+    "pipeline": {
+      "BLOCKED": 640
+    }
+  },
+  "total_action_count": 126
+}

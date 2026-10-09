@@ -58,9 +58,10 @@ def _observation(text,*,version,observation_id=None,raw_input=None,context_facts
     return raw
 
 
-def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None):
+def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,input_observation=None):
+    original=state.observation if input_observation is None else input_observation
     obs=observation_id or state.source_uid; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
-    if not binding.acquire(run_id,obs,version,snapshot_hash=digest([state.observation,state.resource_snapshot]),snapshot_data=state.observation):
+    if not binding.acquire(run_id,obs,version,snapshot_hash=digest([original,state.resource_snapshot]),snapshot_data=original):
         return InterpretationReport(obs,version,run_id,False,'INTEGRITY_ERROR',diagnostics=('RUN_BINDING_FOREIGN_OWNER',))
     if release is None:
         return InterpretationReport(obs,version,run_id,True,'RESOURCE_MISSING',diagnostics=('RESOURCE_MISSING: signed resource release required',))
@@ -111,7 +112,7 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
     if hasattr(selector, 'for_run'): selector = selector.for_run(run_id)
     if hasattr(selector,'start_run'): selector.start_run(run_id)
     state=run_native(text,selector,release,observation,morph=morph)
-    report=run_from_state(state,store,binding,schema=schema,run_id=run_id,version=version,observation_id=obs,release=release)
+    report=run_from_state(state,store,binding,schema=schema,run_id=run_id,version=version,observation_id=obs,release=release,input_observation=observation)
     with store._journal.atomic():
         if not any(r['payload'].get('kind')=='RUN_COMPLETED' and r['payload'].get('run_id')==run_id for r in store._journal.scan_unprocessed(0)):
             store._journal.append('provider',{'kind':'RUN_COMPLETED','run_id':run_id,'outcome':report.terminal,'batch_hash':report.batch_hash},run_id=run_id)

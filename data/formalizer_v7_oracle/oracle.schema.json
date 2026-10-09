@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ag-memory:v7-symbolic-oracle:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "title",
+    "tier",
+    "mechanisms",
+    "norm_refs",
+    "acceptance_refs",
+    "dry_run_refs",
+    "fixture_profile",
+    "tags",
+    "description",
+    "initial_state",
+    "steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "v7-symbolic-oracle-1"
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tier": {
+      "enum": [
+        "pipeline",
+        "component",
+        "durability",
+        "metamorphic",
+        "resource",
+        "query"
+      ]
+    },
+    "mechanisms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "norm_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "acceptance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "dry_run_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "fixture_profile": {
+      "enum": [
+        "known",
+        "open",
+        "known_mapping_broken",
+        "release_validation"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "initial_state": {
+      "const": "EMPTY"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "action",
+          "payload",
+          "checks"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload": {
+            "type": "object"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "op",
+                    "path",
+                    "value"
+                  ],
+                  "properties": {
+                    "op": {
+                      "enum": [
+                        "eq",
+                        "set_eq",
+                        "multiset_eq",
+                        "contains",
+                        "excludes",
+                        "count"
+                      ]
+                    },
+                    "path": {
+                      "type": "string",
+                      "pattern": "^/"
+                    },
+                    "value": {}
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "op",
+                    "path",
+                    "checkpoint"
+                  ],
+                  "properties": {
+                    "op": {
+                      "const": "same_as"
+                    },
+                    "path": {
+                      "type": "string",
+                      "pattern": "^/"
+                    },
+                    "checkpoint": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
