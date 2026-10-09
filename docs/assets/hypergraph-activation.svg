@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120" role="img" aria-labelledby="ttl ds">
+<title id="ttl">АГ-память как гиперграф с уровнями возбуждения и путём вывода</title>
+<desc id="ds">Поле связанных сущностей и утверждений. В уже существующий фрагмент памяти о станции, роботе и клапане встроено новое наблюдение о падении давления. Возбуждение от запроса проходит по связям, выделяя правило и событие, после чего строится условный вывод с тремя основаниями.</desc>
+<defs>
+<pattern id="bg" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#47665A" stroke-width=".65" opacity=".27"/></pattern>
+<linearGradient id="panel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#142B26"/><stop offset="1" stop-color="#0E201E"/></linearGradient>
+<linearGradient id="green" x1="0" x2="1"><stop stop-color="#CDF4C5"/><stop offset="1" stop-color="#6DCAB3"/></linearGradient>
+<filter id="glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="glowBig" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="19" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<marker id="mintArr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#75CCAE" stroke-width="1.7"/></marker>
+<marker id="goldArr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#F0BA73" stroke-width="1.7"/></marker>
+<style>
+text{font-family:'DejaVu Sans','Arial',sans-serif}
+.head{font-size:40px;font-weight:700;fill:#F2F0DC}
+.sub{font-size:23px;fill:#A5BEB4}
+.eyebrow{font-size:19px;font-weight:700;fill:#A8D4BE}
+.nodeText{font-size:26px;font-weight:700;fill:#ECF4E7}
+.note{font-size:20px;fill:#ABC4B5}
+</style>
+</defs><rect width="1800" height="1120" fill="#0B1918"/><rect width="1800" height="1120" fill="url(#bg)"/>
+<rect x="48" y="48" width="1704" height="1014" rx="26" fill="#0D1B1A" stroke="#385D4F" stroke-width="2"/>
+<text x="94" y="120" class="head" >Как новое событие встраивается в гиперграф</text>
+<text x="94" y="164" class="sub" >Существующие сущности — события — правило — опоры — выведенное содержание.</text>
+<!-- dim pre-existing graph -->
+<g opacity=".5" stroke="#4D6E60" stroke-width="2" fill="none">
+<path d="M168 336L257 277L352 329L458 269L550 343L650 233L753 272L865 216"/>
+<path d="M173 337L232 429L339 453L455 407L548 347L629 433L722 400"/>
+<path d="M1610 280L1505 242L1434 309L1510 388L1653 435L1577 535L1690 606"/>
+<path d="M155 809L279 736L365 804L481 742L564 842L666 790"/>
+<path d="M1605 831L1510 758L1437 850L1317 811L1247 910L1142 869"/>
+</g>
+<g fill="#294B3E" stroke="#587A6D" opacity=".7">
+<circle cx="168" cy="336" r="15"/><circle cx="257" cy="277" r="21"/><circle cx="352" cy="329" r="14"/><circle cx="458" cy="269" r="19"/>
+<circle cx="550" cy="343" r="18"/><circle cx="650" cy="233" r="13"/><circle cx="753" cy="272" r="23"/><circle cx="865" cy="216" r="12"/>
+<circle cx="173" cy="809" r="17"/><circle cx="279" cy="736" r="11"/><circle cx="365" cy="804" r="17"/><circle cx="481" cy="742" r="18"/><circle cx="564" cy="842" r="12"/>
+<circle cx="1610" cy="280" r="16"/><circle cx="1505" cy="242" r="10"/><circle cx="1434" cy="309" r="16"/><circle cx="1510" cy="388" r="14"/><circle cx="1653" cy="435" r="19"/><circle cx="1577" cy="535" r="13"/><circle cx="1690" cy="606" r="10"/>
+<circle cx="1605" cy="831" r="18"/><circle cx="1510" cy="758" r="12"/><circle cx="1437" cy="850" r="15"/><circle cx="1317" cy="811" r="19"/><circle cx="1247" cy="910" r="15"/><circle cx="1142" cy="869" r="13"/>
+</g>
+<!-- workspace region -->
+<path d="M393 212C521 181 664 305 850 266C1100 185 1250 253 1396 423C1580 602 1407 771 1197 806C997 858 804 895 598 790C409 691 340 504 393 212Z" fill="#2A674A" fill-opacity=".1" stroke="#93BA75" stroke-width="3" stroke-dasharray="13 13"/>
+<text x="1107" y="245" class="eyebrow" style='font-size:23px'>Рабочее пространство</text>
+<!-- query -->
+<rect x="103" y="462" width="290" height="122" rx="18" fill="#273529" stroke="#DEB66D" stroke-width="2.3"/>
+<text x="128" y="503" class="eyebrow" >Запрос агента</text>
+<text x="128" y="541" class="nodeText" style='font-size:23px'>Что должен</text>
+<text x="128" y="572" class="nodeText" style='font-size:23px'>сделать Кай-7?</text>
+<!-- centers: station 620 310; o2 800 480; drop 850 636; robot 615 738; valve 1200 650; rule 1260 395; duty 1000 785; derived 1400 890 -->
+<path d="M394 525C480 520 515 719 567 735" fill="none" stroke="#EABB73" stroke-width="4" marker-end="url(#goldArr)"/>
+<path d="M393 516C585 444 624 395 675 330" fill="none" stroke="#EABB73" stroke-width="3" marker-end="url(#goldArr)"/>
+<path d="M686 318C767 314 837 406 808 446" fill="none" stroke="#66B6A1" stroke-width="3" marker-end="url(#mintArr)"/>
+<path d="M809 522C789 556 783 575 831 613" fill="none" stroke="#EABB73" stroke-width="4" marker-end="url(#goldArr)"/>
+<path d="M922 631C1092 570 1149 471 1208 419" fill="none" stroke="#EABB73" stroke-width="4" marker-end="url(#goldArr)"/>
+<path d="M668 741C797 766 845 791 943 792" fill="none" stroke="#73C9AA" stroke-width="3" marker-end="url(#mintArr)"/>
+<path d="M1060 771C1176 737 1220 685 1230 680" fill="none" stroke="#6EC4AA" stroke-width="3" marker-end="url(#mintArr)"/>
+<path d="M1288 434C1414 542 1438 728 1427 838" fill="none" stroke="#EABB73" stroke-width="4" marker-end="url(#goldArr)"/>
+<path d="M1261 681C1290 758 1361 805 1402 838" fill="none" stroke="#EABB73" stroke-width="4" marker-end="url(#goldArr)"/>
+<!-- impulse dots -->
+<g fill="#FDDC9B" filter="url(#glow)">
+<circle cx="473" cy="559" r="7"/><circle cx="550" cy="704" r="5"/>
+<circle cx="559" cy="449" r="7"/><circle cx="799" cy="566" r="6"/>
+<circle cx="1030" cy="575" r="8"/><circle cx="1174" cy="471" r="6"/>
+<circle cx="1362" cy="568" r="7"/><circle cx="1426" cy="749" r="6"/>
+<circle cx="1358" cy="806" r="8"/>
+</g>
+<!-- paths connecting with typed relations, different colors -->
+<path d="M637 351C630 460 639 592 620 702" fill="none" stroke="#679B8C" stroke-width="2" stroke-dasharray="7 8"/>
+<path d="M831 486C926 496 976 569 1167 632" fill="none" stroke="#6EC4AA" stroke-width="2.2" stroke-dasharray="8 7"/>
+<path d="M663 315C867 300 1084 310 1213 365" fill="none" stroke="#5B8D80" stroke-width="2.1" />
+<!-- node forms -->
+<circle cx="640" cy="314" r="47" fill="#294C3B" stroke="#BDE6AE" stroke-width="3" filter="url(#glow)"/>
+<text x="640" y="323" class="nodeText" text-anchor='middle' style='font-size:35px'>⌂</text>
+<text x="640" y="392" class="nodeText" text-anchor='middle' style='font-size:23px'>Станция «Орион»</text>
+<circle cx="802" cy="480" r="44" fill="#214436" stroke="#A8DE9E" stroke-width="3" filter="url(#glow)"/>
+<text x="802" y="489" class="nodeText" text-anchor='middle' style='font-size:29px'>О₂</text>
+<text x="803" y="549" class="nodeText" text-anchor='middle' style='font-size:24px'>Отсек О2</text>
+<circle cx="607" cy="741" r="43" fill="#244B37" stroke="#D2F2A0" stroke-width="3" filter="url(#glowBig)"/>
+<text x="607" y="750" class="nodeText" text-anchor='middle' style='font-size:26px'>K7</text>
+<text x="607" y="812" class="nodeText" text-anchor='middle'>Кай-7</text>
+<!-- new observation notched/puzzle marker -->
+<path d="M815 598H875V609A17 17 0 0 1 875 640V652H923V700H876V690A17 17 0 0 0 844 690V700H790V659H801A17 17 0 0 0 801 625H790V598Z" fill="#5A382B" stroke="#F3BC76" stroke-width="3.5" filter="url(#glow)"/>
+<text x="854" y="645" class="nodeText" text-anchor='middle' style='font-size:42px'>↓</text>
+<text x="856" y="737" class="nodeText" text-anchor='middle' style='font-size:23px'>Падение давления</text>
+<text x="856" y="770" class="note" text-anchor='middle' style='font-size:20px'>02:14 · новое событие</text>
+<circle cx="1247" cy="392" r="49" fill="#523C25" stroke="#F2C27D" stroke-width="3" filter="url(#glowBig)"/>
+<text x="1247" y="406" class="nodeText" text-anchor='middle' style='font-size:42px'>⇒</text>
+<text x="1247" y="467" class="nodeText" text-anchor='middle' style='font-size:23px'>Условное правило</text>
+<circle cx="1239" cy="644" r="43" fill="#214334" stroke="#ADDCB0" stroke-width="3" filter="url(#glow)"/>
+<text x="1239" y="654" class="nodeText" text-anchor='middle' style='font-size:27px'>К4</text>
+<text x="1239" y="711" class="nodeText" text-anchor='middle' style='font-size:22px'>Аварийный клапан</text>
+<circle cx="1000" cy="790" r="33" fill="#2D4937" stroke="#97C5AB" stroke-width="3"/>
+<text x="1000" y="798" class="nodeText" text-anchor='middle' style='font-size:26px'>R</text>
+<text x="1000" y="851" class="note" text-anchor='middle' style='font-size:21px'>Дежурный робот</text>
+<!-- new result -->
+<rect x="1294" y="849" width="405" height="106" rx="18" fill="#294933" stroke="#EEC083" stroke-width="2.5"/>
+<text x="1320" y="890" class="nodeText" style='font-size:27px'>Кай-7 обязан</text>
+<text x="1320" y="927" class="nodeText" style='font-size:26px'>закрыть клапан К-4</text>
+<!-- legend -->
+<rect x="107" y="974" width="1491" height="60" rx="11" fill="#142925" stroke="#4C7162"/>
+<circle cx="144" cy="1005" r="11" fill="#315448" stroke="#678578"/>
+<text x="168" y="1012" class="note" style='font-size:19px'>слабая активация</text>
+<circle cx="465" cy="1005" r="12" fill="#4E916D" stroke="#9BCC9B"/>
+<text x="490" y="1012" class="note" style='font-size:19px'>сильная активация</text>
+<path d="M790 1005H848" fill="none" stroke="#F2BD74" stroke-width="3" marker-end="url(#goldArr)"/>
+<text x="869" y="1012" class="note" style='font-size:19px'>распространение импульса</text>
+<path d="M1209 992H1285V1018H1209Z" fill="none" stroke="#A4CC7E" stroke-width="2" stroke-dasharray="6 6"/>
+<text x="1300" y="1012" class="note" style='font-size:19px'>активный подграф</text>
+</svg>
