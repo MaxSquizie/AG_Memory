@@ -184,6 +184,17 @@ class CanonicalLedger:
     def refresh(self, before, tx_ref, T, support_events=()):
         events = []
         effective=self.paths()
+        # A binding is its own terminal proof record. Loss of a named premise
+        # or of the binding's originating observation invalidates that binding
+        # in the same status transaction; leaving it LIVE would misrepresent
+        # the cascade even though paths() already excludes its dependants.
+        for binding in self.data['bindings'].values():
+            tag=binding.get('source_tag')
+            source_dead=tag is not None and self.data['observations'].get(digest(tag),{}).get('status','LIVE')!='LIVE'
+            if binding.get('status')=='LIVE' and (source_dead or any(
+                    sid not in effective for sid in binding.get('premise_support_refs',()))):
+                binding['status']='INVALID'
+        effective=self.paths()
         for rid,s in self.data["supports"].items():
             if s["status"]=="LIVE" and rid not in effective:
                 s["status"]="SUPERSEDED"

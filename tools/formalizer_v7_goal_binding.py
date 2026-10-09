@@ -14,7 +14,9 @@ def goal_action(s,a,p):
         extra={0:[base.witness({'kind':'POINT','t':16})],1:[base.witness({'kind':'POINT','t':16})]} if a=='seed_derived_paths' else None
         req,target=s.goal_request('OR_ELIMINATION',OR,[NOT],windows,run_id='GR15',extra_windows=extra)
         first=execute(s.store,req);s.aliases['N']=first['conclusion_ref'];s.active_goal=req
+        if first.get('assertion_refs'):s.aliases['A_D']=first['assertion_refs'][0]
         s.aliases.update(dict(zip(['S1','S2'],req.premise_support_ids)))
+        s.aliases['S_or']=req.premise_support_ids[0]
         s.aliases.update(dict(zip(['A1','A2'],req.temporal_premise_assertion_refs)))
         if a=='seed_derived_paths':
             s.aliases.update(dict(zip(['A_or15','A_not15'],req.temporal_premise_assertion_refs)))
@@ -46,21 +48,36 @@ def goal_action(s,a,p):
     if a in {'admit_with_crash','partial_commit_before_terminal'}:
         batch=p.get('batch','B')
         if a=='partial_commit_before_terminal':
-            s.prepare(batch,p['fragments']);p={**p,'stop':'AFTER_DECISION'}
+            fragments=p.get('fragments')
+            if fragments is None:
+                from tools.formalizer_v7_query_binding import ensure_templates
+                read={'predicate':'READ','roles':{'AGENT':{'entity':'ivan'},'THEME':{'entity':'book'}}}
+                arrive={'predicate':'ARRIVE','roles':{'AGENT':{'entity':'ivan'}}}
+                ensure_templates(s,[read,arrive])
+                s.obs('O_X',{'operator':'NOT','operands':[arrive]},{'kind':'INTERVAL','bounds':[0,1],'semantics':'CONTINUOUS'})
+                s.partial_focus_batch=batch
+                s.fixture_metrics_baseline={'marker_count':len(s.store.ledger.data['markers']),'decision_count':len(s.store.ledger.data['decisions']),'applied_count':sum(t['outcome']=='APPLIED' for t in s.store._terminal_records().values())}
+                fragments={'F1':read,'F2':arrive}
+                s.prepare(batch,fragments,[base.witness({'kind':'INTERVAL','bounds':[0,1],'semantics':'EXISTENTIAL'})]*2)
+            else:s.prepare(batch,fragments)
+            p={**p,'stop':'AFTER_DECISION'}
         class Stop(Exception):pass
         old=s.store._finish_batch
         if p['stop']=='BEFORE_DECISION':return s.snapshot()
-        s.store._finish_batch=lambda *args:(_ for _ in ()).throw(Stop())
+        if p['stop']!='AFTER_TERMINAL':s.store._finish_batch=lambda *args:(_ for _ in ()).throw(Stop())
         try:s.commit(batch)
         except Stop:pass
         finally:s.store._finish_batch=old
         s.api.add('AHStoreAdapter COMMIT_DECISION/marker atomic boundary before _finish_batch')
         return s.snapshot()
     if a=='commit_partial_plan':
-        batch=p['batch'];frags=p['fragments'];s.prepare(batch,frags,[base.witness(p['windows'][f]) for f in frags]);s.commit(batch)
+        batch=p['batch'];frags=p['fragments']
+        s.partial_focus_batch=batch
+        s.fixture_metrics_baseline={'marker_count':len(s.store.ledger.data['markers']),'decision_count':len(s.store.ledger.data['decisions']),'applied_count':sum(t['outcome']=='APPLIED' for t in s.store._terminal_records().values())}
+        s.prepare(batch,frags,[base.witness(p['windows'][f]) for f in frags],typed_bindings=True,write_rx=True);s.commit(batch)
         D=s.store.ledger.data['decisions'][batch];result=s.snapshot()
         result['plan']={'committed':D['committed'],'excluded':D['excluded']}
-        excluded=set(D['excluded']);ops=s.batches[batch][0];ids=[op.payload.get('record_id',op.payload.get('assertion_id',op.payload.get('binding_id'))) for op in ops if set(op.fragment_refs)<=excluded and op.op_type in {'ADD_ROOT_SUPPORT','ADD_TIME_ASSERTION','SET_IDENTITY_BINDING'}]
-        result['store'].update(entities=sorted(s.entities.values()),records_for_excluded_fragments=[u for u in ids if any(u in s.store.ledger.data[k] for k in ('supports','assertions','bindings'))])
+        excluded=set(D['excluded']);ops=s.batches[batch][0];ids=[op.payload.get('record_id',op.payload.get('assertion_id',op.payload.get('binding_id'))) for op in ops if set(op.fragment_refs)<=excluded and op.op_type in {'ADD_ROOT_SUPPORT','ADD_TIME_ASSERTION','SET_IDENTITY_BINDING','WRITE_COMMITTED_RX'}]
+        result['store'].update(entities=sorted(alias for uid,alias in s.entities.items() if s.store.has_uid(uid)),records_for_excluded_fragments=[u for u in ids if any(u in s.store.ledger.data[k] for k in ('supports','assertions','bindings','rx_cache'))])
         return result
     raise ValueError('UNBOUND_GOAL_ACTION:'+a)

@@ -77,12 +77,24 @@ def _jsonable(x):
 def structural_hash(state: FormalizationState) -> str:
     """Deterministic identity of the frozen structural set (replay-divergence detector)."""
     records = [_jsonable(r) for r in _canonical_records(state)]
+    records.sort(key=lambda record:json.dumps(record,sort_keys=True,ensure_ascii=False,separators=(",", ":")))
     blob = json.dumps(records, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def validate_closure(state: FormalizationState) -> tuple[str, ...]:
     """Return descriptions of dangling references (empty when the set is self-contained)."""
+    # IDs name immutable candidate payloads. Equal IDs with different content
+    # must not silently collapse at seal, even when references happen to close.
+    identities={}
+    for record in _canonical_records(state):
+        identifier=next((record[k] for k in ('candidate_id','frame_id','mention_id','hypothesis_id') if k in record),None)
+        if identifier is None: continue
+        key=(record['_kind'],identifier)
+        payload=_jsonable(record)
+        if key in identities and identities[key]!=payload:
+            return ('INTEGRITY_ERROR: candidate ID collision '+str(identifier),)
+        identities[key]=payload
     frame_ids = {f.frame_id for f in state.frames}
     spans = {ev.span for ev in state.evidence} | set(state.memory_mentions)
     dangling: list[str] = []

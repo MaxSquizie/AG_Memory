@@ -73,6 +73,17 @@ REGISTRY: dict[str, InterrogativeSpec] = {
 }
 
 
+# Explicit host request vocabulary shares the same registered semantic handlers.
+# This is a declaration, not recognition by word or fallback to EXISTS.
+REGISTRY.update({
+    'WH':InterrogativeSpec('WH',(ROLE_FILL,),fallback='UNKNOWN'),
+    'YESNO':InterrogativeSpec('YESNO',(FORMULA,),fallback='UNKNOWN'),
+    'CAUSAL':InterrogativeSpec('CAUSAL',(CAUSE,),fallback='NO_CAUSAL_SUPPORT'),
+    'ASSOCIATIVE':InterrogativeSpec('ASSOCIATIVE',(ASSOCIATION,),fallback='UNKNOWN'),
+    'COUNTERFACTUAL':InterrogativeSpec('COUNTERFACTUAL',(COUNTERFACTUAL,),fallback='UNKNOWN',non_factual=True),
+})
+
+
 @dataclass(frozen=True)
 class CompiledQuery:
     request_kind: str
@@ -95,13 +106,15 @@ def _has_boundaries(detector) -> bool:
     return True
 
 
-def compile(request_kind: str, *, clause_detector=None) -> CompiledQuery:
+def compile(request_kind: str, *, clause_detector=None, handler_available=True) -> CompiledQuery:
     """Compile a request_kind to declared goals.
 
     * Unknown kind            -> QUERY_TARGET_UNBOUND (UNKNOWN_INTERROGATIVE); never an arbitrary EXISTS.
     * Clause-scoped without paired boundaries -> QUERY_TARGET_UNBOUND (CLAUSE_DETECTION_REQUIRED).
     * Otherwise              -> COMPILED with the declared goal_kinds.
     """
+    if handler_available is not True:
+        return CompiledQuery(request_kind, 'QUERY_TARGET_UNBOUND', reason='HANDLER_UNAVAILABLE')
     spec = REGISTRY.get(request_kind)
     if spec is None:
         return CompiledQuery(request_kind, "QUERY_TARGET_UNBOUND", reason=UNKNOWN_INTERROGATIVE)

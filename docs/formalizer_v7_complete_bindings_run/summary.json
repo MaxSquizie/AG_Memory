@@ -1,0 +1,20 @@
+{
+  "blocked_cases": 643,
+  "blocker_counts": {
+    "BLOCKED_LOCAL_PROVIDER_DISABLED": 643
+  },
+  "cases_with_missing_observation_paths": [],
+  "failed_cases": 27,
+  "failure_attribution_counts": {
+    "ORACLE_STIMULUS_INVALID": 27
+  },
+  "gates_pass_claim": false,
+  "passed_cases": 1872,
+  "provider": "disabled",
+  "registered_actions": 126,
+  "runtime_exceptions": 0,
+  "source_unchanged": true,
+  "status": "FAIL",
+  "total_actions": 126,
+  "unbound_actions": []
+}

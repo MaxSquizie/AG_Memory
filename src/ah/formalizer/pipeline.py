@@ -874,7 +874,7 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
                 dec.outcome = "UNRESOLVED"
             continue
         if dec.slot_id == "reference":
-            per_value = {g.value for g in dec.grounds if g.type in _POSITIVE and g.value is not None}
+            per_value = {g.value for g in dec.grounds if g.type in (_POSITIVE | {"P"}) and g.value is not None}
             if not dec.candidates:
                 dec.outcome = "UNRESOLVED"
                 state.diag("REFERENCE_UNKNOWN", f"{key}: no admissible antecedent in observation or memory window")
@@ -894,12 +894,17 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
             continue
         if dec.slot_id != "predicate_value":
             continue
-        search_complete = bool(dec.selector_outcome)  # validated response over the closed set
+        search_complete = bool(dec.selector_outcome) if dec.search_complete is None else dec.search_complete  # validated response over the closed set
         blocked = search_blocked(dec.source_traces) if dec.source_traces else False  # §5.1 incomplete search
 
         def fail(reason: str, code: str) -> None:
             dec.outcome = "UNRESOLVED"
             state.diag(code, f"{key}: {reason}")
+
+        if dec.search_complete is False:
+            dec.outcome = "COMPUTATION_LIMIT"
+            state.diag("COMPUTATION_LIMIT", f"{key}: bounded search did not complete")
+            continue
 
         if not dec.selected:
             if dec.selector_outcome == "NONE_FIT":
@@ -940,6 +945,7 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
                 fail(f"no value-specific positive ground for {ungrounded}", "NO_GROUNDED_CANDIDATE")
             else:
                 dec.outcome = "AMBIGUOUS"  # proven ambiguity, per-value grounds on record
+    state.complete_t4()
     return state
 
 

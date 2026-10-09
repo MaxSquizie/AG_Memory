@@ -41,6 +41,16 @@ def verify_review(review, trusted, sha256):
     if (not isinstance(key, dict) or key.get('reviewer') != review.get('reviewer')
             or key.get('revoked', False) is not False):
         raise ValueError('review key is absent, revoked or belongs to another reviewer')
+    timestamp=datetime.fromisoformat(review['timestamp'].replace('Z','+00:00'))
+    if timestamp.tzinfo is None:raise ValueError('review timestamp must include timezone')
+    # Optional validity boundaries are external trust policy, never self-issued
+    # by the release. No wall-clock input changes historical replay decisions.
+    for field,direction in (('valid_from','before'),('valid_until','after')):
+        if field not in key:continue
+        bound=datetime.fromisoformat(key[field].replace('Z','+00:00'))
+        if bound.tzinfo is None:raise ValueError('trust validity boundary must include timezone')
+        if direction=='before' and timestamp<bound or direction=='after' and timestamp>bound:
+            raise ValueError('review timestamp outside trusted key validity')
     public = base64.b64decode(key['public_key_b64'], validate=True)
     signature = base64.b64decode(review['signature'], validate=True)
     if len(public) != 32 or len(signature) != 64:

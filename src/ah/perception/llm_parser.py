@@ -168,6 +168,8 @@ class LLMPerceptionService:
     def perceive(self, text: str, interaction_context: InteractionContext, *, raw_input=None) -> PerceptionResult:
         if self._formalizer is None or not self._formalizer.native_available:
             raise PerceptionParseError("V7 requires a canonical store and resource release; legacy fact writes are disabled")
+        if self._formalizer._release is None:
+            raise PerceptionParseError("RESOURCE_MISSING: V7 requires a reviewed resource release")
         from ah.temporal import exact_datetime_from_ref
         from ah.formalizer.canonical_ledger import digest
         context=interaction_context

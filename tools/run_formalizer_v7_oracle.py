@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """One entry point for AH component cases and a real local-model native run."""
 from pathlib import Path
+from collections import Counter
 import argparse, gzip, hashlib, json, shutil, sys, time
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -22,6 +23,8 @@ def main(argv=None):
     p.add_argument('--case',action='append',default=[],help='repeatable exact case ID')
     p.add_argument('--tier',action='append',default=[])
     p.add_argument('--mechanism',action='append',default=[])
+    p.add_argument('--acceptance',action='append',default=[],help='repeatable A01–A39 reference')
+    p.add_argument('--dry-run',action='append',default=[],help='repeatable DR1–DR31 reference')
     p.add_argument('--replay-from',type=Path)
     p.add_argument('--list',action='store_true',help='list selected cases; no writes or provider calls')
     a=p.parse_args(argv)
@@ -30,9 +33,20 @@ def main(argv=None):
     if a.provider=='replay' and not a.replay_from:p.error('--replay-from is required')
     if a.replay_from and a.provider!='replay':p.error('--replay-from requires --provider replay')
     validation=checker.validate(a.corpus);manifest,cases=checker.load_corpus(a.corpus)
+    prior=None
+    if a.replay_from:
+        prior=json.loads((a.replay_from/'run_config.json').read_text(encoding='utf-8'))
+        if prior['corpus_manifest_sha256']!=sha(a.corpus/'manifest.json'):p.error('replay corpus hash changed')
+        if prior['source_snapshot']!=base.source_snapshot():p.error('replay implementation hashes changed')
+        # With no explicit filter, replay the original selection, not the
+        # entire corpus against a one-case provider history.
+        if not any((a.case,a.tier,a.mechanism,a.acceptance,a.dry_run)):
+            a.case=list(prior['selected_case_ids'])
     if a.case and set(a.case)-{c['case_id'] for c in cases}:p.error('unknown --case ID')
-    selected=[c for c in cases if (not a.case or c['case_id'] in a.case) and (not a.tier or c['tier'] in a.tier) and (not a.mechanism or set(a.mechanism)&set(c['mechanisms']))]
+    selected=[c for c in cases if (not a.case or c['case_id'] in a.case) and (not a.tier or c['tier'] in a.tier) and (not a.mechanism or set(a.mechanism)&set(c['mechanisms'])) and (not a.acceptance or set(a.acceptance)&set(c['acceptance_refs'])) and (not a.dry_run or set(a.dry_run)&set(c['dry_run_refs']))]
     if not selected:p.error('selection is empty')
+    if prior and {c['case_id'] for c in selected}-set(prior['selected_case_ids']):
+        p.error('replay selection includes cases absent from the original run')
     if a.list:
         print('\n'.join(c['case_id'] for c in selected));return 0
     config={'provider':a.provider,'model':a.model,'base_url':a.base_url,'timeout':a.timeout,'max_tokens':a.max_tokens}
@@ -40,9 +54,6 @@ def main(argv=None):
     if a.out.exists() and any(a.out.iterdir()):p.error('output directory is not empty; choose a new --out')
     a.out.mkdir(parents=True,exist_ok=True)
     if a.replay_from:
-        prior=json.loads((a.replay_from/'run_config.json').read_text(encoding='utf-8'))
-        if prior['corpus_manifest_sha256']!=sha(a.corpus/'manifest.json'):p.error('replay corpus hash changed')
-        if prior['source_snapshot']!=base.source_snapshot():p.error('replay implementation hashes changed')
         config={**prior['provider_config'],'provider':'replay'}
         # Only immutable completed provider histories are copied. Actual/gold
         # checkpoints are never read by the runtime binding.
@@ -75,7 +86,34 @@ def main(argv=None):
             if wal.is_file():received_calls+=sum(json.loads(line)['payload'].get('kind')=='prov_call' and json.loads(line)['payload'].get('state')=='RECEIVED' for line in wal.read_text(encoding='utf-8').splitlines() if line.strip())
             if i%25==0 or i==len(selected):print(f'{i}/{len(selected)}: {gold["case_id"]} ({result["execution_status"]})',flush=True)
     case_filter=[c['case_id'] for c in selected] if len(selected)!=len(cases) else None
-    report=checker.compare(a.corpus,actual,case_filter);dump(a.out/'comparison.json',report)
+    report=checker.compare(a.corpus,actual,case_filter)
+    source_at_end=base.source_snapshot(refresh=True)
+    source_unchanged=source_at_end==base.source_snapshot()
+    if not source_unchanged:
+        report['status']='FAIL'
+        report['errors'].append({'error':'implementation changed during execution'})
+    dump(a.out/'comparison.json',report)
+    required_actions={s['action'] for c in cases for s in c['steps']}
+    records=[json.loads(line) for line in actual.read_text(encoding='utf-8').splitlines()]
+    errors={r['case_id']:r['runtime_error'] for r in records if r.get('runtime_error')}
+    issues=[]
+    for result in report['results']:
+        if result['status']!='FAIL':continue
+        detail=result['errors']
+        attribution=('BINDING_OR_RUNTIME_EXCEPTION' if result['case_id'] in errors else
+            'ORACLE_STIMULUS_INVALID' if any(e.get('error')=='invalid oracle stimulus' for e in detail) else
+            'OBSERVATION_EXPORT_GAP' if any('missing observed path' in e.get('error','') for e in detail) else
+            'IMPLEMENTATION_OR_MODEL_MISMATCH_REQUIRES_REVIEW')
+        issues.append({**result,'attribution':attribution})
+    dump(a.out/'issues.json',{'gates_pass_claim':False,'counts':dict(Counter(x['attribution'] for x in issues)),'cases':issues})
+    summary={k:report[k] for k in ('status','passed_cases','failed_cases','blocked_cases')}
+    summary.update(registered_actions=len(adapter.SUPPORTED&required_actions),total_actions=len(required_actions),
+        unbound_actions=sorted(required_actions-adapter.SUPPORTED),runtime_exceptions=len(errors),
+        blocker_counts=dict(Counter(b['reason'] for r in records for b in r.get('blockers',[]))),
+        cases_with_missing_observation_paths=[x['case_id'] for x in issues if x['attribution']=='OBSERVATION_EXPORT_GAP'],
+        failure_attribution_counts=dict(Counter(x['attribution'] for x in issues)),provider=a.provider,
+        source_unchanged=source_unchanged,gates_pass_claim=False)
+    dump(a.out/'summary.json',summary)
     # Original coverage formatter accepts the extended action registry too.
     old=base.SUPPORTED
     try:base.SUPPORTED=adapter.SUPPORTED;measured=coverage(selected,report)
@@ -83,10 +121,10 @@ def main(argv=None):
     measured['execution_scope']='NATIVE_PIPELINE + COMPONENT_OR_WAL';dump(a.out/'runtime_coverage.json',measured)
     dump(a.out/'bindings.json',{'registered_actions':sorted(adapter.SUPPORTED),'cases':bindings})
     archive=a.out/'actual.jsonl.gz';archive.write_bytes(gzip.compress(actual.read_bytes(),mtime=0))
-    dump(a.out/'provenance.json',{'source_snapshot':base.source_snapshot(),'corpus_manifest_sha256':sha(a.corpus/'manifest.json'),'document_sha256':validation['document_sha256'],'actual_sha256':sha(actual),'archive_sha256':sha(archive),'comparison_sha256':sha(a.out/'comparison.json'),'elapsed_seconds':time.monotonic()-started,'python':sys.version,'production_release':False,'gates_pass_claim':False,'model_live_execution':a.provider in {'lmstudio','openai'} and received_calls>0,'received_provider_calls':received_calls,'process_kill_crashes':False})
+    dump(a.out/'provenance.json',{'source_snapshot':base.source_snapshot(),'source_snapshot_at_end':source_at_end,'source_unchanged':source_unchanged,'corpus_manifest_sha256':sha(a.corpus/'manifest.json'),'document_sha256':validation['document_sha256'],'actual_sha256':sha(actual),'archive_sha256':sha(archive),'comparison_sha256':sha(a.out/'comparison.json'),'elapsed_seconds':time.monotonic()-started,'python':sys.version,'production_release':False,'gates_pass_claim':False,'model_live_execution':a.provider in {'lmstudio','openai'} and received_calls>0,'received_provider_calls':received_calls,'process_kill_crashes':False})
     actual.unlink()
     counts={k:report[k] for k in ('status','passed_cases','failed_cases','blocked_cases')}
-    (a.out/'README.md').write_text('# Runtime oracle run\n\n```json\n'+json.dumps(counts,indent=2)+'\n```\n\nFull provider WAL, typed IR, observed AH facts, signed TEST_ONLY fixture resources and comparison are retained. BLOCKED is an absent binding; FAIL is a comparison or runtime failure. This is not G0–G5 PASS or a reviewed production resource release.\n',encoding='utf-8')
+    (a.out/'README.md').write_text('# Runtime oracle run\n\n```json\n'+json.dumps(counts,indent=2)+'\n```\n\nFull provider WAL, typed IR, observed AH facts, signed TEST_ONLY fixture resources and comparison are retained. BLOCKED records an unavailable prerequisite (for example, a disabled model provider); FAIL records a comparison, invalid stimulus or runtime failure. See summary.json and issues.json for attribution. This is not G0–G5 PASS or a reviewed production resource release.\n',encoding='utf-8')
     print(json.dumps(counts,ensure_ascii=False))
     return 1 if report['status']=='FAIL' else 3 if report['blocked_cases'] else 0
 

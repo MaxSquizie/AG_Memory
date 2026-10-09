@@ -33,6 +33,12 @@ from tools.formalizer_v7_state_binding import STATE_ACTIONS,state_action
 SUPPORTED |= STATE_ACTIONS
 from tools.formalizer_v7_goal_binding import GOAL_ACTIONS,goal_action
 SUPPORTED |= GOAL_ACTIONS
+from tools.formalizer_v7_migration_binding import MIGRATION_ACTIONS,migration_action
+from tools.formalizer_v7_reference_binding import REFERENCE_ACTIONS,reference_action
+from tools.formalizer_v7_temporal_binding import TEMPORAL_ACTIONS,TEMPORAL_FIXTURES,temporal_action
+from tools.formalizer_v7_scope_binding import SCOPE_ACTIONS,scope_action
+from tools.formalizer_v7_fixture_binding import FIXTURE_ACTIONS,fixture_action
+SUPPORTED |= MIGRATION_ACTIONS|REFERENCE_ACTIONS|TEMPORAL_ACTIONS|SCOPE_ACTIONS|FIXTURE_ACTIONS
 
 ATOM={'predicate':'LOCATIVE','roles':{'THEME':{'entity':'book'},'LOCATION':{'entity':'table'}}}
 OTHER={'predicate':'LOCATIVE','roles':{'THEME':{'entity':'book'},'LOCATION':{'entity':'shelf'}}}
@@ -43,7 +49,7 @@ SAY={'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},'CONTENT':ATOM}}
 class Session(base.Session):
     unique=staticmethod(base.unique)
     def __init__(self,payloads,path):
-        super().__init__([*payloads,ATOM,OTHER,SAY],path)
+        super().__init__([*payloads,ATOM,OTHER,SAY,*TEMPORAL_FIXTURES],path)
         self.aliases={};self.sources={};self.som_chain=[];self.native_ready=False
 
     def obs(self,source,formula,window=None):
@@ -63,7 +69,7 @@ class Session(base.Session):
         return answer
 
     def more(self):
-        L=self.store.ledger;v=L.f_visible();s=L.s_accessible()
+        L=self.store.ledger;v=L.f_visible();s=L.s_accessible();paths=L.paths()
         nodes={alias:{'f_visible':ref in v,'s_accessible':ref in s} for alias,ref in self.aliases.items() if ref in L.data['nodes']}
         times={alias:{'status':L.data['assertions'][ref]['status'],'effective':L.evidence_live({'record_id':ref})} for alias,ref in self.aliases.items() if ref in L.data['assertions']}
         reports=[r for r in L.data['reports'].values() if L.report_open(r)]
@@ -72,10 +78,11 @@ class Session(base.Session):
         derived=[x for x in L.data['supports'].values() if x['kind']=='DERIVED']
         result=super().snapshot()
         result['nodes']=nodes;result['time_assertions']=times
-        result['supports']={'count':len(L.data['supports']),'root_count':len(root),'derived_count':len(derived),'old_status':next((x['status'] for x in root if x['status']!='LIVE'),None),**{a:{'status':L.data['supports'][sid]['status']} for a,sid in self.aliases.items() if sid in L.data['supports']}}
+        result['supports']={'count':len(L.data['supports']),'root_count':len(root),'derived_count':len(derived),'old_status':next((x['status'] for x in root if x['status']!='LIVE'),None),**{a:{'status':L.data['supports'][sid]['status'],'effective':sid in paths} for a,sid in self.aliases.items() if sid in L.data['supports']}}
         result['som']={'chain_s_access':[n in s for n in self.som_chain], 'chain_f_visible':[n in v for n in self.som_chain], 'leaf_s_access':bool(self.som_chain and self.som_chain[-1] in s),'leaf_s_accessible':bool(self.som_chain and self.som_chain[-1] in s),'leaf_f_visible':bool(self.som_chain and self.som_chain[-1] in v)}
         links=list(L.data['usage_links'].values())
-        result['usage']={'attitude_count':sum(l['kind']=='ATTITUDE' for l in links),'operator_count':sum(l['kind']=='OPERATOR' for l in links),'operator_statuses':[l['status'] for l in links if l['kind']=='OPERATOR'],'live_attitude_count':sum(l['kind']=='ATTITUDE' and l['status']=='LIVE' for l in links),'attitude_status':[l['status'] for l in links if l['kind']=='ATTITUDE']}
+        attitudes=[l['status'] for l in links if l['kind']=='ATTITUDE']
+        result['usage']={'attitude_count':len(attitudes),'operator_count':sum(l['kind']=='OPERATOR' for l in links),'operator_statuses':[l['status'] for l in links if l['kind']=='OPERATOR'],'live_attitude_count':attitudes.count('LIVE'),'attitude_status':attitudes[0] if len(attitudes)==1 else attitudes,'attitude_statuses':attitudes}
         result['events']={'reaccessible_count':sum(e['type']=='REACCESSIBLE' and e['node_id'] in self.som_chain for e in L.data['events'])}
         if 'N' in self.aliases and hasattr(self,'event_tag'):
             from tools.formalizer_v7_state_binding import event_view
@@ -84,15 +91,59 @@ class Session(base.Session):
             L.validate_audit()
             result['service']={'factual_reads_enabled':True}
             result['audit']={'mutated':False}
-        result['journal'].update(report_closed_count=closed,applied_count=sum(r['payload'].get('kind')=='terminal' and r['payload'].get('outcome')=='APPLIED' for r in rows))
-        result['derived']={'effective':any(x['record_id'] in L.paths() for x in derived)}
+        terminals=list(self.store._terminal_records().values())
+        goal_terminals=[r['payload'] for r in rows if r['payload'].get('kind')=='GOAL_TERMINAL']
+        focus=goal_terminals[-1]['goal_run_id'] if goal_terminals else None
+        result['journal'].update(report_closed_count=closed,applied_count=sum(t.get('outcome')=='APPLIED' for t in terminals),goal_terminal_count=sum(t['goal_run_id']==focus for t in goal_terminals),goal_terminal_total_count=len(goal_terminals))
+        result['reports']['count']=len(L.data['reports'])
+        result['store']['commit_decision_count']=len(L.data['decisions'])
+        result['store']['forall_instance_count']=sum(x.get('rule_id')=='FORALL_INST' for x in derived)
+        if hasattr(self,'partial_focus_batch'):
+            batch=self.partial_focus_batch;d=L.data['decisions'].get(batch)
+            baseline=self.fixture_metrics_baseline
+            result['store']['marker_count']-=baseline['marker_count']
+            result['store']['commit_decision_count']-=baseline['decision_count']
+            result['journal']['applied_count']-=baseline['applied_count']
+            result['fixture']={'background_metrics':baseline,'focus_batch':batch}
+            if 'batch:'+batch in self.store._terminal_records() and d:
+                result['journal'].update(applied_committed=d['committed'],applied_excluded=d['excluded'])
+            result['store']['repeated_admission_count']=getattr(self,'repeated_admission_count',0)
+        result['derived']={'effective':any(x['record_id'] in paths for x in derived),'live_path_count':sum(x['record_id'] in paths for x in derived)}
+        witness_counts={}
+        for assertion in L.data['assertions'].values():
+            if assertion.get('witness_ref'):witness_counts[assertion['witness_ref']]=witness_counts.get(assertion['witness_ref'],0)+1
+        result['time_assertions'].update(count=len(L.data['assertions']),statuses=[x['status'] for x in L.data['assertions'].values()],derived_source_types=sorted(x['provenance']['source']['kind'] for x in L.data['assertions'].values() if x['support_record_id'] in {d['record_id'] for d in derived}),shared_witness_count=max(witness_counts.values(),default=0))
+        if 'quantified_root' in self.aliases:result['quantified_root']={'f_visible':self.aliases['quantified_root'] in v}
+        if hasattr(self,'asserted_content_ref'):result['asserted_content']={'f_visible':self.asserted_content_ref in v}
+        if 'candidate' in self.aliases:result['store']['candidate_asserted']=self.aliases['candidate'] in v
+        if goal_terminals:
+            last=goal_terminals[-1];result['goal']={'outcome':last['outcome'],'reason':last.get('reason'),'decision_outcome':last['outcome']}
+        if hasattr(self,'precheck_records'):
+            current={r['seq']:r for r in rows};result['precheck']={'immutable':all(current.get(seq)==record for seq,record in self.precheck_records.items()),'terminal':False}
+            refs=[ref for d in L.data['decisions'].values() for ref in d.get('precheck_refs',())]
+            result['journal']['applied_precheck_refs']=[self.precheck_aliases.get(ref,ref) for ref in refs]
+        if L.data['reports']:
+            # Reports and terminal outcome must appear together in a durable
+            # canonical unit; the snapshot is the observable atomic boundary.
+            report_ids=set(L.data['reports'])
+            units=[r['payload'] for r in rows if r['payload'].get('kind')=='canonical_unit' and r['payload'].get('terminal')]
+            result['journal']['terminal_report_atomic']=all(any(rid in unit['snapshot'].get('store_metadata',{}).get('formalizer_state',{}).get('reports',{}) for unit in units) for rid in report_ids)
         if hasattr(self,'active_query_target'):result['answer']={'status':L.query_proposition(self.active_query_target)['answer']}
         result['store']['new_content_nodes']=getattr(self,'new_content_nodes',None)
+        from tools.formalizer_v7_reference_binding import reference_snapshot
+        result.update(reference_snapshot(self))
         return result
 
     def snapshot(self):return self.more()
 
     def action(self,a,p):
+        if a in FIXTURE_ACTIONS:return fixture_action(self,a,p)
+        if a in TEMPORAL_ACTIONS or a in {'derive_or','derive_forall'} or a=='change_declared_resource' and getattr(self,'temporal_conflict_seed',False):
+            result=temporal_action(self,a,p)
+            if result is not NotImplemented:return result
+        if a in MIGRATION_ACTIONS:return migration_action(self,a,p)
+        if a in REFERENCE_ACTIONS:return reference_action(self,a,p)
+        if a in SCOPE_ACTIONS:return scope_action(self,a,p)
         if a in GOAL_ACTIONS:return goal_action(self,a,p)
         if a in STATE_ACTIONS:return state_action(self,a,p)
         from tools.formalizer_v7_query_binding import QUERY_ACTIONS,query_action
@@ -142,7 +193,9 @@ class Session(base.Session):
             return {'answer':{'status':'YES' if result is True else 'UNKNOWN'},'query':{'new_root_supports':0}}
         if a in {'seed_fact','commit_batch'}:
             batch=p.get('batch',p.get('source','seed'));forms=p.get('formulas',[p.get('formula')]);window=p.get('window')
-            self.prepare(batch,forms,[base.witness(window)]*len(forms) if window else None);self.commit(batch)
+            if batch not in self.batches:
+                self.prepare(batch,forms,[base.witness(window)]*len(forms) if window else None)
+            self.commit(batch)
             self.sources[p.get('source',p.get('source_tag',batch)).split(':')[0]]=self.batches[batch][2]
             return self.snapshot()
         if a=='seed_state':
@@ -156,6 +209,8 @@ class Session(base.Session):
             r=self.snapshot();r['store']['atomic_node_count']=len(self.store.ledger.data['nodes']);r['time_assertions']['count']=len(self.store.ledger.data['assertions']);return r
         if a=='commit_som':
             for pred in self.templates:self.mode_overrides[pred[0]]=p.get('mode','STATE')
+            if 'predicate' in p['root'] and 'CONTENT' in p['root'].get('roles',{}):
+                return self.action('materialize_attitude_argument',{'source':p['source'],'holder':p['root']['roles']['AGENT']['entity'],'attitude':'QUOTED','content':p['root']['roles']['CONTENT']})
             before=set(self.store.ledger.data['nodes']);uid,_,_=self.obs(p['source'],p['root']);self.aliases['root']=uid
             self.new_content_nodes=len(set(self.store.ledger.data['nodes'])-before)
             chain=[];f=p['root']
@@ -170,6 +225,7 @@ class Session(base.Session):
             self.occurrence_formula=p['content'] if p['mode']!='STATE' else None
             try:uid,_,_=self.obs(p['source'],p['content'])
             finally:self.occurrence_formula=None
+            self.asserted_content_ref=uid
             # EVENT fixture supplies a distinct occurrence identity through the
             # public store plan. It does not alter the comparison expectation.
             self.api.add('AHStoreAdapter.commit_transaction / mode-dependent identity')
@@ -241,8 +297,10 @@ class Session(base.Session):
                 uid,sid,aid=self.obs('assertion',ATOM,{'kind':'POINT','t':5});self.aliases[key]=aid;self.aliases['support']=sid;self.aliases['root']=uid
             mode=p.get('mode');codes=[]
             target='unknown-assertion' if mode=='UNKNOWN_ID' else aid
-            if not self.store.retract(target,reason='oracle:per-assertion') and mode=='UNKNOWN_ID':codes=['INTEGRITY_ERROR'] if self.store.status_of(target) else []
-            if mode=='REPEAT':self.store.retract(target,reason='oracle:per-assertion')
+            from ah.core.journal import JournalIntegrityError
+            try:self.store.retract(target,reason='oracle:per-assertion')
+            except JournalIntegrityError as exc:codes=[str(exc).split(':',1)[0]]
+            if mode in {'REPEAT','REPEAT_ID'}:self.store.retract(target,reason='oracle:per-assertion')
             self.api.add('AHStoreAdapter.retract(assertion_id)')
             r=self.snapshot();s=self.aliases.get('support');root=self.aliases.get('root')
             r['supports'].update(original_alive=s in self.store.ledger.paths() if s else None)
@@ -258,7 +316,8 @@ class Session(base.Session):
             before=len(self.store.ledger.data['supports'])
             answer=self.store.ledger.query_proposition(uid,point=p.get('point'),window=p.get('window')) if uid else {'answer':'UNKNOWN'}
             self.api.add('CanonicalLedger.query_proposition')
-            return {**self.snapshot(),'answer':{'status':answer['answer']},'query':{'new_root_supports':len(self.store.ledger.data['supports'])-before}}
+            conflicts=answer.get('conflict_ref',[])
+            return {**self.snapshot(),'answer':{'status':answer['answer'],'conflict_refs':conflicts,'conflict_count':len(conflicts)},'query':{'new_root_supports':len(self.store.ledger.data['supports'])-before}}
         if a=='seed_temporal_or':
             req,target=self.goal_request('OR_ELIMINATION',p['or_formula'],[p['not_formula']],[base.witness(p['or_window']),base.witness(p['not_window'])])
             self.active_goal=req;self.aliases['target']=target
@@ -330,7 +389,7 @@ class Session(base.Session):
             from ah.formalizer.pipeline import t0
             from ah.formalizer.state import MorphVariant
             st=t0('a b');features=p.get('features',{});gender=None if a=='evaluate_rule_expr' else features.get('n.gender')
-            v=MorphVariant('a',features.get('n.POS','NOUN'),gender=gender)
+            v=MorphVariant(None if features.get('n.oov') else 'a',features.get('n.POS','NOUN'),gender=gender)
             st.evidence[0].lex_status='OOV_KEEP_AS_IS' if features.get('n.oov') else 'OK';st.evidence[0].variants=(v,)
             if a=='morph_agreement':
                 field=p['feature'];vals=[None if p[k]=='UNKNOWN' else {'gender':'masc','number':'sing','case':'nom','person':'1per'}[field] for k in ('left','right')]
@@ -341,7 +400,7 @@ class Session(base.Session):
             else:expr=Parser(p['expression']).expr();assignment={'n':(0,v)}
             value=evaluate_ast(expr,assignment,st,self.release,(0,2),lambda:None)
             self.api.add('rule_dsl.Parser.expr / syntax_rules.evaluate_ast')
-            if a=='morph_agreement':return {'constraint':{'result':'UNKNOWN' if value is None else value},'candidate':{'rejected_by_missing_feature':value is False}}
+            if a=='morph_agreement':return {'constraint':{'result':'UNKNOWN' if value is None else 'TRUE' if value else 'FALSE','raw_result':value},'candidate':{'rejected_by_missing_feature':value is False and any(v is None for v in vals),'rejected_by_hard_feature':value is False}}
             return {'dsl':{'truth':'UNKNOWN' if value is None else value,'emitted_count':int(value is True)}}
         if a=='compile_rule_pair':
             from ah.formalizer.resources.rule_dsl import compile_rules,RuleDslError
@@ -351,7 +410,7 @@ class Session(base.Session):
                 actual=deepcopy(compiled);actual['rule_id']=actual['rule_id'].split('@')[0]
             except RuleDslError as exc:actual=None;code=str(exc)
             self.api.add('resources.rule_dsl.compile_rules / SyntaxRules AST equivalence')
-            return {'dsl':{'ast_equal':actual==expected,'output_equal':actual is not None and actual['output']==expected['output'],'callback_count':0,'compiler_error':code}}
+            return {'dsl':{'ast_equal':actual==expected,'output_equal':actual is not None and actual['output']==expected['output'],'callback_count':0,'compiler_error':code},'stimulus':{'baseline_valid':actual is not None,'baseline_error':code}}
         if a=='parse_time':
             from tools.formalizer_v7_native_binding import fixture
             from ah.formalizer.native_frontend import _temporal
@@ -368,6 +427,9 @@ class Session(base.Session):
             if 'against' in p:self.obs(p['source'],p['against'])
             batch=p.get('batch','B');self.prepare(batch,p.get('formulas',[p.get('fragment',ATOM)]));ops,_,_=self.batches[batch]
             refs=self.store.gate_precheck(batch,ops,run_id='gate:'+batch);self.api.add('AHStoreAdapter.gate_precheck')
+            self.precheck_aliases={ref:'PRECHECK_'+str(i+1) for i,ref in enumerate(refs)}
+            self.precheck_records={r['seq']:deepcopy(r) for r in self.store._journal.scan_unprocessed(0) if r['payload'].get('kind')=='GATE_PRECHECK'}
+            self.batches[batch]=(ops,replace(self.batches[batch][1],precheck_refs=tuple(refs)),self.batches[batch][2])
             r=self.snapshot();r['journal']['precheck_count']=len(refs);r['reports']['count']=len(self.store.ledger.data['reports'])
             r['precheck']={'terminal':False};r['plan']={'excluded':[]};return r
         return super().action(a,p)
@@ -380,18 +442,6 @@ def run_case(case,fixtures):
     for s in case['steps']:
         if s['action'] not in SUPPORTED:blockers.append({'action':s['action'],'reason':'BLOCKED_UNBOUND_ACTION'})
         elif s['action'] in {'formalize','formalize_partial','formalize_speech_act'} and CONFIG.get('provider','disabled')=='disabled':blockers.append({'action':s['action'],'reason':'BLOCKED_LOCAL_PROVIDER_DISABLED'})
-        elif s['action']=='compile_rule':
-            from ah.formalizer.resources.rule_dsl import compile_rules
-            try:compile_rules(s['payload']['base'],{'SUBJECT','OBJECT','EXPERIENCER','SURFACE_ARG'},{'R1':'1'})
-            except ValueError as exc:blockers.append({'action':s['action'],'reason':'BLOCKED_INVALID_ORACLE_DSL_BASELINE','detail':str(exc)})
-        elif s['action']=='execute_head_calls' and s['payload'].get('crash_at','NONE')!='NONE':blockers.append({'action':s['action'],'reason':'BLOCKED_CRASH_BINDING'})
-        elif s['action']=='repeat_goal' and s['payload'].get('change') in {'rule','conclusion'}:blockers.append({'action':s['action'],'reason':'BLOCKED_TYPED_CHANGED_FORM_BINDING'})
-        elif s['action']=='numeric_scope_literal' and s['payload']['source']=='MODEL_NUMBER_ONLY':blockers.append({'action':s['action'],'reason':'BLOCKED_NUMERAL_SOURCE_BINDING'})
-        elif s['action']=='load_release' and s['payload'].get('mutate_kind') in {'R1','R-WK','EvidencePriorityPolicy'}:blockers.append({'action':s['action'],'reason':'BLOCKED_RESOURCE_RUNTIME_PROJECTION'})
-        elif s['action']=='proposal_budget' and s['payload']['limit_name']=='lexical_calls':blockers.append({'action':s['action'],'reason':'BLOCKED_LEXICAL_PROPOSAL_API'})
-        elif s['action']=='validate_proposal' and s['payload']['mutation']=='sealed_mutation':blockers.append({'action':s['action'],'reason':'BLOCKED_SEAL_COMPOSITE_STIMULUS'})
-        elif s['action']=='retract_observation' and s['payload']['observation']=='O_membership':blockers.append({'action':s['action'],'reason':'BLOCKED_PER_PREMISE_SOURCE_FIXTURE'})
-        elif s['action']=='compound_binding_budget':blockers.append({'action':s['action'],'reason':'BLOCKED_ENUMERATION_BUDGET_FIXTURE'})
     result={'schema_version':'v7-oracle-trace-1','case_id':case['case_id'],'checkpoints':[]}
     if blockers:return {**result,'execution_status':'BLOCKED','blockers':blockers}
     case=deepcopy(case)

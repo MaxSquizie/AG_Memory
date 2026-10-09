@@ -1,0 +1,684 @@
+{
+  "cases": [
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "OPEN-KEY-attachment",
+      "errors": [
+        {
+          "detail": "ATTACHMENT_NOT_IN_SEMANTIC_ROLE_SIGNATURE",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": false,
+          "observed": true,
+          "op": "eq",
+          "path": "/open/key_equal",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "OPEN-KEY-sense_conflict",
+      "errors": [
+        {
+          "detail": "INCOMPATIBLE_SENSES_SHARE_KEY_BY_NORM",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": false,
+          "observed": true,
+          "op": "eq",
+          "path": "/open/key_equal",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-STATE-rule",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/derived/target_matches_mode",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-STATE-conclusion",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/derived/target_matches_mode",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-EVENT-rule",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-EVENT-conclusion",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-PROCESS-rule",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-PROCESS-conclusion",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-TRANSITION-rule",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-TRANSITION-conclusion",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-UNKNOWN-rule",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DEDUP-UNKNOWN-conclusion",
+      "errors": [
+        {
+          "detail": "MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": "APPLIED",
+          "observed": "ABORTED",
+          "op": "eq",
+          "path": "/goal/outcome",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/goal/created_path",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/store/new_occurrence_count",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": 1,
+          "observed": 0,
+          "op": "eq",
+          "path": "/time_assertions/new_count",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-EQUIVALENCE",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/dsl/ast_equal",
+          "step": "result"
+        },
+        {
+          "error": "gold mismatch",
+          "expected": true,
+          "observed": false,
+          "op": "eq",
+          "path": "/dsl/output_equal",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-duplicate_stage",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-missing_reads",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-unknown_field",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-unknown_candidate_kind",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-python_eval",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-NaN",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-Infinity",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-wrong_emit_payload",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-undeclared_LOOKUP",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-capture_feature_missing",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-expr_depth_17",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-chars_262145",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-rules_4097",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    },
+    {
+      "attribution": "ORACLE_STIMULUS_INVALID",
+      "case_id": "DSL-REJECT-join_budget_exceeded",
+      "errors": [
+        {
+          "detail": "expected 'Emit' at 101",
+          "error": "invalid oracle stimulus",
+          "step": "result"
+        }
+      ],
+      "status": "FAIL"
+    }
+  ],
+  "counts": {
+    "ORACLE_STIMULUS_INVALID": 27
+  },
+  "gates_pass_claim": false
+}

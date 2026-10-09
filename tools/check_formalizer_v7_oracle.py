@@ -158,9 +158,17 @@ def compare(root,actual_path,case_filter=None):
             for s in c['steps']:
                 actual=checkpoints.get(s['id'])
                 if actual is None:ce.append({'step':s['id'],'error':'missing checkpoint'});continue
+                # A negative mutation cannot establish its boundary when the
+                # unmutated authored stimulus already violates that contract.
+                # Keep its observed validation error, but never count it PASS.
+                stimulus=actual.get('stimulus',{})
+                if stimulus.get('baseline_valid') is False or stimulus.get('mutation_contract_valid') is False:
+                    ce.append({'step':s['id'],'error':'invalid oracle stimulus','detail':stimulus.get('baseline_error') or stimulus.get('defect')})
                 for ck in s['checks']:
                     try:
-                        if not evaluate(ck,actual,previous):ce.append({'step':s['id'],'path':ck['path'],'op':ck['op'],'error':'gold mismatch'})
+                        if not evaluate(ck,actual,previous):
+                            expect=pointer(previous[ck['checkpoint']],ck['path']) if ck['op']=='same_as' else ck['value']
+                            ce.append({'step':s['id'],'path':ck['path'],'op':ck['op'],'error':'gold mismatch','expected':expect,'observed':pointer(actual,ck['path'])})
                     except (ValueError,KeyError,TypeError) as e:ce.append({'step':s['id'],'path':ck['path'],'error':str(e)})
                 previous[s['id']]=actual
         results.append({'case_id':c['case_id'],'status':'FAIL' if ce else 'PASS','errors':ce})

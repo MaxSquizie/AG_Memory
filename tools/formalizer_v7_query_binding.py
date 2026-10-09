@@ -62,29 +62,91 @@ def certify(s,pat,var,win,variant,closure='ENUMERATED',supports_live=True,body_m
     m['entries'].append({'kind':'FormulaDomainCertificate','version':'test-v1','schema_version':'v7','dependency_versions':{},'entries':[cert]})
     m['dependency_versions']['FormulaDomainCertificate']='test-v1';rehash_coverage(m)
     release,_=sign_test_release(m);release.validate_store(s.core.store);s.store.resource_release=release
-    if not supports_live or variant=='STALE_SUPPORT':s.store.retract(sid,reason='certificate evidence stale')
+    if not supports_live or variant in {'STALE_SUPPORT','DEAD_COMPLETENESS_SUPPORT'}:s.store.retract(sid,reason='certificate evidence stale')
     return release
 
-def solve(s,goal,limit=5000):
+def solve(s,goal,limit=5000,workspace=None):
     before=len(s.store.ledger.data['supports']);engine=InferenceEngine(s.core,InferenceSettings(max_expanded_states=limit))
-    answer=engine.solve(goal,workspace_refs=tuple(s.core.ref(u) for u in s.store.ledger.f_visible()))
+    answer=engine.solve(goal,workspace_refs=tuple(s.core.ref(u) for u in s.store.ledger.f_visible()) if workspace is None else tuple(workspace))
     s.api.add('InferenceEngine.solve / NativeBindingGoal / whole-pattern proof / FormulaDomainCertificate')
     return answer,len(s.store.ledger.data['supports'])-before
+
+def binding_budget(s,p):
+    """Observe the real Cartesian search, including its 1024-combination cap.
+
+    Two independently populated roles avoid the separate per-variable cap.
+    The observer delegates every proof to the unmodified production function.
+    """
+    from unittest.mock import patch
+    from ah.formalizer import native_queries
+    required=p['required_combinations']; limit=p['limit']
+    if limit!=1024 or required<1:raise ValueError('UNSUPPORTED_ENUMERATION_LIMIT')
+    factors=min(((n,required//n) for n in range(1,required+1)
+                  if required%n==0 and n<=1024 and required//n<=1024),key=lambda pair:sum(pair),default=None)
+    if factors is None:raise ValueError('ENUMERATION_FIXTURE_DOMAIN_TOO_LARGE')
+    left={'predicate':'STUDENT','roles':{'THEME':{'bound_var':'left'}}}
+    right={'predicate':'ARRIVE','roles':{'AGENT':{'bound_var':'right'}}}
+    ensure_templates(s,[left,right]);forms=[]
+    for f,var,n in [(left,'left',factors[0]),(right,'right',factors[1])]:
+        forms.extend(subst(f,var,var+':'+str(i)) for i in range(n))
+    s.prepare('enumeration-fixture',forms);s.commit('enumeration-fixture')
+    pat=Pattern('AND',(pattern(s,left,'left'),pattern(s,right,'right')))
+    goal=NativeBindingGoal(pat,('left','right'),mode='WH');visited=[]
+    original=native_queries.solve_native_goal
+    def observe(engine,actual_goal,*args,**kwargs):
+        if isinstance(actual_goal,NativeFormulaGoal) and kwargs.get('_depth')==1:
+            visited.append(actual_goal.pattern)
+        return original(engine,actual_goal,*args,**kwargs)
+    with patch.object(native_queries,'solve_native_goal',observe):
+        answer,new=solve(s,goal,10000000)
+    complete='COMPUTATION_LIMIT' not in answer.diagnostics
+    s.api.add('query_bindings.solve_bindings Cartesian enumeration / delegated proof-call observer')
+    return {'query':{'search_complete':complete,'combinations_visited':len(visited),
+                     'domain_certificate_inferred_from_enumeration':bool(getattr(s.store,'resource_release',None) and s.store.resource_release.entries('FormulaDomainCertificate'))},
+            'answer':{'status':answer.status.value},'diagnostics':{'codes':list(answer.diagnostics)}}
+
+def certificate_mutation(s,p):
+    """Bind each mutation to its own changed typed query input."""
+    change=p['change'];before=STUDENT;after=deepcopy(before);window=None
+    ensure_templates(s,[STUDENT,ARRIVE]);query_var='x'
+    if change=='restriction':after={'operator':'AND','operands':[STUDENT,ARRIVE]}
+    elif change=='nested_scope':after={'operator':'NOT','operands':[STUDENT]}
+    elif change=='count_variable':query_var='y';after=subst_var(before,'x','y')
+    elif change=='time_window':window=[0,1]
+    s.obs('certificate-witness',subst(STUDENT,'x','e0'),{'kind':'INTERVAL','bounds':[0,1],'semantics':'CONTINUOUS'} if window else None)
+    release=certify(s,pattern(s,before,'x'),'x',window,'VALID')
+    source_scope=()
+    if change=='source_scope':source_scope=('oracle:foreign-source',)
+    if change=='dead_support':
+        cert=release.entries('FormulaDomainCertificate')[0]
+        s.store.retract(cert['completeness_evidence'][0],reason='explicit certificate evidence retraction')
+    actual_window=[2,3] if change=='time_window' else window
+    goal=NativeBindingGoal(pattern(s,after,query_var),(query_var,),mode='COUNT',
+                          temporal_window=tuple(actual_window) if actual_window else None,
+                          resource_snapshot=release.sha256,source_scope=source_scope)
+    answer,_=solve(s,goal);c=answer.conclusion
+    complete=isinstance(c,CountConclusion) and c.exact_count is not None
+    return {'certificate':{'valid':complete},'answer':{'exact_count':c.exact_count if isinstance(c,CountConclusion) else None,'domain_complete':complete},
+            'diagnostics':{'codes':list(answer.diagnostics)}}
+
+def subst_var(f,old,new):
+    if isinstance(f,dict):return {'bound_var':new} if f=={'bound_var':old} else {k:subst_var(v,old,new) for k,v in f.items()}
+    if isinstance(f,list):return [subst_var(v,old,new) for v in f]
+    return f
 
 def query_action(s,a,p):
     if a=='validate_formula_certificate':
         if 'renaming' in p:
-            old,new=next(iter(p['renaming'].items()));body={'predicate':'STUDENT','roles':{'THEME':{'bound_var':old}}}
-            ensure_templates(s,[body]);before=pattern(s,body,old)
-            after=pattern(s,{'predicate':'STUDENT','roles':{'THEME':{'bound_var':new}}},new)
-            release=certify(s,before,old,None,'VALID')
-            answer,_=solve(s,NativeBindingGoal(after,(new,),mode='COUNT',resource_snapshot=release.sha256))
-            s.api.add('query_bindings.pattern_signature alpha-renamed runtime gap / certificate validation')
+            old,new=next(iter(p['renaming'].items()));gap='count_gap'
+            body={'operator':'FORALL','operands':[{'bound_var':old},{'operator':'AND','operands':[
+                {'predicate':'STUDENT','roles':{'THEME':{'bound_var':old}}},
+                {'predicate':'ARRIVE','roles':{'AGENT':{'bound_var':gap}}}]}]}
+            ensure_templates(s,[body]);before=pattern(s,body,gap);after=pattern(s,subst_var(body,old,new),gap)
+            release=certify(s,before,gap,None,'VALID')
+            answer,_=solve(s,NativeBindingGoal(after,(gap,),mode='COUNT',resource_snapshot=release.sha256))
+            s.api.add('query_bindings.pattern_signature alpha-renamed scoped BoundVar / fixed count gap certificate')
             return {'signature':{'alpha_equal':pattern_signature(before)==pattern_signature(after)},'certificate':{'valid':isinstance(answer.conclusion,CountConclusion) and answer.conclusion.exact_count is not None}}
-        change=p['change'];variant={'count_variable':'WRONG_VARIABLE','window':'WRONG_WINDOW','completeness_evidence':'STALE_SUPPORT','source_snapshot':'NONE'}.get(change,'WRONG_BODY')
-        result=query_action(s,'count_query',{'body':STUDENT,'count_variable':'x','certificate':variant,'window':None,'witness_entities':['e0']})
-        result['certificate']={'valid':result['answer']['domain_complete']}
-        return result
+        return certificate_mutation(s,p)
     if a=='frame_temporal_mode':
         # This old symbolic action describes resolved modes rather than a
         # release entry. Export the actual R-V mode lookup, not guessed tense.
@@ -106,29 +168,39 @@ def query_action(s,a,p):
         release=None
         if variant!='NONE':release=certify(s,pat,var,window,variant,p.get('closure_mode','ENUMERATED'),p.get('certificate_supports_live',True),p.get('certificate_body_matches',True))
         goal=NativeBindingGoal(pat,(var,),mode='COUNT',temporal_window=tuple(window) if window else None,
-                              resource_snapshot=release.sha256 if release else None)
+                              resource_snapshot=release.sha256 if release else None,
+                              expected_count=p.get('threshold'),comparison={'EXACT':'EXACTLY_N','AT_LEAST':'AT_LEAST_N','AT_MOST':'AT_MOST_N'}.get(p.get('comparison','EXACT'),'EXACTLY_N'))
         answer,new=solve(s,goal);c=answer.conclusion
-        return {'answer':{'lower_bound':c.lower_bound if isinstance(c,CountConclusion) else None,
+        return {'answer':{'status':{'PROVED':'YES','DISPROVED':'NO','UNKNOWN':'UNKNOWN'}[answer.status.value],'lower_bound':c.lower_bound if isinstance(c,CountConclusion) else None,
             'exact_count':c.exact_count if isinstance(c,CountConclusion) else None,
             'domain_complete':isinstance(c,CountConclusion) and c.exact_count is not None},
             'diagnostics':{'codes':list(answer.diagnostics)},'query':{'factual_result_materialized':new>0},
             'store':{'fictitious_entity_count':sum(e not in set(entities)|{'book','table'} for e in s.entities.values())}}
     if a=='compound_binding_budget':
-        # An actual tiny inference budget over a populated indexed search.
-        entities=['e'+str(i) for i in range(p.get('candidate_count',32))];p={**p,'candidate_bindings':entities,'atomic_body_match_entities':entities,'whole_pattern_proof_entities':entities,'scope':'AND','runtime_variable':'q'}
+        return binding_budget(s,p)
     if a in {'compound_binding_query','compound_binding_budget'}:
         var=p['runtime_variable'];left={'predicate':'STUDENT','roles':{'THEME':{'bound_var':var}}}
         right={'predicate':'ARRIVE','roles':{'AGENT':{'bound_var':var}}};scope=p['scope']
         body={'operator':scope,'operands':[left,right]} if scope in {'AND','OR','XOR','IMPLIES'} else {'operator':scope,'operands':[left]}
         if scope in {'FORALL','EXISTS'}:body={'operator':scope,'operands':[{'bound_var':'inner'},right]}
-        if scope=='QUOTED':body=right
+        if scope=='QUOTED':
+            # The complete quoted scope is the asserted report, not the
+            # unasserted content proposition. Query its argument without
+            # introducing a truth support for that content.
+            body={'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},'CONTENT':right}}
         ensure_templates(s,[body,left,right]);good=set(p.get('whole_pattern_proof_entities',[]))
         for i,e in enumerate(p.get('atomic_body_match_entities',[])):
-            s.obs('candidate:'+str(i),subst(left,var,e))
+            # Indexed atomic matches are structural candidates, not witnesses
+            # of their own truth or of the complete requested scope.
+            s.action('materialize_attitude_argument',{'source':'candidate:'+str(i),
+                'attitude':'QUOTED','holder':'ivan','content':subst(left,var,e)})
         for i,e in enumerate(good):
             concrete=subst(body,var,e)
-            if scope=='QUOTED' and not p.get('quoted_content_independent_assertion'):
-                s.action('materialize_attitude_argument',{'source':'quoted:'+str(i),'attitude':'QUOTED','holder':'ivan','content':concrete})
+            if scope=='QUOTED':
+                content=subst(right,var,e)
+                s.action('materialize_attitude_argument',{'source':'quoted:'+str(i),'attitude':'QUOTED','holder':'ivan','content':content})
+                if p.get('quoted_content_independent_assertion'):
+                    s.obs('independent-content:'+str(i),content)
             else:s.obs('whole:'+str(i),concrete)
         pat=pattern(s,body,var);goal=NativeBindingGoal(pat,(var,),mode=p.get('mode','WH'))
         answer,new=solve(s,goal,1 if a=='compound_binding_budget' else 5000);c=answer.conclusion

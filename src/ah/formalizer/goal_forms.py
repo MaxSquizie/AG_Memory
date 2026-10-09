@@ -54,14 +54,43 @@ def from_pattern(p):
 
 
 def substitute(value, bindings):
-    if not isinstance(value, dict): return deepcopy(value)
-    if 'bound_var' in value: return deepcopy(bindings.get(value['bound_var'], value))
-    local = bindings
-    ops = value.get('operands', ())
-    if value.get('function_id') in BINDERS and ops and isinstance(ops[0], dict) and 'bound_var' in ops[0]:
-        local = {k:v for k,v in bindings.items() if k != ops[0]['bound_var']}
-    return {k: [substitute(x, local) for x in v] if isinstance(v, list)
-            else substitute(v, local) for k,v in value.items()}
+    """Substitute only free occurrences and alpha-rename capture hazards."""
+    used=set()
+    def collect(v):
+        if isinstance(v,dict):
+            if 'bound_var' in v:used.add(v['bound_var'])
+            for child in v.values():collect(child)
+        elif isinstance(v,list):
+            for child in v:collect(child)
+    collect(value)
+    for replacement in bindings.values():collect(replacement)
+    def fresh():
+        n=max((x for x in used if isinstance(x,int)),default=-1)+1
+        used.add(n);return n
+    def free(v,bound=frozenset()):
+        if not isinstance(v,dict):return set()
+        if 'bound_var' in v:return {v['bound_var']}-bound
+        ops=v.get('operands',());local=bound
+        if v.get('function_id') in BINDERS and ops and isinstance(ops[0],dict) and 'bound_var' in ops[0]:
+            local=bound|{ops[0]['bound_var']}
+        return set().union(*(free(c,local) for child in v.values() for c in (child if isinstance(child,list) else [child])))
+    def rename(v,old,new):
+        if not isinstance(v,dict):return deepcopy(v)
+        if 'bound_var' in v:return {**v,'bound_var':new} if v['bound_var']==old else deepcopy(v)
+        ops=v.get('operands',())
+        if v.get('function_id') in BINDERS and ops and isinstance(ops[0],dict) and ops[0].get('bound_var')==old:return deepcopy(v)
+        return {k:[rename(c,old,new) for c in child] if isinstance(child,list) else rename(child,old,new) for k,child in v.items()}
+    def walk(v,mapping):
+        if not isinstance(v,dict):return deepcopy(v)
+        if 'bound_var' in v:return deepcopy(mapping.get(v['bound_var'],v))
+        ops=v.get('operands',());local=mapping
+        if v.get('function_id') in BINDERS and ops and isinstance(ops[0],dict) and 'bound_var' in ops[0]:
+            var=ops[0]['bound_var'];local={k:x for k,x in mapping.items() if k!=var}
+            hazards=set().union(*(free(x) for x in local.values()))
+            if var in hazards:
+                new=fresh();v={**v,'operands':[{**ops[0],'bound_var':new},*(rename(x,var,new) for x in ops[1:])]}
+        return {k:[walk(c,local) for c in child] if isinstance(child,list) else walk(child,local) for k,child in v.items()}
+    return walk(value,bindings)
 
 
 def canonical(value, env=None):

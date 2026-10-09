@@ -418,6 +418,11 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 proof_refs=tuple(dict.fromkeys([*witnesses.values(),*bound_refs,*(engine.core.ref(ledger.data['supports'][sid]['conclusion_ref']) for sid in certificate_supports)]))
                 return outcome(status,proof_refs,() if complete else ('INCOMPLETE_DOMAIN',),CountConclusion(lower if lower else claimed_lower,exact,tuple(witnesses.values()),exact if complete else claimed_upper))
             pattern=goal.pattern
+            def open_attestation(p):
+                return isinstance(p,Pattern) and (bool(p.lexical_anchor)
+                    or any(open_attestation(m) for m in p.members)
+                    or any(open_attestation(v) for r,v in p.actants))
+            exact_open=open_attestation(pattern)
             if not isinstance(pattern,Pattern) or len(pattern.members)>128: raise ValueError('QUERY_TARGET_UNBOUND')
             if pattern.temporal is not None:
                 own=normalize(region(pattern.temporal))
@@ -440,7 +445,7 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 return outcome(LogicalStatus.UNKNOWN if value is None else LogicalStatus.PROVED if value else LogicalStatus.DISPROVED,
                                diagnostics=('TEMPORAL_ANCHOR_COMPARISON',),
                                conclusion=TemporalComparisonConclusion(pattern.operator,pattern.members[0].bounds,pattern.members[1].bounds) if value is not None else None)
-            if not hypothetical_scope and pattern.occurrence_ref is None and not pattern.lexical_anchor:
+            if not hypothetical_scope and pattern.occurrence_ref is None and not exact_open:
                 from .goal_queries import prove_pattern
                 prove_pattern(adapter,pattern,point=goal.temporal_point,window=goal.temporal_window,budget=_budget)
                 ledger=proof_ledger(engine.core,adapter.ledger,context,goal,_budget,(*workspace,*goal.workspace_refs))
@@ -453,18 +458,44 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                         _budget[0]-=1
                         if _budget[0]<0: raise ValueError('COMPUTATION_LIMIT')
                         if sid in paths: attested_refs.append(engine.core.ref(ledger.data['supports'][sid]['conclusion_ref']))
-            refs=_matching_refs(engine.core,ledger,pattern,limit=max(1,min(4096,_budget[0])),workspace=(*workspace,*goal.workspace_refs,*attested_refs),budget=_budget)
+            selected_workspace=(*workspace,*goal.workspace_refs,*attested_refs)
+            if exact_open:
+                if goal.source_scope:
+                    # A source restriction narrows even an already excited
+                    # workspace; excitation does not override attestation scope.
+                    allowed={r.uid for r in attested_refs};allowed_queue=list(allowed)
+                    for uid in allowed_queue:
+                        n=ledger.data['nodes'].get(uid,{})
+                        for child in (*n.get('operands',()),*n.get('actants',{}).values()):
+                            if isinstance(child,str) and child in ledger.data['nodes'] and child not in allowed:
+                                allowed.add(child);allowed_queue.append(child)
+                    selected_workspace=tuple(r for r in selected_workspace if r.uid in allowed)
+                # Descendants of an excited formula are structural access,
+                # not additional facts; they retain the formula's exact scope.
+                queue=[r.uid for r in selected_workspace];reachable=set(queue)
+                for uid in queue:
+                    n=ledger.data['nodes'].get(uid,{})
+                    for child in (*n.get('operands',()),*n.get('actants',{}).values()):
+                        if isinstance(child,str) and child in ledger.data['nodes'] and child not in reachable:
+                            reachable.add(child);queue.append(child)
+                selected_workspace=tuple(engine.core.ref(u) for u in sorted(reachable))
+            refs=_matching_refs(engine.core,ledger,pattern,limit=max(1,min(4096,_budget[0])),workspace=selected_workspace,budget=_budget)
             if runtime is not None:
                 runtime.memory_query('NATIVE_FORMULA',pattern.operator or pattern.template_ref or pattern.lexical_anchor,logical_depth=_depth,candidate_count=len(refs),detail='template/reverse-function index or declared attestation workspace')
             conflicts=set()
             for uid in refs:
                 if not _uniform_windows(pattern,goal): continue
-                answer=(ledger.query if pattern.occurrence_ref is not None else ledger.query_proposition)(uid,point=goal.temporal_point,window=goal.temporal_window)
+                answer=(ledger.query if pattern.occurrence_ref is not None or exact_open else ledger.query_proposition)(uid,point=goal.temporal_point,window=goal.temporal_window)
                 conflicts.update(answer['conflict_ref'])
                 if answer['answer'] in {'YES','NO'}:
                     evidence_uid=answer.get('evidence_ref',uid)
                     regions=_answer_regions(ledger,evidence_uid,goal,answer['answer'],core=engine.core)
                     return outcome(LogicalStatus.PROVED if answer['answer']=='YES' else LogicalStatus.DISPROVED,(engine.core.ref(evidence_uid),),tuple('conflict_ref:'+r for r in sorted(conflicts)),temporal_regions=regions)
+            if exact_open:
+                # UNLINKED content has EXACT_ATTESTATION capability only.
+                # Inverting NOT or proving a different compound shape would
+                # infer semantic equivalence not licensed by its open template.
+                return outcome(LogicalStatus.UNKNOWN,diagnostics=tuple('conflict_ref:'+r for r in sorted(conflicts)))
             if hypothetical_scope:
                 from .native_derivations import runtime_derivation
                 derived=runtime_derivation(engine,ledger,goal,query,workspace,attention,context,runtime,_budget,_depth)

@@ -144,8 +144,21 @@ class ProviderAdapter:
         return self._exchange("select", prompt, run_id, ordinal)
 
     def propose_local(self, prompt: str, run_id: str) -> str:
-        """Local-structure / lexical proposal (TP/T3). Consumes one tp_call; logged + integrity-checked."""
+        """Local-structure proposal (TP). Consumes one tp_call; logged + integrity-checked."""
         if self._tp_calls_left <= 0:
             raise BudgetExceeded("PROPOSAL_BUDGET", "no structural proposal calls left in budget")
         self._tp_calls_left -= 1
+        return self._exchange("propose_local", prompt, run_id)
+
+
+    def propose_lexical(self, prompt: str, run_id: str) -> str:
+        """Bounded T3 lexical proposal with its independent call allowance.
+
+        It shares the logged proposal capability and ordinal stream with TP;
+        replay bytes remain identical, but spending lexical budget cannot spend
+        the structural allowance (or vice versa).
+        """
+        if self._lexical_calls_left <= 0:
+            raise BudgetExceeded("PROPOSAL_BUDGET", "no lexical proposal calls left in budget")
+        self._lexical_calls_left -= 1
         return self._exchange("propose_local", prompt, run_id)

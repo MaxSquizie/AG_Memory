@@ -48,7 +48,12 @@ def test_retraction_durable(store):
     assert restored.ledger.data['supports']['S']['status']=='SUPERSEDED'
     assert restored.ledger.query_proposition('N')['answer']=='UNKNOWN'
 
-def test_unknown_retraction_false(store):assert not store.retract('ghost',AssertionStatus.SUPERSEDED)
+def test_unknown_retraction_integrity_error_without_mutation(store):
+    before=digest(store._codec.export(store._core));head=store.read_global_head()
+    with pytest.raises(JournalIntegrityError,match='INTEGRITY_ERROR: unknown retraction record'):
+        store.retract('ghost',AssertionStatus.SUPERSEDED)
+    assert digest(store._codec.export(store._core))==before
+    assert store.read_global_head()==head
 
 def test_wrong_digest_refused(store):
     ops=plan();d=journal_plan(store,ops)

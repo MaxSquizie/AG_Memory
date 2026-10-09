@@ -26,7 +26,11 @@ def _ensure_symbol(core: Any, form: str) -> Ref:
 
 
 def _roles(payload_roles) -> tuple[ActantRole, ...]:
-    return tuple(ActantRole(r) for r in payload_roles)
+    from .resources.registry import RegistryReject
+    try:
+        return tuple(ActantRole(r) for r in payload_roles)
+    except ValueError as exc:
+        raise RegistryReject('REGISTRY_REJECT: unknown semantic role') from exc
 
 
 def _get_or_create_template(core: Any, domain: Domain, pred_ref: Ref, roles: tuple[ActantRole, ...]) -> Ref:
@@ -197,6 +201,11 @@ def native_operand(core,value):
 
 def ensure_node(core,p):
     uid=p['uid']
+    from .resources.registry import OpenTemplateInvalid
+    roles=_roles(p['actants'])
+    template=core.store.get_template(p['template_ref'])
+    if set(roles)-set(template.roles):
+        raise OpenTemplateInvalid('OPEN_TEMPLATE_INVALID: actants not allowed by template')
     if core.store.has_uid(uid):
         if core.store.kind_of(uid).value!='N': raise ValueError('NODE_REF_TYPE_MISMATCH')
         old=core.store.get_hypernode(uid)
@@ -213,7 +222,12 @@ def ensure_node(core,p):
 
 
 def ensure_function(core,p):
-    uid=p['uid']; fid=core.function_registry.canonical_id(p['function_id'])
+    from .resources.registry import RegistryReject
+    uid=p['uid']
+    try:
+        fid=core.function_registry.canonical_id(p['function_id'])
+    except KeyError as exc:
+        raise RegistryReject('REGISTRY_REJECT: unknown function '+str(p['function_id'])) from exc
     operands=tuple(native_operand(core,x) for x in p['operands'])
     core.function_registry.validate(fid,operands)
     if fid in {'BEFORE','AFTER','DURING'} and all(isinstance(x,TimeLiteral) for x in operands):
@@ -234,4 +248,24 @@ def ensure_group(core,p):
         core.add_group(Domain(p.get('domain','C')),tuple(core.ref(r) for r in p['members']),uid=p['uid'])
     return p['uid']
 
-GRAPH_HANDLERS.update(ENSURE_ENTITY=ensure_entity,ENSURE_TEMPLATE=ensure_template,ENSURE_NODE=ensure_node,ENSURE_FUNCTION=ensure_function,ENSURE_GROUP=ensure_group)
+
+def ensure_link(core,p):
+    """Native L IDs must have an explicitly registered deterministic schema."""
+    from ah.inference.schema import InferenceSchemaRegistry
+    from .resources.registry import RegistryReject
+    relation=p['link_type'].strip().upper()
+    registry=getattr(core,'link_registry',None) or InferenceSchemaRegistry.default()
+    if relation not in {spec.canonical_id for spec in registry.items()}:
+        raise RegistryReject('REGISTRY_REJECT: unknown link '+relation)
+    source,target=native_operand(core,p['source_ref']),native_operand(core,p['target_ref'])
+    uid=p['uid']
+    if core.store.has_uid(uid):
+        old=core.store.get_link(uid)
+        if old.relation_id!=relation or old.source!=source or old.target!=target:
+            raise ValueError('INTEGRITY_ERROR: link content changed')
+    else:
+        core.add_link(relation,source,target,float(p.get('weight',0.5)),uid=uid)
+    return uid
+
+
+GRAPH_HANDLERS.update(ENSURE_ENTITY=ensure_entity,ENSURE_TEMPLATE=ensure_template,ENSURE_NODE=ensure_node,ENSURE_FUNCTION=ensure_function,ENSURE_GROUP=ensure_group,ENSURE_LINK=ensure_link)

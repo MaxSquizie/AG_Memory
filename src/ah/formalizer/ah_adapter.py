@@ -242,7 +242,13 @@ class AHStoreAdapter(Store):
                 new=p['record_id'] not in ledger.data['supports']
                 ledger.add_support(p)
                 if new: events.append({'node_id':p['conclusion_ref'],'type':'SUPPORT_ADDED','support_id':p['record_id']})
-            elif op.op_type=='ADD_TIME_ASSERTION': ledger.add_assertion(p)
+            elif op.op_type=='ADD_TIME_ASSERTION':
+                try:
+                    ledger.add_assertion(p)
+                except ValueError as exc:
+                    if str(exc) in {'TIME_ASSERTION_SUPPORT_MISMATCH','TIME_ASSERTION_PROVENANCE_INVALID'}:
+                        raise JournalIntegrityError('INTEGRITY_ERROR: '+str(exc)) from exc
+                    raise
             elif op.op_type=='SUPERSEDE_VERSION':
                 continue  # Applied once, before final admission, on this draft.
             elif op.op_type=='LINK_OPEN_TEMPLATE':
@@ -295,7 +301,7 @@ class AHStoreAdapter(Store):
                 if old and old!=p: raise ValueError('INTEGRITY_ERROR: usage identity changed')
                 ledger.data['usage_links'].setdefault(p['link_id'],p)
             else:
-                if op.op_type not in {'ENSURE_ENTITY','ENSURE_TEMPLATE','ENSURE_NODE','ENSURE_FUNCTION','ENSURE_GROUP'}: raise ValueError('LEGACY_MUTATION_NOT_ALLOWED:'+op.op_type)
+                if op.op_type not in {'ENSURE_ENTITY','ENSURE_TEMPLATE','ENSURE_NODE','ENSURE_FUNCTION','ENSURE_GROUP','ENSURE_LINK'}: raise ValueError('LEGACY_MUTATION_NOT_ALLOWED:'+op.op_type)
                 handler=self._op_handlers.get(op.op_type)
                 if handler is None: raise ValueError('UNKNOWN_MUTATION_OPERATION:'+op.op_type)
                 uid=handler(draft,p)
@@ -319,6 +325,19 @@ class AHStoreAdapter(Store):
             previous=self.ledger.data['markers'].get(marker_key)
             if previous:
                 if previous!=decision.batch_hash:
+                    # A second plan presented by the canonical owner for an
+                    # already committed pair is a replay integrity failure,
+                    # rather than an ordinary competing-run admission loss.
+                    owners=[r['payload'] for r in self._journal.scan_unprocessed(0)
+                            if r['payload'].get('kind')=='run_bind'
+                            and r['payload'].get('observation_id')==marker.observation_id
+                            and r['payload'].get('version')==marker.interpretation_version]
+                    if owners and all(p['owner']==decision.run_id for p in owners):
+                        self._journal.append('resolution_log',{'kind':'InvestigationReport',
+                            'code':'INTEGRITY_ERROR','reason':'COMMITTED_PAIR_HASH_MISMATCH',
+                            'observation_id':marker.observation_id,'version':marker.interpretation_version,
+                            'marker_hash':previous,'caller_hash':decision.batch_hash},run_id=decision.run_id)
+                        raise JournalIntegrityError('INTEGRITY_ERROR: committed pair hash mismatch')
                     self.append_terminal(aid,TerminalOutcome.REJECTED_COMMIT_ELIGIBILITY,'pair already committed')
                     return CommitResult(self.read_global_head(),(),TerminalOutcome.REJECTED_COMMIT_ELIGIBILITY)
                 self.append_terminal(aid,TerminalOutcome.APPLIED)
@@ -387,6 +406,8 @@ class AHStoreAdapter(Store):
                 selected.extend(more); required.update(d for o in more for d in o.deps)
             keep={id(o) for o in selected}
             applied,events=self._apply(draft,[o for o in plan_ops if id(o) in keep])
+            from .scope_validation import validate_asserted_scopes
+            validate_asserted_scopes(ledger)
             ledger.data['markers'][marker_key]=decision.batch_hash
             ledger.data['decisions'][decision.batch_hash]=D
             ledger.refresh(before,decision.batch_hash,self.read_global_head()+1,[*retirement_events,*events])
@@ -423,7 +444,7 @@ class AHStoreAdapter(Store):
                 s=ledger.data['supports'][assertion_id]
                 if s['status']!='LIVE': return False
                 s['status']='SUPERSEDED'; events=[{'node_id':s['conclusion_ref'],'type':'SUPPORT_RETRACTED','support_id':assertion_id}]
-            else: return False
+            else: raise JournalIntegrityError('INTEGRITY_ERROR: unknown retraction record '+str(assertion_id))
             tx='retraction:'+digest([assertion_id,reason,len(ledger.data['events'])])
             ledger.refresh(before,tx,self.read_global_head()+1,events)
             self._write_unit(draft,tx_ref=tx,extra={'kind':'RETRACTION','assertion_id':assertion_id,'reason':reason})
@@ -498,10 +519,39 @@ class AHStoreAdapter(Store):
         s=self.ledger.data['supports'].get(assertion_id)
         return AssertionStatus(s['status']) if s else None
 
+    def reconcile_committed_pairs(self, pairs=()):
+        """Validate materialization by the exact observation/version pair.
+
+        A surviving older marker cannot prove a newer committed version. This
+        checks both directions of the marker/COMMIT_DECISION correspondence;
+        callers restoring a separate interpretation view may additionally
+        supply its declared committed pairs. No repair or graph write occurs.
+        """
+        with self._journal.atomic(),self._store._lock:
+            self._refresh()
+            markers=self.ledger.data['markers']; decisions=self.ledger.data['decisions']
+            for batch_hash,D in decisions.items():
+                if D.get('outcome')!='APPLIED' or markers.get(digest(D['marker']))!=batch_hash:
+                    raise JournalIntegrityError('INTEGRITY_ERROR: commit decision marker mismatch')
+            for marker_key,batch_hash in markers.items():
+                D=decisions.get(batch_hash)
+                if D is None or digest(D['marker'])!=marker_key:
+                    raise JournalIntegrityError('INTEGRITY_ERROR: materialization marker decision mismatch')
+            for pair in pairs:
+                if isinstance(pair,MaterializationMarker): pair=asdict(pair)
+                if (not isinstance(pair,dict) or set(pair)!={'observation_id','interpretation_version'}
+                        or not isinstance(pair['observation_id'],str)
+                        or type(pair['interpretation_version']) is not int or pair['interpretation_version']<1):
+                    raise ValueError('INVALID_COMMITTED_PAIR')
+                if digest(pair) not in markers:
+                    raise JournalIntegrityError('INTEGRITY_ERROR: declared committed pair has no marker')
+            return True
+
     def recover_from_head(self, *, drain_pending=True):
         recovered=[]
         with self._journal.atomic(),self._store._lock:
             self._refresh()
+            self.reconcile_committed_pairs()
             for D in list(self.ledger.data['decisions'].values()):
                 if 'batch:'+D['batch_hash'] not in self._terminal_records():
                     self._finish_batch(D); recovered.append(('batch:'+D['batch_hash'],TerminalOutcome(D['outcome'])))

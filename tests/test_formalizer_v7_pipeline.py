@@ -39,7 +39,8 @@ def test_synthetic_state_without_observation_cannot_invent_o(native):
     assert any('COND_5' in d for d in rep.diagnostics)
 
 def test_foreign_owner_blocks(native):
-    oid='observation:'+digest(['pipeline-test',1,[0,len(TEXT)]])
+    from ah.formalizer.v7_pipeline import _observation
+    oid=_observation(TEXT,version=1,raw_input={'source_id':'pipeline-test','revision':1})['observation_id']
     assert native[1].acquire('foreign',oid,1)
     _,rep=invoke(native)
     assert not rep.binding_ok and rep.t5_eligibility=='INTEGRITY_ERROR' and not rep.applied

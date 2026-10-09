@@ -9,6 +9,10 @@ COMPONENT_ACTIONS={'validate_input','input_identity','validate_proposal','propos
 
 def released_fixture(session):
     """Valid baseline first; negative cases mutate only one stated dimension."""
+    cached=getattr(session,'_component_release_fixture',None)
+    if cached is not None:
+        valid,trust=cached
+        return valid,deepcopy(trust)
     from tools.formalizer_v7_native_binding import fixture
     from tools.formalizer_v7_test_support import sign_test_release
     release,_=fixture(session.core,'known');m=deepcopy(release.manifest)
@@ -20,11 +24,16 @@ def released_fixture(session):
         'input_feature_pattern':{'captures':{'n':{'POS':['NOUN']}}},
         'output_kind':'TOKEN_HYPOTHESIS','output':{'capture':'n','variants':['keep_as_is']},
         'constraints':[],'priority':0,'min_evidence':1,'coverage_tag':'TEST_ONLY'}]
+    rr['R1']={'kind':'R1','version':'test-v1','schema_version':'v7','dependency_versions':{},'entries':[{'surface':'книга','lemma':'книга','POS':'NOUN','case':'nom','gender':'femn','number':'sing','person':None,'tense':None,'animacy':'inan','score':1.0,'source_tag':'TEST_ONLY:morph-v1'}]}
+    rr['R-WK']={'kind':'R-WK','version':'test-v1','schema_version':'v7','dependency_versions':{},'entries':[{'record_id':'TEST_ONLY:wk-1','subject_type':'ENTITY','predicate':'LOCATIVE','object':'table','polarity':True,'provenance':{'source':'TEST_ONLY:world'}}]}
+    rr['EvidencePriorityPolicy']={'kind':'EvidencePriorityPolicy','version':'test-v1','schema_version':'v7','dependency_versions':{},'entries':[{'domain':'TEST_ONLY','source_order':['O','C','W'],'conflict_rule':'NO_DOMINANCE','no_auto_winner_conditions':['SOURCE_CONFLICT']}]}
+    rr['DomainCertificate']={'kind':'DomainCertificate','version':'test-v1','schema_version':'v7','dependency_versions':{},'entries':[{'domain_id':'TEST_ONLY:count-domain','template_ref':'fixture:T:LOCATIVE','count_role':'SUBJECT','known_roles':{},'request_window':None,'completeness_evidence':['TEST_ONLY:closed-domain-proof'],'version':'test-v1'}]}
     rr['CorefPolicy']={'kind':'CorefPolicy','version':'test-v1','schema_version':'v7','dependency_versions':{},'entries':[{'window_size':32,'hard_features':['gender','number'],'ranking_criteria':['EXPLICIT_REF'],'tie_policy':'KEEP_ALL','event_anaphora_rules':[]}]}
-    m['entries']=list(rr.values());m['dependency_versions']['CorefPolicy']='test-v1'
+    m['entries']=list(rr.values());m['dependency_versions']={kind:'test-v1' for kind in rr}
     rehash_coverage(m)
     valid,trust=sign_test_release(m);valid.validate_store(session.core.store)
-    return valid,trust
+    session._component_release_fixture=(valid,deepcopy(trust))
+    return valid,deepcopy(trust)
 
 def rehash_coverage(m):
     m['coverage_report']['resource_content_sha256']=digest({k:m[k] for k in ('kind','version','schema_version','entries','dependency_versions')})
@@ -57,6 +66,18 @@ def component_action(s,a,p):
         elif m=='undeclared_read':h['reads']=['private-source']
         elif m=='new_text':h['nodes'][0]['text']='invented input'
         elif m=='truth_claim':h['nodes'][0]['truth']=True
+        elif m=='sealed_mutation':
+            from ah.formalizer.pipeline import t0
+            from ah.formalizer.seal import structural_seal
+            st=t0('fixture');structural_seal(st)
+            # Attempt the production pre-seal admission guard with a valid proposal.
+            # A sealed state cannot accept it even though its schema is valid.
+            parse_and_validate(req,json.dumps(reply))
+            accepted=True;codes=[]
+            try:st.require_structures_open('TP')
+            except RuntimeError:accepted=False;codes=['PROPOSAL_INVALID']
+            s.api.add('tp_proposer.parse_and_validate / FormalizationState.require_structures_open')
+            return {'proposal':{'accepted':accepted},'diagnostics':{'codes':codes},'registry':{'new_entry_count':len(s.store.ledger.data['nodes'])},'store':{'new_record_count':len(s.store.ledger.data['supports'])}}
         elif m=='cycle':h['edges'].append({'kind':'ARGUMENT','from':1,'to':0,'role_id':'SUBJECT'})
         else:raise ValueError('UNBOUND_PROPOSAL_MUTATION:'+m)
         accepted=True;codes=[]
@@ -74,7 +95,7 @@ def component_action(s,a,p):
         try:st.require_structures_open('TP')
         except RuntimeError:codes=['INTEGRITY_ERROR']
         s.api.add('seal.structural_seal / FormalizationState.require_structures_open')
-        return {'diagnostics':{'codes':codes},'structure':{'hash_unchanged':st.structural_hash==before},'proposal':{'accepted':not codes}}
+        return {'diagnostics':{'codes':codes},'structure':{'hash_unchanged':st.structural_hash==before,'seal_changed':st.structural_hash!=before},'proposal':{'accepted':not codes}}
     if a=='proposal_budget':
         from ah.formalizer.provider_adapter import ProviderAdapter,BudgetSnapshot,BudgetExceeded
         limits=dict(tp_calls=100,lexical_calls=100,max_nodes=100,max_edges=100,max_depth=100,token_limit=10000)
@@ -86,14 +107,16 @@ def component_action(s,a,p):
             elif p['limit_name']=='tokens':adapter._check_tokens(p['used'])
             elif p['limit_name']=='tp_calls':
                 for i in range(p['used']):adapter.propose_local('bounded '+str(i),'fixture')
-            else:raise ValueError('NO_LEXICAL_PROPOSAL_API')
+            elif p['limit_name']=='lexical_calls':
+                for i in range(p['used']):adapter.propose_lexical('bounded lexical '+str(i),'fixture')
+            else:raise ValueError('UNKNOWN_PROPOSAL_BUDGET')
         except BudgetExceeded:exceeded=True
         s.api.add('ProviderAdapter.validate_structure / token precheck / propose_local budget')
         return {'budget':{'limit_exceeded':exceeded,'unvalidated_prefix_committed':bool(s.store.ledger.data['supports'])},'decision':{'search_complete':not exceeded}}
     if a=='compile_query_kind':
         from ah.formalizer.interrogatives import compile
-        q=compile(p['query_kind']);s.api.add('interrogatives.compile registered request kinds')
-        return {'goal':{'compiled':q.status=='COMPILED','kinds':list(q.goal_kinds),'arbitrary_exists_fallback':q.goal_kinds==('ExistsGoal',)},'diagnostics':{'codes':[q.status] if q.status!='COMPILED' else []}}
+        q=compile(p['query_kind'],handler_available=p.get('declared_handler',True));s.api.add('interrogatives.compile registered request kinds')
+        return {'goal':{'compiled':q.status=='COMPILED','kinds':list(q.goal_kinds),'arbitrary_exists_fallback':q.goal_kinds==('ExistsGoal',),'kind':q.goal_kinds[0] if q.goal_kinds else None},'query':{'factual_result_materialized':bool(s.store.ledger.data['supports'])},'diagnostics':{'codes':[q.status] if q.status!='COMPILED' else []}}
     if a=='consolidate':
         from ah.formalizer.c_consolidate import ResolvedValue,SenseKind,TemporalMode,resolve_known
         v=ResolvedValue('F','fixture',1,p['known_sense'],p['known_sense'],'SUBJECT',SenseKind.KNOWN,TemporalMode.EVENT)
@@ -127,7 +150,14 @@ def component_action(s,a,p):
                 elif mut=='untrusted_reviewer':r['reviewer']='FOREIGN'
                 elif mut=='revoked_key':trust['keys']['TEST_ONLY']['revoked']=True
                 elif mut=='naive_timestamp':r['timestamp']='2026-10-09T00:00:00'
-                elif mut=='expired_review':r['timestamp']='1970-01-01T00:00:00+00:00'
+                elif mut=='expired_review':
+                    # A correctly signed old review isolates trust expiry from
+                    # signature tampering. This public fixture key is TEST_ONLY.
+                    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+                    from ah.formalizer.resources.signatures import review_message
+                    r['timestamp']='1970-01-01T00:00:00+00:00'
+                    r['signature']=base64.b64encode(Ed25519PrivateKey.from_private_bytes(bytes.fromhex('7f'*32)).sign(review_message(r))).decode()
+                    trust['keys']['TEST_ONLY']['valid_from']='2000-01-01T00:00:00+00:00'
                 elif mut=='reviewed_sha256_mismatch':r['reviewed_sha256']='0'*64
                 elif mut=='resource_content_sha256_mismatch':m['coverage_report']['resource_content_sha256']='0'*64
                 elif mut=='tampered_entry':m['entries'][0]['entries'][0]['foreign']='tampered'

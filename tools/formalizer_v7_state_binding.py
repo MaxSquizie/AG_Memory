@@ -35,7 +35,16 @@ def state_action(s,a,p):
             vals=[ResolvedValue('F'+str(i),r['observation'],r['revision'],r['surface'],r['surface'],r['role'],SenseKind.OPEN_LEXICAL,TemporalMode.EVENT,('t0',),r['surface'],'VERB',sense_label=label,bindings=(RoleBinding(r['role']),)) for i,label in enumerate(('sense-a','sense-b'))]
             plan=consolidate(vals,{},registry,policy);materialized=not plan.blocked_fragment_ids
         s.api.add('resources.registry.ensure_open_template / c_consolidate.consolidate open sense collision')
-        return {'open':{'key_equal':first.open_template_key==second.open_template_key,'alias_created':False,'materialized':materialized}}
+        stimulus={'baseline_valid':True,'mutation_contract_valid':True}
+        if dim=='attachment' and r['role']!='SURFACE_ARG':
+            stimulus.update(mutation_contract_valid=False,
+                defect='ATTACHMENT_NOT_IN_SEMANTIC_ROLE_SIGNATURE',
+                norm_ref='§7.1(3b): syntactic attachment fields enter SURFACE_ARG signatures')
+        elif dim=='sense_conflict':
+            stimulus.update(mutation_contract_valid=False,
+                defect='INCOMPATIBLE_SENSES_SHARE_KEY_BY_NORM',
+                norm_ref='§7.1(3b): incompatible senses with one key remain ambiguous without open T')
+        return {'open':{'key_equal':first.open_template_key==second.open_template_key,'alias_created':False,'materialized':materialized},'stimulus':stimulus}
     if a=='legacy_roundtrip':
         from ah.formalizer.integration_ir import IntegrationCandidateIRV2,StagedElement,legacy_roundtrip
         shape=p['shape'];plain=shape=='representable_graph'
@@ -44,27 +53,9 @@ def state_action(s,a,p):
         s.api.add('integration_ir.legacy_roundtrip lossless V2 capability guard')
         return {'adapter':{'legacy_used':ok,'lossy_coercion':ok and asdict(ir)!=asdict(result),'v2_preserved':not ok},'diagnostics':{'codes':[] if ok else [result]}}
     if a=='compile_rule':
-        from ah.formalizer.resources.rule_dsl import compile_rules
-        text=p['base'];m=p['mutation']
-        mutations={
-          'duplicate_stage':lambda t:t.replace('stage=SRL','stage=SRL, stage=SRL'),
-          'missing_reads':lambda t:t.replace('reads [R1:entries@1],',''),
-          'unknown_stage':lambda t:t.replace('stage=SRL','stage=FOREIGN'),
-          'undeclared_read':lambda t:t.replace('R1:entries@1','FOREIGN:entries@1'),
-          'version_mismatch':lambda t:t.replace('R1:entries@1','R1:entries@2'),
-          'python_callback':lambda t:t.replace('when n.POS="NOUN"','when __import__("os")'),
-          'unregistered_emit':lambda t:t.replace('TOKEN_HYPOTHESIS','FOREIGN'),
-          'capture_not_declared':lambda t:t.replace('"capture":"n"','"capture":"foreign"'),
-          'unbounded_loop':lambda t:t.replace('when n.POS="NOUN"','when while True'),
-        }
-        # The fixture itself may be invalid; retain compiler diagnostics so a
-        # rejection is never misreported as proof of the requested mutation.
-        if m not in mutations:raise ValueError('UNBOUND_DSL_MUTATION:'+m)
-        text=mutations[m](text);accepted=True;err=None
-        try:compile_rules(text,{'SUBJECT','OBJECT','EXPERIENCER','SURFACE_ARG'},{'R1':'1'})
-        except ValueError as exc:accepted=False;err=str(exc)
+        result=dsl_probe(p['base'],p['mutation'])
         s.api.add('resources.rule_dsl.compile_rules strict BNF and declared reads')
-        return {'dsl':{'accepted':accepted,'code_executed':False,'error':err},'release':{'partial_fallback_used':False}}
+        return result
     if a=='rx_replay':
         from ah.formalizer.run_binding import InterpretationRunBinding
         oid,v=p['pair'].split(':v');b=InterpretationRunBinding(s.store._journal)
@@ -73,18 +64,33 @@ def state_action(s,a,p):
         s.api.add('InterpretationRunBinding durable frozen RX input_snapshot')
         return {'rx':{'read_snapshot':snap['rx_snapshot']},'run':{'new_version_created':replay.versions(oid)!=(int(v),)}}
     if a=='rx_read':
-        from ah.formalizer.rx_cache import FormalizationCache,RxRecord
-        # Public pure cache tests stage isolation separately from native/WAL
-        # cache tests; PROVISIONAL/REJECTED records are intentionally not fed
-        # to the committed-cache writer.
-        state=p['record_state'];cache=FormalizationCache({'version':'REL'})
-        if state in {'COMMITTED_LIVE','SUPERSEDED','VERSION_MISMATCH'}:
-            record=RxRecord('RX',{},stages={p['record_stage']:{'priorities':{'K':1}}},
-                versions={'version':'OTHER' if state=='VERSION_MISMATCH' else 'REL'},status='SUPERSEDED' if state=='SUPERSEDED' else 'LIVE')
-            cache.record(record)
-        rows=cache.read_for_stage(p['read_stage'],{})
-        s.api.add('FormalizationCache.read_for_stage stage-isolated committed fixture')
-        return {'rx':{'readable':bool(rows),'writes_uncommitted':any(r.status!='LIVE' and state in {'PROVISIONAL','REJECTED'} for r in cache.all_records())},'supports':{'root_from_rx':len(s.store.ledger.data['supports'])},'aliases':[]}
+        from ah.formalizer.store_interface import TerminalOutcome
+        record_state=p['record_state'];batch='RX-fixture'
+        roots,supports,_=s.prepare(batch,[ATOM]);ops,old,tag=s.batches[batch]
+        snapshot={'version':'OTHER' if record_state=='VERSION_MISMATCH' else 'REL'}
+        # R-X1's authored SRL surface denotes its T1 runtime channel (§2.1).
+        # Both write and read go through that real stage-isolated channel.
+        record_stage='T1' if p['record_stage']=='SRL' else p['record_stage']
+        read_stage='T1' if p['read_stage']=='SRL' else p['read_stage']
+        stages={record_stage:{'priorities':{'K':1}}}
+        rx=StoreOp('WRITE_COMMITTED_RX',{'record_id':'RX','source_tag':tag,
+            'support_record_id':'uncommitted-support' if record_state=='REJECTED' else supports[0],
+            'resource_snapshot':snapshot,'stages':stages},old.committed)
+        s.store.append_terminal('batch:'+batch,TerminalOutcome.STALE_SUPERSEDED,'fixture adds a stage-isolated RX write')
+        actual=batch+':actual';ops=(*ops,rx)
+        d=journal_plan(s.store,ops,run_id=old.run_id,observation_id=tag[0],version=1,batch_hash=actual,fragments=old.committed)
+        s.batches[actual]=(ops,d,tag)
+        if record_state in {'COMMITTED_LIVE','SUPERSEDED','VERSION_MISMATCH','REJECTED'}:
+            try:s.commit(actual)
+            except ValueError as exc:
+                if record_state!='REJECTED' or str(exc)!='RX_COMMIT_GROUND_INVALID':raise
+        if record_state=='SUPERSEDED' and s.store.ledger.data['rx_cache']:s.store.retract_observation(*tag,trigger_ref='RX-supersede')
+        rows=s.store.read_cache_snapshot({'version':'REL'}).get(read_stage,())
+        cache=s.store.ledger.data['rx_cache']
+        uncommitted=any(r['support_record_id'] not in s.store.ledger.data['supports'] for r in cache.values())
+        s.api.add('AHStoreAdapter WRITE_COMMITTED_RX / read_cache stage isolation and committed-ground validation')
+        return {'rx':{'readable':bool(rows),'writes_uncommitted':uncommitted,'record_stage_runtime':record_stage,'read_stage_runtime':read_stage},
+                'supports':{'root_from_rx':sum(r.get('ground_type')=='RX' for r in s.store.ledger.data['supports'].values())},'aliases':[]}
     if a in {'commit_two_state_supports','retract_support_batch'}:
         if a=='commit_two_state_supports':
             roots,sids,_=s.prepare(p['tx_ref'],{'F_a':ATOM,'F_b':ATOM})
@@ -119,15 +125,66 @@ def state_action(s,a,p):
         try:s.store.ledger.validate_audit()
         except ValueError as exc:codes=[str(exc).split(':',1)[0]]
         s.api.add('CanonicalLedger.validate_audit / replaceable AH indexes')
-        return {'diagnostics':{'codes':codes},'service':{'factual_reads_enabled':not codes},'audit':{'repair_append_count':len(data['events'])-validation_before,'unchanged':m=='missing_derived_index' and len(data['events'])==before}}
+        return {'diagnostics':{'codes':codes},'service':{'factual_reads_enabled':not codes},'projection':{'rebuilt':m=='missing_derived_index'},'audit':{'repair_append_count':len(data['events'])-validation_before,'mutated':len(data['events'])!=validation_before,'unchanged':m=='missing_derived_index' and len(data['events'])==before}}
     if a=='replay_identity':
-        from ah.formalizer.run_binding import InterpretationRunBinding
+        from ah.formalizer.run_binding import InterpretationRunBinding,InputConflict
         b=InterpretationRunBinding(s.store._journal);base={'text':'fixture','context':'CTX','resources':'REL'}
         b.acquire('run','O',1,digest(base),base);changed={**base};m=p['mutation']
-        changed['text' if 'text' in m else 'context' if 'context' in m else 'resources']='DIFFERENT'
+        field={'same_revision_different_text':'text',
+               'same_pair_different_context_hash':'context',
+               'same_pair_different_resource_hash':'resources'}.get(m)
+        if field is None:raise ValueError('UNBOUND_REPLAY_MUTATION:'+m)
+        changed[field]='DIFFERENT'
         codes=[]
         try:b.acquire('run','O',1,digest(changed),changed)
+        except InputConflict:codes=['INPUT_CONFLICT']
         except RuntimeError as exc:codes=[str(exc).split(':',1)[0]]
         s.api.add('InterpretationRunBinding immutable snapshot hash guard')
         return {'diagnostics':{'codes':codes},'store':{'new_record_count':len(s.store.ledger.data['nodes'])}}
     raise ValueError('UNBOUND_STATE_ACTION:'+a)
+
+
+def dsl_probe(base,mutation,dependency_versions=None):
+    """Exercise exactly supplied DSL bytes, keeping invalid baselines distinct.
+
+    A negative mutation cannot verify its intended boundary if the unmodified
+    stimulus already fails parsing. The runner records INVALID_STIMULUS using
+    this receipt instead of counting that accidental rejection as a pass.
+    """
+    from ah.formalizer.resources.rule_dsl import compile_rules
+    roles={'SUBJECT','OBJECT','EXPERIENCER','SURFACE_ARG'}
+    deps=dependency_versions or {'R1':'1'}
+    baseline_valid=True;baseline_error=None
+    try:compile_rules(base,roles,deps)
+    except ValueError as exc:baseline_valid=False;baseline_error=str(exc)
+    mutations={
+        'duplicate_stage':lambda t:t.replace('stage=SRL','stage=SRL, stage=SRL'),
+        'missing_reads':lambda t:t.replace('reads [R1:entries@1],',''),
+        'unknown_stage':lambda t:t.replace('stage=SRL','stage=FOREIGN'),
+        'undeclared_read':lambda t:t.replace('R1:entries@1','FOREIGN:entries@1'),
+        'version_mismatch':lambda t:t.replace('R1:entries@1','R1:entries@2'),
+        'python_callback':lambda t:t.replace('when n.POS="NOUN"','when __import__("os")'),
+        'python_eval':lambda t:t.replace('when n.POS="NOUN"','when __import__("os")'),
+        'unregistered_emit':lambda t:t.replace('TOKEN_HYPOTHESIS','FOREIGN'),
+        'unknown_candidate_kind':lambda t:t.replace('TOKEN_HYPOTHESIS','FOREIGN'),
+        'capture_not_declared':lambda t:t.replace('"capture":"n"','"capture":"foreign"'),
+        'unbounded_loop':lambda t:t.replace('when n.POS="NOUN"','when while True'),
+        'unknown_field':lambda t:t[:-1]+', foreign=1}',
+        'NaN':lambda t:t.replace('priority=1','priority=NaN'),
+        'Infinity':lambda t:t.replace('priority=1','priority=Infinity'),
+        'wrong_emit_payload':lambda t:t.replace('["keep_as_is"]','"keep_as_is"'),
+        'undeclared_LOOKUP':lambda t:t.replace('when n.POS="NOUN"','when LOOKUP(FOREIGN,{"lemma":{"field":"n.lemma"}})'),
+        'capture_feature_missing':lambda t:t.replace('when n.POS="NOUN"','when n.foreign="NOUN"'),
+        'expr_depth_17':lambda t:t.replace('when n.POS="NOUN"','when '+'NOT('*17+'n.POS="NOUN"'+')'*17),
+        'chars_262145':lambda t:t+' '*(262145-len(t)),
+        'rules_4097':lambda t:'\n'.join(t.replace('rule noun:','rule noun'+str(i)+':') for i in range(4097)),
+        'join_budget_exceeded':lambda t:t.replace('captures={"n":{"POS":"NOUN"}}','captures={"n":{"POS":"NOUN"},"m":{"POS":"NOUN"}}'),
+    }
+    if mutation not in mutations:raise ValueError('UNBOUND_DSL_MUTATION:'+str(mutation))
+    text=mutations[mutation](base);accepted=True;error=None
+    try:compile_rules(text,roles,deps)
+    except ValueError as exc:accepted=False;error=str(exc)
+    return {'dsl':{'accepted':accepted,'code_executed':False,'error':error},
+            'release':{'partial_fallback_used':False},
+            'stimulus':{'baseline_valid':baseline_valid,'baseline_error':baseline_error,
+                        'mutation_changed_bytes':text!=base}}

@@ -98,7 +98,7 @@ def build_source_traces(
             out.append(CandidateSourceTrace(frame_id, semantic_slot_id, source_id, BLOCKED,
                                            reason=reasons.get(source_id, "blocked")))
             return
-        cands = tuple(candidates)
+        cands = tuple(sorted(set(candidates)))
         if not applicable:
             out.append(CandidateSourceTrace(frame_id, semantic_slot_id, source_id, NOT_APPLICABLE,
                                            reason=na_reason or f"source {source_id} not applicable"))

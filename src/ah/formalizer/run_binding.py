@@ -4,6 +4,13 @@ from threading import RLock
 from copy import deepcopy
 from .canonical_ledger import digest
 
+class InputConflict(ValueError):
+    """An immutable source revision was reused for different input bytes."""
+    def __init__(self, reason):
+        self.reason=reason
+        super().__init__('INPUT_CONFLICT: '+reason)
+
+
 class InterpretationRunBinding:
     def __init__(self, journal=None):
         self._journal = journal
@@ -47,6 +54,19 @@ class InterpretationRunBinding:
     def acquire(self, owner, observation_id, version, snapshot_hash='', snapshot_data=None):
         with self._lock, (self._journal.atomic() if self._journal else nullcontext()):
             self._refresh(); key=(observation_id,version)
+            # The cross-version source check shares the durable append lock.
+            # Checking it only in interpret_full would race when two fresh
+            # interpretation versions claim one revision with different text.
+            if isinstance(snapshot_data,dict) and 'text' in snapshot_data:
+                revision=snapshot_data.get('source_revision',snapshot_data.get('revision',1))
+                prior=[value for (oid,_),value in self._inputs.items()
+                       if oid==observation_id and isinstance(value,dict) and 'text' in value]
+                if any(value.get('source_revision',value.get('revision',1))==revision
+                       and value['text']!=snapshot_data['text'] for value in prior):
+                    raise InputConflict('SOURCE_REVISION_TEXT_CHANGED')
+                if key not in self._bindings and prior and revision<max(
+                        value.get('source_revision',value.get('revision',1)) for value in prior):
+                    raise InputConflict('SOURCE_REVISION_REGRESSED')
             if key in self._reservations and self._reservations[key]!=owner: return False
             current=self._bindings.get(key)
             if current is not None:

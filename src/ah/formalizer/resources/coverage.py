@@ -39,3 +39,20 @@ def validate_coverage(report,content_sha256,resources):
     else:
         if not isinstance(report.get('execution_coverage'),dict) or not report.get('evidence_artifacts'):
             raise ValueError('execution coverage requires measured artifact refs')
+
+
+def summarize_outcomes(outcomes, *, surface_only=0):
+    """Count semantic execution outcomes separately from lexical/surface storage.
+
+    This summary cannot grant G5: reviewed admissibility, candidate recall,
+    false-fact counts and a fixed independent corpus are separate evidence.
+    """
+    kinds={'FULL_CANONICAL','OPEN_LEXICAL','PARTIAL','NONE'}
+    if (not isinstance(outcomes,dict) or set(outcomes)!=kinds
+            or any(type(n) is not int or n<0 for n in outcomes.values())
+            or type(surface_only) is not int or surface_only<0 or surface_only>sum(outcomes.values())):
+        raise ValueError('invalid execution coverage counts')
+    candidates=outcomes['FULL_CANONICAL']+outcomes['OPEN_LEXICAL']
+    return {'outcomes':dict(outcomes),'input_count':sum(outcomes.values()),
+            'surface_only_count':surface_only,
+            'semantic_success_count':max(0,candidates-surface_only)}

@@ -18,7 +18,7 @@ def solve_aggregate(engine,adapter,ledger,goal,query,workspace,attention,context
     signature=pattern_signature(goal.pattern)
     certs=[]
     paths=ledger.paths()
-    if release is not None and release.sha256==goal.resource_snapshot and not context.is_counterfactual():
+    if release is not None and release.sha256==goal.resource_snapshot and not context.is_counterfactual() and not goal.source_scope:
         release.assert_integrity()
         certs=[c for c in release.resources.get('CountDomain',{}).get('entries',())
                if c['pattern_signature']==signature and c['count_unit']==goal.count_unit

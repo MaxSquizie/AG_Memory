@@ -186,7 +186,7 @@ def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime
     lower=max(len(rows),claimed_lower or 0); refs=tuple(dict.fromkeys((*refs,*bound_refs)))
     release=getattr(adapter,'resource_release',None); complete=False; closure_mode='ENUMERATED'
     window=[goal.temporal_point,goal.temporal_point] if goal.temporal_point is not None else list(goal.temporal_window) if goal.temporal_window is not None else None
-    if release is not None and release.sha256==goal.resource_snapshot and not context.is_counterfactual():
+    if release is not None and release.sha256==goal.resource_snapshot and not context.is_counterfactual() and not goal.source_scope:
         paths=ledger.paths(); release.assert_integrity()
         for cert in release.resources.get('FormulaDomainCertificate',{}).get('entries',()):
             if (cert['pattern_signature']==signature and cert['count_variable']==goal.variables[0]

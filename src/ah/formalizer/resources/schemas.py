@@ -41,6 +41,16 @@ READ = obj(('read_id', 'lemma', 'snapshot_version'), {'read_id': S, 'lemma': S, 
     'sense_id': S, 'value_id': S, 'fact_ref': S, 'ground_type': enum('C', 'W'), 'provenance': O,
     'premise_support_refs': array(), 'binding_refs': array()})
 RESOURCE_SCHEMAS = {
+    'R1': obj(('surface','lemma','POS','case','gender','number','person','tense','animacy','score','source_tag'), {
+        'surface':S,'lemma':{'type':['string','null']},'POS':{'type':['string','null']},
+        **{k:{'type':['string','null']} for k in ('case','gender','number','person','tense','animacy')},
+        'score':{'type':'number','minimum':0,'maximum':1},'source_tag':S}),
+    'R-WK': obj(('record_id','subject_type','predicate','object','polarity','provenance'), {
+        'record_id':S,'subject_type':S,'predicate':S,'object':{},'polarity':B,'provenance':O,
+        'validity_interval':{'type':['array','null'],'items':{'type':'number'},'minItems':2,'maxItems':2}}),
+    'EvidencePriorityPolicy': obj(('domain','source_order','conflict_rule','no_auto_winner_conditions'), {
+        'domain':S,'source_order':array(enum('O','C','W','R','D','M','A','P'),minimum=1),
+        'conflict_rule':S,'no_auto_winner_conditions':array(S)}),
     'MeasureSchema': obj(('measure_id','template_ref','subject_role','value_role','numeric_property','unit','version'), {
         'measure_id':S,'template_ref':S,'subject_role':S,'value_role':S,'numeric_property':S,'unit':S,'version':S,
         'literal_syntax':enum('INTEGER','DECIMAL_DOT','DECIMAL_COMMA')}),
@@ -125,6 +135,9 @@ def validate_resources(resources):
         if kind not in RESOURCE_SCHEMAS:
             raise ValueError('RESOURCE_SCHEMA_UNREGISTERED:' + kind)
         validator = Draft202012Validator(RESOURCE_SCHEMAS[kind])
+        from ..canonical_ledger import digest
+        if len({digest(e) for e in resource['entries']}) != len(resource['entries']):
+            raise ValueError('duplicate resource entry:'+kind)
         for i, entry in enumerate(resource['entries']):
             errors = list(validator.iter_errors(entry))
             if errors:

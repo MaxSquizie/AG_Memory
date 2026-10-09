@@ -264,6 +264,8 @@ class Decision:
     candidates: tuple[str, ...]  # admissible closed set for THIS decision (schema rule, rev8)
     selected: tuple[str, ...] = ()  # selector pick; PROVISIONAL until T4 joint validation
     selector_outcome: str | None = None  # protocol outcome (NONE_FIT vs INSUFFICIENT_CONTEXT both select nothing)
+    machine_state: str = "OPEN"  # V7 fixation state, independent from semantic outcome
+    search_complete: bool | None = None  # explicit bounded search receipt, None for legacy callers
     lifecycle: str = "OPEN"  # OPEN -> PROVISIONAL -> COMMITTED (T5 grants COMMITTED)
     outcome: str | None = None  # semantic outcome; granted by T4 only
     grounds: list[Ground] = field(default_factory=list)
@@ -314,6 +316,7 @@ class FormalizationState:
     reference_candidates: list[ReferenceCandidate] = field(default_factory=list)  # TD [H2]
     linked_alternatives: list[LinkedAlternative] = field(default_factory=list)  # I29
     memory_mentions: tuple[str, ...] = ()  # journal window input (V5 §17.4/H5): declared, versioned
+    machine_state: str = "OPEN"  # InterpretationVersion state
     structural_closed: bool = False  # I30 [Rev16]: set after TD+T2; T3/T4 must not add structure
     seal_snapshot_id: str | None = None  # WP1.1/§4.3: identity of the frozen structural snapshot
     structural_hash: str | None = None  # WP1.1/§4.3: deterministic hash of the frozen set (replay)
@@ -355,10 +358,32 @@ class FormalizationState:
     def has_diag(self, code: str) -> bool:
         return any(d.code == code for d in self.diagnostics)
 
+    def complete_t4(self) -> None:
+        """Finalize interpretation states after resolution, without committing.
+
+        Non-resolved decisions retain PROVISIONAL so their recorded outcome is
+        replayable. Only a resolved fragment may proceed to C/T5; a budget
+        interruption freezes that decision rather than choosing a survivor.
+        """
+        for decision in self.decisions.values():
+            if decision.lifecycle == 'COMMITTED':
+                decision.machine_state = 'COMMITTED'
+            elif decision.outcome == 'RESOLVED':
+                decision.machine_state = 'RESOLVED_LOCAL'
+            elif decision.outcome == 'COMPUTATION_LIMIT':
+                decision.machine_state = 'FROZEN'
+            elif decision.lifecycle == 'PROVISIONAL' or decision.outcome is not None:
+                decision.machine_state = 'PROVISIONAL'
+        if any(d.outcome == 'RESOLVED' for d in self.decisions.values()):
+            self.machine_state = 'RESOLVED'
+        elif self.structural_closed:
+            self.machine_state = 'SEALED'
+
     def close_structures(self) -> None:
         """I30 [Rev16]: called after TD+T2. From this point T3/T4 may only DECIDE over
         existing structural objects; creating new ones is a contract violation."""
         self.structural_closed = True
+        self.machine_state = "SEALED"
 
     def require_structures_open(self, stage: str) -> None:
         if self.structural_closed:

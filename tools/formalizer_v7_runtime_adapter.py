@@ -98,14 +98,27 @@ class Session:
             if isinstance(child,str):emit('MATERIALIZE_USAGE_LINK',{'link_id':'usage:'+digest([child,uid,pos,'OPERATOR']),'kind':'OPERATOR','node_ref':child,'parent_ref':uid,'position':pos})
         self.formulas[digest(formula)]=uid;return uid,ck,prop,polarity
 
-    def prepare(self,batch,formulas,windows=None,grounds=('O',),rules=(),extra_windows=None):
+    def prepare(self,batch,formulas,windows=None,grounds=('O',),rules=(),extra_windows=None,typed_bindings=False,write_rx=False):
         tag=['oracle:'+batch,1];ops=[];roots=[];supports=[];assertions=[]
         entries=list(formulas.items()) if isinstance(formulas,dict) else [(batch+':F'+str(i),f) for i,f in enumerate(formulas)]
         for i,(fragment,formula) in enumerate(entries):
             uid,ck,prop,polarity=self.tree(formula,fragment,ops);roots.append(uid)
+            binding_ids=[]
+            if typed_bindings:
+                entity_ids=[]
+                def mentions(value):
+                    if isinstance(value,dict):
+                        if 'entity' in value:entity_ids.append('fixture:M:'+digest(value['entity']))
+                        for child in value.values():mentions(child)
+                    elif isinstance(value,list):
+                        for child in value:mentions(child)
+                mentions(formula)
+                for entity_id in sorted(set(entity_ids)):
+                    bid='fixture:binding:'+digest([tag,fragment,entity_id]);binding_ids.append(bid)
+                    ops.append(StoreOp('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':'mention:'+digest([fragment,entity_id]),'target_ref':entity_id,'source_tag':tag,'premise_support_refs':[]},(fragment,)))
             for ground in grounds:
                 sid='fixture:support:'+digest([tag,fragment,uid,ground]);supports.append(sid)
-                ops.append(StoreOp('ADD_ROOT_SUPPORT',{'record_id':sid,'conclusion_ref':uid,'kind':'ROOT','ground_type':ground,'source_tag':tag},(fragment,)))
+                ops.append(StoreOp('ADD_ROOT_SUPPORT',{'record_id':sid,'conclusion_ref':uid,'kind':'ROOT','ground_type':ground,'source_tag':tag,'binding_refs':binding_ids},(fragment,)))
                 reg=windows[i] if windows else None
                 if reg:
                     aid='fixture:assertion:'+digest([sid,reg]);assertions.append(aid)
@@ -114,6 +127,8 @@ class Session:
                 aid='fixture:assertion:'+digest([sid,extra]);assertions.append(aid)
                 ops.append(StoreOp('ADD_TIME_ASSERTION',{'assertion_id':aid,'target_ref':uid,'support_record_id':sid,'region':extra,'anchor':None,'provenance':{'source':{'kind':'OBSERVATION','source_tag':tag},'support':{'kind':'ROOT'}}},(fragment,)))
             ops.append(StoreOp('DECLARE_FRAGMENT',{'fragment_id':fragment,'node_ref':uid,'content_key':ck,'proposition':prop,'polarity':polarity,'region':windows[i] if windows else None,'source_tag':tag,'incompatibility_rules':list(rules)},(fragment,)))
+            if write_rx:
+                ops.append(StoreOp('WRITE_COMMITTED_RX',{'record_id':'fixture:rx:'+digest([tag,fragment]),'source_tag':tag,'support_record_id':sid,'resource_snapshot':{'snapshot_id':self.release.sha256,'release_version':self.release.manifest['version']},'stages':{'T3':{'priorities':{}}}},(fragment,)))
         merged={}
         for op in ops:
             key=(op.op_type,digest(op.payload))
@@ -240,16 +255,29 @@ class Session:
             elif p['change']=='support':
                 _,sids,aids=self.prepare('other-premises',[root,not_root],[W,V]);self.commit('other-premises')
                 again=replace(again,premise_support_ids=tuple(sids),temporal_premise_assertion_refs=tuple(aids))
+            elif p['change']=='rule':
+                # A changed rule must still pass the registered rule/form
+                # checker. This stimulus intentionally does not invent a
+                # second admissible rule over an OR+NOT pair.
+                again=replace(again,rule_id='MODUS_PONENS')
+            elif p['change']=='conclusion':
+                alternate=self.formulas[digest(not_root['operands'][0])]
+                again=replace(again,conclusion_ref=alternate,conclusion_ops=(),conclusion_signature=digest(self.store.ledger.data['nodes'][alternate]['proposition']))
             before_nodes=set(self.store.ledger.data['nodes']);before_times=set(self.store.ledger.data['assertions'])
             second=execute(self.store,again);L=self.store.ledger
             derived=list(s for s in L.data['supports'].values() if s['kind']=='DERIVED')
             times=[a for aid,a in L.data['assertions'].items() if aid not in before_times]
             new_nodes=set(L.data['nodes'])-before_nodes
-            mode_ok=second['conclusion_ref']==first['conclusion_ref'] if second['outcome']=='APPLIED_NOOP' or p['mode']=='STATE' else second['conclusion_ref']!=first['conclusion_ref']
+            mode_ok=second.get('conclusion_ref')==first['conclusion_ref'] if second['outcome']=='APPLIED_NOOP' or p['mode']=='STATE' else second.get('conclusion_ref')!=first['conclusion_ref']
             match=all(L.data['supports'][a['support_record_id']]['conclusion_ref']==a['target_ref'] for a in times)
             same=all(self.decode(s['formula_ref'])==self.decode(s['conclusion_ref']) for s in derived)
             self.api.add('goal_channel.execute four-component dedup / request-window independence')
-            return {**self.snapshot(),'goal':{'outcome':second['outcome'],'created_path':second['created']},'store':{**self.snapshot()['store'],'new_occurrence_count':len(new_nodes)},'time_assertions':{'new_count':len(times)},'derived':{'target_matches_mode':mode_ok,'time_target_matches_support':match,'formula_ref_matches_content':same}}
+            stimulus={'changed_form_licensed':second['outcome'] in {'APPLIED','APPLIED_NOOP'}}
+            if p['change'] in {'rule','conclusion'} and second['outcome']=='ABORTED':
+                stimulus.update(baseline_valid=True,mutation_contract_valid=False,
+                    defect='MUTATED_RULE_OR_CONCLUSION_HAS_NO_LICENSED_FORM_OVER_AUTHORED_PREMISES',
+                    validation_reason=second.get('reason'))
+            return {**self.snapshot(),'goal':{'outcome':second['outcome'],'created_path':second['created'],'reason':second.get('reason')},'store':{**self.snapshot()['store'],'new_occurrence_count':len(new_nodes)},'time_assertions':{'new_count':len(times)},'derived':{'target_matches_mode':mode_ok,'time_target_matches_support':match,'formula_ref_matches_content':same},'stimulus':stimulus}
         if action=='query_time':
             roots,_,_=self.prepare('query',[p['formula']],[witness(p['witness'])]);self.commit('query')
             uid=roots[0]
@@ -298,16 +326,43 @@ class Session:
             return self.snapshot()
         if action=='execute_head_calls':
             batches=list(self.batches)
-            for i in p['call_order']:self.commit(batches[i-1])
+            boundary=p.get('crash_at','NONE')
+            if boundary=='BEFORE_T6':return self.snapshot()
+            class Stop(Exception):pass
+            previous=self.store._finish_batch
+            if boundary=='AFTER_MARKER_BEFORE_APPLIED':self.store._finish_batch=lambda *args:(_ for _ in ()).throw(Stop())
+            try:
+                for i in p['call_order']:
+                    result=self.commit(batches[i-1])
+                    if boundary=='AFTER_FIRST_COMMIT' and result.outcome.value=='APPLIED':break
+            except Stop:pass
+            finally:self.store._finish_batch=previous
+            self.api.add('AHStoreAdapter._finish_batch interrupted after atomic marker+COMMIT_DECISION')
             return self.snapshot()
         if action=='crash':return self.snapshot()
         if action=='recover':
             restored=self.store._codec.import_payload(deepcopy(self.bootstrap),uid_generator=self.core.uid).core
-            self.store=AHStoreAdapter(restored.store,JournalChannel(self.path),restored);self.store.recover_from_head();self.api.add('AHStoreAdapter.recover_from_head / JsonPersistence.import_payload')
+            self.store=AHStoreAdapter(restored.store,JournalChannel(self.path),restored);self.core=restored
+            decided=set(self.store.ledger.data['decisions']);previous=self.store.commit_transaction
+            def observe(ops,marker,decision,*args,**kwargs):
+                if decision.batch_hash in decided:self.repeated_admission_count=getattr(self,'repeated_admission_count',0)+1
+                return previous(ops,marker,decision,*args,**kwargs)
+            self.store.commit_transaction=observe
+            try:self.store.recover_from_head()
+            finally:self.store.commit_transaction=previous
+            self.api.add('AHStoreAdapter.recover_from_head / JsonPersistence.import_payload / admission-call observer')
             return self.snapshot()
         if action=='numeric_scope_literal':
             try:CountLiteral(p['literal']);accepted=True
             except (TypeError,ValueError):accepted=False
+            if p.get('source')=='MODEL_NUMBER_ONLY':
+                from ah.formalizer.tp_proposer import StructureProposalRequest,parse_and_validate
+                from ah.formalizer.selection_protocol import ProtocolError
+                request=StructureProposalRequest('numeric-source','fixture',('t0',),allowed_node_kinds=frozenset({'NUMERAL'}))
+                proposed={'hypotheses':[{'local_id':'number','nodes':[{'kind':'NUMERAL','anchor_spans':['t0'],'value':p['literal']}],'alignment':['t0']}]}
+                try:parse_and_validate(request,json.dumps(proposed))
+                except (ProtocolError,ValueError):accepted=False
+                self.api.add('tp_proposer.parse_and_validate raw-only NUMERAL value boundary')
             self.api.add('CountLiteral validation')
             return {**self.snapshot(),'literal':{'accepted':accepted},'store':{**self.snapshot()['store'],'fictitious_entity_count':len(self.entities)},'usage':{'nonproposition_link_count':len(self.store.ledger.data['usage_links'])}}
         if action=='function_identity':
@@ -342,12 +397,14 @@ class Session:
     def templates_list(self):return [{'predicate':k[0],'roles':list(k[1]),**v} for k,v in sorted(self.templates.items())]
 
 _SOURCE=None
-def source_snapshot():
+def source_snapshot(*, refresh=False):
     global _SOURCE
-    if _SOURCE is None:
+    if _SOURCE is None or refresh:
         root=Path(__file__).resolve().parents[1]
         paths=[*sorted((root/'src/ah').rglob('*.py')),*sorted((root/'tools').glob('*formalizer_v7*.py'))]
-        _SOURCE={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+        current={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+        if refresh:return current
+        _SOURCE=current
     return _SOURCE
 
 

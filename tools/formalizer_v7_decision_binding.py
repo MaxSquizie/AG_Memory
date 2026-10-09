@@ -24,7 +24,7 @@ def decision_action(s,a,p):
         if not p['source_complete']:d.source_traces[-1]=CandidateSourceTrace('F','predicate_value',5,'BLOCKED',reason='source incomplete')
         if p['each_value_has_positive_ground']:d.grounds=[Ground('R','fixture value-specific evidence',value) for value in ids]
         schema=DecisionSchema('fixture',{cid:Relation(cid,cid,2,('SUBJECT','OBJECT'),cid) for cid in ids})
-        state.decisions['F|predicate_value']=d;t4(state,schema)
+        d.search_complete=p['search_complete'];state.decisions['F|predicate_value']=d;t4(state,schema)
         s.api.add('pipeline.t4 joint candidate/value-ground/source-completeness validation')
         return {'decision':{'outcome':d.outcome,'materializable':d.outcome=='RESOLVED','source_complete':not any(x.status=='BLOCKED' for x in d.source_traces),'search_complete':bool(d.selector_outcome)},'diagnostics':{'codes':[x.code for x in state.diagnostics]}}
     if a=='non_factual_path':
@@ -43,11 +43,11 @@ def decision_action(s,a,p):
         # the failure ensures rollback cannot appear successful by no-op.
         ops.insert(0,StoreOp('ENSURE_ENTITY',{'uid':'rollback:M','name':'rollback entity'},d.committed))
         if p.get('create_open_t_first'):
-            ops.insert(1,StoreOp('ENSURE_OPEN_TEMPLATE',{'uid':'rollback:T','predicate_form':'fixture-open','semantic_status':'UNLINKED','roles':['SUBJECT']},d.committed))
+            ops.insert(1,StoreOp('ENSURE_TEMPLATE',{'uid':'rollback:T','predicate_form':'fixture-open','semantic_status':'UNLINKED','roles':['SUBJECT']},d.committed))
         if fault=='unknown_g':ops.append(StoreOp('ENSURE_FUNCTION',{'uid':'bad:G','function_id':'FOREIGN','operands':roots},d.committed))
         elif fault=='unknown_L':ops.append(StoreOp('ENSURE_LINK',{'uid':'bad:L','link_type':'FOREIGN','source_ref':roots[0],'target_ref':roots[0]},d.committed))
         elif fault=='open_role_mismatch':
-            ops.append(StoreOp('ENSURE_NODE',{'uid':'bad:N','template_ref':s.templates[('LOCATIVE',('LOCATION','THEME'))]['uid'],'actants':{'FOREIGN_ROLE':'rollback:M'},'content_key':'bad','identity_key':['bad']},d.committed))
+            ops.append(StoreOp('ENSURE_NODE',{'uid':'bad:N','template_ref':'rollback:T','actants':{'OBJECT':'rollback:M'},'content_key':'bad','identity_key':['bad']},d.committed))
         else:
             provenance={'source':{'kind':'OBSERVATION','source_tag':tag},'support':{'kind':'ROOT'}}
             if fault=='GOAL_RUN_ROOT':provenance['source']={'kind':'GOAL_RUN','goal_run_id':'foreign'}

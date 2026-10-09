@@ -98,6 +98,7 @@ def test_binding_refuses_gold_checks(tmp_path):
 def test_agreement_fixture_preserves_distinct_known_values(tmp_path,feature):
     s=Session([],tmp_path/'agreement.log')
     result=s.action('morph_agreement',{'feature':feature,'left':'known_a','right':'known_b'})
-    assert result['constraint']['result'] is False
+    assert result['constraint']['result']=='FALSE'
+    assert result['constraint']['raw_result'] is False
     result=s.action('morph_agreement',{'feature':feature,'left':'UNKNOWN','right':'KNOWN'})
     assert result['constraint']['result']=='UNKNOWN'

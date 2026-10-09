@@ -639,4 +639,5 @@ def run_native(text,selector,release,observation,morph=None):
             bindings = ', '.join(role+'='+evidence[tid].span for tid, role in sorted(spec['roles'].items()))
             options.append({'candidate_id': cid, 'label': spec['label'] + ('; '+bindings if bindings else '')})
         offer(state, f.frame_id+'|predicate_value', 'SEMANTIC', f.anchor_span, options)
+    state.complete_t4()
     return state
