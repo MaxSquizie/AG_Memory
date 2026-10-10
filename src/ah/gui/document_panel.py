@@ -41,9 +41,9 @@ class DocumentPanelWidget(QWidget):
         title.setStyleSheet("font-size: 15px; font-weight: 600;")
         layout.addWidget(title)
         intro = QLabel(
-            "Полный проход: chunks → perception → единый DOCUMENT batch → canonical AH. "
-            "Summary получает только bounded source-scoped AgentContext slices; raw chunks "
-            "в Agent LLM не передаются."
+            "Один произвольный файл → дерево областей → формализатор V7 и Ignition. "
+            "Модель отвечает на короткие пробы. В отчёте — реальные решения и пробелы, "
+            "без сравнения со старым ораклом. Границы абзацев не разрешают независимый коммит."
         )
         intro.setWordWrap(True)
         layout.addWidget(intro)
@@ -55,7 +55,7 @@ class DocumentPanelWidget(QWidget):
         browse = QPushButton("Выбрать…")
         browse.clicked.connect(self._browse)
         row.addWidget(browse)
-        self.ingest_button = QPushButton("Загрузить в AH")
+        self.ingest_button = QPushButton("Разобрать файл в AH")
         self.ingest_button.clicked.connect(self._emit_ingest)
         row.addWidget(self.ingest_button)
         layout.addLayout(row)
@@ -163,6 +163,40 @@ class DocumentPanelWidget(QWidget):
         self.summary_view.clear()
         self.activate_button.setEnabled(True)
         self.summary_button.setEnabled(True)
+
+    def set_reading_progress(self, event) -> None:
+        stage = event.get('stage', event['event'])
+        self.status.setText(
+            f"{stage} · {event.get('elapsed_seconds', 0):.1f} с · "
+            f"пробы: {event.get('probes_finished', 0)}/{event.get('probes_started', 0)}, "
+            f"replay: {event.get('probes_replayed', 0)}")
+        if event['event'] == 'reading':
+            total = event.get('tokens_total', 0)
+            self.progress.setRange(0, max(1, total))
+            self.progress.setValue(event.get('tokens_read', 0))
+            self.coverage_stat.setText(f"Прочитано токенов: {event.get('tokens_read', 0)}/{total}")
+        elif event['event'] == 'stage':
+            self.progress.setRange(0, 0)
+
+    def set_reading_report(self, report) -> None:
+        import json
+        self._source_ref = report.get('source_ref')
+        detail = report.get('interpretation', {})
+        self.file_stat.setText(f"Файл: {report['source_path']}")
+        self.chunk_stat.setText(f"Области: {sum(detail.get('regions_by_kind', {}).values())}")
+        self.coverage_stat.setText(f"Фреймы: {detail.get('frames', 0)} · коммит: {len(detail.get('committed_fragments', []))}")
+        self.source_stat.setText(f"Source: {self._source_ref or '—'}")
+        self.status.setText(f"{report['status']} · {report['elapsed_seconds']:.1f} с. Артефакты: {report['output_dir']}")
+        self.continuation_view.setPlainText(json.dumps({
+            'terminal': detail.get('terminal'), 'error': report.get('error'),
+            'decisions': detail.get('decisions_by_outcome'),
+            'diagnostics': detail.get('diagnostics'), 'stages_seconds': report.get('stages_seconds'),
+            'semantic_correctness': 'NOT_EVALUATED',
+        }, ensure_ascii=False, indent=2))
+        self.context_view.clear()
+        self.summary_view.clear()
+        self.activate_button.setEnabled(self._source_ref is not None)
+        self.summary_button.setEnabled(self._source_ref is not None)
 
     def set_context(self, rendered: str, workspace_refs: tuple[str, ...]) -> None:
         self.context_view.setPlainText(rendered or "AgentContext пуст")

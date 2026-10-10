@@ -105,8 +105,11 @@ def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,obser
     if release is None:
         return InterpretationReport(obs,version,run_id,True,'RESOURCE_MISSING',diagnostics=('RESOURCE_MISSING: signed resource release required',))
     release.assert_integrity()
+    from .telemetry import emit
+    emit("stage", stage="T5_PLAN")
     ops,fragments,diagnostics,nodes=build_plan(state,release,store)
     for d in diagnostics: state.diag(d.split(':',1)[0],d)
+    emit("stage", stage="T6_ADMISSION", fragments=len(fragments), operations=len(ops))
     rep=commit(state,store,run_id=run_id,plan_ops=ops,committed_fragments=fragments)
     D=store.ledger.data['decisions'].get(rep.batch_hash,{})
     actual=set(D.get('committed',()))

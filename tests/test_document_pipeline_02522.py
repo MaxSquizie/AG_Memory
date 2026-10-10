@@ -110,13 +110,16 @@ def test_parse_failure_is_fail_closed_before_any_canonical_batch_write():
     assert services.integration.batches == []
 
 
-def test_ingest_file_uses_file_mtime_as_aware_source_anchor(tmp_path: Path):
+def test_ingest_file_requires_explicit_narrative_time_anchor(tmp_path: Path):
     path = tmp_path / "article.md"
     path.write_text("Материал статьи. " * 30, encoding="utf-8")
     services = fake_services()
     DocumentProcessor(services, max_chunk_chars=256).ingest_file(path)
     timestamp = services.integration.batches[0].source_timestamp
-    assert timestamp is not None and timestamp.tzinfo is not None
+    assert timestamp is None
+    declared = datetime(2025, 1, 2, tzinfo=timezone.utc)
+    DocumentProcessor(services, max_chunk_chars=256).ingest_file(path, source_timestamp=declared)
+    assert services.integration.batches[-1].source_timestamp == declared
 
 
 def _source_services():

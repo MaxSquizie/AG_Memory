@@ -600,6 +600,8 @@ def _bindings(frame,evidence,valency,extra_gaps=()):
 
 
 def run_native(text,selector,release,observation,morph=None,context_reader=None):
+    from .telemetry import emit
+    emit("stage", stage="T0_T1", source_chars=len(text))
     release.assert_integrity()
     state=t0(text); state.source_uid=observation['observation_id']; state.interpretation_version=observation['interpretation_version']; state.observation=dict(observation)
     state.resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
@@ -614,6 +616,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     for ev in state.evidence:
         preferred={(v['lemma'],v['POS']) for x in rx1 if x['surface']==ev.span for v in x['variants']}
         ev.variants=tuple(sorted(ev.variants,key=lambda v:(-int((v.lemma,v.pos) in preferred),-v.score)))
+    emit("stage", stage="T2_REGIONS", tokens=len(state.evidence), regions=len(state.region_forest.regions))
     frozen_generation=observation.get('clarification_generation')
     if frozen_generation:
         from .state import RejectionRecord
@@ -695,6 +698,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
     state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
     state.region_forest.attach_frames(state.frames)
+    emit("stage", stage="CONTEXT", frames=len(state.frames))
     if context_reader is not None:
         arguments={tid for f in state.frames for tid in f.argument_token_refs
                    if tid not in f.semantic.get('bound_arguments',{})}
@@ -719,6 +723,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         context_reader.read(state,{'kind':'READ_REMAINDER','decision_ref':'reading:end',
             'region_ref':root.region_id,'source_range':root.source_range,'cue_token_refs':root.token_refs})
     from .coreference import prepare_references,resolve_references
+    emit("stage", stage="T3_CANDIDATES", frames=len(state.frames))
     reference_slots=prepare_references(state,release)
     evidence={e.token_id:e for e in state.evidence}
     candidate_specs={}
@@ -816,6 +821,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         for code in temporal_diag: state.diag(code,frame.frame_id)
         frame.semantic['temporal_unresolved']=bool(temporal_diag)
         candidate_specs[frame.frame_id]=specs
+    emit("stage", stage="T4_RESOLUTION", frames=len(state.frames))
     structural_seal(state)
     resolve_references(state,reference_slots,selector,release)
     for f in state.frames:

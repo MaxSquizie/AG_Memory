@@ -63,6 +63,7 @@ from .metrics_panel import MetricsPanelWidget
 
 class WorkerSignals(QObject):
     result = Signal(object)
+    progress = Signal(object)
     error = Signal(str)
     finished = Signal()
 
@@ -690,13 +691,25 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Документ", f"Файл не найден:\n{path}")
             return
         self.document_panel.set_busy(True)
-        self.document_panel.status.setText("Формализатор V7: все chunks → единый DOCUMENT commit…")
-        worker = FunctionWorker(lambda: self.services.document_processor().ingest_file(path))
+        self.document_panel.status.setText("Чтение V7: источник → области → короткие пробы → admission…")
+        from ah.documents.reading import read_document
+        from datetime import datetime
+        from uuid import uuid4
+        out = self.services.config.paths.data_dir / 'document_runs' / (datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + uuid4().hex[:8])
+        worker = FunctionWorker(lambda: read_document(self.services, path, out, progress=worker.signals.progress.emit))
         self._document_ingest_worker = worker
-        worker.signals.result.connect(self._document_ingest_finished)
+        worker.signals.progress.connect(self.document_panel.set_reading_progress)
+        worker.signals.result.connect(self._document_reading_finished)
         worker.signals.error.connect(self._document_operation_error)
         worker.signals.finished.connect(self._document_ingest_worker_finished)
         self.thread_pool.start(worker)
+
+    @Slot(object)
+    def _document_reading_finished(self, report) -> None:
+        self.document_panel.set_reading_report(report)
+        self.canvas.refresh()
+        self._refresh_status(force=True)
+        self.statusBar().showMessage(f"{report['status']}: {report['output_dir']}", 10000)
 
     @Slot(object)
     def _document_ingest_finished(self, result) -> None:

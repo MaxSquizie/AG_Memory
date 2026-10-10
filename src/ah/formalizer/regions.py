@@ -12,6 +12,39 @@ import re
 from .canonical_ledger import digest
 
 
+def delimiter_scopes(text):
+    """Source delimiter constraints, not inferred attitudes or truth grounds.
+
+    Unclosed/mismatched nests conservatively protect their remainder. No word
+    heuristics, model calls, or assertion permissions are derived here.
+    """
+    pairs = {'«': '»', '“': '”', '„': '“', '(': ')', '[': ']', '{': '}', '"': '"'}
+    stack, scopes = [], []
+    for i, char in enumerate(text):
+        if stack and char == pairs[stack[-1][0]]:
+            opening, start = stack.pop()
+            scopes.append({'kind': 'DELIMITER_SCOPE', 'source_range': (start, i+1),
+                           'opening': opening, 'closed': True})
+        elif char in pairs:
+            stack.append((char, i))
+    for opening, start in stack:
+        scopes.append({'kind': 'DELIMITER_SCOPE', 'source_range': (start, len(text)),
+                       'opening': opening, 'closed': False})
+    return sorted(scopes, key=lambda s: (s['source_range'][0], -s['source_range'][1]))
+
+
+def protected_intervals(text):
+    """Disjoint outer intervals for linear-time boundary screening."""
+    merged = []
+    for scope in delimiter_scopes(text):
+        start, end = scope['source_range']
+        if merged and start < merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+        else:
+            merged.append((start, end))
+    return merged
+
+
 @dataclass(frozen=True)
 class TextRegion:
     region_id: str
@@ -42,7 +75,7 @@ class RegionForest:
     def attach_frames(self, frames):
         """Keep every alternative; shared anchors expose transverse dependencies."""
         self.candidates = []
-        self.dependencies = []
+        self.dependencies = [d for d in self.dependencies if d['kind'] == 'DELIMITER_SCOPE']
         owners = {}
         for f in sorted(frames, key=lambda f: f.frame_id):
             region = self.container(*f.source_range)
@@ -75,7 +108,8 @@ def build_regions(text, evidence, source_id):
         return r
 
     root = add('DOCUMENT', 0, len(text), None)
-    starts = [0, *(m.end() for m in re.finditer(r'\n[ \t]*\n+', text))]
+    forest.dependencies.extend(delimiter_scopes(text))
+    starts = [0, *(m.end() for m in re.finditer(r'(?:\r\n|\n|\r(?!\n))[ \t]*(?:\r\n|\n|\r(?!\n))+', text))]
     ends = [*starts[1:], len(text)]
     for start, end in zip(starts, ends):
         if not text[start:end].strip():

@@ -309,11 +309,27 @@ class RuleMatch:
 
 def _windows(state, kind):
     n = len(state.evidence)
+    from .regions import protected_intervals
+    protected_ranges = protected_intervals(state.text)
     if kind == 'CLAUSE' and state.clause_candidates:
-        return sorted({(a, b + 1) for c in state.clause_candidates for a, b in c.segmentation if a <= b})
+        from bisect import bisect_right
+        starts = [s for s, _ in protected_ranges]
+        def interior(offset):
+            j = bisect_right(starts, offset) - 1
+            return j >= 0 and protected_ranges[j][0] < offset < protected_ranges[j][1]
+        return sorted({(a, b + 1) for c in state.clause_candidates for a, b in c.segmentation
+                       if a <= b and not interior(state.evidence[a].start)
+                       and not interior(state.evidence[b].end)})
     windows = []
     start = 0
+    protected = iter(protected_ranges)
+    current = next(protected, None)
     for i, token in enumerate(state.evidence):
+        while current and token.end >= current[1]:
+            current = next(protected, None)
+        inside_delimiter = current is not None and current[0] < token.end < current[1]
+        if inside_delimiter:
+            continue
         if token.span in {'.', '!', '?', ';'}:
             if start < i: windows.append((start, i + 1))
             start = i + 1
@@ -326,6 +342,7 @@ def enumerate_matches(state, rules, stage, policy, release):
     max_matches = policy.get('max_rule_matches', 256)
     steps = 0
     out = []
+    windows_by_kind = {}
     def spend():
         nonlocal steps
         steps += 1
@@ -339,7 +356,10 @@ def enumerate_matches(state, rules, stage, policy, release):
         if rule.get('stage', 'T2' if rule['output_kind'] == 'CANDIDATE_GRAPH' else 'SRL') != stage: continue
         pattern = rule['input_feature_pattern']
         captures = sorted(pattern['captures'])
-        for lo, hi in _windows(state, pattern.get('window', 'SENTENCE')):
+        kind = pattern.get('window', 'SENTENCE')
+        if kind not in windows_by_kind:
+            windows_by_kind[kind] = _windows(state, kind)
+        for lo, hi in windows_by_kind[kind]:
             if hi-lo > policy['max_source_tokens']:
                 trace(rule,'LIMIT','COMPUTATION_LIMIT',window=[lo,hi])
                 raise SearchLimit('COMPUTATION_LIMIT: SyntaxRules source window')

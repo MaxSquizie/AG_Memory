@@ -56,7 +56,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", default="config/default.toml")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    ingest = sub.add_parser("ingest", help="ingest one TXT/MD/DOCX as one atomic DOCUMENT batch")
+    read = sub.add_parser("read", help="read an arbitrary file with native region diagnostics; no oracle")
+    read.add_argument("path")
+    read.add_argument("--out", type=Path, required=True, help="new directory for source, regions, trace and report")
+    read.add_argument("--save", action="store_true")
+    read.add_argument("--time-anchor", help="explicit ISO timestamp with timezone; file mtime is not an anchor")
+
+    ingest = sub.add_parser("ingest", help="ingest one TXT/MD/DOCX through native T6")
     ingest.add_argument("path")
     ingest.add_argument("--title")
     ingest.add_argument("--source-ref")
@@ -126,6 +132,7 @@ def _ingestion_payload(result) -> dict[str, Any]:
         "chunk_count": len(result.chunks),
         "coverage_chars": result.coverage_chars,
         "coverage_ratio": result.coverage_ratio,
+        "coverage_meaning": "SOURCE_SPAN_COVERAGE_NOT_SEMANTIC_CORRECTNESS",
         "chunks": [
             {"index": item.index, "start": item.start, "end": item.end}
             for item in result.chunks
@@ -153,6 +160,22 @@ def main(argv: list[str] | None = None) -> int:
     services = RuntimeServices.build(config)
     if services.llm is not None and not services.llm.is_running:
         services.llm.start()
+
+    if args.command == 'read':
+        from datetime import datetime
+        from .reading import read_document
+        def progress(event):
+            print(json.dumps(event, ensure_ascii=False), flush=True)
+        try:
+            result = read_document(services, args.path, args.out, progress=progress,
+                source_timestamp=datetime.fromisoformat(args.time_anchor) if args.time_anchor else None)
+            if args.save:
+                services.save()
+            _print(result)
+            return 0 if result['status'] == 'EXECUTED' else 1
+        finally:
+            if services.llm is not None:
+                services.llm.stop()
 
     if args.command == "acceptance":
         result = run_document_acceptance(

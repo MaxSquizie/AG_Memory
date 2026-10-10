@@ -15,6 +15,7 @@ from ah.config import IgnitionSettings, ActivationSettings, PlasticitySettings, 
 from ah.ignition.engine import IgnitionEngine
 from ah.model import RuntimeState
 from .canonical_ledger import digest
+from .telemetry import emit
 
 
 class ContextReadError(ValueError):
@@ -161,6 +162,9 @@ class AttentionContextReader:
                 self.engine.tick(include_pacemaker=False)
                 self.read_token_refs.add(tid)
                 events.append({'kind': 'READ_TOKEN', 'source_ref': tid})
+                if len(self.read_token_refs) % 128 == 0:
+                    emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
+            emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             if request['kind'] == 'REFERENCE':
                 # A goal redistributes existing excitation; it injects no new
                 # semantic evidence and gives no fresh independent seed.

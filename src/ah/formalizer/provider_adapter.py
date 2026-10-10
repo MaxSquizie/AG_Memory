@@ -16,6 +16,7 @@ Contract points enforced here:
 from __future__ import annotations
 
 import hashlib
+from .telemetry import emit
 from dataclasses import dataclass, field
 
 
@@ -115,6 +116,7 @@ class ProviderAdapter:
                 cost = max(1,(len(prompt)+len(raw))//4)
                 self._check_tokens(cost)
                 self._tokens_used += cost
+                emit("probe_replayed", run_id=run_id, ordinal=ordinal, capability=capability)
                 return raw
             if old['state']=='FAILED':
                 # A durable failed exchange is part of this run's history too.
@@ -125,14 +127,17 @@ class ProviderAdapter:
         self._check_tokens(max(1,len(prompt)//4))
         cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=self.params_hash,prompt=prompt)
         started = time.monotonic()
+        emit("probe_started", run_id=run_id, ordinal=ordinal, capability=capability, prompt_chars=len(prompt))
         try:
             raw = self.transport(prompt)
             if not isinstance(raw,str): raise TypeError('provider response must be text')
         except Exception as exc:
             self._log.failed(cid,error=str(exc))
+            emit("probe_failed", run_id=run_id, ordinal=ordinal, error=type(exc).__name__, elapsed_ms=(time.monotonic()-started)*1000)
             self._tokens_used += max(1,len(prompt)//4)
             raise ProviderUnavailable(f'provider {self.name!r} call failed') from exc
         self._log.received(cid,response_digest=self._digest(raw),raw_response=raw,response_time_ms=(time.monotonic()-started)*1000)
+        emit("probe_finished", run_id=run_id, ordinal=ordinal, response_chars=len(raw), elapsed_ms=(time.monotonic()-started)*1000)
         cost = max(1,(len(prompt)+len(raw))//4)
         self._check_tokens(cost)
         self._tokens_used += cost

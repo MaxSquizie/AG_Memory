@@ -91,7 +91,7 @@ def test_regions_keep_all_tokens_and_cross_boundary_candidates():
     forest.attach_frames(frames)
     assert len(forest.candidates)==2
     assert {c['region_ref'] for c in forest.candidates}=={forest.regions[0].region_id}
-    assert forest.dependencies[0]['candidate_refs']==['F1','F2']
+    assert next(d for d in forest.dependencies if d['kind']=='SHARED_ANCHOR')['candidate_refs']==['F1','F2']
     assert forest.to_dict()==build_and_attach(state,frames)
 
 

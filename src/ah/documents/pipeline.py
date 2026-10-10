@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 import hashlib
 from pathlib import Path
 import re
@@ -96,9 +96,10 @@ class DocumentSummary:
 class DocumentProcessor:
     """Ingest and project a whole document without raw-text response shortcuts.
 
-    Chunks are source observations. Native V7 commits each window through T6;
-    one ``FormalizationBatch(DOCUMENT)`` then joins their receipts into the H
-    carrier without a second world write. Legacy staging is separate.
+    Native V7 preserves the whole source as one observation until a proved
+    partial-commit frontier exists. ``FormalizationBatch(DOCUMENT)`` attaches its
+    receipt to the H carrier without a second world write. Legacy chunk staging
+    is separate; it is not the native reading-region contract.
     Summary input is frozen AH projection, never
     raw source or raw chunks. Large-source summarization advances over deterministic
     source-scope slices and aggregates only model results produced from those
@@ -126,7 +127,9 @@ class DocumentProcessor:
             raise FileNotFoundError(source)
         suffix = source.suffix.casefold()
         if suffix in {".txt", ".md", ".markdown", ".text"}:
-            return source.read_text(encoding="utf-8-sig")
+            # Text offsets must name the actual decoded source, including CRLF.
+            with source.open(encoding="utf-8-sig", newline="") as stream:
+                return stream.read()
         if suffix == ".docx":
             try:
                 from docx import Document
@@ -251,28 +254,39 @@ class DocumentProcessor:
             )
         if source_timestamp is not None and source_timestamp.tzinfo is None:
             raise ValueError("source_timestamp must be timezone-aware")
-        source_text = text.replace("\r\n", "\n").replace("\r", "\n")
-        chunks = self.chunk_text(source_text)
+        native = bool(getattr(perception, 'native_available', False))
+        source_text = text if native else text.replace("\r\n", "\n").replace("\r", "\n")
+        if not source_text.strip():
+            raise DocumentProcessingError("Document text is empty")
+        # A punctuation cut is a reading-window proposal, not permission to
+        # assert its contents independently of the enclosing quote/operator.
+        # Until a proved commit frontier exists, V7 owns the entire observation.
+        chunks = ((DocumentChunk(0, source_text, 0, len(source_text)),)
+                  if native else self.chunk_text(source_text))
         source_ref = source_ref or self.source_id(source_text, title)
 
         completion = TemplateCompletionService(self.services.integration, perception)
         units: list[PerceptionResult] = []
-        # Native source IDs and ranges remain stable across repeat ingestion;
-        # each window is its own durable observation, not a legacy batch fact.
+        from ah.formalizer.telemetry import emit
+        emit('document_started', source_ref=source_ref, source_chars=len(source_text),
+             observations=len(chunks), boundary_policy='WHOLE_SOURCE' if native else 'LEGACY_CHUNKS')
         for chunk in chunks:
-            if getattr(perception, 'native_available', False):
-                declared = {'source_id': source_ref, 'revision': self.source_id(source_text, title),
+            if native:
+                declared = {'source_id': source_ref, 'source_revision': 1, 'batch_kind': 'DOCUMENT',
                             'range': [chunk.start, chunk.end]}
                 if source_timestamp is not None:
                     declared['time_anchor'] = source_timestamp.isoformat()
                 from ah.formalizer.canonical_ledger import digest
-                oid = 'observation:' + digest([source_ref, declared['revision'], declared['range']])
+                oid = 'observation:' + digest([source_ref, declared['range']])
                 original = perception._formalizer._binding.input_snapshot(oid, 1)
                 if original is not None:
                     if original['text'] != chunk.text or source_timestamp is not None and original.get('time_anchor') != declared['time_anchor']:
                         raise DocumentProcessingError('DOCUMENT_REPLAY_INPUT_CHANGED: use a declared reinterpretation')
                     declared = original
-                unit = perception.perceive(chunk.text, self.services.context, raw_input=declared)
+                # Serialize the attention snapshot, parse, commit and receipt
+                # with other operations on the same live runtime.
+                with self.services.operation_lock:
+                    unit = perception.perceive(chunk.text, self.services.context, raw_input=declared)
             else:
                 unit = perception.parse(chunk.text, self.services.context)
             units.append(completion.complete(unit))
@@ -285,14 +299,21 @@ class DocumentProcessor:
             unit_offsets=tuple(chunk.start for chunk in chunks),
             source_timestamp=source_timestamp,
         )
+        emit('stage', stage='DOCUMENT_CARRIER')
         with self.services.operation_lock:
             commit = self.services.integration.integrate_external_batch(
                 batch,
                 self.services.context,
                 plan_transform=self._resolve_batch_discourse_refs,
             )
-            self.services.ignition.apply_seed_requests(commit.activation_seeds)
-            self.services.ignition.apply_refutation_requests(commit.refutations)
+            # Native event reading already advanced focus in source order.
+            # Bulk priming the whole document here would reactivate old pages.
+            event_read = native and perception._formalizer._ignition is not None and perception._formalizer._ignition.settings.clock_mode == 'event'
+            if not event_read:
+                self.services.ignition.apply_seed_requests(commit.activation_seeds)
+                self.services.ignition.apply_refutation_requests(commit.refutations)
+
+        emit('document_finished', source_ref=source_ref, observations=len(chunks))
 
         return DocumentIngestionResult(
             source_ref=source_ref,
@@ -312,8 +333,8 @@ class DocumentProcessor:
         source_timestamp: datetime | None = None,
     ) -> DocumentIngestionResult:
         source = Path(path)
-        if source_timestamp is None:
-            source_timestamp = datetime.fromtimestamp(source.stat().st_mtime, tz=timezone.utc)
+        # File modification time is not the narrative's temporal anchor. The
+        # caller can supply an explicit anchor; otherwise runtime context is used.
         return self.ingest_text(
             self.load_text(source),
             title=title if title is not None else source.stem,
