@@ -101,7 +101,7 @@ class AHStoreAdapter(Store):
         current = self._store._state.formalizer_state.get('wal_seq',0)
         if current>self._journal.read_global_head():
             raise JournalIntegrityError('INTEGRITY_ERROR: snapshot is ahead of its journal')
-        for r in self._journal.scan_unprocessed(current):
+        for r in self._journal.scan_unprocessed(current, payload_kinds={'canonical_unit'}):
             p=r['payload']
             if p.get('kind') != 'canonical_unit':
                 continue
@@ -129,7 +129,7 @@ class AHStoreAdapter(Store):
 
     def _terminal_records(self):
         out={}
-        for r in self._journal.scan_unprocessed(0):
+        for r in self._journal.scan_unprocessed(0, payload_kinds={'canonical_unit','terminal'}):
             p=r['payload']
             t=p.get('terminal') if p.get('kind')=='canonical_unit' else p if p.get('kind')=='terminal' else None
             if t:
@@ -143,7 +143,7 @@ class AHStoreAdapter(Store):
         terminals=self._terminal_records()
         committed=set(self.ledger.data['decisions'])
         found={}
-        for r in self._journal.scan_unprocessed(0):
+        for r in self._journal.scan_unprocessed(0, payload_kinds={'BATCH'}):
             p=r['payload']
             if p.get('kind')=='BATCH' and 'batch:'+p['batch_hash'] not in terminals and p['batch_hash'] not in committed:
                 found.setdefault(p['batch_hash'],r)
@@ -197,7 +197,7 @@ class AHStoreAdapter(Store):
         """Durable diagnostics only: no candidates, reports or plan filtering."""
         with self._journal.atomic(), self._store._lock:
             self._refresh()
-            previous=[r['payload']['precheck_id'] for r in self._journal.scan_unprocessed(0)
+            previous=[r['payload']['precheck_id'] for r in self._journal.scan_unprocessed(0, payload_kinds={'GATE_PRECHECK'})
                       if r['payload'].get('kind')=='GATE_PRECHECK'
                       and r['payload'].get('batch_hash')==batch_hash]
             if previous: return tuple(previous)
@@ -328,7 +328,7 @@ class AHStoreAdapter(Store):
                     # A second plan presented by the canonical owner for an
                     # already committed pair is a replay integrity failure,
                     # rather than an ordinary competing-run admission loss.
-                    owners=[r['payload'] for r in self._journal.scan_unprocessed(0)
+                    owners=[r['payload'] for r in self._journal.scan_unprocessed(0, payload_kinds={'run_bind'})
                             if r['payload'].get('kind')=='run_bind'
                             and r['payload'].get('observation_id')==marker.observation_id
                             and r['payload'].get('version')==marker.interpretation_version]
@@ -345,7 +345,7 @@ class AHStoreAdapter(Store):
             pending=self.pending_batches()
             match=next((r for r in pending if r['payload']['batch_hash']==decision.batch_hash),None)
             if match is None: raise ValueError('BATCH_NOT_JOURNALED')
-            owners=[r['payload'] for r in self._journal.scan_unprocessed(0)
+            owners=[r['payload'] for r in self._journal.scan_unprocessed(0, payload_kinds={'run_bind'})
                     if r['payload'].get('kind')=='run_bind'
                     and r['payload'].get('observation_id')==marker.observation_id
                     and r['payload'].get('version')==marker.interpretation_version]

@@ -157,25 +157,32 @@ def _run_summary(services: RuntimeServices, args) -> Any:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     config = load_config(Path(args.config))
-    services = RuntimeServices.build(config)
-    if services.llm is not None and not services.llm.is_running:
-        services.llm.start()
-
     if args.command == 'read':
         from datetime import datetime
         from .reading import read_document
         def progress(event):
             print(json.dumps(event, ensure_ascii=False), flush=True)
+        services = None
+        def start_runtime():
+            nonlocal services
+            services = RuntimeServices.build(config)
+            if services.llm is not None and not services.llm.is_running:
+                services.llm.start()
+            return services
         try:
-            result = read_document(services, args.path, args.out, progress=progress,
+            result = read_document(start_runtime, args.path, args.out, progress=progress,
                 source_timestamp=datetime.fromisoformat(args.time_anchor) if args.time_anchor else None)
-            if args.save:
+            if args.save and services is not None:
                 services.save()
             _print(result)
             return 0 if result['status'] == 'EXECUTED' else 1
         finally:
-            if services.llm is not None:
+            if services is not None and services.llm is not None:
                 services.llm.stop()
+
+    services = RuntimeServices.build(config)
+    if services.llm is not None and not services.llm.is_running:
+        services.llm.start()
 
     if args.command == "acceptance":
         result = run_document_acceptance(

@@ -174,13 +174,17 @@ class LLMPerceptionService:
         from ah.formalizer.canonical_ledger import digest
         context=interaction_context
         declared=dict(raw_input or {})
-        declared.setdefault('context_snapshot', {k:(getattr(context,k).uid if getattr(context,k,None) else None) for k in ('self_ref','user_ref','now_ref','active_location_ref')})
+        document = declared.get('batch_kind') == 'DOCUMENT'
+        # The uploader and their clock/location are not the narrator and
+        # narrative time/place. A document can supply its own explicit frozen
+        # context, but must never inherit chat deixis implicitly.
+        declared.setdefault('context_snapshot', {k:(getattr(context,k).uid if not document and getattr(context,k,None) else None) for k in ('self_ref','user_ref','now_ref','active_location_ref')})
         # Third-person referents must retain their concrete proof path. Old
         # pronoun_refs are attention hints, not permission to bypass V7 bindings.
         policy = self._formalizer._release.resources.get('CorefPolicy', {}).get('entries', ())
         ignition = self._formalizer._ignition
         event_context = ignition is not None and ignition.settings.clock_mode == 'event'
-        if 'coreference_sources' not in declared and len(policy) == 1 and not event_context:
+        if 'coreference_sources' not in declared and len(policy) == 1 and not event_context and not document:
             store = self._formalizer._store
             with store._journal.atomic(), store._store._lock:
                 store._refresh()
@@ -189,7 +193,7 @@ class LLMPerceptionService:
                            if observations.get(digest(list(tag)), {}).get('status') == 'LIVE']
                 limit = min(128, policy[0]['window_size'])
                 declared['coreference_sources'] = sources[-limit:] if limit else []
-        if context.now_ref:
+        if context.now_ref and not document:
             when=exact_datetime_from_ref(self._formalizer._store._core,context.now_ref)
             if when: declared.setdefault('time_anchor',when.isoformat())
         receipt=self._formalizer.interpret(text,raw_input=declared)

@@ -79,10 +79,16 @@ def _jsonable(x):
 
 def structural_hash(state: FormalizationState) -> str:
     """Deterministic identity of the frozen structural set (replay-divergence detector)."""
-    records = [_jsonable(r) for r in _canonical_records(state)]
-    records.sort(key=lambda record:json.dumps(record,sort_keys=True,ensure_ascii=False,separators=(",", ":")))
-    blob = json.dumps(records, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
-    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+    records = sorted(json.dumps(_jsonable(r),sort_keys=True,ensure_ascii=False,separators=(",", ":"))
+                     for r in _canonical_records(state))
+    # Exactly the same canonical JSON array bytes, without an additional
+    # full-document dictionary copy, second serialization and giant string.
+    result = hashlib.sha256(b'[')
+    for i, record in enumerate(records):
+        if i: result.update(b',')
+        result.update(record.encode('utf-8'))
+    result.update(b']')
+    return result.hexdigest()
 
 
 def validate_closure(state: FormalizationState) -> tuple[str, ...]:
@@ -142,7 +148,9 @@ def structural_seal(state: FormalizationState, *, strict: bool = True) -> SealRe
     state.seal_snapshot_id = snapshot_id
     state.close_structures()  # I30: from here T3/T4 may only DECIDE, never add structure
 
-    counts = {tag: sum(1 for r in _canonical_records(state) if r["_kind"] == tag)
-              for tag in ("frame", "clause", "boundary", "ellipsis", "missing_arg", "reference",
-                          "linked_alt", "constraint")}
+    counts = {tag: len(objects) for tag, objects in (
+        ('frame',state.frames), ('clause',state.clause_candidates), ('boundary',state.boundary_candidates),
+        ('ellipsis',state.ellipsis_candidates), ('missing_arg',state.missing_argument_candidates),
+        ('reference',state.reference_candidates), ('linked_alt',state.linked_alternatives),
+        ('constraint',state.constraints))}
     return SealResult(snapshot_id=snapshot_id, structural_hash=h, object_counts=counts)

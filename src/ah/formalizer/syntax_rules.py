@@ -80,8 +80,14 @@ def _ast_schema(expr, captures, reads, depth=0):
 
 
 def _junction(values, kind):
-    if kind == 'AND': return False if False in values else None if None in values else True
-    return True if True in values else None if None in values else False
+    # Kleene three-valued short circuit. UNKNOWN must not stop evaluation,
+    # whereas FALSE proves an AND false and TRUE proves an OR true.
+    unknown = False
+    decisive = False if kind == 'AND' else True
+    for value in values:
+        if value is decisive: return decisive
+        unknown |= value is None
+    return None if unknown else not decisive
 
 
 def _ast_value(field, assignment, state):
@@ -95,7 +101,7 @@ def evaluate_ast(expr, assignment, state, release, window, spend):
     spend()
     op = expr['op']
     if op in {'AND', 'OR'}:
-        return _junction([evaluate_ast(child, assignment, state, release, window, spend) for child in expr['args']], op)
+        return _junction((evaluate_ast(child, assignment, state, release, window, spend) for child in expr['args']), op)
     if op == 'NOT':
         value = evaluate_ast(expr['arg'], assignment, state, release, window, spend)
         return None if value is None else not value
@@ -123,9 +129,9 @@ def evaluate_ast(expr, assignment, state, release, window, spend):
         return _junction(values, 'AND')
     if op == 'window_has':
         lo, hi = window
-        values = [evaluate_ast(expr['expr'], {**assignment,'item':(i,v)}, state, release, window, spend)
-                  for i in range(lo,hi) for v in state.evidence[i].variants or (None,)]
-        return _junction(values, 'OR') if values else None
+        values = (evaluate_ast(expr['expr'], {**assignment,'item':(i,v)}, state, release, window, spend)
+                  for i in range(lo,hi) for v in state.evidence[i].variants or (None,))
+        return _junction(values, 'OR') if lo < hi else None
     expected = {path: _ast_value(value['field'], assignment, state) if isinstance(value, dict) else value for path, value in expr['key'].items()}
     if any(v is None or v == frozenset() for v in expected.values()): return None
     def get(row, path):
@@ -166,6 +172,52 @@ def _feature_schema(pattern, depth=0):
                 raise SyntaxRuleError('feature values must be nonempty strings')
             elif key in {'surface', 'lemma'} and any(any(c.isspace() for c in v) for v in values):
                 raise SyntaxRuleError('lexical captures cannot contain a full sentence')
+
+
+def _possible_ast(expr, domains, state, release, window, spend):
+    """Conservative domain propagation before enumerating the Cartesian join.
+
+    Return an OVER-approximation of the three-valued results of every binding.
+    Dependencies between captures are deliberately ignored: this can retain an
+    impossible join, but cannot discard a possible one. Unsupported operations
+    return all three results. Only the absence of True permits pruning.
+    """
+    spend()
+    op = expr['op']
+    def combine(parts, kind):
+        values = {True if kind == 'AND' else False}
+        decisive = {False} if kind == 'AND' else {True}
+        for part in parts:
+            values = {_junction((a,b), kind) for a in values for b in part}
+            if values == decisive: break
+        return values
+    if op in {'AND', 'OR'}:
+        return combine((_possible_ast(child, domains, state, release, window, spend)
+                        for child in expr['args']), op)
+    if op == 'NOT':
+        return {None if v is None else not v for v in
+                _possible_ast(expr['arg'], domains, state, release, window, spend)}
+    if op == 'window_has':
+        lo, hi = window
+        if lo == hi: return {None}
+        return combine((_possible_ast(expr['expr'], {**domains, 'item': [(i,v)]},
+                                      state, release, window, spend)
+                        for i in range(lo,hi) for v in state.evidence[i].variants or (None,)), 'OR')
+    if op in {'feature_eq', 'feature_in'}:
+        name = expr['field'].split('.')[0]
+        if name not in domains: return {True, False, None}
+        return {evaluate_ast(expr, {name: value}, state, release, window, spend)
+                for value in domains[name]}
+    if op == 'span_relation':
+        left, right = expr['left'], expr['right']
+        if left not in domains or right not in domains: return {True, False, None}
+        # Relations depend on offsets, not morphology; collapse equal positions
+        # for this calculation only (the actual join keeps every whole parse).
+        a = {i: v for i,v in domains[left]}
+        b = {i: v for i,v in domains[right]}
+        return {evaluate_ast(expr, {left:(i,v), right:(j,w)}, state, release, window, spend)
+                for i,v in a.items() for j,w in b.items() if left != right or i == j}
+    return {True, False, None}
 
 
 def validate_rules(rules, roles, declared_reads=()):
@@ -263,10 +315,8 @@ def matches(pattern, token, variant, spend):
         return None if value is None else not value
     if set(pattern) in ({'all'}, {'any'}):
         kind = next(iter(pattern))
-        values = [matches(p, token, variant, spend) for p in pattern[kind]]
-        if kind == 'all':
-            return False if False in values else None if None in values else True
-        return True if True in values else None if None in values else False
+        return _junction((matches(p, token, variant, spend) for p in pattern[kind]),
+                         'AND' if kind == 'all' else 'OR')
     values = []
     for key, allowed in pattern.items():
         spend()
@@ -343,11 +393,23 @@ def enumerate_matches(state, rules, stage, policy, release):
     steps = 0
     out = []
     windows_by_kind = {}
+    # A book is one observation, but not one bounded syntax question. Limits
+    # belong to each distinct source window, shared across ALL rules for that
+    # window. Exhausting any window still fails the whole enumeration closed;
+    # this does not authorize a partial commit or cut quotation scope.
+    regional = state.observation.get('syntax_budget_scope') == 'SOURCE_WINDOW_V1'
+    window_steps, window_matches = {}, {}
+    current_window = None
     def spend():
         nonlocal steps
         steps += 1
-        if steps > limit:
-            state.syntax_trace.append({'stage':stage,'event':'LIMIT','step':steps,'result':'COMPUTATION_LIMIT'})
+        window_steps[current_window] = window_steps.get(current_window, 0) + 1
+        used = window_steps[current_window] if regional else steps
+        if used > limit:
+            state.syntax_trace.append({'stage':stage,'event':'LIMIT','step':steps,
+                'window':list(current_window), 'window_step':window_steps[current_window],
+                'budget_scope':'SOURCE_WINDOW_V1' if regional else 'OBSERVATION',
+                'result':'COMPUTATION_LIMIT'})
             raise SearchLimit('COMPUTATION_LIMIT: SyntaxRules matching/joins/AST')
     def trace(rule, event, result, assignment=None, **details):
         state.syntax_trace.append({'rule_id':rule['rule_id'],'stage':stage,'event':event,'step':steps,
@@ -359,28 +421,52 @@ def enumerate_matches(state, rules, stage, policy, release):
         kind = pattern.get('window', 'SENTENCE')
         if kind not in windows_by_kind:
             windows_by_kind[kind] = _windows(state, kind)
-        for lo, hi in windows_by_kind[kind]:
+        for window_index, (lo, hi) in enumerate(windows_by_kind[kind]):
+            if regional and window_index % 128 == 0:
+                from .telemetry import emit
+                emit('syntax_progress', syntax_stage=stage, rule_id=rule['rule_id'],
+                     windows_started=window_index, windows_total=len(windows_by_kind[kind]),
+                     search_steps=steps, matches=len(out))
+            current_window = (lo, hi)
             if hi-lo > policy['max_source_tokens']:
                 trace(rule,'LIMIT','COMPUTATION_LIMIT',window=[lo,hi])
                 raise SearchLimit('COMPUTATION_LIMIT: SyntaxRules source window')
             options = {}
             for capture in captures:
                 options[capture] = []
+                checks = []
+                if regional:
+                    # Lossless local trace batch: retain every token/parse,
+                    # truth value and exact step, without repeating the rule
+                    # hash, stage, capture and empty assignment per check.
+                    trace(rule, 'FEATURE_CHECK_BATCH', None, capture=capture,
+                          window=[lo,hi], columns=['step','token_ref','variant_index','result'],
+                          checks=checks)
                 for i in range(lo, hi):
                     token = state.evidence[i]
                     for variant_index,variant in enumerate(token.variants or (None,)):
                         spend()
                         truth = matches(pattern['captures'][capture], token, variant, spend)
-                        trace(rule,'FEATURE_CHECK',truth,capture=capture,token_ref=token.token_id,variant_index=variant_index)
+                        if regional: checks.append([steps,token.token_id,variant_index,truth])
+                        else: trace(rule,'FEATURE_CHECK',truth,capture=capture,token_ref=token.token_id,variant_index=variant_index)
                         if truth is True:
                             options[capture].append((i, variant))
+                # A required capture with no match makes every join impossible.
+                # Do not enumerate unrelated argument captures after that.
+                if not options[capture]: break
+            if any(not rows for rows in options.values()): continue
+            if 'where' in pattern and True not in _possible_ast(pattern['where'], options, state, release, (lo,hi), spend):
+                trace(rule, 'DOMAIN_PRUNE', False, window=[lo,hi],
+                      reason='declared predicate cannot be True over capture domains')
+                continue
             def walk(k, assignment):
                 if k == len(captures):
                     truth = evaluate_ast(pattern['where'], assignment, state, release, (lo,hi), spend) if 'where' in pattern else True
                     trace(rule,'PREDICATE_CHECK',truth,assignment)
                     if truth is True and len({i for i, v in assignment.values()}) >= rule['min_evidence']:
                         out.append(RuleMatch(rule, dict(assignment), (lo, hi)))
-                        if len(out) > max_matches:
+                        window_matches[current_window] = window_matches.get(current_window, 0) + 1
+                        if (window_matches[current_window] if regional else len(out)) > max_matches:
                             trace(rule,'LIMIT','COMPUTATION_LIMIT',assignment)
                             raise SearchLimit('COMPUTATION_LIMIT: SyntaxRules matches')
                     return

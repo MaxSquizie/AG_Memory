@@ -52,6 +52,8 @@ def test_native_document_exact_source_integer_revision_and_replay(tmp_path):
     assert observation['source_revision'] == 1
     assert observation['range'] == [0, len(text)]
     assert observation['batch_kind'] == 'DOCUMENT'
+    assert observation['syntax_budget_scope'] == 'SOURCE_WINDOW_V1'
+    assert all(v is None for v in observation['context_snapshot'].values())
     assert 'time_anchor' not in observation  # never the file's mtime
     assert first['observations'] == 1
     tick = svc.ignition.tick_index
@@ -64,6 +66,31 @@ def test_native_document_exact_source_integer_revision_and_replay(tmp_path):
     assert second['interpretation']['observation_id'] == first['interpretation']['observation_id']
     with pytest.raises(FileExistsError):
         read_document(svc, source, tmp_path / 'first')
+
+
+def test_document_does_not_inherit_uploaders_clock_or_identity(tmp_path, monkeypatch):
+    svc, adapter = services(tmp_path)
+    svc.context.now_ref = svc.context.user_ref
+    svc.context.self_ref = svc.context.user_ref
+    def clock_must_not_be_read(*args):
+        pytest.fail('chat clock is not the document timeline')
+    monkeypatch.setattr('ah.temporal.exact_datetime_from_ref', clock_must_not_be_read)
+    class Captured(Exception): pass
+    seen = []
+    def capture(text, *, raw_input):
+        seen.append(raw_input)
+        raise Captured()
+    monkeypatch.setattr(adapter, 'interpret', capture)
+    with pytest.raises(Captured):
+        svc.perception.perceive('Я работаю.', svc.context, raw_input={'batch_kind': 'DOCUMENT'})
+    assert all(v is None for v in seen[0]['context_snapshot'].values())
+    assert 'time_anchor' not in seen[0]
+    with pytest.raises(Captured):
+        svc.perception.perceive('Я работаю.', svc.context, raw_input={
+            'batch_kind': 'DOCUMENT', 'context_snapshot': {'user_ref': 'declared:narrator'},
+            'time_anchor': '1900-01-01T00:00:00+00:00'})
+    assert seen[1]['context_snapshot'] == {'user_ref': 'declared:narrator'}
+    assert seen[1]['time_anchor'] == '1900-01-01T00:00:00+00:00'
 
 
 def test_long_quote_is_not_split_into_independent_observations(tmp_path, monkeypatch):
@@ -83,6 +110,29 @@ def test_long_quote_is_not_split_into_independent_observations(tmp_path, monkeyp
     assert report['error']['message'] == 'COMPUTATION_LIMIT'
     assert not adapter._store.ledger.data['supports']
     assert json.loads((tmp_path / 'out/report.json').read_text())['status'] == 'STOPPED'
+
+
+def test_failed_runtime_start_still_leaves_source_and_diagnostic_report(tmp_path):
+    source=tmp_path/'book.txt'; source.write_text('Текст.\r\n',newline='')
+    def start(): raise ValueError('RESOURCE_MISSING: release')
+    report=read_document(start,source,tmp_path/'out')
+    assert report['status']=='STOPPED'
+    assert report['error']['message']=='RESOURCE_MISSING: release'
+    assert report['events']=={}
+    assert (tmp_path/'out/source.txt').read_bytes()==source.read_bytes()
+    assert json.loads((tmp_path/'out/report.json').read_text())==report
+
+
+def test_streamed_structural_hash_matches_previous_canonical_bytes():
+    from ah.formalizer.pipeline import t0
+    from ah.formalizer.seal import structural_hash, _canonical_records, _jsonable
+    import hashlib
+    st=t0('Разные записи.')
+    st.syntax_trace=[{'event':'check','step':i,'result':result} for i,result in enumerate([True,None,False])]
+    records=[_jsonable(r) for r in _canonical_records(st)]
+    records.sort(key=lambda r:json.dumps(r,sort_keys=True,ensure_ascii=False,separators=(',',':')))
+    expected=hashlib.sha256(json.dumps(records,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+    assert structural_hash(st)==expected
 
 
 def test_probe_progress_distinguishes_transport_and_replay_and_observer_failure():

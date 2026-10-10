@@ -27,7 +27,10 @@ def _json(value):
 
 
 def _dump(path, value):
-    path.write_text(json.dumps(_json(value), ensure_ascii=False, indent=2), encoding='utf-8')
+    # Stream large document traces. Recursively copying the entire snapshot
+    # and then allocating a second giant JSON string multiplied peak memory.
+    with path.open('w', encoding='utf-8') as stream:
+        json.dump(value, stream, default=_json, ensure_ascii=False, indent=2)
 
 
 def summarize_snapshot(snapshot):
@@ -44,6 +47,15 @@ def summarize_snapshot(snapshot):
                   for e in evidence if e['token_id'] not in anchored]
     decisions = state.get('decisions', {})
     receipt = snapshot.get('commit_receipt', {})
+    limits = []
+    for row in state.get('syntax_trace', []):
+        if row.get('event') != 'LIMIT': continue
+        item = dict(row)
+        window = row.get('window')
+        if window and 0 <= window[0] < window[1] <= len(evidence):
+            start, end = evidence[window[0]]['start'], evidence[window[1]-1]['end']
+            item.update(source_range=[start,end], source_preview=state.get('text','')[start:end][:300])
+        limits.append(item)
     return {
         'observation_id': receipt.get('observation_id'),
         'terminal': receipt.get('terminal'),
@@ -56,6 +68,8 @@ def summarize_snapshot(snapshot):
         'diagnostics': state.get('diagnostics', []),
         'unanchored_tokens': unanchored,
         'context_reads': len(state.get('context_reads', [])),
+        'syntax_budget_scope': state.get('observation', {}).get('syntax_budget_scope', 'OBSERVATION'),
+        'syntax_limits': limits,
         'semantic_correctness': 'NOT_EVALUATED',
     }
 
@@ -68,23 +82,22 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
     """
     source = Path(path)
     raw = source.read_bytes()
-    processor = services.document_processor()
+    from .pipeline import DocumentProcessor
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=False)
     saved_source = out / ('source' + source.suffix)
     saved_source.write_bytes(raw)
-    text = processor.load_text(saved_source)
+    text = DocumentProcessor.load_text(saved_source)
     with (out / 'source.txt.decoded').open('w', encoding='utf-8', newline='') as stream:
         stream.write(text)
-    adapter = getattr(getattr(services, 'perception', None), '_formalizer', None)
+    adapter = None
     report = {'schema': 'document-reading-1', 'source_path': str(source.resolve()),
               'source_sha256': hashlib.sha256(raw).hexdigest(),
               'decoded_sha256': hashlib.sha256(text.encode('utf-8')).hexdigest(),
               'source_chars': len(text), 'output_dir': str(out.resolve()),
               'boundary_policy': 'WHOLE_SOURCE', 'status': 'RUNNING',
               'semantic_correctness': 'NOT_EVALUATED',
-              'resource_snapshot': getattr(getattr(adapter, '_release', None), 'sha256', None),
-              'structural_contract': getattr(adapter, '_structure_mode', None)}
+              'resource_snapshot': None, 'structural_contract': None}
     _dump(out / 'report.json', report)
     counts = Counter()
     stage_times = Counter()
@@ -114,6 +127,13 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
 
         snapshot = None
         try:
+            # CLI may provide a factory: retain a report even if reviewed
+            # resources or backend startup fail before the first observation.
+            if callable(services): services = services()
+            processor = services.document_processor()
+            adapter = getattr(getattr(services, 'perception', None), '_formalizer', None)
+            report.update(resource_snapshot=getattr(getattr(adapter, '_release', None), 'sha256', None),
+                          structural_contract=getattr(adapter, '_structure_mode', None))
             if adapter is None or adapter._structure_mode != 'region_probes':
                 raise ValueError('DOCUMENT_REQUIRES_REGION_PROBES: no legacy graph proposer fallback')
             with services.operation_lock, observe(callback):
@@ -131,12 +151,14 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
             report.update(status='STOPPED', error={'type': type(exc).__name__, 'message': str(exc)})
         finally:
             stage_times[stage] += monotonic() - since
-            report.update(elapsed_seconds=monotonic()-started, stages_seconds=dict(stage_times),
+            report.update(pipeline_seconds=monotonic()-started, stages_seconds=dict(stage_times),
                           events=dict(counts), artifact_errors=event_io_errors)
+            artifacts_started = monotonic()
             if snapshot is not None:
                 _dump(out / 'interpretation.json', snapshot)
                 state = snapshot.get('state', {})
                 _dump(out / 'regions.json', state.get('region_forest') or {})
                 report['interpretation'] = summarize_snapshot(snapshot)
+            report.update(artifact_seconds=monotonic()-artifacts_started, elapsed_seconds=monotonic()-started)
             _dump(out / 'report.json', report)
     return report

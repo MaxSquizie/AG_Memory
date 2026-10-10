@@ -126,6 +126,17 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
     validate_input(store, observation)
     obs=observation['observation_id']; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
     frozen=binding.input_snapshot(obs,version)
+    # Pin the search-budget contract in the durable input. Old runs retain
+    # their observation-wide budget on replay; no silent contract migration.
+    if frozen is not None:
+        if 'syntax_budget_scope' in frozen:
+            observation['syntax_budget_scope'] = frozen['syntax_budget_scope']
+        else:
+            observation.pop('syntax_budget_scope', None)
+    else:
+        observation['syntax_budget_scope'] = ('SOURCE_WINDOW_V1'
+            if structure_mode == 'region_probes' and observation['batch_kind'] == 'DOCUMENT'
+            else 'OBSERVATION')
     # Reject source edits before selector/cache activity. Reusing an immutable
     # source revision for different bytes is an input conflict, distinct from a
     # provider or resource replay-integrity error.

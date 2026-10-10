@@ -177,6 +177,13 @@ class DocumentPanelWidget(QWidget):
             self.coverage_stat.setText(f"Прочитано токенов: {event.get('tokens_read', 0)}/{total}")
         elif event['event'] == 'stage':
             self.progress.setRange(0, 0)
+        elif event['event'] == 'syntax_progress':
+            total = event.get('windows_total',0)
+            self.progress.setRange(0,max(1,total))
+            self.progress.setValue(event.get('windows_started',0))
+            self.coverage_stat.setText(
+                f"Поиск текущего правила: {event.get('windows_started',0)}/{total} окон · "
+                f"{event.get('search_steps',0)} шагов · {event.get('matches',0)} совпадений")
 
     def set_reading_report(self, report) -> None:
         import json

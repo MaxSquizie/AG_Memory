@@ -77,3 +77,63 @@ class TestJournalDurability(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_nested_reads_verify_once_and_do_not_expose_cached_mutable_records(tmp_path, monkeypatch):
+    p=tmp_path/'journal.log'
+    a=JournalChannel(p); b=JournalChannel(p)
+    a.append('observation',{'nested':{'value':1}})
+    original=Path.read_bytes; reads=[]
+    def read(path):
+        if path==p: reads.append(path)
+        return original(path)
+    monkeypatch.setattr(Path,'read_bytes',read)
+    with a.atomic():
+        assert a.read_global_head()==1
+        rows=b.scan_unprocessed()
+        rows[0]['payload']['nested']['value']=99
+        assert a.scan_unprocessed()[0]['payload']['nested']['value']==1
+        payload={'nested':{'value':2}}
+        b.append('observation',payload)
+        payload['nested']['value']=99
+        assert a.read_global_head()==2
+        assert a.scan_unprocessed(1)[0]['payload']['nested']['value']==2
+        assert len(reads)==1
+    assert a.read_global_head()==2
+    assert len(reads)==2  # new outer lock revalidates durable bytes
+
+
+def test_external_change_invalidates_verified_frames_inside_lock(tmp_path):
+    import pytest
+    from ah.core.journal import JournalIntegrityError
+    p=tmp_path/'journal.log'; j=JournalChannel(p)
+    j.append('observation',{'value':'one'})
+    with j.atomic():
+        assert j.read_global_head()==1
+        p.write_bytes(p.read_bytes().replace(b'one',b'two'))
+        with pytest.raises(JournalIntegrityError,match='checksum mismatch'):
+            j.read_global_head()
+
+
+def test_torn_tail_is_rechecked_after_cached_read(tmp_path):
+    p=tmp_path/'journal.log'; j=JournalChannel(p)
+    j.append('observation',{'value':1})
+    with j.atomic():
+        assert j.read_global_head()==1
+        with p.open('ab') as stream: stream.write(b'{"seq":2')
+        assert j.read_global_head()==1
+        assert p.read_bytes().endswith(b'\n')
+        assert j.append('observation',{'value':2})==2
+
+
+def test_kind_filter_does_not_skip_integrity_validation(tmp_path):
+    import pytest
+    from ah.core.journal import JournalIntegrityError
+    p=tmp_path/'journal.log'; j=JournalChannel(p)
+    j.append('resolution_log',{'kind':'BATCH','value':'one'})
+    j.append('resolution_log',{'kind':'terminal','value':2})
+    assert [r['seq'] for r in j.scan_unprocessed(payload_kinds={'terminal'})]==[2]
+    assert j.scan_unprocessed(payload_kinds=set())==[]
+    p.write_bytes(p.read_bytes().replace(b'one',b'two'))
+    with pytest.raises(JournalIntegrityError,match='checksum mismatch'):
+        j.scan_unprocessed(payload_kinds={'terminal'})

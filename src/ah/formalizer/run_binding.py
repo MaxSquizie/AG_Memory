@@ -23,7 +23,7 @@ class InterpretationRunBinding:
 
     def _refresh(self):
         if self._journal is None: return
-        for rec in self._journal.scan_unprocessed():
+        for rec in self._journal.scan_unprocessed(payload_kinds={'CLARIFICATION_SELECTED','MIGRATION_PLANNED','run_bind'}):
             p = rec['payload']
             if p.get('kind') == 'CLARIFICATION_SELECTED':
                 key = (p['observation_id'], p['target_version'])
