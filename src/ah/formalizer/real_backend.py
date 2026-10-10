@@ -29,29 +29,39 @@ _SYSTEM = (
     "For selection, never invent relations outside the declared closed candidate set."
 )
 
+_READABLE_SYSTEM = (
+    "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. "
+    "For syntax proposals use declared token references, kinds and roles; declare local graph labels "
+    "exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. "
+    "For selection return only the requested wire representation of choices from the closed candidate set. "
+    "Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations."
+)
+
 
 @dataclass
 class RealBackendSelector:
     """One-argument ``select(prompt)`` over a live backend, logged via ProviderAdapter."""
 
     backend: object
-    system: str = _SYSTEM
+    system: str | None = None
     role: str = "formalizer"
     run_id: str = "real-backend"
     journal: object = None
     budget: BudgetSnapshot | None = None
     generation_settings: dict = field(default_factory=lambda:{"temperature":0.0,"top_p":1.0,"top_k":0,"max_new_tokens":4096,"enable_thinking":False})
     model_key: str = ""
-    structure_reply_format: str = "TP-C1"
+    structure_reply_format: str = "TP-C2"
     selection_reply_format: str = "SELECT_LABELS_V1"
 
     def __post_init__(self):
         from .provider_call_log import ProviderCallLog
         from .canonical_ledger import digest
-        if self.structure_reply_format not in {'TP-C1', 'JSON_V1'}:
+        if self.structure_reply_format not in {'TP-C1', 'TP-C2', 'JSON_V1'}:
             raise ValueError('unsupported structure reply protocol: ' + str(self.structure_reply_format))
         if self.selection_reply_format not in {'SELECT_LABELS_V1', 'JSON_V1'}:
             raise ValueError('unsupported selection reply protocol: ' + str(self.selection_reply_format))
+        if self.system is None:
+            self.system = _READABLE_SYSTEM if self.structure_reply_format == 'TP-C2' else _SYSTEM
         self._adapter = ProviderAdapter(
             name=type(self.backend).__name__,
             capabilities=frozenset({"select", "propose_local"}),
@@ -95,7 +105,7 @@ def selector_from_config(config, journal=None, *, backend=None):
     if backend is None:
         return None
     model=str(getattr(config.llm,config.llm.backend.lower()+'_model',getattr(config.llm,'model_dir','')))
-    return RealBackendSelector(backend, system=_SYSTEM, role="formalizer", journal=journal,model_key=type(backend).__name__+':'+model)
+    return RealBackendSelector(backend, role="formalizer", journal=journal,model_key=type(backend).__name__+':'+model)
 
 
 # --------------------------------------------------------------------------- #

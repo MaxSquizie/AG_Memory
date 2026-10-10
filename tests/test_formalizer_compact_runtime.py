@@ -13,13 +13,14 @@ from ah.formalizer.selector_wire import (
     validate_structure_worker_reply,
 )
 from ah.formalizer.tp_compact_protocol import serialize_compact_structure_reply
+from ah.formalizer.tp_readable_protocol import serialize_readable_structure_reply
 from ah.formalizer.tp_proposer import Hypothesis, StructureProposalRequest, TEdge, TNode
 from tools.formalizer_v7_extended_binding import Session
 from tools.formalizer_v7_native_binding import ChatBackend, execute_native
 
 
 def request_from_payload(prompt):
-    data = json.loads(prompt.split('produced by code:\n', 1)[1])
+    data, _ = json.JSONDecoder().raw_decode(prompt.split('EVIDENCE_JSON:\n', 1)[1])
     request = dict(data['request'])
     request['source_spans'] = tuple(request['source_spans'])
     for field in fields(StructureProposalRequest):
@@ -57,11 +58,11 @@ def test_default_compact_raw_bytes_replay_and_protocol_mismatch(tmp_path):
     hypothesis = Hypothesis('h0', (TNode('PREDICATE', ('source:1',)),
         TNode('ENTITY', ('source:0',))), (TEdge('ARGUMENT', 0, 1, 'SUBJECT'),),
         alignment=req.source_spans)
-    raw = serialize_compact_structure_reply(req, [hypothesis]) + '\n'
+    raw = serialize_readable_structure_reply(req, [hypothesis]) + '\n'
     path = tmp_path / 'provider.log'
     backend = ScriptedBackend([raw, '2\n'])
     selector = RealBackendSelector(backend, journal=JournalChannel(path))
-    assert (selector.structure_reply_format, selector.selection_reply_format) == ('TP-C1', 'SELECT_LABELS_V1')
+    assert (selector.structure_reply_format, selector.selection_reply_format) == ('TP-C2', 'SELECT_LABELS_V1')
     selector.start_run('frozen-run')
     prompt = build_structure_worker_prompt(selector, req, [{'id': 'source:0', 'text': 'актант'},
         {'id': 'source:1', 'text': 'предикат'}])
@@ -86,7 +87,37 @@ def test_default_compact_raw_bytes_replay_and_protocol_mismatch(tmp_path):
         legacy.propose_local(prompt)
     assert replay_backend.calls == [] and path.read_bytes() == before
     child = replay.for_run('separate-run')
-    assert child.structure_reply_format == 'TP-C1' and child.selection_reply_format == 'SELECT_LABELS_V1'
+    assert child.structure_reply_format == 'TP-C2' and child.selection_reply_format == 'SELECT_LABELS_V1'
+
+
+def test_explicitly_pinned_c1_history_replays_without_c2_guessing(tmp_path):
+    req = StructureProposalRequest('fixture', 'frozen', ('source:0', 'source:1'),
+        allowed_node_kinds=frozenset({'PREDICATE', 'ENTITY'}),
+        allowed_edge_kinds=frozenset({'ARGUMENT'}),
+        allowed_role_ids=frozenset({'SUBJECT'}))
+    hypothesis = Hypothesis('h0', (TNode('PREDICATE', ('source:1',)),
+        TNode('ENTITY', ('source:0',))), (TEdge('ARGUMENT', 0, 1, 'SUBJECT'),),
+        alignment=req.source_spans)
+    raw = serialize_compact_structure_reply(req, [hypothesis]) + '\n'
+    path = tmp_path / 'c1-provider.log'
+    writer = RealBackendSelector(ScriptedBackend([raw]), journal=JournalChannel(path),
+        structure_reply_format='TP-C1')
+    writer.start_run('c1-frozen-run')
+    prompt = build_structure_worker_prompt(writer, req, [])
+    assert validate_structure_worker_reply(writer, req, writer.propose_local(prompt)) == [hypothesis]
+    before = path.read_bytes()
+    backend = ScriptedBackend([])
+    replay = RealBackendSelector(backend, journal=JournalChannel(path), structure_reply_format='TP-C1')
+    replay.start_run('c1-frozen-run')
+    assert replay.propose_local(prompt) == raw
+    assert validate_structure_worker_reply(replay, req, raw) == [hypothesis]
+    c2 = RealBackendSelector(backend, journal=JournalChannel(path))
+    c2.start_run('c1-frozen-run')
+    with pytest.raises(IntegrityError, match='REPLAY_MISMATCH'):
+        c2.propose_local(prompt)
+    with pytest.raises(ProtocolError):
+        validate_structure_worker_reply(c2, req, raw)
+    assert backend.calls == [] and path.read_bytes() == before
 
 
 def test_default_native_compact_proposal_commits_scoped_root(monkeypatch, tmp_path):
@@ -99,7 +130,8 @@ def test_default_native_compact_proposal_commits_scoped_root(monkeypatch, tmp_pa
             TNode('PREDICATE', (bytext['вошёл'],)), TNode('ENTITY', (bytext['Иван'],))),
             (TEdge('OPERAND', 0, 1, scope=True), TEdge('ARGUMENT', 1, 2, 'SUBJECT')),
             alignment=req.source_spans)
-        raw = serialize_compact_structure_reply(req, [hypothesis])
+        assert payload['protocol'] == 'TP-C2'
+        raw = serialize_readable_structure_reply(req, [hypothesis])
         replies.append(raw)
         return raw
 

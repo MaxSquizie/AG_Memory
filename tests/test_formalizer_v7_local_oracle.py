@@ -18,24 +18,24 @@ def test_native_http_and_offline_replay(tmp_path):
             requests.append((self.path,body))
             assert body['reasoning']=='off' and body['store'] is False
             prompt=body['input']
-            assert prompt.startswith('Propose bounded local syntax. Reply in TP-C1 only:')
-            data=json.loads(prompt.split('produced by code:\n',1)[1])
-            assert data['protocol']=='TP-C1'
+            assert 'TP-C2' in prompt
+            data,_=json.JSONDecoder().raw_decode(prompt.split('EVIDENCE_JSON:\n',1)[1])
+            assert data['protocol']=='TP-C2'
             catalog=data['catalog']
-            kinds={value:code for code,value in catalog['node_kinds'].items()}
-            edges={value:code for code,value in catalog['edge_kinds'].items()}
-            roles={value:code for code,value in catalog['roles'].items()}
-            anchors={token['text']:catalog['tokens'].index(token['id']) for token in data['tokens']}
-            # The transport fixture supplies indexed local choices only. The
+            assert {'NOT','PREDICATE','ENTITY'}<=set(catalog['node_kinds'])
+            assert {'OPERAND','ARGUMENT'}<=set(catalog['edge_kinds'])
+            assert 'SUBJECT' in catalog['roles']
+            anchors={token['text']:token['id'] for token in data['tokens']}
+            # The transport fixture supplies readable local choices only. The
             # runtime constructs/validates Hypothesis and canonical NOT itself.
             reply='\n'.join([
-                'H unary '+','.join(str(i) for i in range(len(catalog['tokens']))),
-                f'N {kinds["NOT"]} {anchors["не"]}',
-                f'N {kinds["PREDICATE"]} {anchors["пришёл"]}',
-                f'N {kinds["ENTITY"]} {anchors["Иван"]}',
-                f'E {edges["OPERAND"]} 0 1 !',
-                f'E {edges["ARGUMENT"]} 1 2 /{roles["SUBJECT"]}',
-                '.',
+                'H unary '+','.join(catalog['token_refs']),
+                f'N n0 NOT {anchors["не"]}',
+                f'N n1 PREDICATE {anchors["пришёл"]}',
+                f'N n2 ENTITY {anchors["Иван"]}',
+                'E OPERAND n0 n1 scope',
+                'E ARGUMENT n1 n2 role=SUBJECT',
+                'END',
             ])
             raw=json.dumps({'output':[{'type':'message','content':reply}]}).encode()
             self.send_response(200); self.send_header('Content-Type','application/json')

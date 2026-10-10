@@ -617,7 +617,7 @@ def execute_native(session,p,config):
     run_id='native:'+digest([observation['observation_id'],version])
     selector=RealBackendSelector(ChatBackend(config),journal=session.store._journal,run_id=run_id,
         model_key=config.get('model') or 'disabled',generation_settings={'temperature':0.0,'top_p':1.0,'max_new_tokens':config.get('max_tokens',4096),'enable_thinking':False},
-        structure_reply_format=config.get('structure_reply_format','TP-C1'),
+        structure_reply_format=config.get('structure_reply_format','TP-C2'),
         selection_reply_format=config.get('selection_reply_format','SELECT_LABELS_V1'))
     entities_before=native_entity_refs(session)
     state,report=interpret_full(text,None,selector,session.store,InterpretationRunBinding(session.store._journal),
