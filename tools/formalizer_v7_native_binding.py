@@ -48,8 +48,10 @@ LEXICON = (
  ('ENTER','войти','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),)),
  ('DOCTOR','врач','STATE',(('THEME','SUBJECT','nom','ENTITY'),)),
  ('TIRED','устать','STATE',(('EXPERIENCER','EXPERIENCER','nom','ENTITY'),)),
+ ('SIT','сесть','TRANSITION',(('AGENT','SUBJECT','nom','ENTITY'),)),
  ('SIT_STATE','сидеть','STATE',(('THEME','SUBJECT','nom','ENTITY'),('LOCATION','LOCATION','loc','ENTITY'))),
  ('WORK','работать','PROCESS',(('AGENT','SUBJECT','nom','ENTITY'),)),
+ ('SMOKE','курить','PROCESS',(('AGENT','SUBJECT','nom','ENTITY'),)),
  ('CALL','позвонить','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('RECIPIENT','RECIPIENT','dat','ENTITY'))),
  ('WRITE','написать','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('THEME','OBJECT','acc','ENTITY'))),
  ('MEET','встретить','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('THEME','OBJECT','acc','ENTITY'))),
@@ -68,7 +70,6 @@ ENTITY_NAMES = {'иван':'ivan','пётр':'petr','петр':'petr','мари�
 # integrity even when two dictionary entries share a predicate representation.
 LEXICAL_MAPPINGS = (
     ('SLEEP_ONSET', 'уснуть', 'SLEEP', 'TRANSITION'),
-    ('SIT_DOWN', 'сесть', 'SIT_STATE', 'TRANSITION'),
     ('READ_PERFECTIVE', 'прочитать', 'READ', 'EVENT'),
 )
 
@@ -120,7 +121,7 @@ def fixture(core, profile):
                     'event_anaphora_rules':[]}], 'dependency_versions':{}}
     m['entries'].append(R['CorefPolicy']);m['dependency_versions']['CorefPolicy']='test-v1'
     R['AttitudeMap']['entries']=[{'lemma':lemma,'argument_role':'OBJECT','holder_role':'SUBJECT','attitude':att,'factivity':False} for lemma,att in [('сказать','QUOTED'),('думать','EMBEDDED'),('считать','EMBEDDED'),('хотеть','HYPOTHETICAL'),('обещать','HYPOTHETICAL'),('просить','HYPOTHETICAL')]]
-    R['ScopeLexicon']['entries']=[{'pattern':pattern,'operator':op} for pattern,op in [(r'\bне\b|\bневерно\b','NOT'),(r'\bили\b','OR'),(r'\bкажд\w*\b','FORALL'),(r'\bмож\w*\b|\bвозможно\b','POSSIBLE'),(r'\bесли\b','IMPLIES')]]
+    R['ScopeLexicon']['entries']=[{'pattern':pattern,'operator':op} for pattern,op in [(r'\bне\b|\bневерно\b','NOT'),(r'\bили\b','OR'),(r'\bкажд\w*\b','FORALL'),(r'\bмож\w*\b|\bмог(?:ла|ло|ли)?\b|\bвозможно\b','POSSIBLE'),(r'\bесли\b','IMPLIES')]]
     # The generic and explicit-continuity patterns are mutually exclusive.
     # An unspecified day does not acquire continuous truth from a fixture.
     R['TemporalRules']['entries']=[
@@ -137,6 +138,27 @@ def fixture(core, profile):
         for r in R['R-V']['entries']:
             if r['sense_id']=='SEND':r['sense_id']='K_SEND'
         R['TemplateMap']['entries']=[r for r in R['TemplateMap']['entries'] if r['sense_id']!='SEND']
+    # pymorphy declares a finite verb as VERB and its infinitive as INFN.
+    # R-S matching is intentionally exact on POS: declare each infinitive
+    # reading independently, with its own sense ID and the same explicit T
+    # mapping as its finite reading. This changes fixture data, not runtime
+    # POS equivalence or sentence-specific control/inference rules.
+    for finite in tuple(R['R-S']['entries']):
+        if finite['POS']!='VERB':continue
+        finite_id=finite['sense_id'];infinitive_id=finite_id+'_INFN'
+        infinitive=deepcopy(finite)
+        infinitive.update(POS='INFN',sense_id=infinitive_id)
+        R['R-S']['entries'].append(infinitive)
+        for valency in tuple(R['R-V']['entries']):
+            if valency['sense_id']==finite_id:
+                infinitive_valency=deepcopy(valency)
+                infinitive_valency['sense_id']=infinitive_id
+                R['R-V']['entries'].append(infinitive_valency)
+        for mapping in tuple(R['TemplateMap']['entries']):
+            if mapping['sense_id']==finite_id:
+                infinitive_mapping=deepcopy(mapping)
+                infinitive_mapping['sense_id']=infinitive_id
+                R['TemplateMap']['entries'].append(infinitive_mapping)
     content={k:m[k] for k in ('kind','version','schema_version','entries','dependency_versions')}
     m['coverage_report']['resource_content_sha256']=digest(content)
     m['coverage_report']['units_by_kind']={k:len(r['entries']) for k,r in R.items()}
@@ -315,7 +337,7 @@ def native_coverage(state,release,store):
         else:blocked_frames.append(frame.frame_id)
     for root in state.logical_roots:covered.update(root.get('alignment_refs',()))
     relevant={e.token_id for e in state.evidence if e.span.strip()
-              and not all(v.pos=='PNCT' for v in e.variants)}
+              and not (e.variants and all(v.pos=='PNCT' or 'PNCT' in v.features for v in e.variants))}
     unresolved=relevant-covered
     status=compute_coverage(tuple(sorted(covered)),tuple(sorted(unresolved)),surface_roles,
                             open_lexical,bool(closed_frames or state.logical_roots))

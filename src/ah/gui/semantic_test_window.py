@@ -248,10 +248,10 @@ class MainWindow(_BaseMainWindow):
             status = process_run_status(stats.get("status", "INCOMPLETE"), exit_code,
                                         normal_exit=exit_status == QProcess.ExitStatus.NormalExit,
                                         completed=self._oracle_progress.finished, cancelled=self._oracle_cancelled)
+            stats["process_exit_code"] = exit_code
+            stats["gui_status"] = status
             self.chat_history.append(f"<b>V7 oracle {self._html(status)}</b><pre>{self._html(render_report(stats)[-16000:])}</pre>")
             if self._oracle_out_dir is not None and self._oracle_out_dir.is_dir():
-                stats["process_exit_code"] = exit_code
-                stats["gui_status"] = status
                 md_path, json_path = save_report(self._oracle_out_dir, stats)
                 self.chat_history.append(f"Отчёт: {self._html(str(md_path))}<br>Данные: {self._html(str(json_path))}<br>Живой trace: {self._html(str(self._oracle_out_dir / 'progress.jsonl'))}")
         except Exception as exc:

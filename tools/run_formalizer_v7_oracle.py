@@ -77,7 +77,7 @@ def main(argv=None):
     actual=a.out/'actual.jsonl';started=time.monotonic();fixtures=checker.readjson(a.corpus/'fixtures.json');bindings=[];received_calls=0
     progress.configure(a.out/'progress.jsonl',stdout=a.progress_jsonl)
     live_counts={'completed':0,'total':len(selected),'passed':0,'failed':0,'blocked':0}
-    progress.emit('run_started',provider=a.provider,model=a.model,output_dir=str(a.out),
+    progress.emit('run_started',provider=a.provider,model=a.model,provider_config=config,output_dir=str(a.out),
         selected_case_ids=[c['case_id'] for c in selected],**live_counts)
     with actual.open('w',encoding='utf-8') as out:
         for i,gold in enumerate(selected,1):

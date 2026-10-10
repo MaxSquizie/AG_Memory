@@ -31,7 +31,7 @@ def test_declared_synonyms_and_optional_arguments_map_to_actual_templates(tmp_pa
     assert onset['template_ref']=='fixture:T:SLEEP'
     assert aliases[onset['template_ref']][0]=='SLEEP'
     optional=[x for x in release.entries('TemplateMap')
-              if x['sense_id']=='SIT_DOWN' and x['roles']==['SUBJECT']]
+              if x['sense_id']=='SIT_STATE' and x['roles']==['SUBJECT']]
     assert len(optional)==1
     actual=session.core.store.get_template(optional[0]['template_ref'])
     assert [r.value for r in actual.roles]==['SUBJECT']

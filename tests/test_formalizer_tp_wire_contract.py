@@ -63,6 +63,70 @@ def test_one_outer_fence_preserves_the_same_validated_graph_and_prose_stays_inva
         parse_and_validate(request(), 'Here is a graph:\n```json\n' + raw + '\n```')
 
 
+@pytest.mark.parametrize('kind', ['NOT', 'TIME', 'WH'])
+def test_schema_and_validator_agree_on_nonlexical_head_anchor(kind):
+    req = StructureProposalRequest('TP:head-kind', 'pre-seal', ('t0', 't1'),
+        allowed_node_kinds=frozenset({'PREDICATE', kind}),
+        allowed_edge_kinds=frozenset({'OPERAND', 'TIME_SCOPE', 'QUERY_SLOT'}),
+        allowed_role_ids=frozenset({'OBJECT'}))
+    graph = {'hypotheses': [{'local_id': 'h',
+        'nodes': [{'kind': kind, 'anchor_spans': ['t0']},
+                  {'kind': 'PREDICATE', 'anchor_spans': ['t1']}],
+        'edges': [{'kind': 'OPERAND', 'from': 0, 'to': 1}] if kind == 'NOT' else
+                 [{'kind': 'TIME_SCOPE', 'from': 1, 'to': 0}] if kind == 'TIME' else
+                 [{'kind': 'QUERY_SLOT', 'from': 1, 'to': 0, 'role_id': 'OBJECT'}],
+        'alignment': ['t0', 't1']}]}
+    schema = json.loads(build_structure_prompt(req, []))['response_schema']
+    validator = Draft202012Validator(schema)
+    validator.validate(graph)
+    assert parse_and_validate(req, json.dumps(graph))
+    # This is the actual failure class in the recorded run: the token is
+    # anchored correctly but head_anchor is forbidden for this node kind.
+    graph['hypotheses'][0]['nodes'][0]['head_anchor'] = 't0'
+    assert list(validator.iter_errors(graph))
+    with pytest.raises(ProtocolError, match=rf'node\[0\] kind={kind} forbids head_anchor'):
+        parse_and_validate(req, json.dumps(graph))
+
+
+@pytest.mark.parametrize('kind,target', [('ARGUMENT', 'ENTITY'),
+    ('ATTITUDE', 'PREDICATE'), ('QUERY_SLOT', 'WH')])
+@pytest.mark.parametrize('missing', [True, False])
+def test_schema_and_validator_require_nonnull_typed_edge_role(kind, target, missing):
+    req = StructureProposalRequest('TP:role', 'pre-seal', ('t0', 't1'),
+        allowed_node_kinds=frozenset({'PREDICATE', target}),
+        allowed_edge_kinds=frozenset({kind}), allowed_role_ids=frozenset({'OBJECT'}))
+    graph = {'hypotheses': [{'local_id': 'h',
+        'nodes': [{'kind': 'PREDICATE', 'anchor_spans': ['t0']},
+                  {'kind': target, 'anchor_spans': ['t1']}],
+        'edges': [{'kind': kind, 'from': 0, 'to': 1, 'role_id': 'OBJECT'}],
+        'alignment': ['t0', 't1']}]}
+    validator = Draft202012Validator(json.loads(build_structure_prompt(req, []))['response_schema'])
+    validator.validate(graph)
+    assert parse_and_validate(req, json.dumps(graph))
+    edge = graph['hypotheses'][0]['edges'][0]
+    if missing:
+        del edge['role_id']
+    else:
+        edge['role_id'] = None
+    assert list(validator.iter_errors(graph))
+    with pytest.raises(ProtocolError, match=rf'{kind} requires a non-null registered role_id'):
+        parse_and_validate(req, json.dumps(graph))
+
+
+def test_schema_requires_own_head_for_multitoken_lexical_node():
+    req = request()
+    graph = reply()
+    graph['hypotheses'][0]['nodes'][0]['anchor_spans'] = ['t1', 't2']
+    graph['hypotheses'][0]['alignment'].append('t2')
+    validator = Draft202012Validator(json.loads(build_structure_prompt(req, []))['response_schema'])
+    assert list(validator.iter_errors(graph))
+    with pytest.raises(ProtocolError, match='explicit morphological head'):
+        parse_and_validate(req, json.dumps(graph))
+    graph['hypotheses'][0]['nodes'][0]['head_anchor'] = 't1'
+    validator.validate(graph)
+    assert parse_and_validate(req, json.dumps(graph))
+
+
 def test_actual_native_simple_ingest_observes_declared_contract_and_accepts_fenced_graph(tmp_path):
     from tools.formalizer_v7_extended_binding import Session
     from tools.formalizer_v7_native_binding import execute_native
@@ -130,3 +194,47 @@ def test_actual_native_missing_alignment_stays_empty_with_actionable_diagnostic(
     problem = next(d for d in diagnostics['native_diagnostics'] if d['code'] == 'PROPOSAL_INVALID')
     assert "missing=['alignment']" in problem['detail']
     assert '$.hypotheses[0]' in problem['detail']
+
+
+@pytest.mark.parametrize('text,predicate,entities,expected,coverage', [
+    ('Мне холодно.', 'холодно', [('Мне', 'EXPERIENCER')],
+     {'predicate': 'OPEN:холодно', 'roles': {'EXPERIENCER': {'entity': 'speaker'}}}, 'OPEN_LEXICAL'),
+    ('Курьер переадресовал письмо.', 'переадресовал', [('Курьер', 'SUBJECT'), ('письмо', 'OBJECT')],
+     {'predicate': 'OPEN:переадресовать', 'roles': {'AGENT': {'entity': 'courier'},
+                                                'THEME': {'entity': 'letter'}}}, 'OPEN_LEXICAL'),
+    ('Иван вошёл.', 'вошёл', [('Иван', 'SUBJECT')],
+     {'predicate': 'ENTER', 'roles': {'AGENT': {'entity': 'ivan'}}}, 'FULL_CANONICAL'),
+    ('Иван вошёл неизвестно.', 'вошёл', [('Иван', 'SUBJECT')],
+     {'predicate': 'ENTER', 'roles': {'AGENT': {'entity': 'ivan'}}}, 'PARTIAL'),
+])
+def test_real_morphology_punctuation_does_not_lower_native_coverage(
+        tmp_path, text, predicate, entities, expected, coverage):
+    from unittest.mock import patch
+    from tools.formalizer_v7_extended_binding import Session
+    from tools.formalizer_v7_native_binding import execute_native
+
+    class Backend:
+        def generate(self, prompt, **_kwargs):
+            data = json.loads(prompt)
+            tokens = {t['text']: t['id'] for t in data['tokens']}
+            nodes = [{'kind': 'PREDICATE', 'anchor_spans': [tokens[predicate]]}]
+            nodes += [{'kind': 'ENTITY', 'anchor_spans': [tokens[word]]} for word, _ in entities]
+            graph = {'hypotheses': [{'local_id': 'punctuation', 'nodes': nodes,
+                'edges': [{'kind': 'ARGUMENT', 'from': 0, 'to': i, 'role_id': role}
+                          for i, (_, role) in enumerate(entities, 1)],
+                'alignment': [tokens[predicate]] + [tokens[word] for word, _ in entities]}]}
+            Draft202012Validator(data['response_schema']).validate(graph)
+            return json.dumps(graph)
+
+    payload = {'raw_input': {'text': text, 'source_id': 'coverage-wire-contract',
+        'revision': 1, 'range': [0, len(text)], 'language': 'ru',
+        'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    session = Session([payload], tmp_path / 'native.log')
+    with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture'})
+    assert actual['runtime']['report']['terminal'] == 'APPLIED'
+    assert actual['assertions']['ah'] == [expected]
+    assert actual['coverage']['status'] == coverage
+    assert bool(actual['coverage']['unresolved_span_ids']) == (coverage == 'PARTIAL')
+    punct_id = f'tok:{len(text)-1}:{len(text)}'
+    assert punct_id not in actual['runtime']['coverage_evidence']['relevant_token_refs']

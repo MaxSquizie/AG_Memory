@@ -9,6 +9,7 @@ import pytest
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 pytest.importorskip('PySide6')
 from PySide6.QtWidgets import QApplication, QTextEdit
+from PySide6.QtCore import QProcess
 from ah.gui.oracle_progress_state import OracleOutputParser
 from ah.gui.semantic_test_window import MainWindow
 from tools.formalizer_v7_run_diagnostics import case_diagnostics
@@ -59,3 +60,30 @@ def test_first_issue_text_survives_truncated_large_diagnostics(qapp):
         'seq': 1, 'case_id': 'C', 'status': 'FAIL', 'runtime_diagnostics': '<preview>',
         'first_observed_text': 'Записанная ошибка провайдера [TP]: HTTP 403'})
     assert 'HTTP 403' in text and '[TP]' in text
+
+
+def test_cancelled_gui_writer_preserves_completed_case_and_same_report_on_screen(qapp, tmp_path):
+    (tmp_path / 'progress.jsonl').write_text('\n'.join(json.dumps(e) for e in [
+        {'schema_version': 'v7-oracle-progress-1', 'seq': 1, 'event': 'run_started',
+            'total': 2, 'provider_config': {'provider': 'lmstudio', 'model': 'local', 'base_url': 'http://localhost:1234'}},
+        {'schema_version': 'v7-oracle-progress-1', 'seq': 2, 'event': 'case_finished',
+            'case_id': 'A', 'status': 'PASS'},
+        {'schema_version': 'v7-oracle-progress-1', 'seq': 3, 'event': 'case_started', 'case_id': 'B'},
+    ]), encoding='utf-8')
+    history = QTextEdit()
+    finished_status = []
+    target = SimpleNamespace(_oracle_closing=False, _oracle_model_output=lambda: None,
+        _consume_oracle_output=lambda *args, **kwargs: None, _oracle_out_dir=tmp_path,
+        _oracle_progress=SimpleNamespace(finished=False), _oracle_cancelled=True,
+        chat_history=history, _html=escape, _release_oracle=finished_status.append)
+    MainWindow._oracle_model_finished(target, -15, QProcess.ExitStatus.CrashExit)
+    assert finished_status == ['CANCELLED']
+    stats = json.loads((tmp_path / 'gui_stats.json').read_text())
+    assert stats['status'] == 'INCOMPLETE' and stats['gui_status'] == 'CANCELLED'
+    assert stats['totals']['passed'] == 1 and stats['totals']['failed'] == 0
+    assert stats['non_passing_cases'][0]['case_id'] == 'B'
+    text = history.toPlainText()
+    assert 'GUI process status: CANCELLED' in text
+    assert 'passed=1  failed=0' in text
+    assert 'A: INCOMPLETE' not in text
+    assert 'GUI process status: CANCELLED' in (tmp_path / 'gui_report.md').read_text()

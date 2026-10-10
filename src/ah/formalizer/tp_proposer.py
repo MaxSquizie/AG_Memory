@@ -102,6 +102,13 @@ def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) ->
         'feature_refs': feature_refs,
         'head_anchor': {'anyOf': [source_id, {'type': 'null'}]},
     }, ('kind', 'anchor_spans'))
+    node['allOf'] = [
+        {'if': {'properties': {'kind': {'enum': ['PREDICATE', 'ENTITY']}}},
+         'else': {'properties': {'head_anchor': {'type': 'null'}}}},
+        {'if': {'properties': {'kind': {'enum': ['PREDICATE', 'ENTITY']},
+                               'anchor_spans': {'minItems': 2}}},
+         'then': {'required': ['head_anchor'], 'properties': {'head_anchor': source_id}}},
+    ]
     edge = obj({
         'kind': {'type': 'string', 'enum': sorted(req.allowed_edge_kinds)},
         'from': {'type': 'integer', 'minimum': 0},
@@ -110,6 +117,11 @@ def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) ->
                               {'type': 'null'}]},
         'scope': {'type': 'boolean'},
     }, ('kind', 'from', 'to'))
+    edge['allOf'] = [{
+        'if': {'properties': {'kind': {'enum': ['ARGUMENT', 'ATTITUDE', 'QUERY_SLOT']}}},
+        'then': {'required': ['role_id'],
+                 'properties': {'role_id': {'type': 'string', 'enum': sorted(req.allowed_role_ids)}}},
+    }]
     hypothesis = obj({
         'local_id': {'type': 'string', 'minLength': 1},
         'nodes': {'type': 'array', 'items': node, 'minItems': 1, 'maxItems': req.max_nodes},
@@ -129,12 +141,12 @@ def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) ->
             'Every hypothesis must have its own nonempty local_id, nodes, and nonempty alignment. local_id is a local label, not a canonical memory ID.',
             'alignment contains supplied token IDs covering this hypothesis; every node anchor_spans is a nonempty subset of alignment. Use token IDs, never token text or character offsets.',
             'Nodes have no id field. Edge from/to are zero-based INTEGER positions in that hypothesis nodes array, not local_id strings or token IDs.',
-            'For ARGUMENT/ATTITUDE, from is a PREDICATE and to is an ENTITY/proposition; role_id must be a supplied role. ATTITUDE targets a proposition.',
+            'For ARGUMENT/ATTITUDE/QUERY_SLOT, role_id is REQUIRED and must be a non-null supplied role. Never use null or omit it. For ARGUMENT/ATTITUDE, from is a PREDICATE and to is an ENTITY/proposition; ATTITUDE targets a proposition.',
             'OPERAND edges run from an operator to its operands. Preserve their syntactic order. Unary NOT/POSSIBLE/NECESSARY have one operand; AND/OR/XOR have at least two; IMPLIES/COUNTERFACTUAL/ASSOCIATION have two.',
             'FORALL/EXISTS operands are [BOUND_VAR, proposition body]. Numeric scope operands are [BOUND_VAR, proposition body, NUMERAL]. BIND connects BOUND_VAR to its body ENTITY argument.',
             'TIME_SCOPE runs from a proposition to an anchored TIME. BEFORE/AFTER/DURING operands are TIME or proposition nodes. TIME/NUMERAL carry raw anchors only; never supply model-generated numeric values.',
             'QUERY_SLOT runs from PREDICATE to WH/COUNT_REQUEST and uses a registered role_id.',
-            'For a multi-token PREDICATE/ENTITY supply head_anchor from its own anchor_spans. feature_refs must name declared token hypotheses; otherwise omit it or use [].',
+            'head_anchor is ONLY for PREDICATE/ENTITY. On operators, TIME, WH, COUNT_REQUEST, BOUND_VAR and NUMERAL omit head_anchor or use null; never supply a token ID there. For multi-token PREDICATE/ENTITY, head_anchor is required and must be from its own anchor_spans. feature_refs must name declared token hypotheses; otherwise omit it or use [].',
             'Keep the graph acyclic and within the supplied budgets. Preserve every required_operators scope. Never add fields, canonical IDs or invented roles.',
             'Propose only positively supported structures. Preserve genuine alternative readings or abstain when no grounded structure can be supplied.',
         ],
@@ -165,7 +177,7 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             raise ProtocolError("unanchored node or undeclared feature ref")
     src = set(req.source_spans)
 
-    for node in hyp.nodes:
+    for ni, node in enumerate(hyp.nodes):
         # (c) node kind allowlist
         if req.allowed_node_kinds and node.kind not in req.allowed_node_kinds:
             raise ProtocolError(f"hypothesis {hyp.local_id}: node kind {node.kind!r} not allowed")
@@ -174,8 +186,11 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
             if span not in src or span not in hyp.alignment:
                 raise ProtocolError(
                     f"hypothesis {hyp.local_id}: anchor span {span!r} outside the bounded region")
-        if node.head_anchor is not None and (not isinstance(node.head_anchor,str) or node.kind not in {'PREDICATE','ENTITY'} or node.head_anchor not in node.anchor_spans):
-            raise ProtocolError('lexical head is outside its own anchors')
+        if node.head_anchor is not None:
+            if node.kind not in {'PREDICATE','ENTITY'}:
+                raise ProtocolError(f'hypothesis {hyp.local_id}: node[{ni}] kind={node.kind} forbids head_anchor')
+            if not isinstance(node.head_anchor,str) or node.head_anchor not in node.anchor_spans:
+                raise ProtocolError(f'hypothesis {hyp.local_id}: node[{ni}] lexical head is outside its own anchors')
         if node.kind in {'PREDICATE','ENTITY'} and len(node.anchor_spans)>1 and node.head_anchor is None:
             raise ProtocolError('multi-head lexical unit requires an explicit morphological head')
 
@@ -192,6 +207,8 @@ def _validate_hypothesis(req: StructureProposalRequest, hyp: Hypothesis) -> None
         graph[edge.from_idx].append(edge.to_idx)
         a,b=hyp.nodes[edge.from_idx].kind,hyp.nodes[edge.to_idx].kind
         proposition = b in PROPOSITION_NODE_KINDS
+        if edge.kind in {'ARGUMENT','ATTITUDE','QUERY_SLOT'} and not edge.role_id:
+            raise ProtocolError(f'hypothesis {hyp.local_id}: {edge.kind} requires a non-null registered role_id')
         if edge.kind in {'ARGUMENT','ATTITUDE'} and (a!='PREDICATE' or b!='ENTITY' and not proposition or not edge.role_id):
             raise ProtocolError('invalid typed argument edge')
         if edge.kind=='ATTITUDE' and not proposition:

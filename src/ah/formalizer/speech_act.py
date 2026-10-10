@@ -35,7 +35,10 @@ _CONDITIONAL_PARTICLES = {"бы", "б"}
 
 
 def _words(text: str) -> set[str]:
-    return {w for w in re.split(r"[^a-zа-яё]+", text.lower()) if w}
+    # Keep intra-word hyphens inside the token: splitting them would turn an
+    # indefinite form into an independent declared interrogative cue. Dashes
+    # outside words still separate tokens.
+    return set(re.findall(r"[a-zа-яё]+(?:[-\u2010\u2011][a-zа-яё]+)*", text.lower()))
 
 
 def _declared_request_kind(context_facts) -> str | None:
