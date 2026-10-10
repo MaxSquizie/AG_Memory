@@ -7,6 +7,7 @@ from ah.model import Ref, BoundVar, VariableSort, TimeLiteral, CountLiteral
 
 from .canonical_ledger import region
 from .temporal_license import normalize, or_elimination_license, forall_inst_license
+from .inference_policy import node_inference_policy
 
 
 def pattern_from_ref(core, ledger, uid, budget, depth=0):
@@ -30,7 +31,7 @@ def pattern_from_ref(core, ledger, uid, budget, depth=0):
         return pattern_from_ref(core, ledger, value, budget, depth+1) if ref.kind.value in {'N','G'} else ref
     if node.get('function_id'):
         return Pattern(node['function_id'], tuple(operand(x) for x in node['operands']))
-    if node.get('semantic_status') == 'UNLINKED':
+    if node_inference_policy(node).exact_attestation_only:
         raise ValueError('OPEN_LEXICAL_INFERENCE_FORBIDDEN')
     from ah.model import ActantRole
     return Pattern(template_ref=node['template_ref'],

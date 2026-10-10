@@ -16,6 +16,7 @@ from ah.inference.contracts import (NativeFormulaGoal,NativeBindingGoal,NativeBi
     AssociationGoal,TemporalComparisonConclusion,FormulaQueryConclusion)
 from .canonical_ledger import digest,region
 from .temporal_license import normalize,covers,TemporalRegion
+from .inference_policy import EXACT_ATTESTATION,node_inference_policy
 
 
 @dataclass(frozen=True)
@@ -303,7 +304,7 @@ def _matching_refs(core,ledger,pattern,*,limit,workspace=(),target_uid=None,budg
             return all(operand(a,b,variables) for a,b in zip(p.members,actual))
         if node.get('function_id'): return False
         if p.lexical_anchor:
-            if node.get('semantic_status')!='UNLINKED' or uid not in workspace_ids: return False
+            if EXACT_ATTESTATION not in node_inference_policy(node).capabilities or uid not in workspace_ids: return False
             template=core.store.get_template(node['template_ref'])
             if p.lexical_anchor not in {s.casefold() for s in core.store.get_symbol(template.predicate.uid).forms}: return False
         elif node.get('template_ref')!=p.template_ref: return False

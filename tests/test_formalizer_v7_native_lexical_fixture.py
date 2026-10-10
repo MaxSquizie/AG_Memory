@@ -119,3 +119,153 @@ def test_past_modal_forms_declare_required_possible_operator(tmp_path, surface):
         'edges': [], 'alignment': [token]}]}
     with pytest.raises(ProtocolError):
         parse_and_validate(req, json.dumps(without_modal_scope))
+
+
+def test_native_tired_subject_maps_to_canonical_experiencer(tmp_path):
+    class Backend:
+        def generate(self, prompt, **_kwargs):
+            data = json.loads(prompt)
+            tokens = {t['text']: t['id'] for t in data['tokens']}
+            return json.dumps({'hypotheses': [{'local_id': 'tired-structure',
+                'nodes': [{'kind': 'PREDICATE', 'anchor_spans': [tokens['устал']]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens['Иван']]}],
+                'edges': [{'kind': 'ARGUMENT', 'from': 0, 'to': 1, 'role_id': 'SUBJECT'}],
+                'alignment': [tokens['Иван'], tokens['устал']]}]})
+
+    text = 'Иван устал.'
+    payload = {'raw_input': {'text': text, 'source_id': 'tired-role-fixture',
+        'revision': 1, 'range': [0, len(text)], 'language': 'ru',
+        'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    session = Session([payload], tmp_path / 'tired.log')
+    with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+    assert actual['assertions']['ah'] == [
+        {'predicate': 'TIRED', 'roles': {'EXPERIENCER': {'entity': 'ivan'}}}]
+    assert actual['runtime']['report']['terminal'] == 'APPLIED'
+    valency = next(v for v in session.release.entries('R-V') if v['sense_id'] == 'TIRED')
+    assert valency['roles'][0]['role_id'] == 'SUBJECT'
+    assert session.native_aliases['fixture:T:TIRED'] == ('TIRED', {'SUBJECT': 'EXPERIENCER'})
+
+
+@pytest.mark.parametrize('text,predicate,preposition,entity,wire_role,canonical_role,label', [
+    ('Иван сидит на стуле.', 'сидит', 'на', 'стуле', 'LOCATION', 'LOCATION', 'chair'),
+    ('Иван приехал в Москву.', 'приехал', 'в', 'Москву', 'LOCATION', 'DESTINATION', 'moscow'),
+    ('Иван уехал из Москвы.', 'уехал', 'из', 'Москвы', 'SOURCE', 'SOURCE', 'moscow'),
+])
+def test_declared_fixture_prepositional_mention_binding_carrier(
+        tmp_path, text, predicate, preposition, entity, wire_role, canonical_role, label):
+    class Backend:
+        def generate(self, prompt, **_kwargs):
+            data = json.loads(prompt)
+            tokens = {t['text']: t['id'] for t in data['tokens']}
+            return json.dumps({'hypotheses': [{'local_id': 'pp-structure',
+                'nodes': [{'kind': 'PREDICATE', 'anchor_spans': [tokens[predicate]]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens['Иван']]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens[preposition], tokens[entity]],
+                           'head_anchor': tokens[entity]}],
+                'edges': [{'kind': 'ARGUMENT', 'from': 0, 'to': 1, 'role_id': 'SUBJECT'},
+                          {'kind': 'ARGUMENT', 'from': 0, 'to': 2, 'role_id': wire_role}],
+                'alignment': list(tokens.values())}]})
+
+    payload = {'raw_input': {'text': text, 'source_id': 'pp-role-fixture-' + label,
+        'revision': 1, 'range': [0, len(text)], 'language': 'ru',
+        'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    session = Session([payload], tmp_path / (predicate + '.log'))
+    with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+    assert actual['assertions']['ah'][0]['roles'][canonical_role] == {'entity': label}
+    assert actual['runtime']['report']['terminal'] == 'APPLIED'
+    ir = actual['runtime']['ir']
+    frame = ir['frames'][0]
+    unit = next(u for u in frame['semantic']['lexical_units'].values()
+                if len(u['anchor_refs']) == 2)
+    assert ir['observation']['entity_bindings'][unit['mention_ref']] == 'fixture:language:M:' + label
+    binding = next(b for b in session.store.ledger.data['bindings'].values()
+                   if b['mention_ref'] == unit['mention_ref'])
+    assert binding['target_ref'] == 'fixture:language:M:' + label
+    assert binding['source_tag']
+
+
+def test_fixture_does_not_alias_arbitrary_compound_mention_to_its_head(tmp_path):
+    class Backend:
+        def generate(self, prompt, **_kwargs):
+            data = json.loads(prompt)
+            tokens = {t['text']: t['id'] for t in data['tokens']}
+            return json.dumps({'hypotheses': [{'local_id': 'compound-structure',
+                'nodes': [{'kind': 'PREDICATE', 'anchor_spans': [tokens['читает']]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens['Иван']]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens['новую'], tokens['книгу']],
+                           'head_anchor': tokens['книгу']}],
+                'edges': [{'kind': 'ARGUMENT', 'from': 0, 'to': 1, 'role_id': 'SUBJECT'},
+                          {'kind': 'ARGUMENT', 'from': 0, 'to': 2, 'role_id': 'OBJECT'}],
+                'alignment': list(tokens.values())}]})
+
+    text = 'Иван читает новую книгу.'
+    payload = {'raw_input': {'text': text, 'source_id': 'compound-negative-fixture',
+        'revision': 1, 'range': [0, len(text)], 'language': 'ru',
+        'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    session = Session([payload], tmp_path / 'compound.log')
+    with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+    ir = actual['runtime']['ir']
+    unit = next(u for u in ir['frames'][0]['semantic']['lexical_units'].values()
+                if len(u['anchor_refs']) == 2)
+    assert unit['mention_ref'] not in ir['observation']['entity_bindings']
+    assert actual['assertions']['ah'][0]['roles']['THEME'] != {'entity': 'book'}
+
+
+@pytest.mark.parametrize('text,operator', [
+    ('Если Иван пришёл, Мария уснула.', 'IMPLIES'),
+    ('Если бы Иван пришёл, Мария бы уснула.', 'COUNTERFACTUAL'),
+])
+def test_conditional_fixture_scope_triggers_are_mutually_exclusive(tmp_path, text, operator):
+    from ah.formalizer.native_frontend import _required_operators
+
+    session = Session([], tmp_path / 'conditional-scope.log')
+    release, _ = fixture(session.core, 'known')
+    required = _required_operators(t0(text), release)
+    assert [kind for kind, _anchors in required] == [operator]
+
+
+@pytest.mark.parametrize('counterfactual,reply_operator,applied', [
+    (False, 'IMPLIES', True),
+    (True, 'COUNTERFACTUAL', True),
+    (True, 'IMPLIES', False),
+])
+def test_native_conditionals_preserve_the_declared_scope_without_response_rewrites(
+        tmp_path, counterfactual, reply_operator, applied):
+    class Backend:
+        def generate(self, prompt, **_kwargs):
+            data = json.loads(prompt)
+            tokens = {t['text']: t['id'] for t in data['tokens']}
+            conditional_anchors = [t['id'] for t in data['tokens']
+                                   if t['text'] in {'Если', 'бы'}]
+            return json.dumps({'hypotheses': [{'local_id': 'conditional-structure',
+                'nodes': [{'kind': reply_operator, 'anchor_spans': conditional_anchors},
+                          {'kind': 'PREDICATE', 'anchor_spans': [tokens['пришёл']]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens['Иван']]},
+                          {'kind': 'PREDICATE', 'anchor_spans': [tokens['уснула']]},
+                          {'kind': 'ENTITY', 'anchor_spans': [tokens['Мария']]}],
+                'edges': [{'kind': 'OPERAND', 'from': 0, 'to': 1},
+                          {'kind': 'OPERAND', 'from': 0, 'to': 3},
+                          {'kind': 'ARGUMENT', 'from': 1, 'to': 2, 'role_id': 'SUBJECT'},
+                          {'kind': 'ARGUMENT', 'from': 3, 'to': 4, 'role_id': 'SUBJECT'}],
+                'alignment': [t['id'] for t in data['tokens']]}]})
+
+    text = ('Если бы Иван пришёл, Мария бы уснула.' if counterfactual
+            else 'Если Иван пришёл, Мария уснула.')
+    payload = {'raw_input': {'text': text, 'source_id': 'conditional-fixture-' + reply_operator,
+        'revision': 1, 'range': [0, len(text)], 'language': 'ru',
+        'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    session = Session([payload], tmp_path / 'conditional.log')
+    with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+    assert actual['runtime']['report']['applied'] is applied
+    if applied:
+        assert actual['assertions']['ah'][0]['operator'] == reply_operator
+        assert actual['runtime']['report']['terminal'] == 'APPLIED'
+    else:
+        assert actual['assertions']['ah'] == []
+        assert actual['store']['marker_count'] == 0
+        assert any(d['code'] == 'PROPOSAL_INVALID'
+                   for d in actual['runtime']['ir']['diagnostics'])

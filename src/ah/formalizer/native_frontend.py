@@ -87,6 +87,163 @@ def _required_operators(state,release):
     return tuple(required)
 
 
+def _released_slot_evidence(state, release, source, policy):
+    """Project only released, region-matching syntax constraints into TP.
+
+    The local evidence IDs preserve alternatives without exporting R-S semantic
+    IDs, TemplateMap targets, memory references or a preselected predicate.
+    Exhaustion blocks the proposal; a partial list never masquerades as complete.
+    """
+    source_set=set(source)
+    tokens=sorted((e for e in state.evidence if e.token_id in source_set),key=lambda e:e.start)
+    kinds=('R-S','R-V','AttitudeMap','TemporalRules')
+    pin={'release_sha256':release.sha256,'release_version':release.manifest['version'],
+         'resource_versions':{k:release.version(k) for k in kinds if k in release.resources}}
+    limits={'alternatives':policy.get('max_nodes',64),'role_slots':policy.get('max_edges',128),
+            'search_steps':policy.get('max_rule_steps',20000),
+            'serialized_bytes':policy.get('max_source_tokens',256)*policy.get('max_edges',128)}
+    result={'schema_version':'tp-released-slot-evidence-1','status':'COMPLETE',
+            'resource_snapshot':pin,'region_token_refs':list(source),'limits':limits,
+            'valency_alternatives':[],'attitude_alternatives':[],'temporal_triggers':[]}
+    steps=0; slots=0
+
+    class EvidenceLimit(Exception):
+        pass
+
+    def step():
+        nonlocal steps
+        steps+=1
+        if steps>limits['search_steps']: raise EvidenceLimit('search_steps')
+
+    def add(category, record, cost=1):
+        nonlocal slots
+        slots+=cost
+        if slots>limits['role_slots']: raise EvidenceLimit('role_slots')
+        result[category].append(record)
+        if sum(len(result[k]) for k in ('valency_alternatives','attitude_alternatives','temporal_triggers'))>limits['alternatives']:
+            raise EvidenceLimit('alternatives')
+
+    def ref(kind,index,entry):
+        return {'resource_kind':kind,'entry_index':index,'resource_version':release.version(kind),
+                **{k:entry[k] for k in ('rule_id','evidence_rule_id','construction_id') if entry.get(k)}}
+
+    def variant_matches(token, item):
+        return [{'lemma':v.lemma,'POS':v.pos} for v in token.variants
+                if (not item.get('lemma') or item['lemma']==v.lemma)
+                and (not item.get('POS') or item['POS']==v.pos)]
+
+    valencies={}
+    for i,entry in enumerate(release.entries('R-V')):
+        valencies.setdefault(entry['sense_id'],[]).append((i,entry))
+    singles={}; phrases=[]
+    for i,entry in enumerate(release.entries('R-S')):
+        if entry.get('anchor_pattern'): phrases.append((i,entry))
+        else: singles.setdefault((entry['lemma'],entry['POS']),[]).append((i,entry))
+    seen=set()
+
+    def project_valencies(sense_index,sense,anchors,pattern):
+        for valency_index,valency in valencies.get(sense['sense_id'],()):
+            step()
+            record={'evidence_id':'slot:'+digest([release.sha256,sense_index,valency_index,[a.token_id for a in anchors]]),
+                'anchor_refs':[a.token_id for a in anchors],
+                'lexical_variants':[{'anchor_ref':a.token_id,'variants':variant_matches(a,item)}
+                    for a,item in zip(anchors,pattern if isinstance(pattern,list) else [pattern])],
+                'roles':[{k:deepcopy(r[k]) for k in ('role_id','argument_types','allowed_cases','allowed_preps','cardinality','optionality','evidence_rule_id') if k in r}
+                         for r in valency.get('roles',())],
+                'resource_refs':[ref('R-S',sense_index,sense),ref('R-V',valency_index,valency)]}
+            add('valency_alternatives',record,len(record['roles']))
+
+    # Indexing a frozen release is not local search. Only matching entries and
+    # anchor combinations consume the per-request search budget.
+    attitudes={}
+    for i,entry in enumerate(release.entries('AttitudeMap')):
+        attitudes.setdefault(entry['lemma'],[]).append((i,entry))
+    anchor_indices={}
+    for j,token in enumerate(tokens):
+        for variant in token.variants:
+            for key in ((variant.lemma,variant.pos),(variant.lemma,None),(None,variant.pos),(None,None)):
+                anchor_indices.setdefault(key,set()).add(j)
+    try:
+        for token in tokens:
+            for variant in token.variants:
+                step()
+                for i,entry in singles.get((variant.lemma,variant.pos),()):
+                    step()
+                    key=(i,(token.token_id,))
+                    if key not in seen:
+                        seen.add(key);project_valencies(i,entry,(token,),entry)
+        # A declared phrase licenses ordered anchors, including nonadjacent
+        # anchors. Enumerate every match within the bounded region; never choose
+        # a shortest/first phrase or infer one from a matching head alone.
+        for i,entry in phrases:
+            choices=[sorted(anchor_indices.get((item.get('lemma'),item.get('POS')),()))
+                     for item in entry['anchor_pattern']]
+            if any(not choice for choice in choices): continue
+            step()
+            for indices in itertools.product(*choices):
+                step()
+                if any(a>=b for a,b in zip(indices,indices[1:])): continue
+                anchors=tuple(tokens[j] for j in indices)
+                project_valencies(i,entry,anchors,entry['anchor_pattern'])
+        for token in tokens:
+            for lemma in dict.fromkeys(v.lemma for v in token.variants):
+                for i,attitude in attitudes.get(lemma,()):
+                    step()
+                    variants=variant_matches(token,{'lemma':lemma})
+                    add('attitude_alternatives',{'evidence_id':'attitude:'+digest([release.sha256,i,token.token_id]),
+                        'anchor_refs':[token.token_id],'lexical_variants':variants,
+                        **{k:attitude[k] for k in ('argument_role','holder_role','attitude') if k in attitude},
+                        'resource_refs':[ref('AttitudeMap',i,attitude)]})
+        for i,rule in enumerate(release.resources.get('TemporalRules',{}).get('entries',())):
+            for match in re.finditer(rule['pattern'],state.text,re.I):
+                anchors=[t.token_id for t in tokens if t.start<match.end() and t.end>match.start()]
+                # A trigger straddling the region boundary is not evidence for
+                # this request. No clock/default/ownership is projected.
+                full=[t.token_id for t in state.evidence if t.start<match.end() and t.end>match.start()]
+                if not anchors or anchors!=full: continue
+                step()
+                add('temporal_triggers',{'evidence_id':'time:'+digest([release.sha256,i,anchors]),
+                    'anchor_refs':anchors,**{k:rule[k] for k in ('kind','interval_semantics') if k in rule},
+                    'resource_refs':[ref('TemporalRules',i,rule)]})
+        if len(json.dumps(result,ensure_ascii=False,separators=(',',':')).encode('utf-8'))>limits['serialized_bytes']:
+            raise EvidenceLimit('serialized_bytes')
+    except EvidenceLimit as exc:
+        # Discard the partial projection, but expose why it is incomplete. The
+        # caller does not send this request or use an arbitrary retained prefix.
+        result.update(status='LIMIT_EXCEEDED',limit=str(exc),valency_alternatives=[],
+                      attitude_alternatives=[],temporal_triggers=[])
+    result['search_steps']=steps
+    return result
+
+
+def _tp_speech_act_metadata(state, release, source):
+    """Export declared/reviewed requests, without guessing speech act or WH."""
+    from .query_requests import validate_request
+    roles={r['role_id'] for r in release.entries('RoleRegistry')}
+    metadata={'declared_request_kind':state.observation.get('request_kind'),
+              'query_form':'UNDETERMINED','query_modes':[],'reviewed_query_intents':[]}
+    request=state.observation.get('goal_request')
+    if request is not None:
+        try: request=validate_request(request,roles)
+        except ValueError: metadata['goal_request_status']='INVALID'
+        else:
+            metadata['goal_request_status']='VALID'
+            metadata['query_modes'].append(request.get('mode','FORMULA'))
+            metadata['declared_query_request']={k:deepcopy(request[k]) for k in ('mode','requested_roles','count_role','count_unit') if k in request}
+    for intent in state.query_intents:
+        if intent['token_ref'] not in source: continue
+        request=validate_request(intent['request'],roles)
+        metadata['query_modes'].append(request.get('mode','FORMULA'))
+        metadata['reviewed_query_intents'].append({'anchor_ref':intent['token_ref'],
+            'request':{k:deepcopy(request[k]) for k in ('mode','requested_roles','count_role','count_unit') if k in request},
+            'resource_provenance':deepcopy(intent['provenance'])})
+    metadata['query_modes']=sorted(set(metadata['query_modes']))
+    if metadata['query_modes']==['FORMULA']: metadata['query_form']='BOOLEAN'
+    elif len(metadata['query_modes'])==1: metadata['query_form']=metadata['query_modes'][0]
+    elif metadata['query_modes']: metadata['query_form']='ALTERNATIVES'
+    return metadata
+
+
 def _grammar_frames(state,release):
     p=release.entries('ProposalPolicy')[0]
     source=tuple(e.token_id for e in state.evidence)
@@ -267,13 +424,30 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
             for child in t.get('operands',()): inherit_scope(child,reg,owner)
         for t in [*forest,*children.values()]: inherit_scope(t)
         for f in localframes.values(): f.semantic['operator_forest']=forest
+        if not localframes and not forest:
+            # A typed ENTITY/TIME-only reply is not a proposition. Keep the
+            # validated structure for audit and block a valid sibling from
+            # becoming the unique interpretation by silent disappearance.
+            unsupported=True
+            state.grammar_search_incomplete=True
+            state.diag('STRUCTURE_NOT_COVERED','validated hypothesis has no frame or logical root: '
+                       +h.local_id+' anchors='+json.dumps(list(h.alignment)))
         if not localframes:
             state.syntax_trace.append({'stage':'T2','literal_hypothesis':h.local_id,
                                        'operator_forest':[{**t,'alignment_refs':list(h.alignment)} for t in forest]})
         accepted.append((h,list(localframes.values())))
     # An unsupported reading cannot silently disappear and turn the remaining
     # prefix into a uniquely resolved structure.
-    return [] if unsupported else accepted
+    if unsupported:
+        for h in hypotheses:
+            state.syntax_trace.append({'stage':'T2','event':'UNINTERPRETED_STRUCTURAL_ALTERNATIVE',
+                                       'hypothesis':asdict(h)})
+            if not any(a.alt_id==h.local_id for a in state.linked_alternatives):
+                state.linked_alternatives.append(LinkedAlternative(h.local_id,'STRUCTURAL_HYPOTHESIS',
+                    digest(asdict(h)),h.local_id,provenance=provenance.get(h.local_id,
+                        ResourceProvenance(('TP_VALIDATED',),{'release':release.sha256}))))
+        return []
+    return accepted
 
 
 def _propose(state,selector,release):
@@ -307,7 +481,14 @@ def _propose(state,selector,release):
     source=tuple(e.token_id for e in state.evidence)
     if len(source)>p.get('max_source_tokens',256):
         state.diag('COMPUTATION_LIMIT','local TP source region too large; no truncation'); return
-    req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
+    slot_evidence=_released_slot_evidence(state,release,source,p)
+    state.syntax_trace.append({'stage':'TP','event':'RELEASED_SLOT_EVIDENCE',
+        'status':slot_evidence['status'],'resource_snapshot':slot_evidence['resource_snapshot'],
+        'limits':slot_evidence['limits'],**({'limit':slot_evidence['limit']} if 'limit' in slot_evidence else {})})
+    if slot_evidence['status']!='COMPLETE':
+        state.diag('COMPUTATION_LIMIT','TP released slot evidence exceeds '+slot_evidence['limit']+'; no partial evidence sent')
+        return
+    req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required),released_slot_evidence=slot_evidence,speech_act_metadata=_tp_speech_act_metadata(state,release,source))
     prompt=build_structure_prompt(req,[{'id':e.token_id,'text':e.span,
         'variants':[asdict(v) for v in e.variants]} for e in state.evidence])
     frozen_hypotheses = list(frozen.values())

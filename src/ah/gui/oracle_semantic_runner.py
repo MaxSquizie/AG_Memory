@@ -447,7 +447,12 @@ def render_report(stats: dict) -> str:
     lines.append(f"completed comparisons={tot.get('completed')}  incomplete observed cases={tot.get('incomplete_observed')}  not started={tot.get('not_started')}")
     lines.append(f"case result source: {stats.get('comparison_source', 'NOT_RECORDED')}")
     if stats.get("comparison_source") == "progress.jsonl":
-        lines.append("Partial run: completed PASS/FAIL/BLOCKED results are preserved from the last case_finished events. An incomplete run is not an all-case failure.")
+        complete = (stats.get("run_finished_recorded") and isinstance(tot.get("expected"), int)
+                    and tot.get("completed") == tot["expected"])
+        if complete:
+            lines.append("Completed run: PASS/FAIL/BLOCKED results are read from the last case_finished events.")
+        else:
+            lines.append("Partial run: completed PASS/FAIL/BLOCKED results are preserved from the last case_finished events. An incomplete run is not an all-case failure.")
     if stats.get("request_counts"):
         counts = stats["request_counts"]
         lines.append(f"requests started={counts.get('requests_started')}  finished={counts.get('requests_finished')}  failed={counts.get('requests_failed')}")

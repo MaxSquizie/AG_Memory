@@ -71,6 +71,8 @@ class StructureProposalRequest:
     max_edges: int = 128
     max_depth: int = 16
     required_operators: tuple = ()  # (operator kind, anchored trigger token IDs)
+    released_slot_evidence: dict = field(default_factory=dict)
+    speech_act_metadata: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -146,6 +148,10 @@ def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) ->
             'FORALL/EXISTS operands are [BOUND_VAR, proposition body]. Numeric scope operands are [BOUND_VAR, proposition body, NUMERAL]. BIND connects BOUND_VAR to its body ENTITY argument.',
             'TIME_SCOPE runs from a proposition to an anchored TIME. BEFORE/AFTER/DURING operands are TIME or proposition nodes. TIME/NUMERAL carry raw anchors only; never supply model-generated numeric values.',
             'QUERY_SLOT runs from PREDICATE to WH/COUNT_REQUEST and uses a registered role_id.',
+            'released_slot_evidence contains bounded, snapshot-pinned resource alternatives, not a selected predicate or a semantic answer. Keep compatible lexical/construction alternatives distinct; do not combine incompatible alternatives into one frame.',
+            'For a known lexical alternative, use its released role_id and argument_types. A proposition content slot must use its declared PROPOSITION/EVENT role, with the corresponding attitude rule when supplied; SURFACE_ARG is not a default replacement for a declared content role. For an unknown lexical unit, use only positively supported registered roles or anchored SURFACE_ARG attachment.',
+            'Speech act QUERY does not imply WH or COUNT. A BOOLEAN/FORMULA query checks the whole proposition and has no missing-role QUERY_SLOT. Create WH/COUNT_REQUEST and QUERY_SLOT only for a positively supported question gap; a connective or complementizer is not itself a question gap. If query form is UNDETERMINED, preserve supported alternatives rather than inventing a gap.',
+            'Matching temporal_triggers provide raw evidence only, not a date owner. Preserve each supported TIME node and TIME_SCOPE ownership in the hypothesis; do not attach a trigger to the whole sentence by default or invent a timestamp. Retain ambiguous ownership as alternatives.',
             'head_anchor is ONLY for PREDICATE/ENTITY. On operators, TIME, WH, COUNT_REQUEST, BOUND_VAR and NUMERAL omit head_anchor or use null; never supply a token ID there. For multi-token PREDICATE/ENTITY, head_anchor is required and must be from its own anchor_spans. feature_refs must name declared token hypotheses; otherwise omit it or use [].',
             'Keep the graph acyclic and within the supplied budgets. Preserve every required_operators scope. Never add fields, canonical IDs or invented roles.',
             'Propose only positively supported structures. Preserve genuine alternative readings or abstain when no grounded structure can be supplied.',

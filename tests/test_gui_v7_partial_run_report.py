@@ -132,3 +132,21 @@ def test_observed_checkpoint_without_completed_comparison_stays_incomplete(tmp_p
     assert stats["case_results"] == []
     assert stats["non_passing_cases"][0]["status"] == "INCOMPLETE"
     assert "failed=0" in render_report(stats)
+
+
+def test_finished_run_with_progress_results_is_not_labelled_partial(tmp_path):
+    progress(tmp_path, [event(1, "run_started", total=2),
+        event(2, "case_finished", case_id="A", status="PASS"),
+        event(3, "case_finished", case_id="B", status="FAIL"),
+        event(4, "run_finished", status="FAIL", summary={"status": "FAIL", "passed_cases": 1,
+            "failed_cases": 1, "blocked_cases": 0})])
+    stats = parse_run_stats(tmp_path)
+    assert stats["run_finished_recorded"]
+    assert stats["comparison_source"] == "progress.jsonl"
+    assert stats["status"] == "FAIL" and stats["totals"]["completed"] == 2
+    text = render_report(stats)
+    assert "Completed run:" in text and "Partial run:" not in text
+    assert "passed=1  failed=1" in text
+    # Seeing the final event cannot fill a missing per-case comparison.
+    stats["totals"]["completed"] = 1
+    assert "Partial run:" in render_report(stats)

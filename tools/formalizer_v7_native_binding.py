@@ -47,7 +47,7 @@ LEXICON = (
  ('SEE','видеть','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('THEME','OBJECT','acc','ENTITY'))),
  ('ENTER','войти','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),)),
  ('DOCTOR','врач','STATE',(('THEME','SUBJECT','nom','ENTITY'),)),
- ('TIRED','устать','STATE',(('EXPERIENCER','EXPERIENCER','nom','ENTITY'),)),
+ ('TIRED','устать','STATE',(('EXPERIENCER','SUBJECT','nom','ENTITY'),)),
  ('SIT','сесть','TRANSITION',(('AGENT','SUBJECT','nom','ENTITY'),)),
  ('SIT_STATE','сидеть','STATE',(('THEME','SUBJECT','nom','ENTITY'),('LOCATION','LOCATION','loc','ENTITY'))),
  ('WORK','работать','PROCESS',(('AGENT','SUBJECT','nom','ENTITY'),)),
@@ -121,7 +121,10 @@ def fixture(core, profile):
                     'event_anaphora_rules':[]}], 'dependency_versions':{}}
     m['entries'].append(R['CorefPolicy']);m['dependency_versions']['CorefPolicy']='test-v1'
     R['AttitudeMap']['entries']=[{'lemma':lemma,'argument_role':'OBJECT','holder_role':'SUBJECT','attitude':att,'factivity':False} for lemma,att in [('сказать','QUOTED'),('думать','EMBEDDED'),('считать','EMBEDDED'),('хотеть','HYPOTHETICAL'),('обещать','HYPOTHETICAL'),('просить','HYPOTHETICAL')]]
-    R['ScopeLexicon']['entries']=[{'pattern':pattern,'operator':op} for pattern,op in [(r'\bне\b|\bневерно\b','NOT'),(r'\bили\b','OR'),(r'\bкажд\w*\b','FORALL'),(r'\bмож\w*\b|\bмог(?:ла|ло|ли)?\b|\bвозможно\b','POSSIBLE'),(r'\bесли\b','IMPLIES')]]
+    # Ordinary conditionals and counterfactual conditionals are distinct
+    # declared constructions, with mutually exclusive scope triggers. The
+    # runtime still validates them through its generic required_operators path.
+    R['ScopeLexicon']['entries']=[{'pattern':pattern,'operator':op} for pattern,op in [(r'\bне\b|\bневерно\b','NOT'),(r'\bили\b','OR'),(r'\bкажд\w*\b','FORALL'),(r'\bмож\w*\b|\bмог(?:ла|ло|ли)?\b|\bвозможно\b','POSSIBLE'),(r'\bесли\b(?!\s+бы\b)','IMPLIES'),(r'\bесли\s+бы\b','COUNTERFACTUAL')]]
     # The generic and explicit-continuity patterns are mutually exclusive.
     # An unspecified day does not acquire continuous truth from a fixture.
     R['TemporalRules']['entries']=[
@@ -521,14 +524,28 @@ def execute_native(session,p,config):
     raw.setdefault('time_anchor',raw.get('source_timestamp'));raw.setdefault('timezone','UTC')
     # Explicit fixture identity bindings, never production name-based linking.
     bindings={}
-    for ev in t0(text).evidence:
-        names={ENTITY_NAMES.get(v.lemma) for v in morph.analyze(ev.span)}-{None}
+    binding_evidence=t0(text).evidence
+    binding_variants={ev.token_id:morph.analyze(ev.span) for ev in binding_evidence}
+    for ev in binding_evidence:
+        names={ENTITY_NAMES.get(v.lemma) for v in binding_variants[ev.token_id]}-{None}
         if len(names)==1:
             alias=names.pop();uid='fixture:language:M:'+alias
             if not session.core.store.has_uid(uid):
                 from ah.formalizer.graph_ops import ensure_entity
                 ensure_entity(session.core,{'uid':uid,'name':alias})
             bindings[ev.token_id]=uid;session.entities[uid]=alias
+    # Explicit TEST_ONLY binding carriers for the independent lexical pattern
+    # [PREP, declared entity]. A validated TP unit may include its preposition;
+    # its full-span mention ID then differs from the noun's token ID. Declare
+    # that carrier before inference instead of teaching the production planner
+    # to equate arbitrary multiword mentions with their heads. Other compound
+    # mentions receive no inferred identity, and no model reply/gold is read.
+    for preposition,head in zip(binding_evidence,binding_evidence[1:]):
+        if (head.token_id in bindings
+                and any(v.pos=='PREP' for v in binding_variants[preposition.token_id])
+                and any(v.pos in {'NOUN','NPRO'} for v in binding_variants[head.token_id])):
+            mention_ref='mention:'+digest([preposition.token_id,head.token_id])
+            bindings[mention_ref]=bindings[head.token_id]
     raw['entity_bindings']=bindings
     raw.setdefault('user_ref','fixture:language:M:speaker')
     raw.setdefault('self_ref','fixture:language:M:addressee')
@@ -608,6 +625,7 @@ def execute_native(session,p,config):
     invented=[a for a in source if a['provenance']['source'].get('source_tag')==[state.source_uid,state.interpretation_version]
               and digest(region_data(region(a['region']))) not in allowed_regions]
     writes,bindings_observed=native_write_observations(session,state,entities_before)
+    from ah.formalizer.inference_policy import node_inference_policy
     return {'assertions':{'ah':facts,'ir':session.unique([decode_native(session,u) for u in admitted]),
             'journal':session.unique([decode_native(session,u) for u in admitted])},
         'supports':{'root_targets':[{'formula':decode_native(session,s['conclusion_ref'])} for s in root], 'root_count':len(root),'derived_rules':[s['rule_id'] for s in derived]},
@@ -621,7 +639,7 @@ def execute_native(session,p,config):
         'goal':{'non_factive':not facts and modus in {'COMMAND','QUERY','AMBIGUOUS','UNKNOWN'}},
         'open':{'semantic_status':open_nodes[0]['semantic_status'] if open_nodes else None,
             'capabilities':sorted({cap for n in open_nodes for cap in
-                (session.core.store.get_hypernode(n['uid']).meta.get('inference_capabilities') or ())})},
+                node_inference_policy(n).capabilities})},
         'aliases':json_safe(list(L.data.get('template_links',{}).values())),
         'decision':{'outcome':next(iter(decision_outcomes)) if len(decision_outcomes)==1 else None,'records':decisions},
         'bindings':bindings_observed,

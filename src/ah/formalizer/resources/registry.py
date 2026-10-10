@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field
+from ..inference_policy import OPEN_LEXICAL_CAPABILITIES
 
 
 # -- write-boundary errors (§7.1 line 396) ---------------------------------- #
@@ -166,7 +167,7 @@ class OpenTemplate:
 
     open_template_key: str
     semantic_status: str = "UNLINKED"
-    inference_capabilities: tuple[str, ...] = ("EXACT_ATTESTATION",)
+    inference_capabilities: tuple[str, ...] = OPEN_LEXICAL_CAPABILITIES
     source: str = ""
 
 
