@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="425" viewBox="0 0 1100 425" role="img" aria-labelledby="title desc"><title id="title">Кандидаты связей в именной конструкции</title><desc id="desc">Слова «Я» и «твой» связываются с явно заданными участниками контекста. «Твой» согласуется с именной группой. Пунктиром показано ещё проверяемое присоединение «Крипл».</desc><defs><marker id="green-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#267653" stroke-width="2" stroke-linejoin="round"/></marker><marker id="grey-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#55645C" stroke-width="2" stroke-linejoin="round"/></marker><marker id="amber-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#8F632A" stroke-width="2" stroke-linejoin="round"/></marker></defs><rect width="1100" height="425" fill="#F7F6F1"/>
+<path d="M116 113 V64 H836 V113" fill="none" stroke="#AFBAB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="337" y="43" width="279" height="40" rx="0" fill="#F7F6F1" stroke="none" stroke-width="2"/>
+<text x="477" y="72" font-family="DejaVu Sans,Arial,sans-serif" font-size="24" font-weight="400" text-anchor="middle" fill="#55645C">именная конструкция</text>
+<rect x="66" y="120" width="102" height="67" rx="4" fill="#DBEBDC" stroke="none" stroke-width="2"/>
+<text x="117" y="165" font-family="DejaVu Sans,Arial,sans-serif" font-size="34" font-weight="700" text-anchor="middle" fill="#183D32">Я</text>
+<rect x="329" y="120" width="145" height="67" rx="4" fill="#DBEBDC" stroke="none" stroke-width="2"/>
+<text x="401" y="165" font-family="DejaVu Sans,Arial,sans-serif" font-size="31" font-weight="700" text-anchor="middle" fill="#183D32">твой</text>
+<rect x="700" y="120" width="298" height="67" rx="4" fill="#FFFFFF" stroke="#AFBAB0" stroke-width="2"/>
+<text x="849" y="165" font-family="DejaVu Sans,Arial,sans-serif" font-size="31" font-weight="700" text-anchor="middle" fill="#183D32">ИИ ассистент</text>
+<path d="M477 153 H692" fill="none" stroke="#267653" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#green-arrow)"/>
+<text x="586" y="139" font-family="DejaVu Sans,Arial,sans-serif" font-size="22" font-weight="400" text-anchor="middle" fill="#267653">согласование</text>
+<path d="M117 195 V280" fill="none" stroke="#267653" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#green-arrow)"/>
+<path d="M401 195 V280" fill="none" stroke="#267653" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#green-arrow)"/>
+<rect x="41" y="289" width="233" height="67" rx="4" fill="#FFFFFF" stroke="#AFBAB0" stroke-width="2"/>
+<text x="157" y="332" font-family="DejaVu Sans,Arial,sans-serif" font-size="27" font-weight="700" text-anchor="middle" fill="#183D32">говорящий</text>
+<rect x="318" y="289" width="231" height="67" rx="4" fill="#FFFFFF" stroke="#AFBAB0" stroke-width="2"/>
+<text x="433" y="332" font-family="DejaVu Sans,Arial,sans-serif" font-size="27" font-weight="700" text-anchor="middle" fill="#183D32">адресат</text>
+<path d="M158 359 V379 H433 V359" fill="none" stroke="#AFBAB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="295" y="407" font-family="DejaVu Sans,Arial,sans-serif" font-size="22" font-weight="400" text-anchor="middle" fill="#55645C">заданы контекстом</text>
+<rect x="738" y="289" width="231" height="67" rx="4" fill="#F0E0C5" stroke="none" stroke-width="2"/>
+<text x="853" y="332" font-family="DejaVu Sans,Arial,sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#8F632A">Крипл</text>
+<path d="M849 195 V282" fill="none" stroke="#8F632A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 7" marker-end="url(#amber-arrow)"/>
+<rect x="735" y="222" width="325" height="34" rx="0" fill="#F7F6F1" stroke="none" stroke-width="2"/>
+<text x="746" y="247" font-family="DejaVu Sans,Arial,sans-serif" font-size="22" font-weight="400" text-anchor="start" fill="#8F632A">присоединение проверяется</text>
+</svg>
