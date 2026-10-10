@@ -135,11 +135,14 @@ def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) ->
         'hypotheses': {'type': 'array', 'items': hypothesis},
         'abstain': {'type': 'boolean'},
     }, ())
+    # Put the request-independent instructions before the dynamic token enums.
+    # This preserves the same payload and reference space while giving providers
+    # which support prefix reuse a stable prefix; caching is not required.
     payload = {
-        'task': 'Propose bounded local syntax. Return exactly one JSON object conforming to response_schema; no markdown or explanation.',
-        'response_schema': schema,
+        'task': 'Propose bounded local syntax. Return exactly one compact single-line JSON object conforming to response_schema; no markdown or explanation.',
         'reply_rules': [
             'Return {"hypotheses": [...]} or {"abstain": true}. Never abstain with hypotheses.',
+            'Use no whitespace outside strings. Omit neutral optional defaults feature_refs=[], head_anchor=null, alternatives=1, scope=false; omit null role_id only where response_schema does not require it. Preserve required roles, nondefaults and multi-token lexical head_anchor. For proposed structures never drop nodes, edges, alignment or genuine alternatives to shorten the answer.',
             'Every hypothesis must have its own nonempty local_id, nodes, and nonempty alignment. local_id is a local label, not a canonical memory ID.',
             'alignment contains supplied token IDs covering this hypothesis; every node anchor_spans is a nonempty subset of alignment. Use token IDs, never token text or character offsets.',
             'Nodes have no id field. Edge from/to are zero-based INTEGER positions in that hypothesis nodes array, not local_id strings or token IDs.',
@@ -156,10 +159,12 @@ def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) ->
             'Keep the graph acyclic and within the supplied budgets. Preserve every required_operators scope. Never add fields, canonical IDs or invented roles.',
             'Propose only positively supported structures. Preserve genuine alternative readings or abstain when no grounded structure can be supplied.',
         ],
+        'response_schema': schema,
         'request': asdict(req),
         'tokens': tokens,
     }
     return json.dumps(payload, ensure_ascii=False,
+                      separators=(',', ':'),
                       default=lambda x: sorted(x) if isinstance(x, (set, frozenset)) else str(x))
 
 

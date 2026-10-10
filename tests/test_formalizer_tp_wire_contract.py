@@ -1,5 +1,6 @@
 """The live proposer is told the wire contract its validator actually requires."""
 import json
+from copy import deepcopy
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -38,6 +39,61 @@ def test_prompt_declares_mandatory_fields_indices_and_request_reference_space():
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(reply())
     assert len(parse_and_validate(req, json.dumps(reply()))) == 1
+
+
+def test_compact_wire_preserves_text_evidence_and_stable_instruction_prefix():
+    first = request()
+    second = StructureProposalRequest('TP:other-source', 'other-seal', ('different-token',),
+        allowed_node_kinds=first.allowed_node_kinds,
+        allowed_edge_kinds=first.allowed_edge_kinds,
+        allowed_role_ids=first.allowed_role_ids,
+        released_slot_evidence={'status': 'COMPLETE', 'attitude_alternatives': [
+            {'argument_role': 'SUBJECT', 'note': 'spaces within evidence stay intact'}]})
+    tokens = [{'id': 'different-token', 'text': 'слово с пробелами'}]
+    raw = build_structure_prompt(second, tokens)
+    parsed = json.loads(raw)
+    assert raw == json.dumps(parsed, ensure_ascii=False, separators=(',', ':'))
+    assert parsed['tokens'] == tokens
+    assert parsed['request']['released_slot_evidence'] == second.released_slot_evidence
+    assert raw.split(',"response_schema":', 1)[0] == build_structure_prompt(
+        first, []).split(',"response_schema":', 1)[0]
+    assert set(parsed) == {'task', 'reply_rules', 'response_schema', 'request', 'tokens'}
+
+
+def test_omitting_neutral_defaults_preserves_validated_graph_and_nondefaults():
+    req = StructureProposalRequest('TP:defaults', 'seal', ('t0', 't1', 't2', 't3'),
+        token_hypotheses=('feature:t2',),
+        allowed_node_kinds=frozenset({'NOT', 'PREDICATE', 'ENTITY'}),
+        allowed_edge_kinds=frozenset({'OPERAND', 'ARGUMENT'}),
+        allowed_role_ids=frozenset({'SUBJECT'}))
+    minimal = {'hypotheses': [{'local_id': 'h', 'alternatives': 2,
+        'nodes': [{'kind': 'NOT', 'anchor_spans': ['t0']},
+                  {'kind': 'PREDICATE', 'anchor_spans': ['t1', 't2'],
+                   'head_anchor': 't2', 'feature_refs': ['feature:t2']},
+                  {'kind': 'ENTITY', 'anchor_spans': ['t3']}],
+        'edges': [{'kind': 'OPERAND', 'from': 0, 'to': 1, 'scope': True},
+                  {'kind': 'ARGUMENT', 'from': 1, 'to': 2, 'role_id': 'SUBJECT'}],
+        'alignment': ['t0', 't1', 't2', 't3']}, reply()['hypotheses'][0]]}
+    verbose = deepcopy(minimal)
+    for hypothesis in verbose['hypotheses']:
+        hypothesis.setdefault('alternatives', 1)
+        for node in hypothesis['nodes']:
+            node.setdefault('head_anchor', None)
+            node.setdefault('feature_refs', [])
+        for edge in hypothesis['edges']:
+            edge.setdefault('scope', False)
+            edge.setdefault('role_id', None)
+    schema = json.loads(build_structure_prompt(req, []))['response_schema']
+    Draft202012Validator(schema).validate(minimal)
+    Draft202012Validator(schema).validate(verbose)
+    actual = parse_and_validate(req, json.dumps(minimal, separators=(',', ':')))
+    assert actual == parse_and_validate(req, json.dumps(verbose, indent=2))
+    assert len(actual) == 2
+    assert actual[0].alternatives == 2
+    assert actual[0].nodes[1].head_anchor == 't2'
+    assert actual[0].nodes[1].feature_refs == ('feature:t2',)
+    assert actual[0].edges[0].scope is True
+    assert actual[0].edges[1].role_id == 'SUBJECT'
 
 
 @pytest.mark.parametrize('damage', ['alignment', 'node_id', 'string_edge', 'foreign_anchor'])

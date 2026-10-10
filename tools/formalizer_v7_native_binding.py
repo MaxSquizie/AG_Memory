@@ -5,9 +5,10 @@ cannot send a request: missing durable reply bytes are an explicit failure.
 """
 from copy import deepcopy
 from dataclasses import asdict
+from functools import lru_cache
 from pathlib import Path
 import http.client
-import itertools, json, os, time, uuid
+import itertools, json, math, os, time, uuid
 from urllib.parse import urlparse
 from ah.llm.lmstudio_client import LMStudioClient
 from ah.llm.ollama_client import OllamaClientError
@@ -21,6 +22,44 @@ from ah.core.journal import JournalChannel
 from ah.model.types import Hypernode, FunctionSymbol, Ref
 from ah.model.operands import BoundVar, CountLiteral, TimeLiteral
 from tools.formalizer_v7_test_support import test_release, role, sign_test_release
+
+
+_DEFAULT_MORPH_PROVIDER = MorphProvider
+_oracle_morph_scope = None
+
+
+class _OracleMorphCache:
+    """Run-local dictionary analysis, without interpretation or store state.
+
+    MorphProvider returns tuples of frozen MorphVariant records. Reusing those
+    exact records retains every parse and its score; neither casing nor token
+    spelling is normalized in the cache key. Dictionary loading is performed
+    once per oracle execution instead of once per isolated AH case.
+    """
+
+    def __init__(self, provider):
+        self.analyze = lru_cache(maxsize=4096)(provider.analyze)
+
+
+def _oracle_morph(config):
+    """Share only pure default morphology within one runner configuration.
+
+    A new run owns a new CONFIG object. Keep at most its one dictionary/cache,
+    and invalidate it when the provider factory changes. Custom or patched
+    providers are constructed normally, since their purity is not established.
+    AH, resource releases, selectors and interpretation evidence remain local
+    to each case, and no model replies enter this cache.
+    """
+    global _oracle_morph_scope
+    factory = MorphProvider
+    if factory is not _DEFAULT_MORPH_PROVIDER:
+        _oracle_morph_scope = None
+        return factory()
+    if (_oracle_morph_scope is None
+            or _oracle_morph_scope[0] is not config
+            or _oracle_morph_scope[1] is not factory):
+        _oracle_morph_scope = (config, factory, _OracleMorphCache(factory()))
+    return _oracle_morph_scope[2]
 
 # Independently authored TEST_ONLY lexical fixture; not a reviewed production release.
 # No expected case, case ID or source sentence is consulted in its construction.
@@ -181,6 +220,22 @@ def _provider_progress(event, **fields):
         pass
 
 
+def _observed_provider_stats(data):
+    """Keep server measurements independently of the bounded raw preview.
+
+    These numbers are observation only: no estimate or missing value is
+    invented, and they are never fed back into interpretation or validation.
+    """
+    stats = data.get('stats') if isinstance(data, dict) else None
+    if not isinstance(stats, dict):
+        return {}
+    fields = ('input_tokens', 'total_output_tokens', 'reasoning_output_tokens',
+              'tokens_per_second', 'time_to_first_token_seconds')
+    return {key: value for key in fields
+            if type(value := stats.get(key)) in (int, float) and value >= 0
+            and (type(value) is int or math.isfinite(value))}
+
+
 class _OracleHTTPClient(LMStudioClient):
     """Shared request schema/parser, raw HTTP transport, and no endpoint fallback.
 
@@ -302,10 +357,12 @@ class ChatBackend:
                 elapsed_seconds=time.perf_counter()-started,http_status=client.http_status,
                 raw_response=client.raw_response,error=str(exc))
             raise
+        stats = _observed_provider_stats(data) if mode == 'lmstudio' else {}
         _provider_progress('request_finished',request_id=request_id,status='SUCCESS',
             provider=mode,model=self.model,role=role,endpoint=endpoint,
             elapsed_seconds=time.perf_counter()-started,http_status=client.http_status,
-            raw_response=client.raw_response,response=text)
+            raw_response=client.raw_response,response=text,
+            **({'provider_stats': stats} if stats else {}))
         return text
 
 def json_safe(value):
@@ -520,7 +577,7 @@ def execute_native(session,p,config):
     release=session.release
     raw=deepcopy(p.get('raw_input') or {'text':p['text'], 'source_id':'fixture:partial',
         'revision':1,'range':[0,len(p['text'])],'language':'ru','request_kind':'MIXED','batch_kind':'MESSAGE'})
-    text=raw['text'];morph=MorphProvider()
+    text=raw['text'];morph=_oracle_morph(config)
     raw.setdefault('time_anchor',raw.get('source_timestamp'));raw.setdefault('timezone','UTC')
     # Explicit fixture identity bindings, never production name-based linking.
     bindings={}

@@ -133,6 +133,36 @@ def test_progress_error_is_emitted_on_http_failure(monkeypatch):
     assert final['status']=='ERROR' and final['http_status']==400
     assert 'native reasoning invalid' in final['raw_response']
     assert 'HTTP 400' in final['error']
+    assert 'provider_stats' not in final
+
+
+def test_observed_lmstudio_stats_survive_raw_progress_preview_truncation(tmp_path):
+    from tools import formalizer_v7_progress as progress
+    text = 'x' * 6000
+    reply = {'output': [{'type': 'message', 'content': text}], 'stats': {
+        'input_tokens': 3200, 'total_output_tokens': 350,
+        'reasoning_output_tokens': 0, 'tokens_per_second': 37.5,
+        'time_to_first_token_seconds': 0.11, 'unknown_server_field': 1}}
+    path = tmp_path / 'progress.jsonl'
+    progress.configure(path)
+    try:
+        with local_server(reply) as (base, requests):
+            assert backend(base).generate('payload') == text
+    finally:
+        progress.close()
+    final = json.loads(path.read_text(encoding='utf-8').splitlines()[-1])
+    assert final['raw_response_truncated'] is True
+    assert final['response_truncated'] is True
+    assert final['provider_stats'] == {k: v for k, v in reply['stats'].items()
+                                        if k != 'unknown_server_field'}
+    assert len(requests) == 1
+
+
+@pytest.mark.parametrize('bad', [True, False, -1, float('inf'), float('nan'), '42', None])
+def test_provider_stats_keep_only_finite_nonnegative_numbers(bad):
+    assert binding._observed_provider_stats({'stats': {
+        'input_tokens': bad, 'total_output_tokens': 0}}) == {'total_output_tokens': 0}
+    assert binding._observed_provider_stats({}) == {}
 
 
 def test_https_uses_https_connection_and_prefix(monkeypatch):

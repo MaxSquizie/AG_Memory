@@ -11,6 +11,7 @@ from tools import formalizer_v7_extended_binding as adapter
 from tools import formalizer_v7_runtime_adapter as base
 from tools import formalizer_v7_progress as progress
 from tools.formalizer_v7_run_diagnostics import case_diagnostics
+from tools.formalizer_v7_performance import summarize_progress, format_performance
 from tools.run_formalizer_v7_bound_oracle import coverage,dump,sha
 
 def main(argv=None):
@@ -165,6 +166,14 @@ def main(argv=None):
     progress.emit('run_finished',status=report['status'],summary=summary,
         errors=report['errors'],received_provider_calls=received_calls,**live_counts)
     progress.close()
+    # Timing is observational: a damaged/missing preview cannot change the
+    # comparator result or the durability of any completed runtime operation.
+    try:
+        performance=summarize_progress(a.out/'progress.jsonl')
+        dump(a.out/'performance.json',performance)
+        print('\n'.join(format_performance(performance)),flush=True)
+    except Exception as exc:
+        print(f'Performance report warning: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
     return 1 if report['status']=='FAIL' else 3 if report['blocked_cases'] else 0
 
 if __name__=='__main__':raise SystemExit(main())

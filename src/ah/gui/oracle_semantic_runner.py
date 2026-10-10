@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 
+from .oracle_performance import SCHEMA as PERFORMANCE_SCHEMA, format_performance, summarize_progress
+
 
 def select_model_required_case_ids(corpus_dir: Path) -> list[str]:
     """Return case IDs (file order) whose steps contain a raw-text ``formalize``.
@@ -289,6 +291,17 @@ def parse_run_stats(out_dir: Path) -> dict:
 
     artifact_warnings: list[str] = []
     progress = _progress_artifacts(out_dir, artifact_warnings)
+    performance = _read_json(out_dir / "performance.json")
+    if not isinstance(performance, dict) or performance.get("schema_version") != PERFORMANCE_SCHEMA:
+        # Old and interrupted runs have no final performance artifact. Reading
+        # their recorded stream is a reduction, never a modification/re-run.
+        performance = {}
+        if (out_dir / "progress.jsonl").is_file():
+            try:
+                performance = summarize_progress(out_dir / "progress.jsonl")
+            except Exception as exc:
+                artifact_warnings.append(f"Performance reduction failed: {type(exc).__name__}: {exc}")
+    artifact_warnings.extend(performance.get("artifact_warnings") or [])
     started, finished = progress["started"], progress["finished"]
     # The final files have priority; incomplete runs retain flushed comparison
     # results from case_finished, never a guessed failure from a partial IR.
@@ -399,6 +412,7 @@ def parse_run_stats(out_dir: Path) -> dict:
             "runtime_exceptions": effective_summary.get("runtime_exceptions", len(runtime_exceptions)),
         },
         "request_counts": progress["request_counts"],
+        "performance": performance,
         "blocker_counts": blocker_counts,
         "failure_attribution_counts": effective_summary.get("failure_attribution_counts", {}),
         "provenance": {
@@ -457,6 +471,12 @@ def render_report(stats: dict) -> str:
         counts = stats["request_counts"]
         lines.append(f"requests started={counts.get('requests_started')}  finished={counts.get('requests_finished')}  failed={counts.get('requests_failed')}")
     lines.append("")
+
+    performance = stats.get("performance")
+    if isinstance(performance, dict) and performance.get("schema_version") == PERFORMANCE_SCHEMA:
+        lines.append("## Performance")
+        lines.extend(format_performance(performance))
+        lines.append("")
 
     health = stats.get("provider_health") or {}
     lines.append("## Provider transport health")
