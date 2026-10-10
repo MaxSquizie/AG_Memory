@@ -58,6 +58,9 @@ def _canonical_records(state: FormalizationState) -> list[dict]:
     records.extend({'_kind':'logical_root','tree':rec} for rec in state.logical_roots)
     if state.query_intents:
         records.extend({'_kind':'query_intent',**rec} for rec in state.query_intents)
+    if state.region_forest is not None:
+        records.append({'_kind': 'region_forest', **state.region_forest.to_dict()})
+    records.extend({'_kind': 'context_read', **rec} for rec in state.context_reads)
     return records
 
 

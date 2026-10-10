@@ -178,7 +178,9 @@ class LLMPerceptionService:
         # Third-person referents must retain their concrete proof path. Old
         # pronoun_refs are attention hints, not permission to bypass V7 bindings.
         policy = self._formalizer._release.resources.get('CorefPolicy', {}).get('entries', ())
-        if 'coreference_sources' not in declared and len(policy) == 1:
+        ignition = self._formalizer._ignition
+        event_context = ignition is not None and ignition.settings.clock_mode == 'event'
+        if 'coreference_sources' not in declared and len(policy) == 1 and not event_context:
             store = self._formalizer._store
             with store._journal.atomic(), store._store._lock:
                 store._refresh()

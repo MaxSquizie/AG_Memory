@@ -247,7 +247,7 @@ def _tp_speech_act_metadata(state, release, source):
     return metadata
 
 
-def _grammar_frames(state,release):
+def _grammar_frames(state,release,selector=None):
     p=release.entries('ProposalPolicy')[0]
     source=tuple(e.token_id for e in state.evidence)
     request=StructureProposalRequest('syntax:'+state.source_uid,'',source,allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),
@@ -263,6 +263,9 @@ def _grammar_frames(state,release):
     for h, _frames in accepted:
         state.linked_alternatives.append(LinkedAlternative(h.local_id,'STRUCTURAL_HYPOTHESIS',digest(asdict(h)),h.local_id,provenance=provenance[h.local_id]))
     accepted = choose_structures(state, accepted, stage='GRAMMAR', provenance=provenance)
+    if selector is not None:
+        from .region_probes import select_generated
+        accepted=select_generated(state,accepted,selector,release)
     # Multiple overlapping structures are alternatives, never multiple facts.
     by_anchor={}
     for h,frames in accepted:
@@ -596,7 +599,7 @@ def _bindings(frame,evidence,valency,extra_gaps=()):
     return out
 
 
-def run_native(text,selector,release,observation,morph=None):
+def run_native(text,selector,release,observation,morph=None,context_reader=None):
     release.assert_integrity()
     state=t0(text); state.source_uid=observation['observation_id']; state.interpretation_version=observation['interpretation_version']; state.observation=dict(observation)
     state.resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
@@ -604,6 +607,8 @@ def run_native(text,selector,release,observation,morph=None):
     for diagnostic in observation.get('rx_diagnostics',()): state.diag(diagnostic,'bounded optional experience retrieval')
     run_srl(state,release,morph)
     t1(state,morph=morph,preserve_variants=True,shared_form_expansion=False)
+    from .regions import build_regions, reference_goal
+    state.region_forest=build_regions(text,state.evidence,state.source_uid)
     # R-X is ordering experience only; it never adds/removes dictionary parses.
     rx1=[x for rec in observation.get('rx_reads',{}).get('T1',()) for x in rec['payload'].get('morphological_priors',())]
     for ev in state.evidence:
@@ -660,8 +665,13 @@ def run_native(text,selector,release,observation,morph=None):
                 state.logical_roots=[t for trace in state.syntax_trace if trace.get('literal_hypothesis')==selected for t in trace['operator_forest']]
             state.clarification_candidates.remove(row)
     else:
-        state.frames=_grammar_frames(state,release)
-        _propose(state,selector,release)
+        region_mode=observation.get('structural_contract')=='region_probes'
+        state.frames=_grammar_frames(state,release,selector if region_mode else None)
+        if region_mode:
+            if not state.frames and not state.logical_roots:
+                state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
+        else:
+            _propose(state,selector,release)
     state.generation_snapshot={'resource_snapshot':release.sha256,
         'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
         'syntax_trace':deepcopy(state.syntax_trace),
@@ -684,6 +694,30 @@ def run_native(text,selector,release,observation,morph=None):
                 owner.semantic['structural_unresolved']=True; state.diag(str(exc),'host query intent')
     preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
     state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
+    state.region_forest.attach_frames(state.frames)
+    if context_reader is not None:
+        arguments={tid for f in state.frames for tid in f.argument_token_refs
+                   if tid not in f.semantic.get('bound_arguments',{})}
+        context_by_mention={}
+        import re
+        policies=release.resources.get('CorefPolicy',{}).get('entries',())
+        event_rules=policies[0]['event_anaphora_rules'] if len(policies)==1 else ()
+        for e in state.evidence:
+            if e.token_id in state.observation.get('entity_bindings',{}):
+                continue
+            persons={v.person for v in e.variants if v.pos=='NPRO'}
+            context_key='user_ref' if persons=={'1st'} else 'self_ref' if persons=={'2nd'} else None
+            if context_key and state.observation.get('context_snapshot',{}).get(context_key):
+                continue
+            if e.token_id not in arguments or not (any(v.pos=='NPRO' for v in e.variants)
+                    or any(re.fullmatch(r['pattern'],e.span,re.I) for r in event_rules)):
+                continue
+            result=context_reader.read(state,reference_goal(state,e.token_id))
+            context_by_mention[e.token_id]=result['rows']
+        state.observation['coreference_context_by_mention']=context_by_mention
+        root=state.region_forest.regions[0]
+        context_reader.read(state,{'kind':'READ_REMAINDER','decision_ref':'reading:end',
+            'region_ref':root.region_id,'source_range':root.source_range,'cue_token_refs':root.token_refs})
     from .coreference import prepare_references,resolve_references
     reference_slots=prepare_references(state,release)
     evidence={e.token_id:e for e in state.evidence}

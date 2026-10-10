@@ -81,6 +81,8 @@ def _observation(text,*,version,observation_id=None,raw_input=None,context_facts
     raw['source_revision']=revision
     raw['revision']=revision
     raw.pop('coreference_context',None)  # Only the canonical reader may freeze it.
+    raw.pop('attention_context_base',None)
+    raw.pop('coreference_context_by_mention',None)
     raw.pop('event_bindings',None)  # Produced only by grounded TD reference selection.
     raw.setdefault('text',text)
     if raw['text']!=text: raise ValueError('INPUT_TEXT_MISMATCH')
@@ -112,9 +114,11 @@ def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,obser
     return InterpretationReport(obs,version,run_id,True,'OK',rep.committed_fragments,rep.applied,rep.terminal.value,rep.batch_hash,tuple(diagnostics),node_refs)
 
 
-def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts=(),run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,raw_input=None):
+def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts=(),run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,raw_input=None,ignition=None,structure_mode='region_probes'):
     if release is not None: release.assert_integrity()
     observation=_observation(text,version=version,observation_id=observation_id,raw_input=raw_input,context_facts=context_facts)
+    if structure_mode not in {'region_probes','legacy_proposal'}: raise ValueError('STRUCTURAL_CONTRACT_INVALID')
+    observation['structural_contract']=structure_mode
     from .clarifications import validate_input
     validate_input(store, observation)
     obs=observation['observation_id']; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
@@ -149,7 +153,7 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
     if conflict is not None:return conflict_result(conflict)
     if frozen is not None:
         if 'rx_reads' in frozen: observation['rx_reads']=frozen['rx_reads']
-        for key in ('rx_diagnostics','coreference_context'):
+        for key in ('rx_diagnostics','coreference_context','attention_context_base'):
             if key in frozen: observation[key]=frozen[key]
     elif release is not None:
         resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
@@ -157,7 +161,10 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
         keys=lexical_keys(text,morph)
         observation['rx_reads']={stage:list(rows) for stage,rows in store.read_cache_snapshot(resource_snapshot,lexical_keys=keys).items()}
         observation['rx_diagnostics']=list(store.last_rx_diagnostics)
-        if observation.get('coreference_sources'):
+        if ignition is not None and ignition.settings.clock_mode=='event':
+            from .attention_context import freeze_attention_base
+            observation['attention_context_base']=freeze_attention_base(store,ignition)
+        elif observation.get('coreference_sources'):
             from .coreference import freeze_context
             observation['coreference_context']=freeze_context(store,release,observation['coreference_sources'])
     snapshot=digest([observation,{'snapshot_id':release.sha256,'release_version':release.manifest['version']} if release else {}])
@@ -179,7 +186,19 @@ def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts
         # an entirely rejected admission must leave the old version untouched.
     if hasattr(selector, 'for_run'): selector = selector.for_run(run_id)
     if hasattr(selector,'start_run'): selector.start_run(run_id)
-    state=run_native(text,selector,release,observation,morph=morph)
+    context_reader=None
+    if observation.get('attention_context_base'):
+        if ignition is None: raise ValueError('CONTEXT_REPLAY_REQUIRES_IGNITION')
+        from .attention_context import AttentionContextReader
+        context_reader=AttentionContextReader(store,release,ignition,run_id,observation['attention_context_base'])
+    from .attention_context import ContextReadError
+    try:
+        state=run_native(text,selector,release,observation,morph=morph,context_reader=context_reader)
+    except ContextReadError as exc:
+        code=str(exc)
+        state=t0(text); state.source_uid=obs; state.observation=observation
+        state.diag(code,'frozen context read failed; no T5/T6 write')
+        return state,InterpretationReport(obs,version,run_id,True,code,diagnostics=(code,))
     report=run_from_state(state,store,binding,schema=schema,run_id=run_id,version=version,observation_id=obs,release=release,input_observation=observation)
     with store._journal.atomic():
         if not any(r['payload'].get('kind')=='RUN_COMPLETED' and r['payload'].get('run_id')==run_id for r in store._journal.scan_unprocessed(0)):

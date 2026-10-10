@@ -620,8 +620,19 @@ def execute_native(session,p,config):
         structure_reply_format=config.get('structure_reply_format','TP-C2'),
         selection_reply_format=config.get('selection_reply_format','SELECT_LABELS_V1'))
     entities_before=native_entity_refs(session)
+    structure_mode=config.get('structure_mode','legacy_proposal')
+    ignition=None
+    if structure_mode=='region_probes':
+        if not hasattr(session,'native_ignition'):
+            from ah.config import IgnitionSettings, WorkspaceSettings
+            from ah.ignition import IgnitionEngine
+            session.native_ignition=IgnitionEngine(session.core,IgnitionSettings(),WorkspaceSettings())
+        ignition=session.native_ignition
+        if ignition.core is not session.core:
+            raise ValueError('CONTEXT_REPLAY_REQUIRES_MATCHING_IGNITION')
     state,report=interpret_full(text,None,selector,session.store,InterpretationRunBinding(session.store._journal),
-        morph=morph,release=release,raw_input=raw,version=version,run_id=run_id)
+        morph=morph,release=release,raw_input=raw,version=version,run_id=run_id,
+        ignition=ignition,structure_mode=structure_mode)
     session.api.update({'v7_pipeline.interpret_full','native_frontend.run_native','RealBackendSelector / ProviderAdapter / ProviderCallLog','candidate_ir.compute_coverage'})
     session.native_states=getattr(session,'native_states',[])+[json_safe(asdict(state))]
     session.native_reports=getattr(session,'native_reports',[])+[json_safe(asdict(report))]

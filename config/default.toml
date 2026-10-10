@@ -81,6 +81,12 @@ nominal_relation_link_weight = 0.20
 initial_inferred_link_weight = 0.25
 
 [ignition]
+# Text attention advances by reading/goal events, never model latency.
+clock_mode = "event"
+event_retention = 0.90
+event_transfer = 0.25
+event_input_budget = 2.0
+context_query_ticks = 3
 tick_interval_seconds = 1.0
 nu = 1.0
 x_max = 1.0
@@ -143,7 +149,7 @@ domains = ["C", "P", "H"]
 random_seed = 0
 
 [workspace]
-threshold = 0.35
+threshold = 0.02
 
 [lifecycle]
 initial_lifetime_ticks = 40
@@ -203,3 +209,6 @@ propagation_cycles_per_second = 1.25
 propagation_tail_points = 4
 propagation_tail_spacing = 0.055
 propagation_edge_width = 2.4
+
+[formalizer]
+structure_mode = "region_probes"

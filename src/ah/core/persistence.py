@@ -418,6 +418,7 @@ class JsonPersistence:
             payload["ignition"] = {
                 "tick_index": snap.tick_index,
                 "incoming": snap.incoming,
+                "event_external": dict(snap.event_external),
                 "seed_reasons": {k: list(v) for k, v in snap.seed_reasons.items()},
                 "pending_refutations": list(snap.pending_refutations),
                 "pacemaker_incoming": dict(snap.pacemaker_incoming),
@@ -582,6 +583,7 @@ class JsonPersistence:
             from ah.ignition.pacemaker import PacemakerSnapshot
             pac_raw = ign_raw.get("pacemaker") or {}
             ignition_snapshot = IgnitionSnapshot(
+                event_external={str(k): float(v) for k, v in (ign_raw.get('event_external') or {}).items()},
                 tick_index=int(ign_raw.get("tick_index", 0)),
                 incoming={str(k): float(v) for k, v in (ign_raw.get("incoming") or {}).items()},
                 seed_reasons={str(k): tuple(str(x) for x in v) for k, v in (ign_raw.get("seed_reasons") or {}).items()},

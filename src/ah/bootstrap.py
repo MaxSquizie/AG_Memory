@@ -66,7 +66,8 @@ def _build_formalizer_adapter(config, core, *, backend=None):
     store=AHStoreAdapter(core.store,journal,core=core)
     store.recover_from_head()
     release.validate_store(core.store)
-    return FormalizerAdapter(sel,store=store,binding=InterpretationRunBinding(journal),release=release)
+    return FormalizerAdapter(sel,store=store,binding=InterpretationRunBinding(journal),release=release,
+                             structure_mode=config.formalizer.structure_mode)
 
 
 def _build_perception_service(config, core, llm, *, allow_missing_resources=False):
@@ -215,6 +216,8 @@ class RuntimeServices:
             config, core, llm,
             allow_missing_resources=allow_missing_formalizer_resources,
         )
+        if perception is not None and getattr(perception, '_formalizer', None) is not None:
+            perception._formalizer._ignition = ignition
         agent = (
             LLMAgent(
                 llm,
@@ -330,6 +333,8 @@ class RuntimeServices:
                 new_config, self.core, self.llm,
                 allow_missing_resources=self.allow_missing_formalizer_resources,
             )
+            if self.perception is not None and getattr(self.perception, '_formalizer', None) is not None:
+                self.perception._formalizer._ignition = self.ignition
             self.agent = LLMAgent(
                 self.llm,
                 LLMAgentSettings(

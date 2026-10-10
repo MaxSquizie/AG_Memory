@@ -94,7 +94,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         n = self._fact(core)
         engine = IgnitionEngine(
             core,
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             WorkspaceSettings(threshold=0.1),
             LifecycleSettings(
                 initial_lifetime_ticks=100,
@@ -124,7 +124,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         n = self._fact(core)
         engine = IgnitionEngine(
             core,
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             WorkspaceSettings(threshold=0.1),
             LifecycleSettings(
                 initial_lifetime_ticks=100,
@@ -163,7 +163,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         n = self._fact(core)
         engine = IgnitionEngine(
             core,
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             WorkspaceSettings(threshold=0.1),
             LifecycleSettings(
                 initial_lifetime_ticks=2,
@@ -184,7 +184,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         n = self._fact(core)
         engine = IgnitionEngine(
             core,
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             WorkspaceSettings(threshold=0.1),
             LifecycleSettings(
                 initial_lifetime_ticks=2,
@@ -221,7 +221,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         ref = core.ref(event.uid)
         engine = IgnitionEngine(
             core,
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             WorkspaceSettings(threshold=0.1),
             LifecycleSettings(
                 initial_lifetime_ticks=2,
@@ -250,7 +250,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         )
         engine = IgnitionEngine(
             core,
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             WorkspaceSettings(threshold=0.1),
             LifecycleSettings(2, 10, 10, 10),
         )
@@ -273,7 +273,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             a = core.add_entity(Domain.C, properties={"name": Property("name", "Alpha", "str")})
             b = core.add_entity(Domain.C, properties={"name": Property("name", "Beta", "str")})
             link = core.add_link("IS-A", core.ref(a.uid), core.ref(b.uid), 0.4)
-            engine = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+            engine = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
             engine.seed(core.ref(a.uid), 0.6)
             engine.tick()
             engine.seed(core.ref(b.uid), 0.25)  # pending at save time
@@ -305,7 +305,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
             target = self._fact(core, Domain.C)
             from ah.config import PacemakerSettings
             from ah.integration.contracts import RefutationRequest
-            ignition_settings = IgnitionSettings(
+            ignition_settings = IgnitionSettings(clock_mode="wall",
                 tick_interval_seconds=0.1,
                 nu=2.0,
                 pacemaker=PacemakerSettings(
@@ -342,7 +342,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
 
         user_result = PerceptionResult(
             "Небо синее",
@@ -407,7 +407,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
         orchestrator = AgentOrchestrator(
             context=context,
             sensory=TextSensoryService(core),
@@ -442,7 +442,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
         perception = PerceptionResult(
             "Узел работал вчера.",
             assertions=(
@@ -495,7 +495,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
         orchestrator = AgentOrchestrator(
             context=context,
             sensory=TextSensoryService(core),
@@ -523,7 +523,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
         orchestrator = AgentOrchestrator(
             context=context,
             sensory=TextSensoryService(core),
@@ -561,7 +561,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
         invalid = PerceptionResult(
             "Иван читает книгу",
             assertions=(
@@ -615,7 +615,7 @@ class LifecyclePersistenceOrchestratorTests(unittest.TestCase):
         user_e = core.add_entity(Domain.P, properties={"name": Property("name", "User", "str")})
         context = InteractionContext(self_ref=core.ref(self_e.uid), user_ref=core.ref(user_e.uid))
         integration = IntegrationService(core, IntegrationConfig(0.4, 0.3, 0.2))
-        ignition = IgnitionEngine(core, IgnitionSettings(), WorkspaceSettings(0.1))
+        ignition = IgnitionEngine(core, IgnitionSettings(clock_mode="wall"), WorkspaceSettings(0.1))
         user_result = PerceptionResult("Привет")
         perception = FakePerception(user_result, PerceptionResult("SHOULD NOT BE USED"))
         orchestrator = AgentOrchestrator(

@@ -286,6 +286,11 @@ class PacemakerSettings:
 
 @dataclass(frozen=True, slots=True)
 class IgnitionSettings:
+    clock_mode: str = "event"
+    event_retention: float = 0.90
+    event_transfer: float = 0.25
+    event_input_budget: float = 2.0
+    context_query_ticks: int = 3
     tick_interval_seconds: float = 1.0
     nu: float = 1.0
     x_max: float = 1.0
@@ -296,6 +301,17 @@ class IgnitionSettings:
     pacemaker: PacemakerSettings = field(default_factory=PacemakerSettings)
 
     def __post_init__(self) -> None:
+        import math
+        if self.clock_mode not in {'event', 'wall'}:
+            raise ValueError('ignition.clock_mode must be event or wall')
+        if not math.isfinite(self.event_retention) or not 0 < self.event_retention < 1:
+            raise ValueError('ignition.event_retention must be finite and in (0, 1)')
+        if not math.isfinite(self.event_transfer) or not 0 <= self.event_transfer <= 1:
+            raise ValueError('ignition.event_transfer must be finite and in [0, 1]')
+        if not math.isfinite(self.event_input_budget) or self.event_input_budget <= 0:
+            raise ValueError('ignition.event_input_budget must be finite and positive')
+        if type(self.context_query_ticks) is not int or not 1 <= self.context_query_ticks <= 64:
+            raise ValueError('ignition.context_query_ticks must be in [1, 64]')
         if self.tick_interval_seconds <= 0:
             raise ValueError("ignition.tick_interval_seconds must be > 0")
         if self.nu <= 0:
@@ -306,7 +322,7 @@ class IgnitionSettings:
 
 @dataclass(frozen=True, slots=True)
 class WorkspaceSettings:
-    threshold: float = 0.35
+    threshold: float = 0.02
 
     def __post_init__(self) -> None:
         if self.threshold < 0:
@@ -468,11 +484,14 @@ class FormalizerSettings:
     two-channel journal under ``paths.data_dir``."""
 
     native_commit: bool = True
+    structure_mode: str = 'region_probes'
     resource_release_filename: str = "formalizer_release.json"
     review_records_filename: str = "formalizer_reviews.json"
     journal_filename: str = "formalizer_journal.log"
 
     def __post_init__(self) -> None:
+        if self.structure_mode not in {'region_probes', 'legacy_proposal'}:
+            raise ValueError('formalizer.structure_mode must be region_probes or legacy_proposal')
         if self.native_commit is not True:
             raise ValueError('formalizer.native_commit must be true; preview cannot be a production writer')
         if not self.review_records_filename or any(c in self.review_records_filename for c in ("/","\\")):
@@ -607,6 +626,11 @@ def load_config(path: str | Path) -> AppConfig:
     if not isinstance(raw_domains, (list, tuple)):
         raise ValueError("ignition.pacemaker.domains must be an array")
     ignition = IgnitionSettings(
+        clock_mode=str(ign.get('clock_mode', 'event')),
+        event_retention=float(ign.get('event_retention', 0.90)),
+        event_transfer=float(ign.get('event_transfer', 0.25)),
+        event_input_budget=float(ign.get('event_input_budget', 2.0)),
+        context_query_ticks=int(ign.get('context_query_ticks', 3)),
         tick_interval_seconds=float(ign.get("tick_interval_seconds", 1.0)),
         nu=float(ign.get("nu", 1.0)),
         x_max=float(ign.get("x_max", 1.0)),
@@ -670,7 +694,7 @@ def load_config(path: str | Path) -> AppConfig:
         llm=llm,
         integration=integration,
         ignition=ignition,
-        workspace=WorkspaceSettings(threshold=float(wr.get("threshold", 0.35))),
+        workspace=WorkspaceSettings(threshold=float(wr.get("threshold", 0.02))),
         lifecycle=LifecycleSettings(
             initial_lifetime_ticks=int(lifecycle_raw.get("initial_lifetime_ticks", 40)),
             reinforced_lifetime_ticks=int(lifecycle_raw.get("reinforced_lifetime_ticks", 1000)),
@@ -731,6 +755,7 @@ def load_config(path: str | Path) -> AppConfig:
             parse_agent_response_to_h=bool(orchestrator_raw.get("parse_agent_response_to_h", False)),
         ),
         formalizer=FormalizerSettings(
+            structure_mode=str(_section(data, 'formalizer').get('structure_mode', 'region_probes')),
             native_commit=bool(formalizer_raw.get("native_commit", True)),
             resource_release_filename=str(formalizer_raw.get("resource_release_filename", "formalizer_release.json")),
             review_records_filename=str(formalizer_raw.get("review_records_filename", "formalizer_reviews.json")),

@@ -169,6 +169,12 @@ class AgentOrchestrator:
             return perceive(text, self.context)
         return self.perception.parse(text, self.context)
 
+    def _reader_owns_text_attention(self) -> bool:
+        adapter=getattr(self.perception,'_formalizer',None)
+        return (self.ignition.settings.clock_mode=='event'
+                and getattr(self.perception,'native_available',False)
+                and getattr(adapter,'_ignition',None) is self.ignition)
+
     def _settle_input_wave(self) -> tuple[TickResult, ...]:
         """Drain the current prompt's causal wave before freezing Workspace.
 
@@ -369,7 +375,8 @@ class AgentOrchestrator:
         with lock:
             self.ignition.begin_prompt_epoch()
             sensory = self.sensory.process(text)
-            self.ignition.apply_seed_requests(sensory.activation_seeds)
+            if not self._reader_owns_text_attention():
+                self.ignition.apply_seed_requests(sensory.activation_seeds)
 
         perception = PerceptionResult(
             source_text=text,
@@ -526,7 +533,8 @@ class AgentOrchestrator:
         with lock:
             self.ignition.begin_prompt_epoch()
             sensory = self.sensory.process(text)
-            self.ignition.apply_seed_requests(sensory.activation_seeds)
+            if not self._reader_owns_text_attention():
+                self.ignition.apply_seed_requests(sensory.activation_seeds)
         emit_pipeline_event(
             "pipeline_sensory",
             source="USER",

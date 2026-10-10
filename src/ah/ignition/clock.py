@@ -67,6 +67,8 @@ class IgnitionClock:
                 self._listeners.remove(callback)
 
     def start(self) -> None:
+        if self.engine.settings.clock_mode == 'event':
+            return
         if self.running:
             return
         self._stop.clear()
@@ -92,6 +94,8 @@ class IgnitionClock:
     def _run(self) -> None:
         deadline = monotonic()
         while not self._stop.is_set():
+            if self.engine.settings.clock_mode == 'event':
+                break
             with self._state_lock:
                 interval = self.interval_seconds
             deadline += interval

@@ -33,6 +33,7 @@ class IgnitionTuningWidget(QWidget):
         self.floor_value = QLabel(); self.speed_value = QLabel(); self.reactivation_value = QLabel(); self.symbol_value = QLabel()
 
         decay_box = QGroupBox("Затухание")
+        self._decay_box = decay_box
         dl = QVBoxLayout(decay_box)
         for title, slider, value in (
             ("Плавающий низ", self.floor_slider, self.floor_value),
@@ -56,6 +57,7 @@ class IgnitionTuningWidget(QWidget):
             row=QHBoxLayout(); row.addWidget(QLabel(title)); row.addWidget(slider,1); row.addWidget(value); ml.addLayout(row)
         nu = QLabel("Частота pacemaker ν задаётся отдельно параметром ignition.nu; pulse amplitude ≠ ν.")
         nu.setWordWrap(True); ml.addWidget(nu)
+        self._mode_note = nu
 
         self.corpus_path = QLineEdit(); self.corpus_path.setPlaceholderText("JSON / .ahm / .prj")
         self.corpus_domain = QComboBox(); self.corpus_domain.addItems(["C","P","H"])
@@ -106,6 +108,19 @@ class IgnitionTuningWidget(QWidget):
         self.memory_import.clicked.connect(lambda: self.memory_import_requested.emit(self.memory_path.text().strip(), self.memory_cold_restore.isChecked()))
         self.set_parameters(decay, resolved_symbol_seed, tick_interval_seconds)
         self.set_mechanism(pacemaker_enabled=ignition.pacemaker.enabled, pacemaker_pulse=ignition.seeds.pacemaker, workspace_threshold=workspace.threshold)
+        self.set_clock_mode(ignition)
+
+    def set_clock_mode(self, ignition: IgnitionSettings) -> None:
+        event = ignition.clock_mode == 'event'
+        self._decay_box.setEnabled(not event)
+        self.pacemaker_enabled.setEnabled(not event)
+        self.pacemaker_slider.setEnabled(not event)
+        self._mode_note.setText(
+            'Событийное чтение: эпохи и фоновый таймер отключены. '
+            f'Удержание {ignition.event_retention:g}, передача {ignition.event_transfer:g}, '
+            f'вход ≤ {ignition.event_input_budget:g}, GOAL: {ignition.context_query_ticks} шагов. '
+            'Параметры задаются в [ignition] конфигурации.' if event else
+            'Режим совместимости: частота pacemaker ν задаётся параметром ignition.nu.')
 
     @staticmethod
     def midpoint_from_speed(value: int) -> float: return midpoint_from_speed(value)

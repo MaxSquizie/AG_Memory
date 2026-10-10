@@ -51,7 +51,9 @@ class FormalizerAdapter:
         commit) on ``store`` and returns a NativePerceptionResult; downstream reads committed facts from the store.
     The native path is only available when a durable ``store`` + ``binding`` are wired (see bootstrap)."""
 
-    def __init__(self, selector, morph=None, schema=None, store=None, binding=None, release=None):
+    def __init__(self, selector, morph=None, schema=None, store=None, binding=None, release=None, ignition=None, structure_mode='region_probes'):
+        self._ignition = ignition
+        self._structure_mode = structure_mode
         self._release = release
         if release is not None and store is not None:
             release.validate_store(store._store)
@@ -127,6 +129,8 @@ class FormalizerAdapter:
         state, rep = interpret_full(
             text, schema, self._selector, self._store, self._binding,
             morph=self._morph, context_facts=context_facts, release=self._release, raw_input=raw_input, version=version, observation_id=observation_id, run_id=run_id,
+            ignition=self._ignition,
+            structure_mode=self._structure_mode,
         )
         receipt = self._receipt(state, rep)
         self._capture_diagnostics(state, rep, receipt)

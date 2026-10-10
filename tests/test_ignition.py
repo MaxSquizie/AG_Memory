@@ -22,7 +22,7 @@ from ah.model import ActantRole, Domain, Property
 class IgnitionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.core = AHCore(uid_generator=SequentialUidGenerator())
-        self.settings = IgnitionSettings(
+        self.settings = IgnitionSettings(clock_mode="wall",
             x_max=1.0,
             activation=ActivationSettings(gain=1.0, epsilon=1e-9),
             decay=DecaySettings(alpha=0.05, midpoint_ticks=3.0, steepness=1.0),
@@ -133,7 +133,7 @@ class IgnitionTests(unittest.TestCase):
             weight=0.4,
         )
         settings = replace(
-            IgnitionSettings(),
+            IgnitionSettings(clock_mode="wall"),
             pacemaker=PacemakerSettings(enabled=False),
         )
         engine = IgnitionEngine(
@@ -165,7 +165,7 @@ class IgnitionTests(unittest.TestCase):
 
     def test_default_floor_keeps_seeded_fact_active_between_prompts_then_ratchets_down(self) -> None:
         ref = self._entity("prompt-context")
-        settings = replace(IgnitionSettings(), pacemaker=PacemakerSettings(enabled=False))
+        settings = replace(IgnitionSettings(clock_mode="wall"), pacemaker=PacemakerSettings(enabled=False))
         engine = IgnitionEngine(self.core, settings, WorkspaceSettings(threshold=0.35))
         engine.seed(ref, 0.65, reason=SeedReason.SENSORY_SYMBOL)
         engine.tick()
@@ -295,7 +295,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         self.workspace = WorkspaceSettings(threshold=0.1)
 
     def test_saturating_additive_activation_is_selected_by_kind(self) -> None:
-        settings = IgnitionSettings(
+        settings = IgnitionSettings(clock_mode="wall",
             activation=ActivationSettings(kind="saturating_additive", gain=1.0),
             decay=DecaySettings(alpha=0.0, midpoint_ticks=1000.0, steepness=0.01),
             pacemaker=PacemakerSettings(enabled=False),
@@ -319,7 +319,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         self.assertAlmostEqual(policy.multiplier(20), 0.25, places=6)
 
     def test_reconfigure_switches_activation_policy_without_resetting_state(self) -> None:
-        initial = IgnitionSettings(
+        initial = IgnitionSettings(clock_mode="wall",
             activation=ActivationSettings(kind="additive_clamp", gain=1.0),
             pacemaker=PacemakerSettings(enabled=False),
         )
@@ -340,7 +340,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         self.assertLess(self.core.store.runtime_state(self.ref.uid).excitation, 1.0)
 
     def test_weak_input_does_not_rebase_floating_floor(self) -> None:
-        settings = IgnitionSettings(
+        settings = IgnitionSettings(clock_mode="wall",
             decay=DecaySettings(
                 alpha=0.25,
                 midpoint_ticks=4.0,
@@ -368,7 +368,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         self.assertAlmostEqual(self.core.store.runtime_state(self.ref.uid).excitation, 0.2, places=4)
 
     def test_strong_input_rebases_floating_floor(self) -> None:
-        settings = IgnitionSettings(
+        settings = IgnitionSettings(clock_mode="wall",
             decay=DecaySettings(
                 alpha=0.25,
                 midpoint_ticks=4.0,
@@ -396,7 +396,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         )
 
     def test_prompt_epoch_rebases_floor_from_current_x(self) -> None:
-        settings = IgnitionSettings(
+        settings = IgnitionSettings(clock_mode="wall",
             decay=DecaySettings(alpha=0.25, midpoint_ticks=8.0, steepness=0.8),
             pacemaker=PacemakerSettings(enabled=False),
         )
@@ -419,7 +419,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         )
 
     def test_pacemaker_only_input_never_rebases_floor(self) -> None:
-        settings = IgnitionSettings(
+        settings = IgnitionSettings(clock_mode="wall",
             decay=DecaySettings(alpha=0.25, midpoint_ticks=4.0, steepness=1.0),
             pacemaker=PacemakerSettings(enabled=False),
         )
@@ -436,7 +436,7 @@ class ConfigurableIgnitionFunctionTests(unittest.TestCase):
         )
 
     def test_hot_alpha_raise_does_not_create_excitation(self) -> None:
-        settings = IgnitionSettings(
+        settings = IgnitionSettings(clock_mode="wall",
             decay=DecaySettings(alpha=0.10, midpoint_ticks=4.0, steepness=1.0),
             pacemaker=PacemakerSettings(enabled=False),
         )

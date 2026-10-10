@@ -26,6 +26,7 @@ class IgnitionSnapshot:
     pacemaker: PacemakerSnapshot = PacemakerSnapshot()
     pacemaker_incoming: dict[str, float] = field(default_factory=dict)
     pacemaker_only_excitation: tuple[str, ...] = ()
+    event_external: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +108,7 @@ class IgnitionEngine:
         self.tick_index = 0
         self.core.store.enable_lifetime_tracking(self.tick_index)
         self._incoming: dict[str, float] = defaultdict(float)
+        self._event_external: dict[str, float] = defaultdict(float)
         # Portion of _incoming whose complete causal ancestry is pacemaker-only.
         # This provenance prevents ν background activity from turning into
         # learning/consolidation one or more propagation hops later.
@@ -201,14 +203,17 @@ class IgnitionEngine:
         raise ValueError(f"Unhandled seed reason: {reason}")
 
     def seed(self, ref: Ref, amount: float, *, reason: SeedReason | None = None) -> None:
+        from math import isfinite
         with self._lock:
             if not self.core.store.has_uid(ref.uid):
                 raise KeyError(ref.uid)
             if ref.kind is RefKind.L:
                 raise ValueError("L has no excitation state and cannot be seeded")
-            if amount < 0:
+            if not isfinite(amount) or amount < 0:
                 raise ValueError("Seed amount must be >= 0")
             self._incoming[ref.uid] += amount
+            if self.settings.clock_mode == 'event':
+                self._event_external[ref.uid] += amount
             if reason is SeedReason.PACEMAKER:
                 self._pacemaker_incoming[ref.uid] += amount
             if reason is not None:
@@ -235,6 +240,8 @@ class IgnitionEngine:
         but keeps prompt handling proportional to the active cognitive set.
         """
         with self._lock:
+            if self.settings.clock_mode == 'event':
+                return
             updates: dict[str, RuntimeState] = {}
             eps = self.settings.activation.epsilon
             for uid in tuple(self._active_uids):
@@ -283,11 +290,13 @@ class IgnitionEngine:
                 self.pacemaker.snapshot(),
                 (dict(self._pacemaker_incoming) if include_pending else {}),
                 tuple(sorted(self._pacemaker_only_excitation)),
+                dict(self._event_external) if include_pending else {},
             )
 
     def restore_snapshot(self, snapshot: IgnitionSnapshot) -> None:
         with self._lock:
             self.tick_index = max(0, int(snapshot.tick_index))
+            self._event_external = defaultdict(float, snapshot.event_external)
             self.core.store.set_lifetime_clock(self.tick_index)
             # Rebuild the general initial-lifetime schedule against the restored
             # clock/birth metadata. Canonical state itself is unchanged.
@@ -352,6 +361,9 @@ class IgnitionEngine:
             return self._tick_locked(include_pacemaker=include_pacemaker)
 
     def _tick_locked(self, *, include_pacemaker: bool = True) -> TickResult:
+        if self.settings.clock_mode == 'event':
+            from .event_dynamics import event_tick
+            return event_tick(self)
         tick = self.tick_index
         self.core.store.set_lifetime_clock(tick)
         incoming = dict(self._incoming)

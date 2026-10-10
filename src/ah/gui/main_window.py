@@ -1012,6 +1012,11 @@ class MainWindow(QMainWindow):
         self._run_llm_operation(llm.restart, clears_restart=True)
 
     def _toggle_ignition(self) -> None:
+        if self.services.ignition.settings.clock_mode == 'event':
+            QMessageBox.information(self, 'Ignition',
+                'Событийный режим: внимание продвигается при чтении и GOAL-запросах. '
+                'Фоновый таймер отключён; ручной шаг доступен для диагностики.')
+            return
         if self.services.clock.running:
             self.services.clock.stop()
         else:
@@ -1977,6 +1982,7 @@ class MainWindow(QMainWindow):
             self.services.apply_config(new_config)
             self.canvas_browser.set_config(new_config)
             if hasattr(self, "ignition_tuning"):
+                self.ignition_tuning.set_clock_mode(new_config.ignition)
                 self.ignition_tuning.set_parameters(
                     new_config.ignition.decay,
                     new_config.ignition.seeds.resolved_symbol,

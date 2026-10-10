@@ -14,9 +14,9 @@ from .selection_protocol import Relation, DecisionSchema
 from .selector_wire import build_selector_prompt, validate_selector_reply
 
 
-def freeze_context(store, release, source_tags):
+def freeze_context(store, release, source_tags, *, active_refs=None):
     policy=release.resources.get('CorefPolicy',{}).get('entries',())
-    if not source_tags: return []
+    if not source_tags and active_refs is None: return []
     if len(policy)!=1: raise ValueError('RESOURCE_MISSING: CorefPolicy required for declared reference reads')
     if len(source_tags)>policy[0]['window_size']: raise ValueError('COREF_WINDOW_LIMIT')
     tags={tuple(t) for t in source_tags}
@@ -24,7 +24,10 @@ def freeze_context(store, release, source_tags):
         store._refresh(); ledger=store.ledger; paths=ledger.paths(); rows=[]
         # Index candidates by the explicitly permitted sources, not name search.
         for bid,binding in sorted(ledger.data['bindings'].items()):
-            if binding['status']!='LIVE' or tuple(binding.get('source_tag',())) not in tags: continue
+            if binding['status']!='LIVE': continue
+            if active_refs is None and tuple(binding.get('source_tag',())) not in tags: continue
+            if active_refs is not None and (binding['target_ref'] not in active_refs
+                    or tags and tuple(binding.get('source_tag',())) not in tags): continue
             if any(s not in paths for s in binding.get('premise_support_refs',())): continue
             supports=sorted(sid for sid,s in ledger.data['supports'].items()
                             if sid in paths and bid in s.get('binding_refs',())
@@ -39,6 +42,9 @@ def freeze_context(store, release, source_tags):
                          'label':str(name.value) if name is not None else uid})
             if len(rows)>256: raise ValueError('COREF_CANDIDATE_LIMIT')
         if policy[0]['event_anaphora_rules']:
+            if active_refs is not None and not tags:
+                tags={tuple(s['source_tag']) for sid,s in ledger.data['supports'].items()
+                      if sid in paths and s.get('conclusion_ref') in active_refs and s.get('source_tag')}
             from .native_records import record_index
             indexed=record_index(store._core,ledger)['sources']
             texts={}
@@ -50,6 +56,7 @@ def freeze_context(store, release, source_tags):
                 for sid in indexed.get(oid,()):
                     support=ledger.data['supports'][sid]
                     if sid not in paths or support.get('source_tag')!=[oid,version]: continue
+                    if active_refs is not None and support['conclusion_ref'] not in active_refs: continue
                     node=ledger.data['nodes'].get(support['conclusion_ref'],{})
                     if not node.get('template_ref') or node.get('temporal_mode') not in {'EVENT','PROCESS','TRANSITION'} or not node.get('polarity',True): continue
                     rows.append({'entity_ref':support['conclusion_ref'],'reference_kind':'EVENT',
@@ -89,6 +96,8 @@ def prepare_references(state, release):
     provenance=ResourceProvenance(('COREF_DECLARED_WINDOW',),{'release':release.sha256})
     for tid in sorted(arguments):
         ev=evidence[tid]
+        context=state.observation.get('coreference_context_by_mention',{}).get(tid,
+                    state.observation.get('coreference_context',[]))
         event_mention=bool(policy and any(re.fullmatch(r['pattern'],ev.span,re.I) for r in policy['event_anaphora_rules']))
         if tid in explicit or not any(v.pos=='NPRO' for v in ev.variants) and not event_mention: continue
         candidates={}; rejected=[]
@@ -171,7 +180,8 @@ def resolve_references(state, slots, selector, release):
         if selected_by_speaker is not None:
             d.selected=(selected_by_speaker,); d.outcome='RESOLVED'
             d.grounds.append(Ground('C','durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
-        elif len(ids)==1:
+        elif len(ids)==1 and (tid not in state.observation.get('coreference_context_by_mention',{})
+                             or any(r.get('source_kind')=='CONTEXT' for r in candidates[ids[0]])):
             d.selected=ids; d.outcome='RESOLVED'; d.grounds.append(Ground('D','one compatible grounded antecedent',ids[0]))
         elif ids and not state.budget.llm_exhausted:
             local_ids={'reference:'+str(i):uid for i,uid in enumerate(ids)}
@@ -180,7 +190,16 @@ def resolve_references(state, slots, selector, release):
                                    'reference_kind':candidates[uid][0].get('reference_kind','ENTITY')},ensure_ascii=False))
                        for cid,uid in local_ids.items()}
             schema=DecisionSchema(release.sha256,relations)
-            prompt=build_selector_prompt(selector,slot_id='reference',frame_id=tid,context_span=state.text,
+            context_span=state.text
+            if state.region_forest is not None:
+                from .regions import reference_goal
+                start,end=reference_goal(state,tid)['source_range']
+                context_span=state.text[start:end]
+            if len(context_span)>2048 or len(ids)>32:
+                d.outcome='UNRESOLVED'; state.diag('COREF_PROBE_LIMIT',tid)
+                unresolved.append(tid)
+                continue
+            prompt=build_selector_prompt(selector,slot_id='reference',frame_id=tid,context_span=context_span,
                 mentions={tid:evidence[tid].span},schema=schema,candidates=tuple(local_ids),contextual_statements=state.context_facts)
             try:
                 state.budget.spend_llm(); raw=selector.select(prompt)
