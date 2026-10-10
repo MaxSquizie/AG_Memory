@@ -214,7 +214,16 @@ class MainWindow(_BaseMainWindow):
             if event.get("event") == "case_finished":
                 status = event.get("status", "INCOMPLETE")
                 detail = event.get("errors") or event.get("blockers") or event.get("runtime_error") or ""
-                self.chat_history.append(f"<b>{self._html(str(event.get('case_id')))}: {self._html(str(status))}</b> {self._html(str(detail)[:600])}")
+                cause = event.get('first_observed_text')
+                if not isinstance(cause, str):
+                    native = event.get('runtime_diagnostics')
+                    cause = native.get('first_observed_text', '') if isinstance(native, dict) else ''
+                cause_html = f"<br><b>Runtime:</b> {self._html(cause[:2000])}" if cause and status != 'PASS' else ''
+                native_text = event.get('native_diagnostic_text')
+                if isinstance(native_text, str) and native_text and status != 'PASS':
+                    cause_html += f"<br><b>Диагностика IR:</b> {self._html(native_text[:4000])}"
+                self.chat_history.append(f"<b>{self._html(str(event.get('case_id')))}: {self._html(str(status))}</b>"
+                    f"{cause_html}<br><b>Сверка:</b> {self._html(str(detail)[:600])}")
         for line in logs:
             self._semantic_process_output.append(line)
             self.chat_history.append(f"<pre>{self._html(line[:2000])}</pre>")

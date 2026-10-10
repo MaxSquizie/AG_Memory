@@ -14,9 +14,9 @@ bounded-selection micro-shot; all model traffic still goes through ProviderCallL
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 
-from ah.formalizer.selection_protocol import ProtocolError
+from ah.formalizer.selection_protocol import ProtocolError, _strip_code_fence
 
 # The only role ids a TP reply may name without inventing new registry entries: the two roles that
 # MUST exist (EXPERIENCER) plus the syntactic-only SURFACE_ARG. Anything else is a protocol error (a).
@@ -77,6 +77,72 @@ class StructureProposalRequest:
 class StructureProposalReply:
     hypotheses: tuple[Hypothesis, ...] = ()
     abstain: bool = False              # explicit miss — never substituted by AMBIGUOUS (f)
+
+
+def build_structure_prompt(req: StructureProposalRequest, tokens: list[dict]) -> str:
+    """Describe the actual wire format, without supplying a semantic answer.
+
+    Request dataclasses alone do not tell a model the reply's mandatory keys,
+    node-index convention or alignment requirements. Keep the response contract
+    beside its validator; all enums/references come from this bounded request.
+    """
+    def obj(properties, required):
+        return {'type': 'object', 'properties': properties,
+                'required': list(required), 'additionalProperties': False}
+
+    source_id = {'type': 'string', 'enum': list(req.source_spans)}
+    source_ids = {'type': 'array', 'items': source_id, 'minItems': 1}
+    features = [str(getattr(t, 'hypothesis_id', t)) for t in req.token_hypotheses]
+    feature_refs = {'type': 'array', 'items': {'type': 'string', 'enum': features}}
+    if not features:
+        feature_refs = {'type': 'array', 'maxItems': 0}
+    node = obj({
+        'kind': {'type': 'string', 'enum': sorted(req.allowed_node_kinds)},
+        'anchor_spans': source_ids,
+        'feature_refs': feature_refs,
+        'head_anchor': {'anyOf': [source_id, {'type': 'null'}]},
+    }, ('kind', 'anchor_spans'))
+    edge = obj({
+        'kind': {'type': 'string', 'enum': sorted(req.allowed_edge_kinds)},
+        'from': {'type': 'integer', 'minimum': 0},
+        'to': {'type': 'integer', 'minimum': 0},
+        'role_id': {'anyOf': [{'type': 'string', 'enum': sorted(req.allowed_role_ids)},
+                              {'type': 'null'}]},
+        'scope': {'type': 'boolean'},
+    }, ('kind', 'from', 'to'))
+    hypothesis = obj({
+        'local_id': {'type': 'string', 'minLength': 1},
+        'nodes': {'type': 'array', 'items': node, 'minItems': 1, 'maxItems': req.max_nodes},
+        'edges': {'type': 'array', 'items': edge, 'maxItems': req.max_edges},
+        'alternatives': {'type': 'integer', 'minimum': 1},
+        'alignment': source_ids,
+    }, ('local_id', 'nodes', 'alignment'))
+    schema = obj({
+        'hypotheses': {'type': 'array', 'items': hypothesis},
+        'abstain': {'type': 'boolean'},
+    }, ())
+    payload = {
+        'task': 'Propose bounded local syntax. Return exactly one JSON object conforming to response_schema; no markdown or explanation.',
+        'response_schema': schema,
+        'reply_rules': [
+            'Return {"hypotheses": [...]} or {"abstain": true}. Never abstain with hypotheses.',
+            'Every hypothesis must have its own nonempty local_id, nodes, and nonempty alignment. local_id is a local label, not a canonical memory ID.',
+            'alignment contains supplied token IDs covering this hypothesis; every node anchor_spans is a nonempty subset of alignment. Use token IDs, never token text or character offsets.',
+            'Nodes have no id field. Edge from/to are zero-based INTEGER positions in that hypothesis nodes array, not local_id strings or token IDs.',
+            'For ARGUMENT/ATTITUDE, from is a PREDICATE and to is an ENTITY/proposition; role_id must be a supplied role. ATTITUDE targets a proposition.',
+            'OPERAND edges run from an operator to its operands. Preserve their syntactic order. Unary NOT/POSSIBLE/NECESSARY have one operand; AND/OR/XOR have at least two; IMPLIES/COUNTERFACTUAL/ASSOCIATION have two.',
+            'FORALL/EXISTS operands are [BOUND_VAR, proposition body]. Numeric scope operands are [BOUND_VAR, proposition body, NUMERAL]. BIND connects BOUND_VAR to its body ENTITY argument.',
+            'TIME_SCOPE runs from a proposition to an anchored TIME. BEFORE/AFTER/DURING operands are TIME or proposition nodes. TIME/NUMERAL carry raw anchors only; never supply model-generated numeric values.',
+            'QUERY_SLOT runs from PREDICATE to WH/COUNT_REQUEST and uses a registered role_id.',
+            'For a multi-token PREDICATE/ENTITY supply head_anchor from its own anchor_spans. feature_refs must name declared token hypotheses; otherwise omit it or use [].',
+            'Keep the graph acyclic and within the supplied budgets. Preserve every required_operators scope. Never add fields, canonical IDs or invented roles.',
+            'Propose only positively supported structures. Preserve genuine alternative readings or abstain when no grounded structure can be supplied.',
+        ],
+        'request': asdict(req),
+        'tokens': tokens,
+    }
+    return json.dumps(payload, ensure_ascii=False,
+                      default=lambda x: sorted(x) if isinstance(x, (set, frozenset)) else str(x))
 
 
 def budget_precheck(budget) -> bool:
@@ -226,30 +292,36 @@ def parse_and_validate(req: StructureProposalRequest, raw: str | None) -> list[H
     if raw is None:
         return []  # missing reply -> explicit miss, never AMBIGUOUS
     try:
-        data = json.loads(raw)
+        # Same transport-only normalization as bounded selection. Do not search
+        # for JSON inside prose or accept extra/malformed semantic fields.
+        data = json.loads(_strip_code_fence(raw))
     except json.JSONDecodeError as exc:
         raise ProtocolError(f"malformed TP reply JSON: {exc}") from exc
     if not isinstance(data, dict):
         raise ProtocolError("TP reply must be a JSON object")
 
-    def fields(obj,allowed,required=()):
-        if not isinstance(obj,dict) or set(obj)-set(allowed) or not set(required)<=set(obj):
-            raise ProtocolError("unknown/missing TP fields")
+    def fields(obj,allowed,required=(),path='$'):
+        if not isinstance(obj,dict):
+            raise ProtocolError(f"unknown/missing TP fields at {path}: expected object")
+        missing=sorted(set(required)-set(obj)); unknown=sorted(set(obj)-set(allowed))
+        if missing or unknown:
+            raise ProtocolError(f"unknown/missing TP fields at {path}: missing={missing}, unknown={unknown}")
     fields(data,{"hypotheses","abstain"})
     if not isinstance(data.get("abstain",False),bool) or not isinstance(data.get("hypotheses",[]),list):
         raise ProtocolError("invalid TP scalar/list type")
     hyps=[]
     try:
-        for h in data.get("hypotheses",[]):
-            fields(h,{"local_id","nodes","edges","alternatives","alignment"},{"local_id","nodes","alignment"})
+        for hi,h in enumerate(data.get("hypotheses",[])):
+            path=f'$.hypotheses[{hi}]'
+            fields(h,{"local_id","nodes","edges","alternatives","alignment"},{"local_id","nodes","alignment"},path)
             nodes=[]; edges=[]
-            for v in h["nodes"]:
-                fields(v,{"kind","anchor_spans","feature_refs","head_anchor"},{"kind","anchor_spans"})
+            for ni,v in enumerate(h["nodes"]):
+                fields(v,{"kind","anchor_spans","feature_refs","head_anchor"},{"kind","anchor_spans"},f'{path}.nodes[{ni}]')
                 if not isinstance(v["anchor_spans"],list) or not all(isinstance(x,str) for x in v["anchor_spans"]):
                     raise ProtocolError("anchor_spans must be a list of source ids")
                 nodes.append(TNode(v["kind"],tuple(v["anchor_spans"]),tuple(v.get("feature_refs",())),v.get('head_anchor')))
-            for e in h.get("edges",[]):
-                fields(e,{"kind","from","to","role_id","scope"},{"kind","from","to"})
+            for ei,e in enumerate(h.get("edges",[])):
+                fields(e,{"kind","from","to","role_id","scope"},{"kind","from","to"},f'{path}.edges[{ei}]')
                 if type(e["from"]) is not int or type(e["to"]) is not int or type(e.get("scope",False)) is not bool:
                     raise ProtocolError("invalid TP endpoint/scope type")
                 edges.append(TEdge(e["kind"],e["from"],e["to"],e.get("role_id"),e.get("scope",False)))

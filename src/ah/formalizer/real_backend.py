@@ -24,8 +24,9 @@ from ah.formalizer.fake_selector import ProviderUnavailableError
 from ah.formalizer.provider_adapter import BudgetSnapshot, ProviderAdapter
 
 _SYSTEM = (
-    "You are a bounded semantic selector. Answer ONLY with the strict JSON object described in the prompt. "
-    "Never invent relations outside the declared closed set."
+    "You are a bounded language-protocol worker. Answer ONLY with the strict JSON object described in the prompt. "
+    "Use only declared IDs, types and roles. Do not add fields, markdown or explanations. "
+    "For selection, never invent relations outside the declared closed candidate set."
 )
 
 

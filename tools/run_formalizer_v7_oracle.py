@@ -10,6 +10,7 @@ from tools import check_formalizer_v7_oracle as checker
 from tools import formalizer_v7_extended_binding as adapter
 from tools import formalizer_v7_runtime_adapter as base
 from tools import formalizer_v7_progress as progress
+from tools.formalizer_v7_run_diagnostics import case_diagnostics
 from tools.run_formalizer_v7_bound_oracle import coverage,dump,sha
 
 def main(argv=None):
@@ -102,9 +103,21 @@ def main(argv=None):
             compared=checker.compare_case(gold,json.loads(serialized_result))
             live_counts['completed']=i
             live_counts[{'PASS':'passed','FAIL':'failed','BLOCKED':'blocked'}[compared['status']]]+=1
+            # The native cause is distinct from gold mismatches. Observation
+            # cannot change the comparator status or the already-recorded run.
+            try:
+                runtime_diagnostics=case_diagnostics(result,wal_path=wal)
+            except Exception as exc:
+                runtime_diagnostics={'case_id':gold['case_id'],'first_observed_issue':None,
+                    'artifact_warnings':[f'diagnostic extraction failed: {type(exc).__name__}: {exc}'],
+                    'causal_attribution':'NOT_INFERRED'}
             progress.emit('case_finished',case_id=gold['case_id'],case_index=i,
                 status=compared['status'],execution_status=result['execution_status'],
                 errors=compared['errors'],blockers=compared.get('blockers',[]),
+                first_observed_issue=runtime_diagnostics.get('first_observed_issue'),
+                first_observed_text=runtime_diagnostics.get('first_observed_text'),
+                native_diagnostic_text=runtime_diagnostics.get('native_diagnostic_text'),
+                runtime_diagnostics=runtime_diagnostics,
                 runtime_error=result.get('runtime_error'),case_elapsed_seconds=round(time.monotonic()-case_started,3),
                 received_provider_calls=received_calls,**live_counts)
             if i%25==0 or i==len(selected):print(f'{i}/{len(selected)}: {gold["case_id"]} ({result["execution_status"]})',flush=True)

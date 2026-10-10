@@ -17,7 +17,7 @@ from .state import FrameCandidate,Decision,Ground,LinkedAlternative,ResourceProv
 from .seal import structural_seal
 from .selection_protocol import Relation,DecisionSchema,build_selection_prompt,validate_selection_response,ProtocolError
 from .t3_sources import build_source_traces
-from .tp_proposer import StructureProposalRequest,parse_and_validate
+from .tp_proposer import StructureProposalRequest,build_structure_prompt,parse_and_validate
 from .syntax_rules import run_srl, propose_graphs, SearchLimit
 
 OPERATORS={'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'}
@@ -308,7 +308,8 @@ def _propose(state,selector,release):
     if len(source)>p.get('max_source_tokens',256):
         state.diag('COMPUTATION_LIMIT','local TP source region too large; no truncation'); return
     req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required))
-    prompt=json.dumps({'task':'propose bounded local syntax; return hypotheses or abstain. Each node has kind and anchor_spans of supplied token IDs; multi-token PREDICATE/ENTITY also requires head_anchor inside its own anchors. TIME and NUMERAL carry raw anchors only, never model-supplied numeric values. Numeric scope operands are [BOUND_VAR, proposition body, NUMERAL]; BIND connects the variable to its body argument. Temporal order operands may be TIME or proposition nodes. Each edge has kind, from, to, optional role_id, scope. TIME_SCOPE attaches proposition to TIME; QUERY_SLOT attaches predicate to WH/COUNT_REQUEST with a registered role. No canonical IDs.','request':{**asdict(req),'allowed_node_kinds':sorted(req.allowed_node_kinds),'allowed_edge_kinds':sorted(req.allowed_edge_kinds),'allowed_role_ids':sorted(req.allowed_role_ids)},'tokens':[{'id':e.token_id,'text':e.span,'variants':[asdict(v) for v in e.variants]} for e in state.evidence]},ensure_ascii=False,default=lambda x:sorted(x) if isinstance(x,(set,frozenset)) else str(x))
+    prompt=build_structure_prompt(req,[{'id':e.token_id,'text':e.span,
+        'variants':[asdict(v) for v in e.variants]} for e in state.evidence])
     frozen_hypotheses = list(frozen.values())
     try:
         if frozen_hypotheses:
