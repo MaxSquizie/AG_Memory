@@ -9,6 +9,12 @@ from tools.formalizer_v7_extended_binding import Session
 from tools.formalizer_v7_native_binding import execute_native, fixture
 
 
+# These authored fixture backends use the legacy JSON wire explicitly. The
+# default local-model protocol is compact labels, not implicit JSON.
+CONFIG={'provider':'lmstudio','model':'fixture',
+        'structure_reply_format':'JSON_V1','selection_reply_format':'JSON_V1'}
+
+
 def test_every_declared_finite_verb_has_explicit_infinitive_resources(tmp_path):
     session = Session([], tmp_path / 'lexical.log')
     release, aliases = fixture(session.core, 'known')
@@ -89,10 +95,11 @@ def test_native_smoking_predicate_uses_its_real_fixture_template(tmp_path):
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / 'smoke.log')
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+        actual = execute_native(session, payload, CONFIG)
     assert actual['assertions']['ah'] == [
         {'predicate': 'SMOKE', 'roles': {'AGENT': {'entity': 'ivan'}}}]
     assert actual['runtime']['report']['terminal'] == 'APPLIED'
+    assert actual['runtime']['provider_call_count'] == 0
     mappings = [m for m in session.release.entries('TemplateMap') if m['sense_id'] == 'SMOKE']
     assert len(mappings) == 1
     assert mappings[0]['template_ref'] == 'fixture:T:SMOKE'
@@ -138,10 +145,11 @@ def test_native_tired_subject_maps_to_canonical_experiencer(tmp_path):
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / 'tired.log')
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+        actual = execute_native(session, payload, CONFIG)
     assert actual['assertions']['ah'] == [
         {'predicate': 'TIRED', 'roles': {'EXPERIENCER': {'entity': 'ivan'}}}]
     assert actual['runtime']['report']['terminal'] == 'APPLIED'
+    assert actual['runtime']['provider_call_count'] == 0
     valency = next(v for v in session.release.entries('R-V') if v['sense_id'] == 'TIRED')
     assert valency['roles'][0]['role_id'] == 'SUBJECT'
     assert session.native_aliases['fixture:T:TIRED'] == ('TIRED', {'SUBJECT': 'EXPERIENCER'})
@@ -172,7 +180,7 @@ def test_declared_fixture_prepositional_mention_binding_carrier(
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / (predicate + '.log'))
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+        actual = execute_native(session, payload, CONFIG)
     assert actual['assertions']['ah'][0]['roles'][canonical_role] == {'entity': label}
     assert actual['runtime']['report']['terminal'] == 'APPLIED'
     ir = actual['runtime']['ir']
@@ -206,7 +214,7 @@ def test_fixture_does_not_alias_arbitrary_compound_mention_to_its_head(tmp_path)
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / 'compound.log')
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+        actual = execute_native(session, payload, CONFIG)
     ir = actual['runtime']['ir']
     unit = next(u for u in ir['frames'][0]['semantic']['lexical_units'].values()
                 if len(u['anchor_refs']) == 2)
@@ -259,7 +267,7 @@ def test_native_conditionals_preserve_the_declared_scope_without_response_rewrit
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / 'conditional.log')
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'fixture'})
+        actual = execute_native(session, payload, CONFIG)
     assert actual['runtime']['report']['applied'] is applied
     if applied:
         assert actual['assertions']['ah'][0]['operator'] == reply_operator

@@ -73,6 +73,10 @@ def test_normal_bounded_calls_are_raw_and_agent_calls_are_not_parser_calls():
 
 
 class BoundedFixtureBackend:
+    # The authored reply below intentionally verifies the legacy JSON path.
+    structure_reply_format = 'JSON_V1'
+    selection_reply_format = 'JSON_V1'
+
     def generate(self, prompt, **kwargs):
         data = json.loads(prompt)
         anchors = {t['text']: t['id'] for t in data['tokens']}
@@ -86,7 +90,8 @@ class BoundedFixtureBackend:
 def test_native_diagnostic_snapshot_contains_actual_ir_and_receipt_without_aliasing(tmp_path):
     session = Session([], tmp_path / 'native.log')
     release, _ = fixture(session.core, 'known')
-    selector = RealBackendSelector(BoundedFixtureBackend(), journal=session.store._journal)
+    selector = RealBackendSelector(BoundedFixtureBackend(), journal=session.store._journal,
+        structure_reply_format='JSON_V1', selection_reply_format='JSON_V1')
     adapter = FormalizerAdapter(selector, store=session.store,
         binding=InterpretationRunBinding(session.store._journal), release=release)
     assert adapter.diagnostic_snapshot() is None
@@ -110,7 +115,8 @@ def test_diagnostic_conversion_failure_cannot_fail_successful_native_commit(tmp_
     import ah.formalizer.runtime_adapter as runtime
     session = Session([], tmp_path / (conversion + '.log'))
     release, _ = fixture(session.core, 'known')
-    adapter = FormalizerAdapter(RealBackendSelector(BoundedFixtureBackend(), journal=session.store._journal),
+    adapter = FormalizerAdapter(RealBackendSelector(BoundedFixtureBackend(), journal=session.store._journal,
+        structure_reply_format='JSON_V1', selection_reply_format='JSON_V1'),
         store=session.store, binding=InterpretationRunBinding(session.store._journal), release=release)
     text = 'Мария спит.'
     def fail_observer(*args, **kwargs):

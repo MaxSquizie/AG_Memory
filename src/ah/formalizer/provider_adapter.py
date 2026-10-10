@@ -50,12 +50,12 @@ class BudgetSnapshot:
 
 @dataclass
 class ProviderAdapter:
-    """Logged facade over a backend transport. ``transport(prompt) -> raw JSON string`` is injected so the
+    """Logged facade over a backend transport. ``transport(prompt) -> raw protocol text`` is injected so the
     contract machinery (capability, budget, ordinal, replay, integrity) is testable without a live model."""
 
     name: str
     capabilities: frozenset[str] = frozenset()  # e.g. {"select", "propose_local"}
-    transport: object = None                     # callable(prompt) -> raw JSON
+    transport: object = None                     # callable(prompt) -> raw protocol text
     model_key: str = ""
     params_hash: str = "temperature=0"
     log: object = None                           # ProviderCallLog (optional; in-memory if None)

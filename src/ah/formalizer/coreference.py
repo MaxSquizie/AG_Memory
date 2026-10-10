@@ -10,7 +10,8 @@ import json
 import re
 from .canonical_ledger import digest
 from .state import ReferenceCandidate, Decision, Ground, ResourceProvenance
-from .selection_protocol import Relation, DecisionSchema, build_selection_prompt, validate_selection_response
+from .selection_protocol import Relation, DecisionSchema
+from .selector_wire import build_selector_prompt, validate_selector_reply
 
 
 def freeze_context(store, release, source_tags):
@@ -179,11 +180,11 @@ def resolve_references(state, slots, selector, release):
                                    'reference_kind':candidates[uid][0].get('reference_kind','ENTITY')},ensure_ascii=False))
                        for cid,uid in local_ids.items()}
             schema=DecisionSchema(release.sha256,relations)
-            prompt=build_selection_prompt(slot_id='reference',frame_id=tid,context_span=state.text,
+            prompt=build_selector_prompt(selector,slot_id='reference',frame_id=tid,context_span=state.text,
                 mentions={tid:evidence[tid].span},schema=schema,candidates=tuple(local_ids),contextual_statements=state.context_facts)
             try:
                 state.budget.spend_llm(); raw=selector.select(prompt)
-                reply=validate_selection_response(raw,schema,allowed=frozenset(local_ids))
+                reply=validate_selector_reply(selector,raw,schema,tuple(local_ids),allowed=frozenset(local_ids))
                 d.last_prompt=prompt; d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=tuple(local_ids[c] for c in reply.selected)
                 d.outcome='RESOLVED' if reply.outcome=='ONE_SELECTED' else 'AMBIGUOUS' if reply.outcome=='MULTIPLE_ADMISSIBLE' else 'INSUFFICIENT_CONTEXT' if reply.outcome=='INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
                 if d.outcome=='RESOLVED': d.grounds.append(Ground('M','bounded antecedent selection',d.selected[0]))

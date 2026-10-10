@@ -2,7 +2,7 @@
 """RealBackendSelector — connect a live local LLM backend to the formalizer's bounded-selection
 interface (V7 §14 / WP4.1).
 
-The pipeline consumes ``selector.select(prompt) -> raw JSON string`` (see :mod:`ah.formalizer.fake_selector`
+The pipeline consumes ``selector.select(prompt) -> raw protocol text`` (see :mod:`ah.formalizer.fake_selector`
 for the deterministic dry run). This adapter wraps ANY product LLM backend — built by
 :func:`ah.llm.factory.build_llm_backend` (Ollama / LMStudio / Android NPU / builtin process) — behind that
 same one-argument interface, driving it through the logged :class:`~ah.formalizer.provider_adapter.ProviderAdapter`
@@ -24,8 +24,8 @@ from ah.formalizer.fake_selector import ProviderUnavailableError
 from ah.formalizer.provider_adapter import BudgetSnapshot, ProviderAdapter
 
 _SYSTEM = (
-    "You are a bounded language-protocol worker. Answer ONLY with the strict JSON object described in the prompt. "
-    "Use only declared IDs, types and roles. Do not add fields, markdown or explanations. "
+    "You are a bounded language-protocol worker. Follow ONLY the exact response format declared in the request. "
+    "Use only declared labels, token indices, types and roles. Do not add markdown or explanations. "
     "For selection, never invent relations outside the declared closed candidate set."
 )
 
@@ -42,16 +42,23 @@ class RealBackendSelector:
     budget: BudgetSnapshot | None = None
     generation_settings: dict = field(default_factory=lambda:{"temperature":0.0,"top_p":1.0,"top_k":0,"max_new_tokens":4096,"enable_thinking":False})
     model_key: str = ""
+    structure_reply_format: str = "TP-C1"
+    selection_reply_format: str = "SELECT_LABELS_V1"
 
     def __post_init__(self):
         from .provider_call_log import ProviderCallLog
         from .canonical_ledger import digest
+        if self.structure_reply_format not in {'TP-C1', 'JSON_V1'}:
+            raise ValueError('unsupported structure reply protocol: ' + str(self.structure_reply_format))
+        if self.selection_reply_format not in {'SELECT_LABELS_V1', 'JSON_V1'}:
+            raise ValueError('unsupported selection reply protocol: ' + str(self.selection_reply_format))
         self._adapter = ProviderAdapter(
             name=type(self.backend).__name__,
             capabilities=frozenset({"select", "propose_local"}),
             log=ProviderCallLog(self.journal),
             model_key=self.model_key or str(getattr(self.backend,"model",type(self.backend).__name__)),
-            params_hash=digest({"system":self.system,"role":self.role,"generation":self.generation_settings}),
+            params_hash=digest({"system":self.system,"role":self.role,"generation":self.generation_settings,
+                "structure_reply_format":self.structure_reply_format,"selection_reply_format":self.selection_reply_format}),
             transport=self._transport,
             budget=self.budget or BudgetSnapshot(tp_calls=2, lexical_calls=2, max_nodes=64, max_edges=128, max_depth=16, token_limit=32768),
         )

@@ -2,15 +2,16 @@
 """WP4.1 — real local-provider bridge (V7 §14).
 
 Hermetic: no live model is required. A stub backend duck-types the product contract
-``generate(prompt, *, system=..., role=...) -> obj(.text)`` so we can prove the bridge and its
+``generate(prompt, *, system=..., role=..., override=...) -> obj(.text)`` so we can prove the bridge and its
 honest-degradation behavior without Ollama/LMStudio running. The same RealBackendSelector is what a
-live backend (via ``selector_from_config``) plugs into; these tests pin that seam.
+live backend (via ``selector_from_config``) plugs into; authored JSON fixtures
+explicitly select the legacy JSON wire rather than relying on production defaults.
 """
 
 import json
 import unittest
 
-from ah.formalizer.fake_selector import ProviderUnavailableError
+from ah.formalizer.provider_adapter import ProviderUnavailable
 from ah.formalizer.pipeline import run as pipeline_run
 from ah.formalizer.real_backend import RealBackendSelector
 from ah.formalizer.selection_protocol import load_decision_schema
@@ -28,7 +29,7 @@ class StubBackend:
         self._responder = responder
         self.calls = 0
 
-    def generate(self, prompt, *, system="", role=""):
+    def generate(self, prompt, *, system="", role="", override=None):
         self.calls += 1
         return _Resp(self._responder(prompt))
 
@@ -40,11 +41,13 @@ def _json(outcome, selected, note=""):
 class RealProviderBridgeTest(unittest.TestCase):
     def test_bridge_returns_backend_text_and_replays(self):
         backend = StubBackend(lambda p: _json("ONE_SELECTED", ["V1"], "stub"))
-        sel = RealBackendSelector(backend)
+        sel = RealBackendSelector(backend, structure_reply_format="JSON_V1", selection_reply_format="JSON_V1")
+        sel.start_run("recorded-bridge-run")
         first = sel.select("some prompt")
         self.assertEqual(first, _json("ONE_SELECTED", ["V1"], "stub"))
-        # Replay identity: an identical prompt within the same run is served from the log cache —
-        # the transport (the real model) is NOT called a second time.
+        # Replay starts the same durable run at ordinal 1. A consecutive call in
+        # a running execution has a new ordinal and is not a replay cache hit.
+        sel.start_run("recorded-bridge-run")
         again = sel.select("some prompt")
         self.assertEqual(again, first)
         self.assertEqual(backend.calls, 1)
@@ -54,8 +57,8 @@ class RealProviderBridgeTest(unittest.TestCase):
             raise ConnectionError("connection refused (no local model)")
 
         backend = StubBackend(boom)
-        sel = RealBackendSelector(backend)
-        with self.assertRaises(ProviderUnavailableError):
+        sel = RealBackendSelector(backend, structure_reply_format="JSON_V1", selection_reply_format="JSON_V1")
+        with self.assertRaises(ProviderUnavailable):
             sel.select("some prompt")
 
     def test_pipeline_honest_miss_on_outage(self):
@@ -64,7 +67,7 @@ class RealProviderBridgeTest(unittest.TestCase):
         def boom(_prompt):
             raise ConnectionError("down")
 
-        sel = RealBackendSelector(StubBackend(boom))
+        sel = RealBackendSelector(StubBackend(boom), structure_reply_format="JSON_V1", selection_reply_format="JSON_V1")
         schema = load_decision_schema()
         st = pipeline_run("У вороны есть лапки.", schema, sel)
         codes = {d.code for d in st.diagnostics}
@@ -77,7 +80,7 @@ class RealProviderBridgeTest(unittest.TestCase):
         # A well-formed real-model response (ONE_SELECTED V1) flows through T3/T4 exactly like the
         # deterministic dry run: the selection is recorded and no provider diagnostic is raised.
         backend = StubBackend(lambda p: _json("ONE_SELECTED", ["V1"], "textual ground"))
-        sel = RealBackendSelector(backend)
+        sel = RealBackendSelector(backend, structure_reply_format="JSON_V1", selection_reply_format="JSON_V1")
         schema = load_decision_schema()
         st = pipeline_run("У меня есть книга.", schema, sel)
         codes = {d.code for d in st.diagnostics}

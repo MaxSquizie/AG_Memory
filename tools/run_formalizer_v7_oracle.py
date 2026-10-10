@@ -55,7 +55,8 @@ def main(argv=None):
         p.error('replay selection includes cases absent from the original run')
     if a.list:
         print('\n'.join(c['case_id'] for c in selected));return 0
-    config={'provider':a.provider,'model':a.model,'base_url':a.base_url,'timeout':a.timeout,'max_tokens':a.max_tokens}
+    config={'provider':a.provider,'model':a.model,'base_url':a.base_url,'timeout':a.timeout,'max_tokens':a.max_tokens,
+            'structure_reply_format':'TP-C1','selection_reply_format':'SELECT_LABELS_V1'}
     # A new directory means a new execution, never silent reuse of another model's WAL.
     if a.out.exists() and any(a.out.iterdir()):p.error('output directory is not empty; choose a new --out')
     a.out.mkdir(parents=True,exist_ok=True)

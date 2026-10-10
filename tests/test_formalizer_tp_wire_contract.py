@@ -11,6 +11,41 @@ from ah.formalizer.tp_proposer import (
 )
 
 
+@pytest.fixture(autouse=True)
+def explicitly_verify_legacy_tp_fixture(monkeypatch):
+    """These tests target TP decoding even if the grammar covers their input.
+
+    Verification is an explicitly signed TEST_ONLY resource policy here; the
+    ordinary oracle and production retain gap-only proposal dispatch.
+    """
+    from ah.formalizer.canonical_ledger import digest
+    from tools import formalizer_v7_native_binding as native
+    from tools.formalizer_v7_test_support import sign_test_release
+
+    original = native.fixture
+
+    def fixture(core, profile):
+        release, aliases = original(core, profile)
+        manifest = deepcopy(release.manifest)
+        policy = next(row for row in manifest['entries'] if row['kind'] == 'ProposalPolicy')
+        policy['entries'][0]['verify_deterministic'] = True
+        # No sibling deterministic candidate masks the decoder under test.
+        syntax = next(row for row in manifest['entries'] if row['kind'] == 'SyntaxRules')
+        syntax['entries'] = []
+        syntax['dependency_versions'] = {}
+        content = {key: manifest[key] for key in
+                   ('kind', 'version', 'schema_version', 'entries', 'dependency_versions')}
+        manifest['coverage_report']['resource_content_sha256'] = digest(content)
+        manifest['coverage_report']['units_by_kind'] = {
+            row['kind']: len(row['entries']) for row in manifest['entries']}
+        release, trust = sign_test_release(manifest)
+        release.validate_store(core.store)
+        release._oracle_test_trust = trust
+        return release, aliases
+
+    monkeypatch.setattr(native, 'fixture', fixture)
+
+
 def request():
     return StructureProposalRequest('TP:example', 'pre-seal', ('t0', 't1', 't2'),
         allowed_node_kinds=frozenset({'PREDICATE', 'ENTITY', 'NOT'}),
@@ -190,6 +225,10 @@ def test_actual_native_simple_ingest_observes_declared_contract_and_accepts_fenc
     prompts = []
 
     class Backend:
+        # This test exercises the separately declared legacy JSON wire.
+        structure_reply_format = 'JSON_V1'
+        selection_reply_format = 'JSON_V1'
+
         def generate(self, prompt, **_kwargs):
             if prompt.startswith('{'):
                 data = json.loads(prompt)
@@ -212,7 +251,8 @@ def test_actual_native_simple_ingest_observes_declared_contract_and_accepts_fenc
     # Exercise the real T0–T6 path; inject only the provider response.
     from unittest.mock import patch
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture'})
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture',
+            'structure_reply_format': 'JSON_V1', 'selection_reply_format': 'JSON_V1'})
     assert len(prompts) == 1
     expected = [{'predicate': 'ENTER', 'roles': {'AGENT': {'entity': 'ivan'}}}]
     assert actual['generation']['gold_patterns'] == expected
@@ -228,6 +268,9 @@ def test_actual_native_missing_alignment_stays_empty_with_actionable_diagnostic(
     from tools.formalizer_v7_run_diagnostics import case_diagnostics
 
     class Backend:
+        structure_reply_format = 'JSON_V1'
+        selection_reply_format = 'JSON_V1'
+
         def generate(self, prompt, **_kwargs):
             data = json.loads(prompt)
             tokens = {t['text']: t['id'] for t in data['tokens']}
@@ -241,7 +284,8 @@ def test_actual_native_missing_alignment_stays_empty_with_actionable_diagnostic(
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / 'native.log')
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        observed = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture'})
+        observed = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture',
+            'structure_reply_format': 'JSON_V1', 'selection_reply_format': 'JSON_V1'})
     assert observed['assertions']['ah'] == observed['generation']['gold_patterns'] == []
     assert observed['runtime']['report']['terminal'] == 'RESOLUTION_ONLY'
     assert observed['store']['marker_count'] == 0
@@ -270,6 +314,9 @@ def test_real_morphology_punctuation_does_not_lower_native_coverage(
     from tools.formalizer_v7_native_binding import execute_native
 
     class Backend:
+        structure_reply_format = 'JSON_V1'
+        selection_reply_format = 'JSON_V1'
+
         def generate(self, prompt, **_kwargs):
             data = json.loads(prompt)
             tokens = {t['text']: t['id'] for t in data['tokens']}
@@ -287,7 +334,8 @@ def test_real_morphology_punctuation_does_not_lower_native_coverage(
         'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     session = Session([payload], tmp_path / 'native.log')
     with patch('tools.formalizer_v7_native_binding.ChatBackend', return_value=Backend()):
-        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture'})
+        actual = execute_native(session, payload, {'provider': 'lmstudio', 'model': 'wire-fixture',
+            'structure_reply_format': 'JSON_V1', 'selection_reply_format': 'JSON_V1'})
     assert actual['runtime']['report']['terminal'] == 'APPLIED'
     assert actual['assertions']['ah'] == [expected]
     assert actual['coverage']['status'] == coverage

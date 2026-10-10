@@ -586,7 +586,8 @@ def t3(
             break
 
         mentions = {f"M{k}": span for k, span in enumerate(frame.participants)}
-        prompt = build_selection_prompt(
+        from .selector_wire import build_selector_prompt, validate_selector_reply
+        prompt = build_selector_prompt(selector,
             slot_id="predicate_value",
             frame_id=frame.frame_id,
             context_span=state.text,
@@ -609,7 +610,7 @@ def t3(
                     last = "provider"
                     continue  # bounded retry if attempts remain
                 try:
-                    resp = validate_selection_response(raw, schema, allowed=frozenset(candidates))
+                    resp = validate_selector_reply(selector, raw, schema, candidates, allowed=frozenset(candidates))
                 except ProtocolError as exc:
                     state.budget.spend_llm(failed=True)
                     state.diag("PROTOCOL_ERROR", f"{key}: attempt {n}/{attempts}: {exc}")

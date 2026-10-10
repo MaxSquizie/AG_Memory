@@ -22,6 +22,7 @@ from ah.core.journal import JournalChannel
 from ah.model.types import Hypernode, FunctionSymbol, Ref
 from ah.model.operands import BoundVar, CountLiteral, TimeLiteral
 from tools.formalizer_v7_test_support import test_release, role, sign_test_release
+from tools.formalizer_v7_syntax_fixture import finite_clause_rules
 
 
 _DEFAULT_MORPH_PROVIDER = MorphProvider
@@ -172,9 +173,6 @@ def fixture(core, profile):
         {'pattern':r'\bсегодня\b|(?<!весь\s)\bсегодняшний\s+день\b','kind':'DAY_INTERVAL','day_offset':0,'interval_semantics':'EXISTENTIAL'},
         {'pattern':r'\bвесь\s+сегодняшний\s+день\b','kind':'DAY_INTERVAL','day_offset':0,'interval_semantics':'CONTINUOUS'},
         {'pattern':r'\b(?P<hour>\d{1,2}):(?P<minute>\d{2})\b','kind':'POINT_CLOCK'}]
-    # TP is verified even when a deterministic structure exists. No special
-    # sentence patterns are added to conceal structural omissions.
-    R['ProposalPolicy']['entries'][0]['verify_deterministic']=True
     if profile=='known_mapping_broken':
         R['R-S']['entries']=[r for r in R['R-S']['entries'] if r['sense_id']!='SEND']+[{'lemma':'отправить','POS':'VERB','sense_id':'K_SEND'}]
         for r in R['R-V']['entries']:
@@ -201,6 +199,14 @@ def fixture(core, profile):
                 infinitive_mapping=deepcopy(mapping)
                 infinitive_mapping['sense_id']=infinitive_id
                 R['TemplateMap']['entries'].append(infinitive_mapping)
+    # Independently declared TEST_ONLY grammar, derived from the finalized
+    # released dictionary/valencies. A rule must cover its entire sentence;
+    # complex or ambiguous structures still take the ordinary bounded TP path.
+    # No oracle ID, input sentence or expected answer enters this compilation.
+    R['SyntaxRules']['entries']=finite_clause_rules({kind:resource['entries'] for kind,resource in R.items()})
+    R['SyntaxRules']['dependency_versions']={'R-S':R['R-S']['version'],'R-V':R['R-V']['version']}
+    R['ProposalPolicy']['entries'][0]['verify_deterministic']=False
+    R['ProposalPolicy']['entries'][0]['max_rule_steps']=100000
     content={k:m[k] for k in ('kind','version','schema_version','entries','dependency_versions')}
     m['coverage_report']['resource_content_sha256']=digest(content)
     m['coverage_report']['units_by_kind']={k:len(r['entries']) for k,r in R.items()}
@@ -610,7 +616,9 @@ def execute_native(session,p,config):
     observation=_observation(text,version=version,raw_input=raw)
     run_id='native:'+digest([observation['observation_id'],version])
     selector=RealBackendSelector(ChatBackend(config),journal=session.store._journal,run_id=run_id,
-        model_key=config.get('model') or 'disabled',generation_settings={'temperature':0.0,'top_p':1.0,'max_new_tokens':config.get('max_tokens',4096),'enable_thinking':False})
+        model_key=config.get('model') or 'disabled',generation_settings={'temperature':0.0,'top_p':1.0,'max_new_tokens':config.get('max_tokens',4096),'enable_thinking':False},
+        structure_reply_format=config.get('structure_reply_format','TP-C1'),
+        selection_reply_format=config.get('selection_reply_format','SELECT_LABELS_V1'))
     entities_before=native_entity_refs(session)
     state,report=interpret_full(text,None,selector,session.store,InterpretationRunBinding(session.store._journal),
         morph=morph,release=release,raw_input=raw,version=version,run_id=run_id)

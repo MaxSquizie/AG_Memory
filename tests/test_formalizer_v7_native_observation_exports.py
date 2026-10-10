@@ -4,6 +4,7 @@ The scripted replies below are bounded syntax fixtures, not oracle expected
 answers. Native T0–T6, canonical AH, ProviderAdapter and WAL remain real.
 """
 import json
+from copy import deepcopy
 import pytest
 
 from tools.formalizer_v7_extended_binding import Session
@@ -55,10 +56,35 @@ def bounded_reply(monkeypatch,nodes,edges):
     monkeypatch.setattr(ChatBackend,'generate',generate)
 
 
-CONFIG={'provider':'lmstudio','base_url':'http://unused-test-endpoint','model':'bounded-native-fixture'}
+CONFIG={'provider':'lmstudio','base_url':'http://unused-test-endpoint','model':'bounded-native-fixture',
+        'structure_reply_format':'JSON_V1','selection_reply_format':'JSON_V1'}
+
+
+def force_verified_tp_fixture(monkeypatch):
+    """Explicit signed test policy exercises TP even for covered syntax.
+
+    Production's default release may trust a complete deterministic parse.
+    These particular tests instead verify the independent proposal boundary,
+    so their TEST_ONLY resource release declares that extra verification.
+    """
+    from ah.formalizer.canonical_ledger import digest
+    from tools.formalizer_v7_test_support import sign_test_release
+    def reviewed(core,profile):
+        release,aliases=fixture(core,profile)
+        manifest=deepcopy(release.manifest)
+        resources={r['kind']:r for r in manifest['entries']}
+        resources['ProposalPolicy']['entries'][0]['verify_deterministic']=True
+        manifest['coverage_report']['resource_content_sha256']=digest({k:manifest[k]
+            for k in ('kind','version','schema_version','entries','dependency_versions')})
+        signed,trust=sign_test_release(manifest)
+        signed.validate_store(core.store)
+        signed._oracle_test_trust=trust
+        return signed,aliases
+    monkeypatch.setattr('tools.formalizer_v7_native_binding.fixture',reviewed)
 
 
 def test_native_export_reads_selected_modes_decisions_and_real_time(monkeypatch,tmp_path):
+    force_verified_tp_fixture(monkeypatch)
     bounded_reply(monkeypatch,[('PREDICATE','работал'),('ENTITY','Иван')],
         [{'kind':'ARGUMENT','from':0,'to':1,'role_id':'SUBJECT'}])
     payload=raw('Иван работал весь вчерашний день.')
@@ -113,6 +139,7 @@ def test_native_partial_coverage_uses_uncovered_spans_not_payload_gold(monkeypat
 
 @pytest.mark.parametrize('request_kind',['ASSERTION','QUERY'])
 def test_verified_tp_candidate_pattern_survives_without_gold_or_factivity(monkeypatch,tmp_path,request_kind):
+    force_verified_tp_fixture(monkeypatch)
     bounded_reply(monkeypatch,[('PREDICATE','вошёл'),('ENTITY','Иван')],
         [{'kind':'ARGUMENT','from':0,'to':1,'role_id':'SUBJECT'}])
     payload=raw('Иван вошёл.','candidate-pattern:'+request_kind,request_kind)
@@ -127,6 +154,7 @@ def test_verified_tp_candidate_pattern_survives_without_gold_or_factivity(monkey
 
 
 def test_failed_tp_exports_observed_empty_quantifier_and_entity_sets(monkeypatch,tmp_path):
+    force_verified_tp_fixture(monkeypatch)
     def unavailable(self,prompt,**kwargs):raise RuntimeError('independent missing transport fixture')
     monkeypatch.setattr(ChatBackend,'generate',unavailable)
     payload=raw('Кто-то вошёл, а затем он сел.','empty-native-ir')

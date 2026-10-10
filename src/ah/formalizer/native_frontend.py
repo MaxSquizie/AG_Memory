@@ -15,9 +15,12 @@ from .canonical_ledger import digest
 from .pipeline import t0,t1
 from .state import FrameCandidate,Decision,Ground,LinkedAlternative,ResourceProvenance,MorphVariant
 from .seal import structural_seal
-from .selection_protocol import Relation,DecisionSchema,build_selection_prompt,validate_selection_response,ProtocolError
+from .selection_protocol import Relation,DecisionSchema,ProtocolError
+from .selection_labels import PROTOCOL_VERSION as LABEL_SELECTION_PROTOCOL, selection_label_instructions
+from .selector_wire import (build_selector_prompt, validate_selector_reply, selection_wire,
+    structure_wire, build_structure_worker_prompt, validate_structure_worker_reply)
 from .t3_sources import build_source_traces
-from .tp_proposer import StructureProposalRequest,build_structure_prompt,parse_and_validate
+from .tp_proposer import StructureProposalRequest,parse_and_validate
 from .syntax_rules import run_srl, propose_graphs, SearchLimit
 
 OPERATORS={'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION'}
@@ -489,15 +492,17 @@ def _propose(state,selector,release):
         state.diag('COMPUTATION_LIMIT','TP released slot evidence exceeds '+slot_evidence['limit']+'; no partial evidence sent')
         return
     req=StructureProposalRequest('TP:'+state.source_uid,digest([asdict(f) for f in state.frames]),source,deterministic_candidates=tuple(asdict(f) for f in state.frames),uncovered_spans=tuple(uncovered),allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),schema_version='v7',max_nodes=p.get('max_nodes',64),max_edges=p.get('max_edges',128),max_depth=p.get('max_depth',16),budget_ok=not state.budget.llm_exhausted,required_operators=tuple(required),released_slot_evidence=slot_evidence,speech_act_metadata=_tp_speech_act_metadata(state,release,source))
-    prompt=build_structure_prompt(req,[{'id':e.token_id,'text':e.span,
-        'variants':[asdict(v) for v in e.variants]} for e in state.evidence])
     frozen_hypotheses = list(frozen.values())
     try:
         if frozen_hypotheses:
             raw = json.dumps({'hypotheses': frozen_hypotheses})
+            hypotheses=parse_and_validate(req,raw)
         else:
+            prompt=build_structure_worker_prompt(selector,req,[{'id':e.token_id,'text':e.span,
+                'variants':[asdict(v) for v in e.variants]} for e in state.evidence])
+            state.syntax_trace.append({'stage':'TP','event':'REPLY_PROTOCOL','protocol':structure_wire(selector)})
             state.budget.spend_llm(); raw=selector.propose_local(prompt)
-        hypotheses=parse_and_validate(req,raw)
+            hypotheses=validate_structure_worker_reply(selector,req,raw)
     except Exception as exc:
         state.diag(_failure_code(exc,'PROPOSAL_INVALID'),str(exc)); return
     if not hypotheses:
@@ -515,14 +520,18 @@ def _propose(state,selector,release):
         if state.budget.llm_exhausted:
             offer(state, structure_key, 'STRUCTURE', state.text, options)
             state.diag('COMPUTATION_LIMIT','TP hypothesis selection'); return
-        ids={h.local_id for h,fs in accepted}
+        ids=tuple(h.local_id for h,fs in accepted)
         relations={cid:Relation(cid,cid,0,(),json.dumps(asdict(h),ensure_ascii=False)) for h,fs in accepted for cid in [h.local_id]}
         schema=DecisionSchema(release.sha256,relations)
         prompt=json.dumps({'task':'select one grounded local hypothesis, MULTIPLE_ADMISSIBLE or INSUFFICIENT_CONTEXT; return outcome, selected and optional note',
                            'text':state.text,'candidates':[{'candidate_id':h.local_id,'structure':asdict(h)} for h,fs in accepted]},ensure_ascii=False)
+        if selection_wire(selector)==LABEL_SELECTION_PROTOCOL:
+            prompt=json.dumps({'task':'select grounded local hypotheses or report no fit / insufficient context',
+                'text':state.text,'candidates':[{'label':i,'structure':asdict(h)} for i,(h,fs) in enumerate(accepted,1)]},
+                ensure_ascii=False,separators=(',',':'))+'\n'+selection_label_instructions(ids)
         try:
             state.budget.spend_llm(); raw=selector.select(prompt)
-            reply=validate_selection_response(raw,schema,allowed=frozenset(ids))
+            reply=validate_selector_reply(selector,raw,schema,ids,allowed=frozenset(ids))
             state.syntax_trace.append({'stage':'TP','event':'STRUCTURE_SELECTION','candidates':sorted(ids),
                                        'outcome':reply.outcome,'selected':list(reply.selected)})
             if reply.outcome!='ONE_SELECTED':
@@ -797,9 +806,9 @@ def run_native(text,selector,release,observation,morph=None):
             d.outcome='COMPUTATION_LIMIT'; state.diag('COMPUTATION_LIMIT',f.frame_id); continue
         relations={s['candidate_id']:Relation(s['candidate_id'],s['label'],len(s['roles']),tuple(s['roles'].values()),s['label']+'; frame temporal mode: '+s['state_class']+'; token-to-role mapping: '+json.dumps(s['roles'],ensure_ascii=False,sort_keys=True)) for s in specs}
         schema=DecisionSchema(release.sha256,relations)
-        prompt=build_selection_prompt(slot_id=d.slot_id,frame_id=f.frame_id,context_span=text[f.source_range[0]:f.source_range[1]],mentions={tid:evidence[tid].span for tid in f.argument_token_refs},schema=schema,candidates=ids,contextual_statements=state.context_facts)
+        prompt=build_selector_prompt(selector,slot_id=d.slot_id,frame_id=f.frame_id,context_span=text[f.source_range[0]:f.source_range[1]],mentions={tid:evidence[tid].span for tid in f.argument_token_refs},schema=schema,candidates=ids,contextual_statements=state.context_facts)
         try:
-            state.budget.spend_llm(); raw=selector.select(prompt); reply=validate_selection_response(raw,schema,allowed=frozenset(ids))
+            state.budget.spend_llm(); raw=selector.select(prompt); reply=validate_selector_reply(selector,raw,schema,ids,allowed=frozenset(ids))
         except Exception as exc:
             d.outcome='UNRESOLVED'; state.diag(_failure_code(exc,'PROTOCOL_ERROR'),str(exc)); continue
         d.last_prompt=prompt; d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=reply.selected; d.lifecycle='PROVISIONAL'

@@ -18,32 +18,41 @@ def test_native_http_and_offline_replay(tmp_path):
             requests.append((self.path,body))
             assert body['reasoning']=='off' and body['store'] is False
             prompt=body['input']
-            if prompt.startswith('{'):
-                data=json.loads(prompt)
-                tokens=data['tokens']; anchors={t['text']:t['id'] for t in tokens}
-                reply={'hypotheses':[{'local_id':'unary','nodes':[
-                    {'kind':'PREDICATE','anchor_spans':[anchors['пришёл']]},
-                    {'kind':'ENTITY','anchor_spans':[anchors['Иван']]}],
-                    'edges':[{'kind':'ARGUMENT','from':0,'to':1,'role_id':'SUBJECT'}],
-                    'alignment':[anchors['пришёл'],anchors['Иван']]}]}
-            else:
-                lines=prompt.split('closed set):\n',1)[1].split('\nTask:',1)[0].splitlines()
-                ids=[line.split('. ',1)[0] for line in lines if '. ' in line and 'ARRIVE' in line]
-                reply={'outcome':'ONE_SELECTED','selected':ids[:1],'note':'bounded fixture'}
-            raw=json.dumps({'output':[{'type':'message','content':json.dumps(reply)}]}).encode()
+            assert prompt.startswith('Propose bounded local syntax. Reply in TP-C1 only:')
+            data=json.loads(prompt.split('produced by code:\n',1)[1])
+            assert data['protocol']=='TP-C1'
+            catalog=data['catalog']
+            kinds={value:code for code,value in catalog['node_kinds'].items()}
+            edges={value:code for code,value in catalog['edge_kinds'].items()}
+            roles={value:code for code,value in catalog['roles'].items()}
+            anchors={token['text']:catalog['tokens'].index(token['id']) for token in data['tokens']}
+            # The transport fixture supplies indexed local choices only. The
+            # runtime constructs/validates Hypothesis and canonical NOT itself.
+            reply='\n'.join([
+                'H unary '+','.join(str(i) for i in range(len(catalog['tokens']))),
+                f'N {kinds["NOT"]} {anchors["не"]}',
+                f'N {kinds["PREDICATE"]} {anchors["пришёл"]}',
+                f'N {kinds["ENTITY"]} {anchors["Иван"]}',
+                f'E {edges["OPERAND"]} 0 1 !',
+                f'E {edges["ARGUMENT"]} 1 2 /{roles["SUBJECT"]}',
+                '.',
+            ])
+            raw=json.dumps({'output':[{'type':'message','content':reply}]}).encode()
             self.send_response(200); self.send_header('Content-Type','application/json')
             self.send_header('Content-Length',str(len(raw))); self.end_headers();self.wfile.write(raw)
     server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
     thread=Thread(target=server.serve_forever,daemon=True);thread.start()
     config={'provider':'lmstudio','base_url':f'http://127.0.0.1:{server.server_port}',
             'model':'http-fixture','timeout':5,'max_tokens':1024}
-    payload={'raw_input':{'text':'Иван пришёл.','source_id':'http-case','revision':1,
-             'range':[0,12],'language':'ru','request_kind':'ASSERTION','batch_kind':'MESSAGE'}}
+    text='Иван не пришёл.'
+    payload={'raw_input':{'text':text,'source_id':'http-case','revision':1,
+             'range':[0,len(text)],'language':'ru','request_kind':'ASSERTION','batch_kind':'MESSAGE'}}
     live=Session([payload],tmp_path/'live.log')
     try: actual=execute_native(live,payload,config)
     finally:server.shutdown();server.server_close();thread.join(timeout=5)
-    assert requests and all(path=='/api/v1/chat' for path,_ in requests)
-    assert actual['assertions']['ah']==[{'predicate':'ARRIVE','roles':{'AGENT':{'entity':'ivan'}}}],actual
+    assert len(requests)==1 and all(path=='/api/v1/chat' for path,_ in requests)
+    assert actual['assertions']['ah']==[{'operator':'NOT','operands':[
+        {'predicate':'ARRIVE','roles':{'AGENT':{'entity':'ivan'}}}]}],actual
     assert actual['store']['marker_count']==1
     replay=Session([payload],tmp_path/'replay.log')
     for record in live.store._journal.scan_unprocessed(0):

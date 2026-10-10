@@ -42,7 +42,7 @@ class NativePerceptionResult:
 class FormalizerAdapter:
     """Drop-in replacement for AdaptivePerceptionParser.parse(): text -> PerceptionResult.
 
-    ``selector`` is any object with ``select(prompt) -> raw JSON string`` (RealBackendSelector in production,
+    ``selector`` is any object with ``select(prompt) -> raw protocol text`` (RealBackendSelector in production,
     FakeSelector.demo() in the deterministic dry run). ``morph``/``schema`` are optional overrides.
 
     Two modes:
