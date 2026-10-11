@@ -763,6 +763,10 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     for frame in state.frames:
         e=evidence[frame.predicate_token_ref]
         frame.semantic['quoted']=state.text[:e.start].count('«')>state.text[:e.start].count('»') or state.text[:e.start].count('\"')%2==1
+        if frame.semantic.get('nominal_dependency_kind'):
+            from .component_dependency_materialization import prepare_candidate
+            candidate_specs[frame.frame_id]=prepare_candidate(frame,state,release)
+            continue
         predicate_variants=_frame_variants(frame,e)
         lemmas={v.lemma for v in predicate_variants}
         schema_entries=[x for x in release.entries('PredicateSchema') if x['lemma'] in lemmas]

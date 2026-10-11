@@ -81,6 +81,7 @@ def main(argv=None):
     parser.add_argument('--clock-ranges',action='store_true',help='TEST_ONLY two-boundary clock grammar')
     parser.add_argument('--clock-time',action='store_true',help='TEST_ONLY released cardinal clock grammar')
     parser.add_argument('--omissions',action='store_true',help='TEST_ONLY released entity-role omission licenses')
+    parser.add_argument('--dependency-reduction',action='store_true',help='TEST_ONLY early dependency constraint reduction')
     parser.add_argument('--nominal-tree',action='store_true',help='TEST_ONLY recursive nominal questions')
     parser.add_argument('--modifier-forest',action='store_true',help='TEST_ONLY bounded modifier composition')
     args=parser.parse_args(argv)
@@ -88,6 +89,7 @@ def main(argv=None):
     if args.clock_ranges and not args.components: parser.error('--clock-ranges requires --components')
     if args.clock_time and not args.components: parser.error('--clock-time requires --components')
     if args.omissions and not args.components: parser.error('--omissions requires --components')
+    if args.dependency_reduction and not args.nominal_tree: parser.error('--dependency-reduction requires --nominal-tree')
     if args.nominal_tree and not args.modifier_forest: parser.error('--nominal-tree requires --modifier-forest')
     if args.modifier_forest and not args.predication: parser.error('--modifier-forest requires --predication')
     if args.relative_time and not args.components: parser.error('--relative-time requires --components')
@@ -113,7 +115,7 @@ def main(argv=None):
     release,_=fixture(core,'known')
     if args.components:
         from tools.formalizer_component_fixture import with_components
-        release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions,modifier_forest=args.modifier_forest,clock_ranges=args.clock_ranges,nominal_tree=args.nominal_tree)
+        release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions,modifier_forest=args.modifier_forest,clock_ranges=args.clock_ranges,nominal_tree=args.nominal_tree,dependency_reduction=args.dependency_reduction,core=core)
     (args.out/'resource_manifest.json').write_text(json.dumps(release.manifest,ensure_ascii=False,indent=2),encoding='utf-8')
     (args.out/'experiment.json').write_text(json.dumps({
         'resource_status':'TEST_ONLY_COMPONENTS' if args.components else 'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,

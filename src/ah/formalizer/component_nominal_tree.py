@@ -12,7 +12,12 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     from .component_modifier_forest import nominal_variants,unique
     from .component_nominal_questions import select_units,select_hosts
     missing=set(frame.semantic['uncovered_token_refs']);limit=cfg['max_candidates']
-    if not missing or frame.semantic['missing_required_roles'] or frame.semantic.get('relative_temporal'):
+    deps=frame.semantic.get('nominal_dependencies',[])
+    if (not missing and not deps) or frame.semantic['missing_required_roles']:
+        return [[frame]]
+    if deps: frame.semantic['structural_unresolved']=True  # must discharge every pending description
+    if frame.semantic.get('relative_temporal') and missing:
+        if deps: state.diag('COMPONENT_DEPENDENCY_TEMPORAL_SCOPE_UNSUPPORTED',region.region_id)
         return [[frame]]
     try:
         units=[]
@@ -81,7 +86,10 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg):
             tuple(evidence[t].span for t in roles),construction='COMPONENTS_V1',predicate_token_ref=token.token_id,
             argument_token_refs=tuple(roles),source_range=tuple(region.source_range),semantic=sem,provenance=base.provenance)
         frames.append(f);return f
+    from .component_dependency_materialization import prepare_entities,describe_dependencies
+    prepare_entities(base.semantic.get('nominal_dependencies',()),evidence,morphology,lexical)
     pending=[]
+    describe_dependencies(base.semantic.get('nominal_dependencies',()),describe,evidence,owners,pending,cfg)
     for u in units:
         if not u['entities']:continue
         head=u['entities'][0][0].token_id;host=hosts[head]

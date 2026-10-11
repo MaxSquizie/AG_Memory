@@ -4,7 +4,7 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,core=None):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
@@ -20,6 +20,10 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if nominal_tree:
         if not modifier_forest: raise ValueError('nominal_tree requires modifier_forest')
         policy['entries'][0]['composition'].update(nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT')
+    if dependency_reduction:
+        if not nominal_tree: raise ValueError('dependency_reduction requires nominal_tree')
+        from tools.formalizer_dependency_fixture import extend
+        extend(manifest,core,policy['entries'][0]['composition'])
     scopes=next(r for r in manifest['entries'] if r['kind']=='ScopeLexicon')['entries']
     if not any(r.get('operator')=='AND' for r in scopes):
         scopes.append({'pattern':r'\bи\b','operator':'AND'})

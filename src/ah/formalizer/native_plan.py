@@ -176,7 +176,10 @@ def build_plan(state,release,store):
                 ev=evidence[frame.predicate_token_ref]
                 morphology.append({'surface':ev.span,'variants':[{'lemma':v.lemma,'POS':v.pos} for v in ev.variants]})
                 shapes.append({'construction':frame.construction,'role_ids':sorted(set(selected['roles'].values()))})
-                if selected.get('sense_id') and len(frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{}).get('anchor_refs',()))<=1:
+                # A grammatical constructor is not a lexical sense of the noun
+                # serving as its source anchor. Never learn that false R-X prior.
+                if (not frame.semantic.get('nominal_dependency_kind') and selected.get('sense_id')
+                        and len(frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{}).get('anchor_refs',()))<=1):
                     rows.extend({'lemma':v.lemma,'sense_id':selected['sense_id']} for v in ev.variants if v.lemma)
             emit('WRITE_COMMITTED_RX',{'record_id':'rx:'+digest([tag,frag,sid]),'source_tag':tag,
                 'support_record_id':sid,'resource_snapshot':state.resource_snapshot,

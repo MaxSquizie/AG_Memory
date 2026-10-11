@@ -43,6 +43,7 @@ def select_units(state, release, selector, region, covers, frame, cfg):
 
 def select_hosts(state, release, selector, region, units, frame, cfg):
     heads={t for t in frame.argument_token_refs}
+    heads.update(d['head_ref'] for d in frame.semantic.get('nominal_dependencies',()))
     heads.update(e.token_id for u in units for e,v in u['entities'])
     evidence={e.token_id:e for e in state.evidence}; hosts={}
     for u in units:
@@ -59,12 +60,14 @@ def select_hosts(state, release, selector, region, units, frame, cfg):
             state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id)
             return None
         hosts[head]=cid
-    for head in hosts:
+    fixed={d['head_ref']:d['host_ref'] for d in frame.semantic.get('nominal_dependencies',())}
+    combined={**fixed,**hosts}
+    for head in combined:
         seen=set(); cursor=head
-        while cursor in hosts:
+        while cursor in combined:
             if cursor in seen:
                 state.diag('COMPONENT_NOMINAL_CYCLE',region.region_id);return None
-            seen.add(cursor); cursor=hosts[cursor]
+            seen.add(cursor); cursor=combined[cursor]
         if cursor!='EVENT' and cursor not in frame.argument_token_refs:
             state.diag('COMPONENT_NOMINAL_HOST_UNRESOLVED',region.region_id);return None
     return hosts
