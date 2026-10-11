@@ -39,10 +39,10 @@ def summarize_snapshot(snapshot):
     forest = state.get('region_forest') or {}
     evidence = state.get('evidence', [])
     frames = state.get('frames', [])
-    anchored = {ref for f in frames for ref in
-                [f['predicate_token_ref'], *f.get('argument_token_refs', [])]}
+    from .reading_coverage import frame_anchors
+    anchored = frame_anchors(frames)
     # Expose unanchored tokens, including punctuation; this is deliberately not
-    # called semantic coverage (operator anchors and unresolved scopes differ).
+    # called semantic coverage: candidates may still be unresolved/rejected.
     unanchored = [{'token_ref': e['token_id'], 'range': [e['start'], e['end']], 'text': e['span']}
                   for e in evidence if e['token_id'] not in anchored]
     decisions = state.get('decisions', {})

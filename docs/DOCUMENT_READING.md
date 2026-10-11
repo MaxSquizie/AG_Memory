@@ -106,3 +106,14 @@ production требует собственной reviewed-политики `Prop
 Предложные компоненты, вложенные вопросы и сохранение обязательных пробелов
 описаны отдельно: [COMPONENT_PHRASES.md](COMPONENT_PHRASES.md).
 Проверка этого расширения: [COMPONENT_PHRASES_RUN.md](COMPONENT_PHRASES_RUN.md).
+
+Следующее расширение — [COMPONENT_SCOPED_COMPOSITION.md](COMPONENT_SCOPED_COMPOSITION.md):
+конечный бюджет коротких проб по исходным окнам, AND-композиция, относительные
+именные временные якоря и недублирующая модель анонимного участника.
+Для диагностических относительных правил добавьте `--components --relative-time`.
+Триггеры «после/до» входят только в TEST_ONLY release инструмента, не в алгоритм
+и не в production-словарь. Результаты: [COMPONENT_SCOPED_COMPOSITION_RUN.md](COMPONENT_SCOPED_COMPOSITION_RUN.md).
+
+`--verify-replay` повторяет неизменный источник в том же runtime и сохраняет
+`native_replay_check.json`: вызовы провайдера, тики, ledger, batch и committed
+fragments должны остаться прежними. Это проверка воспроизводимости, не gold-оценка.

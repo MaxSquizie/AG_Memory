@@ -75,7 +75,10 @@ def main(argv=None):
                         help='Exact recorded request/reply pairs for transport diagnostics; not a live model or canonical replay')
     parser.add_argument('--components',action='store_true',
                         help='Use the explicit TEST_ONLY COMPONENTS_V1 policy (new resource hash)')
+    parser.add_argument('--relative-time',action='store_true',help='TEST_ONLY released event-relative adjunct rules; requires --components')
+    parser.add_argument('--verify-replay',action='store_true',help='Repeat the same source in the same runtime; verify no new calls/ticks/ledger changes')
     args=parser.parse_args(argv)
+    if args.relative_time and not args.components: parser.error('--relative-time requires --components')
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
     from ah.core.journal import JournalChannel
@@ -98,7 +101,7 @@ def main(argv=None):
     release,_=fixture(core,'known')
     if args.components:
         from tools.formalizer_component_fixture import with_components
-        release=with_components(release)
+        release=with_components(release,relative_time=args.relative_time)
     (args.out/'resource_manifest.json').write_text(json.dumps(release.manifest,ensure_ascii=False,indent=2),encoding='utf-8')
     (args.out/'experiment.json').write_text(json.dumps({
         'resource_status':'TEST_ONLY_COMPONENTS' if args.components else 'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,
@@ -110,7 +113,8 @@ def main(argv=None):
     store=AHStoreAdapter(core.store,journal,core=core)
     binding=InterpretationRunBinding(journal)
     ignition=IgnitionEngine(core,IgnitionSettings(),WorkspaceSettings(.02))
-    selector=RealBackendSelector(MailboxBackend(args.out,captured_probes=args.captured_probes),journal=journal,model_key=MailboxBackend.model)
+    backend=MailboxBackend(args.out,captured_probes=args.captured_probes)
+    selector=RealBackendSelector(backend,journal=journal,model_key=MailboxBackend.model)
     adapter=FormalizerAdapter(selector,morph=MorphProvider(),store=store,binding=binding,release=release,ignition=ignition)
     perception=LLMPerceptionService(None,LLMPerceptionSettings(),formalizer=adapter,native_commit=True)
     services=SimpleNamespace(core=core,ignition=ignition,perception=perception,
@@ -121,6 +125,9 @@ def main(argv=None):
         progress=lambda event:print(json.dumps(event,ensure_ascii=False),flush=True))
     print(json.dumps({'event':'completed','status':report['status'],
                       'report_path':str(args.out/'reading/report.json')},ensure_ascii=False),flush=True)
+    if args.verify_replay and report['status']=='EXECUTED':
+        from tools.document_replay_check import verify
+        if not verify(services,args.source,args.out,report,backend,store): return 1
     return 0 if report['status']=='EXECUTED' else 1
 
 

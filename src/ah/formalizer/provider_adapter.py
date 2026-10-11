@@ -66,12 +66,14 @@ class ProviderAdapter:
         from ah.formalizer.provider_call_log import ProviderCallLog
         self._log = self.log or ProviderCallLog()
         self._tokens_used = 0
+        self._window_tokens = None
         self._tp_calls_left = self.budget.tp_calls
         self._lexical_calls_left = self.budget.lexical_calls
         self._ordinals: dict[str,int] = {}
 
     def start_run(self, run_id):
         self._ordinals[run_id] = 0
+        if self._window_tokens is not None: self._window_tokens.reset()
         self._tokens_used = 0
         self._tp_calls_left = self.budget.tp_calls
         self._lexical_calls_left = self.budget.lexical_calls
@@ -93,9 +95,34 @@ class ProviderAdapter:
         if node_count > b.max_nodes or edge_count > b.max_edges or depth > b.max_depth:
             raise BudgetExceeded("PROPOSAL_BUDGET", f"nodes={node_count} edges={edge_count} depth={depth}")
 
+    def configure_probe_windows(self, keys, token_limit):
+        from .provider_budget import WindowTokens
+        limit=min(token_limit,self.budget.token_limit) if self.budget.token_limit else token_limit
+        self._window_tokens=WindowTokens(keys,limit,self.params_hash)
+
+    def enter_probe_window(self,key):
+        if self._window_tokens is None: raise ValueError('PROBE_SCOPE_UNCONFIGURED')
+        self._window_tokens.enter(key)
+
     def _check_tokens(self, cost: int) -> None:
-        if self.budget.token_limit and self._tokens_used + cost > self.budget.token_limit:
+        if self._window_tokens is not None:
+            if not self._window_tokens.available(cost):
+                raise BudgetExceeded('COMPUTATION_LIMIT','source window token budget exhausted')
+        elif self.budget.token_limit and self._tokens_used + cost > self.budget.token_limit:
             raise BudgetExceeded("COMPUTATION_LIMIT", f"token budget {self.budget.token_limit} exhausted")
+
+    def _charge_tokens(self,cost):
+        self._tokens_used+=cost
+        if self._window_tokens is not None: self._window_tokens.charge(cost)
+
+    def _consume_received(self,cost):
+        # Received bytes consumed resources even if they exceeded the limit.
+        # Replay charges the same durable exchange; another probe cannot reuse
+        # the apparently unspent allowance after an oversized response.
+        try:
+            self._check_tokens(cost)
+        finally:
+            self._charge_tokens(cost)
 
     def _exchange(self, capability: str, prompt: str, run_id: str, ordinal=None) -> str:
         import time
@@ -105,27 +132,27 @@ class ProviderAdapter:
             ordinal = self._ordinals.get(run_id,0)+1
             self._ordinals[run_id] = ordinal
         key = self._digest(prompt)
+        params_hash=self._window_tokens.params_hash() if self._window_tokens is not None else self.params_hash
         old = self._log.lookup(run_id,ordinal)
         if old:
-            if (old['request_digest'],old.get('model_key',''),old.get('params_hash','')) != (key,self.model_key,self.params_hash):
+            if (old['request_digest'],old.get('model_key',''),old.get('params_hash','')) != (key,self.model_key,params_hash):
                 raise IntegrityError('REPLAY_MISMATCH')
             if old['state'] == 'RECEIVED':
                 raw = old.get('raw_response')
                 if raw is None or self._digest(raw) != old['response_digest']:
                     raise IntegrityError('INTEGRITY_ERROR: missing or corrupt provider bytes')
                 cost = max(1,(len(prompt)+len(raw))//4)
-                self._check_tokens(cost)
-                self._tokens_used += cost
+                self._consume_received(cost)
                 emit("probe_replayed", run_id=run_id, ordinal=ordinal, capability=capability)
                 return raw
             if old['state']=='FAILED':
                 # A durable failed exchange is part of this run's history too.
                 # Retrying it would silently change the interpretation on replay.
                 cost=max(1,len(prompt)//4)
-                self._check_tokens(cost); self._tokens_used+=cost
+                self._consume_received(cost)
                 raise ProviderUnavailable(old.get('error','recorded provider failure'))
         self._check_tokens(max(1,len(prompt)//4))
-        cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=self.params_hash,prompt=prompt)
+        cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=params_hash,prompt=prompt)
         started = time.monotonic()
         emit("probe_started", run_id=run_id, ordinal=ordinal, capability=capability, prompt_chars=len(prompt))
         try:
@@ -134,13 +161,12 @@ class ProviderAdapter:
         except Exception as exc:
             self._log.failed(cid,error=str(exc))
             emit("probe_failed", run_id=run_id, ordinal=ordinal, error=type(exc).__name__, elapsed_ms=(time.monotonic()-started)*1000)
-            self._tokens_used += max(1,len(prompt)//4)
+            self._charge_tokens(max(1,len(prompt)//4))
             raise ProviderUnavailable(f'provider {self.name!r} call failed') from exc
         self._log.received(cid,response_digest=self._digest(raw),raw_response=raw,response_time_ms=(time.monotonic()-started)*1000)
         emit("probe_finished", run_id=run_id, ordinal=ordinal, response_chars=len(raw), elapsed_ms=(time.monotonic()-started)*1000)
         cost = max(1,(len(prompt)+len(raw))//4)
-        self._check_tokens(cost)
-        self._tokens_used += cost
+        self._consume_received(cost)
         return raw
 
     def select(self, prompt: str, run_id: str, ordinal=None) -> str:

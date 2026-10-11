@@ -90,6 +90,12 @@ class RealBackendSelector:
         """
         return replace(self, run_id=run_id)
 
+    def configure_probe_windows(self, keys, token_limit):
+        self._adapter.configure_probe_windows(keys,token_limit)
+
+    def enter_probe_window(self,key):
+        self._adapter.enter_probe_window(key)
+
     def propose_local(self, prompt):
         return self._adapter.propose_local(prompt,self.run_id)
 

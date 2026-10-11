@@ -2,8 +2,11 @@
 from .state import Decision, Ground
 from .selection_protocol import DecisionSchema, Relation
 from .selector_wire import build_selector_prompt, validate_selector_reply
+from .provider_adapter import BudgetExceeded, IntegrityError
 
-def _probe(state, selector, release, key, slot, options, context):
+def _probe(state, selector, release, key, slot, options, context, source_range):
+    from .probe_windows import enter
+    enter(state,selector,source_range)
     ids = tuple(o['candidate_id'] for o in options)
     d = Decision(slot, key, ids)
     state.decisions[key] = d
@@ -27,6 +30,12 @@ def _probe(state, selector, release, key, slot, options, context):
         raw = selector.select(prompt)
         reply = validate_selector_reply(selector, raw, schema, ids, allowed=frozenset(ids))
         d.last_prompt, d.raw_response, d.selector_outcome = prompt, raw, reply.outcome
+    except IntegrityError:
+        raise
+    except BudgetExceeded as exc:
+        d.outcome = 'UNRESOLVED'
+        state.diag(exc.code, key)
+        return None
     except Exception as exc:
         d.outcome = 'UNRESOLVED'
         state.diag('COMPONENT_PROBE_FAILED', type(exc).__name__)
@@ -34,7 +43,7 @@ def _probe(state, selector, release, key, slot, options, context):
     if reply.outcome != 'ONE_SELECTED':
         d.outcome = 'INSUFFICIENT_CONTEXT' if reply.outcome == 'INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
         from .clarifications import offer
-        offer(state,key,'COMPONENT' if slot=='component_attachment' else 'IMPLICIT_ARGUMENT',context,options)
+        offer(state,key,'IMPLICIT_ARGUMENT' if slot=='implicit_argument' else 'COMPONENT',context,options)
         return None
     chosen = reply.selected[0]
     d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'

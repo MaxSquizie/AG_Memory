@@ -24,6 +24,7 @@ def main(argv=None):
     parser.add_argument('source',type=Path)
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--development-fixture',action='store_true',required=True)
+    parser.add_argument('--relative-time',action='store_true')
     args=parser.parse_args(argv)
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
@@ -32,7 +33,7 @@ def main(argv=None):
     from tools.formalizer_v7_native_binding import fixture
     from tools.formalizer_component_fixture import with_components
     raw=args.source.read_bytes(); text=raw.decode('utf-8')
-    core=AHCore(); release,_=fixture(core,'known'); release=with_components(release)
+    core=AHCore(); release,_=fixture(core,'known'); release=with_components(release,relative_time=args.relative_time)
     selector=NoDecision(); start=monotonic(); source_hash=hashlib.sha256(raw).hexdigest()
     state=run_native(text,selector,release,{'observation_id':'inventory:'+source_hash,
         'source_id':'source:'+source_hash,'interpretation_version':1,'text':text,
@@ -52,6 +53,8 @@ def main(argv=None):
         'prepositional_questions':sum(q['kind']=='RELATION_TO_EVENT' for r in rows for q in r['questions']),
         'missing_role_questions':sum(q['kind']=='MISSING_REQUIRED_ROLE' for r in rows for q in r['questions']),
         'probe_requests':len(selector.prompts),
+        'probe_windows_used':len(state.budget.probe_scope_calls),
+        'relative_temporal_questions':sum(q['kind']=='WHEN_RELATION' for r in rows for q in r['questions']),
         'diagnostics':dict(Counter(d.code for d in state.diagnostics))}
     for name,value in [('inventory',report),('frames',rows),('prompts',selector.prompts),('resource_manifest',release.manifest)]:
         (args.out/(name+'.json')).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')

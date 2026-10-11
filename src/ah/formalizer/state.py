@@ -290,13 +290,25 @@ class Budget:
     llm_failed: int = 0
     search_steps: int = 0
 
+    probe_window_starts: list[int] = field(default_factory=list)
+    probe_scope_limits: dict[str, int] = field(default_factory=dict)
+    probe_scope_calls: dict[str, int] = field(default_factory=dict)
+    probe_scope_key: str | None = None
+
     def spend_llm(self, failed: bool = False) -> None:
+        if self.probe_scope_limits:
+            if self.probe_scope_key not in self.probe_scope_limits: raise ValueError('PROBE_SCOPE_REQUIRED')
+            key=self.probe_scope_key
+            self.probe_scope_calls[key]=self.probe_scope_calls.get(key,0)+1
         self.llm_calls += 1
         if failed:
             self.llm_failed += 1
 
     @property
     def llm_exhausted(self) -> bool:
+        if self.probe_scope_limits:
+            key=self.probe_scope_key
+            return key not in self.probe_scope_limits or self.probe_scope_calls.get(key,0)>=self.probe_scope_limits[key]
         return self.llm_calls >= self.llm_limit
 
 

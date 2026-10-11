@@ -45,6 +45,8 @@ def test_gap_inventory_is_sealed_without_fabricated_tokens(morph):
     assert f.semantic['proposed_roles']=={next(e.token_id for e in st.evidence if e.span=='Алека'):'OBJECT'}
     assert st.structural_closed and st.structural_hash
     assert st.observation['implicit_bindings']=={}
+    assert len([o for o in gap['options'] if o['kind']=='ANONYMOUS'])==1
+    assert all(o['candidate_id']!='narrative-centre' for o in gap['options'])
 
 
 def test_real_commit_chain_group_and_recovery(tmp_path,morph):

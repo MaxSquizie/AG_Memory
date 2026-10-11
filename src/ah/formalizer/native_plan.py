@@ -181,7 +181,7 @@ def build_plan(state,release,store):
     for f in state.frames:
         for child in f.semantic.get('proposition_args',{}).values():
             structural_leaves.update(leaf_refs(child.get('tree') or {'frame_ref':child['frame_ref']}))
-    roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves]
+    roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner')]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
     for frag,t in roots:
         refs=leaf_refs(t); fs=[frames[f] for f in sorted(refs)]
@@ -257,6 +257,9 @@ def build_plan(state,release,store):
                     child_region=frames[child['frame_ref']].semantic.get('region') if 'frame_ref' in child else child.get('region',reg)
                     describe(n,key,spec.get('polarity',True),child_region)
                     support(n,frag,child_region,kind='DERIVED',premises=[sid],rule='AND_ELIMINATION',witness_ref=witness if child_region==reg else None,formula_ref=formula_ref)
+            from .relative_time_plan import emit_relative_time
+            if 'frame_ref' in t:
+                emit_relative_time(state,frames[t['frame_ref']],uid,ck,frag,tag,emit,support)
             fragments.append(frag)
         except (ValueError,KeyError) as exc:
             op_by_id=before; blocked.add(frag); diagnostics.append(str(exc)+':'+frag)

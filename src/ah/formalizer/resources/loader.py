@@ -140,6 +140,14 @@ class ResourceRelease:
         import re
         for x in self.entries('ScopeLexicon'):
             if x.get('operator') and x['operator'] not in {'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION','AT_LEAST_N','EXACTLY_N','AT_MOST_N'}: raise ResourceMissing('invalid scope operator')
+            if 'TEMPORAL_NOMINAL' in x.get('attachment_kinds',()):
+                restriction=x.get('restriction_pattern',{})
+                cases=restriction.get('anchor_cases',[])
+                if (x.get('operator') not in {'BEFORE','AFTER','DURING'} or
+                        set(restriction)!={'anchor_cases'} or not cases or
+                        not isinstance(cases,list) or any(not isinstance(c,str) or c not in
+                            {'nom','acc','gen','dat','abl','loc'} for c in cases)):
+                    raise ResourceMissing('invalid TEMPORAL_NOMINAL rule')
             if x.get('pattern'): re.compile(x['pattern'])
         for x in self.entries('TemporalRules'):
             re.compile(x['pattern'])

@@ -3,6 +3,7 @@ from .canonical_ledger import digest
 from .state import Decision, Ground
 from .selection_protocol import Relation, DecisionSchema
 from .selector_wire import build_selector_prompt, validate_selector_reply
+from .provider_adapter import BudgetExceeded, IntegrityError
 
 
 def _edge_labels(h, evidence):
@@ -39,6 +40,8 @@ def select_generated(state, accepted, selector, release):
                 or sum(map(len,state.context_facts))>2048):
             state.diag('REGION_PROBE_NOT_LOCAL', row['decision_ref'])
             continue
+        from .probe_windows import enter
+        enter(state,selector,(start,end))
         if state.budget.llm_exhausted:
             state.diag('COMPUTATION_LIMIT', row['decision_ref'])
             continue
@@ -55,6 +58,12 @@ def select_generated(state, accepted, selector, release):
             raw = selector.select(prompt)
             reply = validate_selector_reply(selector, raw, schema, ids, allowed=frozenset(ids))
             d.last_prompt, d.raw_response, d.selector_outcome = prompt, raw, reply.outcome
+        except IntegrityError:
+            raise
+        except BudgetExceeded as exc:
+            d.outcome = 'UNRESOLVED'
+            state.diag(exc.code, row['decision_ref'])
+            continue
         except Exception as exc:
             d.outcome = 'UNRESOLVED'
             state.diag('REGION_PROBE_FAILED', type(exc).__name__)

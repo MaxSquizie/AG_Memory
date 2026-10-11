@@ -617,6 +617,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     t1(state,morph=morph,preserve_variants=True,shared_form_expansion=False)
     from .regions import build_regions, reference_goal
     state.region_forest=build_regions(text,state.evidence,state.source_uid)
+    from .probe_windows import configure, enter as enter_probe_window
+    configure(state,selector,release)
     # R-X is ordering experience only; it never adds/removes dictionary parses.
     rx1=[x for rec in observation.get('rx_reads',{}).get('T1',()) for x in rec['payload'].get('morphological_priors',())]
     for ev in state.evidence:
@@ -850,6 +852,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     resolve_references(state,reference_slots,selector,release)
     resolve_implicit(state,release,selector)
     for f in state.frames:
+        enter_probe_window(state,selector,f.source_range)
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
         d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic['source_traces']; state.decisions[f.frame_id+'|predicate_value']=d
         if f.construction=='COMPONENTS_V1' and f.semantic.get('structural_unresolved'):

@@ -12,6 +12,7 @@ from .canonical_ledger import digest
 from .state import ReferenceCandidate, Decision, Ground, ResourceProvenance
 from .selection_protocol import Relation, DecisionSchema
 from .selector_wire import build_selector_prompt, validate_selector_reply
+from .provider_adapter import BudgetExceeded, IntegrityError
 
 
 def freeze_context(store, release, source_tags, *, active_refs=None):
@@ -166,6 +167,8 @@ def resolve_references(state, slots, selector, release):
     grounds=deepcopy(state.observation.get('entity_binding_grounds',{})); unresolved=[]
     evidence={e.token_id:e for e in state.evidence}
     for tid,candidates in slots.items():
+        from .probe_windows import enter
+        enter(state,selector,(evidence[tid].start,evidence[tid].end))
         ids=tuple(candidates); d=Decision('reference',tid,ids)
         state.decisions[tid+'|reference']=d
         for uid,rows in candidates.items():
@@ -207,6 +210,10 @@ def resolve_references(state, slots, selector, release):
                 d.last_prompt=prompt; d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=tuple(local_ids[c] for c in reply.selected)
                 d.outcome='RESOLVED' if reply.outcome=='ONE_SELECTED' else 'AMBIGUOUS' if reply.outcome=='MULTIPLE_ADMISSIBLE' else 'INSUFFICIENT_CONTEXT' if reply.outcome=='INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
                 if d.outcome=='RESOLVED': d.grounds.append(Ground('M','bounded antecedent selection',d.selected[0]))
+            except IntegrityError:
+                raise
+            except BudgetExceeded as exc:
+                d.outcome='UNRESOLVED'; state.diag(exc.code,tid)
             except Exception as exc:
                 d.outcome='UNRESOLVED'; state.diag('COREF_SELECTION_FAILED',type(exc).__name__)
         else:

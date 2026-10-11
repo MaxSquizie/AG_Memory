@@ -22,16 +22,13 @@ def prepare_implicit(state, release):
         for role,gap in ({} if f.semantic.get('structural_unresolved') else f.semantic.get('implicit_arguments',{})).items():
             plural=gap['features'].get('number')=='plur'
             options=[]
-            # A source centre is a hypothesis, never author/user identity.
-            if not plural:
-                options.append({'candidate_id':'narrative-centre','kind':'ANONYMOUS',
-                    'entity_ref':'M:implicit:'+digest([source,'narrative-centre']),
-                    'label':'Unidentified singular narrative centre of this source; NOT necessarily its author or uploader',
-                    'participant_kind':'INDIVIDUAL'})
+            # A narrative-centre hypothesis is not a second person. Before any
+            # identity is established there is one anonymous introduction for
+            # this gap; continuity must be selected through CHAIN or MEMORY.
             options.append({'candidate_id':'new:'+gap['gap_id'],'kind':'ANONYMOUS',
                 'entity_ref':'M:implicit:'+digest([source,gap['gap_id']]),
                 'participant_kind':'GROUP' if plural else 'INDIVIDUAL',
-                'label':'New unidentified group, plural, membership UNKNOWN (do not infer narrator or previous object as members)' if plural else 'Another unidentified individual; no identity with previous mentions established'})
+                'label':'Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)' if plural else 'Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants'})
             for earlier in previous:
                 if earlier['end']>f.source_range[0] or f.source_range[0]-earlier['end']>cfg['context_chars']: continue
                 if not compatible(gap['features'],earlier['features']): continue
@@ -72,7 +69,7 @@ def resolve_implicit(state, release, selector):
                 state.diag('IMPLICIT_ARGUMENT_UNRESOLVED',gap['gap_id']); continue
             options=gap['options']
             lo,hi=gap['context_range']
-            chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi])
+            chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range)
             if chosen is None: continue
             opt=next(o for o in options if o['candidate_id']==chosen)
             if opt['kind']=='CHAIN':
