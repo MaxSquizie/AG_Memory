@@ -155,6 +155,8 @@ def register_graph_handlers(adapter: Any) -> None:
 # resolve an ENTITY argument to an S token or fabricate a known TemplateMap entry.
 def ensure_entity(core,p):
     uid=p['uid']
+    from .spatial_entities import validate_entity
+    validate_entity(p)
     implicit=p.get('implicit_participant')
     if implicit is not None:
         base={'participant_kind','identity_status','source_scope'}
@@ -185,12 +187,15 @@ def ensure_entity(core,p):
         if 'name' in scalar: raise ValueError('SCALAR_VALUE_INVALID')
         props.update(scalar)
         core.add_entity(Domain(p.get('domain','C')),props,meta={'source_tag':p.get('source_tag'),'mention_ref':p.get('mention_ref'),
-            **({'implicit_participant':implicit} if implicit is not None else {})},uid=uid)
+            **({'implicit_participant':implicit} if implicit is not None else {}),
+            **({'relative_place':p['relative_place']} if p.get('relative_place') is not None else {})},uid=uid)
     elif core.store.kind_of(uid).value!='M': raise ValueError('ENTITY_REF_TYPE_MISMATCH')
     elif any(core.store.get_element_any_domain(uid).properties.get(k)!=v for k,v in scalar.items()):
         raise ValueError('SCALAR_VALUE_CONFLICT')
     elif implicit is not None and core.store.get_element_any_domain(uid).meta.get('implicit_participant')!=implicit:
         raise ValueError('IMPLICIT_PARTICIPANT_INVALID')
+    elif p.get('relative_place') is not None and core.store.get_element_any_domain(uid).meta.get('relative_place')!=p['relative_place']:
+        raise ValueError('RELATIVE_PLACE_INVALID')
     return uid
 
 

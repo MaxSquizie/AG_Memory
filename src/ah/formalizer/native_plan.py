@@ -33,7 +33,7 @@ def build_plan(state,release,store):
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         e=evidence[f.predicate_token_ref]
         roles={}; mention_roles={}
-        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))
+        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',()))
         mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==selected_roles]
         measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
                   if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
@@ -79,6 +79,8 @@ def build_plan(state,release,store):
             mention_roles.setdefault(role,[]).append(mid)
         from .implicit_plan import emit_implicit_roles
         emit_implicit_roles(state,store,f,selected,tag,frag,roles,mention_roles,emit)
+        from .spatial_plan import emit_roles as emit_spatial_roles
+        emit_spatial_roles(f,selected,tag,frag,roles,emit)
         for role,members in mention_roles.items():
             if len(members)==1: roles[role]=members[0]
             elif role=='SURFACE_ARG':

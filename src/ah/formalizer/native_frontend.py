@@ -724,6 +724,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     if frozen_generation:
         from .coordination_clarifications import apply as apply_coordination_choices
         apply_coordination_choices(state,release)
+    from .spatial_references import prepare as prepare_spatial
+    prepare_spatial(state,release)
     from .lexical_snapshot import freeze as freeze_lexical
     state.generation_snapshot={'resource_snapshot':release.sha256,
         'document_scopes':deepcopy(state.document_scopes),
@@ -859,15 +861,19 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                         if mappings and measure['value_role'] not in supplied:
                             extra=(measure['value_role'],)
                 implicit_roles=tuple(frame.semantic.get('implicit_arguments',{}))
-                try: bindings=_bindings(frame,evidence,v,(*extra,*implicit_roles))
+                from .spatial_references import for_sense as spatial_slot
+                spatial=spatial_slot(frame,s['sense_id'])
+                spatial_roles=(spatial['rule']['role_id'],) if spatial else ()
+                try: bindings=_bindings(frame,evidence,v,(*extra,*implicit_roles,*spatial_roles))
                 except ValueError:
                     frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
                 for bs in bindings:
+                    if set(spatial_roles) & (set(bs.values())|set(implicit_roles)|set(frame.semantic.get('proposition_args',{}))): continue
                     mode=v.get('temporal_mode_hint') or v.get('state_class') or 'UNKNOWN'
                     implicit=tuple(r for r in extra if r not in bs.values())
                     cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
                     if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
-                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
                                   **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
         if not senses:
@@ -955,5 +961,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             bindings = ', '.join(role+'='+evidence[tid].span for tid, role in sorted(spec['roles'].items()))
             options.append({'candidate_id': cid, 'label': spec['label'] + ('; '+bindings if bindings else '')})
         offer(state, f.frame_id+'|predicate_value', 'SEMANTIC', f.anchor_span, options)
+    from .spatial_references import resolve as resolve_spatial
+    resolve_spatial(state,release,selector)
     state.complete_t4()
     return state

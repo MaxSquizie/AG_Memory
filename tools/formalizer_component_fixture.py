@@ -4,7 +4,7 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,core=None):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,spatial_references=False,core=None):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
@@ -52,6 +52,10 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         policy['entries'][0]['document_scopes']=document_policy()
         policy['entries'][0]['composition']['temporal_coordination']='NAMED_PERIOD_SCOPE_V1'
         next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].extend(periods())
+    if spatial_references:
+        if not predication: raise ValueError('spatial_references requires predication')
+        from tools.formalizer_spatial_fixture import extend
+        extend(manifest,core)
     if omissions:
         # Explicit lexical fixture data, not a runtime verb/spelling heuristic.
         for valency in next(r for r in manifest['entries'] if r['kind']=='R-V')['entries']:

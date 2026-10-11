@@ -88,6 +88,10 @@ class ResourceRelease:
                 if not set(rule['role_ids']) <= {r['role_id'] for r in self.entries('RoleRegistry')}:
                     raise ResourceMissing('RESOURCE_MISSING: unknown event reference role')
         policy=self.entries('ProposalPolicy')[0]
+        if policy.get('spatial_references'):
+            from ..spatial_release import validate
+            try: validate(self,policy['spatial_references'])
+            except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         if policy.get('document_scopes'):
             from ..document_calendar import validate_policy
             try: validate_policy(policy['document_scopes'])

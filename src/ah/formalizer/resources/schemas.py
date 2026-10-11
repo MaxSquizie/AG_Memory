@@ -114,6 +114,13 @@ RESOURCE_SCHEMAS = {
             'window_tokens': {'type':'integer','minimum':16,'maximum':512},
             'calls_per_window': {'type':'integer','minimum':1,'maximum':64},
             'tokens_per_window': {'type':'integer','minimum':256,'maximum':131072}}),
+        'spatial_references': obj(('version','context_chars','max_candidates','rules'), {
+            'version':enum('SOURCE_RELATIVE_PLACE_V1'),
+            'context_chars':{'type':'integer','minimum':64,'maximum':2048},
+            'max_candidates':{'type':'integer','minimum':1,'maximum':32},
+            'rules':array(obj(('rule_id','lemma','POS','sense_id','role_id','kind'), {
+                'rule_id':S,'lemma':S,'POS':S,'sense_id':S,'role_id':S,
+                'kind':enum('ANCHOR','REFERENCE'),'location_kind':enum('DESTINATION','LOCATION','ORIGIN')}),minimum=1)}),
         'document_scopes': obj(('version','context_chars','rules'), {
             'version':enum('CALENDAR_AREAS_V1'),'context_chars':{'type':'integer','minimum':64,'maximum':2048},
             'rules':array(obj(('rule_id','pattern','days','months'), {

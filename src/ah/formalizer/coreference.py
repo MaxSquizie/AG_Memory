@@ -37,6 +37,8 @@ def freeze_context(store, release, source_tags, *, active_refs=None):
             uid=binding['target_ref']
             if not store._store.has_uid(uid) or store._store.kind_of(uid).value!='M': continue
             entity=store._store.get_element_any_domain(uid)
+            if entity.meta.get('relative_place') is not None:
+                continue  # Typed places are not untyped actor/person candidates.
             name=entity.properties.get('name')
             rows.append({'entity_ref':uid,'binding_ref':bid,'source_tag':binding['source_tag'],
                          'premise_support_refs':supports,'features':deepcopy(binding.get('mention_features',[])),

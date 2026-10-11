@@ -144,7 +144,7 @@ class CanonicalLedger:
         while True:
             new = set()
             for rid, s in self.data["supports"].items():
-                if s["status"] != "LIVE" or any(self.data["bindings"].get(b,{}).get("status") != "LIVE" or any(p not in live for p in self.data["bindings"].get(b,{}).get("premise_support_refs",())) for b in s.get("binding_refs", ())):
+                if s["status"] != "LIVE" or any(not self.binding_live(b,live) for b in s.get("binding_refs", ())):
                     continue
                 if any(self.data["assertions"].get(a,{}).get("status") != "LIVE" or self.data["assertions"][a]["support_record_id"] not in live for a in s.get("temporal_assertion_refs", ())):
                     continue
@@ -155,6 +155,17 @@ class CanonicalLedger:
             if new <= live:
                 return live
             live.update(new)
+
+    def binding_live(self, bid, paths):
+        binding=self.data['bindings'].get(bid,{})
+        if binding.get('status')!='LIVE' or any(p not in paths for p in binding.get('premise_support_refs',())):
+            return False
+        if binding.get('binding_kind')=='SPATIAL_REFERENCE':
+            anchor=self.data['bindings'].get(binding.get('anchor_binding_ref'),{})
+            return (anchor.get('binding_kind')=='SPATIAL_ANCHOR' and anchor.get('status')=='LIVE'
+                    and anchor.get('target_ref')==binding.get('target_ref')
+                    and all(p in paths for p in anchor.get('premise_support_refs',())))
+        return True
 
     def f_visible(self):
         paths = self.paths()
@@ -194,8 +205,7 @@ class CanonicalLedger:
         for binding in self.data['bindings'].values():
             tag=binding.get('source_tag')
             source_dead=tag is not None and self.data['observations'].get(digest(tag),{}).get('status','LIVE')!='LIVE'
-            if binding.get('status')=='LIVE' and (source_dead or any(
-                    sid not in effective for sid in binding.get('premise_support_refs',()))):
+            if binding.get('status')=='LIVE' and (source_dead or not self.binding_live(binding['binding_id'],effective)):
                 binding['status']='INVALID'
         effective=self.paths()
         for rid,s in self.data["supports"].items():
