@@ -25,6 +25,7 @@ def main(argv=None):
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--development-fixture',action='store_true',required=True)
     parser.add_argument('--relative-time',action='store_true')
+    parser.add_argument('--predication',action='store_true',help='TEST_ONLY quality predicates and scoped adverb modifiers')
     args=parser.parse_args(argv)
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
@@ -33,7 +34,7 @@ def main(argv=None):
     from tools.formalizer_v7_native_binding import fixture
     from tools.formalizer_component_fixture import with_components
     raw=args.source.read_bytes(); text=raw.decode('utf-8')
-    core=AHCore(); release,_=fixture(core,'known'); release=with_components(release,relative_time=args.relative_time)
+    core=AHCore(); release,_=fixture(core,'known'); release=with_components(release,relative_time=args.relative_time,predication=args.predication)
     selector=NoDecision(); start=monotonic(); source_hash=hashlib.sha256(raw).hexdigest()
     state=run_native(text,selector,release,{'observation_id':'inventory:'+source_hash,
         'source_id':'source:'+source_hash,'interpretation_version':1,'text':text,

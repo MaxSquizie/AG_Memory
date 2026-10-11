@@ -4,13 +4,16 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
         'version':'COMPONENTS_V1','subject_role':'SUBJECT','coordination_operators':['AND'],
         'open_case_roles':{'nom':'SUBJECT','acc':'OBJECT','dat':'RECIPIENT'},
         'max_candidates':16,'context_chars':2048}
+    if predication:
+        policy['entries'][0]['composition'].update(quality_predicate_pos=['ADJF','ADJS'],
+            copula_lemmas=['быть'], modifier_content_role='OBJECT',preposition_nominal_role='SURFACE_ARG')
     scopes=next(r for r in manifest['entries'] if r['kind']=='ScopeLexicon')['entries']
     if not any(r.get('operator')=='AND' for r in scopes):
         scopes.append({'pattern':r'\bи\b','operator':'AND'})

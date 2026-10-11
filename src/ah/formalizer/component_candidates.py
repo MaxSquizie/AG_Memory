@@ -9,7 +9,9 @@ from .component_phrases import role_choices, nominal_units, phrase_questions
 def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nominals, groups):
     alternatives = {}
     for pv in p.variants:
-        if pv.pos != 'VERB' or pv.mood == 'imperative': continue
+        quality = pv.pos in cfg.get('quality_predicate_pos', ())
+        if not quality and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
+        if quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
         senses = [s for s in release.entries('R-S') if s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
         vals = [v for v in release.entries('R-V') if v['sense_id'] in {s['sense_id'] for s in senses}]
         if senses and not vals:
@@ -19,10 +21,11 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         for val in shapes:
             if val and any(set(r.get('argument_types',())) != {'ENTITY'}
                            or r.get('cardinality',{}).get('max') != 1 for r in val['roles']): continue
+            case_roles = {c:r for c,r in cfg['open_case_roles'].items() if not quality or (c == 'nom' and r == cfg['subject_role'])}
             roles = val['roles'] if val else [
-                {'role_id':r,'allowed_cases':[c for c,r2 in cfg['open_case_roles'].items() if r2==r],
+                {'role_id':r,'allowed_cases':[c for c,r2 in case_roles.items() if r2==r],
                  'cardinality':{'min':int(r==cfg['subject_role'])}}
-                for r in sorted(set(cfg['open_case_roles'].values()) | {cfg['subject_role']})]
+                for r in sorted(set(case_roles.values()) | {cfg['subject_role']})]
             variants = [role_choices(e,roles,pv,cfg['subject_role'],groups.get(e.token_id)) for e in nominals]
             count = 1
             for choices in variants: count *= len(choices)
@@ -35,7 +38,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 rs=[b[0] for e,b in assignments]
                 if len(set(rs))!=len(rs): continue
                 missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
-                gap = cfg['subject_role'] in missing and pv.number in {'sing','plur'}
+                gap = not quality and cfg['subject_role'] in missing and pv.number in {'sing','plur'}
                 unresolved_roles=sorted(missing-({cfg['subject_role']} if gap else set()))
                 used={p.token_id,*temporal,*(e.token_id for e,b in assignments)}
                 units=nominal_units(state,tokens,assignments,used)
@@ -47,6 +50,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                         group=groups[e.token_id]; used.add(group['token_ref'])
                         preps[e.token_id]={'token_ref':group['token_ref'],'lemma':prep.lemma}
                         morph[group['token_ref']]=_morph(prep)
+                from .component_predication import consume_copula
+                copula = consume_copula(tokens, p, pv, cfg, used, morph) if quality else None
                 uncovered=[e.token_id for e in tokens if e.token_id not in used and e.span not in {'.','!'}]
                 ambiguous=any(g['ambiguous_pos'] for g in groups.values())
                 mapping={e.token_id:r for e,(r,_,_) in assignments}
@@ -61,7 +66,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 questions.extend(phrase_questions(groups,mapping,fid))
                 semantic={'proposed_roles':mapping,'morph_bindings':morph,'lexical_units':units,
                     'preposition_bindings':preps,'missing_required_roles':unresolved_roles,
-                    'requires_attachment_probe':ambiguous,
+                    'requires_attachment_probe':ambiguous or quality,
+                    'quality_predication':quality, 'copula_ref':copula,
                     'component_questions':questions,'uncovered_token_refs':uncovered,
                     'structural_unresolved':bool(uncovered or unresolved_roles),'component_region':region.region_id}
                 if gap:

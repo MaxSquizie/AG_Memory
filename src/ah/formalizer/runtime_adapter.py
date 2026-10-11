@@ -245,6 +245,9 @@ class FormalizerAdapter:
                         if len(scoped)!=1 or tree!={'frame_ref':frame.frame_id}:
                             notes.append('NATIVE_ASSERTION_SCOPE_OWNED '+frame.frame_id)
                             continue
+                if frame.semantic.get('proposition_args'):
+                    notes.append('NATIVE_PROPOSITION_SCOPE_OWNED '+frame.frame_id)
+                    continue
                 actant_pairs = self._assign_roles(frame, state)
                 roles = tuple(role for role, _ in actant_pairs)
                 if len(set(roles))!=len(roles):

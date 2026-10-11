@@ -1,0 +1,2085 @@
+{
+  "schema": "diary-predication-evidence-1",
+  "base_commit": "f7a57d6ea1976f5aa44c311bbf9efd2b30eaab32",
+  "mode": "TEST_ONLY_RELEASE_WITH_ISOLATED_SHORT_PROBES",
+  "full_formalization": false,
+  "gates": "NOT_EVALUATED",
+  "local_model_run": false,
+  "source": {
+    "sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+    "excerpt_range": [
+      98865,
+      99084
+    ],
+    "excerpt_sha256": "a9a733b14a065315f3be027c5d176e27c23e54c1e493fdfe43814286a7030023",
+    "excerpt": "Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках и купались. Вода была хорошая. После чая принял Мамáнтова. Вечером занимался."
+  },
+  "resource_sha256": "ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236",
+  "probes": [
+    {
+      "ordinal": 1,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:c41cb84d4559d7688f46827e1a6ade15ebda5d8063cfda388017d6f7490d6ca0|composition\nContext span: Очень жаркий день.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. жаркий [ADJF]; SUBJECT=день -> очень [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment) — жаркий [ADJF]; SUBJECT=день -> очень [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:0bb7df7c38ea7bfdc8c35640740fbce40b918d27d3081f69178591e3a1d3fa52\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "fb8b8db82e8e32e2d3cd68a9bc6380e390740db032996f44a72429ae2d0b6899",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0001.request.json",
+        "request_sha256": "fb8b8db82e8e32e2d3cd68a9bc6380e390740db032996f44a72429ae2d0b6899",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 2,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:ac9b21337c90b6739a28ee32e8d10c041ed29ff252b21191bda39a36625c1074|composition\nContext span:  Доклад кончился вовремя.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. кончиться [VERB]; OBJECT=Доклад; subject omitted, identity unresolved -> вовремя [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment) — кончиться [VERB]; OBJECT=Доклад; subject omitted, identity unresolved -> вовремя [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment)\n2. кончиться [VERB]; SUBJECT=Доклад -> вовремя [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment) — кончиться [VERB]; SUBJECT=Доклад -> вовремя [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:cf7586ac98cdb42096bda9dfac75e8ce206d601db366973194377ad300713774\"\n2 = \"component-modifier:7181378c8629542ac6c58f14949b899a8ceb56d5df147f3e4fbb6eeedf236b74\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "8903951c6be617cb4c5068e18d30a414edb7bda76baf4b2f8e0ea605ae7c330e",
+      "response": "2",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0002.request.json",
+        "request_sha256": "8903951c6be617cb4c5068e18d30a414edb7bda76baf4b2f8e0ea605ae7c330e",
+        "response_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+      }
+    },
+    {
+      "ordinal": 3,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:e9fef5b5ad17a62b3f32d2f89a7853b895c4db10e736c739c7ff9e35fe1083d7|composition\nContext span:  После завтрака принял Алека.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. принять [VERB]; OBJECT=Алека; subject omitted, identity unresolved; relative anchors=[{'operator': 'AFTER', 'anchor_ref': 'tok:50:58', 'anchor_surface': 'завтрака', 'anchor_lemma': 'завтрак', 'anchor_refs': ['tok:44:49', 'tok:50:58'], 'source_range': [44, 58], 'preposition_ref': 'tok:44:49', 'resource_pattern': '\\\\bпосле\\\\b'}] — принять [VERB]; OBJECT=Алека; subject omitted, identity unresolved; relative anchors=[{'operator': 'AFTER', 'anchor_ref': 'tok:50:58', 'anchor_surface': 'завтрака', 'anchor_lemma': 'завтрак', 'anchor_refs': ['tok:44:49', 'tok:50:58'], 'source_range': [44, 58], 'preposition_ref': 'tok:44:49', 'resource_pattern': '\\\\bпосле\\\\b'}]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component:5137ac0e43dc307bbd72c524cc3e6153033075d34e56d4549f57ccfc03d9f2c8\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "50e455d5536066263d44585c18c5eb1b14948919f1c73aa23b0b7de290096150",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0003.request.json",
+        "request_sha256": "50e455d5536066263d44585c18c5eb1b14948919f1c73aa23b0b7de290096150",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 4,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:09fb4729f4e1697781afa15b1765b54c3c1d5cdb70d5fe8a8dc8e4b0b2e88237|composition\nContext span:  Покатались на шлюпках \nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. покататься [VERB]; ; subject omitted, identity unresolved -> на [PREP]; SURFACE_ARG=шлюпках; lexical modifier attaches to the preceding proposition (structural attachment) — покататься [VERB]; ; subject omitted, identity unresolved -> на [PREP]; SURFACE_ARG=шлюпках; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:1e484238355e84636e29b77e6ba916c94d1a325cce73b6b5a7fa554cfac4460d\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "d8c7791e3a33ac50ad529adf6484c25829c346cfbd0e5388e7803005cd56f113",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0004.request.json",
+        "request_sha256": "d8c7791e3a33ac50ad529adf6484c25829c346cfbd0e5388e7803005cd56f113",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 5,
+      "request": {
+        "prompt": "Decision slot: coordination — predicate value of frame region:bfb12f74746589aa29f10c759487aeb821f6787a3fe7b659137c2ae166dcd000|coordination\nContext span:  Покатались на шлюпках и купались.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Покатались на шлюпках AND купались.; asserted conjunction of these clauses; each keeps local arguments. Omitted participants remain unresolved; no shared participant or event time is inferred. — Покатались на шлюпках AND купались.; asserted conjunction of these clauses; each keeps local arguments. Omitted participants remain unresolved; no shared participant or event time is inferred.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"coordination:e4421568e7ff9ef44aa3502e04afcf1457aea423d5ca9ee9a688b198ef70a051\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "a21f5df7738cf14ce9ac6b03a39451776d710ac8d8379e5679df5a7d6e353602",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0005.request.json",
+        "request_sha256": "a21f5df7738cf14ce9ac6b03a39451776d710ac8d8379e5679df5a7d6e353602",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 6,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:97e68bdb50a60946702a5acc98c97de6b0aef41d2c2b1f66c789e2095b8f4bd2|composition\nContext span:  Вода была хорошая.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. хороший [ADJF]; SUBJECT=Вода; copula=была — хороший [ADJF]; SUBJECT=Вода; copula=была\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component:8b0e3e8290afca1efd28518a7a2bc0f13adf64036c258d5827b4efdad912ef68\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "a4ceef5b192093e3bee2c5c154190f74b125f5743dfe2e6ec91c3d537302c0f8",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0006.request.json",
+        "request_sha256": "a4ceef5b192093e3bee2c5c154190f74b125f5743dfe2e6ec91c3d537302c0f8",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 7,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:0b39b2c3c596ed8baeb5a897f8a2dcb5bad8666140f5732bf099fc6325a5b9ab|composition\nContext span:  После чая принял Мамáнтова.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. принять [VERB]; OBJECT=Мамáнтова; subject omitted, identity unresolved; relative anchors=[{'operator': 'AFTER', 'anchor_ref': 'tok:179:182', 'anchor_surface': 'чая', 'anchor_lemma': 'чай', 'anchor_refs': ['tok:173:178', 'tok:179:182'], 'source_range': [173, 182], 'preposition_ref': 'tok:173:178', 'resource_pattern': '\\\\bпосле\\\\b'}] — принять [VERB]; OBJECT=Мамáнтова; subject omitted, identity unresolved; relative anchors=[{'operator': 'AFTER', 'anchor_ref': 'tok:179:182', 'anchor_surface': 'чая', 'anchor_lemma': 'чай', 'anchor_refs': ['tok:173:178', 'tok:179:182'], 'source_range': [173, 182], 'preposition_ref': 'tok:173:178', 'resource_pattern': '\\\\bпосле\\\\b'}]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component:a8f21b89b221a29b8420bf21cfd13be5223b8d337967434a1d2f4ad036fbb190\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "7b79cd7cefe69206e92580324be62656770add30b05ffcad89622a8026b011f6",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0007.request.json",
+        "request_sha256": "7b79cd7cefe69206e92580324be62656770add30b05ffcad89622a8026b011f6",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 8,
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:0150fcbf8550d0c20481a544ce7e9456dca9a420f2f418c168afb47d8af30e55|composition\nContext span:  Вечером занимался.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. заниматься [VERB]; ; subject omitted, identity unresolved -> вечером [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment) — заниматься [VERB]; ; subject omitted, identity unresolved -> вечером [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:965f4067d2e44d06521899a2298657b0cd2cfbab2d88a22a232cc1bb05669f9a\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "91ecd331e4b0e5865a4bcce6d6d28710bcae90ff5f415209fcd9cca6b4dce4e3",
+      "response": "1",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_composition_verified/probe_0008.request.json",
+        "request_sha256": "91ecd331e4b0e5865a4bcce6d6d28710bcae90ff5f415209fcd9cca6b4dce4e3",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      }
+    },
+    {
+      "ordinal": 9,
+      "request": {
+        "prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  После завтрака принял Алека.\nTarget predicate: принял; source range: (43, 72)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants — Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence) — Same participant as день (identity requires contextual evidence)\n3. Same participant as Доклад (identity requires contextual evidence) — Same participant as Доклад (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6\"\n2 = \"mention:tok:13:17\"\n3 = \"mention:tok:19:25\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "2f81a7c9b39bd0d03d874e0d501f92496fb4033e4c30679671fe3b1c5b204ba4",
+      "response": "1",
+      "transport": {
+        "mode": "ISOLATED_SUBAGENT_EXACT_REQUEST",
+        "local_model": false
+      }
+    },
+    {
+      "ordinal": 10,
+      "request": {
+        "prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Покатались на шлюпках \nTarget predicate: Покатались; source range: (119, 142)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:c9f50a6f42f13994484350c47a7fbd26d8f36b330484af3494049f33f2c845c9\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках \nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members) — Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:c9f50a6f42f13994484350c47a7fbd26d8f36b330484af3494049f33f2c845c9\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "81d1adf9653386e088dfeb7d7f69fee2bb475bf74edb481b9908de983eb8721c",
+      "response": "0",
+      "transport": {
+        "mode": "ISOLATED_SUBAGENT_EXACT_REQUEST",
+        "local_model": false
+      }
+    },
+    {
+      "ordinal": 11,
+      "request": {
+        "prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  купались.\nTarget predicate: купались; source range: (143, 153)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:fa89c2bd27b55950ed708aa8d0a0c42182caf03d91eba96eaa6f6f408a0b6991\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках и купались.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members) — Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)\n2. Same participant as шлюпках (identity requires contextual evidence) — Same participant as шлюпках (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (119, 142) (Покатались) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (119, 142) (Покатались) (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:fa89c2bd27b55950ed708aa8d0a0c42182caf03d91eba96eaa6f6f408a0b6991\"\n2 = \"mention:tok:134:141\"\n3 = \"gap:c9f50a6f42f13994484350c47a7fbd26d8f36b330484af3494049f33f2c845c9\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "c8aa3d82215f47f05ede319bab82effd2c4a662612996499a481b0c5273e6a86",
+      "response": "3",
+      "transport": {
+        "mode": "ISOLATED_SUBAGENT_EXACT_REQUEST",
+        "local_model": false
+      }
+    },
+    {
+      "ordinal": 12,
+      "request": {
+        "prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  После чая принял Мамáнтова.\nTarget predicate: принял; source range: (172, 200)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках и купались. Вода была хорошая. После чая принял Мамáнтова.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants — Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence) — Same participant as день (identity requires contextual evidence)\n3. Same participant as Доклад (identity requires contextual evidence) — Same participant as Доклад (identity requires contextual evidence)\n4. Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence)\n5. Same participant as Алека (identity requires contextual evidence) — Same participant as Алека (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32\"\n2 = \"mention:tok:13:17\"\n3 = \"mention:tok:19:25\"\n4 = \"gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6\"\n5 = \"mention:tok:66:71\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "ae8920b0e690d78c32f8d91be54a6cfd37b511f5580c2a93f30d4c99d42374b3",
+      "response": "4",
+      "transport": {
+        "mode": "ISOLATED_SUBAGENT_EXACT_REQUEST",
+        "local_model": false
+      }
+    },
+    {
+      "ordinal": 13,
+      "request": {
+        "prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Вечером занимался.\nTarget predicate: занимался; source range: (200, 219)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках и купались. Вода была хорошая. После чая принял Мамáнтова. Вечером занимался.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants — Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence) — Same participant as день (identity requires contextual evidence)\n3. Same participant as Доклад (identity requires contextual evidence) — Same participant as Доклад (identity requires contextual evidence)\n4. Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence)\n5. Same participant as Алека (identity requires contextual evidence) — Same participant as Алека (identity requires contextual evidence)\n6. Same participant as omitted SUBJECT at (172, 200) (принял) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (172, 200) (принял) (identity requires contextual evidence)\n7. Same participant as Мамáнтова (identity requires contextual evidence) — Same participant as Мамáнтова (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55\"\n2 = \"mention:tok:13:17\"\n3 = \"mention:tok:19:25\"\n4 = \"gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6\"\n5 = \"mention:tok:66:71\"\n6 = \"gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32\"\n7 = \"mention:tok:190:199\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "request_sha256": "24a8ea1455f21109db1f8c2b3720a8789b95a4df08b06fbfe05d71d8d1d0e1eb",
+      "response": "4,6",
+      "transport": {
+        "mode": "ISOLATED_SUBAGENT_EXACT_REQUEST",
+        "local_model": false
+      }
+    }
+  ],
+  "negative_prompt_diagnostics": [
+    {
+      "request": {
+        "prompt": "Decision slot: component_attachment — predicate value of frame region:0150fcbf8550d0c20481a544ce7e9456dca9a420f2f418c168afb47d8af30e55|composition\nContext span:  Вечером занимался.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. заниматься [VERB]; ; subject omitted, identity unresolved -> вечером [ADVB]; ; outer modifier scopes over the inner proposition; inner truth is NOT asserted independently — заниматься [VERB]; ; subject omitted, identity unresolved -> вечером [ADVB]; ; outer modifier scopes over the inner proposition; inner truth is NOT asserted independently\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:965f4067d2e44d06521899a2298657b0cd2cfbab2d88a22a232cc1bb05669f9a\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "0",
+      "executor_explanation": "Independent executor: I rejected the wording \"inner truth is NOT asserted independently.\" I interpreted \"Вечером занимался\" as affirming that the activity occurred, with \"вечером\" specifying its time, rather than suspending the truth of \"занимался.\" That interpretation drove my answer of 0.",
+      "historical_run": "diary_predication_verified",
+      "status": "PRESERVED_NOT_REWRITTEN"
+    },
+    {
+      "request": {
+        "prompt": "Decision slot: implicit_argument — predicate value of frame gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках и купались. Вода была хорошая. После чая принял Мамáнтова.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants — Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence) — Same participant as день (identity requires contextual evidence)\n3. Same participant as Доклад (identity requires contextual evidence) — Same participant as Доклад (identity requires contextual evidence)\n4. Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence)\n5. Same participant as Алека (identity requires contextual evidence) — Same participant as Алека (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32\"\n2 = \"mention:tok:13:17\"\n3 = \"mention:tok:19:25\"\n4 = \"gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6\"\n5 = \"mention:tok:66:71\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1",
+      "executor_explanation": "Independent executor: The candidate ordering suggested the target was the omitted plural subject of «отправились», whereas label 4 refers to the singular subject of «принял». I therefore chose label 1 because their identity was not established. The opaque gap ID did not explicitly identify the target clause, so that identification was an inference.",
+      "historical_run": "diary_predication_verified",
+      "status": "PRESERVED_NOT_REWRITTEN"
+    }
+  ],
+  "final": {
+    "status": "EXECUTED",
+    "terminal": "APPLIED",
+    "committed_fragments": [
+      {
+        "fragment_id": "component-modifier:0bb7df7c38ea7bfdc8c35640740fbce40b918d27d3081f69178591e3a1d3fa52",
+        "source_range": [
+          0,
+          18
+        ],
+        "source_text": "Очень жаркий день."
+      },
+      {
+        "fragment_id": "component-modifier:7181378c8629542ac6c58f14949b899a8ceb56d5df147f3e4fbb6eeedf236b74",
+        "source_range": [
+          18,
+          43
+        ],
+        "source_text": " Доклад кончился вовремя."
+      },
+      {
+        "fragment_id": "component-modifier:965f4067d2e44d06521899a2298657b0cd2cfbab2d88a22a232cc1bb05669f9a",
+        "source_range": [
+          200,
+          219
+        ],
+        "source_text": " Вечером занимался."
+      },
+      {
+        "fragment_id": "component:5137ac0e43dc307bbd72c524cc3e6153033075d34e56d4549f57ccfc03d9f2c8",
+        "source_range": [
+          43,
+          72
+        ],
+        "source_text": " После завтрака принял Алека."
+      },
+      {
+        "fragment_id": "component:8b0e3e8290afca1efd28518a7a2bc0f13adf64036c258d5827b4efdad912ef68",
+        "source_range": [
+          153,
+          172
+        ],
+        "source_text": " Вода была хорошая."
+      },
+      {
+        "fragment_id": "component:a8f21b89b221a29b8420bf21cfd13be5223b8d337967434a1d2f4ad036fbb190",
+        "source_range": [
+          172,
+          200
+        ],
+        "source_text": " После чая принял Мамáнтова."
+      }
+    ],
+    "counts": {
+      "nodes": 13,
+      "supports": 8,
+      "usage_links": 7,
+      "assertions": 0
+    },
+    "implicit_bindings": {
+      "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6": {
+        "entity_ref": "M:implicit:65b07f43c066242896cace9e3f7b061f7dd9cde27244aabffd1d8ba4dde26027",
+        "participant_kind": "INDIVIDUAL",
+        "anonymous": true,
+        "decision_ref": "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6",
+        "features": {
+          "gender": "masc",
+          "number": "sing"
+        }
+      },
+      "gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32": {
+        "entity_ref": "M:implicit:65b07f43c066242896cace9e3f7b061f7dd9cde27244aabffd1d8ba4dde26027",
+        "participant_kind": "INDIVIDUAL",
+        "anonymous": true,
+        "decision_ref": "gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32",
+        "features": {
+          "gender": "masc",
+          "number": "sing"
+        }
+      },
+      "gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55": {
+        "entity_ref": "M:implicit:65b07f43c066242896cace9e3f7b061f7dd9cde27244aabffd1d8ba4dde26027",
+        "participant_kind": "INDIVIDUAL",
+        "anonymous": true,
+        "decision_ref": "gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55",
+        "features": {
+          "gender": "masc",
+          "number": "sing"
+        }
+      }
+    },
+    "reference_equality_decisions": [
+      {
+        "slot_id": "implicit_argument",
+        "frame_id": "gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55",
+        "candidates": [
+          "new:gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55",
+          "mention:tok:13:17",
+          "mention:tok:19:25",
+          "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6",
+          "mention:tok:66:71",
+          "gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32",
+          "mention:tok:190:199"
+        ],
+        "selected": [
+          "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6"
+        ],
+        "selector_outcome": "MULTIPLE_ADMISSIBLE",
+        "machine_state": "RESOLVED_LOCAL",
+        "search_complete": null,
+        "lifecycle": "PROVISIONAL",
+        "outcome": "RESOLVED",
+        "grounds": [
+          {
+            "type": "M",
+            "text": "admissible source reference",
+            "value": "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6"
+          },
+          {
+            "type": "M",
+            "text": "admissible source reference",
+            "value": "gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32"
+          },
+          {
+            "type": "D",
+            "text": "selected references have the same established entity_ref: M:implicit:65b07f43c066242896cace9e3f7b061f7dd9cde27244aabffd1d8ba4dde26027",
+            "value": "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6"
+          }
+        ],
+        "source_traces": [],
+        "history": [
+          {
+            "kind": "EQUIVALENT_REFERENCE_SELECTION",
+            "selected_refs": [
+              "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6",
+              "gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32"
+            ],
+            "entity_ref": "M:implicit:65b07f43c066242896cace9e3f7b061f7dd9cde27244aabffd1d8ba4dde26027",
+            "representative": "gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6"
+          }
+        ],
+        "last_prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Вечером занимался.\nTarget predicate: занимался; source range: (200, 219)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55\nContext span: Очень жаркий день. Доклад кончился вовремя. После завтрака принял Алека. В два часа сорок пять минут отправились вверх. Покатались на шлюпках и купались. Вода была хорошая. После чая принял Мамáнтова. Вечером занимался.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236, closed set):\n1. Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants — Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence) — Same participant as день (identity requires contextual evidence)\n3. Same participant as Доклад (identity requires contextual evidence) — Same participant as Доклад (identity requires contextual evidence)\n4. Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (43, 72) (принял) (identity requires contextual evidence)\n5. Same participant as Алека (identity requires contextual evidence) — Same participant as Алека (identity requires contextual evidence)\n6. Same participant as omitted SUBJECT at (172, 200) (принял) (identity requires contextual evidence) — Same participant as omitted SUBJECT at (172, 200) (принял) (identity requires contextual evidence)\n7. Same participant as Мамáнтова (identity requires contextual evidence) — Same participant as Мамáнтова (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:cb43b9c2f8d0af41fdbdc675e0eb10f68af03867ba1c9e5b6ec543525b2e5d55\"\n2 = \"mention:tok:13:17\"\n3 = \"mention:tok:19:25\"\n4 = \"gap:3d05d4eb61fe4008479d2e82fafa5619b7253e32a93491a8dcafbbd60d9d4dd6\"\n5 = \"mention:tok:66:71\"\n6 = \"gap:d18096c90ddcfb7cca86dbf20f19127d6a2d2ad38be8031234a9e17ec4dd4c32\"\n7 = \"mention:tok:190:199\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "raw_response": "4,6",
+        "provenance": {
+          "pattern_ids": [],
+          "resource_versions": {}
+        }
+      }
+    ],
+    "diagnostics": [
+      {
+        "code": "COMPONENT_SEARCH_INCOMPLETE",
+        "detail": "region:f03dd944b6a6bfdc8334dece5017e1c43b91dcfc5cac391c34431e4af6eb8ad7"
+      },
+      {
+        "code": "COMPONENT_SEARCH_INCOMPLETE",
+        "detail": "region:f03dd944b6a6bfdc8334dece5017e1c43b91dcfc5cac391c34431e4af6eb8ad7"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:a012560ca05b2579cb7f4e2ad244c77422391751f908c2e93ac2f677a77c2229"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:0b16cbdff993a420f39b2d174da3b920e4854714d5d58646babfc4a5068c3adc"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:2cc26bec346fa09b4919ed0e3d0cdc68c8c4b2c48615f15933c75e431873e6bc"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:c0b1b2ae3d85893e81ff87bcf1973bb93d396b4698cfb019dec4128c0d7d022f"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:c4298a0aa150a1c87457cfca67b08d8997b4e66d1eaec951272864fd93a49b6e"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:6588f7542c6bc01e507c68a60d3040f6126766b3828099bea18e91ced5e860eb"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:6ef7d3866aaf7dcbd8f1ab72d6e521ea9ed20d8d5172c31c31181c399775ed52"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:9e76e12fffc52b9bdafcad19c574fc94eda9c6638ef9b15a50051b32fd4fa92b"
+      },
+      {
+        "code": "IMPLICIT_CHAIN_UNRESOLVED",
+        "detail": "gap:fa89c2bd27b55950ed708aa8d0a0c42182caf03d91eba96eaa6f6f408a0b6991"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:26dd60d89ddf327ac5122df3ff518b98019348cae017eb3c5b54ac9d46dbb0cf"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component-modifier:cf7586ac98cdb42096bda9dfac75e8ce206d601db366973194377ad300713774"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:0bb0b11f2348e31bfb51dc91b8bfc9c9ce44b08516a4f14b51f27e1e56323915"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:29f58f46956e3304b48e2e1c6a4311b962ed266673cf8c583a507c8a341ad9f7"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:4fd9cabd2ce19924969595d9d4dea4b80951cb0997a342bbf7e48b7bdcd49a9b"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:56a6fe2746bb8e1257d120843012f86b9efe65c878a1a4216e088771176d07ad"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:63b0d318b499cc0c2d4d44048f22e1ecf1063198a7adf96eeb0ea13733f72ea3"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:85f5c6f33686e16cdefb3dc9f0095a04eaa4d721352b0c428fd4c017270add34"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:cb192eeb1e7bf8d1e288295e7bf5c454fc7f69b4928890857808fed041d50a1f"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:884375b420e5203581d5d336952a3528d2a562ae2a171c00ef5405571d52e91c"
+      },
+      {
+        "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+        "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:d528a48a3a2d1774842b0b9345fb56c90fc3cd86bb31287323ab87713b8fbb49"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "IMPLICIT_ARGUMENT_UNRESOLVED:logical:8ab3c6f2330571c7"
+      }
+    ],
+    "source_regions": {
+      "source_id": "observation:622cd5766a41e9edebf15ebd74582d7c743b8cceb2354ca9ebec391dda17b33f",
+      "regions": [
+        {
+          "region_id": "region:634915d34eab6d34ecbee33a80c1b2e21922b42657bcedacdd822f6429fd704f",
+          "kind": "DOCUMENT",
+          "source_range": [
+            0,
+            219
+          ],
+          "token_refs": [
+            "tok:0:5",
+            "tok:6:12",
+            "tok:13:17",
+            "tok:17:18",
+            "tok:19:25",
+            "tok:26:34",
+            "tok:35:42",
+            "tok:42:43",
+            "tok:44:49",
+            "tok:50:58",
+            "tok:59:65",
+            "tok:66:71",
+            "tok:71:72",
+            "tok:73:74",
+            "tok:75:78",
+            "tok:79:83",
+            "tok:84:89",
+            "tok:90:94",
+            "tok:95:100",
+            "tok:101:112",
+            "tok:113:118",
+            "tok:118:119",
+            "tok:120:130",
+            "tok:131:133",
+            "tok:134:141",
+            "tok:142:143",
+            "tok:144:152",
+            "tok:152:153",
+            "tok:154:158",
+            "tok:159:163",
+            "tok:164:171",
+            "tok:171:172",
+            "tok:173:178",
+            "tok:179:182",
+            "tok:183:189",
+            "tok:190:199",
+            "tok:199:200",
+            "tok:201:208",
+            "tok:209:218",
+            "tok:218:219"
+          ],
+          "parent_ref": null,
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "kind": "PARAGRAPH",
+          "source_range": [
+            0,
+            219
+          ],
+          "token_refs": [
+            "tok:0:5",
+            "tok:6:12",
+            "tok:13:17",
+            "tok:17:18",
+            "tok:19:25",
+            "tok:26:34",
+            "tok:35:42",
+            "tok:42:43",
+            "tok:44:49",
+            "tok:50:58",
+            "tok:59:65",
+            "tok:66:71",
+            "tok:71:72",
+            "tok:73:74",
+            "tok:75:78",
+            "tok:79:83",
+            "tok:84:89",
+            "tok:90:94",
+            "tok:95:100",
+            "tok:101:112",
+            "tok:113:118",
+            "tok:118:119",
+            "tok:120:130",
+            "tok:131:133",
+            "tok:134:141",
+            "tok:142:143",
+            "tok:144:152",
+            "tok:152:153",
+            "tok:154:158",
+            "tok:159:163",
+            "tok:164:171",
+            "tok:171:172",
+            "tok:173:178",
+            "tok:179:182",
+            "tok:183:189",
+            "tok:190:199",
+            "tok:199:200",
+            "tok:201:208",
+            "tok:209:218",
+            "tok:218:219"
+          ],
+          "parent_ref": "region:634915d34eab6d34ecbee33a80c1b2e21922b42657bcedacdd822f6429fd704f",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "LAYOUT"
+          ]
+        },
+        {
+          "region_id": "region:c41cb84d4559d7688f46827e1a6ade15ebda5d8063cfda388017d6f7490d6ca0",
+          "kind": "SENTENCE",
+          "source_range": [
+            0,
+            18
+          ],
+          "token_refs": [
+            "tok:0:5",
+            "tok:6:12",
+            "tok:13:17",
+            "tok:17:18"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            0,
+            18
+          ],
+          "token_refs": [
+            "tok:0:5",
+            "tok:6:12",
+            "tok:13:17",
+            "tok:17:18"
+          ],
+          "parent_ref": "region:c41cb84d4559d7688f46827e1a6ade15ebda5d8063cfda388017d6f7490d6ca0",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:beee6a5d803c67df4526ef8c3e23c2bf56ca64179eb52fd60be4d802c122da81",
+          "kind": "TOKEN",
+          "source_range": [
+            0,
+            5
+          ],
+          "token_refs": [
+            "tok:0:5"
+          ],
+          "parent_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:0f41276967074347ef343ad7361f27c1496ddf1d46c8b3df51db354ef4c6ed1c",
+          "kind": "TOKEN",
+          "source_range": [
+            6,
+            12
+          ],
+          "token_refs": [
+            "tok:6:12"
+          ],
+          "parent_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:8bfeac07b51ae92e72682967d4216dbf703e86f97c8d9348fe0bf2e8f9c2da01",
+          "kind": "TOKEN",
+          "source_range": [
+            13,
+            17
+          ],
+          "token_refs": [
+            "tok:13:17"
+          ],
+          "parent_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:6d611dc5d71404aa66ef91e54fa3288d83bf1a8375f9f39b261ebbd4a0735de2",
+          "kind": "TOKEN",
+          "source_range": [
+            17,
+            18
+          ],
+          "token_refs": [
+            "tok:17:18"
+          ],
+          "parent_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:ac9b21337c90b6739a28ee32e8d10c041ed29ff252b21191bda39a36625c1074",
+          "kind": "SENTENCE",
+          "source_range": [
+            18,
+            43
+          ],
+          "token_refs": [
+            "tok:19:25",
+            "tok:26:34",
+            "tok:35:42",
+            "tok:42:43"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            18,
+            43
+          ],
+          "token_refs": [
+            "tok:19:25",
+            "tok:26:34",
+            "tok:35:42",
+            "tok:42:43"
+          ],
+          "parent_ref": "region:ac9b21337c90b6739a28ee32e8d10c041ed29ff252b21191bda39a36625c1074",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:e021185637d4a06c346d7e5c1f9d56471808f422e889329d927e24e824e66dbd",
+          "kind": "TOKEN",
+          "source_range": [
+            19,
+            25
+          ],
+          "token_refs": [
+            "tok:19:25"
+          ],
+          "parent_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:d742576901c274bdeebd2a91b6a590f2de076d8ee83d5b56ebe1ba9c481c3182",
+          "kind": "TOKEN",
+          "source_range": [
+            26,
+            34
+          ],
+          "token_refs": [
+            "tok:26:34"
+          ],
+          "parent_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:edc05cc0743e469433ed3d2f2bcef5524cb89cd39e455677b3f4353374c10d40",
+          "kind": "TOKEN",
+          "source_range": [
+            35,
+            42
+          ],
+          "token_refs": [
+            "tok:35:42"
+          ],
+          "parent_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:5762683bd601beb14e437b15ef2e88286dabe925f81624b45bacdf1cd6158359",
+          "kind": "TOKEN",
+          "source_range": [
+            42,
+            43
+          ],
+          "token_refs": [
+            "tok:42:43"
+          ],
+          "parent_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:e9fef5b5ad17a62b3f32d2f89a7853b895c4db10e736c739c7ff9e35fe1083d7",
+          "kind": "SENTENCE",
+          "source_range": [
+            43,
+            72
+          ],
+          "token_refs": [
+            "tok:44:49",
+            "tok:50:58",
+            "tok:59:65",
+            "tok:66:71",
+            "tok:71:72"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            43,
+            72
+          ],
+          "token_refs": [
+            "tok:44:49",
+            "tok:50:58",
+            "tok:59:65",
+            "tok:66:71",
+            "tok:71:72"
+          ],
+          "parent_ref": "region:e9fef5b5ad17a62b3f32d2f89a7853b895c4db10e736c739c7ff9e35fe1083d7",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:d09072b3915314e804a3c01db8881f11f88c8accc34215208bc8fd50e6e03fd3",
+          "kind": "TOKEN",
+          "source_range": [
+            44,
+            49
+          ],
+          "token_refs": [
+            "tok:44:49"
+          ],
+          "parent_ref": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:68187dbe59aaca05806b9a07501e31b86bb0e509907e53ef7b5f2f0514018fb0",
+          "kind": "TOKEN",
+          "source_range": [
+            50,
+            58
+          ],
+          "token_refs": [
+            "tok:50:58"
+          ],
+          "parent_ref": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:1bb3f71478504feba2e69dbdb418ec60ddf3ac56ef5cd215551eb5df9ce06f8e",
+          "kind": "TOKEN",
+          "source_range": [
+            59,
+            65
+          ],
+          "token_refs": [
+            "tok:59:65"
+          ],
+          "parent_ref": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:389d689c181eb616548591281751cb2e378358b00b52c8c449b7ab4d02575eed",
+          "kind": "TOKEN",
+          "source_range": [
+            66,
+            71
+          ],
+          "token_refs": [
+            "tok:66:71"
+          ],
+          "parent_ref": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:f0a77685e6b327d0d22e360f9240cd11f319c9c45f89da37505ab2b5c17b8477",
+          "kind": "TOKEN",
+          "source_range": [
+            71,
+            72
+          ],
+          "token_refs": [
+            "tok:71:72"
+          ],
+          "parent_ref": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:f03dd944b6a6bfdc8334dece5017e1c43b91dcfc5cac391c34431e4af6eb8ad7",
+          "kind": "SENTENCE",
+          "source_range": [
+            72,
+            119
+          ],
+          "token_refs": [
+            "tok:73:74",
+            "tok:75:78",
+            "tok:79:83",
+            "tok:84:89",
+            "tok:90:94",
+            "tok:95:100",
+            "tok:101:112",
+            "tok:113:118",
+            "tok:118:119"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            72,
+            119
+          ],
+          "token_refs": [
+            "tok:73:74",
+            "tok:75:78",
+            "tok:79:83",
+            "tok:84:89",
+            "tok:90:94",
+            "tok:95:100",
+            "tok:101:112",
+            "tok:113:118",
+            "tok:118:119"
+          ],
+          "parent_ref": "region:f03dd944b6a6bfdc8334dece5017e1c43b91dcfc5cac391c34431e4af6eb8ad7",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:96fd13d84ea1f8c8a0feafe16deb9000b27f937cc3499d843153088658762baa",
+          "kind": "TOKEN",
+          "source_range": [
+            73,
+            74
+          ],
+          "token_refs": [
+            "tok:73:74"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:6a186383b3481af63f58fdab9dc010b68c973f82e1d10615d7bd651a5ceda946",
+          "kind": "TOKEN",
+          "source_range": [
+            75,
+            78
+          ],
+          "token_refs": [
+            "tok:75:78"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:0a14a259ccb24a659bfe143c66d31ddc82dda284c70deefab7bafc05bca26752",
+          "kind": "TOKEN",
+          "source_range": [
+            79,
+            83
+          ],
+          "token_refs": [
+            "tok:79:83"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:86cf2daa8839481869775d71352068aaeb23d75e93b133c46f02d025e7179c31",
+          "kind": "TOKEN",
+          "source_range": [
+            84,
+            89
+          ],
+          "token_refs": [
+            "tok:84:89"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:68ccd60cd3fa21e2702fb2722dc38e7fe67d063149e55be881691c557f86d637",
+          "kind": "TOKEN",
+          "source_range": [
+            90,
+            94
+          ],
+          "token_refs": [
+            "tok:90:94"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:db958a3b7a5026356b5c1c9174dbbfe387f208381038eba3cf61f1f1a1125abc",
+          "kind": "TOKEN",
+          "source_range": [
+            95,
+            100
+          ],
+          "token_refs": [
+            "tok:95:100"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:01d3100c3f0e64f890bdcdab03a30c6491206a947e6437e40b9c3b9ec8deb852",
+          "kind": "TOKEN",
+          "source_range": [
+            101,
+            112
+          ],
+          "token_refs": [
+            "tok:101:112"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:702a7717fac5000435f726d4913a0ecc19088ba8e5f09cacf368546a71dd8aa7",
+          "kind": "TOKEN",
+          "source_range": [
+            113,
+            118
+          ],
+          "token_refs": [
+            "tok:113:118"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:fc4078d36f33e5b188a0800625aae0ee72fdcf4170c8945f0ad7435857809cf7",
+          "kind": "TOKEN",
+          "source_range": [
+            118,
+            119
+          ],
+          "token_refs": [
+            "tok:118:119"
+          ],
+          "parent_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:bfb12f74746589aa29f10c759487aeb821f6787a3fe7b659137c2ae166dcd000",
+          "kind": "SENTENCE",
+          "source_range": [
+            119,
+            153
+          ],
+          "token_refs": [
+            "tok:120:130",
+            "tok:131:133",
+            "tok:134:141",
+            "tok:142:143",
+            "tok:144:152",
+            "tok:152:153"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            119,
+            153
+          ],
+          "token_refs": [
+            "tok:120:130",
+            "tok:131:133",
+            "tok:134:141",
+            "tok:142:143",
+            "tok:144:152",
+            "tok:152:153"
+          ],
+          "parent_ref": "region:bfb12f74746589aa29f10c759487aeb821f6787a3fe7b659137c2ae166dcd000",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:688b2bded314a398d3fa5d1a8405457b996f7afedb4d0f387c60788851ad46f4",
+          "kind": "TOKEN",
+          "source_range": [
+            120,
+            130
+          ],
+          "token_refs": [
+            "tok:120:130"
+          ],
+          "parent_ref": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:1fa0853c41288f4924e216b8b303ee8f01602a2792a60d1db7c1ea8f7cf9a813",
+          "kind": "TOKEN",
+          "source_range": [
+            131,
+            133
+          ],
+          "token_refs": [
+            "tok:131:133"
+          ],
+          "parent_ref": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:c6313c4382d1fbadf01b5bfd62b3bc4033f6f94182dfcf94a9ab84c33de20d0a",
+          "kind": "TOKEN",
+          "source_range": [
+            134,
+            141
+          ],
+          "token_refs": [
+            "tok:134:141"
+          ],
+          "parent_ref": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:b0de32899ef7fef28fb6db74625aba6a226b94aa63c5cdaafd15f505562ff52a",
+          "kind": "TOKEN",
+          "source_range": [
+            142,
+            143
+          ],
+          "token_refs": [
+            "tok:142:143"
+          ],
+          "parent_ref": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:9f30537107cbce504a5e8aac08a721264633d7afbd5052901b89eaf374a2f7c3",
+          "kind": "TOKEN",
+          "source_range": [
+            144,
+            152
+          ],
+          "token_refs": [
+            "tok:144:152"
+          ],
+          "parent_ref": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:a61d0c45e3b92efe2911d79f1d0c08a7b09e21c63b8d11fa646e018494f16b21",
+          "kind": "TOKEN",
+          "source_range": [
+            152,
+            153
+          ],
+          "token_refs": [
+            "tok:152:153"
+          ],
+          "parent_ref": "region:b60163ddf71693f71102999fe873fbd21c221273be84bf861977b53c68641a56",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:97e68bdb50a60946702a5acc98c97de6b0aef41d2c2b1f66c789e2095b8f4bd2",
+          "kind": "SENTENCE",
+          "source_range": [
+            153,
+            172
+          ],
+          "token_refs": [
+            "tok:154:158",
+            "tok:159:163",
+            "tok:164:171",
+            "tok:171:172"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            153,
+            172
+          ],
+          "token_refs": [
+            "tok:154:158",
+            "tok:159:163",
+            "tok:164:171",
+            "tok:171:172"
+          ],
+          "parent_ref": "region:97e68bdb50a60946702a5acc98c97de6b0aef41d2c2b1f66c789e2095b8f4bd2",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:47c30272bba775f5ea3ed7f9d727fd30b5e95a8588c23e1ff2d3d66f18110ede",
+          "kind": "TOKEN",
+          "source_range": [
+            154,
+            158
+          ],
+          "token_refs": [
+            "tok:154:158"
+          ],
+          "parent_ref": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:1786faa997302ac460e9f33e978d72ecdffb16ad33da12855b75eb12fd29497c",
+          "kind": "TOKEN",
+          "source_range": [
+            159,
+            163
+          ],
+          "token_refs": [
+            "tok:159:163"
+          ],
+          "parent_ref": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:8db5bb6bcb6e8391dcaa43ca0065f116f5017f3351315114fed73faff1a4db7b",
+          "kind": "TOKEN",
+          "source_range": [
+            164,
+            171
+          ],
+          "token_refs": [
+            "tok:164:171"
+          ],
+          "parent_ref": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:22c886cf4564575335150c03597fcdc16fe554920f819aaea36a8b3032dbff27",
+          "kind": "TOKEN",
+          "source_range": [
+            171,
+            172
+          ],
+          "token_refs": [
+            "tok:171:172"
+          ],
+          "parent_ref": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:0b39b2c3c596ed8baeb5a897f8a2dcb5bad8666140f5732bf099fc6325a5b9ab",
+          "kind": "SENTENCE",
+          "source_range": [
+            172,
+            200
+          ],
+          "token_refs": [
+            "tok:173:178",
+            "tok:179:182",
+            "tok:183:189",
+            "tok:190:199",
+            "tok:199:200"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:9afe9b8e0ff679075117ee7df9ba67c630c15a0e4f1d85f7443fc02c15d82ca8",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            172,
+            200
+          ],
+          "token_refs": [
+            "tok:173:178",
+            "tok:179:182",
+            "tok:183:189",
+            "tok:190:199",
+            "tok:199:200"
+          ],
+          "parent_ref": "region:0b39b2c3c596ed8baeb5a897f8a2dcb5bad8666140f5732bf099fc6325a5b9ab",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:ba4c45602332a0952691df187a37998458f0f0ebfc3d0eadb9ad18a5acef52db",
+          "kind": "TOKEN",
+          "source_range": [
+            173,
+            178
+          ],
+          "token_refs": [
+            "tok:173:178"
+          ],
+          "parent_ref": "region:9afe9b8e0ff679075117ee7df9ba67c630c15a0e4f1d85f7443fc02c15d82ca8",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:9baa2c670e49f43d8734074e3d7ae37dbdde48c6a822aaa413d2afc5cea78691",
+          "kind": "TOKEN",
+          "source_range": [
+            179,
+            182
+          ],
+          "token_refs": [
+            "tok:179:182"
+          ],
+          "parent_ref": "region:9afe9b8e0ff679075117ee7df9ba67c630c15a0e4f1d85f7443fc02c15d82ca8",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:ddbb35f71004127cacefbc0f1f568b9be20b634e60195d404e61d573394876c7",
+          "kind": "TOKEN",
+          "source_range": [
+            183,
+            189
+          ],
+          "token_refs": [
+            "tok:183:189"
+          ],
+          "parent_ref": "region:9afe9b8e0ff679075117ee7df9ba67c630c15a0e4f1d85f7443fc02c15d82ca8",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:df8fd294d1f928844b4a66204716618f9804350f7033df71b40146825961cc79",
+          "kind": "TOKEN",
+          "source_range": [
+            190,
+            199
+          ],
+          "token_refs": [
+            "tok:190:199"
+          ],
+          "parent_ref": "region:9afe9b8e0ff679075117ee7df9ba67c630c15a0e4f1d85f7443fc02c15d82ca8",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:1295e49ec5f00758879f9107a9ad4caf61c2c038af8249a19cc7f51387eacc09",
+          "kind": "TOKEN",
+          "source_range": [
+            199,
+            200
+          ],
+          "token_refs": [
+            "tok:199:200"
+          ],
+          "parent_ref": "region:9afe9b8e0ff679075117ee7df9ba67c630c15a0e4f1d85f7443fc02c15d82ca8",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:0150fcbf8550d0c20481a544ce7e9456dca9a420f2f418c168afb47d8af30e55",
+          "kind": "SENTENCE",
+          "source_range": [
+            200,
+            219
+          ],
+          "token_refs": [
+            "tok:201:208",
+            "tok:209:218",
+            "tok:218:219"
+          ],
+          "parent_ref": "region:22b754f16fa991640ef4b3d0159953b7dee469835eb443f6bb6950a94480283e",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:1a1416da81524c600ce16d9106dea19c317967f7ecd02f7208ca4bd0088c82d6",
+          "kind": "CLAUSE_WINDOW",
+          "source_range": [
+            200,
+            219
+          ],
+          "token_refs": [
+            "tok:201:208",
+            "tok:209:218",
+            "tok:218:219"
+          ],
+          "parent_ref": "region:0150fcbf8550d0c20481a544ce7e9456dca9a420f2f418c168afb47d8af30e55",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "PUNCTUATION"
+          ]
+        },
+        {
+          "region_id": "region:58627e6c7622f182555ca55959633e3554511746fbb7cfd2846fc1e18fc8fe2e",
+          "kind": "TOKEN",
+          "source_range": [
+            201,
+            208
+          ],
+          "token_refs": [
+            "tok:201:208"
+          ],
+          "parent_ref": "region:1a1416da81524c600ce16d9106dea19c317967f7ecd02f7208ca4bd0088c82d6",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:609c197b7d186d6d9121825571db02df9b19a43b070b3266c672f86c4e2232a4",
+          "kind": "TOKEN",
+          "source_range": [
+            209,
+            218
+          ],
+          "token_refs": [
+            "tok:209:218"
+          ],
+          "parent_ref": "region:1a1416da81524c600ce16d9106dea19c317967f7ecd02f7208ca4bd0088c82d6",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:a3fa221d1fad9467d8baee072e2ef3d7f268a883040214494788c36c5c7edd7a",
+          "kind": "TOKEN",
+          "source_range": [
+            218,
+            219
+          ],
+          "token_refs": [
+            "tok:218:219"
+          ],
+          "parent_ref": "region:1a1416da81524c600ce16d9106dea19c317967f7ecd02f7208ca4bd0088c82d6",
+          "boundary_status": "SOURCE",
+          "grounds": []
+        },
+        {
+          "region_id": "region:09fb4729f4e1697781afa15b1765b54c3c1d5cdb70d5fe8a8dc8e4b0b2e88237",
+          "kind": "CLAUSE",
+          "source_range": [
+            119,
+            142
+          ],
+          "token_refs": [
+            "tok:120:130",
+            "tok:131:133",
+            "tok:134:141"
+          ],
+          "parent_ref": "region:bfb12f74746589aa29f10c759487aeb821f6787a3fe7b659137c2ae166dcd000",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "RELEASED_CONNECTIVE"
+          ]
+        },
+        {
+          "region_id": "region:5ab9031ecd8a72665750cc5bf536621fe4ff946efd8109a5e247d23e0a8c4201",
+          "kind": "CLAUSE",
+          "source_range": [
+            143,
+            153
+          ],
+          "token_refs": [
+            "tok:144:152",
+            "tok:152:153"
+          ],
+          "parent_ref": "region:bfb12f74746589aa29f10c759487aeb821f6787a3fe7b659137c2ae166dcd000",
+          "boundary_status": "PROVISIONAL",
+          "grounds": [
+            "RELEASED_CONNECTIVE"
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "candidate_id": "component-modifier:0bb7df7c38ea7bfdc8c35640740fbce40b918d27d3081f69178591e3a1d3fa52",
+          "region_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "source_range": [
+            0,
+            18
+          ],
+          "anchor_refs": [
+            "tok:0:5"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component-modifier:1e484238355e84636e29b77e6ba916c94d1a325cce73b6b5a7fa554cfac4460d",
+          "region_ref": "region:09fb4729f4e1697781afa15b1765b54c3c1d5cdb70d5fe8a8dc8e4b0b2e88237",
+          "source_range": [
+            119,
+            142
+          ],
+          "anchor_refs": [
+            "tok:131:133",
+            "tok:134:141"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component-modifier:7181378c8629542ac6c58f14949b899a8ceb56d5df147f3e4fbb6eeedf236b74",
+          "region_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "source_range": [
+            18,
+            43
+          ],
+          "anchor_refs": [
+            "tok:35:42"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component-modifier:965f4067d2e44d06521899a2298657b0cd2cfbab2d88a22a232cc1bb05669f9a",
+          "region_ref": "region:0150fcbf8550d0c20481a544ce7e9456dca9a420f2f418c168afb47d8af30e55",
+          "source_range": [
+            200,
+            219
+          ],
+          "anchor_refs": [
+            "tok:201:208"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component-modifier:cf7586ac98cdb42096bda9dfac75e8ce206d601db366973194377ad300713774",
+          "region_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "source_range": [
+            18,
+            43
+          ],
+          "anchor_refs": [
+            "tok:35:42"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:0bb0b11f2348e31bfb51dc91b8bfc9c9ce44b08516a4f14b51f27e1e56323915",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:2103bfbc2511572230b2b9fcecdfb13518476b6d7ab543c603dc1ba42c295d69",
+          "region_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "source_range": [
+            18,
+            43
+          ],
+          "anchor_refs": [
+            "tok:26:34",
+            "tok:19:25"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:26dd60d89ddf327ac5122df3ff518b98019348cae017eb3c5b54ac9d46dbb0cf",
+          "region_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "source_range": [
+            0,
+            18
+          ],
+          "anchor_refs": [
+            "tok:13:17"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:29f58f46956e3304b48e2e1c6a4311b962ed266673cf8c583a507c8a341ad9f7",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:2a443d9646f03d6ef1f6a579fbf272a0f6316a10e003ff73b01cdd232af5ec6f",
+          "region_ref": "region:bf1252bc5ac935fcdf799811b66c462aab3c52296616a42de2ddfc16c526223d",
+          "source_range": [
+            0,
+            18
+          ],
+          "anchor_refs": [
+            "tok:6:12",
+            "tok:13:17"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:2b329e7c20551c91dd81fc47452c0a8bdd7138c526bfd094ca630a97f06ec405",
+          "region_ref": "region:0150fcbf8550d0c20481a544ce7e9456dca9a420f2f418c168afb47d8af30e55",
+          "source_range": [
+            200,
+            219
+          ],
+          "anchor_refs": [
+            "tok:209:218"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:4fd9cabd2ce19924969595d9d4dea4b80951cb0997a342bbf7e48b7bdcd49a9b",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:5137ac0e43dc307bbd72c524cc3e6153033075d34e56d4549f57ccfc03d9f2c8",
+          "region_ref": "region:387804342e1c5bef3af58a428c7a8634b5c6c2a1167eaf1b549fc8d89b660209",
+          "source_range": [
+            43,
+            72
+          ],
+          "anchor_refs": [
+            "tok:59:65",
+            "tok:66:71"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:56a6fe2746bb8e1257d120843012f86b9efe65c878a1a4216e088771176d07ad",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:63b0d318b499cc0c2d4d44048f22e1ecf1063198a7adf96eeb0ea13733f72ea3",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:85f5c6f33686e16cdefb3dc9f0095a04eaa4d721352b0c428fd4c017270add34",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:884375b420e5203581d5d336952a3528d2a562ae2a171c00ef5405571d52e91c",
+          "region_ref": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "source_range": [
+            153,
+            172
+          ],
+          "anchor_refs": [
+            "tok:159:163",
+            "tok:154:158"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:8b0e3e8290afca1efd28518a7a2bc0f13adf64036c258d5827b4efdad912ef68",
+          "region_ref": "region:29cdc83955e638958532e7a873dab3345bfcde44ae2e1700e06d440bddef50b5",
+          "source_range": [
+            153,
+            172
+          ],
+          "anchor_refs": [
+            "tok:164:171",
+            "tok:154:158"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:9c0e4a096309c3af6e8989a97a600aa4829bcc75e5ec8cbb2e80a5fa6fde4b58",
+          "region_ref": "region:5ab9031ecd8a72665750cc5bf536621fe4ff946efd8109a5e247d23e0a8c4201",
+          "source_range": [
+            143,
+            153
+          ],
+          "anchor_refs": [
+            "tok:144:152"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:a8f21b89b221a29b8420bf21cfd13be5223b8d337967434a1d2f4ad036fbb190",
+          "region_ref": "region:0b39b2c3c596ed8baeb5a897f8a2dcb5bad8666140f5732bf099fc6325a5b9ab",
+          "source_range": [
+            172,
+            200
+          ],
+          "anchor_refs": [
+            "tok:183:189",
+            "tok:190:199"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:cb192eeb1e7bf8d1e288295e7bf5c454fc7f69b4928890857808fed041d50a1f",
+          "region_ref": "region:c47ae96d165b405b608568a0dbd9203c90fe20da02fdafc691feb62c4821114a",
+          "source_range": [
+            72,
+            119
+          ],
+          "anchor_refs": [
+            "tok:95:100",
+            "tok:73:74",
+            "tok:84:89"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:d528a48a3a2d1774842b0b9345fb56c90fc3cd86bb31287323ab87713b8fbb49",
+          "region_ref": "region:0b39b2c3c596ed8baeb5a897f8a2dcb5bad8666140f5732bf099fc6325a5b9ab",
+          "source_range": [
+            172,
+            200
+          ],
+          "anchor_refs": [
+            "tok:190:199"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:e1e97266d7c7908a9c1fa5c5f1f02b5d4889f4fbc0e26f9c91434875b0f58ff0",
+          "region_ref": "region:09fb4729f4e1697781afa15b1765b54c3c1d5cdb70d5fe8a8dc8e4b0b2e88237",
+          "source_range": [
+            119,
+            142
+          ],
+          "anchor_refs": [
+            "tok:120:130"
+          ],
+          "hypothesis_ref": null
+        },
+        {
+          "candidate_id": "component:fbd1d08c2c982690138794cb801bf57c8703e567dd2fdb20b67e0979dc8c8ecd",
+          "region_ref": "region:793e6221e9054d993a5242e23b411e50c89b8e5e4dea16b014b2b100293dbf58",
+          "source_range": [
+            18,
+            43
+          ],
+          "anchor_refs": [
+            "tok:26:34",
+            "tok:19:25"
+          ],
+          "hypothesis_ref": null
+        }
+      ],
+      "dependencies": [
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:13:17",
+          "candidate_refs": [
+            "component:26dd60d89ddf327ac5122df3ff518b98019348cae017eb3c5b54ac9d46dbb0cf",
+            "component:2a443d9646f03d6ef1f6a579fbf272a0f6316a10e003ff73b01cdd232af5ec6f"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:154:158",
+          "candidate_refs": [
+            "component:884375b420e5203581d5d336952a3528d2a562ae2a171c00ef5405571d52e91c",
+            "component:8b0e3e8290afca1efd28518a7a2bc0f13adf64036c258d5827b4efdad912ef68"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:190:199",
+          "candidate_refs": [
+            "component:a8f21b89b221a29b8420bf21cfd13be5223b8d337967434a1d2f4ad036fbb190",
+            "component:d528a48a3a2d1774842b0b9345fb56c90fc3cd86bb31287323ab87713b8fbb49"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:19:25",
+          "candidate_refs": [
+            "component:2103bfbc2511572230b2b9fcecdfb13518476b6d7ab543c603dc1ba42c295d69",
+            "component:fbd1d08c2c982690138794cb801bf57c8703e567dd2fdb20b67e0979dc8c8ecd"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:26:34",
+          "candidate_refs": [
+            "component:2103bfbc2511572230b2b9fcecdfb13518476b6d7ab543c603dc1ba42c295d69",
+            "component:fbd1d08c2c982690138794cb801bf57c8703e567dd2fdb20b67e0979dc8c8ecd"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:35:42",
+          "candidate_refs": [
+            "component-modifier:7181378c8629542ac6c58f14949b899a8ceb56d5df147f3e4fbb6eeedf236b74",
+            "component-modifier:cf7586ac98cdb42096bda9dfac75e8ce206d601db366973194377ad300713774"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:73:74",
+          "candidate_refs": [
+            "component:0bb0b11f2348e31bfb51dc91b8bfc9c9ce44b08516a4f14b51f27e1e56323915",
+            "component:29f58f46956e3304b48e2e1c6a4311b962ed266673cf8c583a507c8a341ad9f7",
+            "component:4fd9cabd2ce19924969595d9d4dea4b80951cb0997a342bbf7e48b7bdcd49a9b",
+            "component:56a6fe2746bb8e1257d120843012f86b9efe65c878a1a4216e088771176d07ad",
+            "component:63b0d318b499cc0c2d4d44048f22e1ecf1063198a7adf96eeb0ea13733f72ea3",
+            "component:85f5c6f33686e16cdefb3dc9f0095a04eaa4d721352b0c428fd4c017270add34",
+            "component:cb192eeb1e7bf8d1e288295e7bf5c454fc7f69b4928890857808fed041d50a1f"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:84:89",
+          "candidate_refs": [
+            "component:0bb0b11f2348e31bfb51dc91b8bfc9c9ce44b08516a4f14b51f27e1e56323915",
+            "component:29f58f46956e3304b48e2e1c6a4311b962ed266673cf8c583a507c8a341ad9f7",
+            "component:4fd9cabd2ce19924969595d9d4dea4b80951cb0997a342bbf7e48b7bdcd49a9b",
+            "component:56a6fe2746bb8e1257d120843012f86b9efe65c878a1a4216e088771176d07ad",
+            "component:63b0d318b499cc0c2d4d44048f22e1ecf1063198a7adf96eeb0ea13733f72ea3",
+            "component:85f5c6f33686e16cdefb3dc9f0095a04eaa4d721352b0c428fd4c017270add34",
+            "component:cb192eeb1e7bf8d1e288295e7bf5c454fc7f69b4928890857808fed041d50a1f"
+          ]
+        },
+        {
+          "kind": "SHARED_ANCHOR",
+          "anchor_ref": "tok:95:100",
+          "candidate_refs": [
+            "component:0bb0b11f2348e31bfb51dc91b8bfc9c9ce44b08516a4f14b51f27e1e56323915",
+            "component:29f58f46956e3304b48e2e1c6a4311b962ed266673cf8c583a507c8a341ad9f7",
+            "component:4fd9cabd2ce19924969595d9d4dea4b80951cb0997a342bbf7e48b7bdcd49a9b",
+            "component:56a6fe2746bb8e1257d120843012f86b9efe65c878a1a4216e088771176d07ad",
+            "component:63b0d318b499cc0c2d4d44048f22e1ecf1063198a7adf96eeb0ea13733f72ea3",
+            "component:85f5c6f33686e16cdefb3dc9f0095a04eaa4d721352b0c428fd4c017270add34",
+            "component:cb192eeb1e7bf8d1e288295e7bf5c454fc7f69b4928890857808fed041d50a1f"
+          ]
+        }
+      ]
+    },
+    "reading_report_sha256": "016770321a9e7271de2a4c9e78e4a97c4187cba02be6032a7f983e52ac652455",
+    "interpretation_sha256": "02fac02197239804dc40c4135708060949158bd9a8b3d57a3e6dffa8cd344699",
+    "ledger_snapshot_sha256": "9ca5acdb5a28a10511fe26606be56acdfd354af03bc39c423ff3136a6ae6418a",
+    "pipeline_seconds_including_human_transport": 338.30602190199716
+  },
+  "native_replay": {
+    "checks": {
+      "no_new_provider_calls": true,
+      "no_new_ignition_ticks": true,
+      "ledger_unchanged": true,
+      "batch_hash_equal": true,
+      "committed_fragments_equal": true,
+      "both_executed": true
+    },
+    "passed": true,
+    "before": {
+      "calls": 13,
+      "tick": 55,
+      "ledger": "f1fc903d4789d64c888423a86259d9f01aa5b5e9b3cefb86a08d0e3ff41bf9ae"
+    },
+    "after": {
+      "calls": 13,
+      "tick": 55,
+      "ledger": "f1fc903d4789d64c888423a86259d9f01aa5b5e9b3cefb86a08d0e3ff41bf9ae"
+    },
+    "semantic_correctness": "NOT_EVALUATED"
+  },
+  "full_document_inventory": {
+    "mode": "GENERATOR_INVENTORY_NO_MODEL_ALL_PROBES_INSUFFICIENT",
+    "source_sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+    "resource_sha256": "ade516afc53dd31f322ed6694e0309bd0ed63e3c932683c374391e2026cfb236",
+    "seconds": 215.80735518200527,
+    "tokens": 17994,
+    "frames": 4070,
+    "composed": 4064,
+    "complete_composed": 31,
+    "prepositional_questions": 1780,
+    "missing_role_questions": 374,
+    "probe_requests": 373,
+    "probe_windows_used": 194,
+    "relative_temporal_questions": 189,
+    "diagnostics": {
+      "REGION_PROBE_NOT_LOCAL": 2,
+      "COMPONENT_SEARCH_INCOMPLETE": 1505,
+      "COMPONENT_SCOPE_UNRESOLVED": 144,
+      "COMPONENT_COORDINATION_UNRESOLVED": 353,
+      "COMPONENT_COORDINATION_TEMPORAL_SCOPE": 6,
+      "VALENCY_UNKNOWN": 53,
+      "REFERENCE_UNKNOWN": 19,
+      "REFERENCE_AMBIGUOUS": 42,
+      "IMPLICIT_ARGUMENT_UNRESOLVED": 2204
+    }
+  },
+  "limitations": [
+    "6/8 sentences have committed structures; not a semantic completeness metric",
+    "Unparsed quantity/clock/direction clause prevents its omitted group from becoming an antecedent",
+    "Subsequent plural coordination stays uncommitted after genuine NONE_FIT and unresolved CHAIN",
+    "Unknown lexical modifiers preserve content but do not license independent inner truth",
+    "All full-book inventory probes return INSUFFICIENT_CONTEXT; no full-book T6 or oracle PASS",
+    "TEST_ONLY resource attribution is not a production reviewed release"
+  ],
+  "targeted_checks": {
+    "passed": 116,
+    "seconds": 21.96,
+    "suite": "component predication/composition/coordination, scopes, references, replay, document runtime, probe budgets"
+  }
+}

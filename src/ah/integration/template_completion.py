@@ -147,6 +147,10 @@ class TemplateCompletionService:
         return replace(result, queries=tuple(queries))
 
     def complete(self, result: PerceptionResult) -> PerceptionResult:
+        # V7 has already compiled/committed T through its own checked boundary.
+        # Its display projection is not input to legacy template construction.
+        if result.native_receipt is not None or result.formalizer_preview:
+            return result
         requests = self.integration.template_requests(result)
         if not requests:
             return self._reconcile_selected_query_roles(result)

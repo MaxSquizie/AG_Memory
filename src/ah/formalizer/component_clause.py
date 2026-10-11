@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg):
+def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True):
     evidence={e.token_id:e for e in tokens}
     raw=state.text[slice(*region.source_range)]
     from .component_temporal import relative_adjuncts, questions
@@ -29,6 +29,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg):
         f.semantic['relative_temporal']=relative
         f.semantic['component_questions'].extend(questions(relative))
         if relative: f.semantic['requires_attachment_probe']=True
+    if not select: return candidates
     if not candidates: return []
     if len(candidates)>cfg['max_candidates']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id)

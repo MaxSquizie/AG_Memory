@@ -25,16 +25,22 @@ def compose(state, release, selector):
             continue
         tokens = [evidence[t] for t in region.token_refs]
         predicates = [e for e in tokens if any(v.pos == 'VERB' and v.mood != 'imperative' for v in e.variants)]
+        if cfg.get('quality_predicate_pos'):
+            predicates += [e for e in tokens if e not in predicates and any(v.pos in cfg['quality_predicate_pos'] for v in e.variants)]
+        compositional = bool(cfg.get('quality_predicate_pos') or cfg.get('modifier_content_role'))
         # A multi-predicate region needs a licensed attachment/coordination.
-        if len(predicates)>1 and not any(p.token_id in covered for p in predicates):
+        if len(predicates)>1 and (not compositional or any(
+                r.get('operator') == 'AND' and re.search(r['pattern'],state.text[slice(*region.source_range)],re.I)
+                for r in release.entries('ScopeLexicon'))) and not any(p.token_id in covered for p in predicates):
             from .component_coordination import coordinate
             coordinate(state,release,selector,region,tokens,predicates,cfg,protected_ranges)
             continue
-        if len(predicates) != 1 or predicates[0].token_id in covered: continue
+        if not predicates or any(p.token_id in covered for p in predicates): continue
+        if not compositional and len(predicates) != 1: continue
         p = predicates[0]
         raw = state.text[region.source_range[0]:region.source_range[1]]
         # Never flatten a scoped region into an asserted finite clause.
-        protected = any(lo <= p.start < hi for lo,hi in protected_ranges)
+        protected = any(lo <= q.start < hi for q in predicates for lo,hi in protected_ranges)
         from .component_temporal import relative_adjuncts
         relative=relative_adjuncts(state,release,region,tokens)
         allowed={(row['resource_pattern'],row['operator']) for row in relative}
@@ -45,7 +51,11 @@ def compose(state, release, selector):
             state.diag('COMPONENT_SCOPE_UNRESOLVED', region.region_id)
             continue
         from .component_clause import build_clause
-        candidates=build_clause(state,release,selector,region,tokens,p,cfg)
+        if compositional:
+            from .component_predication import compose_alternatives
+            candidates=compose_alternatives(state,release,selector,region,tokens,predicates,cfg)
+        else:
+            candidates=build_clause(state,release,selector,region,tokens,p,cfg)
         state.frames.extend(candidates)
         state.syntax_trace.append({'composition_region':region.region_id,
             'candidates':[f.frame_id for f in candidates], 'coverage':'PARTIAL' if any(f.semantic['uncovered_token_refs'] or f.semantic['missing_required_roles'] for f in candidates) else 'COMPLETE'})

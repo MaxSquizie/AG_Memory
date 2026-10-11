@@ -15,10 +15,10 @@ def prepare_implicit(state, release):
     for f in sorted(state.frames,key=lambda f:(f.source_range,f.frame_id)):
         if f.semantic.get('composition_decision'):
             from .clarifications import choice
-            group=[a.frame_id for a in state.frames if a.semantic.get('composition_decision')==f.semantic['composition_decision']]
+            group=list(dict.fromkeys(a.semantic.get('composition_bundle_root',a.frame_id) for a in state.frames if a.semantic.get('composition_decision')==f.semantic['composition_decision']))
             selected=choice(state,f.semantic['composition_decision'],group)
             if selected is not None:
-                f.semantic['structural_unresolved']=f.frame_id!=selected or bool(f.semantic['uncovered_token_refs'] or f.semantic.get('missing_required_roles'))
+                f.semantic['structural_unresolved']=f.semantic.get('composition_bundle_root',f.frame_id)!=selected or bool(f.semantic['uncovered_token_refs'] or f.semantic.get('missing_required_roles'))
         for role,gap in ({} if f.semantic.get('structural_unresolved') else f.semantic.get('implicit_arguments',{})).items():
             plural=gap['features'].get('number')=='plur'
             options=[]
@@ -48,10 +48,19 @@ def prepare_implicit(state, release):
             previous.append({'key':gap['gap_id'],'kind':'CHAIN','gap_ref':gap['gap_id'],
                 'features':gap['features'],'end':f.source_range[1],
                 'label':'omitted '+role+' at '+str(f.source_range)+' ('+f.anchor_span+')'})
+        # Rejected whole-clause alternatives must not leak their hypothetical
+        # noun readings into later reference choices (e.g. a preposition as M).
+        decision=state.decisions.get(f.semantic.get('composition_decision'))
+        if decision and decision.outcome=='RESOLVED' and f.semantic.get('composition_bundle_root',f.frame_id) not in decision.selected:
+            continue
         for tid in f.argument_token_refs:
             unit=f.semantic.get('lexical_units',{}).get(tid,{})
             mention=unit.get('mention_ref',tid); ev=evidence[tid]
-            variants=[v for v in ev.variants if v.pos=='NOUN']
+            if f.semantic.get('structural_unresolved') and any(v.pos!='NOUN' for v in ev.variants):
+                continue
+            selected_morph=f.semantic.get('morph_bindings',{}).get(tid)
+            variants=[v for v in ev.variants if v.pos=='NOUN' and (not selected_morph or
+                all(getattr(v,k)==selected_morph.get(k) for k in ('lemma','pos','number','gender')))]
             if not variants: continue  # pronoun resolution has its own closed question
             features=[_features(v) for v in variants]
             common={k:features[0][k] for k in features[0] if all(x.get(k)==features[0][k] for x in features)}
@@ -69,7 +78,16 @@ def resolve_implicit(state, release, selector):
                 state.diag('IMPLICIT_ARGUMENT_UNRESOLVED',gap['gap_id']); continue
             options=gap['options']
             lo,hi=gap['context_range']
-            chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range)
+            targets={o['candidate_id']:(resolved.get(o.get('gap_ref'),{}).get('entity_ref')
+                if o['kind']=='CHAIN' else o.get('entity_ref')) for o in options}
+            chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range,
+                          equivalent_targets=targets,
+                          question=('Resolve the omitted '+role+' of the TARGET clause below, not of another clause in the context.\n'
+                            +'Target clause: '+state.text[slice(*f.source_range)]+'\n'
+                            +'Target predicate: '+f.anchor_span+'; source range: '+str(f.source_range)+'\n'
+                            +'Grammatical features of omitted participant: '+str(gap['features'])+'\n'
+                            +'Use the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. '
+                            +'Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.'))
             if chosen is None: continue
             opt=next(o for o in options if o['candidate_id']==chosen)
             if opt['kind']=='CHAIN':

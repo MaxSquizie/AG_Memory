@@ -77,7 +77,9 @@ def main(argv=None):
                         help='Use the explicit TEST_ONLY COMPONENTS_V1 policy (new resource hash)')
     parser.add_argument('--relative-time',action='store_true',help='TEST_ONLY released event-relative adjunct rules; requires --components')
     parser.add_argument('--verify-replay',action='store_true',help='Repeat the same source in the same runtime; verify no new calls/ticks/ledger changes')
+    parser.add_argument('--predication',action='store_true',help='TEST_ONLY quality predicates and scoped adverb modifiers')
     args=parser.parse_args(argv)
+    if args.predication and not args.components: parser.error('--predication requires --components')
     if args.relative_time and not args.components: parser.error('--relative-time requires --components')
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
@@ -101,7 +103,7 @@ def main(argv=None):
     release,_=fixture(core,'known')
     if args.components:
         from tools.formalizer_component_fixture import with_components
-        release=with_components(release,relative_time=args.relative_time)
+        release=with_components(release,relative_time=args.relative_time,predication=args.predication)
     (args.out/'resource_manifest.json').write_text(json.dumps(release.manifest,ensure_ascii=False,indent=2),encoding='utf-8')
     (args.out/'experiment.json').write_text(json.dumps({
         'resource_status':'TEST_ONLY_COMPONENTS' if args.components else 'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,

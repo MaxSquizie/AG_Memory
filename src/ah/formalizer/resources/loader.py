@@ -91,9 +91,13 @@ class ResourceRelease:
         composition=policy.get('composition')
         if composition:
             roles={r['role_id'] for r in self.entries('RoleRegistry')}
-            if ({composition['subject_role'],*composition['open_case_roles'].values()}-roles
+            if ({composition['subject_role'],*composition['open_case_roles'].values(),
+                     *[composition[k] for k in ('modifier_content_role','preposition_nominal_role') if composition.get(k)]}-roles
                     or not set(composition['open_case_roles']) <= {'nom','acc','gen','dat','ins','loc'}):
                 raise ResourceMissing('RESOURCE_MISSING: invalid composition role/case mapping')
+            if composition.get('preposition_nominal_role') and (not composition.get('modifier_content_role')
+                    or composition['preposition_nominal_role']==composition['modifier_content_role']):
+                raise ResourceMissing('RESOURCE_MISSING: preposition scope needs distinct entity/content roles')
         if any(type(policy.get(k)) is not int or policy[k]<=0 for k in ('max_nodes','max_edges','max_depth','max_source_tokens')): raise ResourceMissing('invalid proposal limits')
         if any(type(policy.get(k,default)) is not int or policy.get(k,default)<=0 for k,default in (('max_rule_steps',20000),('max_rule_matches',256))): raise ResourceMissing('invalid syntax search limits')
         if type(policy.get('verify_deterministic',False)) is not bool or type(self.entries('OpenTemplatePolicy')[0].get('allow')) is not bool: raise ResourceMissing('invalid proposal/open policy')
