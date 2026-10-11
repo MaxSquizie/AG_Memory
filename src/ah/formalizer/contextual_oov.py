@@ -26,6 +26,10 @@ def resolve(state,release,selector):
                     v=MorphVariant(token.span.casefold(),'NOUN',reading.cases,reading.number,
                         reading.gender,origin='CONTEXTUAL',evidence_refs=(adj.token_id,))
                     options.setdefault(digest(_morph(v)),v)
+            if not options:
+                from .contextual_oov_roles import candidates
+                for v in candidates(tokens,index,release,cfg):
+                    options.setdefault(digest(_morph(v)),v)
             key='oov-reading:'+token.token_id
             if not options:
                 state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id);continue
@@ -33,10 +37,10 @@ def resolve(state,release,selector):
                 state.diag('COMPONENT_SEARCH_INCOMPLETE',key);continue
             choices=[{'candidate_id':cid,'label':'Preserve unknown surface «'+token.span+'» as a noun; '+
                 str({k:v for k,v in _morph(m).items() if k in {'pos','cases','number','gender'}})+
-                '; agreement evidence='+str(m.evidence_refs)} for cid,m in options.items()]
+                '; grammatical constraint anchors='+str(m.evidence_refs)} for cid,m in options.items()]
             chosen=_probe(state,selector,release,key,'oov_morphology',choices,
                 state.text[slice(*region.source_range)],region.source_range,
-                question='Choose a grammatical reading supported by the local agreement and sentence role. '
+                question='Choose a grammatical reading supported by the local agreement or released sentence role. '
                 'The surface is absent from the dictionary. Do NOT expand, correct, translate, or assign its lexical meaning. '
                 'The analyzer prediction is not evidence. If no offered reading is supported, answer ?.')
             state.syntax_trace.append({'kind':'CONTEXTUAL_OOV','token_ref':token.token_id,

@@ -29,7 +29,9 @@ def select_units(state, release, selector, region, covers, frame, cfg):
                 [*u['entities'],*u['adjectives']]]]):u for u in (c[index] for c in alternatives)}
         options=[{'candidate_id':k,'label':'Whole phrase readings: '+str({e.span:
             {a:b for a,b in _morph(v).items() if a in {'lemma','pos','cases','number','gender'}}
-            for e,v in [(u['token'],u['variant']),*u['adjectives'],*u['entities']]})}
+            for e,v in [(u['token'],u['variant']),*u['adjectives'],*u['entities']]})+
+            ('; description host: '+next(e.span for e in state.evidence if e.token_id==u['bound_host'])+
+             '; host_ref='+u['bound_host'] if u.get('bound_host') else '')}
             for k,u in units.items()]
         cid=choose(state,release,selector,region,['morphology',alternatives[0][index]['refs']],options,
             'Which complete morphological reading fits this phrase in the source? '

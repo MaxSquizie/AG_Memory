@@ -21,6 +21,8 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     try:
         from .nominal_prefix_descriptions import units as prefix_units
         units=list(prefix_units(tokens,missing,frame))
+        from .nominal_residual_descriptions import units as residual_units
+        units.extend(list(residual_units(tokens,missing,frame,units)))
         for group in prepositional_groups(tokens).values():
             if set(group['anchor_refs'])<=missing: units.extend(nominal_variants(tokens,group,limit))
         for e in tokens:
@@ -45,6 +47,8 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return [[frame]]
     units=select_units(state,release,selector,region,covers,frame,cfg)
     if units is None: return [[frame]]
+    if any(u.get('requires_host_probe') for u in units):
+        frame.semantic['requires_attachment_probe']=True
     hosts=select_hosts(state,release,selector,region,units,frame,cfg)
     if hosts is None: return [[frame]]
     event=[u for u in units if not u.get('bound_host') and (not u['entities'] or hosts[u['entities'][0][0].token_id]=='EVENT')]
