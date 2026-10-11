@@ -51,7 +51,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 roles = ', '.join(role+'='+evidence[tid].span for tid, role in f.semantic['proposed_roles'].items())
                 label = m['lemma']+' ['+m['pos']+']; '+roles
                 if f.semantic.get('implicit_arguments'):
-                    label += '; subject omitted, identity unresolved'
+                    label += '; omitted roles, identity unresolved='+str(list(f.semantic['implicit_arguments']))
                 if f.semantic.get('copula_ref'):
                     label += '; copula='+evidence[f.semantic['copula_ref']].span
                 if f.semantic.get('relative_temporal'):

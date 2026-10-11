@@ -79,9 +79,11 @@ def main(argv=None):
     parser.add_argument('--verify-replay',action='store_true',help='Repeat the same source in the same runtime; verify no new calls/ticks/ledger changes')
     parser.add_argument('--predication',action='store_true',help='TEST_ONLY quality predicates and scoped adverb modifiers')
     parser.add_argument('--clock-time',action='store_true',help='TEST_ONLY released cardinal clock grammar')
+    parser.add_argument('--omissions',action='store_true',help='TEST_ONLY released entity-role omission licenses')
     args=parser.parse_args(argv)
     if args.predication and not args.components: parser.error('--predication requires --components')
     if args.clock_time and not args.components: parser.error('--clock-time requires --components')
+    if args.omissions and not args.components: parser.error('--omissions requires --components')
     if args.relative_time and not args.components: parser.error('--relative-time requires --components')
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
@@ -105,7 +107,7 @@ def main(argv=None):
     release,_=fixture(core,'known')
     if args.components:
         from tools.formalizer_component_fixture import with_components
-        release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time)
+        release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions)
     (args.out/'resource_manifest.json').write_text(json.dumps(release.manifest,ensure_ascii=False,indent=2),encoding='utf-8')
     (args.out/'experiment.json').write_text(json.dumps({
         'resource_status':'TEST_ONLY_COMPONENTS' if args.components else 'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,

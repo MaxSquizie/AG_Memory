@@ -4,6 +4,7 @@ from .canonical_ledger import digest
 from .state import FrameCandidate, ResourceProvenance
 from .component_policy import _features, _morph
 from .component_phrases import role_choices, nominal_units, phrase_questions
+from .component_omissions import licensed_gaps
 
 
 def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nominals, groups):
@@ -38,8 +39,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 rs=[b[0] for e,b in assignments]
                 if len(set(rs))!=len(rs): continue
                 missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
-                gap = not quality and cfg['subject_role'] in missing and pv.number in {'sing','plur'}
-                unresolved_roles=sorted(missing-({cfg['subject_role']} if gap else set()))
+                gaps = licensed_gaps(roles,missing,pv,cfg,quality=quality,valency=val)
+                unresolved_roles=sorted(missing-set(gaps))
                 used={p.token_id,*temporal,*(e.token_id for e,b in assignments)}
                 units=nominal_units(state,tokens,assignments,used)
                 preps={}
@@ -56,10 +57,12 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 ambiguous=any(g['ambiguous_pos'] for g in groups.values())
                 mapping={e.token_id:r for e,(r,_,_) in assignments}
                 canonical={t:{k:v for k,v in m.items() if k!='score'} for t,m in morph.items()}
-                key=digest([region.region_id,mapping,canonical,gap,uncovered,unresolved_roles])
+                key=digest([region.region_id,mapping,canonical,gaps,uncovered,unresolved_roles])
                 fid='component:'+key
                 questions=[{'kind':'WHAT_EVENT','anchor_ref':p.token_id}]
-                if gap: questions.append({'kind':'WHO','gap_id':'gap:'+digest([fid,cfg['subject_role']]),'role':cfg['subject_role']})
+                for role in gaps:
+                    questions.append({'kind':'WHO' if role==cfg['subject_role'] else 'ARGUMENT_CONTENT',
+                        'gap_id':'gap:'+digest([fid,role]),'role':role})
                 questions.extend({'kind':'MISSING_REQUIRED_ROLE','role':r,
                     'gap_id':'gap:'+digest([fid,r]),'predicate_ref':p.token_id} for r in unresolved_roles)
                 questions.extend({'kind':'UNRESOLVED_COMPONENT','token_ref':tid} for tid in uncovered)
@@ -70,9 +73,9 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     'quality_predication':quality, 'copula_ref':copula,
                     'component_questions':questions,'uncovered_token_refs':uncovered,
                     'structural_unresolved':bool(uncovered or unresolved_roles),'component_region':region.region_id}
-                if gap:
-                    semantic['implicit_arguments']={cfg['subject_role']:{'gap_id':questions[1]['gap_id'],
-                        'features':_features(pv),'predicate_ref':p.token_id,'options':[]}}
+                if gaps:
+                    semantic['implicit_arguments']={role:{**gap,'gap_id':'gap:'+digest([fid,role]),
+                        'predicate_ref':p.token_id,'options':[]} for role,gap in gaps.items()}
                 alternatives[key]=FrameCandidate(fid,'FLAT',p.span,
                     tuple([p.span,*[e.span for e,b in assignments]]),tuple(e.span for e,b in assignments),
                     construction='COMPONENTS_V1',predicate_token_ref=p.token_id,

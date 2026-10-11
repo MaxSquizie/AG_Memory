@@ -27,8 +27,9 @@ def prepare_implicit(state, release):
             # this gap; continuity must be selected through CHAIN or MEMORY.
             options.append({'candidate_id':'new:'+gap['gap_id'],'kind':'ANONYMOUS',
                 'entity_ref':'M:implicit:'+digest([source,gap['gap_id']]),
-                'participant_kind':'GROUP' if plural else 'INDIVIDUAL',
-                'label':'Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)' if plural else 'Unidentified subject of this clause; no antecedent established. Does not identify the author/uploader or assert difference from other participants'})
+                'participant_kind':'GROUP' if plural else ('INDIVIDUAL' if gap['features'].get('number')=='sing' else 'ENTITY'),
+                'label':('Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)' if plural else
+                    'Unidentified referent for '+role+'; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants')})
             for earlier in previous:
                 if earlier['end']>f.source_range[0] or f.source_range[0]-earlier['end']>cfg['context_chars']: continue
                 if not compatible(gap['features'],earlier['features']): continue
@@ -86,7 +87,7 @@ def resolve_implicit(state, release, selector):
                             +'Target clause: '+state.text[slice(*f.source_range)]+'\n'
                             +'Target predicate: '+f.anchor_span+'; source range: '+str(f.source_range)+'\n'
                             +'Grammatical features of omitted participant: '+str(gap['features'])+'\n'
-                            +'Use the preceding source context to choose a reference. An unidentified person can still be the same participant as an earlier omitted subject. '
+                            +'Use the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. '
                             +'Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.'))
             if chosen is None: continue
             opt=next(o for o in options if o['candidate_id']==chosen)

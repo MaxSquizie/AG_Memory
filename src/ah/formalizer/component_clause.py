@@ -41,7 +41,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True):
             if f.semantic['relative_temporal']: roles += '; relative event anchors='+str(f.semantic['relative_temporal'])
             if f.semantic['preposition_bindings']: roles += '; prepositions='+str(f.semantic['preposition_bindings'])
             if f.semantic['missing_required_roles']: roles += '; UNRESOLVED mandatory roles='+str(f.semantic['missing_required_roles'])
-            if f.semantic.get('implicit_arguments'): roles += '; subject omitted (identity unresolved)'
+            if f.semantic.get('implicit_arguments'): roles += '; omitted roles (identity unresolved)='+str(list(f.semantic['implicit_arguments']))
             options.append({'candidate_id':f.frame_id,'label':str(f.semantic['morph_bindings'][p.token_id]['lemma'])+'; '+roles+'; morphology='+str({t:{k:v for k,v in m.items() if k in {'cases','number','gender','pos'}} for t,m in f.semantic['morph_bindings'].items()})})
         if len(raw)>cfg['context_chars'] or all(f.semantic['structural_unresolved'] for f in candidates):
             chosen=None

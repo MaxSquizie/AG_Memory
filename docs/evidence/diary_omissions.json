@@ -1,0 +1,573 @@
+{
+  "schema": "diary-omissions-evidence-1",
+  "base_commit": "ba700477af184965f548dacd2f8742f99a749ced",
+  "source": {
+    "original_sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+    "paragraph_range": [
+      99117,
+      99395
+    ],
+    "paragraph_sha256": "9aad879caeda134f449804db33bf2f4f009dfb8246f467b3acdae639a273d745",
+    "clause_range": [
+      99200,
+      99211
+    ],
+    "clause_text": "Читал долго",
+    "clause_mode": "ISOLATED_DIAGNOSTIC_NOT_ORIGINAL_SENTENCE_COMMIT"
+  },
+  "resource_status": "TEST_ONLY",
+  "local_model_tested": false,
+  "whole_document_formalized": false,
+  "checks": {
+    "known_read_keeps_both_roles": true,
+    "no_invented_object_features": true,
+    "unknown_modifier_does_not_assert_inner_read": true,
+    "no_partial_conjunct_escape": true,
+    "both_native_replays_pass": true
+  },
+  "paragraph": {
+    "resource_snapshot": {
+      "snapshot_id": "05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35",
+      "release_version": "TEST_ONLY-v1"
+    },
+    "receipt": {
+      "observation_id": "observation:63478c992c7a4862614b4d44664a3309b6327617d17ecc43bfc5d02c1b3fff82",
+      "version": 1,
+      "terminal": "RESOLUTION_ONLY",
+      "committed_fragments": [],
+      "applied": false,
+      "batch_hash": "",
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED:component:0b346da0fc52fd6e3245695d5c878bb8cba2f53dac7fec1e14d6adf0f673fe8c",
+        "STRUCTURAL_OPERAND_UNRESOLVED:component:a6dc3230b96bbdf072a1b6f3e19e04e122c7935938d577f4a76693e10caa16d9"
+      ],
+      "node_refs": []
+    },
+    "probes": [
+      {
+        "request": {
+          "prompt": "Decision slot: component_attachment — predicate value of frame region:403d9f508f0f952ece2efc766365d98e6effe24d23d1e2f31c68c5039aebed40|composition\nContext span:  обедали на балконе.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35, closed set):\n1. обедать [VERB]; ; omitted roles, identity unresolved=['SUBJECT'] -> на [PREP]; SURFACE_ARG=балконе; lexical modifier attaches to the preceding proposition (structural attachment) — обедать [VERB]; ; omitted roles, identity unresolved=['SUBJECT'] -> на [PREP]; SURFACE_ARG=балконе; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:069780b9b4345e1ff36cf8216c560d6eb2bc075f40c00bfe5713833b382fcc48\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+          "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+          "role": "formalizer",
+          "override": {
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": 0,
+            "max_new_tokens": 4096,
+            "enable_thinking": false
+          }
+        },
+        "response": "1",
+        "request_sha256": "e96ff9a580dc4b42663f4fd9494c15fb70e201fd7cfb49c588cab8b57db32e09",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "executor": "ISOLATED_SHORT_PROBE_EXECUTOR"
+      },
+      {
+        "request": {
+          "prompt": "Decision slot: coordination — predicate value of frame region:180da21b50a15cad5984f9cd033551623d72bd6af50168a51063eff2271b5379|coordination\nContext span:  Завтракали и обедали на балконе.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35, closed set):\n1. Завтракали AND обедали на балконе.; local scopes: each modifier attaches ONLY to the clause where it is written; no modifier scopes over the whole conjunction. Participant identities remain a separate question. — Завтракали AND обедали на балконе.; local scopes: each modifier attaches ONLY to the clause where it is written; no modifier scopes over the whole conjunction. Participant identities remain a separate question.\n2. Завтракали AND обедали на балконе.; shared scope: на (балконе) encloses the whole conjunction, not only one clause (listed inner to outer). Participant identities remain a separate question. — Завтракали AND обедали на балконе.; shared scope: на (балконе) encloses the whole conjunction, not only one clause (listed inner to outer). Participant identities remain a separate question.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"coordination:8150623f48f571d4809039ee11a152c1ede13889038a47baab723cd3676e247d\"\n2 = \"coordination-scope:566b323b3b53463e421630124199c09ada01f312fdab4c0db8d7b4794a8411c0\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+          "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+          "role": "formalizer",
+          "override": {
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": 0,
+            "max_new_tokens": 4096,
+            "enable_thinking": false
+          }
+        },
+        "response": "1,2",
+        "request_sha256": "d96d7e746c3a2bb3108f717397c52b308f8b96b5f1072666dd8271de35f19908",
+        "response_sha256": "17f8af97ad4a7f7639a4c9171d5185cbafb85462877a4746c21bdb0a4f940ca0",
+        "executor": "ISOLATED_SHORT_PROBE_EXECUTOR"
+      },
+      {
+        "request": {
+          "prompt": "Decision slot: component_attachment — predicate value of frame region:e7245ad3841ffa8f1213000bedb3c6905ec728941da91f44640110657fca0b56|composition\nContext span:  Читал долго \nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35, closed set):\n1. читать [VERB]; ; omitted roles, identity unresolved=['SUBJECT', 'OBJECT'] -> долго [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment) — читать [VERB]; ; omitted roles, identity unresolved=['SUBJECT', 'OBJECT'] -> долго [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:8b646f090a439a54504f890eff5106392f696fb3dcad6bc2084886632d2bb01a\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+          "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+          "role": "formalizer",
+          "override": {
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": 0,
+            "max_new_tokens": 4096,
+            "enable_thinking": false
+          }
+        },
+        "response": "1",
+        "request_sha256": "05c6e3b532da2530a6b1dbdc009ac3a631b7820318d0f7d06209255a984994b6",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "executor": "ISOLATED_SHORT_PROBE_EXECUTOR"
+      }
+    ],
+    "replay": {
+      "checks": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "passed": true,
+      "before": {
+        "calls": 3,
+        "tick": 50,
+        "ledger": "4c769c9cc98761f5bfc09090a79aa596bc88d2e1587337066a540fb985551e51"
+      },
+      "after": {
+        "calls": 3,
+        "tick": 50,
+        "ledger": "4c769c9cc98761f5bfc09090a79aa596bc88d2e1587337066a540fb985551e51"
+      },
+      "semantic_correctness": "NOT_EVALUATED"
+    },
+    "ledger_sha256": "4c769c9cc98761f5bfc09090a79aa596bc88d2e1587337066a540fb985551e51",
+    "ledger_counts": {
+      "nodes": 0,
+      "supports": 0,
+      "bindings": 0,
+      "assertions": 0,
+      "usage_links": 0,
+      "observations": 0,
+      "candidates": 0,
+      "reports": 0,
+      "markers": 0,
+      "decisions": 0,
+      "goal_decisions": 0,
+      "goal_paths": 0,
+      "witnesses": 0,
+      "rx_cache": 0,
+      "open_template_links": 0,
+      "events": 0,
+      "closed_reports": 0
+    },
+    "omitted_frames": [
+      {
+        "anchor": "Завтракали",
+        "source_range": [
+          49,
+          61
+        ],
+        "missing_required_roles": [],
+        "structural_unresolved": true,
+        "gaps": {
+          "SUBJECT": {
+            "features": {
+              "number": "plur"
+            },
+            "license": "SUBJECT_AGREEMENT",
+            "gap_id": "gap:a43873fa8fceba7290c6dc350c4e6aeb0abce425af2633bf58b8465dff790949",
+            "predicate_ref": "tok:50:60",
+            "options": []
+          }
+        }
+      },
+      {
+        "anchor": "обедали",
+        "source_range": [
+          62,
+          82
+        ],
+        "missing_required_roles": [],
+        "structural_unresolved": true,
+        "gaps": {
+          "SUBJECT": {
+            "features": {
+              "number": "plur"
+            },
+            "license": "SUBJECT_AGREEMENT",
+            "gap_id": "gap:66a469c331acaa857b11fd898e66cb73768e0c0cd0e39bd49c7dcb9dcfb9a416",
+            "predicate_ref": "tok:63:70",
+            "options": []
+          }
+        }
+      },
+      {
+        "anchor": "Читал",
+        "source_range": [
+          82,
+          95
+        ],
+        "missing_required_roles": [],
+        "structural_unresolved": true,
+        "gaps": {
+          "SUBJECT": {
+            "features": {
+              "gender": "masc",
+              "number": "sing"
+            },
+            "license": "SUBJECT_AGREEMENT",
+            "gap_id": "gap:cb473db152e43da93bdc09622e8a423f4480f5cfc3c23b72348d1612939f574d",
+            "predicate_ref": "tok:83:88",
+            "options": []
+          },
+          "OBJECT": {
+            "features": {},
+            "license": "UNSPECIFIED_ENTITY",
+            "omission_rule_id": "TEST-READ-UNSPECIFIED-THEME",
+            "valency_digest": "e1acfad47651b9f2a18a84aae196bf1426c9124df2925720a3e2d8ae92d0116d",
+            "gap_id": "gap:31d5bc66cdfcce8cb05f83736f70e1dfde118e3b6c8b9012af20d1d3c70d4cc7",
+            "predicate_ref": "tok:83:88",
+            "options": []
+          }
+        }
+      },
+      {
+        "anchor": "минут",
+        "source_range": [
+          147,
+          236
+        ],
+        "missing_required_roles": [],
+        "structural_unresolved": true,
+        "gaps": {
+          "SUBJECT": {
+            "features": {
+              "number": "plur",
+              "person": "3rd"
+            },
+            "license": "SUBJECT_AGREEMENT",
+            "gap_id": "gap:3bd9343c46308a82b86f3738ab027b72346a3492315b63325168c57825a41fe9",
+            "predicate_ref": "tok:171:176",
+            "options": []
+          }
+        }
+      }
+    ],
+    "nodes": {},
+    "supports": {},
+    "bindings": {},
+    "implicit_entities": {}
+  },
+  "isolated_clause": {
+    "resource_snapshot": {
+      "snapshot_id": "05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35",
+      "release_version": "TEST_ONLY-v1"
+    },
+    "receipt": {
+      "observation_id": "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+      "version": 1,
+      "terminal": "APPLIED",
+      "committed_fragments": [
+        "component-modifier:7c144acbebb265560e7f6d95ada1abd75d9b07b02f81de207f212189b044314f"
+      ],
+      "applied": true,
+      "batch_hash": "741af0a532569994a2c80c0aa560613dd5c490d065a2d2dd36bb812db0f4cbd7",
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED:component:3b5cdddc8b630086034d81d597b85cd3b10f1fbf52d785a91b0766cc01778f79"
+      ],
+      "node_refs": [
+        "N:f26c8f17ce5e80bc330faabce63df75541d894337caddca3720684f4a6c61f6c"
+      ]
+    },
+    "probes": [
+      {
+        "request": {
+          "prompt": "Decision slot: component_attachment — predicate value of frame region:22f4eaec6a001f88e8884e2218c8a47122eac829d241f1f9fe905ade4f4576c4|composition\nContext span: Читал долго\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35, closed set):\n1. читать [VERB]; ; omitted roles, identity unresolved=['SUBJECT', 'OBJECT'] -> долго [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment) — читать [VERB]; ; omitted roles, identity unresolved=['SUBJECT', 'OBJECT'] -> долго [ADVB]; ; lexical modifier attaches to the preceding proposition (structural attachment)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:7c144acbebb265560e7f6d95ada1abd75d9b07b02f81de207f212189b044314f\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+          "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+          "role": "formalizer",
+          "override": {
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": 0,
+            "max_new_tokens": 4096,
+            "enable_thinking": false
+          }
+        },
+        "response": "1",
+        "request_sha256": "1d4681719422936dd210747231f5e0d27a85022d1935fb1bf9d6a0fdb7cbf91f",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "executor": "ISOLATED_SHORT_PROBE_EXECUTOR"
+      },
+      {
+        "request": {
+          "prompt": "Resolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause: Читал долго\nTarget predicate: Читал; source range: (0, 11)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d\nContext span: Читал долго\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants — Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+          "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+          "role": "formalizer",
+          "override": {
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": 0,
+            "max_new_tokens": 4096,
+            "enable_thinking": false
+          }
+        },
+        "response": "1",
+        "request_sha256": "d0192ec199dddcd264a8f8aef272e218c5446def523ce256b0e6a04b382037a5",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "executor": "ISOLATED_SHORT_PROBE_EXECUTOR"
+      },
+      {
+        "request": {
+          "prompt": "Resolve the omitted OBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause: Читал долго\nTarget predicate: Читал; source range: (0, 11)\nGrammatical features of omitted participant: {}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c\nContext span: Читал долго\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 05736f8404cc2cd3d9e3efb34c927748f4f0463923c47ce067afaaf3003dff35, closed set):\n1. Unidentified referent for OBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants — Unidentified referent for OBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+          "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+          "role": "formalizer",
+          "override": {
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": 0,
+            "max_new_tokens": 4096,
+            "enable_thinking": false
+          }
+        },
+        "response": "1",
+        "request_sha256": "751a64fc5d16afb3d5b8175c4d952471854b97fdef84face21661a3abfb6b2ca",
+        "response_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "executor": "ISOLATED_SHORT_PROBE_EXECUTOR"
+      }
+    ],
+    "replay": {
+      "checks": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "passed": true,
+      "before": {
+        "calls": 3,
+        "tick": 8,
+        "ledger": "1b6b6a33a1064865cfac861a2fb21ef0f9b5d6f0b8ca48ff7204214d758c6c83"
+      },
+      "after": {
+        "calls": 3,
+        "tick": 8,
+        "ledger": "1b6b6a33a1064865cfac861a2fb21ef0f9b5d6f0b8ca48ff7204214d758c6c83"
+      },
+      "semantic_correctness": "NOT_EVALUATED"
+    },
+    "ledger_sha256": "1b6b6a33a1064865cfac861a2fb21ef0f9b5d6f0b8ca48ff7204214d758c6c83",
+    "ledger_counts": {
+      "assertions": 0,
+      "bindings": 2,
+      "candidates": 0,
+      "closed_reports": 0,
+      "decisions": 1,
+      "events": 3,
+      "goal_decisions": 0,
+      "goal_paths": 0,
+      "markers": 1,
+      "nodes": 2,
+      "observations": 1,
+      "open_template_links": 0,
+      "reports": 0,
+      "rx_cache": 1,
+      "supports": 1,
+      "usage_links": 1,
+      "witnesses": 0
+    },
+    "omitted_frames": [
+      {
+        "anchor": "Читал",
+        "source_range": [
+          0,
+          11
+        ],
+        "missing_required_roles": [],
+        "structural_unresolved": false,
+        "gaps": {
+          "SUBJECT": {
+            "features": {
+              "gender": "masc",
+              "number": "sing"
+            },
+            "license": "SUBJECT_AGREEMENT",
+            "gap_id": "gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d",
+            "predicate_ref": "tok:0:5",
+            "options": [
+              {
+                "candidate_id": "new:gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d",
+                "kind": "ANONYMOUS",
+                "entity_ref": "M:implicit:c5b17030175bd9a7a6809a6e0c214b043f15e6b1147ca42f499a9a1904f473a8",
+                "participant_kind": "INDIVIDUAL",
+                "label": "Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants"
+              }
+            ],
+            "context_range": [
+              0,
+              11
+            ]
+          },
+          "OBJECT": {
+            "features": {},
+            "license": "UNSPECIFIED_ENTITY",
+            "omission_rule_id": "TEST-READ-UNSPECIFIED-THEME",
+            "valency_digest": "e1acfad47651b9f2a18a84aae196bf1426c9124df2925720a3e2d8ae92d0116d",
+            "gap_id": "gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c",
+            "predicate_ref": "tok:0:5",
+            "options": [
+              {
+                "candidate_id": "new:gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c",
+                "kind": "ANONYMOUS",
+                "entity_ref": "M:implicit:12fb474195b0b94a584b3ca2d7ac9cf77269c865c0b22b83197c2db641156acf",
+                "participant_kind": "ENTITY",
+                "label": "Unidentified referent for OBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants"
+              }
+            ],
+            "context_range": [
+              0,
+              11
+            ]
+          }
+        }
+      }
+    ],
+    "nodes": {
+      "N:e7ce378f21afe670a78374072e5f3959cc17b4b5ce37664a06431baf574f0dad": {
+        "actants": {
+          "OBJECT": "M:implicit:12fb474195b0b94a584b3ca2d7ac9cf77269c865c0b22b83197c2db641156acf",
+          "SUBJECT": "M:implicit:c5b17030175bd9a7a6809a6e0c214b043f15e6b1147ca42f499a9a1904f473a8"
+        },
+        "content_key": "2eb7175bd98656ba0bed77993a4e24f2abfc99f968075a8ecf191eb35cf8fd3c",
+        "identity_key": [
+          "2eb7175bd98656ba0bed77993a4e24f2abfc99f968075a8ecf191eb35cf8fd3c"
+        ],
+        "op_id": "ENSURE_NODE:N:e7ce378f21afe670a78374072e5f3959cc17b4b5ce37664a06431baf574f0dad",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "OBJECT": "M:implicit:12fb474195b0b94a584b3ca2d7ac9cf77269c865c0b22b83197c2db641156acf",
+            "SUBJECT": "M:implicit:c5b17030175bd9a7a6809a6e0c214b043f15e6b1147ca42f499a9a1904f473a8"
+          },
+          "predicate": "READ"
+        },
+        "semantic_status": "KNOWN",
+        "source_ref": "tok:0:5",
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ],
+        "template_ref": "fixture:T:READ",
+        "temporal_mode": "EVENT",
+        "uid": "N:e7ce378f21afe670a78374072e5f3959cc17b4b5ce37664a06431baf574f0dad"
+      },
+      "N:f26c8f17ce5e80bc330faabce63df75541d894337caddca3720684f4a6c61f6c": {
+        "actants": {
+          "OBJECT": "N:e7ce378f21afe670a78374072e5f3959cc17b4b5ce37664a06431baf574f0dad"
+        },
+        "content_key": "fd86697b74786b0c4718608e13e5f42bc4ff90471c3035f3eeee7e6a1f505142",
+        "identity_key": [
+          "fd86697b74786b0c4718608e13e5f42bc4ff90471c3035f3eeee7e6a1f505142",
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          "tok:6:11"
+        ],
+        "op_id": "ENSURE_NODE:N:f26c8f17ce5e80bc330faabce63df75541d894337caddca3720684f4a6c61f6c",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "OBJECT": "N:e7ce378f21afe670a78374072e5f3959cc17b4b5ce37664a06431baf574f0dad"
+          },
+          "predicate": "T:open:5d37baf7d28835e4de8a7ca179a2a54fe226afea8e7d1444de530cf1933bc1dc"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:6:11",
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ],
+        "template_ref": "T:open:5d37baf7d28835e4de8a7ca179a2a54fe226afea8e7d1444de530cf1933bc1dc",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:f26c8f17ce5e80bc330faabce63df75541d894337caddca3720684f4a6c61f6c"
+      }
+    },
+    "supports": {
+      "support:2d771f94c8537716fc1270bc82833254e441f5ecbe8ff54e6ce6876604217acc": {
+        "binding_refs": [
+          "binding:ae72c5a9f8d1c03a8f80d5cb7abfd5c49ba40cad60951ed622029ab8fcbdaac8",
+          "binding:1e9925dc2be2e92d932171d40c89ad7b2983369e4699304ba20dff6f39388953"
+        ],
+        "conclusion_ref": "N:f26c8f17ce5e80bc330faabce63df75541d894337caddca3720684f4a6c61f6c",
+        "ground_type": "O",
+        "kind": "ROOT",
+        "op_id": "ADD_ROOT_SUPPORT:support:2d771f94c8537716fc1270bc82833254e441f5ecbe8ff54e6ce6876604217acc",
+        "record_id": "support:2d771f94c8537716fc1270bc82833254e441f5ecbe8ff54e6ce6876604217acc",
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ],
+        "status": "LIVE"
+      }
+    },
+    "bindings": {
+      "binding:1e9925dc2be2e92d932171d40c89ad7b2983369e4699304ba20dff6f39388953": {
+        "binding_id": "binding:1e9925dc2be2e92d932171d40c89ad7b2983369e4699304ba20dff6f39388953",
+        "binding_kind": "IMPLICIT_ARGUMENT",
+        "interpretation_decision_ref": "gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c",
+        "mention_features": [
+          {}
+        ],
+        "mention_ref": "gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c",
+        "op_id": "SET_IDENTITY_BINDING:2023dffa86143980b8126ebe91c9b9b3d129744d1acd8ba406f706765a63f830",
+        "premise_support_refs": [],
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ],
+        "status": "LIVE",
+        "target_ref": "M:implicit:12fb474195b0b94a584b3ca2d7ac9cf77269c865c0b22b83197c2db641156acf"
+      },
+      "binding:ae72c5a9f8d1c03a8f80d5cb7abfd5c49ba40cad60951ed622029ab8fcbdaac8": {
+        "binding_id": "binding:ae72c5a9f8d1c03a8f80d5cb7abfd5c49ba40cad60951ed622029ab8fcbdaac8",
+        "binding_kind": "IMPLICIT_ARGUMENT",
+        "interpretation_decision_ref": "gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d",
+        "mention_features": [
+          {
+            "gender": "masc",
+            "number": "sing"
+          }
+        ],
+        "mention_ref": "gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d",
+        "op_id": "SET_IDENTITY_BINDING:67dc2d5dc4095f18d3c504f3bb1a2dc38e09ddc6a2321ff519ba5fb82bd8d348",
+        "premise_support_refs": [],
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ],
+        "status": "LIVE",
+        "target_ref": "M:implicit:c5b17030175bd9a7a6809a6e0c214b043f15e6b1147ca42f499a9a1904f473a8"
+      }
+    },
+    "implicit_entities": {
+      "M:implicit:12fb474195b0b94a584b3ca2d7ac9cf77269c865c0b22b83197c2db641156acf": {
+        "implicit_participant": {
+          "animacy_status": "UNKNOWN",
+          "identity_status": "UNIDENTIFIED",
+          "number_status": "UNKNOWN",
+          "participant_kind": "ENTITY",
+          "source_scope": "document:bd7a3cdcddfca89562fcc344"
+        },
+        "mention_ref": "gap:68589e059f869aa366b4a22fb4c7a5932bedbc37a254b0908a13c2c5655bd78c",
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ]
+      },
+      "M:implicit:c5b17030175bd9a7a6809a6e0c214b043f15e6b1147ca42f499a9a1904f473a8": {
+        "implicit_participant": {
+          "identity_status": "UNIDENTIFIED",
+          "participant_kind": "INDIVIDUAL",
+          "source_scope": "document:bd7a3cdcddfca89562fcc344"
+        },
+        "mention_ref": "gap:21d5545f22b1d1751f744f027bff539ca8300ca4db562af748a7852d3874941d",
+        "source_tag": [
+          "observation:08ee535d48d00bfde942dc5198f4cbf8047e755e78d1310e32efa8528d015373",
+          1
+        ]
+      }
+    }
+  },
+  "validation": {
+    "targeted_suite": {
+      "passed": 123,
+      "seconds": 6.52
+    },
+    "additional_T3_sense_isolation": {
+      "passed": 11,
+      "seconds": 0.51,
+      "note": "11 omission tests, 10 overlap prior suite; total distinct checks 124"
+    },
+    "full_suite": "NOT_RUN"
+  }
+}

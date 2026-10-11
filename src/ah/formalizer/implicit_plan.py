@@ -16,6 +16,7 @@ def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, men
         meta={'participant_kind':target.get('participant_kind','INDIVIDUAL'),
               'identity_status':'UNIDENTIFIED','source_scope':state.observation.get('source_id') or state.source_uid}
         if meta['participant_kind']=='GROUP': meta.update(membership_status='UNKNOWN',minimum_cardinality=2)
+        if meta['participant_kind']=='ENTITY': meta.update(number_status='UNKNOWN',animacy_status='UNKNOWN')
         emit('ENSURE_ENTITY',{'uid':mid,'mention_ref':target.get('anchor_mention',gap['gap_id']),
             'source_tag':tag,'reference_existing':not anonymous and not target.get('anchor_mention'),
             **({'implicit_participant':meta} if anonymous else {'name':target.get('label')})},frag)

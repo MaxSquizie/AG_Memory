@@ -36,7 +36,8 @@ BASE_EMITS=frozenset({'CANDIDATE_GRAPH','CLAUSE_BOUNDARY','ELLIPSIS','TOKEN_HYPO
 
 ROLE = obj(('role_id',), {'role_id': S, 'allowed_cases': array(), 'allowed_preps': array(),
     'argument_types': array(), 'cardinality': obj((), {'min': I, 'max': {'type': ['integer', 'null'], 'minimum': 0}}),
-    'optionality': B, 'evidence_rule_id': S})
+    'optionality': B, 'evidence_rule_id': S,
+    'omission': obj(('kind','rule_id'), {'kind':enum('UNSPECIFIED_ENTITY'),'rule_id':S})})
 READ = obj(('read_id', 'lemma', 'snapshot_version'), {'read_id': S, 'lemma': S, 'snapshot_version': S,
     'sense_id': S, 'value_id': S, 'fact_ref': S, 'ground_type': enum('C', 'W'), 'provenance': O,
     'premise_support_refs': array(), 'binding_refs': array()})

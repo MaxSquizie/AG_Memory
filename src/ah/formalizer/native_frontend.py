@@ -154,7 +154,7 @@ def _released_slot_evidence(state, release, source, policy):
                 'anchor_refs':[a.token_id for a in anchors],
                 'lexical_variants':[{'anchor_ref':a.token_id,'variants':variant_matches(a,item)}
                     for a,item in zip(anchors,pattern if isinstance(pattern,list) else [pattern])],
-                'roles':[{k:deepcopy(r[k]) for k in ('role_id','argument_types','allowed_cases','allowed_preps','cardinality','optionality','evidence_rule_id') if k in r}
+                'roles':[{k:deepcopy(r[k]) for k in ('role_id','argument_types','allowed_cases','allowed_preps','cardinality','optionality','evidence_rule_id','omission') if k in r}
                          for r in valency.get('roles',())],
                 'resource_refs':[ref('R-S',sense_index,sense),ref('R-V',valency_index,valency)]}
             add('valency_alternatives',record,len(record['roles']))
@@ -802,6 +802,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         for s in senses:
             valencies=[v for v in release.entries('R-V') if v['sense_id']==s['sense_id']]
             for v in valencies:
+                from .component_omissions import licenses_match
+                if not licenses_match(frame,v): continue
                 # A declared measured-value question can existentially bind
                 # an omitted value. This is licensed by its actual mapped T,
                 # not by an arbitrary missing mandatory predicate argument.

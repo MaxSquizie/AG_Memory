@@ -159,11 +159,14 @@ def ensure_entity(core,p):
     if implicit is not None:
         base={'participant_kind','identity_status','source_scope'}
         group=implicit.get('participant_kind')=='GROUP' if isinstance(implicit,dict) else False
-        if (not isinstance(implicit,dict) or set(implicit)!=(base|({'membership_status','minimum_cardinality'} if group else set()))
-                or implicit.get('participant_kind') not in {'INDIVIDUAL','GROUP'}
+        entity=implicit.get('participant_kind')=='ENTITY' if isinstance(implicit,dict) else False
+        extra={'membership_status','minimum_cardinality'} if group else ({'number_status','animacy_status'} if entity else set())
+        if (not isinstance(implicit,dict) or set(implicit)!=(base|extra)
+                or implicit.get('participant_kind') not in {'INDIVIDUAL','GROUP','ENTITY'}
                 or implicit.get('identity_status')!='UNIDENTIFIED'
                 or not isinstance(implicit.get('source_scope'),str) or not implicit['source_scope']
                 or group and (implicit['membership_status']!='UNKNOWN' or implicit['minimum_cardinality']!=2)
+                or entity and (implicit['number_status']!='UNKNOWN' or implicit['animacy_status']!='UNKNOWN')
                 or p.get('name')):
             raise ValueError('IMPLICIT_PARTICIPANT_INVALID')
     scalar={}

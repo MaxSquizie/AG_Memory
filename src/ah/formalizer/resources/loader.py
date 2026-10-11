@@ -133,6 +133,9 @@ class ResourceRelease:
                 if not all(isinstance(r.get(k,[]),list) for k in ('allowed_cases','allowed_preps','argument_types')): raise ResourceMissing('invalid R-V role lists')
                 cardinality=r.get('cardinality',{}); lo=cardinality.get('min',0); hi=cardinality.get('max',1)
                 if type(lo) is not int or lo<0 or hi is not None and (type(hi) is not int or hi<lo): raise ResourceMissing('invalid role cardinality')
+                if r.get('omission') and (set(r.get('argument_types',())) != {'ENTITY'} or
+                        lo != 1 or hi != 1 or r.get('optionality',False)):
+                    raise ResourceMissing('invalid entity omission license')
         for key in ('PredicateSchema','R-X3'):
             for x in self.entries(key):
                 values=x.get('value_ids',()) if key=='PredicateSchema' else [x.get('sense_id')]
