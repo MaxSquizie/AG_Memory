@@ -4,7 +4,7 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
@@ -14,6 +14,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if predication:
         policy['entries'][0]['composition'].update(quality_predicate_pos=['ADJF','ADJS'],
             copula_lemmas=['быть'], modifier_content_role='OBJECT',preposition_nominal_role='SURFACE_ARG')
+    if modifier_forest:
+        if not predication: raise ValueError('modifier_forest requires predication')
+        policy['entries'][0]['composition']['modifier_composition']='BOUNDED_FOREST_V1'
     scopes=next(r for r in manifest['entries'] if r['kind']=='ScopeLexicon')['entries']
     if not any(r.get('operator')=='AND' for r in scopes):
         scopes.append({'pattern':r'\bи\b','operator':'AND'})

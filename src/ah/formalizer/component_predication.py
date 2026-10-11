@@ -26,7 +26,11 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     diagnostics_before = len(state.diagnostics)
     for predicate in predicates:
         for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False):
-            bundles.append(scoped_bundle(state, release, region, tokens, frame, cfg))
+            if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
+                from .component_modifier_forest import bundles as modifier_bundles
+                bundles.extend(modifier_bundles(state,region,tokens,frame,cfg))
+            else:
+                bundles.append(scoped_bundle(state, release, region, tokens, frame, cfg))
     frames = [f for bundle in bundles for f in bundle]
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
     incomplete_search = any(d.code=='COMPONENT_SEARCH_INCOMPLETE' and d.detail==region.region_id
@@ -50,6 +54,9 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 m = f.semantic['morph_bindings'][f.predicate_token_ref]
                 roles = ', '.join(role+'='+evidence[tid].span for tid, role in f.semantic['proposed_roles'].items())
                 label = m['lemma']+' ['+m['pos']+']; '+roles
+                if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
+                    label += '; linked morphology='+str({evidence[t].span:{k:v for k,v in morph.items()
+                        if k in {'lemma','pos','cases','gender','number'}} for t,morph in f.semantic['morph_bindings'].items()})
                 if f.semantic.get('implicit_arguments'):
                     label += '; omitted roles, identity unresolved='+str(list(f.semantic['implicit_arguments']))
                 if f.semantic.get('copula_ref'):

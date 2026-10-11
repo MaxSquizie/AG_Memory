@@ -20,6 +20,9 @@ def alternatives(state, region, selected, frames, anchors, limit):
         role, child = next(iter(args.items()))
         if 'frame_ref' not in child or child['frame_ref'] not in by_id:
             continue
+        if by_id[child['frame_ref']].frame_id.startswith('component-modifier:'):
+            state.diag('COMPONENT_COORDINATION_SCOPE_INCOMPLETE',region.region_id)
+            return []
         modifiers.append((i, frame, role, child))
     count = term = 1
     for n in range(len(modifiers), 0, -1):

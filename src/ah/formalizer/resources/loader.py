@@ -90,6 +90,9 @@ class ResourceRelease:
         policy=self.entries('ProposalPolicy')[0]
         composition=policy.get('composition')
         if composition:
+            if composition.get('modifier_composition') and not all(composition.get(k)
+                    for k in ('modifier_content_role','preposition_nominal_role')):
+                raise ResourceMissing('invalid modifier composition roles')
             roles={r['role_id'] for r in self.entries('RoleRegistry')}
             if ({composition['subject_role'],*composition['open_case_roles'].values(),
                      *[composition[k] for k in ('modifier_content_role','preposition_nominal_role') if composition.get(k)]}-roles
