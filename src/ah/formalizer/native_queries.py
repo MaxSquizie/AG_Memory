@@ -58,6 +58,7 @@ def project_native_queries(state,release):
     for f in state.frames:
         for tree in f.semantic.get('operator_forest',()):
             if tree not in trees: trees.append(tree)
+        embedded.update(c['frame_ref'] for c in f.semantic.get('nominal_args',()))
         for child in f.semantic.get('proposition_args',{}).values():
             embedded.update(leaves(child.get('tree') or {'frame_ref':child['frame_ref']}))
         d=state.decisions.get(f.frame_id+'|predicate_value')
@@ -104,6 +105,16 @@ def project_native_queries(state,release):
             hi=min(ends) if ends else len(state.text)
             query |= hi<len(state.text) and state.text[hi]=='?'
         if not query: continue
+        def qualified(fid,seen=None):
+            seen=set() if seen is None else seen
+            if fid in seen: return False
+            seen.add(fid);f=frames[fid]
+            return bool(f.semantic.get('nominal_args')) or any(qualified(x,seen)
+                for c in f.semantic.get('proposition_args',{}).values()
+                for x in leaves(c.get('tree') or {'frame_ref':c['frame_ref']}))
+        if any(qualified(fid) for fid in refs):
+            state.diag('QUERY_NOMINAL_SCOPE_UNSUPPORTED','qualified entity constraints must not be dropped')
+            continue
         temporal=[f.semantic.get('region') for f in fs if f.semantic.get('region')]
         owners={f.semantic.get('time_scope_owner') for f in fs if 'time_scope_owner' in f.semantic}
         common=tree.get('region') or (temporal[0] if temporal and len({digest(t) for t in temporal})==1 and len(owners)<=1 else None)

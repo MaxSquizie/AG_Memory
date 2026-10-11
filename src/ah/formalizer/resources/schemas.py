@@ -122,6 +122,7 @@ RESOURCE_SCHEMAS = {
             'quality_predicate_pos': array(enum('ADJF','ADJS')),
             'copula_lemmas': array(), 'modifier_content_role': S, 'preposition_nominal_role': S,
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
+            'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
             'open_case_roles': {'type':'object','additionalProperties':S},
             'max_candidates': {'type':'integer','minimum':2,'maximum':16},
             'context_chars': {'type':'integer','minimum':128,'maximum':4096}})}),

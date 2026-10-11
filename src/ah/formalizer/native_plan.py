@@ -9,6 +9,7 @@ from .t5_batch import FragmentT5Input,evaluate_fragment
 def build_plan(state,release,store):
     evidence={e.token_id:e for e in state.evidence}; frames={f.frame_id:f for f in state.frames}
     nodes={}; op_by_id={}; diagnostics=[]; fragments=[]; blocked=set()
+    nominal_links=[]
     tag=[state.source_uid,state.interpretation_version]
     def emit(kind,payload,frag):
         oid=payload.get('op_id') or kind+':'+str(payload.get('uid',payload.get('record_id',payload.get('assertion_id',digest(payload)))))
@@ -104,6 +105,13 @@ def build_plan(state,release,store):
             target=roles[role]
             link='usage:'+digest([target,nid,role,'ATTITUDE',tag])
             emit('MATERIALIZE_USAGE_LINK',{'link_id':link,'node_ref':target,'parent_ref':nid,'position':role,'kind':'ATTITUDE','attitude':child['attitude'],'holder_ref':roles.get(child.get('holder_role','SUBJECT')),'source_tag':tag},frag)
+        for child in f.semantic.get('nominal_args',()):
+            target,_=node_for(child['frame_ref'],frag,True,active)
+            host_role=selected['roles'].get(child['host_token_ref'])
+            if host_role is None or host_role not in roles: raise ValueError('NOMINAL_HOST_UNRESOLVED')
+            nominal_links.append((frag,{'node_ref':target,'parent_ref':nid,'position':host_role,
+                'kind':'NOMINAL','attitude':'UNKNOWN','host_ref':roles[host_role],
+                'host_role':child['host_role'],'source_tag':tag}))
         nodes[fid]=nid
         return nid,ck
 
@@ -145,6 +153,12 @@ def build_plan(state,release,store):
         else: raw.update(rule_id=rule,premise_support_refs=list(premises))
         if formula_ref is not None: raw['formula_ref']=formula_ref
         emit('ADD_ROOT_SUPPORT' if kind=='ROOT' else 'ADD_DERIVED_SUPPORT',raw,frag)
+        if kind=='ROOT':
+            from .nominal_usage import link_id
+            for owner,payload in nominal_links:
+                if owner==frag:
+                    payload={**payload,'root_support_ref':sid}
+                    emit('MATERIALIZE_USAGE_LINK',{'link_id':link_id(payload),**payload},frag)
         if reg:
             aid='assertion:'+digest([sid,reg])
             prov={'source':{'kind':'OBSERVATION','source_tag':tag},'support':{'kind':kind}}
@@ -182,6 +196,7 @@ def build_plan(state,release,store):
     for f in state.frames:
         for child in f.semantic.get('proposition_args',{}).values():
             structural_leaves.update(leaf_refs(child.get('tree') or {'frame_ref':child['frame_ref']}))
+    structural_leaves.update(c['frame_ref'] for f in state.frames for c in f.semantic.get('nominal_args',()))
     roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner')]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
     for frag,t in roots:
@@ -212,6 +227,7 @@ def build_plan(state,release,store):
         owners={f.semantic.get('time_scope_owner') for f in fs if 'time_scope_owner' in f.semantic}
         reg=t.get('region') or (regions[0] if regions and len({digest(r) for r in regions})==1 and len(owners)<=1 else None)
         before=dict(op_by_id)
+        nominal_before=len(nominal_links)
         try:
             if 'frame_ref' in t:
                 f=frames[t['frame_ref']]
@@ -263,6 +279,7 @@ def build_plan(state,release,store):
                 emit_relative_time(state,frames[t['frame_ref']],uid,ck,frag,tag,emit,support)
             fragments.append(frag)
         except (ValueError,KeyError) as exc:
+            del nominal_links[nominal_before:]
             op_by_id=before; blocked.add(frag); diagnostics.append(str(exc)+':'+frag)
     previous=state.observation.get('supersedes_version')
     if previous is not None and fragments:

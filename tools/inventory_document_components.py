@@ -29,8 +29,10 @@ def main(argv=None):
     parser.add_argument('--clock-ranges',action='store_true',help='TEST_ONLY two-boundary clock grammar')
     parser.add_argument('--clock-time',action='store_true',help='TEST_ONLY released cardinal clock grammar')
     parser.add_argument('--omissions',action='store_true',help='TEST_ONLY entity-role omission licenses')
+    parser.add_argument('--nominal-tree',action='store_true',help='TEST_ONLY recursive nominal questions')
     parser.add_argument('--modifier-forest',action='store_true',help='TEST_ONLY bounded modifier composition')
     args=parser.parse_args(argv)
+    if args.nominal_tree and not args.modifier_forest: parser.error('--nominal-tree requires --modifier-forest')
     if args.modifier_forest and not args.predication: parser.error('--modifier-forest requires --predication')
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
@@ -39,7 +41,7 @@ def main(argv=None):
     from tools.formalizer_v7_native_binding import fixture
     from tools.formalizer_component_fixture import with_components
     raw=args.source.read_bytes(); text=raw.decode('utf-8')
-    core=AHCore(); release,_=fixture(core,'known'); release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions,modifier_forest=args.modifier_forest,clock_ranges=args.clock_ranges)
+    core=AHCore(); release,_=fixture(core,'known'); release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions,modifier_forest=args.modifier_forest,clock_ranges=args.clock_ranges,nominal_tree=args.nominal_tree)
     selector=NoDecision(); start=monotonic(); source_hash=hashlib.sha256(raw).hexdigest()
     state=run_native(text,selector,release,{'observation_id':'inventory:'+source_hash,
         'source_id':'source:'+source_hash,'interpretation_version':1,'text':text,

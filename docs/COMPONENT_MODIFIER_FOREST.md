@@ -55,3 +55,5 @@ OPEN-модификатор остаётся UNLINKED с UNKNOWN attitude к с�
 
 Диагностические CLI получают `--modifier-forest` только вместе с
 `--predication`; TEST_ONLY fixture не подменяет production release.
+
+Дополнение: ресурсный QUESTION_TREE_V1 снимает отказ для рекурсивного PP→именная голова, сохраняя ограничения базового режима без opt-in. Контракт: [COMPONENT_NOMINAL_TREE.md](COMPONENT_NOMINAL_TREE.md).

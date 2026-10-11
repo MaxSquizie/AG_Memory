@@ -162,8 +162,10 @@ class CanonicalLedger:
 
     def s_accessible(self):
         accessible = self.f_visible()
+        paths = self.paths()
         while True:
-            extra = {l["node_ref"] for l in self.data["usage_links"].values() if l["status"] == "LIVE" and l["parent_ref"] in accessible}
+            extra = {l["node_ref"] for l in self.data["usage_links"].values() if l["status"] == "LIVE" and l["parent_ref"] in accessible
+                     and (l["kind"] != "NOMINAL" or l.get("root_support_ref") in paths)}
             if extra <= accessible:
                 return accessible
             accessible.update(extra)
@@ -302,7 +304,7 @@ class CanonicalLedger:
                 if c.get("source_tag") == tag and c['status']=='LIVE':
                     c["status"] = source_status
             for l in self.data["usage_links"].values():
-                if l["kind"] == "ATTITUDE" and l.get("source_tag") == tag:
+                if l["kind"] in {"ATTITUDE", "NOMINAL"} and l.get("source_tag") == tag:
                     l["status"] = "SUPERSEDED"
         if assertion_id is not None and self.data['assertions'][assertion_id]['status']=='LIVE':
             self.data["assertions"][assertion_id]["status"] = "RETRACTED"

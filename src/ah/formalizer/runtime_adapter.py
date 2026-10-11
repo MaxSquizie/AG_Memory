@@ -208,6 +208,7 @@ class FormalizerAdapter:
             return set().union(*(leaves(c) for c in tree.get('operands',())))
         embedded=set()
         for f in state.frames:
+            embedded.update(c['frame_ref'] for c in f.semantic.get('nominal_args',()))
             for child in f.semantic.get('proposition_args',{}).values():
                 embedded.update(leaves(child.get('tree') or {'frame_ref':child['frame_ref']}))
         for frame in state.frames:
@@ -245,7 +246,7 @@ class FormalizerAdapter:
                         if len(scoped)!=1 or tree!={'frame_ref':frame.frame_id}:
                             notes.append('NATIVE_ASSERTION_SCOPE_OWNED '+frame.frame_id)
                             continue
-                if frame.semantic.get('proposition_args'):
+                if frame.semantic.get('proposition_args') or frame.semantic.get('nominal_args'):
                     notes.append('NATIVE_PROPOSITION_SCOPE_OWNED '+frame.frame_id)
                     continue
                 actant_pairs = self._assign_roles(frame, state)

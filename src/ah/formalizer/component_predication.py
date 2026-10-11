@@ -28,12 +28,17 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False):
             if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                 from .component_modifier_forest import bundles as modifier_bundles
-                bundles.extend(modifier_bundles(state,region,tokens,frame,cfg))
+                if cfg.get('nominal_composition')=='QUESTION_TREE_V1':
+                    from .component_nominal_tree import bundles as nominal_bundles
+                    bundles.extend(nominal_bundles(state,release,selector,region,tokens,frame,cfg))
+                else:
+                    bundles.extend(modifier_bundles(state,region,tokens,frame,cfg))
             else:
                 bundles.append(scoped_bundle(state, release, region, tokens, frame, cfg))
     frames = [f for bundle in bundles for f in bundle]
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
-    incomplete_search = any(d.code=='COMPONENT_SEARCH_INCOMPLETE' and d.detail==region.region_id
+    incomplete_search = any(d.code in {'COMPONENT_SEARCH_INCOMPLETE','COMPONENT_NOMINAL_SELECTION_UNRESOLVED',
+        'COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED','COMPONENT_NOMINAL_CYCLE','COMPONENT_NOMINAL_HOST_UNRESOLVED'} and d.detail==region.region_id
                             for d in state.diagnostics[diagnostics_before:])
     if incomplete_search or len(complete) > cfg['max_candidates']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)
@@ -61,6 +66,10 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                     label += '; omitted roles, identity unresolved='+str(list(f.semantic['implicit_arguments']))
                 if f.semantic.get('copula_ref'):
                     label += '; copula='+evidence[f.semantic['copula_ref']].span
+                if f.semantic.get('nominal_args'):
+                    by_id={item.frame_id:item for item in bundle}
+                    label += '; nominal descriptions='+str([{'host':evidence[c['host_token_ref']].span,
+                        'description':by_id[c['frame_ref']].anchor_span} for c in f.semantic['nominal_args']])
                 if f.semantic.get('relative_temporal'):
                     label += '; relative anchors='+str(f.semantic['relative_temporal'])
                 labels.append(label)
@@ -70,7 +79,9 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 if clock and clock[0] and clock[0].get('expressions'):
                     labels.append('clock expression attaches to this clause: '+str(clock[0]['expressions'][0]['raw']))
             options.append({'candidate_id':bundle[-1].frame_id, 'label':' -> '.join(labels)
-                + ('; lexical modifier attaches to the preceding proposition (structural attachment)' if len(bundle)>1 else '')})
+                + ('; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts'
+                   if cfg.get('nominal_composition') else
+                   '; lexical modifier attaches to the preceding proposition (structural attachment)' if len(bundle)>1 else '')})
         chosen = _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, raw, region.source_range)
     for bundle in bundles:

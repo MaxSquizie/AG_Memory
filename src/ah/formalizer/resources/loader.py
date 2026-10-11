@@ -93,9 +93,19 @@ class ResourceRelease:
             if composition.get('modifier_composition') and not all(composition.get(k)
                     for k in ('modifier_content_role','preposition_nominal_role')):
                 raise ResourceMissing('invalid modifier composition roles')
+            if composition.get('nominal_composition') and (composition.get('modifier_composition')!='BOUNDED_FOREST_V1'
+                    or not composition.get('nominal_host_role') or
+                    len({composition.get(k) for k in ('nominal_host_role','preposition_nominal_role','modifier_content_role')})!=3):
+                raise ResourceMissing('invalid nominal composition roles')
             roles={r['role_id'] for r in self.entries('RoleRegistry')}
+            if composition.get('nominal_composition'):
+                allowed={r['role_id']:r.get('allowed_argument_kinds',()) for r in self.entries('RoleRegistry')}
+                for key in ('nominal_host_role','preposition_nominal_role'):
+                    kinds=allowed.get(composition[key],())
+                    if kinds and 'ENTITY' not in kinds:
+                        raise ResourceMissing('RESOURCE_MISSING: nominal role must allow ENTITY')
             if ({composition['subject_role'],*composition['open_case_roles'].values(),
-                     *[composition[k] for k in ('modifier_content_role','preposition_nominal_role') if composition.get(k)]}-roles
+                     *[composition[k] for k in ('modifier_content_role','preposition_nominal_role','nominal_host_role') if composition.get(k)]}-roles
                     or not set(composition['open_case_roles']) <= {'nom','acc','gen','dat','ins','loc'}):
                 raise ResourceMissing('RESOURCE_MISSING: invalid composition role/case mapping')
             if composition.get('preposition_nominal_role') and (not composition.get('modifier_content_role')

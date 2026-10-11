@@ -296,6 +296,9 @@ class AHStoreAdapter(Store):
                     position=p.get('position')
                     if not isinstance(position,int) or position<0 or position>=len(parent.get('operands',())) or parent['operands'][position]!=p['node_ref']: raise ValueError('USAGE_LINK_SLOT_INVALID')
                     p['source']='STRUCTURE'
+                elif p['kind']=='NOMINAL':
+                    from .nominal_usage import validate
+                    validate(p,ledger,draft.store)
                 elif p['kind']!='ATTITUDE' or not p.get('source_tag') or p.get('attitude') not in {'QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN'} or ledger.data['nodes'][p['parent_ref']].get('actants',{}).get(p.get('position'))!=p['node_ref']: raise ValueError('USAGE_LINK_INVALID')
                 old=ledger.data['usage_links'].get(p['link_id'])
                 if old and old!=p: raise ValueError('INTEGRITY_ERROR: usage identity changed')
