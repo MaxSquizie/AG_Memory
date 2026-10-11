@@ -642,7 +642,13 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         resolve_agreement(state,release,selector,morph)
         from .contextual_oov import resolve
         resolve(state,release,selector)
-    if frozen_generation:
+    rebuild_components=bool(frozen_generation and frozen_generation.get('rebuild_components'))
+    if rebuild_components:
+        if frozen_generation['resource_snapshot'] != release.sha256:
+            raise ValueError('CLARIFICATION_RESOURCE_STALE')
+        from .lexical_snapshot import restore as restore_lexical
+        restore_lexical(state.evidence,frozen_generation.get('lexical_decisions',()))
+    if frozen_generation and not rebuild_components:
         from .state import RejectionRecord
         if frozen_generation['resource_snapshot'] != release.sha256:
             raise ValueError('CLARIFICATION_RESOURCE_STALE')
@@ -712,6 +718,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     from .lexical_snapshot import freeze as freeze_lexical
     state.generation_snapshot={'resource_snapshot':release.sha256,
         'lexical_decisions':freeze_lexical(state.evidence),
+        'component_probe_records':deepcopy(state.component_probe_records),
         'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
         'syntax_trace':deepcopy(state.syntax_trace),
         'linked_alternatives':[asdict(a) for a in state.linked_alternatives],

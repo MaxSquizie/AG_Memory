@@ -352,6 +352,7 @@ class FormalizationState:
     rejections: list[RejectionRecord] = field(default_factory=list)  # I29/§2.3 audit trail
     clarification_candidates: list[dict] = field(default_factory=list)
     generation_snapshot: dict = field(default_factory=dict)
+    component_probe_records: dict = field(default_factory=dict)
     region_forest: object | None = None
     context_reads: list[dict] = field(default_factory=list)
 

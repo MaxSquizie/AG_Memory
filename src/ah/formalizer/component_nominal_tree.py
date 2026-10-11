@@ -11,11 +11,13 @@ from .state import FrameCandidate
 def bundles(state,release,selector,region,tokens,frame,cfg):
     from .component_modifier_forest import nominal_variants,unique
     from .component_nominal_questions import select_units,select_hosts
-    missing=set(frame.semantic['uncovered_token_refs']);limit=cfg['max_candidates']
+    from .nominal_prefix_descriptions import pending_refs
+    missing=set(frame.semantic['uncovered_token_refs'])|pending_refs(frame,tokens)
+    limit=cfg['max_candidates']
     deps=frame.semantic.get('nominal_dependencies',[])
     if (not missing and not deps) or frame.semantic['missing_required_roles']:
         return [[frame]]
-    if deps: frame.semantic['structural_unresolved']=True  # must discharge every pending description
+    if missing or deps: frame.semantic['structural_unresolved']=True  # must discharge every pending description
     try:
         from .nominal_prefix_descriptions import units as prefix_units
         units=list(prefix_units(tokens,missing,frame))

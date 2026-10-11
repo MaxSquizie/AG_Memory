@@ -3,6 +3,14 @@ from .component_policy import _features,compatible,_morph
 from .state import MorphVariant
 
 
+def pending_refs(frame,tokens):
+    """A multi-token mention covers spelling, not its adjective propositions."""
+    evidence={e.token_id:e for e in tokens}
+    return {t for head,unit in frame.semantic.get('lexical_units',{}).items()
+            for t in unit['anchor_refs'] if t!=head and t in evidence
+            and any(v.pos in {'ADJF','PRTF'} for v in evidence[t].variants)}
+
+
 def units(tokens,missing,frame):
     readings=dict(frame.semantic['morph_bindings'])
     readings.update({d['head_ref']:d['morph'] for d in frame.semantic.get('nominal_dependencies',())})

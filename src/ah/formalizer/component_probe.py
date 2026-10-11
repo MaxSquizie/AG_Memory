@@ -4,7 +4,7 @@ from .selection_protocol import DecisionSchema, Relation
 from .selector_wire import build_selector_prompt, validate_selector_reply
 from .provider_adapter import BudgetExceeded, IntegrityError
 
-def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None):
+def _live_probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None):
     from .probe_windows import enter
     enter(state,selector,source_range)
     ids = tuple(o['candidate_id'] for o in options)
@@ -69,3 +69,7 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     return chosen
 
 
+def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None):
+    from .component_probe_replay import execute
+    return execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
+                   equivalent_targets=equivalent_targets,question=question)

@@ -42,20 +42,26 @@ def select_units(state, release, selector, region, covers, frame, cfg):
 
 
 def select_hosts(state, release, selector, region, units, frame, cfg):
-    heads={t for t in frame.argument_token_refs}
-    heads.update(d['head_ref'] for d in frame.semantic.get('nominal_dependencies',()))
-    heads.update(e.token_id for u in units for e,v in u['entities'])
     evidence={e.token_id:e for e in state.evidence}; hosts={}
     for u in units:
         if not u['entities']: continue
         head=u['entities'][0][0].token_id
-        options=[{'candidate_id':'EVENT','label':'Describes the occurrence/situation: '+frame.anchor_span}]
-        options.extend({'candidate_id':t,'label':'Describes this nominal participant: '+evidence[t].span+
-                        '; source range='+str([evidence[t].start,evidence[t].end])} for t in sorted(heads-{head}))
-        cid=choose(state,release,selector,region,['host',u['refs'],frame.predicate_token_ref],options,
+        from .nominal_host_views import candidates
+        views=candidates(state,frame,units,hosts,head)
+        options=[{'candidate_id':v['candidate_id'],'label':
+            ('Predicate subtree' if v['candidate_id']=='EVENT' else 'Nominal subtree')+
+            ' «'+v['surface']+'»; head=«'+evidence[v['head_ref']].span+'»; head range='+
+            str([evidence[v['head_ref']].start,evidence[v['head_ref']].end])} for v in views]
+        cid=choose(state,release,selector,region,['host',u['refs'],frame.predicate_token_ref,views],options,
             'What does the prepositional phrase «'+state.text[evidence[u['refs'][0]].start:evidence[u['refs'][-1]].end]+
-            '» describe? Choose the immediate attachment host, not every related entity. '
-            'A phrase may describe a noun inside another phrase. This is structural attachment, not evidence of truth.')
+            '» describe? Candidates show already assembled subtrees, including their established dependents. '
+            'Choose the whole described unit; an internal subtree remains a separate option. '
+            'The head identifies the attachment point, not an isolated word. '
+            'These are grammatical structures, not claims of identity, ownership or truth. '
+            'Preserve ambiguity if the wording does not discriminate.')
+        state.syntax_trace.append({'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
+            'phrase_refs':list(u['refs']),'candidate_subtrees':views,'selected':cid,
+            'decision_ref':region.region_id+'|nominal:'+digest([['host',u['refs'],frame.predicate_token_ref,views],options])})
         if cid is None:
             state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id)
             return None

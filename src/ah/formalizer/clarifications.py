@@ -212,6 +212,10 @@ def resolve(adapter, resolution_key, *, source_text=None):
                        'clarification_selection_ref': sid}
             if request.get('generation_snapshot'):
                 changes['clarification_generation'] = deepcopy(request['generation_snapshot'])
+                if request['ambiguity_type']=='COMPONENT':
+                    if not request['generation_snapshot'].get('component_probe_records'):
+                        raise ValueError('CLARIFICATION_COMPONENT_SNAPSHOT_MISSING')
+                    changes['clarification_generation']['rebuild_components']=True
             selected = {'kind': 'CLARIFICATION_SELECTED', 'selection_id': sid, 'request_id': rid,
                         'option_hash': option_hash, 'observation_id': oid, 'previous_version': previous,
                         'target_version': previous + 1, 'run_id': 'run:' + digest([sid, previous + 1]),

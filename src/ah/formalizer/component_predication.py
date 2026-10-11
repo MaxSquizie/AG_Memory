@@ -91,6 +91,8 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                                        **{k:v for k,v in local.items() if k not in {'options','question'}}})
         from .component_source import probe_context
         context, target_question=probe_context(state,region,cfg,raw)
+        from .component_constraints import question as established_constraints
+        target_question += established_constraints(state,region)
         chosen = _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, context, region.source_range,
                         question=target_question+(local['question'] if local else ''))
