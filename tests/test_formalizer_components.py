@@ -114,7 +114,12 @@ def test_scope_not_flattened(morph,text):
 def test_known_missing_object_is_not_bypassed_by_open(morph):
     core=AHCore(); release=with_components(test_release(core,[('READ','читать','VERB',[role('SUBJECT'),role('OBJECT',('acc',))],'EVENT')]))
     st=frontend('Читал.',morph,release=release)
-    assert not st.frames
+    assert st.frames
+    assert all(f.semantic['structural_unresolved'] for f in st.frames)
+    assert all(f.semantic['missing_required_roles']==['OBJECT'] for f in st.frames)
+    assert all(any(q['kind']=='MISSING_REQUIRED_ROLE' and q['role']=='OBJECT'
+                   for q in f.semantic['component_questions']) for f in st.frames)
+    assert not st.observation['implicit_bindings']
 
 
 def test_component_policy_is_opt_in(morph):

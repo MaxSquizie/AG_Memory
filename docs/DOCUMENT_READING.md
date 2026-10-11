@@ -102,3 +102,7 @@ system/prompt этой записи. Ответ записывайте атом�
 production требует собственной reviewed-политики `ProposalPolicy.composition`.
 Подробности, границы покрытия и проверка исходного дневника:
 [COMPONENT_ARGUMENTS_RUN.md](COMPONENT_ARGUMENTS_RUN.md).
+
+Предложные компоненты, вложенные вопросы и сохранение обязательных пробелов
+описаны отдельно: [COMPONENT_PHRASES.md](COMPONENT_PHRASES.md).
+Проверка этого расширения: [COMPONENT_PHRASES_RUN.md](COMPONENT_PHRASES_RUN.md).
