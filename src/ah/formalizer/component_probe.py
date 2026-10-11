@@ -25,8 +25,12 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     prompt = build_selector_prompt(selector, slot_id=slot, frame_id=key,
         context_span=context, mentions={}, schema=schema, candidates=ids,
         contextual_statements=())
-    if question:
-        prompt = question+'\n\n'+prompt
+    prompt = ('Resolve this local interpretation using the wording and supplied context. '
+        'Generated candidates are possibilities, not evidence that every reading is supported. '
+        'Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. '
+        'Multiple selections require positive support for each; if the source cannot discriminate, answer ?. '
+        'Do not invent missing context, identities or world facts.\n'+
+        ((question+'\n\n') if question else '')+prompt)
     try:
         state.budget.spend_llm()
         raw = selector.select(prompt)

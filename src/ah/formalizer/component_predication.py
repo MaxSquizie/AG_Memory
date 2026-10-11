@@ -82,8 +82,15 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 + ('; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts'
                    if cfg.get('nominal_composition') else
                    '; lexical modifier attaches to the preceding proposition (structural attachment)' if len(bundle)>1 else '')})
+        from .component_scope_contrast import contrast
+        local=contrast(complete,evidence)
+        if local:
+            options=local['options']
+            state.syntax_trace.append({'kind':'LOCAL_SCOPE_CONTRAST','decision_ref':region.region_id+'|composition',
+                                       **{k:v for k,v in local.items() if k not in {'options','question'}}})
         chosen = _probe(state, selector, release, region.region_id+'|composition',
-                        'component_attachment', options, raw, region.source_range)
+                        'component_attachment', options, raw, region.source_range,
+                        question=local['question'] if local else None)
     for bundle in bundles:
         for f in bundle:
             f.semantic['composition_decision'] = region.region_id+'|composition'

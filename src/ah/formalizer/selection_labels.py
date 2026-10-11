@@ -80,7 +80,9 @@ def build_label_selection_prompt(
         raise ValueError(f"candidate IDs missing from decision schema: {missing}")
     mention_lines = "\n".join(f"  {key}={value}" for key, value in mentions.items())
     candidate_lines = "\n".join(
-        f"{index}. {schema.relations[cid].name} — {schema.relations[cid].meaning_en}"
+        f"{index}. {schema.relations[cid].name}" +
+        (f" — {schema.relations[cid].meaning_en}" if schema.relations[cid].meaning_en
+         and schema.relations[cid].meaning_en != schema.relations[cid].name else "")
         for index, cid in enumerate(ids, 1)
     )
     context_block = (

@@ -81,7 +81,10 @@ def resolve_implicit(state, release, selector):
             lo,hi=gap['context_range']
             targets={o['candidate_id']:(resolved.get(o.get('gap_ref'),{}).get('entity_ref')
                 if o['kind']=='CHAIN' else o.get('entity_ref')) for o in options}
-            chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range,
+            from .implicit_introduction import introduce_without_antecedent
+            chosen=introduce_without_antecedent(state,gap)
+            if chosen is None:
+                chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range,
                           equivalent_targets=targets,
                           question=('Resolve the omitted '+role+' of the TARGET clause below, not of another clause in the context.\n'
                             +'Target clause: '+state.text[slice(*f.source_range)]+'\n'

@@ -55,7 +55,10 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
         choices=alternatives(state,region,selected_frames,all_frames,anchors,cfg['max_candidates'])
         if choices:
             options=[{'candidate_id':c['candidate_id'],'label':c['label']} for c in choices]
-            chosen=_probe(state,selector,release,key,'coordination',options,raw,region.source_range)
+            clauses='; '.join(str(i+1)+' = «'+state.text[slice(*f.source_range)].strip()+'»' for i,f in enumerate(selected_frames))
+            chosen=_probe(state,selector,release,key,'coordination',options,raw,region.source_range,
+                question='Which clauses does each modifier actually describe here? '+clauses+
+                '. Local nesting is already fixed; shared lifting may not reverse it. Participant identities are a separate question.')
     if chosen is not None:
         from .coordination_scope import install
         install(next(c for c in choices if c['candidate_id']==chosen),selected_frames,all_frames,region,key)
