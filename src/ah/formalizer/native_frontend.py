@@ -37,6 +37,9 @@ def _failure_code(exc,default):
 
 
 def _temporal(text, observation, release, *, source_start=0):
+    from .clock_ranges import resolve as resolve_range
+    range_result=resolve_range(text,observation,release,source_start=source_start)
+    if range_result is not None: return range_result
     from .clock_expressions import resolve
     clock_result=resolve(text,observation,release,source_start=source_start)
     if clock_result is not None: return clock_result
@@ -202,10 +205,12 @@ def _released_slot_evidence(state, release, source, policy):
                         'resource_refs':[ref('AttitudeMap',i,attitude)]})
         for i,rule in enumerate(release.resources.get('TemporalRules',{}).get('entries',())):
             for match in re.finditer(rule['pattern'],state.text,re.I):
-                anchors=[t.token_id for t in tokens if t.start<match.end() and t.end>match.start()]
+                from .clock_ranges import boundary_spans
+                spans=boundary_spans(rule,match)
+                anchors=[t.token_id for t in tokens if any(t.start<b and t.end>a for a,b in spans)]
                 # A trigger straddling the region boundary is not evidence for
                 # this request. No clock/default/ownership is projected.
-                full=[t.token_id for t in state.evidence if t.start<match.end() and t.end>match.start()]
+                full=[t.token_id for t in state.evidence if any(t.start<b and t.end>a for a,b in spans)]
                 if not anchors or anchors!=full: continue
                 step()
                 add('temporal_triggers',{'evidence_id':'time:'+digest([release.sha256,i,anchors]),

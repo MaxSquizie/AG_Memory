@@ -15,3 +15,13 @@ def clock_rule():
     pattern = r'\bв\s+(?P<hour>'+number+r')\s+(?:часа|часов|час)\b(?:\s+(?P<minute>'+number+r')\s+(?:минуты|минуту|минута|минут)\b)?'
     return {'rule_id':'TEST-WORD-CLOCK-1','kind':'WORD_CLOCK', 'pattern':pattern,
             'number_values':values, 'clock_cycle':12}
+
+
+def range_rule():
+    clock = clock_rule()
+    # Explicit test lexicon: boundary forms and fixed civil anchors are data.
+    end = dict(clock, pattern=clock['pattern'].replace(r'\bв\s+', r'\bдо\s+'))
+    return {'rule_id':'TEST-CLOCK-RANGE-1','kind':'CLOCK_RANGE',
+        'pattern':r'(?P<start>\bс\s+полудня\b)[^.!?;]*?(?P<end>'+end['pattern']+')',
+        'start_clock':{'kind':'FIXED','hour':12,'minute':0}, 'end_clock':end,
+        'end_day_offsets':[0,1], 'interval_semantics':'EXISTENTIAL'}

@@ -86,6 +86,10 @@ def validate_evidence(expressions, temporal_region):
     if not isinstance(expressions, list) or not expressions:
         raise ValueError('TEMPORAL_EXPRESSION_INVALID')
     for e in expressions:
+        if isinstance(e, dict) and e.get('kind') == 'CLOCK_RANGE':
+            from .clock_range_evidence import validate
+            validate(e, temporal_region)
+            continue
         if (not isinstance(e, dict) or e.get('kind') != 'CLOCK' or
                 e.get('status') not in {'SYMBOLIC', 'RESOLVED'} or
                 not all(isinstance(e.get(k), str) and e[k] for k in ('expr_id','raw','resource_sha256','rule_id'))):

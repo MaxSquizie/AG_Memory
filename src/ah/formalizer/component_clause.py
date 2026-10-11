@@ -12,8 +12,10 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True):
     temporal = {tid for row in relative for tid in row['anchor_refs']}
     for rule in release.entries('TemporalRules'):
         for m in re.finditer(rule['pattern'],raw,re.I):
-            lo,hi = region.source_range[0]+m.start(),region.source_range[0]+m.end()
-            temporal.update(e.token_id for e in tokens if lo <= e.start and e.end <= hi)
+            from .clock_ranges import boundary_spans
+            for a,b in boundary_spans(rule,m):
+                lo,hi = region.source_range[0]+a,region.source_range[0]+b
+                temporal.update(e.token_id for e in tokens if lo <= e.start and e.end <= hi)
     from .component_phrases import prepositional_groups
     groups=prepositional_groups(tokens,temporal)
     prep_markers={g['token_ref'] for g in groups.values()}

@@ -44,8 +44,11 @@ def compose(state, release, selector):
         from .component_temporal import relative_adjuncts
         relative=relative_adjuncts(state,release,region,tokens)
         allowed={(row['resource_pattern'],row['operator']) for row in relative}
-        scope = protected or any(re.search(r['pattern'], raw, re.I) and
-            (r['pattern'],r.get('operator')) not in allowed for r in release.entries('ScopeLexicon'))
+        from .clock_ranges import consumed_scope_spans, scope_consumed
+        clock_spans=consumed_scope_spans(raw,state.observation,release)
+        scope = protected or any((r['pattern'],r.get('operator')) not in allowed and
+            not scope_consumed(r,m,clock_spans) for r in release.entries('ScopeLexicon')
+            for m in re.finditer(r['pattern'],raw,re.I))
         scope |= any(e.span in {'«','»','"','(',')','?',':'} for e in tokens)
         if scope:
             state.diag('COMPONENT_SCOPE_UNRESOLVED', region.region_id)

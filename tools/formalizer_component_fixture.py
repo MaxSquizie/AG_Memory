@@ -4,7 +4,7 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
@@ -27,6 +27,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if clock_time:
         from tools.formalizer_clock_fixture import clock_rule
         next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].append(clock_rule())
+    if clock_ranges:
+        from tools.formalizer_clock_fixture import range_rule
+        next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].append(range_rule())
     if omissions:
         # Explicit lexical fixture data, not a runtime verb/spelling heuristic.
         for valency in next(r for r in manifest['entries'] if r['kind']=='R-V')['entries']:

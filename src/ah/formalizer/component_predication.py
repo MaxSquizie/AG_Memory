@@ -64,10 +64,10 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 if f.semantic.get('relative_temporal'):
                     label += '; relative anchors='+str(f.semantic['relative_temporal'])
                 labels.append(label)
-            if any(r['kind']=='WORD_CLOCK' for r in release.entries('TemporalRules')):
-                from .clock_expressions import resolve
-                clock=resolve(raw,state.observation,release,source_start=region.source_range[0])
-                if clock and clock[0]:
+            if any(r['kind'] in {'WORD_CLOCK','CLOCK_RANGE'} for r in release.entries('TemporalRules')):
+                from .native_frontend import _temporal
+                clock=_temporal(raw,state.observation,release,source_start=region.source_range[0])
+                if clock and clock[0] and clock[0].get('expressions'):
                     labels.append('clock expression attaches to this clause: '+str(clock[0]['expressions'][0]['raw']))
             options.append({'candidate_id':bundle[-1].frame_id, 'label':' -> '.join(labels)
                 + ('; lexical modifier attaches to the preceding proposition (structural attachment)' if len(bundle)>1 else '')})
