@@ -107,11 +107,14 @@ def build_plan(state,release,store):
             emit('MATERIALIZE_USAGE_LINK',{'link_id':link,'node_ref':target,'parent_ref':nid,'position':role,'kind':'ATTITUDE','attitude':child['attitude'],'holder_ref':roles.get(child.get('holder_role','SUBJECT')),'source_tag':tag},frag)
         for child in f.semantic.get('nominal_args',()):
             target,_=node_for(child['frame_ref'],frag,True,active)
+            from .refinement_host_path import node_path
+            host_path=node_path(child,frames,nodes)
             host_role=selected['roles'].get(child['host_token_ref'])
             if host_role is None or host_role not in roles: raise ValueError('NOMINAL_HOST_UNRESOLVED')
             nominal_links.append((frag,{'node_ref':target,'parent_ref':nid,'position':host_role,
                 'kind':'NOMINAL','attitude':'UNKNOWN','host_ref':roles[host_role],
-                'host_role':child['host_role'],'source_tag':tag}))
+                'host_role':child['host_role'],'source_tag':tag,
+                **({'host_path':host_path} if len(host_path)>1 else {})}))
         nodes[fid]=nid
         return nid,ck
 
@@ -209,6 +212,9 @@ def build_plan(state,release,store):
         # Speech act and attitudes are structural guards; they do not confirm content.
         ranges=[f.source_range for f in fs]
         local=state.text[min(lo for lo,hi in ranges):max(hi for lo,hi in ranges)] if ranges else state.text
+        if len(fs)==1 and fs[0].semantic.get('owned_token_refs') is not None:
+            from .component_source import frame_view
+            local=frame_view(state,fs[0])
         entire=state.text
         positions=[evidence[f.predicate_token_ref].start for f in fs] or [evidence[a].start for a in t.get('anchor_refs',())]
         is_query=any(f.semantic.get('query_request') for f in fs)

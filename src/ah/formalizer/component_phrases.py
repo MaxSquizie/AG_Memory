@@ -31,7 +31,8 @@ def role_choices(token, roles, predicate, subject_role, group=None):
         if mv.pos not in {'NOUN','NPRO'}: continue
         for role in roles:
             if not set(mv.cases)&set(role.get('allowed_cases',())): continue
-            if role['role_id']==subject_role and not compatible(_features(predicate),_features(mv)): continue
+            if (role['role_id']==subject_role and not (predicate.pos=='PRTF' and 'pssv' in predicate.features)
+                    and not compatible(_features(predicate),_features(mv))): continue
             preps=role.get('allowed_preps',())
             if group:
                 for pv in group['variants']:

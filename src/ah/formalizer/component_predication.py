@@ -20,12 +20,12 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
     return e.token_id
 
 
-def compose_alternatives(state, release, selector, region, tokens, predicates, cfg):
+def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None):
     from .component_modifiers import scoped_bundle
     bundles = []
     diagnostics_before = len(state.diagnostics)
     for predicate in predicates:
-        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False):
+        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment):
             if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                 from .component_modifier_forest import bundles as modifier_bundles
                 if cfg.get('nominal_composition')=='QUESTION_TREE_V1':
@@ -49,9 +49,10 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     # source interpretation. Each complete choice includes every child frame.
     needs_probe = len(bundles) > 1 or any(f.semantic['requires_attachment_probe'] for f in frames)
     chosen = complete[0][-1].frame_id if len(complete) == 1 and not needs_probe else None
-    raw = state.text[slice(*region.source_range)]
+    from .component_source import view
+    raw = view(state,region,tokens)
     if complete and needs_probe and len(raw) <= cfg['context_chars']:
-        evidence = {e.token_id:e for e in tokens}
+        evidence = {e.token_id:e for e in state.evidence}
         options = []
         for bundle in complete:
             labels = []
@@ -88,9 +89,11 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
             options=local['options']
             state.syntax_trace.append({'kind':'LOCAL_SCOPE_CONTRAST','decision_ref':region.region_id+'|composition',
                                        **{k:v for k,v in local.items() if k not in {'options','question'}}})
+        from .component_source import probe_context
+        context, target_question=probe_context(state,region,cfg,raw)
         chosen = _probe(state, selector, release, region.region_id+'|composition',
-                        'component_attachment', options, raw, region.source_range,
-                        question=local['question'] if local else None)
+                        'component_attachment', options, context, region.source_range,
+                        question=target_question+(local['question'] if local else ''))
     for bundle in bundles:
         for f in bundle:
             f.semantic['composition_decision'] = region.region_id+'|composition'

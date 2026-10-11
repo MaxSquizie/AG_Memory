@@ -66,7 +66,7 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg):
         old=gap['gap_id'];gap['gap_id']='gap:'+digest([base.frame_id,role])
         for q in base.semantic['component_questions']:
             if q.get('gap_id')==old:q['gap_id']=gap['gap_id']
-    evidence={e.token_id:e for e in tokens}; frames=[base]; owners={t:base for t in base.argument_token_refs}
+    evidence={e.token_id:e for e in state.evidence}; frames=[base]; owners={t:base for t in base.argument_token_refs}
     morphology=deepcopy(base.semantic['morph_bindings']); lexical=deepcopy(base.semantic['lexical_units'])
     for u in units:
         for e,v in u['entities']:

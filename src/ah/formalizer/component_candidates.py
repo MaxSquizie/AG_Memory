@@ -7,11 +7,14 @@ from .component_phrases import role_choices, nominal_units, phrase_questions
 from .component_omissions import licensed_gaps
 
 
-def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nominals, groups, *, selector=None):
+def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nominals, groups, *, selector=None, attachment=None):
     alternatives = {}
     for pv in p.variants:
+        from .participial_roles import projection
+        projected = projection(pv, attachment, cfg)
         quality = pv.pos in cfg.get('quality_predicate_pos', ())
-        if not quality and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
+        if attachment and projected is None: continue
+        if not projected and not quality and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
         if quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
         senses = [s for s in release.entries('R-S') if s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
         vals = [v for v in release.entries('R-V') if v['sense_id'] in {s['sense_id'] for s in senses}]
@@ -22,11 +25,13 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         for val in shapes:
             if val and any(set(r.get('argument_types',())) != {'ENTITY'}
                            or r.get('cardinality',{}).get('max') != 1 for r in val['roles']): continue
-            case_roles = {c:r for c,r in cfg['open_case_roles'].items() if not quality or (c == 'nom' and r == cfg['subject_role'])}
+            case_roles = {c:r for c,r in (projected['rule']['case_roles'] if projected else cfg['open_case_roles']).items() if not quality or (c == 'nom' and r == cfg['subject_role'])}
             roles = val['roles'] if val else [
                 {'role_id':r,'allowed_cases':[c for c,r2 in case_roles.items() if r2==r],
-                 'cardinality':{'min':int(r==cfg['subject_role'])}}
+                 'cardinality':{'min':int(r==cfg['subject_role'] and not projected)}}
                 for r in sorted(set(case_roles.values()) | {cfg['subject_role']})]
+            if projected:
+                roles = [r for r in roles if r['role_id'] != projected['rule']['host_role']]
             reduction=None
             needs_reduction=cfg.get('dependency_reduction') and (len(nominals)>3 or any(
                 e.token_id not in groups and any(v.pos in {'NOUN','NPRO'} and 'gen' in v.cases for v in e.variants)
@@ -50,6 +55,10 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 if len(set(rs))!=len(rs): continue
                 missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
                 gaps = licensed_gaps(roles,missing,pv,cfg,quality=quality,valency=val)
+                if projected and 'pssv' in pv.features:
+                    # Passive agreement describes the patient, never licenses
+                    # an omitted agent with the patient's number/gender.
+                    gaps.pop(cfg['subject_role'],None)
                 unresolved_roles=sorted(missing-set(gaps))
                 used={p.token_id,*temporal,*(e.token_id for e,b in assignments)}
                 units=nominal_units(state,tokens,assignments,used)
@@ -70,7 +79,9 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 ambiguous=any(g['ambiguous_pos'] for g in groups.values())
                 mapping={e.token_id:r for e,(r,_,_) in assignments}
                 canonical={t:{k:v for k,v in m.items() if k!='score'} for t,m in morph.items()}
-                key=digest([region.region_id,mapping,canonical,gaps,uncovered,unresolved_roles,deps])
+                key_parts=[region.region_id,mapping,canonical,gaps,uncovered,unresolved_roles,deps]
+                if projected: key_parts.append([projected['host'].token_id,projected['rule']])
+                key=digest(key_parts)
                 fid='component:'+key
                 questions=[{'kind':'WHAT_EVENT','anchor_ref':p.token_id}]
                 for role in gaps:
@@ -92,9 +103,13 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 if gaps:
                     semantic['implicit_arguments']={role:{**gap,'gap_id':'gap:'+digest([fid,role]),
                         'predicate_ref':p.token_id,'options':[]} for role,gap in gaps.items()}
-                alternatives[key]=FrameCandidate(fid,'FLAT',p.span,
+                candidate=FrameCandidate(fid,'FLAT',p.span,
                     tuple([p.span,*[e.span for e,b in assignments]]),tuple(e.span for e,b in assignments),
                     construction='COMPONENTS_V1',predicate_token_ref=p.token_id,
                     argument_token_refs=tuple(e.token_id for e,b in assignments),source_range=tuple(region.source_range),
                     semantic=semantic,provenance=ResourceProvenance(('COMPONENTS_V1',),{'release':release.sha256}))
+                if projected:
+                    from .participial_roles import add_host
+                    add_host(candidate,projected)
+                alternatives[key]=candidate
     return list(alternatives.values())

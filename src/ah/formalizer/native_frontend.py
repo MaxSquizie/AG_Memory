@@ -858,7 +858,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         if 'explicit_region' in frame.semantic:
             frame.semantic['region'],temporal_diag=frame.semantic['explicit_region'],[]
         else:
-            frame.semantic['region'],temporal_diag=_temporal(text[frame.source_range[0]:frame.source_range[1]],observation,release,source_start=frame.source_range[0])
+            from .component_source import frame_view
+            frame.semantic['region'],temporal_diag=_temporal(frame_view(state,frame),observation,release,source_start=frame.source_range[0])
         for code in temporal_diag: state.diag(code,frame.frame_id)
         frame.semantic['temporal_unresolved']=bool(temporal_diag) and not (
             frame.semantic['region'] and frame.semantic['region'].get('expressions') and

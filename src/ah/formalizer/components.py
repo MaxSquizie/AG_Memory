@@ -53,6 +53,12 @@ def compose(state, release, selector):
         if scope:
             state.diag('COMPONENT_SCOPE_UNRESOLVED', region.region_id)
             continue
+        if cfg.get('refinement'):
+            from .refinement_boundaries import starts
+            if any(starts(tokens,cfg['refinement'])):
+                from .component_refinement import compose_area
+                state.frames.extend(compose_area(state,release,selector,region,tokens,cfg))
+                continue
         from .component_clause import build_clause
         if compositional:
             from .component_predication import compose_alternatives

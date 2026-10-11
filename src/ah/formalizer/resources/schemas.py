@@ -126,6 +126,13 @@ RESOURCE_SCHEMAS = {
             'dependency_reduction': enum('CONSTRAINT_TREE_V1'),
             'apposition_markers': array(S,minimum=1),
             'dependency_senses': obj(('GENITIVE','APPOSITION'), {'GENITIVE':S,'APPOSITION':S}),
+            'refinement': obj(('version','max_depth','relative_markers','participle_voices'), {
+                'version':enum('POSTNOMINAL_AREAS_V1'),
+                'max_depth':{'type':'integer','minimum':1,'maximum':16},
+                'relative_markers':array(obj(('lemma','POS'),{'lemma':S,'POS':enum('ADVB')})),
+                'participle_voices':array(obj(('feature','host_role','case_roles'),{
+                    'feature':enum('actv','pssv'),'host_role':S,
+                    'case_roles':{'type':'object','additionalProperties':S}}))}),
             'open_case_roles': {'type':'object','additionalProperties':S},
             'max_candidates': {'type':'integer','minimum':2,'maximum':16},
             'context_chars': {'type':'integer','minimum':128,'maximum':4096}})}),

@@ -161,11 +161,12 @@ class CanonicalLedger:
         return {s["conclusion_ref"] for rid,s in self.data["supports"].items() if rid in paths}
 
     def s_accessible(self):
+        from .refinement_host_path import live as nominal_path_live
         accessible = self.f_visible()
         paths = self.paths()
         while True:
             extra = {l["node_ref"] for l in self.data["usage_links"].values() if l["status"] == "LIVE" and l["parent_ref"] in accessible
-                     and (l["kind"] != "NOMINAL" or l.get("root_support_ref") in paths)}
+                     and (l["kind"] != "NOMINAL" or l.get("root_support_ref") in paths and nominal_path_live(l,self))}
             if extra <= accessible:
                 return accessible
             accessible.update(extra)

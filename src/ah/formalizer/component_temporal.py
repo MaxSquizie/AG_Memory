@@ -4,7 +4,8 @@ from .component_phrases import prepositional_groups
 
 
 def relative_adjuncts(state,release,region,tokens):
-    raw=state.text[slice(*region.source_range)]; groups=prepositional_groups(tokens)
+    from .component_source import view
+    raw=view(state,region,tokens); groups=prepositional_groups(tokens)
     evidence={e.token_id:e for e in tokens}; out=[]
     for rule in release.entries('ScopeLexicon'):
         if 'TEMPORAL_NOMINAL' not in rule.get('attachment_kinds',()): continue
