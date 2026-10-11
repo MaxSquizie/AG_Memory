@@ -97,9 +97,10 @@ RESOURCE_SCHEMAS = {
         'restriction_pattern': O, 'precedence_constraints': array(O)}),
     'AttitudeMap': obj(('lemma', 'argument_role', 'attitude'), {'lemma': S, 'argument_role': S,
         'attitude': enum('QUOTED', 'EMBEDDED', 'HYPOTHETICAL', 'UNKNOWN'), 'holder_role': S, 'factivity': B}),
-    'TemporalRules': obj(('pattern', 'kind'), {'pattern': S, 'kind': enum('POINT_CLOCK', 'DAY_INTERVAL', 'INTERVAL_CLOCK'),
+    'TemporalRules': obj(('pattern', 'kind'), {'pattern': S, 'kind': enum('POINT_CLOCK', 'DAY_INTERVAL', 'INTERVAL_CLOCK', 'WORD_CLOCK'),
         'day_offset': {'type': 'integer'}, 'interval_semantics': enum('EXISTENTIAL', 'CONTINUOUS'), 'rule_id': S,
-        'hour_group': S, 'minute_group': S}),
+        'hour_group': S, 'minute_group': S, 'clock_cycle': enum(12,24),
+        'number_values': {'type':'object','additionalProperties':{'type':'integer','minimum':0,'maximum':90}}}),
     'OpenTemplatePolicy': obj(('allow',), {'allow': B, 'version': S, 'key_schema_version': S,
         'allowed_argument_kinds': array(), 'isolation_domain': S, 'migration_policy': S, 'permitted_query_mode': S}),
     'ProposalPolicy': obj(('max_nodes', 'max_edges', 'max_depth', 'max_source_tokens'), {

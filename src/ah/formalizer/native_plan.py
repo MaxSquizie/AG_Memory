@@ -149,7 +149,8 @@ def build_plan(state,release,store):
             aid='assertion:'+digest([sid,reg])
             prov={'source':{'kind':'OBSERVATION','source_tag':tag},'support':{'kind':kind}}
             if kind=='DERIVED': prov['support'].update(rule_id=rule,premise_support_refs=list(premises))
-            emit('ADD_TIME_ASSERTION',{'assertion_id':aid,'target_ref':uid,'support_record_id':sid,'region':reg,'anchor':state.observation.get('time_anchor'),'provenance':prov,'witness_ref':witness_ref},frag)
+            emit('ADD_TIME_ASSERTION',{'assertion_id':aid,'target_ref':uid,'support_record_id':sid,'region':reg,'anchor':state.observation.get('time_anchor'),'provenance':prov,'witness_ref':witness_ref,
+                **({'temporal_expressions':reg['expressions']} if reg.get('expressions') else {})},frag)
         if kind=='ROOT':
             rows=[]; morphology=[]; shapes=[]
             owned={op.payload['uid'] for op in op_by_id.values() if op.op_type=='ENSURE_NODE' and frag in op.fragment_refs}

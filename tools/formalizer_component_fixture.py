@@ -4,7 +4,7 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
@@ -21,6 +21,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         scopes.extend({'pattern':pattern,'operator':operator,'attachment_kinds':['TEMPORAL_NOMINAL'],
             'restriction_pattern':{'anchor_cases':['gen']}} for pattern,operator in
             [(r'\bпосле\b','AFTER'),(r'\bдо\b','BEFORE')])
+    if clock_time:
+        from tools.formalizer_clock_fixture import clock_rule
+        next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].append(clock_rule())
     if regional_probes:
         policy['entries'][0]['probe_budget']={'version':'SOURCE_WINDOW_V1','window_tokens':64,
             'calls_per_window':24,'tokens_per_window':16384}

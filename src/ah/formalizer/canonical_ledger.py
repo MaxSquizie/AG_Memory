@@ -266,6 +266,9 @@ class CanonicalLedger:
             raise ValueError("UNDATED_ASSERTION_FORBIDDEN")
         if r.kind not in {"POINT","CONTINUOUS","EXISTENTIAL"} or (r.kind == "POINT" and r.point is None) or (r.lo is not None and r.hi is not None and r.lo > r.hi):
             raise ValueError("TIME_ASSERTION_REGION_INVALID")
+        if "temporal_expressions" in raw:
+            from .clock_expressions import validate_evidence
+            validate_evidence(raw["temporal_expressions"], r)
         raw["region"]=region_data(r)
         witness=raw.get('witness_ref')
         if witness:

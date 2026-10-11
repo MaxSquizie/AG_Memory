@@ -155,7 +155,11 @@ class ResourceRelease:
             if x.get('pattern'): re.compile(x['pattern'])
         for x in self.entries('TemporalRules'):
             re.compile(x['pattern'])
-            if x['kind'] not in {'POINT_CLOCK','DAY_INTERVAL','INTERVAL_CLOCK'} or x.get('interval_semantics','EXISTENTIAL') not in {'EXISTENTIAL','CONTINUOUS'}: raise ResourceMissing('invalid temporal rule')
+            if x['kind'] not in {'POINT_CLOCK','DAY_INTERVAL','INTERVAL_CLOCK','WORD_CLOCK'} or x.get('interval_semantics','EXISTENTIAL') not in {'EXISTENTIAL','CONTINUOUS'}: raise ResourceMissing('invalid temporal rule')
+            if x['kind']=='WORD_CLOCK':
+                from ..clock_expressions import validate_rule
+                try: validate_rule(x)
+                except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         for x in self.entries('IncompatibilityRules'):
             if x.get('kind')!='ROLE_EXCLUSIVE' or not all(x.get(k) for k in ('rule_id','sense_id','role_id','key_roles')) or x['sense_id'] not in sense_ids or x['role_id'] not in roles: raise ResourceMissing('invalid incompatibility rule')
             if not set(x['key_roles'])<=roles: raise ResourceMissing('invalid incompatibility key roles')

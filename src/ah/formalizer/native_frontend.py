@@ -36,7 +36,10 @@ def _failure_code(exc,default):
     return default
 
 
-def _temporal(text, observation, release):
+def _temporal(text, observation, release, *, source_start=0):
+    from .clock_expressions import resolve
+    clock_result=resolve(text,observation,release,source_start=source_start)
+    if clock_result is not None: return clock_result
     def clock(day,hour,minute):
         if not 0<=hour<24 or not 0<=minute<60: raise ValueError('TEMPORAL_EXPRESSION_INVALID')
         local=day.replace(hour=hour,minute=minute)
@@ -322,7 +325,7 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
         for i,n in enumerate(h.nodes):
             if n.kind!='TIME': continue
             anchors=[bytoken[a] for a in n.anchor_spans]
-            value,errors=_temporal(state.text[min(a.start for a in anchors):max(a.end for a in anchors)],state.observation,release)
+            value,errors=_temporal(state.text[min(a.start for a in anchors):max(a.end for a in anchors)],state.observation,release,source_start=min(a.start for a in anchors))
             if errors or value is None:
                 state.diag('INTERVAL_BOUNDARY_UNKNOWN',','.join(errors))
                 unsupported=True
@@ -841,9 +844,11 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         if 'explicit_region' in frame.semantic:
             frame.semantic['region'],temporal_diag=frame.semantic['explicit_region'],[]
         else:
-            frame.semantic['region'],temporal_diag=_temporal(text[frame.source_range[0]:frame.source_range[1]],observation,release)
+            frame.semantic['region'],temporal_diag=_temporal(text[frame.source_range[0]:frame.source_range[1]],observation,release,source_start=frame.source_range[0])
         for code in temporal_diag: state.diag(code,frame.frame_id)
-        frame.semantic['temporal_unresolved']=bool(temporal_diag)
+        frame.semantic['temporal_unresolved']=bool(temporal_diag) and not (
+            frame.semantic['region'] and frame.semantic['region'].get('expressions') and
+            set(temporal_diag) <= {'REFERENCE_UNKNOWN','REFERENCE_AMBIGUOUS'})
         candidate_specs[frame.frame_id]=specs
     emit("stage", stage="T4_RESOLUTION", frames=len(state.frames))
     # The clarification snapshot includes the full prepared gap inventory.
