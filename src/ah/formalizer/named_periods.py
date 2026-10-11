@@ -22,7 +22,7 @@ def resolve(text,observation,release,*,source_start=0):
         'interval_semantics':rule['interval_semantics'],'anchor':observation.get('time_anchor'),
         'resource_sha256':release.sha256,'rule_id':rule.get('rule_id',digest(rule))}
     expression['expr_id']='time-expr:'+digest([observation.get('observation_id'),expression])
-    return {'kind':rule['interval_semantics'],'lo':None,'hi':None,'expressions':[expression]},['REFERENCE_UNKNOWN']
+    return {'kind':rule['interval_semantics'],'lo':None,'hi':None,'expressions':[expression]},[]
 
 
 def validate_evidence(e,region):

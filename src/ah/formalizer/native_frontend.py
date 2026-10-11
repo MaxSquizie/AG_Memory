@@ -637,6 +637,9 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         ev.variants=tuple(sorted(ev.variants,key=lambda v:(-int((v.lemma,v.pos) in preferred),-v.score)))
     emit("stage", stage="T2_REGIONS", tokens=len(state.evidence), regions=len(state.region_forest.regions))
     frozen_generation=observation.get('clarification_generation')
+    if observation.get('structural_contract')=='region_probes':
+        from .document_scopes import prepare as prepare_document_scopes
+        prepare_document_scopes(state,release,selector,frozen_generation)
     if not frozen_generation and observation.get('structural_contract')=='region_probes':
         from .contextual_agreement import resolve as resolve_agreement
         resolve_agreement(state,release,selector,morph)
@@ -702,6 +705,12 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     else:
         region_mode=observation.get('structural_contract')=='region_probes'
         state.frames=_grammar_frames(state,release,selector if region_mode else None)
+        for frame in state.frames:
+            if any(a<frame.source_range[1] and frame.source_range[0]<b for a,b in
+                   (scope['header_range'] for scope in state.document_scopes)):
+                frame.semantic['structural_rejection']='DOCUMENT_HEADER_NOT_EVENT'
+                frame.semantic['structural_unresolved']=True
+                state.diag('DOCUMENT_HEADER_NOT_EVENT',frame.frame_id)
         if region_mode:
             from .temporal_token_ownership import reject_entity_overlap
             reject_entity_overlap(state,release,state.frames)
@@ -717,6 +726,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         apply_coordination_choices(state,release)
     from .lexical_snapshot import freeze as freeze_lexical
     state.generation_snapshot={'resource_snapshot':release.sha256,
+        'document_scopes':deepcopy(state.document_scopes),
         'lexical_decisions':freeze_lexical(state.evidence),
         'component_probe_records':deepcopy(state.component_probe_records),
         'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
@@ -882,6 +892,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         else:
             from .component_source import frame_view
             frame.semantic['region'],temporal_diag=_temporal(frame_view(state,frame),observation,release,source_start=frame.source_range[0])
+        from .document_scopes import inherit as inherit_document_scope
+        frame.semantic['region'],temporal_diag=inherit_document_scope(state,frame,frame.semantic['region'],temporal_diag,release)
         for code in temporal_diag: state.diag(code,frame.frame_id)
         frame.semantic['temporal_unresolved']=bool(temporal_diag) and not (
             frame.semantic['region'] and frame.semantic['region'].get('expressions') and

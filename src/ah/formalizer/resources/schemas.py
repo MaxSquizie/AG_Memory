@@ -114,11 +114,18 @@ RESOURCE_SCHEMAS = {
             'window_tokens': {'type':'integer','minimum':16,'maximum':512},
             'calls_per_window': {'type':'integer','minimum':1,'maximum':64},
             'tokens_per_window': {'type':'integer','minimum':256,'maximum':131072}}),
+        'document_scopes': obj(('version','context_chars','rules'), {
+            'version':enum('CALENDAR_AREAS_V1'),'context_chars':{'type':'integer','minimum':64,'maximum':2048},
+            'rules':array(obj(('rule_id','pattern','days','months'), {
+                'rule_id':S,'pattern':S,
+                'days':{'type':'object','minProperties':1,'additionalProperties':{'type':'integer','minimum':1,'maximum':31}},
+                'months':{'type':'object','minProperties':1,'additionalProperties':{'type':'integer','minimum':1,'maximum':12}}}),minimum=1)}),
         'allowed_anchor_kinds': array(), 'allowed_edge_kinds': array(), 'allowed_read_sets': array(),
         'validation_schema_version': S, 'model_key': S, 'params_hash': S,
         'composition': obj(('version','subject_role','open_case_roles','max_candidates','context_chars'), {
             'version': enum('COMPONENTS_V1'), 'subject_role': S,
             'coordination_operators': array(enum('AND')),
+            'temporal_coordination':enum('NAMED_PERIOD_SCOPE_V1'),
             'quality_predicate_pos': array(enum('ADJF','ADJS')),
             'copula_lemmas': array(), 'modifier_content_role': S, 'preposition_nominal_role': S,
             'modifier_composition': enum('BOUNDED_FOREST_V1'),

@@ -3,7 +3,7 @@ from copy import deepcopy
 from .canonical_ledger import digest
 
 
-def alternatives(state, region, selected, frames, anchors, limit):
+def alternatives(state, region, selected, frames, anchors, limit, *, release=None):
     """Enumerate scope orders, never infer modifier factivity or distribution.
 
     Local clause attachment is only an operand candidate. A lexical modifier
@@ -51,11 +51,20 @@ def alternatives(state, region, selected, frames, anchors, limit):
         label=scope_label(order,modifiers)
         choices.append({'candidate_id':cid,'label':label,'tree':tree,'wrappers':wrappers,
                         'lifted_modifier_refs':[modifiers[m][1].frame_id for m in order]})
+    if release is not None:
+        from .coordination_temporal import expand
+        choices=expand(state,release,region,selected,choices,limit)
     return choices
 
 
 def install(choice, selected, all_frames, region, decision):
     """Only the selected root is assertible; its operands remain structural."""
+    for frame in selected:
+        if frame.frame_id in choice.get('temporal_assignments',{}):
+            frame.semantic['explicit_region']=deepcopy(choice['temporal_assignments'][frame.frame_id])
+            # Distinct existential witnesses, even when period expressions agree.
+            frame.semantic['time_scope_owner']=frame.frame_id
+            frame.semantic['temporal_scope_decision']=decision
     if not choice['wrappers']:
         for f in selected:
             f.semantic['operator_forest'] = [choice['tree']]
@@ -73,6 +82,7 @@ def install(choice, selected, all_frames, region, decision):
 def trace(choices):
     return [{'candidate_id':c['candidate_id'],'label':c['label'],'tree':c['tree'],
              'lifted_modifier_refs':c['lifted_modifier_refs'],
+             'temporal_assignments':c.get('temporal_assignments',{}),
              'wrappers':[{'frame_id':f.frame_id,'proposition_args':f.semantic['proposition_args'],
                           'source_frame':f.semantic['scope_source_frame']} for f in c['wrappers']]}
             for c in choices]

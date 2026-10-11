@@ -23,7 +23,7 @@ def apply(state, release):
                 f.semantic['structural_unresolved']=not row['local_eligible'][f.frame_id]
             conjuncts=[by_id[fid] for fid in row['conjunct_refs']]
             region=next(r for r in state.region_forest.regions if r.region_id==row['composition_region'])
-            options=alternatives(state,region,conjuncts,local,row['coordination_anchors'],cfg['max_candidates'])
+            options=alternatives(state,region,conjuncts,local,row['coordination_anchors'],cfg['max_candidates'],release=release)
             if tuple(c['candidate_id'] for c in options)!=ids:
                 raise ValueError('CLARIFICATION_STRUCTURE_STALE')
             picked=next(c for c in options if c['candidate_id']==selected)

@@ -91,7 +91,7 @@ class RegionForest:
                                           'candidate_refs': sorted(refs)})
 
 
-def build_regions(text, evidence, source_id):
+def build_regions(text, evidence, source_id, *, document_scopes=()):
     forest = RegionForest(source_id)
     evidence = sorted(evidence, key=lambda e: e.start)
     offsets = [e.start for e in evidence]
@@ -110,11 +110,23 @@ def build_regions(text, evidence, source_id):
     root = add('DOCUMENT', 0, len(text), None)
     forest.dependencies.extend(delimiter_scopes(text))
     starts = [0, *(m.end() for m in re.finditer(r'(?:\r\n|\n|\r(?!\n))[ \t]*(?:\r\n|\n|\r(?!\n))+', text))]
+    for scope in document_scopes:
+        lo,hi=scope["scope_range"]
+        area=TextRegion(scope["scope_ref"],"TEMPORAL_SCOPE",(lo,hi),
+            tuple(e.token_id for e in within(lo,hi)),root.region_id,"PROVISIONAL",(scope["decision_ref"],))
+        forest.regions.append(area)
+    starts=sorted(set(starts)|{x for s in document_scopes for x in (*s["header_range"],s["scope_range"][1]) if x<len(text)})
     ends = [*starts[1:], len(text)]
     for start, end in zip(starts, ends):
         if not text[start:end].strip():
             continue
-        paragraph = add('PARAGRAPH', start, end, root.region_id, ('LAYOUT',))
+        owner=next((s for s in document_scopes if s['scope_range'][0]<=start and end<=s['scope_range'][1]),None)
+        parent=owner['scope_ref'] if owner else root.region_id
+        if owner and owner['header_range'][0]<=start and end<=owner['header_range'][1]:
+            header=add('CONTEXT_HEADER',start,end,parent,(owner['decision_ref'],))
+            for e in within(start,end): add('TOKEN',e.start,e.end,header.region_id)
+            continue
+        paragraph = add('PARAGRAPH', start, end, parent, ('LAYOUT',))
         cursor = start
         # These are tentative read windows, including punctuation inside quotes.
         # Scope closure is proved by the candidate graph, never this split.

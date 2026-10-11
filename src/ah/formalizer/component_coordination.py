@@ -21,7 +21,7 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
         state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id); return
     if any(a[1]>b[0] for a,b in zip(matches,matches[1:])): return
     # Temporal distribution across conjuncts needs its own scope alternatives.
-    if any(re.search(rule['pattern'],raw,re.I) for rule in release.entries('TemporalRules')):
+    if cfg.get('temporal_coordination')!='NAMED_PERIOD_SCOPE_V1' and any(re.search(rule['pattern'],raw,re.I) for rule in release.entries('TemporalRules')):
         state.diag('COMPONENT_COORDINATION_TEMPORAL_SCOPE',region.region_id); return
     ranges=list(zip([lo,*[end for start,end in matches]],[*[start for start,end in matches],hi]))
     all_frames=[]; selected=[]
@@ -52,7 +52,7 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
     anchors=[e.token_id for e in tokens if any(a<=e.start and e.end<=b for a,b in matches)]
     if complete and len(raw)<=cfg['context_chars']:
         from .coordination_scope import alternatives
-        choices=alternatives(state,region,selected_frames,all_frames,anchors,cfg['max_candidates'])
+        choices=alternatives(state,region,selected_frames,all_frames,anchors,cfg['max_candidates'],release=release)
         if choices:
             options=[{'candidate_id':c['candidate_id'],'label':c['label']} for c in choices]
             clauses='; '.join(str(i+1)+' = «'+state.text[slice(*f.source_range)].strip()+'»' for i,f in enumerate(selected_frames))

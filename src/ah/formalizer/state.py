@@ -353,6 +353,7 @@ class FormalizationState:
     clarification_candidates: list[dict] = field(default_factory=list)
     generation_snapshot: dict = field(default_factory=dict)
     component_probe_records: dict = field(default_factory=dict)
+    document_scopes: list[dict] = field(default_factory=list)
     region_forest: object | None = None
     context_reads: list[dict] = field(default_factory=list)
 
