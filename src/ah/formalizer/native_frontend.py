@@ -688,6 +688,9 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                 state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
         else:
             _propose(state,selector,release)
+    if frozen_generation:
+        from .coordination_clarifications import apply as apply_coordination_choices
+        apply_coordination_choices(state,release)
     state.generation_snapshot={'resource_snapshot':release.sha256,
         'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
         'syntax_trace':deepcopy(state.syntax_trace),

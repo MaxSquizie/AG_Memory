@@ -47,23 +47,27 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
     selected_frames=[group[0] for group in selected] if complete else []
     key=region.region_id+'|coordination'
     chosen=None
+    choices=[]
+    eligible={f.frame_id:not f.semantic['structural_unresolved'] for f in all_frames}
+    anchors=[e.token_id for e in tokens if any(a<=e.start and e.end<=b for a,b in matches)]
     if complete and len(raw)<=cfg['context_chars']:
-        labels=[' AND '.join(state.text[slice(*f.source_range)].strip() for f in selected_frames)]
-        options=[{'candidate_id':'coordination:'+digest([f.frame_id for f in selected_frames]),
-            'label':labels[0]+'; asserted conjunction of these clauses; each keeps local arguments. '
-                    'Omitted participants remain unresolved; no shared participant or event time is inferred.'}]
-        chosen=_probe(state,selector,release,key,'coordination',options,raw,region.source_range)
+        from .coordination_scope import alternatives
+        choices=alternatives(state,region,selected_frames,all_frames,anchors,cfg['max_candidates'])
+        if choices:
+            options=[{'candidate_id':c['candidate_id'],'label':c['label']} for c in choices]
+            chosen=_probe(state,selector,release,key,'coordination',options,raw,region.source_range)
     if chosen is not None:
-        forest={'operator':'AND','operands':[{'frame_ref':f.frame_id} for f in selected_frames],
-            'anchor_refs':[e.token_id for e in tokens if any(a<=e.start and e.end<=b for a,b in matches)]}
-        for f in selected_frames:
-            f.semantic['operator_forest']=[forest]
-            f.semantic['coordination_decision']=key
+        from .coordination_scope import install
+        install(next(c for c in choices if c['candidate_id']==chosen),selected_frames,all_frames,region,key)
     else:
         # No valid conjunct may escape an unresolved enclosing logical scope.
         for f in all_frames: f.semantic['structural_unresolved']=True
         state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id)
     state.frames.extend(all_frames)
+    from .coordination_scope import trace
     state.syntax_trace.append({'composition_region':region.region_id,'kind':'COORDINATION',
         'candidates':[f.frame_id for f in all_frames],'decision_ref':key,
+        'conjunct_refs':[f.frame_id for f in selected_frames],'local_eligible':eligible,
+        'coordination_anchors':anchors,'selected_scope':chosen,
+        'scope_alternatives':trace(choices),
         'coverage':'COMPLETE' if chosen else 'PARTIAL'})

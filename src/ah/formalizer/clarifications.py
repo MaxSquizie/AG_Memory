@@ -114,6 +114,11 @@ def persist_offers(state, store, binding, release):
             body['generation_snapshot'] = deepcopy(state.generation_snapshot)
             rid = digest(body)
             record = {'kind': 'CLARIFICATION_REQUEST', 'request_id': rid, **body}
+            # Compare the durable JSON representation on both sides. Frozen
+            # frame ranges/operands contain tuples before their first append,
+            # while journal replay returns arrays. Their canonical identity is
+            # identical; Python tuple/list inequality is not corruption.
+            record = json.loads(json.dumps(record, ensure_ascii=False))
             if rid in existing and existing[rid] != record:
                 raise ValueError('INTEGRITY_ERROR: clarification request changed')
             if rid not in existing:
