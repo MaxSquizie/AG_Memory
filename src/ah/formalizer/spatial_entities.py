@@ -1,4 +1,4 @@
-"""Write-boundary validation for source-local relative-place identity."""
+"""Write-boundary validation for local and memory-backed relative-place identity."""
 from .canonical_ledger import digest
 
 
@@ -20,16 +20,24 @@ def validate_entity(payload):
         raise ValueError('RELATIVE_PLACE_INVALID')
 
 
-def validate_binding(p, ledger, store):
+def validate_binding(p, ledger, store, journal=None):
     if p.get('binding_kind') not in {'SPATIAL_ANCHOR','SPATIAL_REFERENCE'}: return
     meta = store.get_element_any_domain(p['target_ref']).meta.get('relative_place')
-    if not meta or meta['source_tag']!=p.get('source_tag'): raise ValueError('SPATIAL_BINDING_INVALID')
-    anchor = 'binding:place:'+digest([p['source_tag'],meta['anchor_ref'],meta['rule_id'],p['target_ref']])
+    if not meta: raise ValueError('SPATIAL_BINDING_INVALID')
+    anchor = 'binding:place:'+digest([meta['source_tag'],meta['anchor_ref'],meta['rule_id'],p['target_ref']])
     if p['binding_kind']=='SPATIAL_ANCHOR':
-        valid = p['binding_id']==anchor and p['mention_ref']==meta['anchor_ref']
+        valid = meta['source_tag']==p.get('source_tag') and p['binding_id']==anchor and p['mention_ref']==meta['anchor_ref']
     else:
         proof = ledger.data['bindings'].get(anchor,{})
         valid = (p.get('anchor_binding_ref')==anchor and proof.get('status')=='LIVE'
                  and proof.get('binding_kind')=='SPATIAL_ANCHOR'
-                 and proof.get('target_ref')==p['target_ref'] and bool(p.get('interpretation_decision_ref')))
+                 and proof.get('target_ref')==p['target_ref'] and bool(p.get('interpretation_decision_ref'))
+                 and ledger.binding_live(anchor,ledger.paths())
+                 and (meta['source_tag']==p.get('source_tag') or bool(p.get('context_read_hash'))))
     if not valid: raise ValueError('SPATIAL_BINDING_INVALID')
+    if p['binding_kind']=='SPATIAL_REFERENCE':
+        expected='binding:place-reference:'+digest([p['source_tag'],p['mention_ref'],p['target_ref'],p['interpretation_decision_ref']])
+        if p['binding_id']!=expected: raise ValueError('SPATIAL_BINDING_INVALID')
+        if meta['source_tag']!=p['source_tag']:
+            from .spatial_memory import validate_receipt
+            validate_receipt(p,journal)

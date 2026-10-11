@@ -69,6 +69,8 @@ def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source',type=Path)
     parser.add_argument('--out',type=Path,required=True)
+    parser.add_argument('--prior-source',type=Path,action='append',default=[],
+                        help='Read an explicit earlier source in the same AH/Ignition before the target; repeatable')
     parser.add_argument('--development-fixture',action='store_true',required=True,
                         help='Explicit TEST_ONLY resource release in a new isolated AH; never production validation')
     parser.add_argument('--captured-probes',type=Path,
@@ -141,6 +143,12 @@ def main(argv=None):
         integration=IntegrationService(core,IntegrationConfig.from_settings(IntegrationSettings())),
         operation_lock=RLock(),context=InteractionContext(user_ref=core.ref(core.add_entity(Domain.C).uid)))
     services.document_processor=lambda:DocumentProcessor(services)
+    for i,prior in enumerate(args.prior_source):
+        prior_report=read_document(services,prior,args.out/f'prior_{i+1:04d}',
+            progress=lambda event:print(json.dumps(event,ensure_ascii=False),flush=True))
+        if prior_report['status']!='EXECUTED':
+            print(json.dumps({'event':'prior_source_stopped','path':str(prior)}),flush=True)
+            return 1
     report=read_document(services,args.source,args.out/'reading',
         progress=lambda event:print(json.dumps(event,ensure_ascii=False),flush=True))
     print(json.dumps({'event':'completed','status':report['status'],

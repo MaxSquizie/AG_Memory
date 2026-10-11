@@ -1,0 +1,420 @@
+{
+  "schema": "diary-spatial-memory-1",
+  "resource_status": "TEST_ONLY",
+  "semantic_correctness": "MANUAL_SCOPED_SPATIAL_REVIEW",
+  "source_texts": [
+    "Прогулку совершили вверх.",
+    "Там катались на шлюпках и гуляли."
+  ],
+  "receipts": [
+    {
+      "observation_id": "observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d",
+      "version": 1,
+      "terminal": "APPLIED",
+      "committed_fragments": [
+        "component-modifier:03fc08d3f69c9c25e4cef97b8a85459c9fcbeca9fe5529de0313d9356476b7d3"
+      ],
+      "applied": true,
+      "batch_hash": "7b9a4624b4c78363988ac84bcd751158a96da896f7c46eca7661b850f1e944a8",
+      "diagnostics": [],
+      "node_refs": [
+        "N:eb42868a8a1ca9a44af6c072569564e61e9291ff47737dd18fb2daf810ee6a1d"
+      ]
+    },
+    {
+      "observation_id": "observation:ef2c2ad446a97372a6cd845ceb4ca0609077128d597f366424642ad379dafeaa",
+      "version": 1,
+      "terminal": "APPLIED",
+      "committed_fragments": [
+        "component-scope:af40d84518b4a9808ead3135629846ae60542204f6bc155d5d1fe1fcf1547ab0"
+      ],
+      "applied": true,
+      "batch_hash": "c9418225bdb076eed47c7aa42710f065ae5713bb73add84ea4610cc8e5f1cbf5",
+      "diagnostics": [],
+      "node_refs": [
+        "N:be8e82c1212b84d944fd0f73c3d813aff23c7d31a316b2648e48c3bd965ca8ef"
+      ]
+    }
+  ],
+  "resource_sha256": "c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269",
+  "bindings": {
+    "binding:place:ad221494ffc068a0628087067181a7f5d5d8d1231f82e11c1257d9a08826b307": {
+      "binding_id": "binding:place:ad221494ffc068a0628087067181a7f5d5d8d1231f82e11c1257d9a08826b307",
+      "binding_kind": "SPATIAL_ANCHOR",
+      "mention_ref": "tok:19:24",
+      "op_id": "SET_IDENTITY_BINDING:ab4da753210cbab66cbd77973edf9afc1415cfc5d5244aefa321d021c6a7f89c",
+      "premise_support_refs": [],
+      "source_tag": [
+        "observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d",
+        1
+      ],
+      "status": "LIVE",
+      "target_ref": "M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d"
+    },
+    "binding:place-reference:f6cbf3e93c803d9947213bca74b9c28848983e0763c8823f5e69242adc28c47a": {
+      "anchor_binding_ref": "binding:place:ad221494ffc068a0628087067181a7f5d5d8d1231f82e11c1257d9a08826b307",
+      "binding_id": "binding:place-reference:f6cbf3e93c803d9947213bca74b9c28848983e0763c8823f5e69242adc28c47a",
+      "binding_kind": "SPATIAL_REFERENCE",
+      "context_read_hash": "db9fa9f4579a0c27fed14ce4ff3317832a79b44baf43adc51c68bd003cdadaa6",
+      "interpretation_decision_ref": "spatial:a34fd88c56c4e8a55d4f40e41e31d92bab7faddf517c9ca1c955cb6df7c82d35",
+      "mention_ref": "tok:0:3",
+      "op_id": "SET_IDENTITY_BINDING:76512cda2e7da1c7235f0b1c573857d2a760b03a8bca567852fe91b23b01f99c",
+      "premise_support_refs": [],
+      "source_tag": [
+        "observation:ef2c2ad446a97372a6cd845ceb4ca0609077128d597f366424642ad379dafeaa",
+        1
+      ],
+      "status": "LIVE",
+      "target_ref": "M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d"
+    }
+  },
+  "place": {
+    "anchor_ref": "tok:19:24",
+    "coordinates_status": "UNKNOWN",
+    "location_kind": "DESTINATION",
+    "raw": "вверх",
+    "resource_sha256": "c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269",
+    "rule_id": "TEST-SPATIAL-RELATIVE_UP_DESTINATION",
+    "source_range": [
+      19,
+      24
+    ],
+    "source_tag": [
+      "observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d",
+      1
+    ]
+  },
+  "active_only_check": {
+    "active_place_returned": true,
+    "empty_workspace_returns_no_place": true,
+    "unrecorded_read_rejected": true
+  },
+  "context_reads": [
+    {
+      "request": {
+        "kind": "SPATIAL_REFERENCE",
+        "decision_ref": "spatial:a34fd88c56c4e8a55d4f40e41e31d92bab7faddf517c9ca1c955cb6df7c82d35",
+        "source_range": [
+          0,
+          33
+        ],
+        "cue_token_refs": [
+          "tok:0:3"
+        ],
+        "ordinal": 2,
+        "run_id": "run:dca0ab748d124c0f8a2f57bdfc89725e",
+        "memory_hash": "f41df149301cac02e737c4057d7d0ca094dbddeb8c5c1df58fb69efb04b2587a",
+        "release_hash": "c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269"
+      },
+      "result_hash": "db9fa9f4579a0c27fed14ce4ff3317832a79b44baf43adc51c68bd003cdadaa6",
+      "scope": "ACTIVE_WORKSPACE",
+      "events": [
+        {
+          "kind": "CONTEXT_GOAL",
+          "decision_ref": "spatial:a34fd88c56c4e8a55d4f40e41e31d92bab7faddf517c9ca1c955cb6df7c82d35"
+        }
+      ],
+      "rows": [
+        {
+          "anchor_ref": "tok:19:24",
+          "source_tag": [
+            "observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d",
+            1
+          ],
+          "source_range": [
+            19,
+            24
+          ],
+          "raw": "вверх",
+          "rule_id": "TEST-SPATIAL-RELATIVE_UP_DESTINATION",
+          "resource_sha256": "c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269",
+          "location_kind": "DESTINATION",
+          "coordinates_status": "UNKNOWN",
+          "entity_ref": "M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d",
+          "memory_binding_ref": "binding:place:ad221494ffc068a0628087067181a7f5d5d8d1231f82e11c1257d9a08826b307",
+          "memory_excerpt": "Прогулку совершили вверх.",
+          "memory_excerpt_range": [
+            0,
+            25
+          ]
+        }
+      ],
+      "global_search_complete": false
+    }
+  ],
+  "spatial_trace": [
+    {
+      "kind": "SPATIAL_REFERENCE",
+      "frame_ref": "component-modifier:f92632349e1b4b576cc7b54dd7db5b352c9f00cbc8bf69e9827d99dcbbc4a4f1",
+      "decision_ref": "spatial:a34fd88c56c4e8a55d4f40e41e31d92bab7faddf517c9ca1c955cb6df7c82d35",
+      "options": [
+        {
+          "anchor_ref": "tok:19:24",
+          "source_tag": [
+            "observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d",
+            1
+          ],
+          "source_range": [
+            19,
+            24
+          ],
+          "raw": "вверх",
+          "rule_id": "TEST-SPATIAL-RELATIVE_UP_DESTINATION",
+          "resource_sha256": "c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269",
+          "location_kind": "DESTINATION",
+          "coordinates_status": "UNKNOWN",
+          "entity_ref": "M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d",
+          "memory_binding_ref": "binding:place:ad221494ffc068a0628087067181a7f5d5d8d1231f82e11c1257d9a08826b307",
+          "memory_excerpt": "Прогулку совершили вверх.",
+          "memory_excerpt_range": [
+            0,
+            25
+          ]
+        }
+      ],
+      "selected_place": {
+        "anchor_ref": "tok:19:24",
+        "source_tag": [
+          "observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d",
+          1
+        ],
+        "source_range": [
+          19,
+          24
+        ],
+        "raw": "вверх",
+        "rule_id": "TEST-SPATIAL-RELATIVE_UP_DESTINATION",
+        "resource_sha256": "c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269",
+        "location_kind": "DESTINATION",
+        "coordinates_status": "UNKNOWN",
+        "entity_ref": "M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d",
+        "memory_binding_ref": "binding:place:ad221494ffc068a0628087067181a7f5d5d8d1231f82e11c1257d9a08826b307",
+        "memory_excerpt": "Прогулку совершили вверх.",
+        "memory_excerpt_range": [
+          0,
+          25
+        ]
+      }
+    },
+    {
+      "kind": "SPATIAL_REFERENCE_REUSED",
+      "frame_ref": "component-scope:af40d84518b4a9808ead3135629846ae60542204f6bc155d5d1fe1fcf1547ab0",
+      "decision_ref": "spatial:a34fd88c56c4e8a55d4f40e41e31d92bab7faddf517c9ca1c955cb6df7c82d35"
+    }
+  ],
+  "visible_before": [
+    "N:be8e82c1212b84d944fd0f73c3d813aff23c7d31a316b2648e48c3bd965ca8ef",
+    "N:eb42868a8a1ca9a44af6c072569564e61e9291ff47737dd18fb2daf810ee6a1d"
+  ],
+  "retractions": {
+    "anchor_binding": {
+      "visible": [],
+      "anchor_status": "INVALID",
+      "reference_status": "INVALID",
+      "recovery_identical": true
+    },
+    "source_support": {
+      "visible": [
+        "N:be8e82c1212b84d944fd0f73c3d813aff23c7d31a316b2648e48c3bd965ca8ef"
+      ],
+      "anchor_status": "LIVE",
+      "reference_status": "LIVE",
+      "recovery_identical": true
+    },
+    "source_observation": {
+      "visible": [],
+      "anchor_status": "INVALID",
+      "reference_status": "INVALID",
+      "recovery_identical": true
+    },
+    "target_observation": {
+      "visible": [
+        "N:eb42868a8a1ca9a44af6c072569564e61e9291ff47737dd18fb2daf810ee6a1d"
+      ],
+      "anchor_status": "LIVE",
+      "reference_status": "INVALID",
+      "recovery_identical": true
+    }
+  },
+  "native_replay": {
+    "checks": {
+      "no_new_provider_calls": true,
+      "no_new_ignition_ticks": true,
+      "ledger_unchanged": true,
+      "batch_hash_equal": true,
+      "committed_fragments_equal": true,
+      "both_executed": true
+    },
+    "passed": true,
+    "before": {
+      "calls": 5,
+      "tick": 23,
+      "ledger": "a207e84b6412dbc654b8257aff3a5e5b58c3fcd14748487491b5b33dfa9770e8"
+    },
+    "after": {
+      "calls": 5,
+      "tick": 23,
+      "ledger": "a207e84b6412dbc654b8257aff3a5e5b58c3fcd14748487491b5b33dfa9770e8"
+    },
+    "semantic_correctness": "NOT_EVALUATED"
+  },
+  "diagnostics": [
+    [],
+    [
+      {
+        "code": "VALENCY_UNKNOWN",
+        "detail": "component-modifier:46d1a2cff56be55bb74859add12f0849ff5ba7b4c1bd8ec4f53b15b770f214f1"
+      },
+      {
+        "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+        "detail": "gap:8436f35ac737b0a5b4ed2bd7786b7998e28054e24e6a6774610e8fe0b05868c5"
+      }
+    ]
+  ],
+  "probes": [
+    {
+      "request": {
+        "prompt": "Resolve this local interpretation using the wording and supplied context. Generated candidates are possibilities, not evidence that every reading is supported. Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. Multiple selections require positive support for each; if the source cannot discriminate, answer ?. Do not invent missing context, identities or world facts.\nDecision slot: component_attachment — predicate value of frame region:fe3bd468326fb6194bf82173020825bd74aa21c43b42195f359f766a10e15176|composition\nContext span: Прогулку совершили вверх.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269, closed set):\n1. совершить [VERB]; OBJECT=Прогулку; linked morphology={'совершили': {'lemma': 'совершить', 'pos': 'VERB', 'cases': [], 'number': 'plur', 'gender': None}, 'Прогулку': {'lemma': 'прогулка', 'pos': 'NOUN', 'cases': ['acc'], 'number': 'sing', 'gender': 'femn'}}; omitted roles, identity unresolved=['SUBJECT'] -> вверх [ADVB]; ; linked morphology={'вверх': {'lemma': 'вверх', 'pos': 'ADVB', 'cases': [], 'number': None, 'gender': None}}; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:03fc08d3f69c9c25e4cef97b8a85459c9fcbeca9fe5529de0313d9356476b7d3\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_spatial_memory_live/probe_0001.request.json",
+        "request_sha256": "4705fa6da6407a9e34f9a20fec2e319f90f506137b95d1291b46f47f51c456de",
+        "response_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Resolve this local interpretation using the wording and supplied context. Generated candidates are possibilities, not evidence that every reading is supported. Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. Multiple selections require positive support for each; if the source cannot discriminate, answer ?. Do not invent missing context, identities or world facts.\nAlready established interpretation constraints: «на шлюпках» attaches to «катались» (previous resolved local question). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. Only scope links differ; roles, whole morphology and nominal dependencies are fixed. Which immediate scope links are supported by this source? Do not assume that lexical modifiers commute.\n\nDecision slot: component_attachment — predicate value of frame region:2eabd34c6f2b3f47167d93408c05f30e03669010303fa4802d38fc5a4d48af9b|composition\nContext span: Там катались на шлюпках \nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269, closed set):\n1. «на»@13 (шлюпках) scopes over «Там»@0 [OBJECT, attitude=UNKNOWN]; «Там»@0 scopes over «катались»@4 [OBJECT, attitude=UNKNOWN]\n2. «Там»@0 scopes over «на»@13 (шлюпках) [OBJECT, attitude=UNKNOWN]; «на»@13 (шлюпках) scopes over «катались»@4 [OBJECT, attitude=UNKNOWN]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:7dba8db394670cba686a06465457a7380c89cb29af462437fdf315c29d1008f2\"\n2 = \"component-modifier:f92632349e1b4b576cc7b54dd7db5b352c9f00cbc8bf69e9827d99dcbbc4a4f1\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "2\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_spatial_memory_live/probe_0002.request.json",
+        "request_sha256": "c612f565b1017af6b033e3291295c2fda5af87ae44980eccd215bbf8115ada5b",
+        "response_sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Resolve this local interpretation using the wording and supplied context. Generated candidates are possibilities, not evidence that every reading is supported. Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. Multiple selections require positive support for each; if the source cannot discriminate, answer ?. Do not invent missing context, identities or world facts.\nWhich clauses does each modifier actually describe here? 1 = «Там катались на шлюпках»; 2 = «гуляли.». Local nesting is already fixed; shared lifting may not reverse it. Participant identities are a separate question.\n\nDecision slot: coordination — predicate value of frame region:dc6397ac1e12303633b3822dd68af8b0ef47fb29425463bf9596ec0e6ee22ebb|coordination\nContext span: Там катались на шлюпках и гуляли.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269, closed set):\n1. M1 «Там » (from clause 1) applies to only clause 1; M2 «на шлюпках» (from clause 1) applies to only clause 1\n2. M1 «Там » (from clause 1) applies to both clauses; M2 «на шлюпках» (from clause 1) applies to only clause 1\n3. M1 «Там » (from clause 1) applies to both clauses; M2 «на шлюпках» (from clause 1) applies to both clauses; shared nesting, inner to outer: M2 then M1\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"coordination:7c07b3cd894bd8af6f2f05f8c95368b4df5321384d4c20ac726daa71460fafd1\"\n2 = \"coordination-scope:cb2c644ca91674cb55505642b4dc05c5f968ce919537ba131c3178371e4fccae\"\n3 = \"coordination-scope:87211fb1102f44d7183a0a1feb13968efbb1e10b014a0d7bbe01bb9590b0e6a8\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "2\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_spatial_memory_live/probe_0003.request.json",
+        "request_sha256": "435a79ef0bfc308d12da47a7d0c5261156506119508b6afc33e43c04f8acab1c",
+        "response_sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Resolve this local interpretation using the wording and supplied context. Generated candidates are possibilities, not evidence that every reading is supported. Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. Multiple selections require positive support for each; if the source cannot discriminate, answer ?. Do not invent missing context, identities or world facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  гуляли.\nTarget predicate: гуляли; source range: (25, 33)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:1902d880f77262054dfb30eef7f86a443964b2cb0752d229188dbeee9fbffa07\nContext span: Там катались на шлюпках и гуляли.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)\n2. Same participant as шлюпках (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (0, 24) (катались) (identity requires contextual evidence)\n4. Memory participant M:implicit:1503721006deaf6b38e0b6910c491a366488c8de6abd6c5079d4a01c7207e141\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:1902d880f77262054dfb30eef7f86a443964b2cb0752d229188dbeee9fbffa07\"\n2 = \"mention:tok:16:23\"\n3 = \"gap:522f16a1f64e3c80b9eee49beedf0697f2ebee5f7d836c40aff710376498ecd4\"\n4 = \"memory:M:implicit:1503721006deaf6b38e0b6910c491a366488c8de6abd6c5079d4a01c7207e141\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_spatial_memory_live/probe_0004.request.json",
+        "request_sha256": "604ff7a29fe95cf298a79aabcb09487cb745970c13764429064cfe9d12f59dca",
+        "response_sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Resolve this local interpretation using the wording and supplied context. Generated candidates are possibilities, not evidence that every reading is supported. Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. Multiple selections require positive support for each; if the source cannot discriminate, answer ?. Do not invent missing context, identities or world facts.\nWhat place does «Там» refer to in the TARGET clause: Там катались на шлюпках и гуляли.? Select only a source-supported antecedent. Direction and location are not synonyms; a directed movement can introduce its relative destination. No coordinates are required. If none of the supplied antecedents is established, answer ?. This is a bounded context read, not a global search.\n\nDecision slot: spatial_reference — predicate value of frame spatial:a34fd88c56c4e8a55d4f40e41e31d92bab7faddf517c9ca1c955cb6df7c82d35\nContext span: Там катались на шлюпках и гуляли.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema c34d8635631e03babe5c79d888d74357e02aa61689e687b38378b84083485269, closed set):\n1. Same relative place introduced by «вверх» at [19, 24]; relation=DESTINATION; absolute coordinates UNKNOWN; prior source ['observation:30752fcbeb3d5222fbfe2bd830e2bb6913af10a4b5439e72bffef3990867f34d', 1] excerpt: «Прогулку совершили вверх.»\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "request_source": "/workspace/scratch/ce998c263405/diary_spatial_memory_live/probe_0005.request.json",
+        "request_sha256": "69b9c8c18af4a26d47782cdcbd91e7f6ba7c0a1c21d4a451e067e3a0d188a2dc",
+        "response_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      }
+    }
+  ],
+  "diary_sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+  "source_ranges": [
+    [
+      99737,
+      99762
+    ],
+    [
+      99763,
+      99796
+    ]
+  ],
+  "runtime_sha256": {
+    "src/ah/formalizer/ah_adapter.py": "dd91b10b87169c64166cf381b223ba526adb3f07b40ca02cba6b99e496932397",
+    "src/ah/formalizer/attention_context.py": "2d833c01aad76f366b75f641b6d10224a9e160734d474309b7dd4b298f5edf99",
+    "src/ah/formalizer/canonical_ledger.py": "b7c095c7e1aacf75582d96059c952826bf16acfa488c8121460a21105380ae43",
+    "src/ah/formalizer/native_frontend.py": "3fa84110c24937ad2d5c009e36c8bb28d3e1d85425a3d58ead08f8ad30da8d66",
+    "src/ah/formalizer/spatial_entities.py": "2b2035773d2da09c086b90d3f7afad9c8607726eff14f0ec404271ce5d633507",
+    "src/ah/formalizer/spatial_plan.py": "adb2affab679ff11a09ed83886460254c43a02af90781bfbb828ac2f5f61140a",
+    "src/ah/formalizer/spatial_references.py": "1bee5ec9cebe08e75ab6d0e6289a0d2906281196c3d102ac54c1365fd027b108",
+    "tools/read_document_probe_mailbox.py": "240e9d933931950e71de78de0c5558cc7313056816b65dcf90a4e58a2a637b04",
+    "src/ah/formalizer/spatial_memory.py": "22b855785f23e78df8f3d63bcf98c9ea4ee9a3766ca1623dfa474ed7431a36f3"
+  },
+  "spatial_read_activation": {
+    "tick": 23,
+    "threshold": 0.02,
+    "places": {
+      "M:place:1470c8564df7ffc98d20b2828df7709b8c8c60adc411b60cf54aee0d1cf21c8d": {
+        "activation_event": true,
+        "activation_function_id": "DEFAULT",
+        "decay_age": 14,
+        "decay_origin_excitation": 0.0,
+        "excitation": 0.04829873235336692,
+        "first_excitation_tick": 9,
+        "last_activation_tick": 22,
+        "last_output_tick": null,
+        "output": 0.0
+      }
+    }
+  }
+}

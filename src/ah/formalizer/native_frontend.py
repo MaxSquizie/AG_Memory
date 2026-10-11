@@ -781,9 +781,12 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                 context_requests.append(({'kind':'IMPLICIT_ARGUMENT','decision_ref':gap['gap_id'],
                     'region_ref':frame.semantic['component_region'],'source_range':frame.source_range,
                     'cue_token_refs':[frame.predicate_token_ref,*frame.argument_token_refs],'role':role},None,gap))
+        from .spatial_memory import requests as spatial_requests, attach as attach_spatial_memory
+        context_requests.extend((r,None,None) for r in spatial_requests(state))
         for request,mention,gap in sorted(context_requests,key=lambda row:(row[0]['source_range'][1],row[0]['decision_ref'])):
             result=context_reader.read(state,request)
-            if gap is None: context_by_mention[mention]=result['rows']
+            if request['kind']=='SPATIAL_REFERENCE': attach_spatial_memory(state,request,result,release)
+            elif gap is None: context_by_mention[mention]=result['rows']
             else: add_memory_options(gap,result['rows'],release)
         state.observation['coreference_context_by_mention']=context_by_mention
         root=state.region_forest.regions[0]

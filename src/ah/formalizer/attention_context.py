@@ -165,7 +165,8 @@ class AttentionContextReader:
                 if len(self.read_token_refs) % 128 == 0:
                     emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
-            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT'}:
+            search_incomplete = False
+            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT','SPATIAL_REFERENCE'}:
                 # A goal redistributes existing excitation; it injects no new
                 # semantic evidence and gives no fresh independent seed.
                 for _ in range(self.engine.settings.context_query_ticks):
@@ -174,8 +175,13 @@ class AttentionContextReader:
                 from .coreference import freeze_context
                 active = {r.uid for r in self.engine.workspace_refs()}
                 try:
-                    rows = freeze_context(store, self.release, state.observation.get('coreference_sources', []),
-                                          active_refs=active)
+                    if request['kind'] == 'SPATIAL_REFERENCE':
+                        from .spatial_memory import read_active
+                        rows, search_incomplete = read_active(store, self.release, active,
+                            state.observation.get('coreference_sources', []))
+                    else:
+                        rows = freeze_context(store, self.release, state.observation.get('coreference_sources', []),
+                                              active_refs=active)
                 except ValueError as exc:
                     code=str(exc).split(':',1)[0]
                     if code not in {'RESOURCE_MISSING','COREF_WINDOW_LIMIT','COREF_CANDIDATE_LIMIT'}:
@@ -184,6 +190,7 @@ class AttentionContextReader:
             else:
                 rows = []
             result = {'rows': rows, 'events': events, 'scope': 'ACTIVE_WORKSPACE',
+                      'search_incomplete': search_incomplete,
                       'global_search_complete': False, 'read_token_refs': sorted(self.read_token_refs),
                       'attention_after': attention_snapshot(self.engine)}
             store._journal.append('resolution_log', {'kind': 'CONTEXT_READ', 'ordinal': ordinal,

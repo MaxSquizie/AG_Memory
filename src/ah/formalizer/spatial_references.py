@@ -1,4 +1,4 @@
-"""Released relative-place slots and bounded, source-local anaphora choices."""
+"""Released relative-place slots and bounded source/memory anaphora choices."""
 from copy import deepcopy
 from .canonical_ledger import digest
 from .component_probe import _probe
@@ -90,7 +90,11 @@ def resolve(state, release, selector):
         lo,hi = slot['context_range']
         options = [{'candidate_id':a['entity_ref'], 'label':
                     'Same relative place introduced by «'+a['raw']+'» at '+str(a['source_range'])+
-                    '; relation='+a['location_kind']+'; absolute coordinates UNKNOWN'} for a in slot['options'] if a['entity_ref'] in grounded]
+                    '; relation='+a['location_kind']+'; absolute coordinates UNKNOWN'+
+                    ('; prior source '+str(a['source_tag'])+' excerpt: «'+a['memory_excerpt']+'»' if a.get('memory_binding_ref') else '')}
+                   for a in slot['options'] if a.get('memory_binding_ref') or a['entity_ref'] in grounded]
+        if sum(len(o['label']) for o in options)+hi-lo > policy(release)['context_chars']:
+            state.diag('SPATIAL_REFERENCE_SEARCH_INCOMPLETE',slot['decision_ref']); continue
         selected = _probe(state,selector,release,slot['decision_ref'],'spatial_reference',options,
                           state.text[lo:hi],slot['target_range'],
                           question='What place does «'+frame.anchor_span+'» refer to in the TARGET clause: '+
@@ -100,7 +104,11 @@ def resolve(state, release, selector):
                           'If none of the supplied antecedents is established, answer ?. This is a bounded context read, not a global search.')
         if selected:
             slot['selected_place'] = deepcopy(next(a for a in slot['options'] if a['entity_ref']==selected))
-            state.decisions[slot['decision_ref']].grounds.append(Ground('D','source-addressed relative place; no absolute coordinates inferred',selected))
+            chosen=slot['selected_place']
+            state.decisions[slot['decision_ref']].grounds.append(Ground(
+                'P' if chosen.get('memory_binding_ref') else 'D',
+                'frozen active-place binding '+chosen['memory_binding_ref']+'; read '+slot['memory_read_hash']
+                if chosen.get('memory_binding_ref') else 'source-addressed relative place; no absolute coordinates inferred',selected))
         else:
             state.diag('SPATIAL_REFERENCE_UNRESOLVED',slot['decision_ref'])
         resolved_mentions[slot['decision_ref']]=deepcopy(slot.get('selected_place'))

@@ -158,13 +158,16 @@ class CanonicalLedger:
 
     def binding_live(self, bid, paths):
         binding=self.data['bindings'].get(bid,{})
+        tag=binding.get('source_tag')
+        if tag is not None and self.data['observations'].get(digest(tag),{}).get('status','LIVE')!='LIVE':
+            return False
         if binding.get('status')!='LIVE' or any(p not in paths for p in binding.get('premise_support_refs',())):
             return False
         if binding.get('binding_kind')=='SPATIAL_REFERENCE':
             anchor=self.data['bindings'].get(binding.get('anchor_binding_ref'),{})
-            return (anchor.get('binding_kind')=='SPATIAL_ANCHOR' and anchor.get('status')=='LIVE'
+            return (anchor.get('binding_kind')=='SPATIAL_ANCHOR'
                     and anchor.get('target_ref')==binding.get('target_ref')
-                    and all(p in paths for p in anchor.get('premise_support_refs',())))
+                    and self.binding_live(binding['anchor_binding_ref'],paths))
         return True
 
     def f_visible(self):

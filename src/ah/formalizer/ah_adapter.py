@@ -281,7 +281,7 @@ class AHStoreAdapter(Store):
                 if not draft.store.has_uid(target) or draft.store.kind_of(target).value not in ({'N','G'} if event else {'M'}):
                     raise ValueError('REFERENCE_BINDING_TYPE_INVALID')
                 from .spatial_entities import validate_binding as validate_spatial_binding
-                validate_spatial_binding(p,ledger,draft.store)
+                validate_spatial_binding(p,ledger,draft.store,self._journal)
                 if event and (not p.get('premise_support_refs')
                               or any(ledger.data['supports'].get(sid,{}).get('conclusion_ref')!=target for sid in p['premise_support_refs'])
                               or ledger.data['nodes'].get(target,{}).get('temporal_mode') not in {'EVENT','PROCESS','TRANSITION'}):
