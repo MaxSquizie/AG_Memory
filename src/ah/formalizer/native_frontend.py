@@ -671,6 +671,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         region_mode=observation.get('structural_contract')=='region_probes'
         state.frames=_grammar_frames(state,release,selector if region_mode else None)
         if region_mode:
+            from .components import compose
+            compose(state,release,selector)
             if not state.frames and not state.logical_roots:
                 state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
         else:
@@ -698,6 +700,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
     state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
     state.region_forest.attach_frames(state.frames)
+    from .components import prepare_implicit, resolve_implicit, add_memory_options
+    prepare_implicit(state,release)
     emit("stage", stage="CONTEXT", frames=len(state.frames))
     if context_reader is not None:
         arguments={tid for f in state.frames for tid in f.argument_token_refs
@@ -706,6 +710,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         import re
         policies=release.resources.get('CorefPolicy',{}).get('entries',())
         event_rules=policies[0]['event_anaphora_rules'] if len(policies)==1 else ()
+        context_requests=[]
         for e in state.evidence:
             if e.token_id in state.observation.get('entity_bindings',{}):
                 continue
@@ -716,8 +721,17 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             if e.token_id not in arguments or not (any(v.pos=='NPRO' for v in e.variants)
                     or any(re.fullmatch(r['pattern'],e.span,re.I) for r in event_rules)):
                 continue
-            result=context_reader.read(state,reference_goal(state,e.token_id))
-            context_by_mention[e.token_id]=result['rows']
+            context_requests.append((reference_goal(state,e.token_id),e.token_id,None))
+        for frame in state.frames:
+            if frame.semantic.get('structural_unresolved'): continue
+            for role,gap in frame.semantic.get('implicit_arguments',{}).items():
+                context_requests.append(({'kind':'IMPLICIT_ARGUMENT','decision_ref':gap['gap_id'],
+                    'region_ref':frame.semantic['component_region'],'source_range':frame.source_range,
+                    'cue_token_refs':[frame.predicate_token_ref,*frame.argument_token_refs],'role':role},None,gap))
+        for request,mention,gap in sorted(context_requests,key=lambda row:(row[0]['source_range'][1],row[0]['decision_ref'])):
+            result=context_reader.read(state,request)
+            if gap is None: context_by_mention[mention]=result['rows']
+            else: add_memory_options(gap,result['rows'],release)
         state.observation['coreference_context_by_mention']=context_by_mention
         root=state.region_forest.regions[0]
         context_reader.read(state,{'kind':'READ_REMAINDER','decision_ref':'reading:end',
@@ -787,21 +801,23 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                         supplied=set(frame.semantic.get('proposed_roles',{}).values())|set(request.get('requested_roles',()))
                         if mappings and measure['value_role'] not in supplied:
                             extra=(measure['value_role'],)
-                try: bindings=_bindings(frame,evidence,v,extra)
+                implicit_roles=tuple(frame.semantic.get('implicit_arguments',{}))
+                try: bindings=_bindings(frame,evidence,v,(*extra,*implicit_roles))
                 except ValueError:
                     frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
                 for bs in bindings:
                     mode=v.get('temporal_mode_hint') or v.get('state_class') or 'UNKNOWN'
                     implicit=tuple(r for r in extra if r not in bs.values())
                     cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
-                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                    if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
+                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
                                   **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
         if not senses:
             policy=release.entries('OpenTemplatePolicy')
             if policy and policy[0].get('allow',False):
                 bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
-                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'state_class':'UNKNOWN'}
+                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(frame.semantic.get('implicit_arguments',{})),'state_class':'UNKNOWN'}
                 specs.append(open_spec)
         if senses and not specs: state.diag('VALENCY_UNKNOWN',frame.frame_id)
         known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
@@ -822,11 +838,17 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         frame.semantic['temporal_unresolved']=bool(temporal_diag)
         candidate_specs[frame.frame_id]=specs
     emit("stage", stage="T4_RESOLUTION", frames=len(state.frames))
+    # The clarification snapshot includes the full prepared gap inventory.
+    state.generation_snapshot['frames']=[asdict(f) for f in state.frames]
     structural_seal(state)
     resolve_references(state,reference_slots,selector,release)
+    resolve_implicit(state,release,selector)
     for f in state.frames:
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
         d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic['source_traces']; state.decisions[f.frame_id+'|predicate_value']=d
+        if f.construction=='COMPONENTS_V1' and f.semantic.get('structural_unresolved'):
+            d.outcome='UNRESOLVED'
+            continue  # No semantic probe can repair an uncovered structural dependency.
         from .clarifications import choice
         selected_by_speaker = choice(state, f.frame_id+'|predicate_value', ids)
         if f.semantic.get('source_blocked'):

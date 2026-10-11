@@ -84,6 +84,7 @@ def _observation(text,*,version,observation_id=None,raw_input=None,context_facts
     raw.pop('attention_context_base',None)
     raw.pop('coreference_context_by_mention',None)
     raw.pop('event_bindings',None)  # Produced only by grounded TD reference selection.
+    raw.pop('implicit_bindings',None)  # Produced by closed component questions only.
     raw.setdefault('text',text)
     if raw['text']!=text: raise ValueError('INPUT_TEXT_MISMATCH')
     raw.setdefault('range',[0,len(text)])

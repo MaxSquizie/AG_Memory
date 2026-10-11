@@ -73,6 +73,8 @@ def main(argv=None):
                         help='Explicit TEST_ONLY resource release in a new isolated AH; never production validation')
     parser.add_argument('--captured-probes',type=Path,
                         help='Exact recorded request/reply pairs for transport diagnostics; not a live model or canonical replay')
+    parser.add_argument('--components',action='store_true',
+                        help='Use the explicit TEST_ONLY COMPONENTS_V1 policy (new resource hash)')
     args=parser.parse_args(argv)
     args.out.mkdir(parents=True,exist_ok=False)
     from ah.core import AHCore
@@ -94,9 +96,12 @@ def main(argv=None):
 
     core=AHCore()
     release,_=fixture(core,'known')
+    if args.components:
+        from tools.formalizer_component_fixture import with_components
+        release=with_components(release)
     (args.out/'resource_manifest.json').write_text(json.dumps(release.manifest,ensure_ascii=False,indent=2),encoding='utf-8')
     (args.out/'experiment.json').write_text(json.dumps({
-        'resource_status':'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,
+        'resource_status':'TEST_ONLY_COMPONENTS' if args.components else 'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,
         'source_sha256':hashlib.sha256(args.source.read_bytes()).hexdigest(),
         'entity_bindings':'NO_ORACLE_ALIASES','provider':MailboxBackend.model,
         'transport':'EXACT_CAPTURED_TRANSPORT' if args.captured_probes else 'EXTERNAL_EXECUTOR',

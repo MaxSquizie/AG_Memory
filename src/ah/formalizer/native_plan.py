@@ -30,7 +30,7 @@ def build_plan(state,release,store):
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         e=evidence[f.predicate_token_ref]
         roles={}; mention_roles={}
-        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))
+        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))
         mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==selected_roles]
         measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
                   if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
@@ -68,12 +68,33 @@ def build_plan(state,release,store):
                     value=scalar_property(unit.get('surface',ev.span),measure)
                     if value is not None and value not in scalar: scalar.append(value)
             if len({v['name'] for v in scalar})!=len(scalar): raise ValueError('SCALAR_VALUE_CONFLICT')
-            emit('ENSURE_ENTITY',{'uid':mid,'name':name,'mention_ref':local['mention_ref'] if local else mention_ref,'source_tag':tag,'reference_existing':bool(known and store.has_uid(known)),
+            emit('ENSURE_ENTITY',{'uid':mid,'name':name,'mention_ref':local['mention_ref'] if local else mention_ref,'source_tag':tag,'reference_existing':bool(known and not local),
                                   **({'scalar_properties':scalar} if scalar else {})},frag)
             bid='binding:'+digest([tag,mention_ref,mid])
             from .coreference import mention_features
             emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)
             mention_roles.setdefault(role,[]).append(mid)
+        for role in selected.get('implicit_roles',()):
+            gap=f.semantic['implicit_arguments'][role]
+            target=state.observation.get('implicit_bindings',{}).get(gap['gap_id'])
+            if not target: raise ValueError('IMPLICIT_ARGUMENT_UNRESOLVED')
+            if role in mention_roles or role in roles: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')
+            mid=target['entity_ref']
+            anonymous=target.get('anonymous',False)
+            if not anonymous and not target.get('anchor_mention') and not store.has_uid(mid):
+                raise ValueError('IDENTITY_CONFLICT')
+            meta={'participant_kind':target.get('participant_kind','INDIVIDUAL'),
+                  'identity_status':'UNIDENTIFIED','source_scope':state.observation.get('source_id') or state.source_uid}
+            if meta['participant_kind']=='GROUP': meta.update(membership_status='UNKNOWN',minimum_cardinality=2)
+            emit('ENSURE_ENTITY',{'uid':mid,'mention_ref':target.get('anchor_mention',gap['gap_id']),
+                'source_tag':tag,'reference_existing':not anonymous and not target.get('anchor_mention'),
+                **({'implicit_participant':meta} if anonymous else {'name':target.get('label')})},frag)
+            bid='binding:'+digest([tag,gap['gap_id'],mid])
+            emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':gap['gap_id'],
+                'target_ref':mid,'source_tag':tag,'premise_support_refs':target.get('premise_support_refs',[]),
+                'mention_features':[target['features']],'interpretation_decision_ref':target['decision_ref'],
+                'binding_kind':'IMPLICIT_ARGUMENT'},frag)
+            roles[role]=mid
         for role,members in mention_roles.items():
             if len(members)==1: roles[role]=members[0]
             elif role=='SURFACE_ARG':

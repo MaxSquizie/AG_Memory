@@ -153,7 +153,7 @@ def prepare_references(state, release):
         candidates={uid:candidates[uid] for uid in sorted(candidates,key=rank)}
         ids=tuple(candidates)
         state.memory_mentions=tuple(dict.fromkeys((*state.memory_mentions,*ids)))
-        state.reference_candidates.append(ReferenceCandidate(ev.span,ids,evidence=[('D' if c.get('local_anchor_ref') or c.get('source_kind')=='CONTEXT' else 'P',json.dumps(c,ensure_ascii=False,sort_keys=True)) for cs in candidates.values() for c in cs],provenance=provenance))
+        state.reference_candidates.append(ReferenceCandidate(tid,ids,evidence=[('D' if c.get('local_anchor_ref') or c.get('source_kind')=='CONTEXT' else 'P',json.dumps(c,ensure_ascii=False,sort_keys=True)) for cs in candidates.values() for c in cs],provenance=provenance))
         state.syntax_trace.append({'stage':'TD','mention_ref':tid,'rejected_reference_candidates':rejected,
                                    'coref_policy':release.version('CorefPolicy') if policy else None})
         slots[tid]=candidates

@@ -96,3 +96,9 @@ system/prompt этой записи. Ответ записывайте атом�
 `CAPTURED_PROBE_AMBIGUOUS`. В артефактах явно отмечается
 `EXACT_CAPTURED_TRANSPORT`: это не новая проба модели и не native replay run_id.
 Пример фактического прохода и ограничения: [DIARY_FORMALIZATION_RUN.md](DIARY_FORMALIZATION_RUN.md).
+
+Для первого контура неявных субъектов и групп добавьте `--components`.
+Он включает `COMPONENTS_V1` через новый явно TEST_ONLY resource release/hash;
+production требует собственной reviewed-политики `ProposalPolicy.composition`.
+Подробности, границы покрытия и проверка исходного дневника:
+[COMPONENT_ARGUMENTS_RUN.md](COMPONENT_ARGUMENTS_RUN.md).

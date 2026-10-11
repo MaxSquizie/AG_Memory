@@ -155,6 +155,17 @@ def register_graph_handlers(adapter: Any) -> None:
 # resolve an ENTITY argument to an S token or fabricate a known TemplateMap entry.
 def ensure_entity(core,p):
     uid=p['uid']
+    implicit=p.get('implicit_participant')
+    if implicit is not None:
+        base={'participant_kind','identity_status','source_scope'}
+        group=implicit.get('participant_kind')=='GROUP' if isinstance(implicit,dict) else False
+        if (not isinstance(implicit,dict) or set(implicit)!=(base|({'membership_status','minimum_cardinality'} if group else set()))
+                or implicit.get('participant_kind') not in {'INDIVIDUAL','GROUP'}
+                or implicit.get('identity_status')!='UNIDENTIFIED'
+                or not isinstance(implicit.get('source_scope'),str) or not implicit['source_scope']
+                or group and (implicit['membership_status']!='UNKNOWN' or implicit['minimum_cardinality']!=2)
+                or p.get('name')):
+            raise ValueError('IMPLICIT_PARTICIPANT_INVALID')
     scalar={}
     for raw in p.get('scalar_properties',()):
         from decimal import Decimal,InvalidOperation
@@ -170,10 +181,13 @@ def ensure_entity(core,p):
         if p.get('name'): props['name']=Property('name',p['name'],'str')
         if 'name' in scalar: raise ValueError('SCALAR_VALUE_INVALID')
         props.update(scalar)
-        core.add_entity(Domain(p.get('domain','C')),props,meta={'source_tag':p.get('source_tag'),'mention_ref':p.get('mention_ref')},uid=uid)
+        core.add_entity(Domain(p.get('domain','C')),props,meta={'source_tag':p.get('source_tag'),'mention_ref':p.get('mention_ref'),
+            **({'implicit_participant':implicit} if implicit is not None else {})},uid=uid)
     elif core.store.kind_of(uid).value!='M': raise ValueError('ENTITY_REF_TYPE_MISMATCH')
     elif any(core.store.get_element_any_domain(uid).properties.get(k)!=v for k,v in scalar.items()):
         raise ValueError('SCALAR_VALUE_CONFLICT')
+    elif implicit is not None and core.store.get_element_any_domain(uid).meta.get('implicit_participant')!=implicit:
+        raise ValueError('IMPLICIT_PARTICIPANT_INVALID')
     return uid
 
 

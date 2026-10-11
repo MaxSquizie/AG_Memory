@@ -106,7 +106,12 @@ RESOURCE_SCHEMAS = {
         **{k: {'type': 'integer', 'minimum': 1} for k in ('max_nodes', 'max_edges', 'max_depth', 'max_source_tokens', 'max_rule_steps', 'max_rule_matches')},
         'max_calls_per_unit': I, 'verify_deterministic': B, 'version': S,
         'allowed_anchor_kinds': array(), 'allowed_edge_kinds': array(), 'allowed_read_sets': array(),
-        'validation_schema_version': S, 'model_key': S, 'params_hash': S}),
+        'validation_schema_version': S, 'model_key': S, 'params_hash': S,
+        'composition': obj(('version','subject_role','open_case_roles','max_candidates','context_chars'), {
+            'version': enum('COMPONENTS_V1'), 'subject_role': S,
+            'open_case_roles': {'type':'object','additionalProperties':S},
+            'max_candidates': {'type':'integer','minimum':2,'maximum':16},
+            'context_chars': {'type':'integer','minimum':128,'maximum':4096}})}),
     'IncompatibilityRules': obj(('kind', 'rule_id', 'sense_id', 'role_id', 'key_roles'), {
         'kind': enum('ROLE_EXCLUSIVE'), 'rule_id': S, 'sense_id': S, 'role_id': S, 'key_roles': array()}),
     'DomainCertificate': obj(('domain_id', 'template_ref', 'count_role', 'known_roles', 'request_window', 'completeness_evidence', 'version'), {

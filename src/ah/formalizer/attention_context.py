@@ -165,7 +165,7 @@ class AttentionContextReader:
                 if len(self.read_token_refs) % 128 == 0:
                     emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
-            if request['kind'] == 'REFERENCE':
+            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT'}:
                 # A goal redistributes existing excitation; it injects no new
                 # semantic evidence and gives no fresh independent seed.
                 for _ in range(self.engine.settings.context_query_ticks):
