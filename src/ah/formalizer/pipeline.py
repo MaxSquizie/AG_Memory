@@ -190,30 +190,47 @@ class MorphProvider:
         self._morph = MorphAnalyzer()
 
     def analyze(self, token: str) -> tuple[MorphVariant, ...]:
-        out: list[MorphVariant] = []
+        return tuple(self._variant(p,token) for p in self._morph.parse(token))
+
+    def inflect(self, token, lemma, target):
+        """Dictionary inflections of one existing lexeme, never a spelling guess."""
+        grams=set()
+        for mapping, value in ((self._CASE_MAP,target['case']),(self._NUM,target.get('number')),
+                               (self._GEND,target.get('gender'))):
+            if value and not (mapping is self._GEND and target.get('number')=='plur'):
+                grams.update(k for k,v in mapping.items() if v==value and k!='inst')
+        forms=[]
         for p in self._morph.parse(token):
-            tag = p.tag
-            grams = set(tag.grammemes)
-            cases = frozenset(code for g in grams if (code := self._CASE_MAP.get(g)))
-            consumed = {g for g in grams if self._CASE_MAP.get(g)}
-            consumed |= {g for g in grams if self._NUM.get(g)}
-            consumed |= {g for g in grams if self._GEND.get(g)}
-            consumed |= {g for g in grams if self._PERS.get(g)}
-            consumed |= {g for g in grams if self._TENSE.get(g)}
-            consumed |= {g for g in grams if self._MOOD.get(g)}
-            out.append(MorphVariant(
-                lemma=p.normal_form,
-                pos=str(tag.POS) if tag.POS is not None else None,
-                cases=cases,
-                number=next((self._NUM[g] for g in sorted(grams) if g in self._NUM), None),
-                gender=next((self._GEND[g] for g in sorted(grams) if g in self._GEND), None),
-                person=next((self._PERS[g] for g in sorted(grams) if g in self._PERS), None),
-                tense=next((self._TENSE[g] for g in sorted(grams) if g in self._TENSE), None),
-                mood=next((self._MOOD[g] for g in sorted(grams) if g in self._MOOD), None),
-                features=frozenset(grams - consumed),  # SUBX, ASPT, VOCL, ... stay visible
-                score=p.score,
-            ))
-        return tuple(out)
+            if not p.is_known or p.normal_form!=lemma or str(p.tag.POS)!='ADJF':continue
+            result=p.inflect(grams)
+            if result is not None and result.is_known:
+                forms.append((result.word,self._variant(result,result.word)))
+        return forms
+
+    def _variant(self,p,token):
+        tag = p.tag
+        grams = set(tag.grammemes)
+        cases = frozenset(code for g in grams if (code := self._CASE_MAP.get(g)))
+        consumed = {g for g in grams if self._CASE_MAP.get(g)}
+        consumed |= {g for g in grams if self._NUM.get(g)}
+        consumed |= {g for g in grams if self._GEND.get(g)}
+        consumed |= {g for g in grams if self._PERS.get(g)}
+        consumed |= {g for g in grams if self._TENSE.get(g)}
+        consumed |= {g for g in grams if self._MOOD.get(g)}
+        return MorphVariant(
+            lemma=p.normal_form,
+            pos=str(tag.POS) if tag.POS is not None else None,
+            cases=cases,
+            number=next((self._NUM[g] for g in sorted(grams) if g in self._NUM), None),
+            gender=next((self._GEND[g] for g in sorted(grams) if g in self._GEND), None),
+            person=next((self._PERS[g] for g in sorted(grams) if g in self._PERS), None),
+            tense=next((self._TENSE[g] for g in sorted(grams) if g in self._TENSE), None),
+            mood=next((self._MOOD[g] for g in sorted(grams) if g in self._MOOD), None),
+            features=frozenset(grams - consumed),  # SUBX, ASPT, VOCL, ... stay visible
+            score=p.score,
+            origin=("DICTIONARY" if p.is_known else "NONLEXICAL" if not any(c.isalpha() for c in token) else "PREDICTED"),
+            evidence_refs=tuple(type(method[0]).__name__ for method in p.methods_stack),
+        )
 
 
 def _expand_shared_form(v: MorphVariant, token: str) -> MorphVariant:
@@ -229,9 +246,10 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
     state.require_structures_open("T1")  # I30: T1 consumes SRL output; it is a structural producer
     provider = morph if preserve_variants else morph or MorphProvider()
     for ev in state.evidence:
-        observed = ev.variants if preserve_variants else provider.analyze(ev.span)
+        from .morph_evidence import partition
+        observed = partition(ev, (*ev.variants, *ev.morph_guesses) if preserve_variants else provider.analyze(ev.span))
         variants = tuple(_expand_shared_form(v, ev.span) for v in observed) if shared_form_expansion else tuple(observed)
-        if not variants:
+        if not variants or ev.is_oov():
             # OOV is a first-class candidate (keep-as-is), not an error. Dictionary
             # distance may rank candidates later; it never proves a correction.
             ev.lex_status = "OOV_KEEP_AS_IS"
@@ -244,7 +262,7 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
                 f"'{ev.span}' kept as-is: first-class candidate; dictionary distance may rank but never prove a correction",
             ))
             state.decisions[f"lex|{ev.span}"] = lex
-            continue
+            if not variants: continue
         top = max(variants, key=lambda v: v.score)
         ev.variants = variants  # whole parses; nothing dropped by a score cutoff
         ev.lemma, ev.pos, ev.score = top.lemma, top.pos, top.score

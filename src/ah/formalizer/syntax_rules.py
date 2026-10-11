@@ -503,7 +503,8 @@ def run_srl(state, release, morph):
     from .pipeline import MorphProvider
     provider = morph or MorphProvider()
     for token in state.evidence:
-        token.variants = tuple(provider.analyze(token.span))
+        from .morph_evidence import partition
+        token.variants = partition(token, provider.analyze(token.span))
     try:
         found = enumerate_matches(state, release.entries('SyntaxRules'), 'SRL', release.entries('ProposalPolicy')[0], release)
     except SearchLimit as exc:

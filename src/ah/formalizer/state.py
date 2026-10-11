@@ -87,6 +87,8 @@ class MorphVariant:
     mood: str | None = None  # indicative | imperative
     features: frozenset[str] = frozenset()  # remaining tagset/dictionary codes (e.g. SUBX, ASPT)
     score: float = 1.0
+    origin: str = "DECLARED"  # DICTIONARY | PREDICTED | NONLEXICAL | CONTEXTUAL | RECOVERED | DECLARED
+    evidence_refs: tuple[str, ...] = ()
 
 
 @dataclass
@@ -108,7 +110,9 @@ class TokenEvidence:
     cases: frozenset[str] = frozenset()  # INDEX only: strict union over variants
     variants: tuple[MorphVariant, ...] = ()  # whole parses; the authoritative record
     score: float = 1.0  # top variant score
-    lex_status: str = "OK"  # OK | OOV_KEEP_AS_IS (first-class candidate, D-provenance)
+    lex_status: str = "OK"  # OK | OOV_KEEP_AS_IS | RECOVERY_SELECTED
+    morph_guesses: tuple[MorphVariant, ...] = ()  # auditable predictions, not hard agreement constraints
+    lexical_recovery: dict | None = None  # source is immutable; selected dictionary repair and original readings
 
     def is_oov(self) -> bool:
         return self.lex_status == "OOV_KEEP_AS_IS"

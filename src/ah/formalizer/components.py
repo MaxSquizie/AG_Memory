@@ -17,7 +17,7 @@ def compose(state, release, selector):
         return
     state.require_structures_open('COMPONENT_COMPOSITION')
     evidence = {e.token_id:e for e in state.evidence}
-    covered = {f.predicate_token_ref for f in state.frames}
+    covered = {f.predicate_token_ref for f in state.frames if not f.semantic.get('structural_rejection')}
     from .regions import protected_intervals
     protected_ranges=protected_intervals(state.text)
     for region in list(state.region_forest.regions):

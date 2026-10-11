@@ -9,7 +9,7 @@ def projection(variant, attachment, cfg):
     host, reading = attachment
     if not agreeing(reading, variant):
         return None
-    matches = [r for r in cfg['refinement']['participle_voices']
+    matches = [r for r in cfg.get('refinement',{}).get('participle_voices',())
                if r['feature'] in variant.features]
     if len(matches) != 1:
         return None

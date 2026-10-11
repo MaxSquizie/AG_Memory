@@ -20,7 +20,7 @@ def nominal_variants(tokens, group, limit):
     out=[]
     for pv in unique(v for v in prep.variants if v.pos=='PREP'):
         for nv in unique(v for v in head.variants if v.pos in {'NOUN','NPRO'}):
-            adjectives=[unique(v for v in a.variants if v.pos=='ADJF' and
+            adjectives=[unique(v for v in a.variants if v.pos in {'ADJF','PRTF'} and
                 compatible(_features(v),_features(nv)) and set(v.cases)&set(nv.cases))
                 for a in anchors[1:-1]]
             if len(out)+prod(len(x) for x in adjectives)>limit: raise OverflowError

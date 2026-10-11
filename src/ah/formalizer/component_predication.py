@@ -38,7 +38,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     frames = [f for bundle in bundles for f in bundle]
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
     incomplete_search = any(d.code in {'COMPONENT_SEARCH_INCOMPLETE','COMPONENT_NOMINAL_SELECTION_UNRESOLVED',
-        'COMPONENT_DEPENDENCY_UNRESOLVED','COMPONENT_DEPENDENCY_CONTRADICTION','COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED','COMPONENT_NOMINAL_CYCLE','COMPONENT_NOMINAL_HOST_UNRESOLVED'} and d.detail==region.region_id
+        'COMPONENT_DEPENDENCY_UNRESOLVED','COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED','COMPONENT_NOMINAL_CYCLE','COMPONENT_NOMINAL_HOST_UNRESOLVED'} and d.detail==region.region_id
                             for d in state.diagnostics[diagnostics_before:])
     if incomplete_search or len(complete) > cfg['max_candidates']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)
@@ -94,6 +94,10 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         chosen = _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, context, region.source_range,
                         question=target_question+(local['question'] if local else ''))
+    for bundle in complete:
+        if bundle[-1].frame_id==chosen:
+            from .component_temporal_scope import resolve
+            if not resolve(state,release,selector,region,tokens,bundle,cfg): chosen=None
     for bundle in bundles:
         for f in bundle:
             f.semantic['composition_decision'] = region.region_id+'|composition'

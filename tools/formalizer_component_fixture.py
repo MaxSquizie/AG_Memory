@@ -24,6 +24,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         if not nominal_tree: raise ValueError('dependency_reduction requires nominal_tree')
         from tools.formalizer_dependency_fixture import extend
         extend(manifest,core,policy['entries'][0]['composition'])
+    if predication:
+        policy['entries'][0]['composition']['oov_morphology']='CONTEXTUAL_NOMINAL_V1'
+        policy['entries'][0]['composition']['agreement_recovery']={'version':'MODIFIER_AGREEMENT_V1','max_edits':2}
     if refinement:
         if not dependency_reduction: raise ValueError('refinement requires dependency_reduction')
         from tools.formalizer_refinement_fixture import extend
@@ -38,6 +41,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if clock_time:
         from tools.formalizer_clock_fixture import clock_rule
         next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].append(clock_rule())
+    if clock_time:
+        from tools.formalizer_period_fixture import rules
+        next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].extend(rules())
     if clock_ranges:
         from tools.formalizer_clock_fixture import range_rule
         next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].append(range_rule())

@@ -25,7 +25,7 @@ def select_units(state, release, selector, region, covers, frame, cfg):
         return None
     alternatives=next(iter(grouped.values())); selected=[]
     for index in range(len(alternatives[0])):
-        units={digest([_morph(u['variant']),[(e.token_id,_morph(v)) for e,v in
+        units={digest([_morph(u['variant']),u.get('bound_host'),[(e.token_id,_morph(v)) for e,v in
                 [*u['entities'],*u['adjectives']]]]):u for u in (c[index] for c in alternatives)}
         options=[{'candidate_id':k,'label':'Whole phrase readings: '+str({e.span:
             {a:b for a,b in _morph(v).items() if a in {'lemma','pos','cases','number','gender'}}

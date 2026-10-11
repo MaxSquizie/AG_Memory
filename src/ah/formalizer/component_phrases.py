@@ -14,7 +14,7 @@ def prepositional_groups(tokens, excluded=()):
         variants=[v for v in prep.variants if v.pos=='PREP']
         if not variants or prep.token_id in excluded: continue
         j=i+1
-        while j<len(tokens) and any(v.pos=='ADJF' for v in tokens[j].variants): j+=1
+        while j<len(tokens) and any(v.pos in {'ADJF','PRTF'} for v in tokens[j].variants): j+=1
         if j==len(tokens): continue
         head=tokens[j]
         if head.token_id in excluded or not any(v.pos in {'NOUN','NPRO'} for v in head.variants): continue

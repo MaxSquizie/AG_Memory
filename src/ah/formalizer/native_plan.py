@@ -26,6 +26,8 @@ def build_plan(state,release,store):
         active=active|{fid}
         f=frames[fid]
         if f.semantic.get('structural_unresolved'): raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
+        if structural and (f.semantic.get('relative_temporal') or f.semantic.get('relative_time_targets')):
+            raise ValueError('TEMPORAL_NESTED_SCOPE_UNSUPPORTED')
         d=state.decisions.get(fid+'|predicate_value')
         selected=f.semantic.get('candidate_specs',{}).get(d.selected[0]) if d and len(d.selected)==1 else None
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
@@ -148,7 +150,7 @@ def build_plan(state,release,store):
             emit('MATERIALIZE_USAGE_LINK',{'link_id':'usage:'+digest([n,uid,position,'OPERATOR']),'node_ref':n,'parent_ref':uid,'position':position,'kind':'OPERATOR'},frag)
         return uid,content_key
 
-    def support(uid,frag,reg,*,kind='ROOT',premises=(),rule=None,witness_ref=None,formula_ref=None):
+    def support(uid,frag,reg,*,kind='ROOT',premises=(),rule=None,witness_ref=None,formula_ref=None,include_nominal_links=True):
         sid='support:'+digest([tag,frag,uid,kind,rule,premises])
         bindings=[op.payload['binding_id'] for op in op_by_id.values() if op.op_type=='SET_IDENTITY_BINDING' and frag in op.fragment_refs]
         raw={'record_id':sid,'conclusion_ref':uid,'kind':kind,'source_tag':tag,'binding_refs':bindings}
@@ -156,7 +158,7 @@ def build_plan(state,release,store):
         else: raw.update(rule_id=rule,premise_support_refs=list(premises))
         if formula_ref is not None: raw['formula_ref']=formula_ref
         emit('ADD_ROOT_SUPPORT' if kind=='ROOT' else 'ADD_DERIVED_SUPPORT',raw,frag)
-        if kind=='ROOT':
+        if kind=='ROOT' and include_nominal_links:
             from .nominal_usage import link_id
             for owner,payload in nominal_links:
                 if owner==frag:
@@ -285,7 +287,12 @@ def build_plan(state,release,store):
                     support(n,frag,child_region,kind='DERIVED',premises=[sid],rule='AND_ELIMINATION',witness_ref=witness if child_region==reg else None,formula_ref=formula_ref)
             from .relative_time_plan import emit_relative_time
             if 'frame_ref' in t:
-                emit_relative_time(state,frames[t['frame_ref']],uid,ck,frag,tag,emit,support)
+                owner=frames[t['frame_ref']]
+                emit_relative_time(state,owner,uid,ck,frag,tag,emit,support)
+                for scope in owner.semantic.get('relative_time_targets',()):
+                    target=nodes[scope['frame_ref']]
+                    spec=next(op.payload for op in op_by_id.values() if op.op_type=='ENSURE_NODE' and op.payload['uid']==target)
+                    emit_relative_time(state,owner,target,spec['content_key'],frag,tag,emit,support,rows=scope['rows'])
             fragments.append(frag)
         except (ValueError,KeyError) as exc:
             del nominal_links[nominal_before:]

@@ -1,6 +1,6 @@
 """Reduce local dependencies before the Cartesian predicate-role join."""
 from .canonical_ledger import digest
-from .component_dependency_domains import domains,prune
+from .component_dependency_domains import domains,prune,clean
 from .component_probe import _probe
 
 
@@ -13,6 +13,9 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg):
         context_range=paragraph.source_range
     while len(fixed)<len(pool):
         if not prune(pool,fixed):
+            state.syntax_trace.append({'kind':'DEPENDENCY_REJECTED','region_ref':region.region_id,
+                'predicate_ref':p.token_id,'predicate_reading':clean(pv),'roles':roles,
+                'empty_domains':[tid for tid,choices in pool.items() if not choices]})
             state.diag('COMPONENT_DEPENDENCY_CONTRADICTION',region.region_id);return None
         remaining=[t for t in pool if t not in fixed]
         tid=min(remaining,key=lambda t:(len(pool[t]),evidence[t].start))

@@ -37,6 +37,9 @@ def _failure_code(exc,default):
 
 
 def _temporal(text, observation, release, *, source_start=0):
+    from .named_periods import resolve as resolve_period
+    period_result=resolve_period(text,observation,release,source_start=source_start)
+    if period_result is not None: return period_result
     from .clock_ranges import resolve as resolve_range
     range_result=resolve_range(text,observation,release,source_start=source_start)
     if range_result is not None: return range_result
@@ -634,10 +637,17 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         ev.variants=tuple(sorted(ev.variants,key=lambda v:(-int((v.lemma,v.pos) in preferred),-v.score)))
     emit("stage", stage="T2_REGIONS", tokens=len(state.evidence), regions=len(state.region_forest.regions))
     frozen_generation=observation.get('clarification_generation')
+    if not frozen_generation and observation.get('structural_contract')=='region_probes':
+        from .contextual_agreement import resolve as resolve_agreement
+        resolve_agreement(state,release,selector,morph)
+        from .contextual_oov import resolve
+        resolve(state,release,selector)
     if frozen_generation:
         from .state import RejectionRecord
         if frozen_generation['resource_snapshot'] != release.sha256:
             raise ValueError('CLARIFICATION_RESOURCE_STALE')
+        from .lexical_snapshot import restore as restore_lexical
+        restore_lexical(state.evidence,frozen_generation.get('lexical_decisions',()))
         state.frames=[]
         for raw in frozen_generation['frames']:
             raw=deepcopy(raw)
@@ -687,6 +697,9 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         region_mode=observation.get('structural_contract')=='region_probes'
         state.frames=_grammar_frames(state,release,selector if region_mode else None)
         if region_mode:
+            from .temporal_token_ownership import reject_entity_overlap
+            reject_entity_overlap(state,release,state.frames)
+        if region_mode:
             from .components import compose
             compose(state,release,selector)
             if not state.frames and not state.logical_roots:
@@ -696,7 +709,9 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     if frozen_generation:
         from .coordination_clarifications import apply as apply_coordination_choices
         apply_coordination_choices(state,release)
+    from .lexical_snapshot import freeze as freeze_lexical
     state.generation_snapshot={'resource_snapshot':release.sha256,
+        'lexical_decisions':freeze_lexical(state.evidence),
         'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
         'syntax_trace':deepcopy(state.syntax_trace),
         'linked_alternatives':[asdict(a) for a in state.linked_alternatives],

@@ -2,8 +2,8 @@
 from .canonical_ledger import digest
 
 
-def emit_relative_time(state,frame,target,target_content_key,fragment,tag,emit,support):
-    for row in frame.semantic.get('relative_temporal',()):
+def emit_relative_time(state,frame,target,target_content_key,fragment,tag,emit,support,*,rows=None):
+    for row in frame.semantic.get('relative_temporal',()) if rows is None else rows:
         anchor=row['anchor_ref']
         tid='T:open:event-anchor:'+digest([state.source_uid,anchor])
         emit('ENSURE_TEMPLATE',{'uid':tid,'predicate_form':row['anchor_lemma'],'roles':[],
@@ -25,7 +25,7 @@ def emit_relative_time(state,frame,target,target_content_key,fragment,tag,emit,s
                 'position':position,'kind':'OPERATOR','operator':row['operator']},fragment)
         # The relation is directly expressed; the anchor is structural only.
         # No TimeAssertion exists without an absolute, licensed time region.
-        support(gid,fragment,None)
+        support(gid,fragment,None,include_nominal_links=False)
         emit('DECLARE_FRAGMENT',{'fragment_id':fragment,'content_key':key,'polarity':True,
             'proposition':None,'region':None,'source_tag':tag,'node_ref':gid,
             'incompatibility_rules':[]},fragment)
