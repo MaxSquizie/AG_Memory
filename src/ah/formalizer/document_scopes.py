@@ -15,7 +15,7 @@ def prepare(state, release, selector, frozen=None):
         from .state import Decision,Ground,ResourceProvenance
         for row in state.document_scopes:
             key=row['decision_ref']; record=deepcopy(frozen['component_probe_records'][key])
-            raw=record['decision'];raw['candidates']=tuple(raw['candidates']);raw['selected']=tuple(raw['selected'])
+            raw=deepcopy(record['decision']);raw['candidates']=tuple(raw['candidates']);raw['selected']=tuple(raw['selected'])
             raw['grounds']=[Ground(**g) for g in raw['grounds']]
             raw['provenance']=ResourceProvenance(**raw['provenance'])
             state.decisions[key]=Decision(**raw);state.component_probe_records[key]=record

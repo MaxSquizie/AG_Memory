@@ -30,7 +30,9 @@ def compose(state, release, selector):
         if not predicates or any(p.token_id in covered for p in predicates): continue
         if cfg.get('refinement'):
             from .component_refinement import compose_area
-            state.frames.extend(compose_area(state,release,selector,region,tokens,cfg))
+            from .soft_clause_boundaries import areas
+            for area,owned in areas(state,release,selector,region,tokens,cfg):
+                state.frames.extend(compose_area(state,release,selector,area,owned,cfg))
             continue
         from .component_area_scope import allowed, connectives
         if not allowed(state,release,region,tokens,conjunction=True):

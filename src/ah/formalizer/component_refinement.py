@@ -118,6 +118,13 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
         state.text[slice(*region.source_range)],region.source_range,
         question='Which existing nominal does «'+state.text[body[0].start:body[-1].end]+
         '» describe? Choose its immediate host. Do not resolve pronoun identities or invent an entity.')
+    assumption=None
+    if chosen is None and boundary['kind']=='PARTICIPLE':
+        from .refinement_uncertainty import select as select_assumption
+        members={tid:[tid] for tid in hosts}
+        members.update({tid:entry[3]['group']['member_refs'] for tid,entry in group_hosts.items()})
+        assumption=select_assumption(state,release,region.region_id+'|refinement-host',choices,members,cfg)
+        if assumption:chosen=assumption['selected']
     if chosen is None: return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
     selected_group=group_hosts.get(chosen)
     owner,host,reading=selected_group[:3] if selected_group else hosts[chosen]
@@ -160,6 +167,7 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
     description.semantic['component_child']=owner.frame_id
     owner.semantic.setdefault('nominal_args',[]).append({'host_token_ref':chosen,'host_role':host_role,
         'frame_ref':description.frame_id,'host_frame_ref':host_frame.frame_id,
+        **({'scope_assumption':assumption} if assumption else {}),
         **({'host_group_member_refs':selected_group[3]['group']['member_refs']} if selected_group else {})})
     state.syntax_trace.append({'kind':'NOMINAL_REFINEMENT','parent_ref':owner.frame_id,
         'description_ref':description.frame_id,'host_token_ref':chosen,'kind_detail':boundary['kind'],

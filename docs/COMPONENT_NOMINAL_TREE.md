@@ -44,9 +44,9 @@ M_искусство; определения «австрийское» и «и�
 host_ref:Ref(M|K), host_role, source_tag, root_support_ref, attitude=UNKNOWN,
 status=LIVE}`. `position` — ENTITY-роль родителя; `host_role` — роль того же M или K
 в описании. Write boundary проверяет обе стороны, тип M|K и привязку к ROOT-опоре
-того же source_tag. ID = H(node_ref, parent_ref, position, NOMINAL, host_ref,
+того же source_tag. Для отдельного члена родительского K допустим проверяемый `host_group_ref` + `host_member_binding_ref` (DEFERRED_SCOPE_AND_DESCRIBED_ENTITIES.md). ID = H(node_ref, parent_ref, position, NOMINAL, host_ref,
 source_tag, root_support_ref); при наличии `host_path` и/или `content_time` они
-добавляются к ключу в этом порядке. Контракт временной квалификации —
+добавляются к ключу в этом порядке; для описания члена группы затем добавляются `[host_group_ref, host_member_binding_ref]`; при наличии `scope_assumption` она добавляется последней. Контракт временной квалификации —
 [CONTEXTUAL_GROUP_REFINEMENT.md](CONTEXTUAL_GROUP_REFINEMENT.md). Это отдельный вариант tagged union UsageLink;
 ограничение пропозициональных слотов для OPERATOR не меняется.
 

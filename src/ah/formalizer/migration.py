@@ -11,7 +11,7 @@ from .canonical_ledger import digest
 def _input_changes(changes):
     allowed={'context_snapshot','context_facts','declared_reads','entity_bindings','entity_binding_grounds',
              'coreference_sources','time_anchor','timezone', 'clarification_choices',
-             'clarification_structures', 'clarification_selection_ref', 'clarification_generation'}
+             'clarification_structures', 'clarification_selection_ref', 'clarification_generation', 'clarification_delivery'}
     if not isinstance(changes,dict) or not set(changes)<=allowed:
         raise ValueError('MIGRATION_CONTEXT_CHANGE_INVALID')
     for key,value in changes.items():
@@ -116,7 +116,10 @@ def plan_mass_migration(store,binding,release,*,trigger_ref,items):
             oid,version=item['observation_id'],item['previous_version']
             observation=store.ledger.data['observations'].get(digest([oid,version]))
             raw=binding.input_snapshot(oid,version)
-            if not observation or observation['status']!='LIVE' or raw is None:
+            resolution_only=observation is None and any(r['payload'].get('kind')=='RESOLUTION'
+                and r['payload'].get('observation_id')==oid and r['payload'].get('version')==version
+                for r in store._journal.scan_unprocessed(payload_kinds={'RESOLUTION'}))
+            if raw is None or (observation['status']!='LIVE' if observation else not resolution_only):
                 raise ValueError('MIGRATION_SOURCE_STALE')
             paths=store.ledger.paths()
             for link in item['open_template_links']:

@@ -59,6 +59,8 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
                               'entity_ref':next(iter(targets)), 'representative':chosen})
             return chosen
     if reply.outcome != 'ONE_SELECTED':
+        d.history.append({'kind':'CLOSED_PROBE_ALTERNATIVES','outcome':reply.outcome,
+                          'selected':list(reply.selected)})
         d.outcome = 'INSUFFICIENT_CONTEXT' if reply.outcome == 'INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
         from .clarifications import offer
         offer(state,key,'IMPLICIT_ARGUMENT' if slot=='implicit_argument' else 'COMPONENT',context,options)

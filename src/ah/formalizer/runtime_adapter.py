@@ -51,7 +51,9 @@ class FormalizerAdapter:
         commit) on ``store`` and returns a NativePerceptionResult; downstream reads committed facts from the store.
     The native path is only available when a durable ``store`` + ``binding`` are wired (see bootstrap)."""
 
-    def __init__(self, selector, morph=None, schema=None, store=None, binding=None, release=None, ignition=None, structure_mode='region_probes'):
+    def __init__(self, selector, morph=None, schema=None, store=None, binding=None, release=None, ignition=None, structure_mode='region_probes', clarification_channel='AVAILABLE'):
+        if clarification_channel not in {'AVAILABLE','UNAVAILABLE'}:raise ValueError('CLARIFICATION_CHANNEL_INVALID')
+        self._clarification_channel=clarification_channel
         self._ignition = ignition
         self._structure_mode = structure_mode
         self._release = release
@@ -126,6 +128,9 @@ class FormalizerAdapter:
         from ah.formalizer.v7_pipeline import interpret_full
 
         schema = self._schema or load_decision_schema()
+        if self._clarification_channel!='AVAILABLE':
+            raw_input=dict(raw_input or {})
+            raw_input.setdefault('clarification_channel',self._clarification_channel)
         state, rep = interpret_full(
             text, schema, self._selector, self._store, self._binding,
             morph=self._morph, context_facts=context_facts, release=self._release, raw_input=raw_input, version=version, observation_id=observation_id, run_id=run_id,
@@ -149,6 +154,14 @@ class FormalizerAdapter:
                         'request_id': rid, 'observation_id': rep.observation_id,
                         'version': rep.version, 'outcome': rep.terminal, 'batch_hash': rep.batch_hash})
         self._capture_diagnostics(state, rep, result)
+        return result
+
+    def ignore_clarification(self, resolution_key):
+        """Host explicitly reports an ignored question; no wall-clock timeout."""
+        from .clarification_deferral import ignore
+        state,rep=ignore(self,resolution_key)
+        result=self._receipt(state,rep)
+        self._capture_diagnostics(state,rep,result)
         return result
 
     def _receipt(self, state, rep):

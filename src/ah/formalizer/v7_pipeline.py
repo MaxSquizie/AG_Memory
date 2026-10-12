@@ -25,6 +25,11 @@ class InterpretationReport:
 
 def _observation(text,*,version,observation_id=None,raw_input=None,context_facts=()):
     raw=dict(raw_input or {})
+    if raw.get('clarification_channel','AVAILABLE') not in {'AVAILABLE','UNAVAILABLE'}:
+        raise ValueError('CLARIFICATION_CHANNEL_INVALID')
+    delivery=raw.get('clarification_delivery',{})
+    if not isinstance(delivery,dict) or any(not isinstance(k,str) or not k or v!='IGNORED' for k,v in delivery.items()):
+        raise ValueError('CLARIFICATION_DELIVERY_INVALID')
     if not isinstance(text,str): raise ValueError('INPUT_REJECTED: text must be a string')
     try: text.encode('utf-8',errors='strict')
     except UnicodeError as exc: raise ValueError('INPUT_REJECTED: invalid UTF-8') from exc

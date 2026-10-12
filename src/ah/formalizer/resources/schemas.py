@@ -142,6 +142,7 @@ RESOURCE_SCHEMAS = {
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
             'dependency_reduction': enum('CONSTRAINT_TREE_V1'),
             'contextual_nominal_case': enum('PROPER_NAME_COORDINATION_V1'),
+            'soft_clause_boundaries': enum('CAPITAL_FINITE_HINT_V1'),
             'oov_morphology': enum('CONTEXTUAL_NOMINAL_V1'),
             'agreement_recovery': obj(('version','max_edits'),{'version':enum('MODIFIER_AGREEMENT_V1'),
                 'max_edits':{'type':'integer','minimum':1,'maximum':2}}),
@@ -149,6 +150,7 @@ RESOURCE_SCHEMAS = {
             'dependency_senses': obj(('GENITIVE','APPOSITION'), {'GENITIVE':S,'APPOSITION':S}),
             'refinement': obj(('version','max_depth','relative_markers','participle_voices'), {
                 'version':enum('POSTNOMINAL_AREAS_V1'),
+                'ambiguity_policy':enum('ASK_THEN_MINIMAL_MEMBER_SET_V1'),
                 'max_depth':{'type':'integer','minimum':1,'maximum':16},
                 'relative_markers':array(obj(('lemma','POS'),{'lemma':S,'POS':enum('ADVB')})),
                 'participle_voices':array(obj(('feature','host_role','case_roles'),{

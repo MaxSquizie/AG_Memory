@@ -34,7 +34,7 @@ def build_plan(state,release,store):
         selected=f.semantic.get('candidate_specs',{}).get(d.selected[0]) if d and len(d.selected)==1 else None
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         e=evidence[f.predicate_token_ref]
-        roles={}; mention_roles={}
+        roles={}; mention_roles={}; mention_entities={}; mention_bindings={}
         selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',()))
         mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==selected_roles]
         measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
@@ -84,6 +84,7 @@ def build_plan(state,release,store):
                 ev=replace(ev,variants=_frame_variants(f,ev))
             emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)
             mention_roles.setdefault(role,[]).append(mid)
+            mention_entities[tid]=mid;mention_bindings[tid]=bid
         from .implicit_plan import emit_implicit_roles
         emit_implicit_roles(state,store,f,selected,tag,frag,roles,mention_roles,emit,frames)
         from .spatial_plan import emit_roles as emit_spatial_roles
@@ -134,10 +135,19 @@ def build_plan(state,release,store):
                 if len(host_roles)!=1 or None in host_roles:raise ValueError('NOMINAL_HOST_UNRESOLVED')
                 host_role=next(iter(host_roles))
             if host_role is None or host_role not in roles: raise ValueError('NOMINAL_HOST_UNRESOLVED')
+            host_ref=roles[host_role];member_link={}
+            single=child.get('host_token_ref') if not child.get('host_group_member_refs') else None
+            if single in mention_entities and mention_entities[single]!=host_ref:
+                from .component_nominal_groups import group_for
+                group=group_for(f,host_role,selected['roles'])
+                if single not in group['member_refs']:raise ValueError('NOMINAL_HOST_UNRESOLVED')
+                member_link={'host_group_ref':host_ref,'host_member_binding_ref':mention_bindings[single]}
+                host_ref=mention_entities[single]
             nominal_links.append((frag,{'node_ref':target,'parent_ref':nid,'position':host_role,
-                'kind':'NOMINAL','attitude':'UNKNOWN','host_ref':roles[host_role],
+                'kind':'NOMINAL','attitude':'UNKNOWN','host_ref':host_ref,**member_link,
                 'host_role':child['host_role'],'source_tag':tag,
                 **content_time(frames[child['frame_ref']],target,tag),
+                **({'scope_assumption':child['scope_assumption']} if child.get('scope_assumption') else {}),
                 **({'host_path':host_path} if len(host_path)>1 else {})}))
         nodes[fid]=nid
         return nid,ck

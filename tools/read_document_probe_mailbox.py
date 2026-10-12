@@ -75,6 +75,8 @@ def main(argv=None):
                         help='Explicit TEST_ONLY resource release in a new isolated AH; never production validation')
     parser.add_argument('--captured-probes',type=Path,
                         help='Exact recorded request/reply pairs for transport diagnostics; not a live model or canonical replay')
+    parser.add_argument('--clarification-channel',choices=('AVAILABLE','UNAVAILABLE'),default='AVAILABLE',
+                        help='Declare whether an agent can ask the source owner; pinned in native input')
     parser.add_argument('--components',action='store_true',
                         help='Use the explicit TEST_ONLY COMPONENTS_V1 policy (new resource hash)')
     parser.add_argument('--relative-time',action='store_true',help='TEST_ONLY released event-relative adjunct rules; requires --components')
@@ -137,7 +139,7 @@ def main(argv=None):
     ignition=IgnitionEngine(core,IgnitionSettings(),WorkspaceSettings(.02))
     backend=MailboxBackend(args.out,captured_probes=args.captured_probes)
     selector=RealBackendSelector(backend,journal=journal,model_key=MailboxBackend.model)
-    adapter=FormalizerAdapter(selector,morph=MorphProvider(),store=store,binding=binding,release=release,ignition=ignition)
+    adapter=FormalizerAdapter(selector,morph=MorphProvider(),store=store,binding=binding,release=release,ignition=ignition,clarification_channel=args.clarification_channel)
     perception=LLMPerceptionService(None,LLMPerceptionSettings(),formalizer=adapter,native_commit=True)
     services=SimpleNamespace(core=core,ignition=ignition,perception=perception,
         integration=IntegrationService(core,IntegrationConfig.from_settings(IntegrationSettings())),
