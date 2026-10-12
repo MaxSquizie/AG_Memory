@@ -2,6 +2,18 @@
 import re
 
 
+def bound_rules():
+    # Forms are resource data. Runtime stores the captured phrase unchanged;
+    # these entries deliberately contain no numeric interpretation or hours.
+    forms = ['одного','двух','трех','трёх','четырех','четырёх','пяти','шести',
+             'семи','восьми','девяти','десяти','одиннадцати','двенадцати']
+    atoms = '(?:[0-9]{1,2}|'+'|'.join(map(re.escape, forms))+')'
+    anchor = atoms+r'\s+(?:часа|часов)\b'
+    return [{'rule_id':'TEST-SYMBOLIC-BOUND-'+op, 'kind':'TEMPORAL_BOUND', 'operator':op,
+             'pattern':r'\b'+word+r'\s+(?P<anchor>'+anchor+')'}
+            for word,op in [('до','BEFORE'),('после','AFTER')]]
+
+
 def clock_rule():
     atoms = ['ноль','один','два','три','четыре','пять','шесть','семь','восемь','девять',
              'десять','одиннадцать','двенадцать','тринадцать','четырнадцать',

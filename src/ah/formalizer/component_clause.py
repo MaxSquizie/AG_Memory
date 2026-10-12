@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None):
+def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=()):
     from .contextual_name_case import overlay
     tokens=overlay(tokens,nominal_groups)
     if select:
@@ -40,6 +40,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
         return []
     candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive)
     for f in candidates:
+        f.semantic['qualitative_groups']=[g for g in qualitative_groups if g['head_ref'] in f.semantic['proposed_roles']]
         f.semantic['relative_temporal']=relative
         f.semantic['component_questions'].extend(questions(relative))
         if relative: f.semantic['requires_attachment_probe']=True

@@ -43,6 +43,9 @@ def _temporal(text, observation, release, *, source_start=0):
     from .clock_ranges import resolve as resolve_range
     range_result=resolve_range(text,observation,release,source_start=source_start)
     if range_result is not None: return range_result
+    from .symbolic_temporal_bounds import resolve as resolve_bound
+    bound_result=resolve_bound(text,observation,release,source_start=source_start)
+    if bound_result is not None: return bound_result
     from .clock_expressions import resolve
     clock_result=resolve(text,observation,release,source_start=source_start)
     if clock_result is not None: return clock_result

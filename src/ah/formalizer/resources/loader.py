@@ -98,6 +98,9 @@ class ResourceRelease:
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         composition=policy.get('composition')
         if composition:
+            from ..qualitative_quantity import validate as validate_quantity
+            try: validate_quantity(composition)
+            except ValueError as exc: raise ResourceMissing(str(exc)) from exc
             from ..contextual_preposition_case import validate as validate_government
             try: validate_government(composition)
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc
@@ -199,7 +202,11 @@ class ResourceRelease:
             if x.get('pattern'): re.compile(x['pattern'])
         for x in self.entries('TemporalRules'):
             re.compile(x['pattern'])
-            if x['kind'] not in {'POINT_CLOCK','DAY_INTERVAL','INTERVAL_CLOCK','WORD_CLOCK','CLOCK_RANGE','NAMED_PERIOD'} or x.get('interval_semantics','EXISTENTIAL') not in {'EXISTENTIAL','CONTINUOUS'}: raise ResourceMissing('invalid temporal rule')
+            if x['kind'] not in {'POINT_CLOCK','DAY_INTERVAL','INTERVAL_CLOCK','WORD_CLOCK','CLOCK_RANGE','NAMED_PERIOD','TEMPORAL_BOUND'} or x.get('interval_semantics','EXISTENTIAL') not in {'EXISTENTIAL','CONTINUOUS'}: raise ResourceMissing('invalid temporal rule')
+            if x['kind']=='TEMPORAL_BOUND':
+                from ..symbolic_temporal_bounds import validate_rule
+                try: validate_rule(x)
+                except ValueError as exc: raise ResourceMissing(str(exc)) from exc
             if x['kind']=='NAMED_PERIOD':
                 from ..named_periods import validate_rule
                 try: validate_rule(x)

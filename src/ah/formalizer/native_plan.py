@@ -73,7 +73,9 @@ def build_plan(state,release,store):
                     value=scalar_property(unit.get('surface',ev.span),measure)
                     if value is not None and value not in scalar: scalar.append(value)
             if len({v['name'] for v in scalar})!=len(scalar): raise ValueError('SCALAR_VALUE_CONFLICT')
+            from .qualitative_group_entity import payload as quantity_payload
             emit('ENSURE_ENTITY',{'uid':mid,'name':name,'mention_ref':local['mention_ref'] if local else mention_ref,'source_tag':tag,'reference_existing':bool(known and not local),
+                                  **quantity_payload(f,tid),
                                   **({'scalar_properties':scalar} if scalar else {})},frag)
             bid='binding:'+digest([tag,mention_ref,mid])
             from .coreference import mention_features

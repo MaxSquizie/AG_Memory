@@ -42,6 +42,10 @@ def solve_aggregate(engine,adapter,ledger,goal,query,workspace,attention,context
             if answer.status is LogicalStatus.PROVED:
                 witnessed[uid]=set(r.uid for r in answer.premise_refs if r.kind in {RefKind.N,RefKind.G})
                 proof_refs.extend(answer.premise_refs)
+        from .qualitative_group_entity import has_unspecified_members
+        if has_unspecified_members(engine.core,witnessed):
+            refs=tuple(dict.fromkeys(proof_refs))
+            return outcome(LogicalStatus.UNKNOWN,refs,('QUALITATIVE_QUANTITY_NOT_NUMERIC',),CountConclusion(None,None,refs,None))
         lower=len(witnessed)
     else:
         owner=_owner(goal.pattern)

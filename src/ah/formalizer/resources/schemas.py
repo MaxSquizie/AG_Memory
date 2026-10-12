@@ -98,7 +98,8 @@ RESOURCE_SCHEMAS = {
         'restriction_pattern': O, 'precedence_constraints': array(O)}),
     'AttitudeMap': obj(('lemma', 'argument_role', 'attitude'), {'lemma': S, 'argument_role': S,
         'attitude': enum('QUOTED', 'EMBEDDED', 'HYPOTHETICAL', 'UNKNOWN'), 'holder_role': S, 'factivity': B}),
-    'TemporalRules': obj(('pattern', 'kind'), {'pattern': S, 'kind': enum('POINT_CLOCK', 'DAY_INTERVAL', 'INTERVAL_CLOCK', 'WORD_CLOCK', 'CLOCK_RANGE', 'NAMED_PERIOD'),
+    'TemporalRules': obj(('pattern', 'kind'), {'pattern': S, 'kind': enum('POINT_CLOCK', 'DAY_INTERVAL', 'INTERVAL_CLOCK', 'WORD_CLOCK', 'CLOCK_RANGE', 'NAMED_PERIOD', 'TEMPORAL_BOUND'),
+        'operator': enum('BEFORE','AFTER'),
         'day_offset': {'type': 'integer'}, 'interval_semantics': enum('EXISTENTIAL', 'CONTINUOUS'), 'rule_id': S,
         'period_id': S, 'start_clock': O, 'end_clock': O,
         'end_day_offsets': array({'type':'integer','minimum':0}),
@@ -141,6 +142,9 @@ RESOURCE_SCHEMAS = {
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
             'modifier_scope': enum('SHARED_EVENT_V1'),
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
+            'qualitative_quantity': obj(('version','rules'), {
+                'version':enum('LEXICAL_GROUP_V1'),
+                'rules':array(obj(('rule_id','lemma','POS'),{'rule_id':S,'lemma':S,'POS':enum('NUMR')}),minimum=1)}),
             'dependency_reduction': enum('CONSTRAINT_TREE_V1'),
             'contextual_nominal_case': enum('PROPER_NAME_COORDINATION_V1'),
             'contextual_preposition_case': obj(('version','rules'), {

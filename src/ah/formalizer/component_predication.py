@@ -26,10 +26,13 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     from .contextual_preposition_case import overlay as governed_readings
     tokens=governed_readings(state,release,selector,region,coordinated_readings(tokens,nominal_groups),cfg)
     if tokens is None:return []
+    from .qualitative_quantity import resolve as quantity_groups
+    tokens, quantities=quantity_groups(state,release,selector,region,tokens,cfg)
+    if tokens is None:return []
     bundles = []
     diagnostics_before = len(state.diagnostics)
     for predicate in predicates:
-        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive):
+        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities):
             if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                 from .component_modifier_forest import bundles as modifier_bundles
                 if cfg.get('nominal_composition')=='QUESTION_TREE_V1':

@@ -86,6 +86,10 @@ def validate_evidence(expressions, temporal_region):
     if not isinstance(expressions, list) or not expressions:
         raise ValueError('TEMPORAL_EXPRESSION_INVALID')
     for e in expressions:
+        if isinstance(e, dict) and e.get('kind') == 'TEMPORAL_BOUND':
+            from .symbolic_temporal_bounds import validate_evidence
+            validate_evidence(e, temporal_region)
+            continue
         if isinstance(e, dict) and e.get('kind') == 'CALENDAR_SCOPE':
             from .document_calendar import validate_evidence
             validate_evidence(e, temporal_region)

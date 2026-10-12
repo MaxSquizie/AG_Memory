@@ -182,6 +182,9 @@ def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime
     if goal.mode=='WH':
         return outcome(LogicalStatus.PROVED if rows else LogicalStatus.UNKNOWN,refs,
                        tuple(dict.fromkeys(diagnostics)),NativeBindingsConclusion(goal.variables,tuple(rows),signature))
+    from .qualitative_group_entity import has_unspecified_members
+    if has_unspecified_members(engine.core,(row[0].uid for row in rows)):
+        return outcome(LogicalStatus.UNKNOWN,refs,('QUALITATIVE_QUANTITY_NOT_NUMERIC',),CountConclusion(None,None,refs,None))
     claimed_lower,claimed_upper,bound_refs=formula_numeric_bounds(engine.core,ledger,goal,budget)
     lower=max(len(rows),claimed_lower or 0); refs=tuple(dict.fromkeys((*refs,*bound_refs)))
     release=getattr(adapter,'resource_release',None); complete=False; closure_mode='ENUMERATED'

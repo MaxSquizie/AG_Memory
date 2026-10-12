@@ -31,6 +31,9 @@ def role_choices(token, roles, predicate, subject_role, group=None, *, coordinat
         if mv.pos not in {'NOUN','NPRO'}: continue
         for role in roles:
             if not set(mv.cases)&set(role.get('allowed_cases',())): continue
+            if role['role_id']==subject_role and 'QUALITATIVE_GROUP' in mv.features:
+                from .qualitative_quantity import agrees
+                if not agrees(predicate): continue
             if (role['role_id']==subject_role and not (predicate.pos=='PRTF' and 'pssv' in predicate.features)
                     and not (predicate.number in {None,'plur'} if coordinated else compatible(_features(predicate),_features(mv)))): continue
             preps=role.get('allowed_preps',())

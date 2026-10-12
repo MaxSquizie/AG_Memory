@@ -69,8 +69,10 @@ def resolve(text, observation, release, *, source_start=0):
         return None, ['TEMPORAL_EXPRESSION_INVALID']
     # An overlapping release rule may assign a different meaning even to the
     # same boundary. Do not silently suppress that competing interpretation.
-    if any(re.search(r['pattern'], text, re.I)
-           for r in release.entries('TemporalRules') if r['kind'] != 'CLOCK_RANGE'):
+    from .symbolic_temporal_bounds import range_constituent
+    if any(not range_constituent(r, m, spans)
+           for r in release.entries('TemporalRules') if r['kind'] != 'CLOCK_RANGE'
+           for m in re.finditer(r['pattern'], text, re.I)):
         return None, ['TEMPORAL_SCOPE_UNRESOLVED']
     try:
         endpoints = [dict(endpoint(match.group(k), rule[k+'_clock']), raw=match.group(k),
@@ -119,6 +121,11 @@ def resolve(text, observation, release, *, source_start=0):
 def consumed_scope_spans(text, observation, release):
     """Exact boundary markers occupy temporal syntax, not an extra G operator."""
     result = resolve(text, observation, release)
+    if result is None:
+        from .symbolic_temporal_bounds import resolve as resolve_bound
+        result = resolve_bound(text, observation, release)
+        if result and result[0]:
+            return [tuple(e['source_range']) for e in result[0]['expressions']]
     if not result or not result[0]:
         return []
     return [tuple(b['source_range']) for b in result[0]['expressions'][0]['boundaries']]

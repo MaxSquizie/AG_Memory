@@ -408,6 +408,10 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                     if ledger.query(node.uid,point=goal.temporal_point,window=goal.temporal_window)['answer']!='YES': continue
                     value=actual.get(goal.count_role.value)
                     if isinstance(value,str) and engine.core.store.kind_of(value) is RefKind.M: witnesses.setdefault(value,engine.core.ref(node.uid))
+                from .qualitative_group_entity import has_unspecified_members
+                if has_unspecified_members(engine.core,witnesses):
+                    refs=tuple(witnesses.values())
+                    return outcome(LogicalStatus.UNKNOWN,refs,('QUALITATIVE_QUANTITY_NOT_NUMERIC',),CountConclusion(None,None,refs,None))
                 claimed_lower,claimed_upper,bound_refs=_numeric_bounds(engine.core,ledger,goal,_budget)
                 lower=max(len(witnesses),claimed_lower or 0)
                 certificate=None if hypothetical_scope else _complete_domain(adapter,ledger,goal)

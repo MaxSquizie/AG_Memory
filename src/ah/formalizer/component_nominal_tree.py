@@ -25,10 +25,14 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         units.extend(list(residual_units(tokens,missing,frame,units)))
         from .implicit_descriptions import units as implicit_units
         units.extend(implicit_units(tokens,missing,frame,cfg))
+        from .qualitative_quantity import units as quantity_units
+        quantities=list(quantity_units(tokens,missing,frame))
+        units.extend(quantities)
+        quantity_refs={t for u in quantities for t in u['refs']}
         for group in prepositional_groups(tokens).values():
             if set(group['anchor_refs'])<=missing: units.extend(nominal_variants(tokens,group,limit))
         for e in tokens:
-            if e.token_id in missing:
+            if e.token_id in missing and e.token_id not in quantity_refs:
                 units.extend({'token':e,'variant':v,'refs':(e.token_id,),'entities':[],'adjectives':[]}
                              for v in unique(v for v in e.variants if v.pos=='ADVB'))
         covers=[]
@@ -93,7 +97,8 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None)
             **{t:morphology[t] for t in roles}},'lexical_units':{t:deepcopy(lexical[t]) for t in roles},
             'preposition_bindings':{},'missing_required_roles':[],'requires_attachment_probe':False,
             'uncovered_token_refs':[],'structural_unresolved':False,'relative_temporal':[],
-            'component_region':region.region_id,'component_questions':[], 'nominal_description':True}
+            'component_region':region.region_id,'component_questions':[], 'nominal_description':True,
+            'qualitative_groups':[deepcopy(g) for g in base.semantic.get('qualitative_groups',()) if g['head_ref'] in roles]}
         f=FrameCandidate(fid,'FLAT',token.span,(token.span,*[evidence[t].span for t in roles]),
             tuple(evidence[t].span for t in roles),construction='COMPONENTS_V1',predicate_token_ref=token.token_id,
             argument_token_refs=tuple(roles),source_range=tuple(region.source_range),semantic=sem,provenance=base.provenance)

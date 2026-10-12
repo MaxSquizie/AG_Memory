@@ -20,6 +20,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if nominal_tree:
         if not modifier_forest: raise ValueError('nominal_tree requires modifier_forest')
         policy['entries'][0]['composition'].update(nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
+        policy['entries'][0]['composition']['qualitative_quantity']={'version':'LEXICAL_GROUP_V1',
+            'rules':[{'rule_id':'TEST-QUALITATIVE-'+str(i),'lemma':lemma,'POS':'NUMR'}
+                     for i,lemma in enumerate(('несколько','много','мало'))]}
     if dependency_reduction:
         if not nominal_tree: raise ValueError('dependency_reduction requires nominal_tree')
         from tools.formalizer_dependency_fixture import extend
@@ -44,8 +47,8 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
             'restriction_pattern':{'anchor_cases':['gen']}} for pattern,operator in
             [(r'\bпосле\b','AFTER'),(r'\bдо\b','BEFORE')])
     if clock_time:
-        from tools.formalizer_clock_fixture import clock_rule
-        next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].append(clock_rule())
+        from tools.formalizer_clock_fixture import clock_rule, bound_rules
+        next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].extend([clock_rule(),*bound_rules()])
     if clock_time:
         from tools.formalizer_period_fixture import rules
         next(r for r in manifest['entries'] if r['kind']=='TemporalRules')['entries'].extend(rules())

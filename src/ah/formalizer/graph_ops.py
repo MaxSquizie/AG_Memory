@@ -157,6 +157,8 @@ def ensure_entity(core,p):
     uid=p['uid']
     from .spatial_entities import validate_entity
     validate_entity(p)
+    from .qualitative_group_entity import validate as validate_quantity
+    validate_quantity(p)
     implicit=p.get('implicit_participant')
     if implicit is not None:
         base={'participant_kind','identity_status','source_scope'}
@@ -188,6 +190,7 @@ def ensure_entity(core,p):
         props.update(scalar)
         core.add_entity(Domain(p.get('domain','C')),props,meta={'source_tag':p.get('source_tag'),'mention_ref':p.get('mention_ref'),
             **({'implicit_participant':implicit} if implicit is not None else {}),
+            **({'qualitative_group':p['qualitative_group']} if p.get('qualitative_group') is not None else {}),
             **({'relative_place':p['relative_place']} if p.get('relative_place') is not None else {})},uid=uid)
     elif core.store.kind_of(uid).value!='M': raise ValueError('ENTITY_REF_TYPE_MISMATCH')
     elif any(core.store.get_element_any_domain(uid).properties.get(k)!=v for k,v in scalar.items()):
@@ -196,6 +199,8 @@ def ensure_entity(core,p):
         raise ValueError('IMPLICIT_PARTICIPANT_INVALID')
     elif p.get('relative_place') is not None and core.store.get_element_any_domain(uid).meta.get('relative_place')!=p['relative_place']:
         raise ValueError('RELATIVE_PLACE_INVALID')
+    elif p.get('qualitative_group') is not None and core.store.get_element_any_domain(uid).meta.get('qualitative_group')!=p['qualitative_group']:
+        raise ValueError('QUALITATIVE_GROUP_INVALID')
     return uid
 
 
