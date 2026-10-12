@@ -16,6 +16,8 @@ def candidates(state,frame,units,hosts,head, *, pending=False):
         edge('EVENT',t,'ARGUMENT')
     for t,unit in frame.semantic.get('lexical_units',{}).items():
         owned.setdefault(t,{t}).update(unit['anchor_refs'])
+    for t,binding in frame.semantic.get('preposition_bindings',{}).items():
+        owned.setdefault(t,{t}).add(binding['token_ref'])
     for d in frame.semantic.get('nominal_dependencies',()):
         edge(d['host_ref'],d['head_ref'],d['kind'])
     for u in units:

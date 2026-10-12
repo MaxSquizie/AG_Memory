@@ -1,0 +1,1797 @@
+{
+  "schema": "diary-assembled-scope-1",
+  "base_commit": "cdd9d32e329bb86c76d68ac00262481edae86b9c",
+  "resource_status": "TEST_ONLY_COMPONENTS",
+  "production_validation": false,
+  "model_benchmark": false,
+  "user_selections": [
+    {
+      "stage": "forest",
+      "conversation_ground": "Лес — локация; согласованное в чате чтение: в лес относится к области отправился на прогулку, ориентир относится к лесу.",
+      "resolution_key": "v7:009c161212704d29b42350c43d0991b1856ee346eb3a75fc5fabe138b5bce2a8:5dae9d8afded5837b2c8b5b268ba3c76ebc612d815f69000c4f85ae5cc09cfe0",
+      "request_id": "009c161212704d29b42350c43d0991b1856ee346eb3a75fc5fabe138b5bce2a8",
+      "option": {
+        "candidate_id": "EVENT",
+        "label": "Predicate subtree «отправился на прогулку»; head=«отправился»; head range=[185, 195]"
+      }
+    },
+    {
+      "stage": "evening",
+      "conversation_ground": "Обедал скорее всего не относится к с Аликс; пользователь поручил применить локальное чтение к провел вечер.",
+      "resolution_key": "v7:61f7452de98adba60198f554c7f64e9823b084a51a392ba28682bfbc4c2c8072:1df36ef4253603a3b26a6dc734517803b5c644578c67922621a9eaacfdbe0d41",
+      "request_id": "61f7452de98adba60198f554c7f64e9823b084a51a392ba28682bfbc4c2c8072",
+      "option": {
+        "candidate_id": "coordination:00903cb8bf43f58911f554098148e02b5fb318eda78886b59c84ae1e73216565",
+        "label": "M1 «с Аликс» (from clause 2) applies to only clause 2"
+      }
+    }
+  ],
+  "stages": {
+    "forest": {
+      "report": {
+        "observation_id": "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+        "version": 2,
+        "run_id": "run:c51ff79624fd16a26e08ab55137cf33f315843c9cd70bdbab6d1621f202157f2",
+        "binding_ok": true,
+        "t5_eligibility": "OK",
+        "committed_fragments": [
+          "component-modifier:a67050ed31d6537a5388fb416cd4cfc028d21b21e2e87a40e894bc48527f50f4",
+          "component-modifier:b5f9735941d16ce3676a09bd0a963ee7d6f491cdf6fc43153c82a79e087d4fe4",
+          "component-nominal:27f392003e7d50cdf417a63d2191f9b2c4d8c6b7442a452d02d4f5a1e1ab2cac",
+          "logical:b689d7e678e57768"
+        ],
+        "applied": true,
+        "terminal": "APPLIED",
+        "batch_hash": "51fe28184fc250835d51d6dc93f06eb764fb72d8072aa6f1ab5b61128a73338e",
+        "diagnostics": [],
+        "node_refs": [
+          "G:72f87b378bbeda935161c1099e3887e1da56800c723e08e8d91e2ab38cdb1ce8",
+          "G:cc7bf1541947b46be62b1b0718014c9317c42a614261c543a60b3ae2f0467cba",
+          "N:7d12470c9d65a5c420866b661dbdc22934477e0ad819cf86082938c4d6507c96",
+          "N:aea25879a15fd83ea757473badf794f499c9eb71698c7741d9c98efbc05d56e7",
+          "N:b59603f303dd962988eaa6dc2ec924b7cb861dadd89217816d3cbb15fca04b13",
+          "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b"
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "REFINEMENT_SCOPE_ASSUMED",
+          "detail": "region:6c680f6cc5dea2ff06a84e5e87b92b268b4dd233293a404793b1423c49b0bab7|refinement-host"
+        },
+        {
+          "code": "COMPONENT_COORDINATION_UNRESOLVED",
+          "detail": "region:7fa62d8b4a1cc32fd0437f6f3db4da9f38aba3c63a9bb9f60894e4d49a74544a"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component:236aedf2559d3ea4583dcf5c0828ef6e08d0bb5e69f5c7dcba629ba5a92d7066"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:1dde9751364a3fc75e1541a8952f4e988b73173fd0697f6518321539c4ed0d8d"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:8efbdfab0940f9100ad9c77f31fb09acae848fafa8b583f3c3150e09c50652bc"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:9c74609881494337a7284f70d52af0ede80e0c0315688b8838708f9e1d52e244"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:bc6f165da24d5c85b535824ef3511b9d2d4ac67b91b79d5de3b2ea59183395b5"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:ce29d2199e432c26f56f3b048e3b07ae96508090441eeddcc7bc288b384f8487"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:df6be302c380174a033cdfc7522ddaa7c8101fd46db90340066724e7ac63e642"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:142c67f5d4f446f13f86fb08384f638a70a9d1f578ec515fc263499230d45ff0"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:3c55b6d3a6543dbb23ab905ccde4763ec5344555db57db9b041c250c0b44e7f5"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:537ff528ba257ce0f4e86e386eaa7c9c0b2de48e545251136e4e7e79502b86b0"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:94e4dbfe9b08d275c5ee1f8393b13326aa49c26ce4852797717085727b977ff9"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:cdacec10bbe2710400a7395efaafd2324b84d0259cbb7f19c0dea8b0403b3a2b"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:ddad9bc8682047617e19afb36be0e5d88f06b573f1d4575b4fa3280e2b067109"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-nominal:51ff55860cdbf4c93e26fd7f5923e270f6e46087fb95dab29574d4222b9234d3"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-nominal:534aa84aa8e21a19d517696590a596feaca4c606ad85f2416c2b2f098b258b4a"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-nominal:6c794636d0ddd6b7b543ad36cce98301a37c66e93c5ac0433e82170947f52505"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component:aae90bf7ef39b457ff4aa46115b20d65cd6f37c2245b83a4c2158c7d5dcaabd9"
+        },
+        {
+          "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+          "detail": "gap:ca2c20e84c5b3d51b733446f17ef509a17b4977de552cbfcd654f2154724b2d8"
+        },
+        {
+          "code": "IMPLICIT_ARGUMENT_UNRESOLVED",
+          "detail": "gap:14dfc6a4dcd3672ff2789bae3b4c4693b58b6b814b3a8a33a22706f7abe0a217"
+        }
+      ],
+      "decision": {
+        "slot_id": "nominal_attachment",
+        "frame_id": "region:7a5ddf9a21bb182f680984bafa7e94d94a9067e4401eccaa9ef577c7ab24aba4|nominal:36247c1621f326fdcc7bb3ea80eca5adaaf3549be725114bfae16187703f0386",
+        "candidates": [
+          "EVENT",
+          "tok:199:207"
+        ],
+        "selected": [
+          "EVENT"
+        ],
+        "selector_outcome": null,
+        "machine_state": "RESOLVED_LOCAL",
+        "search_complete": null,
+        "lifecycle": "PROVISIONAL",
+        "outcome": "RESOLVED",
+        "grounds": [
+          {
+            "type": "C",
+            "text": "explicit clarification selection",
+            "value": "EVENT"
+          }
+        ],
+        "source_traces": [],
+        "history": [],
+        "last_prompt": null,
+        "raw_response": null,
+        "provenance": {
+          "pattern_ids": [],
+          "resource_versions": {}
+        }
+      },
+      "replay": {
+        "before": {
+          "calls": 8,
+          "ledger": "ced8eafc35e302ee008bd041531eb4dec820e4941d41faaef1f6a5ad56e3ea4c",
+          "batch_hash": "51fe28184fc250835d51d6dc93f06eb764fb72d8072aa6f1ab5b61128a73338e"
+        },
+        "after": {
+          "calls": 8,
+          "ledger": "ced8eafc35e302ee008bd041531eb4dec820e4941d41faaef1f6a5ad56e3ea4c",
+          "batch_hash": "51fe28184fc250835d51d6dc93f06eb764fb72d8072aa6f1ab5b61128a73338e"
+        },
+        "passed": true
+      },
+      "same_ledger_as_live_execution": true
+    },
+    "evening": {
+      "report": {
+        "observation_id": "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+        "version": 3,
+        "run_id": "run:fa0e39d047fb6e84485bd73aef2a2a5a27d2532743c0642b19a9811798a8dc58",
+        "binding_ok": true,
+        "t5_eligibility": "OK",
+        "committed_fragments": [
+          "component-modifier:a67050ed31d6537a5388fb416cd4cfc028d21b21e2e87a40e894bc48527f50f4",
+          "component-modifier:b5f9735941d16ce3676a09bd0a963ee7d6f491cdf6fc43153c82a79e087d4fe4",
+          "component-nominal:27f392003e7d50cdf417a63d2191f9b2c4d8c6b7442a452d02d4f5a1e1ab2cac",
+          "logical:8c6a6d6eaf37a7d9",
+          "logical:b689d7e678e57768"
+        ],
+        "applied": true,
+        "terminal": "APPLIED",
+        "batch_hash": "4b5e090d455c5685cb232169890c51283f849bd016c2fb9dd936370424a9fe94",
+        "diagnostics": [],
+        "node_refs": [
+          "G:354242d09de559a488ce6a5f83070c3e58b9c68875ae9fdd6ce623054c98a7de",
+          "G:72f87b378bbeda935161c1099e3887e1da56800c723e08e8d91e2ab38cdb1ce8",
+          "G:cc7bf1541947b46be62b1b0718014c9317c42a614261c543a60b3ae2f0467cba",
+          "N:7d12470c9d65a5c420866b661dbdc22934477e0ad819cf86082938c4d6507c96",
+          "N:aea25879a15fd83ea757473badf794f499c9eb71698c7741d9c98efbc05d56e7",
+          "N:and:027caa3605f2f21b25d464b6fb461cfca64d0fccb45662f4c35c67c6710eae5c",
+          "N:and:43ba699ffc81c01b438de9bc29c3c15701c8a193ea95348efce3693d422cbd69",
+          "N:b59603f303dd962988eaa6dc2ec924b7cb861dadd89217816d3cbb15fca04b13",
+          "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b"
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "REFINEMENT_SCOPE_ASSUMED",
+          "detail": "region:6c680f6cc5dea2ff06a84e5e87b92b268b4dd233293a404793b1423c49b0bab7|refinement-host"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component:236aedf2559d3ea4583dcf5c0828ef6e08d0bb5e69f5c7dcba629ba5a92d7066"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:1dde9751364a3fc75e1541a8952f4e988b73173fd0697f6518321539c4ed0d8d"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:8efbdfab0940f9100ad9c77f31fb09acae848fafa8b583f3c3150e09c50652bc"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:9c74609881494337a7284f70d52af0ede80e0c0315688b8838708f9e1d52e244"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:bc6f165da24d5c85b535824ef3511b9d2d4ac67b91b79d5de3b2ea59183395b5"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:ce29d2199e432c26f56f3b048e3b07ae96508090441eeddcc7bc288b384f8487"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-description:df6be302c380174a033cdfc7522ddaa7c8101fd46db90340066724e7ac63e642"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:142c67f5d4f446f13f86fb08384f638a70a9d1f578ec515fc263499230d45ff0"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:3c55b6d3a6543dbb23ab905ccde4763ec5344555db57db9b041c250c0b44e7f5"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:537ff528ba257ce0f4e86e386eaa7c9c0b2de48e545251136e4e7e79502b86b0"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:94e4dbfe9b08d275c5ee1f8393b13326aa49c26ce4852797717085727b977ff9"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:cdacec10bbe2710400a7395efaafd2324b84d0259cbb7f19c0dea8b0403b3a2b"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-modifier:ddad9bc8682047617e19afb36be0e5d88f06b573f1d4575b4fa3280e2b067109"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-nominal:51ff55860cdbf4c93e26fd7f5923e270f6e46087fb95dab29574d4222b9234d3"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-nominal:534aa84aa8e21a19d517696590a596feaca4c606ad85f2416c2b2f098b258b4a"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component-nominal:6c794636d0ddd6b7b543ad36cce98301a37c66e93c5ac0433e82170947f52505"
+        },
+        {
+          "code": "REFERENCE_UNKNOWN",
+          "detail": "component:aae90bf7ef39b457ff4aa46115b20d65cd6f37c2245b83a4c2158c7d5dcaabd9"
+        }
+      ],
+      "decision": {
+        "slot_id": "coordination",
+        "frame_id": "region:7fa62d8b4a1cc32fd0437f6f3db4da9f38aba3c63a9bb9f60894e4d49a74544a|coordination",
+        "candidates": [
+          "coordination:00903cb8bf43f58911f554098148e02b5fb318eda78886b59c84ae1e73216565",
+          "coordination-scope:48bac30b258e780552ac4b0b4bd5c0e1cac044f2dcb318ebed372a833f52e282"
+        ],
+        "selected": [
+          "coordination:00903cb8bf43f58911f554098148e02b5fb318eda78886b59c84ae1e73216565"
+        ],
+        "selector_outcome": null,
+        "machine_state": "RESOLVED_LOCAL",
+        "search_complete": null,
+        "lifecycle": "PROVISIONAL",
+        "outcome": "RESOLVED",
+        "grounds": [
+          {
+            "type": "C",
+            "text": "explicit clarification selection",
+            "value": "coordination:00903cb8bf43f58911f554098148e02b5fb318eda78886b59c84ae1e73216565"
+          }
+        ],
+        "source_traces": [],
+        "history": [],
+        "last_prompt": null,
+        "raw_response": null,
+        "provenance": {
+          "pattern_ids": [],
+          "resource_versions": {}
+        }
+      },
+      "replay": {
+        "before": {
+          "calls": 13,
+          "ledger": "f46d5ffb4b74ecc60ba0653700a3aca6d1fafc0c0bf01a0587a9c2b1218ac0c9",
+          "batch_hash": "4b5e090d455c5685cb232169890c51283f849bd016c2fb9dd936370424a9fe94"
+        },
+        "after": {
+          "calls": 13,
+          "ledger": "f46d5ffb4b74ecc60ba0653700a3aca6d1fafc0c0bf01a0587a9c2b1218ac0c9",
+          "batch_hash": "4b5e090d455c5685cb232169890c51283f849bd016c2fb9dd936370424a9fe94"
+        },
+        "passed": true
+      },
+      "same_ledger_as_live_execution": true
+    }
+  },
+  "verified_structure": {
+    "nodes": [
+      {
+        "actants": {
+          "OBJECT": "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79",
+          "SURFACE_ARG": "M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f"
+        },
+        "content_key": "24ed9cfb6f0a4ba4bcd1be0a7ab7c93972ba6c7ea95a20247cc0688e2a628aff",
+        "identity_key": [
+          "24ed9cfb6f0a4ba4bcd1be0a7ab7c93972ba6c7ea95a20247cc0688e2a628aff",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:208:209"
+        ],
+        "op_id": "ENSURE_NODE:N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "OBJECT": "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79",
+            "SURFACE_ARG": "M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f"
+          },
+          "predicate": "T:open:e01cb376e47776321fc53dbd8e55509c6cbcdf6dd3009a84f57b5e06212f1ec3"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:208:209",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          2
+        ],
+        "template_ref": "T:open:e01cb376e47776321fc53dbd8e55509c6cbcdf6dd3009a84f57b5e06212f1ec3",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b"
+      },
+      {
+        "actants": {
+          "OBJECT": "N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417",
+          "SURFACE_ARG": "M:a6ddb32c85f641ed71d97400cbd2c4d70d67366708ce8c7d37d699a94346de4d"
+        },
+        "content_key": "5dfa0b8aff9eddd2de602a81b48ecf0211322490927ad58a3efd516ded6ab4b1",
+        "identity_key": [
+          "5dfa0b8aff9eddd2de602a81b48ecf0211322490927ad58a3efd516ded6ab4b1",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:196:198"
+        ],
+        "op_id": "ENSURE_NODE:N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "OBJECT": "N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417",
+            "SURFACE_ARG": "M:a6ddb32c85f641ed71d97400cbd2c4d70d67366708ce8c7d37d699a94346de4d"
+          },
+          "predicate": "T:open:80c5385e9b12e0d5bab82ea856fd84fb659bb964b9e525ee19be0ccbc9570ffe"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:196:198",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          2
+        ],
+        "template_ref": "T:open:80c5385e9b12e0d5bab82ea856fd84fb659bb964b9e525ee19be0ccbc9570ffe",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79"
+      },
+      {
+        "actants": {
+          "SUBJECT": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068"
+        },
+        "content_key": "ed6e35f444f98b4941087a63a14be807ea303f27c2adb818bd68aea1ba431a73",
+        "identity_key": [
+          "ed6e35f444f98b4941087a63a14be807ea303f27c2adb818bd68aea1ba431a73",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:185:195"
+        ],
+        "op_id": "ENSURE_NODE:N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "SUBJECT": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068"
+          },
+          "predicate": "T:open:7b5291ab26fcce18dcd1173f8dcf356c6553b75103d16dd6b2deb38b871cab17"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:185:195",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          2
+        ],
+        "template_ref": "T:open:7b5291ab26fcce18dcd1173f8dcf356c6553b75103d16dd6b2deb38b871cab17",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417"
+      },
+      {
+        "actants": {
+          "SUBJECT": "M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f",
+          "SURFACE_ARG": "M:4fbfac48992c67e9763a21d73b5cf33fcce3c5cba1976231d4ecc2459b340ca7"
+        },
+        "content_key": "57855a1b57019a6fca03279f0118f098a54c42d383da22ee8c644c6e7006d1bb",
+        "identity_key": [
+          "57855a1b57019a6fca03279f0118f098a54c42d383da22ee8c644c6e7006d1bb",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:214:216"
+        ],
+        "op_id": "ENSURE_NODE:N:35ec9c38ea2289023fcef52ddbbcecf6273579f6c4e8e7a555fb6e39eca482a9",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "SUBJECT": "M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f",
+            "SURFACE_ARG": "M:4fbfac48992c67e9763a21d73b5cf33fcce3c5cba1976231d4ecc2459b340ca7"
+          },
+          "predicate": "T:open:28465821c698d273eb47559abfef3504541b9248a0ccc2d786ffcd8cd0c6591b"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:214:216",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          2
+        ],
+        "template_ref": "T:open:28465821c698d273eb47559abfef3504541b9248a0ccc2d786ffcd8cd0c6591b",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:35ec9c38ea2289023fcef52ddbbcecf6273579f6c4e8e7a555fb6e39eca482a9"
+      },
+      {
+        "actants": {
+          "SUBJECT": "M:4fbfac48992c67e9763a21d73b5cf33fcce3c5cba1976231d4ecc2459b340ca7"
+        },
+        "content_key": "91865180e777d0a88dc72694cc369245f1f51187f565fa705f01ecdc07a06987",
+        "identity_key": [
+          "91865180e777d0a88dc72694cc369245f1f51187f565fa705f01ecdc07a06987",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:217:229"
+        ],
+        "op_id": "ENSURE_NODE:N:92ad18d57ce1440f4930254ae3bfe1b58033eca439efab17caf99fe4f2d29336",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "SUBJECT": "M:4fbfac48992c67e9763a21d73b5cf33fcce3c5cba1976231d4ecc2459b340ca7"
+          },
+          "predicate": "T:open:88a5bd93591a46d16b8d8b2d5ab85fc0bd409887429fb616ec8153ba60d6424f"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:217:229",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          2
+        ],
+        "template_ref": "T:open:88a5bd93591a46d16b8d8b2d5ab85fc0bd409887429fb616ec8153ba60d6424f",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:92ad18d57ce1440f4930254ae3bfe1b58033eca439efab17caf99fe4f2d29336"
+      },
+      {
+        "actants": {
+          "SUBJECT": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068"
+        },
+        "content_key": "510b6212ff36cc5994c1a6a7ba61edf77a1cf8a5a5f2835fcec757b86c996bea",
+        "identity_key": [
+          "510b6212ff36cc5994c1a6a7ba61edf77a1cf8a5a5f2835fcec757b86c996bea",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:337:343"
+        ],
+        "op_id": "ENSURE_NODE:N:27dc4e9da01637fb7b8743a56558a4336f22d81f78e88aa4bf81fad0956f3e48",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "SUBJECT": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068"
+          },
+          "predicate": "T:open:115e9cfac2695a17a4fca6d6feef8d579d1ea273ceaebfa34156dbc87d65e510"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:337:343",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "template_ref": "T:open:115e9cfac2695a17a4fca6d6feef8d579d1ea273ceaebfa34156dbc87d65e510",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:27dc4e9da01637fb7b8743a56558a4336f22d81f78e88aa4bf81fad0956f3e48"
+      },
+      {
+        "actants": {
+          "OBJECT": "M:31caaa5401217f6cbc2d53d06ecfeba182d1eaa0e676dadb3199058f464b0e1d",
+          "SUBJECT": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068"
+        },
+        "content_key": "8fe608cb6c9d349ebb79749a4b080b2be34c71aea47908c72914a0a8e74df08e",
+        "identity_key": [
+          "8fe608cb6c9d349ebb79749a4b080b2be34c71aea47908c72914a0a8e74df08e",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:346:352"
+        ],
+        "op_id": "ENSURE_NODE:N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "OBJECT": "M:31caaa5401217f6cbc2d53d06ecfeba182d1eaa0e676dadb3199058f464b0e1d",
+            "SUBJECT": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068"
+          },
+          "predicate": "T:open:3f2d29ba4c986af0aa001f6c7ccfcd54229ed6b8e1513cf31e9ec129b271b306"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:346:352",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "template_ref": "T:open:3f2d29ba4c986af0aa001f6c7ccfcd54229ed6b8e1513cf31e9ec129b271b306",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e"
+      },
+      {
+        "actants": {
+          "OBJECT": "N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e",
+          "SURFACE_ARG": "M:31453304bf95937f8d1054b7ae316f533d180137cce067de97e7d7856d753c87"
+        },
+        "content_key": "f24c5e2d79694fa4e623ae9a38b1b45ec38c6aef93b8e4da0d40afa904e855aa",
+        "identity_key": [
+          "f24c5e2d79694fa4e623ae9a38b1b45ec38c6aef93b8e4da0d40afa904e855aa",
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          "tok:359:360"
+        ],
+        "op_id": "ENSURE_NODE:N:463079edabe31b1551f35aa2fc02849db2a2293f598c0bd89efea18d2ffb19d4",
+        "polarity": true,
+        "proposition": {
+          "actants": {
+            "OBJECT": "N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e",
+            "SURFACE_ARG": "M:31453304bf95937f8d1054b7ae316f533d180137cce067de97e7d7856d753c87"
+          },
+          "predicate": "T:open:606e97f3d2a27074cc7ce052dd7be31a4216ba1e040741a171ed2da80a5800ab"
+        },
+        "semantic_status": "UNLINKED",
+        "source_ref": "tok:359:360",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "template_ref": "T:open:606e97f3d2a27074cc7ce052dd7be31a4216ba1e040741a171ed2da80a5800ab",
+        "temporal_mode": "UNKNOWN",
+        "uid": "N:463079edabe31b1551f35aa2fc02849db2a2293f598c0bd89efea18d2ffb19d4"
+      },
+      {
+        "content_key": "9c3da21b51deb1f29586ea0373f651914fd9d936efcdc1cfa64e6c360e94bd6d",
+        "function_id": "AND",
+        "op_id": "ENSURE_FUNCTION:G:354242d09de559a488ce6a5f83070c3e58b9c68875ae9fdd6ce623054c98a7de",
+        "operands": [
+          "N:27dc4e9da01637fb7b8743a56558a4336f22d81f78e88aa4bf81fad0956f3e48",
+          "N:463079edabe31b1551f35aa2fc02849db2a2293f598c0bd89efea18d2ffb19d4"
+        ],
+        "polarity": true,
+        "uid": "G:354242d09de559a488ce6a5f83070c3e58b9c68875ae9fdd6ce623054c98a7de"
+      }
+    ],
+    "usage_links": [
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "anchor": null,
+                "expr_id": "time-expr:29d7175eeeea71b9321eab477aed4bc002005974e06baa5676f2c87de8b6611e",
+                "hour_candidates": [
+                  2,
+                  14
+                ],
+                "kind": "CLOCK",
+                "minute": 30,
+                "raw": "В два часа тридцать минут",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-WORD-CLOCK-1",
+                "source_range": [
+                  159,
+                  184
+                ],
+                "status": "SYMBOLIC",
+                "timezone": null
+              },
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:35ec9c38ea2289023fcef52ddbbcecf6273579f6c4e8e7a555fb6e39eca482a9"
+        },
+        "host_ref": "M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:061ec3bef713bb966b9c1f03068efb8da4a7ee8d2cb9567d7684d49406d9a4c2",
+        "node_ref": "N:35ec9c38ea2289023fcef52ddbbcecf6273579f6c4e8e7a555fb6e39eca482a9",
+        "op_id": "MATERIALIZE_USAGE_LINK:1297ad59e9a47a96d89e1245d69ce0b4130897b0457fc9247e7313508efbb634",
+        "parent_ref": "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b",
+        "position": "SURFACE_ARG",
+        "root_support_ref": "support:daf20220f798b6230c904ab67364a73d939b08d524e6a2a2a63354d896b305d9",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:8368c9e02cade291a4a478c3c8670e4b922f24ad92e05d6f1e0f4fdb47e211b0"
+        },
+        "holder_ref": null,
+        "kind": "ATTITUDE",
+        "link_id": "usage:0b876c496d88a5c60abbad0e18a553fbcc9c44d2653746e4116da5d2e30ab1a9",
+        "node_ref": "N:8368c9e02cade291a4a478c3c8670e4b922f24ad92e05d6f1e0f4fdb47e211b0",
+        "op_id": "MATERIALIZE_USAGE_LINK:5c8001b38b08d609d39307e0b025b01f52a2947b3ff599a39b2b1706c79798ab",
+        "parent_ref": "N:aea25879a15fd83ea757473badf794f499c9eb71698c7741d9c98efbc05d56e7",
+        "position": "OBJECT",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "anchor": null,
+                "expr_id": "time-expr:29d7175eeeea71b9321eab477aed4bc002005974e06baa5676f2c87de8b6611e",
+                "hour_candidates": [
+                  2,
+                  14
+                ],
+                "kind": "CLOCK",
+                "minute": 30,
+                "raw": "В два часа тридцать минут",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-WORD-CLOCK-1",
+                "source_range": [
+                  159,
+                  184
+                ],
+                "status": "SYMBOLIC",
+                "timezone": null
+              },
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417"
+        },
+        "holder_ref": null,
+        "kind": "ATTITUDE",
+        "link_id": "usage:2b8a5917a67fce342252e976085bbeabf947ef5a1d090953d9ab853a5b6467d0",
+        "node_ref": "N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417",
+        "op_id": "MATERIALIZE_USAGE_LINK:0991618df9e172dea044a3595aea2310645d83dfd5b90c44a1e4fcf92858b553",
+        "parent_ref": "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79",
+        "position": "OBJECT",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "anchor": null,
+                "expr_id": "time-expr:29d7175eeeea71b9321eab477aed4bc002005974e06baa5676f2c87de8b6611e",
+                "hour_candidates": [
+                  2,
+                  14
+                ],
+                "kind": "CLOCK",
+                "minute": 30,
+                "raw": "В два часа тридцать минут",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-WORD-CLOCK-1",
+                "source_range": [
+                  159,
+                  184
+                ],
+                "status": "SYMBOLIC",
+                "timezone": null
+              },
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:92ad18d57ce1440f4930254ae3bfe1b58033eca439efab17caf99fe4f2d29336"
+        },
+        "host_ref": "M:4fbfac48992c67e9763a21d73b5cf33fcce3c5cba1976231d4ecc2459b340ca7",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:38e9b82eaaf815c07cd57358c36eb67915756263b40786b62a0478b79e1b0718",
+        "node_ref": "N:92ad18d57ce1440f4930254ae3bfe1b58033eca439efab17caf99fe4f2d29336",
+        "op_id": "MATERIALIZE_USAGE_LINK:0e7fe310cde88fa1fbe71efd4fe482c91769bff94e2b5460e674ed17134bc519",
+        "parent_ref": "N:35ec9c38ea2289023fcef52ddbbcecf6273579f6c4e8e7a555fb6e39eca482a9",
+        "position": "SURFACE_ARG",
+        "root_support_ref": "support:daf20220f798b6230c904ab67364a73d939b08d524e6a2a2a63354d896b305d9",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "HYPOTHETICAL",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:51090f1095885b0f32932962338d1d3a6dcad343b58a5aeb08679e49effdf615"
+        },
+        "holder_ref": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068",
+        "kind": "ATTITUDE",
+        "link_id": "usage:60a9998ed62e81a1cfff1f88842adfb02f716d81db1274daa3d369488e9ff369",
+        "node_ref": "N:51090f1095885b0f32932962338d1d3a6dcad343b58a5aeb08679e49effdf615",
+        "op_id": "MATERIALIZE_USAGE_LINK:d41c2c2593ebf8aac0720c4e76b6aad56ec25145fe0668be72204c119afdf2ce",
+        "parent_ref": "N:8368c9e02cade291a4a478c3c8670e4b922f24ad92e05d6f1e0f4fdb47e211b0",
+        "position": "PURPOSE",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e"
+        },
+        "holder_ref": null,
+        "kind": "ATTITUDE",
+        "link_id": "usage:8abe8746faf7031baef9c43ce930330a6e2226bc76e4affd97911c82ade19f3d",
+        "node_ref": "N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e",
+        "op_id": "MATERIALIZE_USAGE_LINK:dc3648a8f876332beecf017c2a7930b3c7dd279693c495a3cc26cec6c36e9fb4",
+        "parent_ref": "N:463079edabe31b1551f35aa2fc02849db2a2293f598c0bd89efea18d2ffb19d4",
+        "position": "OBJECT",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:d78510df153387e6643e411b89f8670e9afb526118c2bf48963ef793c6dc3334"
+        },
+        "host_ref": "M:b989aab4865a8b3b0fcf8053a12ee1f4b7039a6ac8c86da648c8e23222e102b6",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:8f9d0dc298287e3b75985a2ba610da6a42b79da1ee628f31666d098b3ecfb7f2",
+        "node_ref": "N:d78510df153387e6643e411b89f8670e9afb526118c2bf48963ef793c6dc3334",
+        "op_id": "MATERIALIZE_USAGE_LINK:118ea3feadccc63235f0c26384f24fe1ee2cd7e5b52bae8c7f54c6922022d7f3",
+        "parent_ref": "N:7d12470c9d65a5c420866b661dbdc22934477e0ad819cf86082938c4d6507c96",
+        "position": "OBJECT",
+        "root_support_ref": "support:a09071da7fb23909f7d362289e5da18b447a256c9c52a379b0e5bf1b53e7f0ba",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:1c8b38237e18c27371db0e041ea9874b84fe322509f0987ca5415316624e2286"
+        },
+        "host_ref": "M:implicit:9b9de26e2803bf85d973b8b72ab0672035b14c3b082423872615a16900149c8e",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:9d28fd0625809fbb8f00d53790e48d19091dbc589adfd6ef2419c21e81cdcb51",
+        "node_ref": "N:1c8b38237e18c27371db0e041ea9874b84fe322509f0987ca5415316624e2286",
+        "op_id": "MATERIALIZE_USAGE_LINK:33513dc460a1f5360204ff6732975f6960b185feb8124780e029f9935e97e60d",
+        "parent_ref": "N:8e32eed352a423003ae228411b1b74374e4670de26569870bd2c57c144890ba5",
+        "position": "SUBJECT",
+        "root_support_ref": "support:2ce4d7de6875dea03164dfb28dc4c4ae309e1daabe53bdf7d11aed62be3eb487",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "anchor": null,
+                "expr_id": "time-expr:de411361b15cffb24fc11df09fc86af624b3731106308664003177834e2df7d1",
+                "hour_candidates": [
+                  0,
+                  12
+                ],
+                "kind": "CLOCK",
+                "minute": 30,
+                "raw": "в двенадцать часов тридцать минут",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-WORD-CLOCK-1",
+                "source_range": [
+                  99,
+                  132
+                ],
+                "status": "SYMBOLIC",
+                "timezone": null
+              },
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:8be1416a8e1ba5f35b743a881051b60a7e432075bf2424594d6e1aa7e932055e"
+        },
+        "host_group_ref": "K:52d1f749552e7869788e00aa53bc252445a9a34964645432d7e2103979b2dd68",
+        "host_member_binding_ref": "binding:71220b71894c0b841ed6e40c353c0cf4f49ad7e874fe5da2006cdb182b7475d1",
+        "host_ref": "M:c6811df0a6b12d07f3adbd815ec9dec79d818ff2509c75d55f0adfe81b36f70d",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:aff283b8c573f97503b57c5d22d66fba459e60bd920ef6b4a062932de62c0141",
+        "node_ref": "N:8be1416a8e1ba5f35b743a881051b60a7e432075bf2424594d6e1aa7e932055e",
+        "op_id": "MATERIALIZE_USAGE_LINK:6d9acfbb526e37744ba33621dbd22f84fe9d91d7981b09fbf02733dbf34c8e49",
+        "parent_ref": "N:51090f1095885b0f32932962338d1d3a6dcad343b58a5aeb08679e49effdf615",
+        "position": "OBJECT",
+        "root_support_ref": "support:e0e417362297b728d39265134c57f8c6f046a1d23b4cb0e9f41bc5d0cf40bbe7",
+        "scope_assumption": {
+          "decision_ref": "region:6c680f6cc5dea2ff06a84e5e87b92b268b4dd233293a404793b1423c49b0bab7|refinement-host",
+          "options": [
+            {
+              "candidate_id": "tok:80:87",
+              "label": "Existing nominal «дочерей» at [80, 87]",
+              "member_refs": [
+                "tok:80:87"
+              ]
+            },
+            {
+              "candidate_id": "nominal-group:b709a37acbbec68ba3874a8e971d7923e965463ed411139a08e14f8191375cf9",
+              "label": "WHOLE established group «Аликс + дочерей»",
+              "member_refs": [
+                "tok:72:77",
+                "tok:80:87"
+              ]
+            }
+          ],
+          "policy": "ASK_THEN_MINIMAL_MEMBER_SET_V1",
+          "reason": "UNAVAILABLE",
+          "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+          "selected": "tok:80:87",
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "status": "ASSUMED_UNRESOLVED",
+          "uncertainty_id": "uncertainty:a0c0a706e29d029475ed8ba3a419c0033c4e7f065b109b77893d3366be2142f0"
+        },
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:528a325b782a6c8c1ea3408ac4da52dcd17dfb3dd4aad2a0eaaecc9e93d2ad72"
+        },
+        "host_path": [
+          "N:528a325b782a6c8c1ea3408ac4da52dcd17dfb3dd4aad2a0eaaecc9e93d2ad72",
+          "N:fd8dd44bfe8a07a444c8935be892ea06b61e54883a8dae932c6ee1736eca269e"
+        ],
+        "host_ref": "M:b989aab4865a8b3b0fcf8053a12ee1f4b7039a6ac8c86da648c8e23222e102b6",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:b555f9adb3205be3b7295e843210bff8fa08011dfa83ed609c9f6003237cdcdc",
+        "node_ref": "N:528a325b782a6c8c1ea3408ac4da52dcd17dfb3dd4aad2a0eaaecc9e93d2ad72",
+        "op_id": "MATERIALIZE_USAGE_LINK:6f353cbdf548e08215a610dc5cb0ccb1aeedcffa6a50d64f97320a6c8e79f4af",
+        "parent_ref": "N:d78510df153387e6643e411b89f8670e9afb526118c2bf48963ef793c6dc3334",
+        "position": "SUBJECT",
+        "root_support_ref": "support:a09071da7fb23909f7d362289e5da18b447a256c9c52a379b0e5bf1b53e7f0ba",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:b2fdb6542beec55794f3f485eaf337d4546e4faa9d7fc0322efcab53fd0cf023"
+        },
+        "host_ref": "M:534dc1e909dbab8caa56da7897fa9ebb62939539fc064481a44f6ed8168daccd",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:d4f474a0bc84db0fa8656bfd6da9226c2bbaf34612ee3e45e0b0073890c7ec2b",
+        "node_ref": "N:b2fdb6542beec55794f3f485eaf337d4546e4faa9d7fc0322efcab53fd0cf023",
+        "op_id": "MATERIALIZE_USAGE_LINK:357b80942f42403de4e502c561c62556e9b6f07d6676a027838d7a36a5690fe6",
+        "parent_ref": "N:a077899efe2c66ce1c92b552da3acc92569acde24fc9c530bd489f9dcd5e62f3",
+        "position": "SURFACE_ARG",
+        "root_support_ref": "support:a09071da7fb23909f7d362289e5da18b447a256c9c52a379b0e5bf1b53e7f0ba",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "anchor": null,
+                "expr_id": "time-expr:29d7175eeeea71b9321eab477aed4bc002005974e06baa5676f2c87de8b6611e",
+                "hour_candidates": [
+                  2,
+                  14
+                ],
+                "kind": "CLOCK",
+                "minute": 30,
+                "raw": "В два часа тридцать минут",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-WORD-CLOCK-1",
+                "source_range": [
+                  159,
+                  184
+                ],
+                "status": "SYMBOLIC",
+                "timezone": null
+              },
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79"
+        },
+        "holder_ref": null,
+        "kind": "ATTITUDE",
+        "link_id": "usage:e8b402c8b1519310d609f99a05e405760c23d57413937e1169b1bb32cfa88c5a",
+        "node_ref": "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79",
+        "op_id": "MATERIALIZE_USAGE_LINK:f4caf54a7a49cc44343166f288c87b0da6faa963466793d50b2c19ae5d543629",
+        "parent_ref": "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b",
+        "position": "OBJECT",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "host_ref": "M:f82abf2a303d96df04ced046d8666b98703b874ccea587c8dd9257dd38b5811b",
+        "host_role": "SUBJECT",
+        "kind": "NOMINAL",
+        "link_id": "usage:f18ce04a1a4bf10c9c940d7a65fa4f625eeb1c53237acc028e59af6835e5c38a",
+        "node_ref": "N:a077899efe2c66ce1c92b552da3acc92569acde24fc9c530bd489f9dcd5e62f3",
+        "op_id": "MATERIALIZE_USAGE_LINK:bb195330d818e385c19406693cc572ddd0e0d0f0c49e745fa71806f3f12b559a",
+        "parent_ref": "N:fd8dd44bfe8a07a444c8935be892ea06b61e54883a8dae932c6ee1736eca269e",
+        "position": "SURFACE_ARG",
+        "root_support_ref": "support:a09071da7fb23909f7d362289e5da18b447a256c9c52a379b0e5bf1b53e7f0ba",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:fd8dd44bfe8a07a444c8935be892ea06b61e54883a8dae932c6ee1736eca269e"
+        },
+        "holder_ref": null,
+        "kind": "ATTITUDE",
+        "link_id": "usage:f3d7ff97b0c498706db0c4d2176bfdb97c82aa94d38b9380fabc1ed288d1c14f",
+        "node_ref": "N:fd8dd44bfe8a07a444c8935be892ea06b61e54883a8dae932c6ee1736eca269e",
+        "op_id": "MATERIALIZE_USAGE_LINK:f371d5daf819977b6e7806b5c0d93bd3c0a9f252e677afa332157898a0e3f991",
+        "parent_ref": "N:528a325b782a6c8c1ea3408ac4da52dcd17dfb3dd4aad2a0eaaecc9e93d2ad72",
+        "position": "OBJECT",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      },
+      {
+        "attitude": "UNKNOWN",
+        "content_time": {
+          "region": {
+            "expressions": [
+              {
+                "calendar": {
+                  "day": 27,
+                  "month": 7,
+                  "weekday_surface": "Среда",
+                  "year": null
+                },
+                "decision_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc|document_scope",
+                "expr_id": "time-expr:c83250510b8084e45378f65fbc9311fb05ca5ae9b862cbdcc28718b8a5833c93",
+                "kind": "CALENDAR_SCOPE",
+                "raw": "Двадцать седьмого июля. Среда",
+                "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+                "rule_id": "TEST-CALENDAR-HEADER",
+                "scope_range": [
+                  0,
+                  367
+                ],
+                "scope_ref": "region:ad7c4827e3a73a4a7151ce982606839c10d193ffcf6d394cf78271251f458ecc",
+                "source_range": [
+                  0,
+                  29
+                ],
+                "status": "SYMBOLIC"
+              }
+            ],
+            "hi": null,
+            "kind": "EXISTENTIAL",
+            "lo": null
+          },
+          "source_tag": [
+            "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+            3
+          ],
+          "target_ref": "N:8e32eed352a423003ae228411b1b74374e4670de26569870bd2c57c144890ba5"
+        },
+        "holder_ref": null,
+        "kind": "ATTITUDE",
+        "link_id": "usage:f915453a831e301f867e2d9b3e78a59ed5a9fbece5fc9135f234408469d98e7b",
+        "node_ref": "N:8e32eed352a423003ae228411b1b74374e4670de26569870bd2c57c144890ba5",
+        "op_id": "MATERIALIZE_USAGE_LINK:6495e91d86f922e4e875481e8bc31b95a142b5ce7f442a089beb28dc7b0e8a21",
+        "parent_ref": "N:b59603f303dd962988eaa6dc2ec924b7cb861dadd89217816d3cbb15fca04b13",
+        "position": "OBJECT",
+        "source_tag": [
+          "observation:bf72a678ec655c0e782c01cac39e3913517362d4ae9c221c0ce874b652e3534d",
+          3
+        ],
+        "status": "LIVE"
+      }
+    ],
+    "forest_entity": "M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f",
+    "landmark_entity": "M:4fbfac48992c67e9763a21d73b5cf33fcce3c5cba1976231d4ecc2459b340ca7",
+    "common_implicit_subject": "M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068",
+    "F_visible": [
+      "G:354242d09de559a488ce6a5f83070c3e58b9c68875ae9fdd6ce623054c98a7de",
+      "G:72f87b378bbeda935161c1099e3887e1da56800c723e08e8d91e2ab38cdb1ce8",
+      "G:cc7bf1541947b46be62b1b0718014c9317c42a614261c543a60b3ae2f0467cba",
+      "N:7d12470c9d65a5c420866b661dbdc22934477e0ad819cf86082938c4d6507c96",
+      "N:aea25879a15fd83ea757473badf794f499c9eb71698c7741d9c98efbc05d56e7",
+      "N:and:027caa3605f2f21b25d464b6fb461cfca64d0fccb45662f4c35c67c6710eae5c",
+      "N:and:43ba699ffc81c01b438de9bc29c3c15701c8a193ea95348efce3693d422cbd69",
+      "N:b59603f303dd962988eaa6dc2ec924b7cb861dadd89217816d3cbb15fca04b13",
+      "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b"
+    ],
+    "S_accessible": [
+      "G:354242d09de559a488ce6a5f83070c3e58b9c68875ae9fdd6ce623054c98a7de",
+      "G:72f87b378bbeda935161c1099e3887e1da56800c723e08e8d91e2ab38cdb1ce8",
+      "G:cc7bf1541947b46be62b1b0718014c9317c42a614261c543a60b3ae2f0467cba",
+      "N:1c8b38237e18c27371db0e041ea9874b84fe322509f0987ca5415316624e2286",
+      "N:27dc4e9da01637fb7b8743a56558a4336f22d81f78e88aa4bf81fad0956f3e48",
+      "N:35ec9c38ea2289023fcef52ddbbcecf6273579f6c4e8e7a555fb6e39eca482a9",
+      "N:463079edabe31b1551f35aa2fc02849db2a2293f598c0bd89efea18d2ffb19d4",
+      "N:51090f1095885b0f32932962338d1d3a6dcad343b58a5aeb08679e49effdf615",
+      "N:528a325b782a6c8c1ea3408ac4da52dcd17dfb3dd4aad2a0eaaecc9e93d2ad72",
+      "N:5438d467637ca996bd9cd4e7fb6cd81100caacb51794df9954fd1fdc0c20e19e",
+      "N:6eead3b9516824df8d3e8e2691a49470c6a2b4862ec10e1197130b4ad4b15e79",
+      "N:7a13e4cee405d7ffcfbda1d9bd650638a071ab4d49c13f26653487a7712e4417",
+      "N:7d12470c9d65a5c420866b661dbdc22934477e0ad819cf86082938c4d6507c96",
+      "N:8368c9e02cade291a4a478c3c8670e4b922f24ad92e05d6f1e0f4fdb47e211b0",
+      "N:8be1416a8e1ba5f35b743a881051b60a7e432075bf2424594d6e1aa7e932055e",
+      "N:8e32eed352a423003ae228411b1b74374e4670de26569870bd2c57c144890ba5",
+      "N:92ad18d57ce1440f4930254ae3bfe1b58033eca439efab17caf99fe4f2d29336",
+      "N:a077899efe2c66ce1c92b552da3acc92569acde24fc9c530bd489f9dcd5e62f3",
+      "N:aea25879a15fd83ea757473badf794f499c9eb71698c7741d9c98efbc05d56e7",
+      "N:and:027caa3605f2f21b25d464b6fb461cfca64d0fccb45662f4c35c67c6710eae5c",
+      "N:and:43ba699ffc81c01b438de9bc29c3c15701c8a193ea95348efce3693d422cbd69",
+      "N:b2fdb6542beec55794f3f485eaf337d4546e4faa9d7fc0322efcab53fd0cf023",
+      "N:b59603f303dd962988eaa6dc2ec924b7cb861dadd89217816d3cbb15fca04b13",
+      "N:d78510df153387e6643e411b89f8670e9afb526118c2bf48963ef793c6dc3334",
+      "N:e679815d62151c765728b44178dc014900bc0ae1a354ec73d884cf6a6cbb4d5b",
+      "N:event-anchor:2c7c3764eeffc246ab0388f4f85bc28335418b66daabae0415b6347ca5f332f6",
+      "N:event-anchor:d745e1f0ffa0b94569156ee23dfb5b3347a966dd41d110ae8a92287128275b7d",
+      "N:fd8dd44bfe8a07a444c8935be892ea06b61e54883a8dae932c6ee1736eca269e"
+    ],
+    "canonical_location_sense": "NOT_INTRODUCED: source-preserving OPEN preposition relation; SURFACE_ARG remains generic",
+    "fresh_recovery_equal": true
+  },
+  "source_withdrawal": {
+    "F_visible": [],
+    "S_accessible": [],
+    "fresh_recovery_equal": true,
+    "old_versions_not_resurrected": true
+  },
+  "source_document_sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+  "source_text": "Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с Аликс.",
+  "source_range": [
+    94447,
+    94814
+  ],
+  "resource_sha256": "bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d",
+  "probes": [
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «на прогулку» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:7a5ddf9a21bb182f680984bafa7e94d94a9067e4401eccaa9ef577c7ab24aba4|nominal:1e35ed181012bb2db6acf62d47d820ef861fabea7c91c220239e18b980d35324\nContext span:  В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Predicate subtree «отправился»; head=«отправился»; head range=[185, 195]\n2. Nominal subtree «лес»; head=«лес»; head range=[210, 213]\n3. Nominal subtree «архиерейской церковью»; head=«церковью»; head range=[230, 238]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:210:213\"\n3 = \"tok:230:238\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «в лес» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «отправился» -- via «на» --> «прогулку». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:7a5ddf9a21bb182f680984bafa7e94d94a9067e4401eccaa9ef577c7ab24aba4|nominal:83db83ca87c4e1b735ce87ef9561e27b4df427cab92f6715ad5b78016c850f1d\nContext span:  В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Predicate subtree «отправился на прогулку»; head=«отправился»; head range=[185, 195]\n2. Nominal subtree «на прогулку»; head=«прогулку»; head range=[199, 207]\n3. Nominal subtree «архиерейской церковью»; head=«церковью»; head range=[230, 238]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:199:207\"\n3 = \"tok:230:238\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "?\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «за архиерейской церковью» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «отправился» -- via «на» --> «прогулку». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:7a5ddf9a21bb182f680984bafa7e94d94a9067e4401eccaa9ef577c7ab24aba4|nominal:5204cc1faa0e3535cb030e0c46c955194cbfaeea8e4c6a42c62c7dfa407bd5cd\nContext span:  В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Predicate subtree «отправился на прогулку»; head=«отправился»; head range=[185, 195]\n2. Nominal subtree «на прогулку»; head=«прогулку»; head range=[199, 207]\n3. Nominal subtree «лес»; head=«лес»; head range=[210, 213]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:199:207\"\n3 = \"tok:210:213\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nAlready established interpretation constraints: «на прогулку» attaches to «отправился» (previous resolved local question); «за архиерейской церковью» attaches to «лес» (previous resolved local question); «в лес» attaches to «отправился на прогулку» (explicit user clarification). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. Only scope links differ; roles, whole morphology and nominal dependencies are fixed. BOTH means joint descriptions of the SAME event, not separate event occurrences. Which immediate scope links are supported by this source? Do not assume that lexical modifiers commute.\n\nDecision slot: component_attachment — predicate value of frame region:7a5ddf9a21bb182f680984bafa7e94d94a9067e4401eccaa9ef577c7ab24aba4|composition\nContext span:  В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. BOTH descriptions scopes over «на»@196 (прогулку) [AND, attitude=OPERATOR]; «на»@196 (прогулку) scopes over «отправился»@185 [OBJECT, attitude=UNKNOWN]; source assertion scopes over BOTH descriptions [ASSERTS, attitude=ROOT]; BOTH descriptions scopes over «в»@208 (лес) [AND, attitude=OPERATOR]; «в»@208 (лес) scopes over «отправился»@185 [OBJECT, attitude=UNKNOWN]\n2. «на»@196 (прогулку) scopes over «в»@208 (лес) [OBJECT, attitude=UNKNOWN]; source assertion scopes over «на»@196 (прогулку) [ASSERTS, attitude=ROOT]; «в»@208 (лес) scopes over «отправился»@185 [OBJECT, attitude=UNKNOWN]\n3. «на»@196 (прогулку) scopes over «отправился»@185 [OBJECT, attitude=UNKNOWN]; source assertion scopes over «в»@208 (лес) [ASSERTS, attitude=ROOT]; «в»@208 (лес) scopes over «на»@196 (прогулку) [OBJECT, attitude=UNKNOWN]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:142c67f5d4f446f13f86fb08384f638a70a9d1f578ec515fc263499230d45ff0\"\n2 = \"component-modifier:ddad9bc8682047617e19afb36be0e5d88f06b573f1d4575b4fa3280e2b067109\"\n3 = \"component-modifier:94e4dbfe9b08d275c5ee1f8393b13326aa49c26ce4852797717085727b977ff9\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «с Аликс» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «провел» -- OBJECT --> «вечер». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:963252019463822bb30f953238e3df65de4d1495c78d9a22ab280269653efc81|nominal:c1f9b57d026bfe9c33169fd8521ce159aa4ea79c057b86c274d11144c0d8751c\nContext span:  провел вечер с Аликс.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Predicate subtree «провел вечер»; head=«провел»; head range=[346, 352]\n2. Nominal subtree «вечер»; head=«вечер»; head range=[353, 358]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:353:358\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Завтракали одни семейно.\nTarget predicate: Завтракали; source range: (133, 158)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:77835be34273a6af02d385ddd008c28ed26ae21647a2a829146d05a2e2ba16b4\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)\n2. Same participant as дочерей (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:77835be34273a6af02d385ddd008c28ed26ae21647a2a829146d05a2e2ba16b4\"\n2 = \"mention:tok:80:87\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "source": "/workspace/scratch/ce998c263405/diary_government_final/probe_0029.request.json"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nTarget predicate: отправился; source range: (158, 239)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as Алексеем (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (30, 61) (поехал) (identity requires contextual evidence)\n4. Same participant as Аликс (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\"\n2 = \"mention:tok:53:61\"\n3 = \"gap:a3a306cbea6b9ab05218991c221253cfa39c6063825f2f6eeabc7a975abe95d2\"\n4 = \"mention:tok:72:77\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause: После чая принял генерала Рузского\nTarget predicate: принял; source range: (240, 274)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:cebb2ea873d516d5e70df359adb0ff9aad091bb8a021d76631842b7a37d499a0\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as Алексеем (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (30, 61) (поехал) (identity requires contextual evidence)\n4. Same participant as Аликс (identity requires contextual evidence)\n5. Same participant as лес (identity requires contextual evidence)\n6. Same participant as omitted SUBJECT at (158, 239) (отправился) (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:cebb2ea873d516d5e70df359adb0ff9aad091bb8a021d76631842b7a37d499a0\"\n2 = \"mention:tok:53:61\"\n3 = \"gap:a3a306cbea6b9ab05218991c221253cfa39c6063825f2f6eeabc7a975abe95d2\"\n4 = \"mention:tok:72:77\"\n5 = \"mention:tok:210:213\"\n6 = \"gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3,6\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Завтракали одни семейно.\nTarget predicate: Завтракали; source range: (133, 158)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:77835be34273a6af02d385ddd008c28ed26ae21647a2a829146d05a2e2ba16b4\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)\n2. Same participant as дочерей (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:77835be34273a6af02d385ddd008c28ed26ae21647a2a829146d05a2e2ba16b4\"\n2 = \"mention:tok:80:87\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "transport": {
+        "mode": "EXACT_CAPTURED_TRANSPORT",
+        "source": "/workspace/scratch/ce998c263405/diary_government_final/probe_0029.request.json"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nTarget predicate: отправился; source range: (158, 239)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as Алексеем (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (30, 61) (поехал) (identity requires contextual evidence)\n4. Same participant as Аликс (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\"\n2 = \"mention:tok:53:61\"\n3 = \"gap:a3a306cbea6b9ab05218991c221253cfa39c6063825f2f6eeabc7a975abe95d2\"\n4 = \"mention:tok:72:77\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause: После чая принял генерала Рузского\nTarget predicate: принял; source range: (240, 274)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:cebb2ea873d516d5e70df359adb0ff9aad091bb8a021d76631842b7a37d499a0\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as Алексеем (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (30, 61) (поехал) (identity requires contextual evidence)\n4. Same participant as Аликс (identity requires contextual evidence)\n5. Same participant as лес (identity requires contextual evidence)\n6. Same participant as omitted SUBJECT at (158, 239) (отправился) (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:cebb2ea873d516d5e70df359adb0ff9aad091bb8a021d76631842b7a37d499a0\"\n2 = \"mention:tok:53:61\"\n3 = \"gap:a3a306cbea6b9ab05218991c221253cfa39c6063825f2f6eeabc7a975abe95d2\"\n4 = \"mention:tok:72:77\"\n5 = \"mention:tok:210:213\"\n6 = \"gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3,6\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause: Обедал \nTarget predicate: Обедал; source range: (337, 344)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:ca2c20e84c5b3d51b733446f17ef509a17b4977de552cbfcd654f2154724b2d8\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал \nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as Алексеем (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (30, 61) (поехал) (identity requires contextual evidence)\n4. Same participant as Аликс (identity requires contextual evidence)\n5. Same participant as лес (identity requires contextual evidence)\n6. Same participant as omitted SUBJECT at (158, 239) (отправился) (identity requires contextual evidence)\n7. Same participant as генерала (identity requires contextual evidence)\n8. Same participant as omitted SUBJECT at (240, 274) (принял) (identity requires contextual evidence)\n9. Same participant as главнокомандующим (identity requires contextual evidence)\n10. Same participant as фронтом (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:ca2c20e84c5b3d51b733446f17ef509a17b4977de552cbfcd654f2154724b2d8\"\n2 = \"mention:tok:53:61\"\n3 = \"gap:a3a306cbea6b9ab05218991c221253cfa39c6063825f2f6eeabc7a975abe95d2\"\n4 = \"mention:tok:72:77\"\n5 = \"mention:tok:210:213\"\n6 = \"gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\"\n7 = \"mention:tok:257:265\"\n8 = \"gap:cebb2ea873d516d5e70df359adb0ff9aad091bb8a021d76631842b7a37d499a0\"\n9 = \"mention:tok:302:319\"\n10 = \"mention:tok:329:336\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3,6,8\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    },
+    {
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  провел вечер с Аликс.\nTarget predicate: провел; source range: (345, 367)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:14dfc6a4dcd3672ff2789bae3b4c4693b58b6b814b3a8a33a22706f7abe0a217\nContext span: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с Аликс.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema bbdd85b69756623979bca06ed7b75e96fc1d3428edaf1ea8f2fe4bacd803c77d, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as Алексеем (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (30, 61) (поехал) (identity requires contextual evidence)\n4. Same participant as Аликс (identity requires contextual evidence)\n5. Same participant as лес (identity requires contextual evidence)\n6. Same participant as omitted SUBJECT at (158, 239) (отправился) (identity requires contextual evidence)\n7. Same participant as генерала (identity requires contextual evidence)\n8. Same participant as omitted SUBJECT at (240, 274) (принял) (identity requires contextual evidence)\n9. Same participant as главнокомандующим (identity requires contextual evidence)\n10. Same participant as фронтом (identity requires contextual evidence)\n11. Same participant as omitted SUBJECT at (337, 344) (Обедал) (identity requires contextual evidence)\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:14dfc6a4dcd3672ff2789bae3b4c4693b58b6b814b3a8a33a22706f7abe0a217\"\n2 = \"mention:tok:53:61\"\n3 = \"gap:a3a306cbea6b9ab05218991c221253cfa39c6063825f2f6eeabc7a975abe95d2\"\n4 = \"mention:tok:72:77\"\n5 = \"mention:tok:210:213\"\n6 = \"gap:512333b2ec7a5351b4eea5b87a9a9036f655f9d1d3ab22f837039f29ffb8423e\"\n7 = \"mention:tok:257:265\"\n8 = \"gap:cebb2ea873d516d5e70df359adb0ff9aad091bb8a021d76631842b7a37d499a0\"\n9 = \"mention:tok:302:319\"\n10 = \"mention:tok:329:336\"\n11 = \"gap:ca2c20e84c5b3d51b733446f17ef509a17b4977de552cbfcd654f2154724b2d8\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3,6,8,11\n",
+      "transport": {
+        "mode": "INDEPENDENT_SHORT_PROBE_EXECUTOR"
+      }
+    }
+  ],
+  "current_code_verification": "Exact captured transport of the successful clarification sequence; no newly generated answers",
+  "runtime_sha256": {
+    "src/ah/formalizer/nominal_host_question.py": "6eddc3148e5e78f280a61d58a65a8c9cf76f888d6046cc5bcbb4ef0e67406788",
+    "src/ah/formalizer/nominal_host_views.py": "560f2450af2b4961f53d344048defc7bf255f5bfe559575b0e8fb32654fda11e",
+    "src/ah/formalizer/component_nominal_questions.py": "f1ec0e91ce5765ab5dcca44d17307421f16461115dc857d94396c26c80fec434"
+  }
+}

@@ -74,13 +74,9 @@ def select_hosts(state, release, selector, region, units, frame, cfg):
                 state.syntax_trace.append({'kind':'NOMINAL_HOST_REVISITED','head_ref':head,
                     'previous_decision_ref':previous,'decision_ref':decision_ref})
             prior_keys[head]=decision_ref
+            from .nominal_host_question import question
             cid=choose(state,release,selector,region,key,options,
-                'What does the prepositional phrase «'+u['token'].span+' '+target['surface']+
-                '» describe? Candidates show already assembled subtrees, including their established dependents. '
-                'Choose the whole described unit; an internal subtree remains a separate option. '
-                'The head identifies the attachment point, not an isolated word. '
-                'These are grammatical structures, not claims of identity, ownership or truth. '
-                'Preserve ambiguity if the wording does not discriminate.')
+                question(state,frame,units,views,target,u))
             state.syntax_trace.append({'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
                 'phrase_refs':list(u['refs']),'pending_subtree':target,'candidate_subtrees':views,'selected':cid,
                 'decision_ref':decision_ref})
