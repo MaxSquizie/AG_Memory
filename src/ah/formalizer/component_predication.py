@@ -20,12 +20,12 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
     return e.token_id
 
 
-def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None):
+def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None):
     from .component_modifiers import scoped_bundle
     bundles = []
     diagnostics_before = len(state.diagnostics)
     for predicate in predicates:
-        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment):
+        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive):
             if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                 from .component_modifier_forest import bundles as modifier_bundles
                 if cfg.get('nominal_composition')=='QUESTION_TREE_V1':
@@ -63,8 +63,11 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                     label += '; linked morphology='+str({evidence[t].span:{k:v for k,v in morph.items()
                         if k in {'lemma','pos','cases','gender','number'}} for t,morph in f.semantic['morph_bindings'].items()})
+                if f.semantic.get('nominal_groups'):
+                    label += '; one coordinated slot per group='+str([
+                        [evidence[t].span for t in g['member_refs']] for g in f.semantic['nominal_groups']])
                 if f.semantic.get('shared_implicit_arguments'):
-                    label += '; describes the SAME omitted participant slot: '+str(f.semantic['shared_implicit_arguments'])+'; no new participant or identity'
+                    label += '; uses the SAME omitted participant slot: '+str(f.semantic['shared_implicit_arguments'])+'; no new participant or identity'
                 if f.semantic.get('implicit_arguments'):
                     label += '; omitted roles, identity unresolved='+str(list(f.semantic['implicit_arguments']))
                 if f.semantic.get('copula_ref'):

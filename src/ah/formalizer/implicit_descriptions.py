@@ -1,4 +1,4 @@
-"""Agreeing descriptions may target an existing omitted subject slot."""
+"""Descriptions and dependent areas can share one licensed omitted subject."""
 from .canonical_ledger import digest
 from .component_policy import _features, _morph, compatible
 from .state import FrameCandidate

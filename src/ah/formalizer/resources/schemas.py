@@ -132,6 +132,9 @@ RESOURCE_SCHEMAS = {
         'composition': obj(('version','subject_role','open_case_roles','max_candidates','context_chars'), {
             'version': enum('COMPONENTS_V1'), 'subject_role': S,
             'coordination_operators': array(enum('AND')),
+            'infinitive_composition': obj(('version','relations'), {
+                'version':enum('DEPENDENT_INFINITIVE_V1'),
+                'relations':array(obj(('role','attitude'),{'role':S,'attitude':enum('HYPOTHETICAL','UNKNOWN')}),minimum=1)}),
             'temporal_coordination':enum('NAMED_PERIOD_SCOPE_V1'),
             'quality_predicate_pos': array(enum('ADJF','ADJS')),
             'copula_lemmas': array(), 'modifier_content_role': S, 'preposition_nominal_role': S,

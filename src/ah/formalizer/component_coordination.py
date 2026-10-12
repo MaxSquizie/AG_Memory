@@ -6,23 +6,20 @@ from .component_probe import _probe
 from .regions import TextRegion
 
 
-def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
-    if 'AND' not in cfg.get('coordination_operators',()): return
-    lo,hi=region.source_range; raw=state.text[lo:hi]
-    if any(a<=p.start<b for p in predicates for a,b in protected): return
-    if any(t.span in {'«','»','"','(',')','?',':'} for t in tokens): return
-    matches=[]
-    for rule in release.entries('ScopeLexicon'):
-        for m in re.finditer(rule['pattern'],raw,re.I):
-            if rule.get('operator')!='AND': return
-            matches.append((lo+m.start(),lo+m.end()))
+def coordinate(state,release,selector,region,tokens,predicates,cfg,protected, *, compose_child=None):
+    from .component_area_scope import allowed, connectives
+    from .component_source import view
+    lo,hi=region.source_range; raw=view(state,region,tokens)
+    if 'AND' not in cfg.get('coordination_operators',()) or not allowed(state,release,region,tokens,conjunction=True):
+        state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id); return []
+    matches=connectives(state,release,region,tokens)
     matches=sorted(set(matches))
     if not matches or len(matches)+1>cfg['max_candidates']:
-        state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id); return
-    if any(a[1]>b[0] for a,b in zip(matches,matches[1:])): return
+        state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id); return []
+    if any(a[1]>b[0] for a,b in zip(matches,matches[1:])): return []
     # Temporal distribution across conjuncts needs its own scope alternatives.
     if cfg.get('temporal_coordination')!='NAMED_PERIOD_SCOPE_V1' and any(re.search(rule['pattern'],raw,re.I) for rule in release.entries('TemporalRules')):
-        state.diag('COMPONENT_COORDINATION_TEMPORAL_SCOPE',region.region_id); return
+        state.diag('COMPONENT_COORDINATION_TEMPORAL_SCOPE',region.region_id); return []
     ranges=list(zip([lo,*[end for start,end in matches]],[*[start for start,end in matches],hi]))
     all_frames=[]; selected=[]
     for index,(start,end) in enumerate(ranges):
@@ -33,6 +30,8 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
         anchors=[p for p in predicates if start<=p.start and p.end<=end]
         if not anchors:
             frames=[]
+        elif compose_child is not None:
+            frames=compose_child(child,local)
         elif cfg.get('modifier_content_role') or cfg.get('quality_predicate_pos'):
             from .component_predication import compose_alternatives
             frames=compose_alternatives(state,release,selector,child,local,anchors,cfg)
@@ -66,7 +65,6 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
         # No valid conjunct may escape an unresolved enclosing logical scope.
         for f in all_frames: f.semantic['structural_unresolved']=True
         state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id)
-    state.frames.extend(all_frames)
     from .coordination_scope import trace
     state.syntax_trace.append({'composition_region':region.region_id,'kind':'COORDINATION',
         'candidates':[f.frame_id for f in all_frames],'decision_ref':key,
@@ -74,3 +72,5 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected):
         'coordination_anchors':anchors,'selected_scope':chosen,
         'scope_alternatives':trace(choices),
         'coverage':'COMPLETE' if chosen else 'PARTIAL'})
+
+    return all_frames

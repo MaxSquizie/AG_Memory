@@ -32,23 +32,40 @@ def block(state, region, frames, reason):
     return frames
 
 
-def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None):
+def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None, infinitive=None):
     from .refinement_boundaries import select, agreeing
     from .component_predication import compose_alternatives
     tokens=list(tokens)
     if depth>=cfg['refinement']['max_depth']:
         return block(state,region,[],'COMPONENT_REFINEMENT_SEARCH_INCOMPLETE')
+    from .component_area_scope import allowed, connectives
+    if not allowed(state,release,region,tokens,conjunction=True):
+        return block(state,region,[],'COMPONENT_SCOPE_UNRESOLVED')
     # A participating head is already owned by this area, not a nested start.
     search_tokens=tokens[1:] if attachment else tokens
     boundary=select(state,release,selector,region,search_tokens,cfg)
     if boundary is False: return block(state,region,[],'COMPONENT_REFINEMENT_UNRESOLVED')
     if boundary is None:
-        if attachment:
+        if attachment is None and infinitive is None:
+            from .component_infinitives import compose as compose_infinitive
+            nested=compose_infinitive(state,release,selector,region,tokens,cfg,depth)
+            if nested is not None:return nested
+        if attachment or infinitive:
             predicates=[tokens[0]]
         else:
             predicates=[t for t in tokens if any(v.pos=='VERB' and v.mood!='imperative' or
                 v.pos in cfg.get('quality_predicate_pos',()) for v in t.variants)]
-        frames=compose_alternatives(state,release,selector,region,tokens,predicates,cfg,attachment=attachment)
+        nominal_groups=[]
+        if connectives(state,release,region,tokens):
+            from .component_nominal_groups import select as select_nominal_groups
+            nominal_groups=select_nominal_groups(state,release,selector,region,tokens,cfg)
+            if nominal_groups is False:
+                return block(state,region,[],'COMPONENT_NOMINAL_COORDINATION_UNRESOLVED')
+        if nominal_groups is None:
+            from .component_coordination import coordinate
+            return coordinate(state,release,selector,region,tokens,predicates,cfg,[],
+                compose_child=lambda area,owned:compose_area(state,release,selector,area,owned,cfg,depth+1))
+        frames=compose_alternatives(state,release,selector,region,tokens,predicates,cfg,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive)
         for f in frames:
             f.semantic['owned_token_refs']=[t.token_id for t in tokens]
         return frames
@@ -70,7 +87,7 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
         separators.append(tokens[a-1].token_id)
     if not parent or not body: return block(state,region,[],'COMPONENT_REFINEMENT_UNRESOLVED')
     pr=region_for(state,region,parent,'PARENT')
-    frames=compose_area(state,release,selector,pr,parent,cfg,depth+1,attachment)
+    frames=compose_area(state,release,selector,pr,parent,cfg,depth+1,attachment,infinitive)
     parent_root=root(frames)
     if parent_root is None: return block(state,region,frames,'COMPONENT_REFINEMENT_PARENT_UNRESOLVED')
     evidence={t.token_id:t for t in state.evidence}
@@ -87,6 +104,13 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
             # One source mention can occur in several descriptions. Its owner
             # for this edge is the original slot, never a separate guessed M.
             hosts.setdefault(tid,(frame,h,hv))
+    # Do not present only individual members when a whole group can be the
+    # host: the current postnominal write contract is ENTITY(M)-only.
+    if boundary['kind']=='PARTICIPLE' and any(
+        set(g['cases']) & set(v.cases) and v.number=='plur'
+        for f in accepted(frames) for g in f.semantic.get('nominal_groups',())
+        for v in body[0].variants if v.pos=='PRTF'):
+        return block(state,region,frames,'COMPONENT_GROUP_REFINEMENT_UNSUPPORTED')
     choices=[{'candidate_id':tid,'label':'Existing nominal «'+h.span+'» at '+str([h.start,h.end])}
              for tid,(_,h,_) in hosts.items()]
     chosen=_probe(state,selector,release,region.region_id+'|refinement-host','nominal_attachment',choices,

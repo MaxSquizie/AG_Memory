@@ -83,7 +83,11 @@ def build_plan(state,release,store):
         emit_spatial_roles(f,selected,tag,frag,roles,emit)
         for role,members in mention_roles.items():
             if len(members)==1: roles[role]=members[0]
-            elif role=='SURFACE_ARG':
+            elif role=='SURFACE_ARG' or f.semantic.get('nominal_groups'):
+                if role!='SURFACE_ARG':
+                    from .component_nominal_groups import group_for
+                    group_for(f,role,selected['roles'])
+                members=sorted(set(members))
                 kid='K:'+digest(members)
                 emit('ENSURE_GROUP',{'uid':kid,'members':members},frag); roles[role]=kid
             else: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')

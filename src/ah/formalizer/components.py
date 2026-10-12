@@ -1,5 +1,4 @@
 """Orchestrate source-grounded clauses; substantive stages live in small modules."""
-import re
 from .component_policy import policy
 from .component_participants import prepare_implicit, resolve_implicit, add_memory_options
 
@@ -28,37 +27,22 @@ def compose(state, release, selector):
         if cfg.get('quality_predicate_pos'):
             predicates += [e for e in tokens if e not in predicates and any(v.pos in cfg['quality_predicate_pos'] for v in e.variants)]
         compositional = bool(cfg.get('quality_predicate_pos') or cfg.get('modifier_content_role'))
-        # A multi-predicate region needs a licensed attachment/coordination.
-        if len(predicates)>1 and (not compositional or any(
-                r.get('operator') == 'AND' and re.search(r['pattern'],state.text[slice(*region.source_range)],re.I)
-                for r in release.entries('ScopeLexicon'))) and not any(p.token_id in covered for p in predicates):
-            from .component_coordination import coordinate
-            coordinate(state,release,selector,region,tokens,predicates,cfg,protected_ranges)
-            continue
         if not predicates or any(p.token_id in covered for p in predicates): continue
+        if cfg.get('refinement'):
+            from .component_refinement import compose_area
+            state.frames.extend(compose_area(state,release,selector,region,tokens,cfg))
+            continue
+        from .component_area_scope import allowed, connectives
+        if not allowed(state,release,region,tokens,conjunction=True):
+            state.diag('COMPONENT_SCOPE_UNRESOLVED',region.region_id);continue
+        if len(predicates)>1 and connectives(state,release,region,tokens):
+            from .component_coordination import coordinate
+            state.frames.extend(coordinate(state,release,selector,region,tokens,predicates,cfg,protected_ranges))
+            continue
+        if connectives(state,release,region,tokens):
+            state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id);continue
         if not compositional and len(predicates) != 1: continue
         p = predicates[0]
-        raw = state.text[region.source_range[0]:region.source_range[1]]
-        # Never flatten a scoped region into an asserted finite clause.
-        protected = any(lo <= q.start < hi for q in predicates for lo,hi in protected_ranges)
-        from .component_temporal import relative_adjuncts
-        relative=relative_adjuncts(state,release,region,tokens)
-        allowed={(row['resource_pattern'],row['operator']) for row in relative}
-        from .clock_ranges import consumed_scope_spans, scope_consumed
-        clock_spans=consumed_scope_spans(raw,state.observation,release)
-        scope = protected or any((r['pattern'],r.get('operator')) not in allowed and
-            not scope_consumed(r,m,clock_spans) for r in release.entries('ScopeLexicon')
-            for m in re.finditer(r['pattern'],raw,re.I))
-        scope |= any(e.span in {'«','»','"','(',')','?',':'} for e in tokens)
-        if scope:
-            state.diag('COMPONENT_SCOPE_UNRESOLVED', region.region_id)
-            continue
-        if cfg.get('refinement'):
-            from .refinement_boundaries import starts
-            if any(starts(tokens,cfg['refinement'])):
-                from .component_refinement import compose_area
-                state.frames.extend(compose_area(state,release,selector,region,tokens,cfg))
-                continue
         from .component_clause import build_clause
         if compositional:
             from .component_predication import compose_alternatives

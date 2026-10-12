@@ -610,7 +610,8 @@ def _bindings(frame,evidence,valency,extra_gaps=()):
     out=[]
     for choice in itertools.product(*candidates):
         rs=[r for _,r in choice]
-        if len(rs)!=len(set(rs)): continue
+        from .component_nominal_groups import valid_roles
+        if not valid_roles(dict(choice),frame.semantic.get('nominal_groups',())):continue
         if any(r.get('cardinality',{}).get('min',0)>0 and r['role_id'] not in rs and r['role_id'] not in gaps and r['role_id'] not in frame.semantic.get('proposition_args',{}) for r in roles): continue
         out.append(dict(choice))
     return out

@@ -109,6 +109,15 @@ class ResourceRelease:
                 from .dependency_release import validate_dependency_policy
                 validate_dependency_policy(self,composition)
             roles={r['role_id'] for r in self.entries('RoleRegistry')}
+            if composition.get('infinitive_composition'):
+                if not composition.get('refinement'):raise ResourceMissing('infinitive composition requires recursive areas')
+                relations=composition['infinitive_composition']['relations']
+                if len({r['role'] for r in relations})!=len(relations):raise ResourceMissing('duplicate infinitive relation')
+                registry={r['role_id']:r for r in self.entries('RoleRegistry')}
+                for row in relations:
+                    kinds=registry.get(row['role'],{}).get('allowed_argument_kinds',())
+                    if row['role'] not in roles or kinds and not set(kinds)&{'PROPOSITION','EVENT'}:
+                        raise ResourceMissing('infinitive role requires PROPOSITION/EVENT')
             if composition.get('refinement'):
                 from ..refinement_release import validate
                 validate(self,composition)

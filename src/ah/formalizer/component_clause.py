@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None):
+def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None):
     evidence={e.token_id:e for e in tokens}
     from .component_source import view
     raw=view(state,region,tokens)
@@ -25,13 +25,14 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
         allowed_cases.update(c for rule in cfg['refinement']['participle_voices'] for c in rule['case_roles'])
     if cfg.get('dependency_reduction'):
         allowed_cases.update({'gen','nom'})  # nominal dependencies need not fill a predicate role
-    nominals = [e for e in tokens if e.token_id not in temporal|prep_markers and e != p
+    nominal_connectors={t for g in nominal_groups for t in g['marker_refs']}
+    nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors and e != p
                 and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and set(v.cases)&allowed_cases for v in e.variants))]
     # No arbitrary truncation of the argument candidate inventory.
     if len(nominals) > 3 and not cfg.get('dependency_reduction'):
         state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)
         return []
-    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment)
+    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive)
     for f in candidates:
         f.semantic['relative_temporal']=relative
         f.semantic['component_questions'].extend(questions(relative))

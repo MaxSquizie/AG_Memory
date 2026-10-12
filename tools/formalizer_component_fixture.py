@@ -31,6 +31,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         if not dependency_reduction: raise ValueError('refinement requires dependency_reduction')
         from tools.formalizer_refinement_fixture import extend
         extend(policy['entries'][0]['composition'])
+        registry=next(r for r in manifest['entries'] if r['kind']=='RoleRegistry')['entries']
+        if not any(r['role_id']=='PURPOSE' for r in registry):
+            registry.append({'role_id':'PURPOSE','allowed_argument_kinds':['PROPOSITION','EVENT']})
     scopes=next(r for r in manifest['entries'] if r['kind']=='ScopeLexicon')['entries']
     if not any(r.get('operator')=='AND' for r in scopes):
         scopes.append({'pattern':r'\bи\b','operator':'AND'})
