@@ -25,11 +25,9 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     prompt = build_selector_prompt(selector, slot_id=slot, frame_id=key,
         context_span=context, mentions={}, schema=schema, candidates=ids,
         contextual_statements=())
-    prompt = ('Resolve this local interpretation using the wording and supplied context. '
-        'Generated candidates are possibilities, not evidence that every reading is supported. '
-        'Select a reading with positive source-specific support; do not include an alternative merely because it is conceivable. '
-        'Multiple selections require positive support for each; if the source cannot discriminate, answer ?. '
-        'Do not invent missing context, identities or world facts.\n'+
+    prompt = ('Choose only interpretations positively supported by this source and supplied context. '
+        'Generated alternatives are not evidence. Multiple choices need support for EACH. '
+        'If context cannot discriminate, answer ?. Do not invent context, identities or facts.\n'+
         ((question+'\n\n') if question else '')+prompt)
     try:
         state.budget.spend_llm()

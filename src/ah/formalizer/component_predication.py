@@ -22,6 +22,10 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
 
 def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None):
     from .component_modifiers import scoped_bundle
+    from .contextual_name_case import overlay as coordinated_readings
+    from .contextual_preposition_case import overlay as governed_readings
+    tokens=governed_readings(state,release,selector,region,coordinated_readings(tokens,nominal_groups),cfg)
+    if tokens is None:return []
     bundles = []
     diagnostics_before = len(state.diagnostics)
     for predicate in predicates:

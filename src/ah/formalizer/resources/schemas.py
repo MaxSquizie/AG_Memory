@@ -143,6 +143,10 @@ RESOURCE_SCHEMAS = {
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
             'dependency_reduction': enum('CONSTRAINT_TREE_V1'),
             'contextual_nominal_case': enum('PROPER_NAME_COORDINATION_V1'),
+            'contextual_preposition_case': obj(('version','rules'), {
+                'version':enum('PROPER_NAME_GOVERNMENT_V1'),
+                'rules':array(obj(('rule_id','lemma','cases'),{'rule_id':S,'lemma':S,
+                    'cases':array(enum('acc','gen','dat','abl','loc'),minimum=1)}),minimum=1)}),
             'soft_clause_boundaries': enum('CAPITAL_FINITE_HINT_V1'),
             'oov_morphology': enum('CONTEXTUAL_NOMINAL_V1'),
             'agreement_recovery': obj(('version','max_edits'),{'version':enum('MODIFIER_AGREEMENT_V1'),

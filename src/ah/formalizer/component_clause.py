@@ -7,6 +7,10 @@ from .component_candidates import enumerate_candidates
 def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None):
     from .contextual_name_case import overlay
     tokens=overlay(tokens,nominal_groups)
+    if select:
+        from .contextual_preposition_case import overlay as governed_readings
+        tokens=governed_readings(state,release,selector,region,tokens,cfg)
+        if tokens is None:return []
     evidence={e.token_id:e for e in tokens}
     from .component_source import view
     raw=view(state,region,tokens)

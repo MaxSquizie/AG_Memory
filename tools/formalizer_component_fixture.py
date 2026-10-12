@@ -26,6 +26,8 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         extend(manifest,core,policy['entries'][0]['composition'])
     if predication:
         policy['entries'][0]['composition']['oov_morphology']='CONTEXTUAL_NOMINAL_V1'
+        from tools.formalizer_government_fixture import policy as government_policy
+        policy['entries'][0]['composition']['contextual_preposition_case']=government_policy()
         policy['entries'][0]['composition']['agreement_recovery']={'version':'MODIFIER_AGREEMENT_V1','max_edits':2}
     if refinement:
         if not dependency_reduction: raise ValueError('refinement requires dependency_reduction')

@@ -98,6 +98,9 @@ class ResourceRelease:
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         composition=policy.get('composition')
         if composition:
+            from ..contextual_preposition_case import validate as validate_government
+            try: validate_government(composition)
+            except ValueError as exc: raise ResourceMissing(str(exc)) from exc
             if composition.get('modifier_composition') and not all(composition.get(k)
                     for k in ('modifier_content_role','preposition_nominal_role')):
                 raise ResourceMissing('invalid modifier composition roles')
