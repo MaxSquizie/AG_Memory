@@ -15,6 +15,13 @@ def select(state, release, selector, region, tokens, cfg):
         av=[v for v in a.variants if v.pos in {'NOUN','NPRO'}]
         bv=[v for v in b.variants if v.pos in {'NOUN','NPRO'}]
         cases=sorted({c for x in av for y in bv for c in x.cases & y.cases})
+        contextual=[]
+        if not cases and av and bv:
+            from .contextual_name_case import resolve
+            row=resolve(state,release,selector,region,a,b,cfg)
+            if row:
+                contextual.append(row)
+                cases=sorted({c for v in row['variants'] for c in v['cases']})
         if not cases:
             if av and bv:
                 state.diag('NOMINAL_COORDINATION_CASE_CONFLICT',region.region_id)
@@ -22,13 +29,14 @@ def select(state, release, selector, region, tokens, cfg):
             return None
         groups.append({'member_refs':[a.token_id,b.token_id],
             'marker_refs':[t.token_id for t in tokens if lo<=t.start and t.end<=hi],
-            'cases':cases,'operator':'AND'})
+            'cases':cases,'operator':'AND','contextual_readings':contextual})
     # Overlapping pairs form one connected nominal group, never two copies.
     merged=[]
     for g in groups:
         old=next((p for p in merged if set(p['member_refs']) & set(g['member_refs'])),None)
         if old:
             old['member_refs']=list(dict.fromkeys([*old['member_refs'],*g['member_refs']]))
+            old['contextual_readings']+=g['contextual_readings']
             old['marker_refs']+=g['marker_refs'];old['cases']=sorted(set(old['cases']) & set(g['cases']))
             if not old['cases']: return None
         else:merged.append(g)

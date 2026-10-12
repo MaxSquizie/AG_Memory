@@ -33,7 +33,7 @@ AH-факты. Общая T4-проверка и T5/T6 остаются обяз
 
 ## Типизированная запись: UsageLink.kind=NOMINAL
 
-ENTITY-слот основного узла по-прежнему содержит Ref(M). Его описание — отдельный
+ENTITY-слот основного узла содержит Ref(M), а для выбранной явной именной группы допускается Ref(K) по [CONTEXTUAL_GROUP_REFINEMENT.md](CONTEXTUAL_GROUP_REFINEMENT.md). Его описание — отдельный
 N с лексическим T, ENTITY-актантом хозяина и, для PP, ENTITY-дополнением.
 Например, структурное описание «об искусстве» связывает M_сообщение и
 M_искусство; определения «австрийское» и «инженерное» описывают M_искусство.
@@ -41,11 +41,13 @@ M_искусство; определения «австрийское» и «и�
 или alias по сходству текста нет.
 
 `UsageLink{kind=NOMINAL, node_ref:Ref(N), parent_ref:Ref(N), position,
-host_ref:Ref(M), host_role, source_tag, root_support_ref, attitude=UNKNOWN,
-status=LIVE}`. `position` — ENTITY-роль родителя; `host_role` — роль того же M
-в описании. Write boundary проверяет обе стороны, тип M и привязку к ROOT-опоре
+host_ref:Ref(M|K), host_role, source_tag, root_support_ref, attitude=UNKNOWN,
+status=LIVE}`. `position` — ENTITY-роль родителя; `host_role` — роль того же M или K
+в описании. Write boundary проверяет обе стороны, тип M|K и привязку к ROOT-опоре
 того же source_tag. ID = H(node_ref, parent_ref, position, NOMINAL, host_ref,
-source_tag, root_support_ref). Это отдельный вариант tagged union UsageLink;
+source_tag, root_support_ref); при наличии `host_path` и/или `content_time` они
+добавляются к ключу в этом порядке. Контракт временной квалификации —
+[CONTEXTUAL_GROUP_REFINEMENT.md](CONTEXTUAL_GROUP_REFINEMENT.md). Это отдельный вариант tagged union UsageLink;
 ограничение пропозициональных слотов для OPERATOR не меняется.
 
 Описание доступно структурно, если родитель S-accessible, link LIVE и именно

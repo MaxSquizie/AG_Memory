@@ -6,17 +6,22 @@ from .component_policy import _morph
 def projection(variant, attachment, cfg):
     if not attachment or variant.pos != 'PRTF':
         return None
-    host, reading = attachment
+    host, reading = attachment[:2]
     if not agreeing(reading, variant):
         return None
     matches = [r for r in cfg.get('refinement',{}).get('participle_voices',())
                if r['feature'] in variant.features]
     if len(matches) != 1:
         return None
-    return {'host':host, 'reading':reading, 'rule':matches[0]}
+    return {'host':host, 'reading':reading, 'rule':matches[0],
+            **({'group':attachment[2]} if len(attachment)>2 else {})}
 
 
 def add_host(frame, projected):
+    if projected.get('group'):
+        from .refinement_group_hosts import add_host as add_group_host
+        add_group_host(frame,projected)
+        return
     host, reading, rule = (projected[k] for k in ('host','reading','rule'))
     tid = host.token_id
     frame.semantic['proposed_roles'][tid] = rule['host_role']

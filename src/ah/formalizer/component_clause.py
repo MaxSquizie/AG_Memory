@@ -5,6 +5,8 @@ from .component_candidates import enumerate_candidates
 
 
 def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None):
+    from .contextual_name_case import overlay
+    tokens=overlay(tokens,nominal_groups)
     evidence={e.token_id:e for e in tokens}
     from .component_source import view
     raw=view(state,region,tokens)

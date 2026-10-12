@@ -94,6 +94,16 @@ def prepare_references(state, release):
     context=state.observation.get('coreference_context',[])
     explicit=state.observation.get('entity_bindings',{})
     evidence={e.token_id:e for e in state.evidence}; slots={}; local_targets={}
+    # Local contextual readings affect antecedent compatibility, not the R1 record.
+    from dataclasses import replace
+    from .native_frontend import _frame_variants
+    for tid,ev in list(evidence.items()):
+        owners=[f for f in state.frames if not f.semantic.get('structural_unresolved') and
+                f.semantic.get('morph_bindings',{}).get(tid,{}).get('origin')=='CONTEXTUAL']
+        if owners:
+            from .component_policy import _morph
+            variants=tuple({digest(_morph(v)):v for f in owners for v in _frame_variants(f,ev)}.values())
+            evidence[tid]=replace(ev,variants=variants)
     arguments={tid for f in state.frames for tid in f.argument_token_refs
                if tid not in f.semantic.get('bound_arguments',{})}
     provenance=ResourceProvenance(('COREF_DECLARED_WINDOW',),{'release':release.sha256})

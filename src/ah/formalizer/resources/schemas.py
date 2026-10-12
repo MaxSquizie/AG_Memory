@@ -141,6 +141,7 @@ RESOURCE_SCHEMAS = {
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
             'dependency_reduction': enum('CONSTRAINT_TREE_V1'),
+            'contextual_nominal_case': enum('PROPER_NAME_COORDINATION_V1'),
             'oov_morphology': enum('CONTEXTUAL_NOMINAL_V1'),
             'agreement_recovery': obj(('version','max_edits'),{'version':enum('MODIFIER_AGREEMENT_V1'),
                 'max_edits':{'type':'integer','minimum':1,'maximum':2}}),

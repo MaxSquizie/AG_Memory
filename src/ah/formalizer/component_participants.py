@@ -60,7 +60,9 @@ def prepare_implicit(state, release):
             if f.semantic.get('structural_unresolved') and any(v.pos!='NOUN' for v in ev.variants):
                 continue
             selected_morph=f.semantic.get('morph_bindings',{}).get(tid)
-            variants=[v for v in ev.variants if v.pos=='NOUN' and (not selected_morph or
+            from .native_frontend import _frame_variants
+            readings=_frame_variants(f,ev) if selected_morph and selected_morph.get('origin')=='CONTEXTUAL' else ev.variants
+            variants=[v for v in readings if v.pos=='NOUN' and (not selected_morph or
                 all(getattr(v,k)==selected_morph.get(k) for k in ('lemma','pos','number','gender')))]
             if not variants: continue  # pronoun resolution has its own closed question
             features=[_features(v) for v in variants]

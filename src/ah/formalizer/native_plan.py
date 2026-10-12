@@ -4,6 +4,7 @@ import re
 from .canonical_ledger import digest
 from .store_interface import StoreOp
 from .t5_batch import FragmentT5Input,evaluate_fragment
+from .structural_content_time import payload as content_time
 
 
 def build_plan(state,release,store):
@@ -26,6 +27,7 @@ def build_plan(state,release,store):
         active=active|{fid}
         f=frames[fid]
         if f.semantic.get('structural_unresolved'): raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
+        if structural and f.semantic.get('temporal_unresolved'):raise ValueError('TEMPORAL_NESTED_SCOPE_UNRESOLVED')
         if structural and (f.semantic.get('relative_temporal') or f.semantic.get('relative_time_targets')):
             raise ValueError('TEMPORAL_NESTED_SCOPE_UNSUPPORTED')
         d=state.decisions.get(fid+'|predicate_value')
@@ -75,6 +77,11 @@ def build_plan(state,release,store):
                                   **({'scalar_properties':scalar} if scalar else {})},frag)
             bid='binding:'+digest([tag,mention_ref,mid])
             from .coreference import mention_features
+            reading=f.semantic.get('morph_bindings',{}).get(tid,{})
+            if reading.get('origin')=='CONTEXTUAL':
+                from dataclasses import replace
+                from .native_frontend import _frame_variants
+                ev=replace(ev,variants=_frame_variants(f,ev))
             emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)
             mention_roles.setdefault(role,[]).append(mid)
         from .implicit_plan import emit_implicit_roles
@@ -111,8 +118,9 @@ def build_plan(state,release,store):
         emit('ENSURE_NODE',{'uid':nid,'template_ref':tid,'actants':roles,'semantic_status':'UNLINKED' if open_ else 'KNOWN','temporal_mode':mode,'identity_key':identity,'content_key':ck,'polarity':True,'proposition':content,'source_tag':tag,'source_ref':f.predicate_token_ref},frag)
         for role,child in f.semantic.get('proposition_args',{}).items():
             target=roles[role]
-            link='usage:'+digest([target,nid,role,'ATTITUDE',tag])
-            emit('MATERIALIZE_USAGE_LINK',{'link_id':link,'node_ref':target,'parent_ref':nid,'position':role,'kind':'ATTITUDE','attitude':child['attitude'],'holder_ref':roles.get(child.get('holder_role','SUBJECT')),'source_tag':tag},frag)
+            qualification=content_time(frames[child['frame_ref']],target,tag) if child.get('frame_ref') else {}
+            link='usage:'+digest([target,nid,role,'ATTITUDE',tag,*([qualification] if qualification else [])])
+            emit('MATERIALIZE_USAGE_LINK',{'link_id':link,'node_ref':target,'parent_ref':nid,'position':role,'kind':'ATTITUDE','attitude':child['attitude'],'holder_ref':roles.get(child.get('holder_role','SUBJECT')),'source_tag':tag,**qualification},frag)
         for child in f.semantic.get('nominal_args',()):
             target,_=node_for(child['frame_ref'],frag,True,active)
             from .refinement_host_path import node_path
@@ -120,11 +128,16 @@ def build_plan(state,release,store):
             host_role=child.get('host_implicit_role')
             if host_role is not None and host_role not in selected.get('implicit_roles',()):
                 raise ValueError('NOMINAL_HOST_UNRESOLVED')
-            if host_role is None: host_role=selected['roles'].get(child['host_token_ref'])
+            if host_role is None:
+                members=child.get('host_group_member_refs',[child['host_token_ref']])
+                host_roles={selected['roles'].get(t) for t in members}
+                if len(host_roles)!=1 or None in host_roles:raise ValueError('NOMINAL_HOST_UNRESOLVED')
+                host_role=next(iter(host_roles))
             if host_role is None or host_role not in roles: raise ValueError('NOMINAL_HOST_UNRESOLVED')
             nominal_links.append((frag,{'node_ref':target,'parent_ref':nid,'position':host_role,
                 'kind':'NOMINAL','attitude':'UNKNOWN','host_ref':roles[host_role],
                 'host_role':child['host_role'],'source_tag':tag,
+                **content_time(frames[child['frame_ref']],target,tag),
                 **({'host_path':host_path} if len(host_path)>1 else {})}))
         nodes[fid]=nid
         return nid,ck

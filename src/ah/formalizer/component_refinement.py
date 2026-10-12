@@ -104,21 +104,23 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
             # One source mention can occur in several descriptions. Its owner
             # for this edge is the original slot, never a separate guessed M.
             hosts.setdefault(tid,(frame,h,hv))
-    # Do not present only individual members when a whole group can be the
-    # host: the current postnominal write contract is ENTITY(M)-only.
-    if boundary['kind']=='PARTICIPLE' and any(
-        set(g['cases']) & set(v.cases) and v.number=='plur'
-        for f in accepted(frames) for g in f.semantic.get('nominal_groups',())
-        for v in body[0].variants if v.pos=='PRTF'):
-        return block(state,region,frames,'COMPONENT_GROUP_REFINEMENT_UNSUPPORTED')
+    group_hosts={}
+    if boundary['kind']=='PARTICIPLE':
+        from .refinement_group_hosts import candidates as group_candidates
+        group_hosts=group_candidates(accepted(frames),evidence,body)
     choices=[{'candidate_id':tid,'label':'Existing nominal «'+h.span+'» at '+str([h.start,h.end])}
              for tid,(_,h,_) in hosts.items()]
+    choices.extend({'candidate_id':tid,'label':'WHOLE established group «'+h.span+'»'}
+                   for tid,(_,h,_,_) in group_hosts.items())
+    if len(choices)>cfg['max_candidates']:
+        return block(state,region,frames,'COMPONENT_REFINEMENT_SEARCH_INCOMPLETE')
     chosen=_probe(state,selector,release,region.region_id+'|refinement-host','nominal_attachment',choices,
         state.text[slice(*region.source_range)],region.source_range,
         question='Which existing nominal does «'+state.text[body[0].start:body[-1].end]+
         '» describe? Choose its immediate host. Do not resolve pronoun identities or invent an entity.')
     if chosen is None: return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
-    owner,host,reading=hosts[chosen]
+    selected_group=group_hosts.get(chosen)
+    owner,host,reading=selected_group[:3] if selected_group else hosts[chosen]
     if boundary['kind']=='RELATIVE':
         marker=body[0]; child_tokens=body[1:]
         if not child_tokens: return block(state,region,frames,'COMPONENT_REFINEMENT_UNRESOLVED')
@@ -146,17 +148,19 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
         host_role=cfg['nominal_host_role']
     else:
         cr=region_for(state,region,body,'PARTICIPLE')
-        children=compose_area(state,release,selector,cr,body,cfg,depth+1,(host,reading))
+        children=compose_area(state,release,selector,cr,body,cfg,depth+1,(host,reading,*([selected_group[3]] if selected_group else [])))
         description=root(children)
         candidates=[f for f in accepted(children) if f.semantic.get('refinement_binding',{}).get('host_token_ref')==chosen]
         if description is None or len(candidates)!=1:
             return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_CHILD_UNRESOLVED')
         host_frame=candidates[0];host_role=host_frame.semantic['refinement_binding']['host_role']
         # Reuse the exact nominal unit/mention of the already assembled host.
-        host_frame.semantic['lexical_units'][chosen]=deepcopy(owner.semantic['lexical_units'][chosen])
+        if not selected_group:
+            host_frame.semantic['lexical_units'][chosen]=deepcopy(owner.semantic['lexical_units'][chosen])
     description.semantic['component_child']=owner.frame_id
     owner.semantic.setdefault('nominal_args',[]).append({'host_token_ref':chosen,'host_role':host_role,
-        'frame_ref':description.frame_id,'host_frame_ref':host_frame.frame_id})
+        'frame_ref':description.frame_id,'host_frame_ref':host_frame.frame_id,
+        **({'host_group_member_refs':selected_group[3]['group']['member_refs']} if selected_group else {})})
     state.syntax_trace.append({'kind':'NOMINAL_REFINEMENT','parent_ref':owner.frame_id,
         'description_ref':description.frame_id,'host_token_ref':chosen,'kind_detail':boundary['kind'],
         'source_token_refs':[t.token_id for t in tokens],'parent_token_refs':[t.token_id for t in parent],

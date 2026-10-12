@@ -2,6 +2,7 @@
 
 
 def extend(cfg):
+    cfg['contextual_nominal_case']='PROPER_NAME_COORDINATION_V1'
     cfg['infinitive_composition']={'version':'DEPENDENT_INFINITIVE_V1','relations':[
         {'role':'PURPOSE','attitude':'HYPOTHETICAL'}, {'role':'OBJECT','attitude':'UNKNOWN'}]}
     cfg['refinement']={'version':'POSTNOMINAL_AREAS_V1','max_depth':8,
