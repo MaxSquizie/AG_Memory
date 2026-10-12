@@ -412,6 +412,10 @@ def solve_native_goal(engine,goal,query,workspace,attention,context,runtime,*,_b
                 if has_unspecified_members(engine.core,witnesses):
                     refs=tuple(witnesses.values())
                     return outcome(LogicalStatus.UNKNOWN,refs,('QUALITATIVE_QUANTITY_NOT_NUMERIC',),CountConclusion(None,None,refs,None))
+                from .referential_placeholder import has_unresolved_identity
+                if has_unresolved_identity(engine.core,witnesses):
+                    unresolved_refs=tuple(witnesses.values())
+                    return outcome(LogicalStatus.UNKNOWN,unresolved_refs,('REFERENCE_DISTINCTNESS_UNKNOWN',),CountConclusion(None,None,unresolved_refs,None))
                 claimed_lower,claimed_upper,bound_refs=_numeric_bounds(engine.core,ledger,goal,_budget)
                 lower=max(len(witnesses),claimed_lower or 0)
                 certificate=None if hypothetical_scope else _complete_domain(adapter,ledger,goal)

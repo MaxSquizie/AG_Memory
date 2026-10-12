@@ -17,8 +17,9 @@ def extend(manifest, core):
         resources['R-S'].append({'sense_id':sid,'lemma':lemma,'POS':'ADVB'})
         resources['R-V'].append({'sense_id':sid,'state_class':'EVENT','roles':[
             {'role_id':role,'argument_types':types,'cardinality':{'min':1,'max':1},
-             'allowed_cases':[],'optionality':False}
+             'allowed_cases':['dat'] if role=='LOCATION' and kind=='ANCHOR' else [],
+             **({'allowed_preps':['к']} if role=='LOCATION' and kind=='ANCHOR' else {}),'optionality':False}
             for role,types in [('OBJECT',['PROPOSITION']),('LOCATION',['ENTITY'])]]})
         resources['TemplateMap'].append({'sense_id':sid,'template_ref':template,'roles':['OBJECT','LOCATION']})
         cfg['rules'].append({'rule_id':'TEST-SPATIAL-'+sid,'lemma':lemma,'POS':'ADVB','sense_id':sid,
-            'role_id':'LOCATION','kind':kind,**({'location_kind':relation} if relation else {})})
+            'role_id':'LOCATION','kind':kind,**({'location_kind':relation,'goal_prepositions':[{'lemma':'к','cases':['dat']}]} if relation else {})})

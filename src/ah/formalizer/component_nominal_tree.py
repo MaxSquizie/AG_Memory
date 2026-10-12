@@ -58,6 +58,9 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     hosts=select_hosts(state,release,selector,region,units,frame,cfg)
     if hosts is None: return [[frame]]
     event=[u for u in units if not u.get('bound_host') and not u.get('implicit_host_role') and (not u['entities'] or hosts[u['entities'][0][0].token_id]=='EVENT')]
+    from .directional_goal import bundle as directional_bundle
+    shared=directional_bundle(state,release,selector,region,tokens,frame,units,hosts,event,cfg)
+    if shared is not None:return [shared]
     if cfg.get('modifier_scope')=='SHARED_EVENT_V1' and len(event)>1:
         from .modifier_scope_shapes import shapes
         try: topology=shapes(len(event),limit)

@@ -46,6 +46,10 @@ def solve_aggregate(engine,adapter,ledger,goal,query,workspace,attention,context
         if has_unspecified_members(engine.core,witnessed):
             refs=tuple(dict.fromkeys(proof_refs))
             return outcome(LogicalStatus.UNKNOWN,refs,('QUALITATIVE_QUANTITY_NOT_NUMERIC',),CountConclusion(None,None,refs,None))
+        from .referential_placeholder import has_unresolved_identity
+        if has_unresolved_identity(engine.core,witnessed):
+            unresolved_refs=tuple(dict.fromkeys(proof_refs))
+            return outcome(LogicalStatus.UNKNOWN,unresolved_refs,('REFERENCE_DISTINCTNESS_UNKNOWN',),CountConclusion(None,None,unresolved_refs,None))
         lower=len(witnessed)
     else:
         owner=_owner(goal.pattern)

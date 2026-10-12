@@ -25,6 +25,7 @@ def prepare(state, release):
         slots = frame.semantic['spatial_slots'] = {}
         for rule in cfg['rules']:
             if (rule['lemma'],rule['POS']) not in forms: continue
+            if rule['role_id'] in frame.semantic.get('proposed_roles',{}).values():continue
             slot = {'rule':deepcopy(rule), 'mention_ref':ev.token_id,
                     'decision_ref':frame.frame_id+'|spatial:'+rule['rule_id']}
             if rule['kind']=='ANCHOR':

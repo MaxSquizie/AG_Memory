@@ -185,6 +185,10 @@ def solve_bindings(engine,adapter,goal,query,workspace,attention,context,runtime
     from .qualitative_group_entity import has_unspecified_members
     if has_unspecified_members(engine.core,(row[0].uid for row in rows)):
         return outcome(LogicalStatus.UNKNOWN,refs,('QUALITATIVE_QUANTITY_NOT_NUMERIC',),CountConclusion(None,None,refs,None))
+    from .referential_placeholder import has_unresolved_identity
+    if has_unresolved_identity(engine.core,(row[0].uid for row in rows)):
+        unresolved_refs=refs
+        return outcome(LogicalStatus.UNKNOWN,unresolved_refs,('REFERENCE_DISTINCTNESS_UNKNOWN',),CountConclusion(None,None,unresolved_refs,None))
     claimed_lower,claimed_upper,bound_refs=formula_numeric_bounds(engine.core,ledger,goal,budget)
     lower=max(len(rows),claimed_lower or 0); refs=tuple(dict.fromkeys((*refs,*bound_refs)))
     release=getattr(adapter,'resource_release',None); complete=False; closure_mode='ENUMERATED'

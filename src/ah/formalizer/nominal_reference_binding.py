@@ -1,4 +1,4 @@
-"""Proof-carrying noun-group identity. No new M for an unresolved reference."""
+"""Proof-carrying noun-group identity. Resolved identity is separate from a mention-local unknown referent."""
 from .canonical_ledger import digest
 
 
@@ -9,7 +9,7 @@ def payload(state, unit):
     mention=unit['mention_ref']
     binding=state.observation.get('nominal_reference_bindings',{}).get(mention)
     if binding is None:
-        raise ValueError('NOMINAL_REFERENCE_UNRESOLVED')
+        return None  # A typed placeholder preserves the source relation, not identity.
     return {'binding_kind':'NOMINAL_REFERENCE',**binding}
 
 

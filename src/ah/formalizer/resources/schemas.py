@@ -121,7 +121,8 @@ RESOURCE_SCHEMAS = {
             'max_candidates':{'type':'integer','minimum':1,'maximum':32},
             'rules':array(obj(('rule_id','lemma','POS','sense_id','role_id','kind'), {
                 'rule_id':S,'lemma':S,'POS':S,'sense_id':S,'role_id':S,
-                'kind':enum('ANCHOR','REFERENCE'),'location_kind':enum('DESTINATION','LOCATION','ORIGIN')}),minimum=1)}),
+                'kind':enum('ANCHOR','REFERENCE'),'location_kind':enum('DESTINATION','LOCATION','ORIGIN'),
+                'goal_prepositions':array(obj(('lemma','cases'),{'lemma':S,'cases':array(enum('dat','acc','gen','loc','ins'),minimum=1)}),minimum=1)}),minimum=1)}),
         'document_scopes': obj(('version','context_chars','rules'), {
             'version':enum('CALENDAR_AREAS_V1'),'context_chars':{'type':'integer','minimum':64,'maximum':2048},
             'rules':array(obj(('rule_id','pattern','days','months'), {
