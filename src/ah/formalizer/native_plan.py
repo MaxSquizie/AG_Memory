@@ -78,7 +78,7 @@ def build_plan(state,release,store):
             emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)
             mention_roles.setdefault(role,[]).append(mid)
         from .implicit_plan import emit_implicit_roles
-        emit_implicit_roles(state,store,f,selected,tag,frag,roles,mention_roles,emit)
+        emit_implicit_roles(state,store,f,selected,tag,frag,roles,mention_roles,emit,frames)
         from .spatial_plan import emit_roles as emit_spatial_roles
         emit_spatial_roles(f,selected,tag,frag,roles,emit)
         for role,members in mention_roles.items():
@@ -113,7 +113,10 @@ def build_plan(state,release,store):
             target,_=node_for(child['frame_ref'],frag,True,active)
             from .refinement_host_path import node_path
             host_path=node_path(child,frames,nodes)
-            host_role=selected['roles'].get(child['host_token_ref'])
+            host_role=child.get('host_implicit_role')
+            if host_role is not None and host_role not in selected.get('implicit_roles',()):
+                raise ValueError('NOMINAL_HOST_UNRESOLVED')
+            if host_role is None: host_role=selected['roles'].get(child['host_token_ref'])
             if host_role is None or host_role not in roles: raise ValueError('NOMINAL_HOST_UNRESOLVED')
             nominal_links.append((frag,{'node_ref':target,'parent_ref':nid,'position':host_role,
                 'kind':'NOMINAL','attitude':'UNKNOWN','host_ref':roles[host_role],

@@ -845,6 +845,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             declared_ids &= allowed; priors &= allowed; context_senses &= allowed
         frame.semantic['has_known_senses']=bool(senses)
         specs=[]
+        from .implicit_descriptions import roles as implicit_frame_roles
         for s in senses:
             valencies=[v for v in release.entries('R-V') if v['sense_id']==s['sense_id']]
             for v in valencies:
@@ -863,7 +864,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                         supplied=set(frame.semantic.get('proposed_roles',{}).values())|set(request.get('requested_roles',()))
                         if mappings and measure['value_role'] not in supplied:
                             extra=(measure['value_role'],)
-                implicit_roles=tuple(frame.semantic.get('implicit_arguments',{}))
+                implicit_roles=implicit_frame_roles(frame)
                 from .spatial_references import for_sense as spatial_slot
                 spatial=spatial_slot(frame,s['sense_id'])
                 spatial_roles=(spatial['rule']['role_id'],) if spatial else ()
@@ -883,7 +884,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             policy=release.entries('OpenTemplatePolicy')
             if policy and policy[0].get('allow',False):
                 bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
-                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(frame.semantic.get('implicit_arguments',{})),'state_class':'UNKNOWN'}
+                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
                 specs.append(open_spec)
         if senses and not specs: state.diag('VALENCY_UNKNOWN',frame.frame_id)
         known_specs=[s for s in specs if s['sense_kind']=='KNOWN']

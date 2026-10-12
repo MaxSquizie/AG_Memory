@@ -23,6 +23,8 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         units=list(prefix_units(tokens,missing,frame))
         from .nominal_residual_descriptions import units as residual_units
         units.extend(list(residual_units(tokens,missing,frame,units)))
+        from .implicit_descriptions import units as implicit_units
+        units.extend(implicit_units(tokens,missing,frame,cfg))
         for group in prepositional_groups(tokens).values():
             if set(group['anchor_refs'])<=missing: units.extend(nominal_variants(tokens,group,limit))
         for e in tokens:
@@ -51,7 +53,7 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         frame.semantic['requires_attachment_probe']=True
     hosts=select_hosts(state,release,selector,region,units,frame,cfg)
     if hosts is None: return [[frame]]
-    event=[u for u in units if not u.get('bound_host') and (not u['entities'] or hosts[u['entities'][0][0].token_id]=='EVENT')]
+    event=[u for u in units if not u.get('bound_host') and not u.get('implicit_host_role') and (not u['entities'] or hosts[u['entities'][0][0].token_id]=='EVENT')]
     if factorial(len(event))>limit:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return [[frame]]
     return [materialize(state,region,tokens,frame,units,hosts,order,cfg) for order in permutations(event)]
@@ -59,7 +61,7 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
 
 def materialize(state,region,tokens,original,units,hosts,order,cfg):
     from .component_modifiers import wrap
-    signature=[(u['refs'],_morph(u['variant']),u.get('bound_host'),u.get('host_reading'),[(e.token_id,_morph(v)) for e,v in
+    signature=[(u['refs'],_morph(u['variant']),u.get('bound_host'),u.get('host_reading'),u.get('implicit_host_role'),[(e.token_id,_morph(v)) for e,v in
                  [*u['entities'],*u['adjectives']]]) for u in units]
     seed=digest([original.frame_id,signature,hosts,[u['refs'] for u in order]])
     base=deepcopy(original);base.frame_id='component-nominal:'+seed
@@ -108,6 +110,9 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg):
             outer.semantic['lexical_units'][e.token_id]=deepcopy(lexical[e.token_id]);owners[e.token_id]=outer
         frames.append(outer);root=outer
     for u in units:
+        if u.get('implicit_host_role'):
+            from .implicit_descriptions import materialize as implicit_description
+            frames.append(implicit_description(u,base,region,cfg))
         if u.get('bound_host'):
             from .nominal_prefix_descriptions import host_role as prefix_role
             head=u['bound_host'];role=prefix_role(u,cfg)

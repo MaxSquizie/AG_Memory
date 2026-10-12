@@ -2,10 +2,11 @@
 from .canonical_ledger import digest
 
 
-def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, mention_roles, emit):
+def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, mention_roles, emit, frames=None):
     f, frag = frame, fragment
     for role in selected.get('implicit_roles',()):
-        gap=f.semantic['implicit_arguments'][role]
+        from .implicit_descriptions import gap_for
+        gap=gap_for(f,role,frames or {})
         target=state.observation.get('implicit_bindings',{}).get(gap['gap_id'])
         if not target: raise ValueError('IMPLICIT_ARGUMENT_UNRESOLVED')
         if role in mention_roles or role in roles: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')

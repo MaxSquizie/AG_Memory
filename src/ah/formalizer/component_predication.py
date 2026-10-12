@@ -63,13 +63,15 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                     label += '; linked morphology='+str({evidence[t].span:{k:v for k,v in morph.items()
                         if k in {'lemma','pos','cases','gender','number'}} for t,morph in f.semantic['morph_bindings'].items()})
+                if f.semantic.get('shared_implicit_arguments'):
+                    label += '; describes the SAME omitted participant slot: '+str(f.semantic['shared_implicit_arguments'])+'; no new participant or identity'
                 if f.semantic.get('implicit_arguments'):
                     label += '; omitted roles, identity unresolved='+str(list(f.semantic['implicit_arguments']))
                 if f.semantic.get('copula_ref'):
                     label += '; copula='+evidence[f.semantic['copula_ref']].span
                 if f.semantic.get('nominal_args'):
                     by_id={item.frame_id:item for item in bundle}
-                    label += '; nominal descriptions='+str([{'host':evidence[c['host_token_ref']].span,
+                    label += '; nominal descriptions='+str([{'host':evidence[c['host_token_ref']].span if 'host_token_ref' in c else 'omitted '+c['host_implicit_role']+' of '+f.anchor_span,
                         'description':by_id[c['frame_ref']].anchor_span} for c in f.semantic['nominal_args']])
                 if f.semantic.get('relative_temporal'):
                     label += '; relative anchors='+str(f.semantic['relative_temporal'])
