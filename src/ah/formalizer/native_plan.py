@@ -123,9 +123,9 @@ def build_plan(state,release,store):
             link='usage:'+digest([target,nid,role,'ATTITUDE',tag,*([qualification] if qualification else [])])
             emit('MATERIALIZE_USAGE_LINK',{'link_id':link,'node_ref':target,'parent_ref':nid,'position':role,'kind':'ATTITUDE','attitude':child['attitude'],'holder_ref':roles.get(child.get('holder_role','SUBJECT')),'source_tag':tag,**qualification},frag)
         for child in f.semantic.get('nominal_args',()):
-            target,_=node_for(child['frame_ref'],frag,True,active)
+            target,_=tree_node(child['tree'],frag,active) if child.get('tree') else node_for(child['frame_ref'],frag,True,active)
             from .refinement_host_path import node_path
-            host_path=node_path(child,frames,nodes)
+            host_path=node_path(child,frames,nodes,root_node=target,operations=op_by_id.values())
             host_role=child.get('host_implicit_role')
             if host_role is not None and host_role not in selected.get('implicit_roles',()):
                 raise ValueError('NOMINAL_HOST_UNRESOLVED')
@@ -224,6 +224,9 @@ def build_plan(state,release,store):
         return sid
 
     forests=list(state.logical_roots)
+    forests.extend(f.semantic['component_scope_tree'] for f in state.frames
+        if f.semantic.get('component_scope_tree') and not f.semantic.get('component_child')
+        and not f.semantic.get('structural_unresolved'))
     for f in state.frames:
         for t in f.semantic.get('operator_forest',()):
             if t not in forests: forests.append(t)
@@ -236,8 +239,11 @@ def build_plan(state,release,store):
     for f in state.frames:
         for child in f.semantic.get('proposition_args',{}).values():
             structural_leaves.update(leaf_refs(child.get('tree') or {'frame_ref':child['frame_ref']}))
-    structural_leaves.update(c['frame_ref'] for f in state.frames for c in f.semantic.get('nominal_args',()))
-    roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner')]
+    for f in state.frames:
+        for c in f.semantic.get('nominal_args',()):
+            structural_leaves.update(leaf_refs(c.get('tree') or {'frame_ref':c['frame_ref']}))
+    from .component_policy import rejected
+    roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner') and not rejected(state,f)]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
     for frag,t in roots:
         refs=leaf_refs(t); fs=[frames[f] for f in sorted(refs)]
@@ -318,8 +324,10 @@ def build_plan(state,release,store):
                     describe(n,key,spec.get('polarity',True),child_region)
                     support(n,frag,child_region,kind='DERIVED',premises=[sid],rule='AND_ELIMINATION',witness_ref=witness if child_region==reg else None,formula_ref=formula_ref)
             from .relative_time_plan import emit_relative_time
-            if 'frame_ref' in t:
-                owner=frames[t['frame_ref']]
+            scope_owner=next((f for f in state.frames if f.semantic.get('component_scope_tree')==t
+                              and not f.semantic.get('component_child') and not f.semantic.get('structural_unresolved')),None)
+            if 'frame_ref' in t or scope_owner is not None:
+                owner=scope_owner if scope_owner is not None else frames[t['frame_ref']]
                 emit_relative_time(state,owner,uid,ck,frag,tag,emit,support)
                 for scope in owner.semantic.get('relative_time_targets',()):
                     target=nodes[scope['frame_ref']]

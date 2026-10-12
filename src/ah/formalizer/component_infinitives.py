@@ -52,7 +52,8 @@ def compose(state, release, selector, region, tokens, cfg, depth):
     children=compose_area(state,release,selector,cr,body,cfg,depth+1,infinitive=alias)
     content=root(children)
     if content is None:return block(state,region,[*frames,*children],'COMPONENT_INFINITIVE_CHILD_UNRESOLVED')
-    owner.semantic.setdefault('proposition_args',{})[relation['role']]={'frame_ref':content.frame_id,'attitude':relation['attitude']}
+    from .modifier_scope_shapes import argument
+    owner.semantic.setdefault('proposition_args',{})[relation['role']]=argument(content,relation['attitude'])
     content.semantic['component_child']=owner.frame_id
     state.syntax_trace.append({'kind':'INFINITIVE_ATTACHMENT','decision_ref':key,'owner_ref':owner.frame_id,
         'content_ref':content.frame_id,'relation':relation,'controller':alias,

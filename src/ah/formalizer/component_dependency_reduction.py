@@ -35,7 +35,9 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg):
             committed=[{'dependent':evidence[t].span,'attachment':o['kind'],
                         'host':evidence[o['host_ref']].span if 'host_ref' in o else o.get('role')} for t,o in fixed.items()]
             question='Choose the immediate grammatical attachment of «'+evidence[tid].span+'» at '+str(evidence[tid].start)+'. '
-            question+='GENITIVE records a nominal dependency, not ownership. APPOSITION records an explanation, not entity identity. '
+            question+='GENITIVE and CASE_DEPENDENCY record nominal grammar, not ownership, command, identity or a guessed semantic relation. '
+            question+='CASE_DEPENDENCY is allowed only if the dependent completes that noun in this source, not merely because its case is compatible. '
+            question+='APPOSITION records an explanation, not entity identity. '
             question+='Already fixed dependencies: '+str(committed)+'. Preserve ambiguity if evidence is insufficient.'
             probe_key=region.region_id+'|dependency:'+digest([p.token_id,pv.lemma,roles,tid,options,committed,context_range])
             previous=state.decisions.get(probe_key)
@@ -51,5 +53,5 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg):
                       'remaining_domain_ids':list(choices)})
     roots={t:(o['role'],o['variant'],o.get('prep_variant')) for t,o in fixed.items() if o['kind']=='ROOT'}
     deps=[{'head_ref':t,**{k:v for k,v in o.items() if k not in {'variant','prep_variant'}}}
-          for t,o in fixed.items() if o['kind'] in {'GENITIVE','APPOSITION'}]
+          for t,o in fixed.items() if o['kind'] in {'GENITIVE','APPOSITION','CASE_DEPENDENCY'}]
     return {'roots':roots,'dependencies':deps,'trace':trace}

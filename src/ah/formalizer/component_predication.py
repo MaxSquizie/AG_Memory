@@ -88,6 +88,9 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 + ('; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts'
                    if cfg.get('nominal_composition') else
                    '; lexical modifier attaches to the preceding proposition (structural attachment)' if len(bundle)>1 else '')})
+        for option,bundle in zip(options,complete):
+            if bundle[-1].semantic.get('component_scope_label'):
+                option['label'] += '; EXACT scope: '+bundle[-1].semantic['component_scope_label']
         from .component_scope_contrast import contrast
         local=contrast(complete,evidence)
         if local:

@@ -19,7 +19,7 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         policy['entries'][0]['composition']['modifier_composition']='BOUNDED_FOREST_V1'
     if nominal_tree:
         if not modifier_forest: raise ValueError('nominal_tree requires modifier_forest')
-        policy['entries'][0]['composition'].update(nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT')
+        policy['entries'][0]['composition'].update(nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
     if dependency_reduction:
         if not nominal_tree: raise ValueError('dependency_reduction requires nominal_tree')
         from tools.formalizer_dependency_fixture import extend
@@ -68,7 +68,7 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
                         role['omission']={'kind':'UNSPECIFIED_ENTITY','rule_id':'TEST-READ-UNSPECIFIED-THEME'}
     if regional_probes:
         policy['entries'][0]['probe_budget']={'version':'SOURCE_WINDOW_V1','window_tokens':64,
-            'calls_per_window':24,'tokens_per_window':16384}
+            'calls_per_window':32,'tokens_per_window':16384}
     content={k:manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions')}
     manifest['coverage_report']['resource_content_sha256']=digest(content)
     result,trust=sign_test_release(manifest)

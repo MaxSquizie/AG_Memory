@@ -5,6 +5,11 @@ from itertools import product
 def inventory(selected, by_id):
     modifiers=[];chains=[]
     for i,root in enumerate(selected):
+        # Shared-event DAGs need subgroup scope enumeration before lifting
+        # through a separate inter-clause conjunction. Never inspect just
+        # the lexical carrier and silently discard its sibling branches.
+        if root.semantic.get('component_scope_tree',{}).get('operator'):
+            raise ValueError('COMPONENT_COORDINATION_SCOPE_INCOMPLETE')
         frame=root;chain=[];seen=set()
         while frame.frame_id.startswith('component-modifier:'):
             if frame.frame_id in seen: raise ValueError('COMPONENT_NOMINAL_CYCLE')

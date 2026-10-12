@@ -25,6 +25,9 @@ def domains(tokens, nominals, groups, roles, pv, cfg):
                 if 'gen' in mv.cases:
                     options.extend({'kind':'GENITIVE','host_ref':h.token_id,'morph':clean(mv),'variant':mv}
                                    for h in nominals if h!=e)
+                for case in sorted(mv.cases & set(cfg.get('nominal_dependency_cases',()))):
+                    options.extend({'kind':'CASE_DEPENDENCY','host_ref':h.token_id,'case':case,
+                                    'morph':clean(mv),'variant':mv} for h in nominals if h!=e)
                 if 'nom' in mv.cases:
                     dash=[t for t in tokens if t.end<=e.start and t.span in cfg['apposition_markers']]
                     if dash:

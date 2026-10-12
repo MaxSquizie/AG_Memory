@@ -30,6 +30,9 @@ def prepare_candidate(frame,state,release):
     valid=any(clean(v)==reading for v in evidence[head].variants)
     valid &= frame.semantic['proposed_roles']=={host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']}
     if kind=='GENITIVE': valid &= 'gen' in reading['cases']
+    elif kind=='CASE_DEPENDENCY':
+        valid &= d.get('case') in cfg.get('nominal_dependency_cases',()) and d.get('case') in reading['cases']
+        valid &= head!=host
     else:
         marker=evidence.get(d.get('marker_ref'))
         valid &= bool(marker and marker.span in cfg['apposition_markers'] and

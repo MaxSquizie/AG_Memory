@@ -5,7 +5,9 @@ from ah.model.types import ActantRole,Domain
 def extend(manifest,core,cfg):
     if core is None: raise ValueError('dependency reduction fixture requires its actual AH core')
     cfg.update(dependency_reduction='CONSTRAINT_TREE_V1',apposition_markers=['—','–'],
-               dependency_senses={k:'SYNTAX_'+k for k in ('GENITIVE','APPOSITION')})
+               dependency_senses={k:'SYNTAX_'+k for k in ('GENITIVE','APPOSITION','CASE_DEPENDENCY')},
+               nominal_dependency_cases=['acc','dat','abl','ins','loc','loct'])
+    cfg['open_case_roles'].update(abl='SURFACE_ARG',ins='SURFACE_ARG')
     resources={r['kind']:r['entries'] for r in manifest['entries']}
     roles=[cfg['nominal_host_role'],cfg['preposition_nominal_role']]
     for kind,sid in cfg['dependency_senses'].items():

@@ -3,12 +3,13 @@ from .loader import ResourceMissing
 
 
 def validate_dependency_policy(release,cfg):
-    if cfg.get('nominal_composition')!='QUESTION_TREE_V1' or not cfg.get('apposition_markers') or set(cfg.get('dependency_senses',{}))!={'GENITIVE','APPOSITION'}:
+    expected_kinds={'GENITIVE','APPOSITION'}|({'CASE_DEPENDENCY'} if cfg.get('nominal_dependency_cases') else set())
+    if cfg.get('nominal_composition')!='QUESTION_TREE_V1' or not cfg.get('apposition_markers') or set(cfg.get('dependency_senses',{}))!=expected_kinds:
         raise ResourceMissing('RESOURCE_MISSING: incomplete dependency constructor policy')
     if any(not marker or any(c.isalnum() for c in marker) for marker in cfg['apposition_markers']):
         raise ResourceMissing('RESOURCE_MISSING: apposition marker must be punctuation')
     expected={cfg['nominal_host_role'],cfg['preposition_nominal_role']}
-    if len(set(cfg['dependency_senses'].values()))!=2:
+    if len(set(cfg['dependency_senses'].values()))!=len(expected_kinds):
         raise ResourceMissing('RESOURCE_MISSING: dependency kinds need distinct senses')
     for sid in cfg['dependency_senses'].values():
         senses=[s for s in release.entries('R-S') if s['sense_id']==sid]

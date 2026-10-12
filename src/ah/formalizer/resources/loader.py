@@ -105,6 +105,8 @@ class ResourceRelease:
                     or not composition.get('nominal_host_role') or
                     len({composition.get(k) for k in ('nominal_host_role','preposition_nominal_role','modifier_content_role')})!=3):
                 raise ResourceMissing('invalid nominal composition roles')
+            if composition.get('modifier_scope') and composition.get('nominal_composition')!='QUESTION_TREE_V1':
+                raise ResourceMissing('shared modifier scope requires nominal question tree')
             if composition.get('dependency_reduction'):
                 from .dependency_release import validate_dependency_policy
                 validate_dependency_policy(self,composition)
@@ -129,7 +131,7 @@ class ResourceRelease:
                         raise ResourceMissing('RESOURCE_MISSING: nominal role must allow ENTITY')
             if ({composition['subject_role'],*composition['open_case_roles'].values(),
                      *[composition[k] for k in ('modifier_content_role','preposition_nominal_role','nominal_host_role') if composition.get(k)]}-roles
-                    or not set(composition['open_case_roles']) <= {'nom','acc','gen','dat','ins','loc'}):
+                    or not set(composition['open_case_roles']) <= {'nom','acc','gen','dat','ins','abl','loc'}):
                 raise ResourceMissing('RESOURCE_MISSING: invalid composition role/case mapping')
             if composition.get('preposition_nominal_role') and (not composition.get('modifier_content_role')
                     or composition['preposition_nominal_role']==composition['modifier_content_role']):

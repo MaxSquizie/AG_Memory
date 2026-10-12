@@ -1,7 +1,7 @@
 """Prepare/freeze and resolve omitted participants through addressable choices."""
 from copy import deepcopy
 from .canonical_ledger import digest
-from .component_policy import policy, compatible, _features
+from .component_policy import policy, compatible, _features, rejected
 from .component_probe import _probe
 
 def prepare_implicit(state, release):
@@ -76,6 +76,7 @@ def resolve_implicit(state, release, selector):
     if not policy(release): return
     resolved=state.observation['implicit_bindings']={}
     for f in sorted(state.frames,key=lambda f:(f.source_range,f.frame_id)):
+        if rejected(state,f):continue
         for role,gap in f.semantic.get('implicit_arguments',{}).items():
             if f.semantic.get('structural_unresolved') or gap.get('search_incomplete'):
                 state.diag('IMPLICIT_ARGUMENT_UNRESOLVED',gap['gap_id']); continue

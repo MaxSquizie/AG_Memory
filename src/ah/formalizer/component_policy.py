@@ -20,3 +20,9 @@ def _morph(v):
     return raw
 
 
+
+
+def rejected(state, frame):
+    decision=state.decisions.get(frame.semantic.get('composition_decision'))
+    return bool(decision and decision.outcome=='RESOLVED' and
+                frame.semantic.get('composition_bundle_root',frame.frame_id) not in decision.selected)

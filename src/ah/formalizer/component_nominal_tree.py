@@ -54,16 +54,22 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     hosts=select_hosts(state,release,selector,region,units,frame,cfg)
     if hosts is None: return [[frame]]
     event=[u for u in units if not u.get('bound_host') and not u.get('implicit_host_role') and (not u['entities'] or hosts[u['entities'][0][0].token_id]=='EVENT')]
+    if cfg.get('modifier_scope')=='SHARED_EVENT_V1' and len(event)>1:
+        from .modifier_scope_shapes import shapes
+        try: topology=shapes(len(event),limit)
+        except OverflowError:
+            state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return [[frame]]
+        return [materialize(state,region,tokens,frame,units,hosts,event,cfg,shape=s) for s in topology]
     if factorial(len(event))>limit:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return [[frame]]
     return [materialize(state,region,tokens,frame,units,hosts,order,cfg) for order in permutations(event)]
 
 
-def materialize(state,region,tokens,original,units,hosts,order,cfg):
+def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None):
     from .component_modifiers import wrap
     signature=[(u['refs'],_morph(u['variant']),u.get('bound_host'),u.get('host_reading'),u.get('implicit_host_role'),[(e.token_id,_morph(v)) for e,v in
                  [*u['entities'],*u['adjectives']]]) for u in units]
-    seed=digest([original.frame_id,signature,hosts,[u['refs'] for u in order]])
+    seed=digest([original.frame_id,signature,hosts,[u['refs'] for u in order],*([shape] if shape else [])])
     base=deepcopy(original);base.frame_id='component-nominal:'+seed
     base.semantic['uncovered_token_refs']=[];base.semantic['structural_unresolved']=False
     base.semantic['component_questions']=[q for q in base.semantic['component_questions']
@@ -103,12 +109,33 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg):
             f=describe(u['token'],u['variant'],{host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']})
             owners[head]=f;pending.append((host,f))
     root=base
-    for u in order:
-        outer=wrap(root,region,u['token'],u['variant'],cfg['modifier_content_role'],
-            entities=u['entities'],nominal_role=cfg['preposition_nominal_role'] if u['entities'] else None)[-1]
-        for e,v in u['entities']:
+    def apply(unit,inner,content=None):
+        outer=wrap(inner,region,unit['token'],unit['variant'],cfg['modifier_content_role'],
+            entities=unit['entities'],nominal_role=cfg['preposition_nominal_role'] if unit['entities'] else None)[-1]
+        if content is not None:
+            outer.semantic['proposition_args'][cfg['modifier_content_role']]={'tree':content,'attitude':'UNKNOWN'}
+        for e,v in unit['entities']:
             outer.semantic['lexical_units'][e.token_id]=deepcopy(lexical[e.token_id]);owners[e.token_id]=outer
-        frames.append(outer);root=outer
+        frames.append(outer)
+        return outer
+    if shape is None:
+        for u in order:root=apply(u,root)
+    else:
+        from .modifier_scope_shapes import label
+        def build(s):
+            if s is None:return {'frame_ref':base.frame_id},base
+            if s[0]=='AND':
+                children=[build(child) for child in s[1]]
+                return {'operator':'AND','operands':[t for t,f in children]},children[-1][1]
+            content,inner=build(s[2])
+            outer=apply(order[s[1]],inner,content if 'operator' in content else None)
+            return {'frame_ref':outer.frame_id},outer
+        scope,root=build(shape)
+        # The carrier is a lexical frame too. The explicit tree, rather than
+        # component_child, owns all roots and shared edges of this alternative.
+        root.semantic.pop('component_child',None)
+        root.semantic['component_scope_tree']=scope
+        root.semantic['component_scope_label']=label(shape,base.anchor_span,order)
     for u in units:
         if u.get('implicit_host_role'):
             from .implicit_descriptions import materialize as implicit_description

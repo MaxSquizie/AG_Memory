@@ -139,6 +139,7 @@ RESOURCE_SCHEMAS = {
             'quality_predicate_pos': array(enum('ADJF','ADJS')),
             'copula_lemmas': array(), 'modifier_content_role': S, 'preposition_nominal_role': S,
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
+            'modifier_scope': enum('SHARED_EVENT_V1'),
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
             'dependency_reduction': enum('CONSTRAINT_TREE_V1'),
             'contextual_nominal_case': enum('PROPER_NAME_COORDINATION_V1'),
@@ -147,7 +148,8 @@ RESOURCE_SCHEMAS = {
             'agreement_recovery': obj(('version','max_edits'),{'version':enum('MODIFIER_AGREEMENT_V1'),
                 'max_edits':{'type':'integer','minimum':1,'maximum':2}}),
             'apposition_markers': array(S,minimum=1),
-            'dependency_senses': obj(('GENITIVE','APPOSITION'), {'GENITIVE':S,'APPOSITION':S}),
+            'dependency_senses': obj(('GENITIVE','APPOSITION'), {'GENITIVE':S,'APPOSITION':S,'CASE_DEPENDENCY':S}),
+            'nominal_dependency_cases': array(enum('acc','dat','abl','ins','loc','loct'),minimum=1),
             'refinement': obj(('version','max_depth','relative_markers','participle_voices'), {
                 'version':enum('POSTNOMINAL_AREAS_V1'),
                 'ambiguity_policy':enum('ASK_THEN_MINIMAL_MEMBER_SET_V1'),

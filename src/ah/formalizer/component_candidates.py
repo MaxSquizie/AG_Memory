@@ -42,7 +42,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 roles = [r for r in roles if r['role_id'] != projected['rule']['host_role']]
             reduction=None
             needs_reduction=cfg.get('dependency_reduction') and (len(nominals)>3 or any(
-                e.token_id not in groups and e.token_id not in grouped and any(v.pos in {'NOUN','NPRO'} and 'gen' in v.cases for v in e.variants)
+                e.token_id not in groups and e.token_id not in grouped and any(v.pos in {'NOUN','NPRO'} and set(v.cases)&({'gen'}|set(cfg.get('nominal_dependency_cases',()))) for v in e.variants)
                 for e in nominals) or any(e.span in cfg.get('apposition_markers',()) for e in tokens))
             if needs_reduction and grouped:
                 state.diag('COMPONENT_GROUP_DEPENDENCY_UNSUPPORTED',region.region_id)

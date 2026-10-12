@@ -1,7 +1,18 @@
 """Check a nominal host inside a scoped description, never by global lookup."""
 
 
-def node_path(child, frames, nodes):
+def node_path(child, frames, nodes, *, root_node=None, operations=()):
+    if child.get('tree'):
+        target=nodes[child.get('host_frame_ref',child['frame_ref'])]
+        links=[o.payload for o in operations if o.op_type=='MATERIALIZE_USAGE_LINK' and o.payload['kind'] in {'ATTITUDE','OPERATOR'}]
+        def paths(node,seen):
+            if node in seen:raise ValueError('CYCLIC_PROPOSITION_ARGUMENT')
+            if node==target:return [[node]]
+            return [[node,*tail] for nxt in sorted({l['node_ref'] for l in links if l['parent_ref']==node})
+                    for tail in paths(nxt,seen|{node})]
+        found=paths(root_node,set())
+        if len(found)!=1:raise ValueError('NOMINAL_HOST_PATH_AMBIGUOUS' if found else 'NOMINAL_HOST_UNRESOLVED')
+        return found[0]
     start=child['frame_ref']; target=child.get('host_frame_ref',start)
     def visit(fid, seen):
         if fid in seen: raise ValueError('CYCLIC_PROPOSITION_ARGUMENT')

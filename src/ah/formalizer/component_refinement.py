@@ -20,6 +20,9 @@ def accepted(frames):
 
 
 def root(frames):
+    carriers=[f for f in accepted(frames) if f.semantic.get('component_scope_tree') and not f.semantic.get('component_child')]
+    if len(carriers)==1:return carriers[0]
+    if len(carriers)>1:return None
     children = {c['frame_ref'] for f in frames for c in f.semantic.get('nominal_args',())}
     children.update(c['frame_ref'] for f in frames for c in f.semantic.get('proposition_args',{}).values())
     roots = [f for f in accepted(frames) if f.frame_id not in children and not f.semantic.get('component_child')]
@@ -150,9 +153,10 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
         if len(unique)!=1: return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
         sem=deepcopy(content.semantic)
         sem={k:sem[k] for k in ('component_region',) if k in sem}
+        from .modifier_scope_shapes import argument
         sem.update(proposed_roles={chosen:cfg['nominal_host_role']},morph_bindings={chosen:_morph(reading),marker.token_id:_morph(next(iter(unique.values())))},
             lexical_units={chosen:deepcopy(owner.semantic['lexical_units'].get(chosen,{'head_ref':chosen,'anchor_refs':[chosen],'surface':host.span,'mention_ref':chosen}))},
-            proposition_args={cfg['modifier_content_role']:{'frame_ref':content.frame_id,'attitude':'UNKNOWN'}},
+            proposition_args={cfg['modifier_content_role']:argument(content,'UNKNOWN')},
             structural_unresolved=False,missing_required_roles=[],uncovered_token_refs=[],component_questions=[],
             preposition_bindings={},relative_temporal=[],requires_attachment_probe=False,owned_token_refs=[marker.token_id],nominal_description=True)
         description=FrameCandidate('component-relative:'+digest([marker.token_id,chosen,content.frame_id]),'FLAT',marker.span,
@@ -175,6 +179,7 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
     description.semantic['component_child']=owner.frame_id
     owner.semantic.setdefault('nominal_args',[]).append({'host_token_ref':chosen,'host_role':host_role,
         'frame_ref':description.frame_id,'host_frame_ref':host_frame.frame_id,
+        **({'tree':description.semantic['component_scope_tree']} if description.semantic.get('component_scope_tree') else {}),
         **({'scope_assumption':assumption} if assumption else {}),
         **({'host_group_member_refs':selected_group[3]['group']['member_refs']} if selected_group else {})})
     state.syntax_trace.append({'kind':'NOMINAL_REFINEMENT','parent_ref':owner.frame_id,
