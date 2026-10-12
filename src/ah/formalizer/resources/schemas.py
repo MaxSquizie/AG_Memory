@@ -152,7 +152,7 @@ RESOURCE_SCHEMAS = {
                 'version':enum('POSTNOMINAL_AREAS_V1'),
                 'ambiguity_policy':enum('ASK_THEN_MINIMAL_MEMBER_SET_V1'),
                 'max_depth':{'type':'integer','minimum':1,'maximum':16},
-                'relative_markers':array(obj(('lemma','POS'),{'lemma':S,'POS':enum('ADVB')})),
+                'relative_markers':array(obj(('lemma','POS'),{'lemma':S,'POS':enum('ADVB','ADJF')})),
                 'participle_voices':array(obj(('feature','host_role','case_roles'),{
                     'feature':enum('actv','pssv'),'host_role':S,
                     'case_roles':{'type':'object','additionalProperties':S}}))}),

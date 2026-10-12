@@ -592,7 +592,9 @@ def _bindings(frame,evidence,valency,extra_gaps=()):
             if any(v.pos=='PREP' for v in variants):
                 prep=next(v.lemma for v in variants if v.pos=='PREP'); break
             if not any(v.pos in {'ADJF','ADJS'} for v in variants): break
-        allowed=[r['role_id'] for r in roles if any(set(r.get('allowed_cases',())) & set(v.cases) for v in _frame_variants(frame,e)) and (not r.get('allowed_preps') or prep in r['allowed_preps'])]
+        from .relative_pronoun import role_readings
+        readings=role_readings(frame,tid,evidence,_frame_variants(frame,e))
+        allowed=[r['role_id'] for r in roles if any(set(r.get('allowed_cases',())) & set(v.cases) for v in readings) and (not r.get('allowed_preps') or prep in r['allowed_preps'])]
         if frame.construction=='COMPONENTS_V1':
             # The sealed PP binding must match this valency, not a different
             # bare-case sense which happens to use the same role name.

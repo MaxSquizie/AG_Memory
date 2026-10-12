@@ -47,29 +47,51 @@ def select_units(state, release, selector, region, covers, frame, cfg):
 
 def select_hosts(state, release, selector, region, units, frame, cfg):
     evidence={e.token_id:e for e in state.evidence}; hosts={}
-    for u in units:
-        if not u['entities']: continue
-        head=u['entities'][0][0].token_id
-        from .nominal_host_views import candidates
-        views=candidates(state,frame,units,hosts,head)
-        options=[{'candidate_id':v['candidate_id'],'label':
-            ('Predicate subtree' if v['candidate_id']=='EVENT' else 'Nominal subtree')+
-            ' «'+v['surface']+'»; head=«'+evidence[v['head_ref']].span+'»; head range='+
-            str([evidence[v['head_ref']].start,evidence[v['head_ref']].end])} for v in views]
-        cid=choose(state,release,selector,region,['host',u['refs'],frame.predicate_token_ref,views],options,
-            'What does the prepositional phrase «'+state.text[evidence[u['refs'][0]].start:evidence[u['refs'][-1]].end]+
-            '» describe? Candidates show already assembled subtrees, including their established dependents. '
-            'Choose the whole described unit; an internal subtree remains a separate option. '
-            'The head identifies the attachment point, not an isolated word. '
-            'These are grammatical structures, not claims of identity, ownership or truth. '
-            'Preserve ambiguity if the wording does not discriminate.')
-        state.syntax_trace.append({'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
-            'phrase_refs':list(u['refs']),'candidate_subtrees':views,'selected':cid,
-            'decision_ref':region.region_id+'|nominal:'+digest([['host',u['refs'],frame.predicate_token_ref,views],options])})
-        if cid is None:
+    pending=[u for u in units if u['entities']]; prior_keys={}
+    # A blocked edge must not prevent an independent, resolvable edge from
+    # enriching its subtree. Every successful round removes at least one unit.
+    while pending:
+        deferred=[]
+        for u in pending:
+            head=u['entities'][0][0].token_id
+            from .nominal_host_views import candidates
+            views=candidates(state,frame,units,hosts,head)
+            if len(views)>cfg['max_candidates']:
+                state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id)
+                return None
+            target=candidates(state,frame,units,hosts,head,pending=True)[0]
+            options=[{'candidate_id':v['candidate_id'],'label':
+                ('Predicate subtree' if v['candidate_id']=='EVENT' else 'Nominal subtree')+
+                ' «'+v['surface']+'»; head=«'+evidence[v['head_ref']].span+'»; head range='+
+                str([evidence[v['head_ref']].start,evidence[v['head_ref']].end])} for v in views]
+            key=['host',u['refs'],frame.predicate_token_ref,views,target]
+            decision_ref=region.region_id+'|nominal:'+digest([key,options])
+            previous=prior_keys.get(head)
+            if previous and previous!=decision_ref:
+                # Before durable offer publication, retire only the obsolete
+                # question. Its Decision and alternatives remain in the trace.
+                state.clarification_candidates=[r for r in state.clarification_candidates if r['decision_ref']!=previous]
+                state.syntax_trace.append({'kind':'NOMINAL_HOST_REVISITED','head_ref':head,
+                    'previous_decision_ref':previous,'decision_ref':decision_ref})
+            prior_keys[head]=decision_ref
+            cid=choose(state,release,selector,region,key,options,
+                'What does the prepositional phrase «'+u['token'].span+' '+target['surface']+
+                '» describe? Candidates show already assembled subtrees, including their established dependents. '
+                'Choose the whole described unit; an internal subtree remains a separate option. '
+                'The head identifies the attachment point, not an isolated word. '
+                'These are grammatical structures, not claims of identity, ownership or truth. '
+                'Preserve ambiguity if the wording does not discriminate.')
+            state.syntax_trace.append({'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
+                'phrase_refs':list(u['refs']),'pending_subtree':target,'candidate_subtrees':views,'selected':cid,
+                'decision_ref':decision_ref})
+            if cid is None:
+                deferred.append(u)
+            else:
+                hosts[head]=cid
+        if len(deferred)==len(pending):
             state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id)
             return None
-        hosts[head]=cid
+        pending=deferred
     fixed={d['head_ref']:d['host_ref'] for d in frame.semantic.get('nominal_dependencies',())}
     combined={**fixed,**hosts}
     for head in combined:

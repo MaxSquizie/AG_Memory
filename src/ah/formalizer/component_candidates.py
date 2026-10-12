@@ -32,8 +32,12 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             case_roles = {c:r for c,r in (projected['rule']['case_roles'] if projected else cfg['open_case_roles']).items() if not quality or (c == 'nom' and r == cfg['subject_role'])}
             roles = val['roles'] if val else [
                 {'role_id':r,'allowed_cases':[c for c,r2 in case_roles.items() if r2==r],
-                 'cardinality':{'min':int(r==cfg['subject_role'] and not projected)}}
+                 'cardinality':{'min':int(r==cfg['subject_role'] and (not projected or bool(projected.get('relative_marker')) and projected['rule']['host_role']!=r))}}
                 for r in sorted(set(case_roles.values()) | {cfg['subject_role']})]
+            if projected and projected.get('relative_marker') and val:
+                marker_cases=projected['marker_reading'].cases
+                if not any(r['role_id']==projected['rule']['host_role'] and marker_cases & set(r.get('allowed_cases',())) and not r.get('allowed_preps') for r in roles):
+                    continue
             if projected:
                 roles = [r for r in roles if r['role_id'] != projected['rule']['host_role']]
             reduction=None

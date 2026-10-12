@@ -42,7 +42,8 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
     if not allowed(state,release,region,tokens,conjunction=True):
         return block(state,region,[],'COMPONENT_SCOPE_UNRESOLVED')
     # A participating head is already owned by this area, not a nested start.
-    search_tokens=tokens[1:] if attachment else tokens
+    participial=isinstance(attachment,tuple)
+    search_tokens=tokens[1:] if participial else tokens
     boundary=select(state,release,selector,region,search_tokens,cfg)
     if boundary is False: return block(state,region,[],'COMPONENT_REFINEMENT_UNRESOLVED')
     if boundary is None:
@@ -50,7 +51,7 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
             from .component_infinitives import compose as compose_infinitive
             nested=compose_infinitive(state,release,selector,region,tokens,cfg,depth)
             if nested is not None:return nested
-        if attachment or infinitive:
+        if participial or infinitive:
             predicates=[tokens[0]]
         else:
             predicates=[t for t in tokens if any(v.pos=='VERB' and v.mood!='imperative' or
@@ -69,7 +70,7 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
         for f in frames:
             f.semantic['owned_token_refs']=[t.token_id for t in tokens]
         return frames
-    offset=int(attachment is not None)
+    offset=int(participial)
     a,b=boundary['start']+offset,boundary['end']+offset
     body=tokens[a:b]
     parent=[*tokens[:a],*tokens[b:]]
@@ -128,7 +129,14 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
     if chosen is None: return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
     selected_group=group_hosts.get(chosen)
     owner,host,reading=selected_group[:3] if selected_group else hosts[chosen]
-    if boundary['kind']=='RELATIVE':
+    if boundary['kind']=='RELATIVE' and boundary['rule']['POS']=='ADJF':
+        from .relative_pronoun import compose as compose_relative
+        children,host_frame=compose_relative(state,release,selector,region,body,owner,host,reading,boundary['rule'],cfg,depth)
+        description=root(children)
+        if description is None or host_frame is None:
+            return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_CHILD_UNRESOLVED')
+        host_role=host_frame.semantic['refinement_binding']['host_role']
+    elif boundary['kind']=='RELATIVE':
         marker=body[0]; child_tokens=body[1:]
         if not child_tokens: return block(state,region,frames,'COMPONENT_REFINEMENT_UNRESOLVED')
         cr=region_for(state,region,child_tokens,'RELATIVE')

@@ -1,7 +1,7 @@
 """Render established subtrees as attachment candidates without changing identity."""
 
 
-def candidates(state,frame,units,hosts,head):
+def candidates(state,frame,units,hosts,head, *, pending=False):
     evidence={e.token_id:e for e in state.evidence}
     roots=set(frame.argument_token_refs)
     roots.update(d['head_ref'] for d in frame.semantic.get('nominal_dependencies',()))
@@ -37,8 +37,8 @@ def candidates(state,frame,units,hosts,head):
         return found
     forbidden=subtree(head)  # a new parent inside this subtree would form a cycle
     result=[]
-    for root in ['EVENT',*sorted(roots-forbidden,key=lambda t:evidence[t].start)]:
-        nodes=subtree(root)-forbidden
+    for root in ([head] if pending else ['EVENT',*sorted(roots-forbidden,key=lambda t:evidence[t].start)]):
+        nodes=subtree(root) if pending else subtree(root)-forbidden
         refs=set().union(*(owned.get(t,{t}) for t in nodes))
         refs=sorted((t for t in refs if t in evidence),key=lambda t:evidence[t].start)
         result.append({'candidate_id':root,'head_ref':frame.predicate_token_ref if root=='EVENT' else root,
