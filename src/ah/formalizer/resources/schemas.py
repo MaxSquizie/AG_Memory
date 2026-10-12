@@ -147,7 +147,7 @@ RESOURCE_SCHEMAS = {
                 'version':enum('PROPER_NAME_GOVERNMENT_V1'),
                 'rules':array(obj(('rule_id','lemma','cases'),{'rule_id':S,'lemma':S,
                     'cases':array(enum('acc','gen','dat','abl','loc'),minimum=1)}),minimum=1)}),
-            'soft_clause_boundaries': enum('CAPITAL_FINITE_HINT_V1'),
+            'soft_clause_boundaries': enum('CAPITAL_FINITE_HINT_V1','FINITE_SUBJECT_HINT_V2'),
             'oov_morphology': enum('CONTEXTUAL_NOMINAL_V1'),
             'agreement_recovery': obj(('version','max_edits'),{'version':enum('MODIFIER_AGREEMENT_V1'),
                 'max_edits':{'type':'integer','minimum':1,'maximum':2}}),

@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 from pathlib import Path
 from threading import RLock
 from time import monotonic, sleep
@@ -75,6 +76,8 @@ def main(argv=None):
                         help='Explicit TEST_ONLY resource release in a new isolated AH; never production validation')
     parser.add_argument('--captured-probes',type=Path,
                         help='Exact recorded request/reply pairs for transport diagnostics; not a live model or canonical replay')
+    parser.add_argument('--resume-journal',type=Path,
+                        help='Recover an existing canonical journal into this new experiment; attention starts cold')
     parser.add_argument('--clarification-channel',choices=('AVAILABLE','UNAVAILABLE'),default='AVAILABLE',
                         help='Declare whether an agent can ask the source owner; pinned in native input')
     parser.add_argument('--components',action='store_true',
@@ -92,6 +95,7 @@ def main(argv=None):
     parser.add_argument('--document-scopes',action='store_true',help='TEST_ONLY calendar areas and symbolic day parts')
     parser.add_argument('--spatial-references',action='store_true',help='TEST_ONLY released relative places and source-local anaphora')
     args=parser.parse_args(argv)
+    if args.resume_journal and not args.resume_journal.is_file(): parser.error('--resume-journal must name an existing journal')
     if args.spatial_references and not args.predication: parser.error('--spatial-references requires --predication')
     if args.document_scopes and not args.components: parser.error('--document-scopes requires --components')
     if args.refinement and not args.dependency_reduction: parser.error('--refinement requires --dependency-reduction')
@@ -132,7 +136,11 @@ def main(argv=None):
         'source_sha256':hashlib.sha256(args.source.read_bytes()).hexdigest(),
         'entity_bindings':'NO_ORACLE_ALIASES','provider':MailboxBackend.model,
         'transport':'EXACT_CAPTURED_TRANSPORT' if args.captured_probes else 'EXTERNAL_EXECUTOR',
+        'resume_journal_sha256':hashlib.sha256(args.resume_journal.read_bytes()).hexdigest() if args.resume_journal else None,
+        'attention_start':'COLD; prior canonical memory recovered' if args.resume_journal else 'EMPTY_MEMORY',
         'captured_probes':str(args.captured_probes) if args.captured_probes else None},indent=2),encoding='utf-8')
+    if args.resume_journal:
+        shutil.copyfile(args.resume_journal,args.out/'journal.log')
     journal=JournalChannel(args.out/'journal.log')
     store=AHStoreAdapter(core.store,journal,core=core)
     binding=InterpretationRunBinding(journal)
