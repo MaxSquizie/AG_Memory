@@ -166,7 +166,7 @@ class AttentionContextReader:
                     emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             search_incomplete = False
-            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT','SPATIAL_REFERENCE'}:
+            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT','SPATIAL_REFERENCE','NOMINAL_REFERENCE'}:
                 # A goal redistributes existing excitation; it injects no new
                 # semantic evidence and gives no fresh independent seed.
                 for _ in range(self.engine.settings.context_query_ticks):
@@ -175,7 +175,11 @@ class AttentionContextReader:
                 from .coreference import freeze_context
                 active = {r.uid for r in self.engine.workspace_refs()}
                 try:
-                    if request['kind'] == 'SPATIAL_REFERENCE':
+                    if request['kind'] == 'NOMINAL_REFERENCE':
+                        from .nominal_reference_memory import read_active
+                        rows, search_incomplete = read_active(self.store,self.release,active,
+                            state.observation.get('coreference_sources',()))
+                    elif request['kind'] == 'SPATIAL_REFERENCE':
                         from .spatial_memory import read_active
                         rows, search_incomplete = read_active(store, self.release, active,
                             state.observation.get('coreference_sources', []))

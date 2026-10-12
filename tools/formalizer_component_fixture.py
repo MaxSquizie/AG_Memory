@@ -20,6 +20,11 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if nominal_tree:
         if not modifier_forest: raise ValueError('nominal_tree requires modifier_forest')
         policy['entries'][0]['composition'].update(nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
+        policy['entries'][0]['composition']['nominal_references']={'version':'DETERMINER_GROUP_V1',
+            'demonstratives':[{'rule_id':'TEST-DEMONSTRATIVE-'+str(i),'lemma':lemma,'POS':'ADJF'}
+                             for i,lemma in enumerate(('тот','этот'))],
+            'identity_modifiers':[{'rule_id':'TEST-SAME-'+str(i),'lemma':lemma,'POS':pos}
+                                  for i,(lemma,pos) in enumerate((('же','PRCL'),('самый','ADJF')))]}
         policy['entries'][0]['composition']['qualitative_quantity']={'version':'LEXICAL_GROUP_V1',
             'rules':[{'rule_id':'TEST-QUALITATIVE-'+str(i),'lemma':lemma,'POS':'NUMR'}
                      for i,lemma in enumerate(('несколько','много','мало'))]}

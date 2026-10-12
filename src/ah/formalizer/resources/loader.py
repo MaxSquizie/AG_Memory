@@ -98,6 +98,9 @@ class ResourceRelease:
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         composition=policy.get('composition')
         if composition:
+            from ..nominal_reference_groups import validate as validate_references
+            try: validate_references(composition)
+            except ValueError as exc: raise ResourceMissing(str(exc)) from exc
             from ..qualitative_quantity import validate as validate_quantity
             try: validate_quantity(composition)
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc

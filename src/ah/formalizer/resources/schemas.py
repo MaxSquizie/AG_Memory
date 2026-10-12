@@ -142,6 +142,10 @@ RESOURCE_SCHEMAS = {
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
             'modifier_scope': enum('SHARED_EVENT_V1'),
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
+            'nominal_references': obj(('version','demonstratives','identity_modifiers'), {
+                'version':enum('DETERMINER_GROUP_V1'),
+                'demonstratives':array(obj(('rule_id','lemma','POS'),{'rule_id':S,'lemma':S,'POS':enum('ADJF')}),minimum=1),
+                'identity_modifiers':array(obj(('rule_id','lemma','POS'),{'rule_id':S,'lemma':S,'POS':enum('PRCL','ADJF')}),minimum=1)}),
             'qualitative_quantity': obj(('version','rules'), {
                 'version':enum('LEXICAL_GROUP_V1'),
                 'rules':array(obj(('rule_id','lemma','POS'),{'rule_id':S,'lemma':S,'POS':enum('NUMR')}),minimum=1)}),

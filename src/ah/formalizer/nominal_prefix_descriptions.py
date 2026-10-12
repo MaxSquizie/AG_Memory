@@ -5,10 +5,11 @@ from .state import MorphVariant
 
 def pending_refs(frame,tokens):
     """A multi-token mention covers spelling, not its adjective propositions."""
+    from .nominal_reference_groups import functional
     evidence={e.token_id:e for e in tokens}
     return {t for head,unit in frame.semantic.get('lexical_units',{}).items()
             for t in unit['anchor_refs'] if t!=head and t in evidence
-            and any(v.pos in {'ADJF','PRTF'} for v in evidence[t].variants)}
+            and not functional(evidence[t]) and any(v.pos in {'ADJF','PRTF'} for v in evidence[t].variants)}
 
 
 def units(tokens,missing,frame):

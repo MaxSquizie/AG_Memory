@@ -1,11 +1,13 @@
 """Local preposition/nominal structures, without lexical or semantic guessing."""
 from .canonical_ledger import digest
 from .component_policy import _features, compatible
+from .nominal_reference_groups import functional
 
 
 def prepositional_groups(tokens, excluded=()):
-    """Recognize PREP ADJF* (NOUN|NPRO), retaining whole PREP readings.
+    """Recognize PREP plus a typed nominal group, retaining whole PREP readings.
 
+    Grounded determiner/identity-function tokens stay inside the group.
     A token with another POS reading requires a closed attachment probe. Multiword
     prepositions and coordination are not flattened by this local constructor.
     """
@@ -14,7 +16,7 @@ def prepositional_groups(tokens, excluded=()):
         variants=[v for v in prep.variants if v.pos=='PREP']
         if not variants or prep.token_id in excluded: continue
         j=i+1
-        while j<len(tokens) and any(v.pos in {'ADJF','PRTF'} for v in tokens[j].variants): j+=1
+        while j<len(tokens) and (functional(tokens[j]) or any(v.pos in {'ADJF','PRTF'} for v in tokens[j].variants)): j+=1
         if j==len(tokens): continue
         head=tokens[j]
         if head.token_id in excluded or not any(v.pos in {'NOUN','NPRO'} for v in head.variants): continue
@@ -53,8 +55,8 @@ def nominal_units(state, tokens, assignments, used):
         refs=[e.token_id]; idx=tokens.index(e)-1
         while idx>=0:
             adj=tokens[idx]
-            if adj.token_id in used or not any(av.pos=='ADJF' and compatible(_features(av),_features(mv))
-                    and set(av.cases)&set(mv.cases) for av in adj.variants): break
+            if adj.token_id in used or not (functional(adj) or any(av.pos=='ADJF' and compatible(_features(av),_features(mv))
+                    and set(av.cases)&set(mv.cases) for av in adj.variants)): break
             used.add(adj.token_id); refs.insert(0,adj.token_id); idx-=1
         start=next(t.start for t in tokens if t.token_id==refs[0])
         units[e.token_id]={'head_ref':e.token_id,'anchor_refs':refs,

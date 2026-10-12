@@ -789,9 +789,12 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                     'cue_token_refs':[frame.predicate_token_ref,*frame.argument_token_refs],'role':role},None,gap))
         from .spatial_memory import requests as spatial_requests, attach as attach_spatial_memory
         context_requests.extend((r,None,None) for r in spatial_requests(state))
+        from .nominal_reference_memory import requests as nominal_requests, attach as attach_nominal_memory
+        context_requests.extend((r,None,None) for r in nominal_requests(state))
         for request,mention,gap in sorted(context_requests,key=lambda row:(row[0]['source_range'][1],row[0]['decision_ref'])):
             result=context_reader.read(state,request)
-            if request['kind']=='SPATIAL_REFERENCE': attach_spatial_memory(state,request,result,release)
+            if request['kind']=='NOMINAL_REFERENCE': attach_nominal_memory(state,request,result)
+            elif request['kind']=='SPATIAL_REFERENCE': attach_spatial_memory(state,request,result,release)
             elif gap is None: context_by_mention[mention]=result['rows']
             else: add_memory_options(gap,result['rows'],release)
         state.observation['coreference_context_by_mention']=context_by_mention
@@ -973,5 +976,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         offer(state, f.frame_id+'|predicate_value', 'SEMANTIC', f.anchor_span, options)
     from .spatial_references import resolve as resolve_spatial
     resolve_spatial(state,release,selector)
+    from .nominal_reference_memory import resolve as resolve_nominal_references
+    resolve_nominal_references(state,release,selector)
     state.complete_t4()
     return state

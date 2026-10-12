@@ -61,7 +61,9 @@ def build_plan(state,release,store):
                     'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[])},frag)
                 roles[role]=event_ref
                 continue
-            known=state.observation.get('entity_bindings',{}).get(mention_ref)
+            from .nominal_reference_binding import payload as reference_payload
+            reference=reference_payload(state,unit)
+            known=reference['target_ref'] if reference else state.observation.get('entity_bindings',{}).get(mention_ref)
             mid=known or 'M:'+digest([state.source_uid,mention_ref])
             local=state.observation.get('local_reference_targets',{}).get(mid)
             if known and not local and (not store.has_uid(known) or store._store.kind_of(known).value!='M'): raise ValueError('IDENTITY_CONFLICT')
@@ -84,7 +86,7 @@ def build_plan(state,release,store):
                 from dataclasses import replace
                 from .native_frontend import _frame_variants
                 ev=replace(ev,variants=_frame_variants(f,ev))
-            emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev)},frag)
+            emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev),**(reference or {})},frag)
             mention_roles.setdefault(role,[]).append(mid)
             mention_entities[tid]=mid;mention_bindings[tid]=bid
         from .implicit_plan import emit_implicit_roles
