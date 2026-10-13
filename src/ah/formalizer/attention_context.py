@@ -196,6 +196,9 @@ class AttentionContextReader:
                     raise ContextReadError(code) from exc
             else:
                 rows = []
+            # A replacement version must not depend on bindings it will itself
+            # retire. Its own current-source references are resolved locally.
+            rows=[r for r in rows if r.get('source_tag',[None])[0]!=state.source_uid]
             result = {'rows': rows, 'events': events, 'scope': 'ACTIVE_WORKSPACE',
                       'search_incomplete': search_incomplete,
                       'global_search_complete': False, 'read_token_refs': sorted(self.read_token_refs),

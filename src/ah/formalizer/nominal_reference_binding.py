@@ -13,7 +13,7 @@ def payload(state, unit):
     return {'binding_kind':'NOMINAL_REFERENCE',**binding}
 
 
-def validate(p, ledger, journal):
+def validate(p, ledger, journal, store=None):
     if p.get('binding_kind')!='NOMINAL_REFERENCE':
         return
     anchor=p.get('anchor_binding_ref')
@@ -23,6 +23,17 @@ def validate(p, ledger, journal):
     if (not anchor or proof.get('target_ref')!=p['target_ref'] or
             not ledger.binding_live(anchor,ledger.paths()) or journal is None):
         raise ValueError('NOMINAL_REFERENCE_GROUND_INVALID')
+    local=p.get('local_spatial_anchor')
+    if local is not None:
+        meta=store.get_element_any_domain(p['target_ref']).meta.get('relative_place') if store else None
+        expected={k:v for k,v in local.items() if k!='entity_ref'}
+        if (meta!=expected or local.get('entity_ref')!=p['target_ref']
+                or local.get('source_tag')!=p['source_tag'] or proof.get('source_tag')!=p['source_tag']
+                or proof.get('binding_kind')!='SPATIAL_ANCHOR'
+                or local['source_range'][1]>p['reference_constraint']['source_range'][0]
+                or p.get('context_read_hash') or p.get('premise_support_refs')):
+            raise ValueError('NOMINAL_REFERENCE_LOCAL_ANCHOR_INVALID')
+        return
     records=journal.scan_unprocessed(0,payload_kinds={'run_bind','CONTEXT_READ'})
     owners={r['payload']['owner'] for r in records if r['payload'].get('kind')=='run_bind'
             and [r['payload'].get('observation_id'),r['payload'].get('version')]==p['source_tag']}
@@ -34,7 +45,10 @@ def validate(p, ledger, journal):
         if (request.get('kind')=='NOMINAL_REFERENCE' and
             request.get('decision_ref')==p.get('interpretation_decision_ref') and
             request.get('mention_ref')==p['mention_ref'] and
-            request.get('constraint')==p.get('reference_constraint') and
+            # Morphology evidence contains tuples in memory and JSON lists in
+            # durable receipts. Compare the complete canonical value, not the
+            # incidental Python container representation.
+            digest(request.get('constraint'))==digest(p.get('reference_constraint')) and
             log['result_hash']==p.get('context_read_hash')==digest(result) and
             result.get('scope')=='ACTIVE_WORKSPACE' and not result.get('search_incomplete') and
             any(r.get('entity_ref')==p['target_ref'] and r.get('memory_binding_ref')==anchor

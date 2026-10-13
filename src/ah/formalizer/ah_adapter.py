@@ -283,7 +283,7 @@ class AHStoreAdapter(Store):
                 from .spatial_entities import validate_binding as validate_spatial_binding
                 validate_spatial_binding(p,ledger,draft.store,self._journal)
                 from .nominal_reference_binding import validate as validate_nominal_reference
-                validate_nominal_reference(p,ledger,self._journal)
+                validate_nominal_reference(p,ledger,self._journal,draft.store)
                 from .narrative_group_plan import validate_binding as validate_member
                 validate_member(p,ledger,self._journal)
                 if p.get('binding_kind')=='UNRESOLVED_NOMINAL':

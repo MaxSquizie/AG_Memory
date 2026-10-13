@@ -23,7 +23,7 @@ def _input_changes(changes):
 
 
 def reinterpret_observation(store,binding,selector,release,*,observation_id,
-                            previous_version,trigger_ref,open_template_links=(),morph=None,target_version=None,run_id=None,input_changes=None):
+                            previous_version,trigger_ref,open_template_links=(),morph=None,target_version=None,run_id=None,input_changes=None,ignition=None):
     from .v7_pipeline import interpret_full
     release.assert_integrity()
     changes=_input_changes({} if input_changes is None else input_changes)
@@ -46,6 +46,8 @@ def reinterpret_observation(store,binding,selector,release,*,observation_id,
                 and r['payload'].get('version') == previous_version for r in store._journal.scan_unprocessed()):
             raise ValueError('MIGRATION_SOURCE_STALE')
         raw=deepcopy(raw)
+    if raw.get('attention_context_base') and ignition is None:
+        raise ValueError('CONTEXT_REINTERPRETATION_REQUIRES_IGNITION')
     if replay:
         replacement=binding.input_snapshot(observation_id,target_version)
         if (replacement is None or replacement.get('trigger_ref')!=trigger_ref
@@ -72,7 +74,7 @@ def reinterpret_observation(store,binding,selector,release,*,observation_id,
                open_template_links=deepcopy(list(open_template_links)))
     return interpret_full(raw['text'],None,selector,store,binding,release=release,
                           version=target_version,observation_id=observation_id,
-                          raw_input=raw,context_facts=tuple(raw.get('context_facts',())),morph=morph,run_id=run_id)
+                          raw_input=raw,context_facts=tuple(raw.get('context_facts',())),morph=morph,run_id=run_id,ignition=ignition)
 
 
 def plan_mass_migration(store,binding,release,*,trigger_ref,items):
@@ -136,7 +138,7 @@ def plan_mass_migration(store,binding,release,*,trigger_ref,items):
         return deepcopy(plan)
 
 
-def resume_mass_migration(store,binding,selector,release,*,migration_id,morph=None):
+def resume_mass_migration(store,binding,selector,release,*,migration_id,morph=None,ignition=None):
     import re
     from ah.core.journal import JournalChannel
     if not isinstance(migration_id,str) or not re.fullmatch(r'migration:[0-9a-f]{64}',migration_id):
@@ -145,10 +147,10 @@ def resume_mass_migration(store,binding,selector,release,*,migration_id,morph=No
     # AH writer lock, and two workers cannot execute the same job concurrently.
     mutex=JournalChannel(store._journal.path.with_name(store._journal.path.name+'.'+migration_id.split(':')[1]+'.coord'))
     with mutex.atomic():
-        return _resume_mass_migration(store,binding,selector,release,migration_id=migration_id,morph=morph)
+        return _resume_mass_migration(store,binding,selector,release,migration_id=migration_id,morph=morph,ignition=ignition)
 
 
-def _resume_mass_migration(store,binding,selector,release,*,migration_id,morph=None):
+def _resume_mass_migration(store,binding,selector,release,*,migration_id,morph=None,ignition=None):
     """Idempotent coordinator; all AH mutations still belong to native T6."""
     from dataclasses import asdict
     release.assert_integrity()
@@ -168,7 +170,7 @@ def _resume_mass_migration(store,binding,selector,release,*,migration_id,morph=N
             _,report=reinterpret_observation(store,binding,selector,release,observation_id=oid,
                 previous_version=item['previous_version'],target_version=item['target_version'],
                 trigger_ref=plan['trigger_ref'],open_template_links=item['open_template_links'],morph=morph,run_id=item['run_id'],
-                input_changes=item.get('input_changes'))
+                input_changes=item.get('input_changes'),ignition=ignition)
             if report.terminal=='PENDING_ADMISSION_ORDER': continue
             receipt=asdict(report)
         except ValueError as exc:

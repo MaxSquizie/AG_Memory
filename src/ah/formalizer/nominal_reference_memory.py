@@ -42,7 +42,7 @@ def read_active(store, release, active_refs, source_tags=()):
 
 def attach(state, request, result):
     state.observation.setdefault('nominal_reference_reads',{})[request['decision_ref']] = {
-        'rows':deepcopy(result['rows']), 'context_read_hash':digest(result),
+        'rows':deepcopy([r for r in result['rows'] if r['source_tag'][0]!=state.source_uid]), 'context_read_hash':digest(result),
         'search_incomplete':bool(result.get('search_incomplete'))}
 
 
@@ -51,12 +51,14 @@ def resolve(state, release, selector):
     for key, (mention, constraint) in groups(state).items():
         decision = key+'|referent'
         read = state.observation.get('nominal_reference_reads',{}).get(decision,{})
-        rows = read.get('rows',[])
+        from .nominal_reference_local import rows as local_rows
+        rows = [*local_rows(state,constraint),*read.get('rows',[])]
+        incomplete=bool(read.get('search_incomplete')) or len(rows)>32
         options = [{'candidate_id':'antecedent:'+str(i),
             'label':r['label']+'; type='+r.get('reference_kind','ENTITY')+
                     '; features='+str(r.get('features',[]))} for i,r in enumerate(rows)]
         chosen = None
-        if rows and not read.get('search_incomplete'):
+        if rows and not incomplete:
             start,end=constraint['source_range']
             from .regions import reference_goal
             goal=reference_goal(state,constraint['head_ref'])
@@ -67,20 +69,22 @@ def resolve(state, release, selector):
                     equivalent_targets={o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},
                     question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
                     constraint['identity_constraint']+'. Select only a compatible antecedent supported by these source excerpts. '+
-                    'Proximity and name spelling alone do not prove identity. If evidence is insufficient answer ?. Do not create an object.')
+                    'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '
+                    'Choose the existing referent, not a new object. If several antecedents remain indistinguishable, answer ?.')
         by_id={o['candidate_id']:r for o,r in zip(options,rows)}
         if chosen in by_id:
             row=by_id[chosen]
             from .state import Ground
-            state.decisions[decision].grounds.append(Ground('P',
+            state.decisions[decision].grounds.append(Ground('D' if row.get('local_spatial_anchor') else 'P',
+                'local source anchor: '+row['memory_binding_ref'] if row.get('local_spatial_anchor') else
                 'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
             state.observation.setdefault('nominal_reference_bindings',{})[mention]={
                 'target_ref':row['entity_ref'], 'anchor_binding_ref':row['memory_binding_ref'],
                 'premise_support_refs':row.get('premise_support_refs',[])[:1],
-                'context_read_hash':read['context_read_hash'],
+                **({'local_spatial_anchor':deepcopy(row['local_spatial_anchor'])} if row.get('local_spatial_anchor') else {'context_read_hash':read['context_read_hash']}),
                 'interpretation_decision_ref':decision, 'reference_constraint':deepcopy(constraint)}
         else:
-            state.diag('NOMINAL_REFERENCE_SEARCH_INCOMPLETE' if read.get('search_incomplete')
+            state.diag('NOMINAL_REFERENCE_SEARCH_INCOMPLETE' if incomplete
                        else 'NOMINAL_REFERENCE_UNRESOLVED',decision)
             from .clarifications import offer
             offer(state,decision,'REFERENCE',constraint['raw'],options)

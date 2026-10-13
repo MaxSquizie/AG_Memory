@@ -134,6 +134,7 @@ RESOURCE_SCHEMAS = {
         'composition': obj(('version','subject_role','open_case_roles','max_candidates','context_chars'), {
             'version': enum('COMPONENTS_V1'), 'subject_role': S,
             'narrative_continuity':enum('SOURCE_CARRIER_V1'),
+            'source_assertions':enum('BOUNDED_SOURCE_V1'),
             'narrative_groups':obj(('version','sense_id','template_ref'),{'version':enum('OPEN_NARRATIVE_GROUP_V1'),'sense_id':S,'template_ref':S}),
             'coordination_operators': array(enum('AND')),
             'infinitive_composition': obj(('version','relations'), {

@@ -80,7 +80,7 @@ class NativeMemoryService:
         # against current durable state and atomically retires the old version.
         state, report = reinterpret_observation(a._store, a._binding, a._selector, a._release,
             observation_id=observation_id, previous_version=previous_version, trigger_ref=trigger_ref,
-            input_changes=input_changes, open_template_links=open_template_links, morph=a._morph)
+            input_changes=input_changes, open_template_links=open_template_links, morph=a._morph,ignition=a._ignition)
         receipt = a._receipt(state, report)
         with self.runtime.operation_lock:
             if report.committed_fragments:
@@ -97,7 +97,7 @@ class NativeMemoryService:
         from .migration import resume_mass_migration
         a = self.adapter
         result = resume_mass_migration(a._store, a._binding, a._selector, a._release,
-                                       migration_id=migration_id, morph=a._morph)
+                                       migration_id=migration_id, morph=a._morph,ignition=a._ignition)
         with self.runtime.operation_lock:
             self._save()
         return result

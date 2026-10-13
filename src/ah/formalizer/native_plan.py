@@ -63,12 +63,16 @@ def build_plan(state,release,store):
                 continue
             from .nominal_reference_binding import payload as reference_payload
             reference=reference_payload(state,unit)
+            local_place=reference.get('local_spatial_anchor') if reference else None
+            if local_place:
+                from .spatial_plan import emit_anchor
+                emit_anchor(local_place,tag,frag,emit)
             known=reference['target_ref'] if reference else state.observation.get('entity_bindings',{}).get(mention_ref)
             from .referential_placeholder import payload as unknown_reference, uid as reference_uid
             placeholder=unknown_reference(state,unit)
             mid=reference_uid(placeholder['referential_placeholder']) if placeholder else known or 'M:'+digest([state.source_uid,mention_ref])
             local=state.observation.get('local_reference_targets',{}).get(mid)
-            if known and not local and (not store.has_uid(known) or store._store.kind_of(known).value!='M'): raise ValueError('IDENTITY_CONFLICT')
+            if known and not local and not local_place and (not store.has_uid(known) or store._store.kind_of(known).value!='M'): raise ValueError('IDENTITY_CONFLICT')
             name=None if placeholder else local['label'] if local else unit.get('surface',ev.span)
             scalar=[]
             for measure in measures:
@@ -252,6 +256,8 @@ def build_plan(state,release,store):
     from .component_policy import rejected
     roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner') and not rejected(state,f)]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
+    from .source_assertions import roots as source_asserted_roots
+    roots += source_asserted_roots(state,release)
     for frag,t in roots:
         refs=leaf_refs(t); fs=[frames[f] for f in sorted(refs)]
         if any(f.semantic.get('temporal_unresolved') for f in fs):

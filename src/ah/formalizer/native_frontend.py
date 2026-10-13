@@ -980,5 +980,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     resolve_spatial(state,release,selector)
     from .nominal_reference_memory import resolve as resolve_nominal_references
     resolve_nominal_references(state,release,selector)
+    from .source_assertions import resolve as resolve_source_assertions
+    resolve_source_assertions(state,release,selector)
     state.complete_t4()
     return state

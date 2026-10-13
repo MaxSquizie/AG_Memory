@@ -19,7 +19,7 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         policy['entries'][0]['composition']['modifier_composition']='BOUNDED_FOREST_V1'
     if nominal_tree:
         if not modifier_forest: raise ValueError('nominal_tree requires modifier_forest')
-        policy['entries'][0]['composition'].update(narrative_continuity='SOURCE_CARRIER_V1',substantive_readings='CONTEXTUAL_SUBSTANTIVE_V1',nominal_utterances='NOMINATIVE_DESCRIPTION_V1',nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
+        policy['entries'][0]['composition'].update(source_assertions='BOUNDED_SOURCE_V1',narrative_continuity='SOURCE_CARRIER_V1',substantive_readings='CONTEXTUAL_SUBSTANTIVE_V1',nominal_utterances='NOMINATIVE_DESCRIPTION_V1',nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
         policy['entries'][0]['composition']['nominal_references']={'version':'DETERMINER_GROUP_V1',
             'demonstratives':[{'rule_id':'TEST-DEMONSTRATIVE-'+str(i),'lemma':lemma,'POS':'ADJF'}
                              for i,lemma in enumerate(('тот','этот'))],

@@ -35,4 +35,4 @@ def ignore(adapter,resolution_key):
     # Source generation may issue fresh short probes. Migration owns recovery.
     return reinterpret_observation(store,binding,adapter._selector,release,
         observation_id=oid,previous_version=version,target_version=item['target_version'],
-        run_id=item['run_id'],trigger_ref=trigger,input_changes=item['input_changes'],morph=adapter._morph)
+        run_id=item['run_id'],trigger_ref=trigger,input_changes=item['input_changes'],morph=adapter._morph,ignition=adapter._ignition)

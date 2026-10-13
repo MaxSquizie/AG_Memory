@@ -3,6 +3,16 @@ from .canonical_ledger import digest
 from .spatial_references import for_sense
 
 
+def emit_anchor(place,tag,frag,emit):
+    mid=place['entity_ref']
+    meta={k:v for k,v in place.items() if k!='entity_ref'}
+    emit('ENSURE_ENTITY',{'uid':mid,'mention_ref':place['anchor_ref'],'source_tag':tag,'relative_place':meta},frag)
+    bid='binding:place:'+digest([tag,place['anchor_ref'],place['rule_id'],mid])
+    emit('SET_IDENTITY_BINDING',{'binding_id':bid,'binding_kind':'SPATIAL_ANCHOR',
+         'mention_ref':place['anchor_ref'],'target_ref':mid,'source_tag':tag,'premise_support_refs':[]},frag)
+    return bid
+
+
 def emit_roles(frame, selected, tag, frag, roles, emit):
     slot = for_sense(frame,selected.get('sense_id'))
     if slot is None: return
@@ -13,14 +23,7 @@ def emit_roles(frame, selected, tag, frag, roles, emit):
     mid = place['entity_ref']
     anchor_binding = place.get('memory_binding_ref')
     if anchor_binding is None:
-        meta = {k:v for k,v in place.items() if k!='entity_ref'}
-        emit('ENSURE_ENTITY',{'uid':mid,'mention_ref':place['anchor_ref'],
-                             'source_tag':tag,'relative_place':meta},frag)
-        anchor_binding = 'binding:place:'+digest([tag,place['anchor_ref'],place['rule_id'],mid])
-        # Local structural mention; never assert the source movement.
-        emit('SET_IDENTITY_BINDING',{'binding_id':anchor_binding,'binding_kind':'SPATIAL_ANCHOR',
-             'mention_ref':place['anchor_ref'],'target_ref':mid,'source_tag':tag,
-             'premise_support_refs':[]},frag)
+        anchor_binding=emit_anchor(place,tag,frag,emit)
     if slot['rule']['kind']=='REFERENCE':
         bid = 'binding:place-reference:'+digest([tag,slot['mention_ref'],mid,slot['decision_ref']])
         emit('SET_IDENTITY_BINDING',{'binding_id':bid,'binding_kind':'SPATIAL_REFERENCE',

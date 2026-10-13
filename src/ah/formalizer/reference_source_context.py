@@ -18,6 +18,12 @@ def attach(store, rows):
             row['label']='Previously grounded omitted '+implicit['participant_kind'].lower()+' (identity unidentified)'
             row['implicit_participant']=dict(implicit)
         anchors=[binding.get('mention_ref','')]
+        placeholder=entity.meta.get('referential_placeholder')
+        if placeholder is not None:
+            constraint=placeholder['constraint']
+            row['referential_placeholder']=dict(placeholder)
+            row['label']='Previously introduced referent «'+constraint['raw']+'» (identity/details unknown; this is an existing referent, not a new object)'
+            anchors.insert(0,constraint['head_ref'])
         for sid in row.get('premise_support_refs',()):
             support=store.ledger.data['supports'].get(sid,{})
             node=store.ledger.data['nodes'].get(support.get('conclusion_ref'),{})

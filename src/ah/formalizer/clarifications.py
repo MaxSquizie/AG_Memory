@@ -229,7 +229,7 @@ def resolve(adapter, resolution_key, *, source_text=None):
         store, binding, adapter._selector, release, observation_id=oid,
         previous_version=previous, target_version=selected['target_version'],
         run_id=selected['run_id'], trigger_ref=selected['selection_id'],
-        input_changes=selected['input_changes'], morph=adapter._morph)
+        input_changes=selected['input_changes'], morph=adapter._morph,ignition=adapter._ignition)
     return state, report
 
 
