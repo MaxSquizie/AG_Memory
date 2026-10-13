@@ -270,7 +270,8 @@ def build_plan(state,release,store):
             ends=[entire.find(c,pos) for c in '.!?;' if entire.find(c,pos)>=0]
             hi=min(ends) if ends else len(entire)
             is_query |= hi<len(entire) and entire[hi]=='?'
-        is_command=any(any(v.mood=='imperative' for v in evidence[f.predicate_token_ref].variants) for f in fs)
+        from .native_frontend import _frame_variants
+        is_command=any(any(v.mood=='imperative' for v in _frame_variants(f,evidence[f.predicate_token_ref])) for f in fs)
         quoted=any(f.semantic.get('quoted') for f in fs)
         requested=state.observation.get('request_kind')
         if requested in {'QUERY','COMMAND','UNKNOWN'}:

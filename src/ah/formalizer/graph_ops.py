@@ -167,6 +167,10 @@ def ensure_entity(core,p):
         group=implicit.get('participant_kind')=='GROUP' if isinstance(implicit,dict) else False
         entity=implicit.get('participant_kind')=='ENTITY' if isinstance(implicit,dict) else False
         extra={'membership_status','minimum_cardinality'} if group else ({'number_status','animacy_status'} if entity else set())
+        if isinstance(implicit,dict) and 'narrative_scope_ref' in implicit:
+            if implicit.get('participant_kind')!='INDIVIDUAL' or not isinstance(implicit['narrative_scope_ref'],str) or not implicit['narrative_scope_ref'].startswith('narrative-area:'):
+                raise ValueError('IMPLICIT_PARTICIPANT_INVALID')
+            extra=extra|{'narrative_scope_ref'}
         if (not isinstance(implicit,dict) or set(implicit)!=(base|extra)
                 or implicit.get('participant_kind') not in {'INDIVIDUAL','GROUP','ENTITY'}
                 or implicit.get('identity_status')!='UNIDENTIFIED'

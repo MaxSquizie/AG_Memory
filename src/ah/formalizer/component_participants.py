@@ -44,6 +44,8 @@ def prepare_implicit(state, release):
                 else: merged[key]=opt
             gap['options']=list(merged.values())
             gap['context_range']=[max(0,f.source_range[0]-cfg['context_chars']//2),f.source_range[1]]
+            from .narrative_perspective import prepare as prepare_perspective
+            prepare_perspective(state,gap,f,cfg)
             from .narrative_groups import add_local
             add_local(state,gap,previous,release,f)
             if len(gap['options'])>cfg['max_candidates'] or gap['context_range'][1]-gap['context_range'][0]>cfg['context_chars']:
@@ -95,7 +97,7 @@ def resolve_implicit(state, release, selector):
                             +'Target clause: '+state.text[slice(*f.source_range)]+'\n'
                             +'Target predicate: '+f.anchor_span+'; source range: '+str(f.source_range)+'\n'
                             +'Grammatical features of omitted participant: '+str(gap['features'])+'\n'
-                            +'Use the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. '
+                            +'Use the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. '
                             +'A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.'))
             if chosen is None:
                 from .implicit_introduction import unresolved_group
@@ -114,10 +116,10 @@ def resolve_implicit(state, release, selector):
                     state.diag('IMPLICIT_CHAIN_UNRESOLVED',gap['gap_id']); continue
                 value=deepcopy(target)
             else:
-                value={k:deepcopy(v) for k,v in opt.items() if k in {'entity_ref','participant_kind','premise_support_refs','anchor_binding_ref','context_decision_ref'}}
+                value={k:deepcopy(v) for k,v in opt.items() if k in {'entity_ref','participant_kind','premise_support_refs','anchor_binding_ref','context_decision_ref','perspective','perspective_source_range','narrative_scope_ref'}}
                 if opt['kind']=='MEMORY':
                     value['premise_support_refs']=list(min(tuple(path) for path in opt['grounding_paths']))
-                value['anonymous']=opt['kind']=='ANONYMOUS'
+                value['anonymous']=opt['kind'] in {'ANONYMOUS','NARRATOR'}
                 if opt['kind']=='MENTION': value['label']=opt['anchor_label']; value['anchor_mention']=opt['mention_ref']
             if any(v['entity_ref']==value['entity_ref'] and not compatible(v['features'],gap['features']) for v in resolved.values()):
                 state.diag('IMPLICIT_CHAIN_FEATURE_CONFLICT',gap['gap_id']); continue

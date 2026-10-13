@@ -182,7 +182,7 @@ class MorphProvider:
     _GEND = {"masc": "masc", "femn": "femn", "neut": "neut"}
     _PERS = {"1per": "1st", "2per": "2nd", "3per": "3rd"}
     _TENSE = {"past": "past", "pres": "present", "futr": "future"}
-    _MOOD = {"indc": "indicative", "impv": "imperative"}
+    _MOOD = {"indc": "indicative", "impv": "imperative", "impr": "imperative"}
 
     def __init__(self):
         from pymorphy3 import MorphAnalyzer

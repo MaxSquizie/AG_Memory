@@ -98,6 +98,8 @@ class ResourceRelease:
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         composition=policy.get('composition')
         if composition:
+            if composition.get('nominal_utterances') and composition.get('nominal_composition')!='QUESTION_TREE_V1':
+                raise ResourceMissing('nominal utterances require nominal question tree')
             ng=composition.get('narrative_groups')
             if ng and (not any(m['sense_id']==ng['sense_id'] and m['template_ref']==ng['template_ref'] and set(m['roles'])=={'SUBJECT','OBJECT'} for m in self.entries('TemplateMap'))
                 or not any(v['sense_id']==ng['sense_id'] and v['state_class']=='STATE' and {r['role_id'] for r in v['roles']}=={'SUBJECT','OBJECT'}

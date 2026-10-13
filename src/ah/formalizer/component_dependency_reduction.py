@@ -46,7 +46,11 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg):
                 cid=_probe(state,selector,release,probe_key,'nominal_dependency',options,
                            state.text[slice(*context_range)],region.source_range,question=question)
             if cid is None:
-                state.diag('COMPONENT_DEPENDENCY_UNRESOLVED',region.region_id);return None
+                decision=state.decisions.get(probe_key)
+                if decision and decision.selector_outcome=='NONE_FIT':
+                    state.syntax_trace.append({'kind':'DEPENDENCY_REJECTED','region_ref':region.region_id,'predicate_ref':p.token_id,'decision_ref':probe_key,'reason':'NO_LICENSED_ATTACHMENT'})
+                else:state.diag('COMPONENT_DEPENDENCY_UNRESOLVED',region.region_id)
+                return None
             ground='M'
         fixed[tid]=choices[cid]
         trace.append({'kind':'FIXED_DEPENDENCY','token_ref':tid,'selected':cid,'ground':ground,

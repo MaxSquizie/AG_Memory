@@ -16,7 +16,8 @@ def emit_members(state,store,release,target,group,gap,tag,frag,emit):
         emit('ENSURE_ENTITY',{'uid':mid,'source_tag':tag,'mention_ref':member.get('anchor_mention',gap['gap_id']+':narrator'),
             'reference_existing':not anonymous and not member.get('anchor_mention'),
             **({'implicit_participant':{'participant_kind':'INDIVIDUAL','identity_status':'UNIDENTIFIED',
-                'source_scope':state.observation.get('source_id') or state.source_uid}} if anonymous else {'name':member.get('label')})},frag)
+                'source_scope':state.observation.get('source_id') or state.source_uid,
+                **({'narrative_scope_ref':member['narrative_scope_ref']} if member.get('narrative_scope_ref') else {})}} if anonymous else {'name':member.get('label')})},frag)
         bid='binding:narrator:'+digest([tag,gap['gap_id'],mid])
         emit('SET_IDENTITY_BINDING',{'binding_id':bid,'binding_kind':'NARRATIVE_MEMBER','mention_ref':gap['gap_id']+':narrator',
             'target_ref':mid,'source_tag':tag,'mention_features':member['features'] if isinstance(member['features'],list) else [member['features']],

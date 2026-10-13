@@ -27,7 +27,7 @@ def compose(state, release, selector):
         if cfg.get('quality_predicate_pos'):
             predicates += [e for e in tokens if e not in predicates and any(v.pos in cfg['quality_predicate_pos'] for v in e.variants)]
         compositional = bool(cfg.get('quality_predicate_pos') or cfg.get('modifier_content_role'))
-        if not predicates or any(p.token_id in covered for p in predicates): continue
+        if (not predicates and not cfg.get('nominal_utterances')) or any(p.token_id in covered for p in predicates): continue
         if cfg.get('refinement'):
             from .component_refinement import compose_area
             from .soft_clause_boundaries import areas

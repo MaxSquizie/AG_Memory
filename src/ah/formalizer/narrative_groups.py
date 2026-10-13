@@ -22,12 +22,14 @@ def add_local(state,gap,previous,release,frame):
     if prefix.count('«')>prefix.count('»') or prefix.count(chr(34))%2:return
     if any(c.get('frame_ref')==frame.frame_id and c.get('attitude') in {'QUOTED','HYPOTHETICAL','EMBEDDED'}
            for f in state.frames for c in f.semantic.get('proposition_args',{}).values()):return
+    if not gap.get('narrative_area'):return
+    area=gap['narrative_area']
     source=state.observation.get('source_id') or state.source_uid
     cfg=policy(release);end=gap['context_range'][1]
     members=[dict(x,candidate_id=x['key']) for x in previous if x['features'].get('number')=='sing'
         and x['end']<=frame.source_range[0] and end-x['end']<=cfg['context_chars'] and x['features'].get('animacy')!='inan']
     # Introduction is a referent of the source's narrator, never the uploader.
-    members.append({'candidate_id':'narrator:new','kind':'ANONYMOUS','entity_ref':'M:narrator:'+digest([source,gap['gap_id']]),
+    members.append({'candidate_id':'narrator:new','kind':'ANONYMOUS','entity_ref':area['entity_ref'],'narrative_scope_ref':area['scope_ref'],
         'participant_kind':'INDIVIDUAL','label':'an unidentified narrator of this local narrative area (use an established narrator reference instead when the supplied context supports one)'})
     gap['options'].extend(option(gap,m,source) for m in members)
     gap['narrative_source']=source
@@ -52,7 +54,7 @@ def resolved_group(opt,resolved,gap):
         member=deepcopy(resolved.get(m['gap_ref']))
         if member is None: return None
     else:
-        member={k:deepcopy(m[k]) for k in ('entity_ref','participant_kind','anchor_binding_ref','context_decision_ref') if k in m}
+        member={k:deepcopy(m[k]) for k in ('entity_ref','participant_kind','anchor_binding_ref','context_decision_ref','narrative_scope_ref') if k in m}
         member['anonymous']=m['kind']=='ANONYMOUS'
         if m['kind']=='MEMORY':member['premise_support_refs']=list(min(tuple(p) for p in m['grounding_paths']))
         if m['kind']=='MENTION':member.update(anchor_mention=m['mention_ref'],label=m['anchor_label'])

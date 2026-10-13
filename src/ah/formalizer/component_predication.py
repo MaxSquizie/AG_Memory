@@ -26,6 +26,11 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     from .contextual_preposition_case import overlay as governed_readings
     tokens=governed_readings(state,release,selector,region,coordinated_readings(tokens,nominal_groups),cfg)
     if tokens is None:return []
+    from .contextual_substantives import overlay as substantive_readings
+    tokens=substantive_readings(state,release,selector,region,tokens,cfg)
+    # Predicate inventories must see the same occurrence-local readings.
+    by_token={e.token_id:e for e in tokens}
+    predicates=[by_token[e.token_id] for e in predicates]
     from .qualitative_quantity import resolve as quantity_groups
     tokens, quantities=quantity_groups(state,release,selector,region,tokens,cfg)
     if tokens is None:return []
@@ -34,17 +39,22 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     if tokens is None:return []
     bundles = []
     diagnostics_before = len(state.diagnostics)
+    bases=[]
     for predicate in predicates:
-        for frame in build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities):
-            if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
-                from .component_modifier_forest import bundles as modifier_bundles
-                if cfg.get('nominal_composition')=='QUESTION_TREE_V1':
-                    from .component_nominal_tree import bundles as nominal_bundles
-                    bundles.extend(nominal_bundles(state,release,selector,region,tokens,frame,cfg))
-                else:
-                    bundles.extend(modifier_bundles(state,region,tokens,frame,cfg))
+        bases.extend(build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities))
+    if attachment is None and infinitive is None:
+        from .component_nominal_utterance import candidates as nominatives
+        bases.extend(nominatives(state,release,region,tokens,cfg))
+    for frame in bases:
+        if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
+            from .component_modifier_forest import bundles as modifier_bundles
+            if cfg.get('nominal_composition')=='QUESTION_TREE_V1':
+                from .component_nominal_tree import bundles as nominal_bundles
+                bundles.extend(nominal_bundles(state,release,selector,region,tokens,frame,cfg))
             else:
-                bundles.append(scoped_bundle(state, release, region, tokens, frame, cfg))
+                bundles.extend(modifier_bundles(state,region,tokens,frame,cfg))
+        else:
+            bundles.append(scoped_bundle(state, release, region, tokens, frame, cfg))
     frames = [f for bundle in bundles for f in bundle]
     attach_references(frames,references)
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]

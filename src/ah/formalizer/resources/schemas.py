@@ -143,6 +143,7 @@ RESOURCE_SCHEMAS = {
             'copula_lemmas': array(), 'modifier_content_role': S, 'preposition_nominal_role': S,
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
             'modifier_scope': enum('SHARED_EVENT_V1'),
+            'substantive_readings': enum('CONTEXTUAL_SUBSTANTIVE_V1'), 'nominal_utterances': enum('NOMINATIVE_DESCRIPTION_V1'),
             'nominal_composition': enum('QUESTION_TREE_V1'), 'nominal_host_role': S,
             'nominal_references': obj(('version','demonstratives','identity_modifiers'), {
                 'version':enum('DETERMINER_GROUP_V1'),
