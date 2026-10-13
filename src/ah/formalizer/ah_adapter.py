@@ -284,6 +284,8 @@ class AHStoreAdapter(Store):
                 validate_spatial_binding(p,ledger,draft.store,self._journal)
                 from .nominal_reference_binding import validate as validate_nominal_reference
                 validate_nominal_reference(p,ledger,self._journal)
+                from .narrative_group_plan import validate_binding as validate_member
+                validate_member(p,ledger,self._journal)
                 if p.get('binding_kind')=='UNRESOLVED_NOMINAL':
                     meta=draft.store.get_element_any_domain(target).meta.get('referential_placeholder',{})
                     if (meta.get('constraint')!=p.get('reference_constraint') or meta.get('mention_ref')!=p['mention_ref']

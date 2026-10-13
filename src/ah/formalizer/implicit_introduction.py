@@ -21,3 +21,22 @@ def introduce_without_antecedent(state, gap):
                       'identity_status':'UNKNOWN','distinctness_asserted':False})
     state.decisions[gap['gap_id']]=d
     return cid
+
+
+def unresolved_group(state,gap):
+    """A licensed plural role survives an unresolved identity question."""
+    d=state.decisions.get(gap['gap_id'])
+    if (gap.get('license')!='SUBJECT_AGREEMENT' or gap['features'].get('number')!='plur'
+        or gap.get('search_incomplete') or d is None
+        or d.selector_outcome not in {'INSUFFICIENT_CONTEXT','MULTIPLE_ADMISSIBLE','NONE_FIT'}):return None
+    anonymous=next((o for o in gap['options'] if o['kind']=='ANONYMOUS'),None)
+    if anonymous is None:return None
+    # The identity Decision and all its alternatives remain unresolved.
+    key=gap['gap_id']+'|group_existence'
+    exist=Decision('implicit_group_existence',key,(anonymous['candidate_id'],))
+    exist.selected,exist.outcome,exist.lifecycle=(anonymous['candidate_id'],),'RESOLVED','PROVISIONAL'
+    exist.grounds.append(Ground('D','plural subject agreement licenses an unidentified group; no membership/inequality inferred',anonymous['candidate_id']))
+    state.decisions[key]=exist
+    state.syntax_trace.append({'kind':'UNRESOLVED_GROUP_IDENTITY','decision_ref':gap['gap_id'],'existence_decision_ref':key})
+    return {'entity_ref':anonymous['entity_ref'],'participant_kind':'GROUP','anonymous':True,
+            'features':gap['features'],'decision_ref':key}

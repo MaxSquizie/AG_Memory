@@ -28,7 +28,7 @@ def prepare_implicit(state, release):
             options.append({'candidate_id':'new:'+gap['gap_id'],'kind':'ANONYMOUS',
                 'entity_ref':'M:implicit:'+digest([source,gap['gap_id']]),
                 'participant_kind':'GROUP' if plural else ('INDIVIDUAL' if gap['features'].get('number')=='sing' else 'ENTITY'),
-                'label':('Unidentified group for this clause, membership UNKNOWN; no antecedent established (do not infer narrator or previous object as members)' if plural else
+                'label':('Unidentified group for this clause, membership UNKNOWN; neither a particular antecedent nor narrator membership is supported for THIS clause' if plural else
                     'Unidentified referent for '+role+'; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants')})
             for earlier in previous:
                 if earlier['end']>f.source_range[0] or f.source_range[0]-earlier['end']>cfg['context_chars']: continue
@@ -44,6 +44,8 @@ def prepare_implicit(state, release):
                 else: merged[key]=opt
             gap['options']=list(merged.values())
             gap['context_range']=[max(0,f.source_range[0]-cfg['context_chars']//2),f.source_range[1]]
+            from .narrative_groups import add_local
+            add_local(state,gap,previous,release,f)
             if len(gap['options'])>cfg['max_candidates'] or gap['context_range'][1]-gap['context_range'][0]>cfg['context_chars']:
                 gap['search_incomplete']=True
             previous.append({'key':gap['gap_id'],'kind':'CHAIN','gap_ref':gap['gap_id'],
@@ -65,7 +67,7 @@ def prepare_implicit(state, release):
             variants=[v for v in readings if v.pos=='NOUN' and (not selected_morph or
                 all(getattr(v,k)==selected_morph.get(k) for k in ('lemma','pos','number','gender')))]
             if not variants: continue  # pronoun resolution has its own closed question
-            features=[_features(v) for v in variants]
+            features=[{**_features(v),'animacy':next(iter(set(v.features)&{'anim','inan'}),None)} for v in variants]
             common={k:features[0][k] for k in features[0] if all(x.get(k)==features[0][k] for x in features)}
             previous.append({'key':'mention:'+mention,'kind':'MENTION','mention_ref':mention,
                 'entity_ref':state.observation.get('entity_bindings',{}).get(mention) or 'M:'+digest([state.source_uid,mention]),
@@ -83,7 +85,7 @@ def resolve_implicit(state, release, selector):
             options=gap['options']
             lo,hi=gap['context_range']
             targets={o['candidate_id']:(resolved.get(o.get('gap_ref'),{}).get('entity_ref')
-                if o['kind']=='CHAIN' else o.get('entity_ref')) for o in options}
+                if o['kind']=='CHAIN' else None if o['kind']=='NARRATIVE_GROUP' else o.get('entity_ref')) for o in options}
             from .implicit_introduction import introduce_without_antecedent
             chosen=introduce_without_antecedent(state,gap)
             if chosen is None:
@@ -94,16 +96,25 @@ def resolve_implicit(state, release, selector):
                             +'Target predicate: '+f.anchor_span+'; source range: '+str(f.source_range)+'\n'
                             +'Grammatical features of omitted participant: '+str(gap['features'])+'\n'
                             +'Use the preceding source context to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. '
-                            +'Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.'))
-            if chosen is None: continue
+                            +'A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.'))
+            if chosen is None:
+                from .implicit_introduction import unresolved_group
+                unknown=unresolved_group(state,gap)
+                if unknown is not None:resolved[gap['gap_id']]=unknown
+                continue
             opt=next(o for o in options if o['candidate_id']==chosen)
-            if opt['kind']=='CHAIN':
+            if opt['kind']=='NARRATIVE_GROUP':
+                from .narrative_groups import resolved_group
+                value=resolved_group(opt,resolved,gap)
+                if value is None:
+                    state.diag('IMPLICIT_CHAIN_UNRESOLVED',gap['gap_id']);continue
+            elif opt['kind']=='CHAIN':
                 target=resolved.get(opt['gap_ref'])
                 if target is None:
                     state.diag('IMPLICIT_CHAIN_UNRESOLVED',gap['gap_id']); continue
                 value=deepcopy(target)
             else:
-                value={k:deepcopy(v) for k,v in opt.items() if k in {'entity_ref','participant_kind','premise_support_refs'}}
+                value={k:deepcopy(v) for k,v in opt.items() if k in {'entity_ref','participant_kind','premise_support_refs','anchor_binding_ref','context_decision_ref'}}
                 if opt['kind']=='MEMORY':
                     value['premise_support_refs']=list(min(tuple(path) for path in opt['grounding_paths']))
                 value['anonymous']=opt['kind']=='ANONYMOUS'
@@ -125,8 +136,11 @@ def add_memory_options(gap, rows, release):
         old=by_id.get(cid,{})
         paths={tuple(path) for path in old.get('grounding_paths',())}
         paths.add(tuple(sorted(row['premise_support_refs'])))
+        anchor=old.get('anchor_binding_ref',row['binding_ref']) if old.get('grounding_paths') and min(tuple(p) for p in old['grounding_paths'])<=tuple(sorted(row['premise_support_refs'])) else row['binding_ref']
         by_id[cid]={'candidate_id':cid,'kind':'MEMORY','entity_ref':row['entity_ref'],
-            'label':'Memory participant '+row['label'],
+            'label':'Memory participant '+row['label'],'anchor_binding_ref':anchor,'context_decision_ref':gap['gap_id'],
             'grounding_paths':[list(path) for path in sorted(paths)]}
     gap['options']=list(by_id.values())
+    from .narrative_groups import add_memory
+    add_memory(gap,rows,release)
     if len(gap['options'])>policy(release)['max_candidates']: gap['search_incomplete']=True

@@ -11,7 +11,12 @@ def attach(store, rows):
             texts[tag]=(p.get('snapshot_data') or {}).get('text','')
     for row in rows:
         text=texts.get(tuple(row['source_tag']),'')
-        binding=store.ledger.data['bindings'][row['memory_binding_ref']]
+        binding=store.ledger.data['bindings'][row.get('memory_binding_ref',row.get('binding_ref'))]
+        entity=store._store.get_element_any_domain(row['entity_ref'])
+        implicit=entity.meta.get('implicit_participant')
+        if implicit is not None:
+            row['label']='Previously grounded omitted '+implicit['participant_kind'].lower()+' (identity unidentified)'
+            row['implicit_participant']=dict(implicit)
         anchors=[binding.get('mention_ref','')]
         for sid in row.get('premise_support_refs',()):
             support=store.ledger.data['supports'].get(sid,{})

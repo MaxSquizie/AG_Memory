@@ -84,7 +84,7 @@ def build_plan(state,release,store):
             bid='binding:'+digest([tag,mention_ref,mid])
             from .coreference import mention_features
             reading=f.semantic.get('morph_bindings',{}).get(tid,{})
-            if reading.get('origin')=='CONTEXTUAL':
+            if reading:
                 from dataclasses import replace
                 from .native_frontend import _frame_variants
                 ev=replace(ev,variants=_frame_variants(f,ev))
@@ -93,7 +93,7 @@ def build_plan(state,release,store):
             mention_roles.setdefault(role,[]).append(mid)
             mention_entities[tid]=mid;mention_bindings[tid]=bid
         from .implicit_plan import emit_implicit_roles
-        emit_implicit_roles(state,store,f,selected,tag,frag,roles,mention_roles,emit,frames)
+        emit_implicit_roles(state,store,f,selected,tag,frag,roles,mention_roles,emit,frames,release)
         from .spatial_plan import emit_roles as emit_spatial_roles
         emit_spatial_roles(f,selected,tag,frag,roles,emit)
         for role,members in mention_roles.items():
@@ -303,6 +303,10 @@ def build_plan(state,release,store):
             if not ok: raise ValueError(code)
             witness='witness:'+digest([tag,frag,reg]) if reg and t.get('operator')=='AND' else None
             sid=support(uid,frag,reg,witness_ref=witness)
+            # A member is asserted only with the admitted fragment; no closed K.
+            for op in list(op_by_id.values()):
+                if op.op_type=='ENSURE_NODE' and op.payload.get('narrative_membership') and frag in op.fragment_refs:
+                    support(op.payload['uid'],frag,None,include_nominal_links=False)
             def describe(n,key,polarity,own_region=reg):
                 spec=next(op.payload for op in op_by_id.values() if op.op_type in {'ENSURE_NODE','ENSURE_FUNCTION'} and op.payload['uid']==n)
                 prop=spec.get('proposition')
@@ -311,6 +315,9 @@ def build_plan(state,release,store):
                     prop=next((op.payload.get('proposition') for op in op_by_id.values() if op.op_type=='ENSURE_NODE' and op.payload['uid']==child),None)
                 emit('DECLARE_FRAGMENT',{'fragment_id':frag,'content_key':key,'polarity':polarity,'proposition':prop,'region':own_region,'source_tag':tag,'node_ref':n,'witness_ref':witness if own_region==reg else None,'incompatibility_rules':release.entries('IncompatibilityRules')},frag)
             describe(uid,ck,polarity)
+            for op in list(op_by_id.values()):
+                if op.op_type=='ENSURE_NODE' and op.payload.get('narrative_membership') and frag in op.fragment_refs:
+                    describe(op.payload['uid'],op.payload['content_key'],True,None)
             # A single existential AND asserts a common witness. Preserve its
             # correlation ID on the derived conjunct evidence; don't infer two
             # independently timed occurrences from unrelated evidence.

@@ -98,6 +98,11 @@ class ResourceRelease:
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc
         composition=policy.get('composition')
         if composition:
+            ng=composition.get('narrative_groups')
+            if ng and (not any(m['sense_id']==ng['sense_id'] and m['template_ref']==ng['template_ref'] and set(m['roles'])=={'SUBJECT','OBJECT'} for m in self.entries('TemplateMap'))
+                or not any(v['sense_id']==ng['sense_id'] and v['state_class']=='STATE' and {r['role_id'] for r in v['roles']}=={'SUBJECT','OBJECT'}
+                    and all(set(r.get('argument_types',()))=={'ENTITY'} and r.get('cardinality')=={'min':1,'max':1} for r in v['roles']) for v in self.entries('R-V'))):
+                raise ResourceMissing('NARRATIVE_MEMBERSHIP_MAPPING_MISSING')
             from ..nominal_reference_groups import validate as validate_references
             try: validate_references(composition)
             except ValueError as exc: raise ResourceMissing(str(exc)) from exc

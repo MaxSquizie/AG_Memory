@@ -4,7 +4,8 @@
 def has_unspecified_members(core, entity_ids):
     """A group mention is not one enumerated member of a numerical domain."""
     return any(core.store.kind_of(uid).value == 'M' and
-               core.store.get_element_any_domain(uid).meta.get('qualitative_group') is not None
+               (core.store.get_element_any_domain(uid).meta.get('qualitative_group') is not None or
+                core.store.get_element_any_domain(uid).meta.get('implicit_participant',{}).get('participant_kind')=='GROUP')
                for uid in entity_ids)
 
 

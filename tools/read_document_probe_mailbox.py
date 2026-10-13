@@ -143,6 +143,9 @@ def main(argv=None):
         shutil.copyfile(args.resume_journal,args.out/'journal.log')
     journal=JournalChannel(args.out/'journal.log')
     store=AHStoreAdapter(core.store,journal,core=core)
+    if args.resume_journal and args.omissions and args.components:
+        from tools.formalizer_narrative_fixture import install_recovered
+        install_recovered(store)
     binding=InterpretationRunBinding(journal)
     ignition=IgnitionEngine(core,IgnitionSettings(),WorkspaceSettings(.02))
     backend=MailboxBackend(args.out,captured_probes=args.captured_probes)

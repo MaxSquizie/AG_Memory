@@ -69,6 +69,9 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         if not predication: raise ValueError('spatial_references requires predication')
         from tools.formalizer_spatial_fixture import extend
         extend(manifest,core)
+    if omissions and core is not None:
+        from tools.formalizer_narrative_fixture import extend as extend_narrative
+        extend_narrative(manifest,core)
     if omissions:
         # Explicit lexical fixture data, not a runtime verb/spelling heuristic.
         for valency in next(r for r in manifest['entries'] if r['kind']=='R-V')['entries']:

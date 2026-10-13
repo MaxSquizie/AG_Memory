@@ -2,7 +2,7 @@
 from .canonical_ledger import digest
 
 
-def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, mention_roles, emit, frames=None):
+def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, mention_roles, emit, frames=None, release=None):
     f, frag = frame, fragment
     for role in selected.get('implicit_roles',()):
         from .implicit_descriptions import gap_for
@@ -26,4 +26,6 @@ def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, men
             'target_ref':mid,'source_tag':tag,'premise_support_refs':target.get('premise_support_refs',[]),
             'mention_features':[target['features']],'interpretation_decision_ref':target['decision_ref'],
             'binding_kind':'IMPLICIT_ARGUMENT'},frag)
+        from .narrative_group_plan import emit_members
+        emit_members(state,store,release,target,mid,gap,tag,frag,emit)
         roles[role]=mid
